@@ -8,8 +8,8 @@
 
 С плагином JetBrains (`org.jetbrains.plugins.go`, GoLand) объявлена несовместимость: тот же тип файлов, и добавить там нечего.
 
-Статус фич — `ROADMAP.md` (ведётся по-русски). `playground/` — Go-модуль для живой проверки (один тест в нём падает нарочно), к сборке не относится.
-`tools/dlv-dap/probe.py` — зонд `dlv dap` (как объявляет порт, capabilities). Анализ платформенных API LSP / DAP — в соседнем репозитории:
+Статус фич — `ROADMAP.md`, что делать дальше и в каком порядке — `PLAN.md` (оба ведутся по-русски; сделанный пункт плана отмечать и переносить в ROADMAP). `playground/` — Go-модуль для живой проверки (один тест в нём падает нарочно), к сборке не относится.
+`tools/dlv-dap/probe.py` — зонд `dlv dap` (как объявляет порт, capabilities). `tools/gopls/probe.py` — зонд gopls без IDE: диагностики файла и code actions в заданных местах (так отличают «сервер не предлагает» от «платформа не показывает»). `tools/icons/generate.py` — все SVG плагина (править фигуры там, потом запускать). Анализ платформенных API LSP / DAP — в соседнем репозитории:
 `../idea-dotnet-support/docs/platform-lsp-dap.html`, `tools/platform-api/api.json`, журнал находок по DAP-клиенту — `PLATFORM_DAP_PLAN.md` там же.
 
 ## Сборка и проверка
@@ -28,7 +28,7 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
   LSP-клиента называется `LspIntegrationProvider` / `LspClientDescriptor` (старые `LspServer*` — Deprecated) и есть модуль DAP.
 - Gradle 9.7.1, Kotlin 2.3.21, `apiVersion`/`languageVersion` = **2.3** (stdlib берётся из платформы) — не использовать API Kotlin новее.
 - Упавшие тесты: `build/test-results/test/TEST-*.xml` (grep по `<failure`).
-- **GUI агент проверяет сам через UI-робота**: `./gradlew.bat runIdeForUiTests` (в фоне) поднимает песочницу с Remote Robot на `127.0.0.1:8082`,
+- **GUI агент проверяет сам через UI-робота**: `./gradlew.bat runIdeForUiTests` (в фоне) поднимает песочницу с Remote Robot на `127.0.0.1:8083` (**не 8082**: там песочница dotnet-плагина, и два агента иначе управляют IDE друг друга и закрывают её; другой порт — `-ProbotPort=N` и `ROBOT_PORT=N`),
   `tools/ui-robot/robot.py` открывает проект, ставит точки останова, запускает Run/Debug, снимает окно IDE; `. tools/ui-robot/scripts/session.sh` даёт
   `state`, `evaluate "выражение" [дети]`, `stop_all`. Работать на копии: `build/ui-robot/playground` (без `.idea`). Плагин в песочнице обновляется
   только перезапуском задачи; перед перезапуском закрыть IDE (`robot.py action Exit`, затем клик по `Exit` в диалоге). После проверки песочницу закрыть:
@@ -42,16 +42,19 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 
 | Пакет | Что там |
 |---|---|
-| `lang` | `GoLexer`, `GoDeclarations` (сканер: package, imports, func / type / var / const, поля и методы интерфейсов), PSI и Structure view (`GoPsi`), подсветка и аннотатор идентификаторов, индекс и Go to Class / Symbol, folding, commenter, скобки, live templates |
+| `lang` | `GoIdioms` (следующая строка по правилам: `if err != nil`, `defer`) и её показ через inline completion платформы; `GoLexer`, `GoDeclarations` (сканер: package, imports, func / type / var / const, поля и методы интерфейсов), PSI и Structure view (`GoPsi`), подсветка и аннотатор идентификаторов, индекс и Go to Class / Symbol, folding, commenter, скобки, live templates |
 | `mod` | `GoModFile` (чистый разбор go.mod / go.work), язык и подсветка go.mod, `GoModulesService` (модуль файла, все модули проекта) |
 | `view` | узел Dependencies в Project view (исходники из module cache), иконки файлов |
 | `cli` | `GoCli` (поиск `go`, `commandLine`, `execute`, `runInBackground`, нотификации), `GoTool` (gopls, dlv, golangci-lint, goimports: поиск и `go install`), `GoEnvironment` (`go env -json`) |
 | `build` | действия меню Go (Build, Vet, Generate, Modules) → Build tool window, разбор вывода компилятора (`GoBuildOutputParser`) |
 | `run` | run configuration «Go» (`go run` / `go test`), редактор, producer и gutter-иконки, `GoLaunchArguments` (запрос `launch` для delve), `GoDebugSupport` — всё об отладке, чему не нужны классы DAP |
-| `testing` | `GoTestEvents` (`go test -json` → service messages, дерево по id, подтесты под родителем), консоль, локатор, Rerun Failed |
-| `format` | gofmt / goimports за Reformat Code |
-| `settings` | `GoSettings` (application-level) и страница Settings \| Tools \| Go |
-| `lsp` | **content-модуль**: gopls на `LspIntegrationProvider` |
+| `testing` | `GoTestEvents` (`go test -json` → service messages, дерево по id, подтесты под родителем), консоль, локатор, Rerun Failed; окно Go Tests и `GoTestStatuses` (статусы прогонов копит слушатель проекта: окно создаётся лениво, позже запусков) |
+| `format` | gofmt / goimports за Reformat Code и при сохранении (в фоне: ждать процесс на EDT платформа запрещает — SEVERE в логе) |
+| `templates` | New → Go File, New Go Module |
+| `lint` | golangci-lint: разбор JSON-отчёта (`GoLintOutput`, v1 и v2), внешний аннотатор для сохранённых файлов; исправления к находкам (`GoLintFixes`: errcheck, `//nolint`), число результатов функции спрашивается у модуля с gopls через точку расширения `signatureProvider` |
+| `sdk` | окно «Go on This Machine», проверка toolchain при открытии проекта |
+| `settings` | `GoSettings` (application-level) и страница Settings \| Tools \| Go; `GoplsCatalogue` + страница gopls под ней: настройки сервера берутся из `gopls api-json` установленной версии, своих списков опций не заводить; форма генерируется по типам опций (`GoplsSettingsConfigurable`), то, что плагин задаёт gopls сам, — `GoplsDefaults` (здесь, а не в `lsp`: страница показывает это как действующие значения), хранится только отличие от них |
+| `lsp` | **content-модуль**: gopls на `LspIntegrationProvider`; `GoplsNavigation` / `GoplsCodeVision` — чего нет в LSP-клиенте платформы: Go to Declaration через PSI-цели (ссылка под Ctrl + мышь), usages с объявления, implementations, счётчики над объявлениями |
 | `dap` | **content-модуль**: delve на платформенном DAP-клиенте |
 
 Регистрация — `resources/META-INF/plugin.xml`. То, чему нужны платформенные LSP / DAP (есть не в каждой IDE), — content-модули `io.github.golangsupport.lsp`
@@ -67,7 +70,14 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
   компилятора и убивает delve. Hit count и logpoints дописываются в `setBreakpoints` на исходящем потоке (`DapSetBreakpoints`), как в dotnet-плагине.
 - Остановившийся поток платформа ищет бинарным поиском по несортированному списку — `StoppedThread` + `GoPresentationFactory` берут id из события.
 - delve новее toolchain отказывается запускать программу («Go version … is too old») — по умолчанию передаётся `--check-go-version=false` (настройка).
-- Вызов функции в Evaluate у delve — `call f()`; `setExpression` нет, поэтому Set Value пока не сделан.
+- Вызов функции в Evaluate у delve — `call f()`: префикс дописывает `GoEvaluate`. `setExpression` нет, а `setVariable` нужен `variablesReference` контейнера,
+  которого модель платформы не отдаёт: `DapVariableContainers` узнаёт его из проходящих запросов и ответов `variables` (по `evaluateName`).
+- Расширения платформы зовут наш код и на EDT, и на фоне без read action: файлы на EDT читать через `LoadTextUtil` (поток — slow operation), `element.project`
+  и всё о PSI — внутри `ReadAction`, процессы на EDT не ждать. После проверки роботом смотреть в логе песочницы `Plugin to blame: Go` — должно быть 0.
+- Semantic tokens платформа по умолчанию спрашивает только у файлов без своей подсветки: для Go это включено в `GoplsDescriptor`, там же gopls называются его
+  модификаторы (`struct`, `interface`, …) — без этого сервер их не шлёт. Что именно он отдаёт — `tools/gopls/semantic_tokens.py`. Снимку робота, снятому сразу
+  после открытия файла или при закрытии IDE, в вопросе цветов не верить: цвета приходят позже разметки (так было принято за ошибку то, что работало).
+- `SMTestProxy.isDefect` истинно и для пропущенных тестов: сначала проверять `isIgnored`. errcheck указывает колонкой на скобку вызова, а не на имя.
 
 Действия: `Go.MainMenu` — меню **Go** в главной строке (после Tools); `Go.ProjectViewPopup` — ПКМ в дереве проекта. Content-модули добавляют свои
 действия в `Go.MainMenu` сами. Настройки — Settings | Tools | Go; на странице **только то, за чем есть реализация**, опция появляется вместе с фичей.

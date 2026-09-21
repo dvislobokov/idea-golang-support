@@ -163,6 +163,70 @@ object GoHoverExpression {
     }
 }
 
+/** Delve evaluates a function call only when told to: `call f(x)`. People type `f(x)`. */
+object GoEvaluate {
+    private val CALL = Regex("""^([A-Za-z_][\w.]*)\s*\(.*\)$""", RegexOption.DOT_MATCHES_ALL)
+
+    /** The builtins and conversions delve evaluates by itself; with `call` in front it would look for a function of that name. */
+    private val OWN = setOf("len", "cap", "complex", "imag", "real", "min", "max") + io.github.golangsupport.lang.GoTokenTypes.BUILTIN_TYPES
+
+    fun expression(text: String): String {
+        val trimmed = text.trim()
+        val function = CALL.matchEntire(trimmed)?.groupValues?.get(1) ?: return text
+        return if (function in OWN || trimmed.startsWith("call ")) text else "call $trimmed"
+    }
+}
+
+/**
+ * Where the variables of the stopped program live, learned from the traffic: `setVariable`, the only way delve changes a value, wants
+ * the reference of the container a variable is listed in, and the model of the platform keeps that to itself. Requests for `variables`
+ * and the answers to them pass through the streams of the plugin, so a variable is found again by its expression (`evaluateName`).
+ */
+class DapVariableContainers {
+    /** [hasChildren]: a struct, a slice, a map; delve assigns to such a value only when it is a string or a pointer. */
+    class Container(val variablesReference: Int, val name: String, val hasChildren: Boolean)
+
+    private val requests = HashMap<Int, Int>()
+    private val byExpression = HashMap<String, Container>()
+
+    /** A message of the client: a `variables` request is remembered by its `seq`. */
+    @Synchronized
+    fun request(body: ByteArray) {
+        val text = String(body, Charsets.UTF_8)
+        if (!text.contains("\"variables\"")) return
+        val message = parse(text)?.takeIf { it.string("command") == "variables" } ?: return
+        val reference = (message.get("arguments") as? JsonObject)?.get("variablesReference")?.takeIf { it.isJsonPrimitive }?.asInt ?: return
+        message.get("seq")?.takeIf { it.isJsonPrimitive }?.asInt?.let { requests[it] = reference }
+    }
+
+    /** A message of the adapter: the answer to a remembered request fills the map; the program going on empties it, references do not outlive a stop. */
+    @Synchronized
+    fun message(body: ByteArray) {
+        val text = String(body, Charsets.UTF_8)
+        if (text.contains("\"event\":\"continued\"") || text.contains("\"event\":\"stopped\"")) {
+            requests.clear()
+            byExpression.clear()
+            return
+        }
+        if (!text.contains("\"variables\"")) return
+        val message = parse(text)?.takeIf { it.string("command") == "variables" && it.string("type") == "response" } ?: return
+        val reference = requests.remove(message.get("request_seq")?.takeIf { it.isJsonPrimitive }?.asInt ?: return) ?: return
+        val variables = (message.get("body") as? JsonObject)?.get("variables")?.takeIf { it.isJsonArray }?.asJsonArray ?: return
+        for (variable in variables) {
+            val item = variable as? JsonObject ?: continue
+            val expression = item.string("evaluateName")?.takeIf { it.isNotBlank() } ?: continue
+            val children = item.get("variablesReference")?.takeIf { it.isJsonPrimitive }?.asInt ?: 0
+            byExpression[expression] = Container(reference, item.string("name") ?: continue, children > 0)
+        }
+    }
+
+    @Synchronized
+    fun of(evaluateName: String?): Container? = evaluateName?.let(byExpression::get)
+
+    private fun parse(text: String): JsonObject? = runCatching { JsonParser.parseString(text) as? JsonObject }.getOrNull()
+    private fun JsonObject.string(name: String): String? = get(name)?.takeIf { it.isJsonPrimitive }?.asString
+}
+
 /** What a line breakpoint has beyond the line and the condition, in the terms of the protocol: `hitCondition` and `logMessage`. */
 class BreakpointExtras(val hitCondition: String?, val logMessage: String?) {
     val isEmpty: Boolean get() = hitCondition.isNullOrBlank() && logMessage.isNullOrBlank()

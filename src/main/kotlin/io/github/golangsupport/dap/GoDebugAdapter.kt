@@ -31,6 +31,7 @@ import io.github.golangsupport.run.DapMessageRewritingStream
 import io.github.golangsupport.run.DapMessageWatchingStream
 import io.github.golangsupport.run.DapSetBreakpoints
 import io.github.golangsupport.run.DapStartWatcher
+import io.github.golangsupport.run.DapVariableContainers
 import io.github.golangsupport.run.DlvDap
 import io.github.golangsupport.run.GoRunConfiguration
 import io.github.golangsupport.settings.GoSettings
@@ -73,6 +74,9 @@ class GoDebugAdapterDescriptor(private val project: Project) : DebugAdapterDescr
     /** A descriptor is made for every session, so this is the stopped thread of one session. */
     private val stoppedThread = StoppedThread()
 
+    /** Filled by the handle from the traffic, read by the values of the variables view, see [DapVariableContainers]. */
+    private val containers = DapVariableContainers()
+
     override fun createClient(
         eventConsumer: DapEventConsumer, environment: ExecutionEnvironment, executionResult: ExecutionResult?, commandProcessor: DapCommandProcessor,
         sessionScope: CoroutineScope,
@@ -89,7 +93,7 @@ class GoDebugAdapterDescriptor(private val project: Project) : DebugAdapterDescr
         LOG.info("Starting $delve for session $sessionId in $directory, log: ${log ?: "off"}")
         val commandLine = GoCli.toolCommandLine(delve.path, directory, *DlvDap.arguments(log != null, GoSettings.getInstance().debugAnyGoVersion).toTypedArray())
         return withContext(Dispatchers.IO) {
-            DelveHandle(commandLine, log, { path, line -> GoLineBreakpointType.extrasAt(project, path, line) }) { GoCli.notifyError(project, "Debug has not started", it) }
+            DelveHandle(commandLine, log, containers, { path, line -> GoLineBreakpointType.extrasAt(project, path, line) }) { GoCli.notifyError(project, "Debug has not started", it) }
         }
     }
 
@@ -98,7 +102,7 @@ class GoDebugAdapterDescriptor(private val project: Project) : DebugAdapterDescr
         debugAdapterDescriptor: DebugAdapterDescriptor<*>, executionEnvironment: ExecutionEnvironment, executionResult: ExecutionResult?,
         startRequestType: DapStartRequest, startRequestArguments: Map<String, Any?>,
     ): DapXDebugProcess = GoDebugProcess(
-        session, dapDebugSession, xDebugProcessScope, globalScope, debugAdapterDescriptor, executionEnvironment, executionResult, startRequestType, startRequestArguments, stoppedThread,
+        session, dapDebugSession, xDebugProcessScope, globalScope, debugAdapterDescriptor, executionEnvironment, executionResult, startRequestType, startRequestArguments, stoppedThread, containers,
     )
 
     private companion object {
@@ -112,7 +116,7 @@ class GoDebugAdapterDescriptor(private val project: Project) : DebugAdapterDescr
  * answers nothing at all. The debuggee is a child of delve and goes with it.
  */
 class DelveHandle(
-    commandLine: GeneralCommandLine, log: File?, breakpointExtras: (path: String, line: Int) -> BreakpointExtras?, onStartFailed: (String) -> Unit,
+    commandLine: GeneralCommandLine, log: File?, containers: DapVariableContainers, breakpointExtras: (path: String, line: Int) -> BreakpointExtras?, onStartFailed: (String) -> Unit,
 ) : DebugAdapterHandle {
     private val process: Process = commandLine.withRedirectErrorStream(true).createProcess()
     private val socket: Socket
@@ -156,10 +160,14 @@ class DelveHandle(
      */
     private val startWatcher = DapStartWatcher(onStartFailed)
 
-    override val input: InputStream = DapMessageWatchingStream(socket.getInputStream()) { body -> if (startWatcher.message(body)) kill() }
+    override val input: InputStream = DapMessageWatchingStream(socket.getInputStream()) { body ->
+        containers.message(body)
+        if (startWatcher.message(body)) kill()
+    }
 
     /** What the client writes goes to delve with the hit counts and log messages of the breakpoints added, see [DapSetBreakpoints]. */
     override val output: OutputStream = DapMessageRewritingStream(socket.getOutputStream()) { body ->
+        containers.request(body)
         DapSetBreakpoints.rewrite(body, breakpointExtras) { LOG.warn("Cannot add hit counts and log messages to setBreakpoints", it) }
     }
 

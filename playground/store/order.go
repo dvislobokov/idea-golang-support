@@ -49,3 +49,13 @@ func (o *Order) Validate() error {
 	}
 	return nil
 }
+
+// Discounted is a Priced thing with a discount.
+type Discounted struct {
+	Order   *Order
+	Percent int
+}
+
+func (d Discounted) Total() int {
+	return d.Order.Total() * (100 - d.Percent) / 100
+}

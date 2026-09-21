@@ -3,7 +3,12 @@ package io.github.golangsupport
 import com.google.gson.JsonParser
 import io.github.golangsupport.build.GoBuildOutputParser
 import io.github.golangsupport.cli.GoEnvironment
+import io.github.golangsupport.lint.GoLintIssue
+import io.github.golangsupport.lint.GoLintOutput
 import io.github.golangsupport.mod.GoModFile
+import io.github.golangsupport.run.DapVariableContainers
+import io.github.golangsupport.run.GoEvaluate
+import io.github.golangsupport.run.GoOutputLocations
 import io.github.golangsupport.run.DapMessageRewritingStream
 import io.github.golangsupport.run.DapSetBreakpoints
 import io.github.golangsupport.run.DapStartFailure
@@ -134,6 +139,59 @@ class GoToolingTest {
         assertEquals(">= 3", HitCondition.normalize(">=3"))
         assertEquals("5", HitCondition.normalize(" 5 "))
         assertNull(HitCondition.normalize(""))
+    }
+
+    @Test fun lint() {
+        assertEquals(2, GoLintOutput.majorVersion("golangci-lint has version 2.13.2 built with go1.26.8"))
+        assertEquals(1, GoLintOutput.majorVersion("golangci-lint has version v1.64.8 built with go1.24"))
+        assertTrue("--output.json.path=stdout" in GoLintOutput.arguments(2, listOf("a", "b"), "./store"))
+        assertEquals(listOf("run", "--out-format=json", "--issues-exit-code=0", "--build-tags=a,b", "./store"), GoLintOutput.arguments(1, listOf("a", "b"), "./store"))
+        val report = """level=warning msg="something"
+{"Issues":[{"FromLinter":"errcheck","Text":"Error return value of `os.Open` is not checked","Severity":"","Pos":{"Filename":"store\\lint.go","Offset":50,"Line":6,"Column":9}},{"FromLinter":"typecheck","Text":"boom","Severity":"error","Pos":{"Filename":"a.go","Line":1,"Column":0}}],"Report":{}}"""
+        val issues = GoLintOutput.parse(report)
+        assertEquals(GoLintIssue("store\\lint.go", 6, 9, "Error return value of `os.Open` is not checked", "errcheck", false), issues[0])
+        assertTrue(issues[1].isError)
+        assertTrue(GoLintOutput.parse("not json").isEmpty())
+        // the word at the column, or the line without its indent
+        assertEquals(1..7, GoLintOutput.rangeInLine("\tos.Open(\"x\")", 2))
+        assertEquals(1..12, GoLintOutput.rangeInLine("\tos.Open(\"x\")  ", 0))
+        // errcheck names the parenthesis of the call: the call is underlined from its name
+        assertEquals(1..12, GoLintOutput.rangeInLine("\tos.Open(\"x\")", 9))
+    }
+
+    @Test fun outputLocations() {
+        fun paths(line: String) = GoOutputLocations.find(line).map { Triple(it.path, it.line, it.column) }
+        assertEquals(listOf(Triple("order_test.go", 39, 1)), paths("    order_test.go:39: about to fail"))
+        assertEquals(listOf(Triple("C:/app/store/order.go", 41, 1)), paths("\tC:/app/store/order.go:41 +0x1d"))
+        assertEquals(listOf(Triple("./cmd/shop/main.go", 7, 2)), paths("./cmd/shop/main.go:7:2: \"os\" imported and not used"))
+        assertEquals(listOf(Triple("/home/me/app/main.go", 12, 1)), paths("panic at (/home/me/app/main.go:12)"))
+        assertTrue(paths("nothing here: go:12").isEmpty())
+        val location = GoOutputLocations.find("    order_test.go:39: x").single()
+        assertEquals("order_test.go:39", "    order_test.go:39: x".substring(location.start, location.end))
+    }
+
+    @Test fun functionCallsAreEvaluatedWithCall() {
+        assertEquals("call order.Total()", GoEvaluate.expression("order.Total()"))
+        assertEquals("call f(a, g(b))", GoEvaluate.expression(" f(a, g(b)) "))
+        assertEquals("len(items)", GoEvaluate.expression("len(items)"))
+        assertEquals("int64(x)", GoEvaluate.expression("int64(x)"))
+        assertEquals("call f()", GoEvaluate.expression("call f()"))
+        assertEquals("order.Currency", GoEvaluate.expression("order.Currency"))
+        assertEquals("a + f(x)", GoEvaluate.expression("a + f(x)"))
+    }
+
+    @Test fun variableContainersAreLearnedFromTheTraffic() {
+        val containers = DapVariableContainers()
+        containers.request("""{"seq":9,"type":"request","command":"variables","arguments":{"variablesReference":1001}}""".toByteArray())
+        containers.message("""{"seq":20,"type":"response","request_seq":9,"success":true,"command":"variables","body":{"variables":[{"name":"total","value":"5","type":"int","evaluateName":"total","variablesReference":0},{"name":"order","value":"*store.Order {...}","evaluateName":"order","variablesReference":1002}]}}""".toByteArray())
+        assertEquals(1001, containers.of("total")!!.variablesReference)
+        assertEquals("total", containers.of("total")!!.name)
+        assertFalse(containers.of("total")!!.hasChildren)
+        assertTrue(containers.of("order")!!.hasChildren)
+        assertNull(containers.of("missing"))
+        // references do not outlive a stop
+        containers.message("""{"type":"event","event":"continued","body":{"threadId":1}}""".toByteArray())
+        assertNull(containers.of("total"))
     }
 
     private fun frame(json: String) = "Content-Length: ${json.toByteArray().size}\r\n\r\n$json".toByteArray()

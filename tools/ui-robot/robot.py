@@ -1,4 +1,7 @@
-"""Drives the sandbox IDE started with `./gradlew runIdeForUiTests` through the Remote Robot server (http://127.0.0.1:8082).
+"""Drives the sandbox IDE started with `./gradlew runIdeForUiTests` through the Remote Robot server (http://127.0.0.1:8083).
+
+The port is 8083 (ROBOT_PORT overrides it; start the IDE with the same `-ProbotPort=`): 8082 belongs to the sandbox of idea-dotnet-support,
+and a robot pointed at the IDE of another agent clicks, types and exits there.
 
     python robot.py wait                         wait until the server answers
     python robot.py windows                      frames and dialogs of the IDE
@@ -12,19 +15,20 @@
     python robot.py breakpoint FILE LINE         toggle a line breakpoint (LINE is 1-based)
     python robot.py run CONFIGURATION [Debug]    start a run configuration by name, with the Run or the Debug executor
     python robot.py js FILE.js [--edt]           run JavaScript inside the IDE, print what it returns
-    python robot.py tree OUT.html                the component tree with XPaths (what http://127.0.0.1:8082 shows)
+    python robot.py tree OUT.html                the component tree with XPaths (what http://127.0.0.1:8083 shows)
 
 Pictures are always of a component of the IDE, painted by the component itself: the `/screenshot` of the server captures the
 whole desktop with whatever else is on it, and is deliberately not used.
 """
 import base64
+import os
 import json
 import sys
 import time
 import urllib.error
 import urllib.request
 
-BASE = "http://127.0.0.1:8082"
+BASE = "http://127.0.0.1:" + os.environ.get("ROBOT_PORT", "8083")
 MAIN_WINDOWS = ["//div[@class='IdeFrameImpl']", "//div[@class='FlatWelcomeFrame']"]
 DIALOGS = "//div[@class='MyDialog']"
 
@@ -89,6 +93,7 @@ def command_wait(_):
     for _ in range(120):
         try:
             request("/", timeout=3)
+            check_sandbox()
             print("robot is up")
             return
         except (urllib.error.URLError, OSError):
@@ -235,7 +240,20 @@ COMMANDS = {
     "clicktext": command_clicktext, "openfile": command_openfile, "breakpoint": command_breakpoint, "run": command_run,
 }
 
+SANDBOX = "idea-golang-support"
+
+
+def check_sandbox():
+    """Refuses to touch an IDE that is not the sandbox of this project: another agent may have one on the same port."""
+    path = js("com.intellij.openapi.application.PathManager.getConfigPath()") or ""
+    if SANDBOX not in path.replace("\\", "/"):
+        raise SystemExit("robot: the IDE on %s is not the sandbox of %s (its configuration is in %r): wrong port?" % (BASE, SANDBOX, path))
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
         raise SystemExit(__doc__)
+    # `wait` is what finds out whether anything listens at all; everything else acts, and acts on the right IDE only
+    if sys.argv[1] != "wait":
+        check_sandbox()
     COMMANDS[sys.argv[1]](sys.argv[2:])

@@ -33,11 +33,22 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var buildTags by string("")
 
         var languageServerEnabled by property(true)
-        var goplsStaticcheck by property(false)
+        /** On: the analyzers of staticcheck come with fixes, and fixes are what Alt+Enter is made of here. */
+        var goplsStaticcheck by property(true)
         var goplsGofumpt by property(false)
         var goplsInlayHints by property(true)
 
+        /** Setting of gopls -> its value as a JSON text, from the page with the catalogue of the server; wins over the switches above. */
+        var goplsOverrides by map<String, String>()
+
         var formatter by enum(GoFormatter.GOFMT)
+
+        /** On: unformatted Go passes no review, so the formatter is not something to remember about. */
+        var formatOnSave by property(true)
+        var createRunConfigurations by property(true)
+
+        /** `if err != nil { ... }` and the `defer` of what was just opened, as grey text to accept with Tab. */
+        var inlineIdioms by property(true)
         var lintOnTheFly by property(true)
 
         /** Added to every `go test`: `-race -count=1`. */
@@ -99,9 +110,26 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         get() = state.goplsInlayHints
         set(value) { state.goplsInlayHints = value }
 
+    var goplsOverrides: Map<String, String>
+        get() = state.goplsOverrides.toMap()
+        // a new map: BaseState does not notice changes inside the one it holds
+        set(value) { state.goplsOverrides = value.toMutableMap() }
+
     var formatter: GoFormatter
         get() = state.formatter
         set(value) { state.formatter = value }
+
+    var formatOnSave: Boolean
+        get() = state.formatOnSave
+        set(value) { state.formatOnSave = value }
+
+    var inlineIdioms: Boolean
+        get() = state.inlineIdioms
+        set(value) { state.inlineIdioms = value }
+
+    var createRunConfigurations: Boolean
+        get() = state.createRunConfigurations
+        set(value) { state.createRunConfigurations = value }
 
     var lintOnTheFly: Boolean
         get() = state.lintOnTheFly

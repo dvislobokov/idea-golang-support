@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/uuid"
+
 	"example.com/playground/store"
 )
 
@@ -17,5 +19,11 @@ func main() {
 	if len(os.Args) > 1 {
 		fmt.Println("arguments:", os.Args[1:])
 	}
-	fmt.Printf("total: %d %s\n", order.Total(), order.Currency)
+
+	os.Stdout
+
+	fmt.Printf("order %s, total: %d %s\n", uuid.NewString(), order.Total(), order.Currency)
+
+	var priced store.Priced = store.Discounted{Order: order, Percent: 10}
+	fmt.Printf("with a discount: %d %s\n", priced.Total(), order.Currency)
 }

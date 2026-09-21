@@ -9,10 +9,24 @@
 
     <extensions defaultExtensionNs="io.github.golangsupport">
         <languageServerControl implementation="io.github.golangsupport.lsp.GoplsControl"/>
+        <signatureProvider implementation="io.github.golangsupport.lsp.GoplsSignatureProvider"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
         <platform.lsp.integrationProvider implementation="io.github.golangsupport.lsp.GoplsIntegrationProvider"/>
+        <!-- what the LSP client of the platform does not do: a link under Ctrl + mouse, usages of a declaration, implementations, the counts above declarations -->
+        <gotoDeclarationHandler implementation="io.github.golangsupport.lsp.GoplsGotoDeclarationHandler"/>
+        <customUsageSearcher implementation="io.github.golangsupport.lsp.GoplsUsageSearcher"/>
+        <definitionsScopedSearch implementation="io.github.golangsupport.lsp.GoplsImplementationSearch"/>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsActionsIntention</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsActionsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <codeInsight.lineMarkerProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsImplementationLineMarkerProvider"/>
+        <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.lsp.GoplsUsagesCodeVisionProvider"/>
+        <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.lsp.GoplsImplementationsCodeVisionProvider"/>
     </extensions>
 
     <actions>

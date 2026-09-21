@@ -17,6 +17,7 @@ import com.intellij.lang.PsiParser
 import com.intellij.lang.PsiStructureViewFactory
 import com.intellij.lexer.Lexer
 import com.intellij.navigation.ItemPresentation
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.FileViewProvider
@@ -112,7 +113,8 @@ class GoDeclaration(node: ASTNode) : ASTWrapperPsiElement(node), PsiNameIdentifi
     }
 
     override fun getIcon(flags: Int): Icon = GoDeclarationIcons.of(kind, info?.isExported == true)
-    override fun toString(): String = "GoDeclaration(${kind.title} ${name.orEmpty()})"
+    /** The name needs read access, and `toString` is called from anywhere: logs, debuggers, scripts. */
+    override fun toString(): String = "GoDeclaration(${kind.title}" + (if (ApplicationManager.getApplication().isReadAccessAllowed) " " + name.orEmpty() else "") + ")"
 
     private companion object {
         const val MAX_TEXT = 40

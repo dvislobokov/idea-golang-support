@@ -16,7 +16,6 @@ import com.intellij.psi.PsiManager
 import com.intellij.ui.SimpleTextAttributes
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.cli.GoEnvironment
-import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.mod.GoModFile
 import io.github.golangsupport.mod.GoModFileType
 import io.github.golangsupport.mod.GoModule
@@ -85,7 +84,7 @@ class GoDependencyNode(project: Project, private val module: GoModule, private v
     }
 
     override fun update(presentation: PresentationData) {
-        presentation.setIcon(GoIcons.Package)
+        presentation.setIcon(if (require.indirect) GoIcons.IndirectPackage else GoIcons.Package)
         presentation.addText(require.path, SimpleTextAttributes.REGULAR_ATTRIBUTES)
         presentation.addText("  " + require.version, SimpleTextAttributes.GRAYED_ATTRIBUTES)
         replace?.let { presentation.addText("  => " + listOfNotNull(it.newPath, it.newVersion).joinToString(" "), SimpleTextAttributes.GRAYED_ITALIC_ATTRIBUTES) }
@@ -106,12 +105,8 @@ class GoDependencyNode(project: Project, private val module: GoModule, private v
     }
 }
 
-/** go.sum is plain text and keeps being it; test files get a mark of their own. */
+/** go.sum is plain text and keeps being it; go.work, test files and the vendor directory get a mark of their own. */
 class GoFileIconProvider : FileIconProvider {
-    override fun getIcon(file: VirtualFile, flags: Int, project: Project?): Icon? = when {
-        file.isDirectory -> null
-        file.name == "go.sum" -> GoIcons.Module
-        file.name.endsWith(GoFile.TEST_SUFFIX) -> GoIcons.TestFile
-        else -> null
-    }
+    override fun getIcon(file: VirtualFile, flags: Int, project: Project?): Icon? =
+        if (file.isDirectory) GoIcons.Vendor.takeIf { file.name == "vendor" && file.findChild("modules.txt") != null } else GoIcons.forFile(file.name)
 }

@@ -77,6 +77,7 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                     textField().align(AlignX.FILL).bindText(settings::buildTags)
                         .comment("<code>-tags</code> of build, run, test and vet, of the language server, the linter and the debugger")
                 }
+                row { checkBox("Create run configurations for the programs of the project").bindSelected(settings::createRunConfigurations).comment("One per directory with a <code>func main</code>, when the project is opened; a deleted one does not come back") }
                 row("Test arguments:") { textField().align(AlignX.FILL).bindText(settings::testArguments).comment("Added to every <code>go test</code>: <code>-race -count=1</code>") }
             }
             group("Language Server (gopls)") {
@@ -84,6 +85,7 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                 row { checkBox("Staticcheck analyzers").bindSelected(settings::goplsStaticcheck) }
                 row { checkBox("Format with gofumpt, a stricter gofmt").bindSelected(settings::goplsGofumpt) }
                 row { checkBox("Inlay hints: parameter names, types of variables, values of constants").bindSelected(settings::goplsInlayHints) }
+                row { comment("Every other setting of the server: the <b>gopls</b> page below this one. What is set there wins over these switches") }
             }
             group("Debugger (delve)") {
                 row { checkBox("Show global variables of the package").bindSelected(settings::debugShowGlobalVariables) }
@@ -95,8 +97,19 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                 }
                 row { checkBox("Write the log of delve for every debug session").bindSelected(settings::debugAdapterLog).comment("Menu Go | Show Debugger Logs") }
             }
+            group("Editor") {
+                row {
+                    checkBox("Suggest the idiomatic next line as grey text (Tab to accept)").bindSelected(settings::inlineIdioms)
+                        .comment("<code>if err != nil { return ... }</code> after an assigned error, with the return values of the function; <code>defer cancel()</code>, <code>defer mu.Unlock()</code>, <code>defer f.Close()</code> after what needs them")
+                }
+            }
             group("Code Quality") {
                 row("Reformat Code with:") { comboBox(GoFormatter.entries).bindItem(settings::formatter.toNullableProperty()) }
+                row { checkBox("Format Go files on save").bindSelected(settings::formatOnSave).comment("With the formatter above; goimports also adds and removes imports. A file with a syntax error is saved as it is") }
+                row {
+                    checkBox("Show golangci-lint warnings in the editor").bindSelected(settings::lintOnTheFly)
+                        .comment("For saved files, with the <code>.golangci.yml</code> of the repository; the linter is run for the package of the file")
+                }
             }
             group("Tools") {
                 for (row in toolRows.values) {

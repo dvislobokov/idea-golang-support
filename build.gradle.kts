@@ -48,13 +48,17 @@ kotlin {
 }
 
 // `./gradlew runIdeForUiTests`: a sandbox IDE with the plugin and the Remote Robot server (https://github.com/JetBrains/intellij-ui-test-robot)
-// on http://127.0.0.1:8082, for driving the UI from outside: component tree, clicks, actions, screenshots. See tools/ui-robot.
+// on http://127.0.0.1:<robotPort>, for driving the UI from outside: component tree, clicks, actions, screenshots. See tools/ui-robot.
+// The port is 8083 and not the 8082 of the examples: the sandbox of ../idea-dotnet-support listens there, and two agents working at
+// the same time would drive (and close) each other's IDE. Another one: `-ProbotPort=8090`, and ROBOT_PORT=8090 for robot.py.
 // The robot-server plugin is the one thing the build downloads (from the JetBrains plugin repository), and only for this task.
+val robotPort = providers.gradleProperty("robotPort").orElse("8083")
+
 val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
     task {
         jvmArgumentProviders += CommandLineArgumentProvider {
             listOf(
-                "-Drobot-server.port=8082",
+                "-Drobot-server.port=${robotPort.get()}",
                 "-Dide.mac.message.dialogs.as.sheets=false",
                 "-Djb.privacy.policy.text=<!--999.999-->",
                 "-Djb.consents.confirmation.enabled=false",

@@ -55,6 +55,14 @@ class GoSyntaxHighlighter : SyntaxHighlighterBase() {
         val FIELD = createTextAttributesKey("GO_FIELD", Default.INSTANCE_FIELD)
         val CONSTANT = createTextAttributesKey("GO_CONSTANT", Default.CONSTANT)
 
+        // by the semantic tokens of gopls (GoSemanticColors), and what of it the annotator can tell by itself
+        val TYPE_REFERENCE = createTextAttributesKey("GO_TYPE_REFERENCE", Default.CLASS_REFERENCE)
+        val PACKAGE = createTextAttributesKey("GO_PACKAGE", Default.IDENTIFIER)
+        val PARAMETER = createTextAttributesKey("GO_PARAMETER", Default.PARAMETER)
+        val LOCAL_VARIABLE = createTextAttributesKey("GO_LOCAL_VARIABLE", Default.LOCAL_VARIABLE)
+        val PACKAGE_VARIABLE = createTextAttributesKey("GO_PACKAGE_VARIABLE", Default.GLOBAL_VARIABLE)
+        val LABEL = createTextAttributesKey("GO_LABEL", Default.LABEL)
+
         private val KEYS: Map<IElementType, TextAttributesKey> = mapOf(
             GoTokenTypes.KEYWORD to KEYWORD,
             GoTokenTypes.STRING to STRING,
@@ -77,6 +85,44 @@ class GoSyntaxHighlighter : SyntaxHighlighterBase() {
             TokenType.BAD_CHARACTER to BAD_CHARACTER,
         )
     }
+}
+
+/**
+ * The colour of a semantic token of gopls (https://go.dev/gopls/features/passive#semantic-tokens): its type, and the modifiers gopls
+ * adds to the standard ones (`struct`, `interface`, `signature`, ...). Null: the token is coloured well enough by the lexer.
+ */
+object GoSemanticColors {
+    fun key(type: String, modifiers: List<String>): TextAttributesKey? {
+        val builtin = "defaultLibrary" in modifiers
+        val definition = "definition" in modifiers
+        return when (type) {
+            "namespace" -> GoSyntaxHighlighter.PACKAGE
+            "type", "typeParameter" -> if (builtin) GoSyntaxHighlighter.BUILTIN_TYPE else if (definition) GoSyntaxHighlighter.TYPE_DECLARATION else GoSyntaxHighlighter.TYPE_REFERENCE
+            "function", "method" -> if (builtin) GoSyntaxHighlighter.BUILTIN_FUNCTION else if (definition) GoSyntaxHighlighter.FUNCTION_DECLARATION else GoSyntaxHighlighter.FUNCTION_CALL
+            "property" -> GoSyntaxHighlighter.FIELD
+            "parameter" -> GoSyntaxHighlighter.PARAMETER
+            "variable" -> when {
+                builtin -> GoSyntaxHighlighter.BUILTIN_CONSTANT // nil, true, false, iota
+                "readonly" in modifiers -> GoSyntaxHighlighter.CONSTANT
+                "static" in modifiers -> GoSyntaxHighlighter.PACKAGE_VARIABLE
+                else -> GoSyntaxHighlighter.LOCAL_VARIABLE
+            }
+            "label" -> GoSyntaxHighlighter.LABEL
+            else -> null
+        }
+    }
+
+    /** What gopls adds to the token modifiers of the protocol; a client has to name the ones it wants to hear. */
+    val MODIFIERS = listOf("array", "bool", "chan", "format", "interface", "map", "number", "pointer", "signature", "slice", "string", "struct", "shadowing")
+
+    /** `gopkg.in/yaml.v3` is `yaml`, `github.com/go-chi/chi/v5` is `chi`: the name a package is used by, guessed from its path by convention. */
+    fun packageName(importPath: String): String {
+        val segments = importPath.split('/')
+        val last = if (segments.size > 1 && VERSION.matches(segments.last())) segments[segments.size - 2] else segments.last()
+        return last.substringBefore('.').removePrefix("go-")
+    }
+
+    private val VERSION = Regex("v[0-9]+")
 }
 
 class GoSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
@@ -104,9 +150,12 @@ class GoIdentifierAnnotator : Annotator {
             GoDeclarationKind.VAR -> null
         }
         val afterDot = PsiTreeUtil.skipWhitespacesAndCommentsBackward(element).elementType == GoTokenTypes.DOT
-        val isCall = PsiTreeUtil.skipWhitespacesAndCommentsForward(element).elementType == GoTokenTypes.LPAREN
+        val next = PsiTreeUtil.skipWhitespacesAndCommentsForward(element).elementType
+        val isCall = next == GoTokenTypes.LPAREN
         val text = element.text
         return when {
+            // `fmt.` where the file imports something named fmt: a package; a variable that shadows it gopls repaints
+            !afterDot && next == GoTokenTypes.DOT && text in importedNames(element) -> GoSyntaxHighlighter.PACKAGE
             !afterDot && text in GoTokenTypes.BUILTIN_TYPES -> GoSyntaxHighlighter.BUILTIN_TYPE
             !afterDot && text in GoTokenTypes.BUILTIN_CONSTANTS -> GoSyntaxHighlighter.BUILTIN_CONSTANT
             !afterDot && isCall && text in GoTokenTypes.BUILTIN_FUNCTIONS -> GoSyntaxHighlighter.BUILTIN_FUNCTION
@@ -115,6 +164,9 @@ class GoIdentifierAnnotator : Annotator {
         }
     }
 }
+
+private fun importedNames(element: PsiElement): Set<String> =
+    GoStructure.of(element.containingFile).imports.mapTo(HashSet()) { it.alias?.takeIf { alias -> alias != "_" && alias != "." } ?: GoSemanticColors.packageName(it.path) }
 
 class GoColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName(): String = "Go"
@@ -140,9 +192,9 @@ class GoColorSettingsPage : ColorSettingsPage {
             <field>name</field> <bt>string</bt> `json:"name"`
         }
 
-        func (s *Server) <fn>Start</fn>(args ...<bt>string</bt>) <bt>error</bt> {
-            if <bf>len</bf>(args) == 0 || s == <bc>nil</bc> {
-                return fmt.<call>Errorf</call>("no arguments: %d, %q", 0x1F, 'x')
+        func (s *<tref>Server</tref>) <fn>Start</fn>(<param>args</param> ...<bt>string</bt>) <bt>error</bt> {
+            if <bf>len</bf>(<param>args</param>) == 0 || s == <bc>nil</bc> {
+                return <pkg>fmt</pkg>.<call>Errorf</call>("no arguments: %d, %q", 0x1F, 'x')
             }
             return <bc>nil</bc>
         }
@@ -171,6 +223,12 @@ class GoColorSettingsPage : ColorSettingsPage {
             AttributesDescriptor("Declarations//Struct field", GoSyntaxHighlighter.FIELD),
             AttributesDescriptor("Declarations//Constant", GoSyntaxHighlighter.CONSTANT),
             AttributesDescriptor("Function call", GoSyntaxHighlighter.FUNCTION_CALL),
+            AttributesDescriptor("References//Type", GoSyntaxHighlighter.TYPE_REFERENCE),
+            AttributesDescriptor("References//Package", GoSyntaxHighlighter.PACKAGE),
+            AttributesDescriptor("Variables//Parameter", GoSyntaxHighlighter.PARAMETER),
+            AttributesDescriptor("Variables//Local variable", GoSyntaxHighlighter.LOCAL_VARIABLE),
+            AttributesDescriptor("Variables//Package variable", GoSyntaxHighlighter.PACKAGE_VARIABLE),
+            AttributesDescriptor("Label", GoSyntaxHighlighter.LABEL),
             AttributesDescriptor("Bad character", GoSyntaxHighlighter.BAD_CHARACTER),
         )
 
@@ -178,6 +236,7 @@ class GoColorSettingsPage : ColorSettingsPage {
             "bt" to GoSyntaxHighlighter.BUILTIN_TYPE, "bc" to GoSyntaxHighlighter.BUILTIN_CONSTANT, "bf" to GoSyntaxHighlighter.BUILTIN_FUNCTION,
             "fn" to GoSyntaxHighlighter.FUNCTION_DECLARATION, "type" to GoSyntaxHighlighter.TYPE_DECLARATION, "field" to GoSyntaxHighlighter.FIELD,
             "const" to GoSyntaxHighlighter.CONSTANT, "call" to GoSyntaxHighlighter.FUNCTION_CALL,
+            "tref" to GoSyntaxHighlighter.TYPE_REFERENCE, "pkg" to GoSyntaxHighlighter.PACKAGE, "param" to GoSyntaxHighlighter.PARAMETER,
         )
     }
 }

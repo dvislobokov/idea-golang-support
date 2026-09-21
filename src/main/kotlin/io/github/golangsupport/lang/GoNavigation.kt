@@ -1,8 +1,11 @@
 package io.github.golangsupport.lang
 
+import com.intellij.lang.cacheBuilder.WordsScanner
+import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.navigation.ChooseByNameContributorEx
 import com.intellij.navigation.NavigationItem
 import com.intellij.openapi.project.DumbAware
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PsiTreeUtil
@@ -66,6 +69,19 @@ abstract class GoGotoContributor(private val types: Boolean, private val members
             }
         }
     }
+}
+
+/**
+ * Lets Find Usages and Show Usages start from a declaration. The usages themselves come from gopls (the searcher is in the module with
+ * the language server); without it there are none, and the IDE says so instead of refusing the action.
+ */
+class GoFindUsagesProvider : FindUsagesProvider {
+    override fun getWordsScanner(): WordsScanner? = null
+    override fun canFindUsagesFor(element: PsiElement): Boolean = element is GoDeclaration
+    override fun getHelpId(element: PsiElement): String? = null
+    override fun getType(element: PsiElement): String = (element as? GoDeclaration)?.kind?.title.orEmpty()
+    override fun getDescriptiveName(element: PsiElement): String = (element as? GoDeclaration)?.let { listOf(it.containerName, it.name.orEmpty()).filter(String::isNotEmpty).joinToString(".") }.orEmpty()
+    override fun getNodeText(element: PsiElement, useFullName: Boolean): String = (element as? GoDeclaration)?.info?.presentation ?: element.text.take(40)
 }
 
 /** Go to Class: structs, interfaces and the other named types. */
