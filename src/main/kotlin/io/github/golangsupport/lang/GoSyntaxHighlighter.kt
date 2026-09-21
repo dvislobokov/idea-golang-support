@@ -1,0 +1,183 @@
+package io.github.golangsupport.lang
+
+import com.intellij.lang.annotation.AnnotationHolder
+import com.intellij.lang.annotation.Annotator
+import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.lexer.Lexer
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
+import com.intellij.openapi.editor.HighlighterColors
+import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey
+import com.intellij.openapi.fileTypes.SyntaxHighlighter
+import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
+import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
+import com.intellij.openapi.options.colors.AttributesDescriptor
+import com.intellij.openapi.options.colors.ColorDescriptor
+import com.intellij.openapi.options.colors.ColorSettingsPage
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiElement
+import com.intellij.psi.TokenType
+import com.intellij.psi.tree.IElementType
+import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.elementType
+import io.github.golangsupport.GoIcons
+import javax.swing.Icon
+
+class GoSyntaxHighlighter : SyntaxHighlighterBase() {
+    override fun getHighlightingLexer(): Lexer = GoLexer()
+
+    override fun getTokenHighlights(tokenType: IElementType): Array<TextAttributesKey> = pack(KEYS[tokenType])
+
+    companion object {
+        val KEYWORD = createTextAttributesKey("GO_KEYWORD", Default.KEYWORD)
+        val STRING = createTextAttributesKey("GO_STRING", Default.STRING)
+        val NUMBER = createTextAttributesKey("GO_NUMBER", Default.NUMBER)
+        val LINE_COMMENT = createTextAttributesKey("GO_LINE_COMMENT", Default.LINE_COMMENT)
+        val BLOCK_COMMENT = createTextAttributesKey("GO_BLOCK_COMMENT", Default.BLOCK_COMMENT)
+        val DIRECTIVE = createTextAttributesKey("GO_DIRECTIVE", Default.METADATA)
+        val BRACES = createTextAttributesKey("GO_BRACES", Default.BRACES)
+        val PARENTHESES = createTextAttributesKey("GO_PARENTHESES", Default.PARENTHESES)
+        val BRACKETS = createTextAttributesKey("GO_BRACKETS", Default.BRACKETS)
+        val SEMICOLON = createTextAttributesKey("GO_SEMICOLON", Default.SEMICOLON)
+        val COMMA = createTextAttributesKey("GO_COMMA", Default.COMMA)
+        val DOT = createTextAttributesKey("GO_DOT", Default.DOT)
+        val OPERATOR = createTextAttributesKey("GO_OPERATOR", Default.OPERATION_SIGN)
+        val BAD_CHARACTER = createTextAttributesKey("GO_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER)
+
+        // by GoIdentifierAnnotator
+        val BUILTIN_TYPE = createTextAttributesKey("GO_BUILTIN_TYPE", Default.KEYWORD)
+        val BUILTIN_CONSTANT = createTextAttributesKey("GO_BUILTIN_CONSTANT", Default.KEYWORD)
+        val BUILTIN_FUNCTION = createTextAttributesKey("GO_BUILTIN_FUNCTION", Default.PREDEFINED_SYMBOL)
+        val FUNCTION_DECLARATION = createTextAttributesKey("GO_FUNCTION_DECLARATION", Default.FUNCTION_DECLARATION)
+        val TYPE_DECLARATION = createTextAttributesKey("GO_TYPE_DECLARATION", Default.CLASS_NAME)
+        val FUNCTION_CALL = createTextAttributesKey("GO_FUNCTION_CALL", Default.FUNCTION_CALL)
+        val FIELD = createTextAttributesKey("GO_FIELD", Default.INSTANCE_FIELD)
+        val CONSTANT = createTextAttributesKey("GO_CONSTANT", Default.CONSTANT)
+
+        private val KEYS: Map<IElementType, TextAttributesKey> = mapOf(
+            GoTokenTypes.KEYWORD to KEYWORD,
+            GoTokenTypes.STRING to STRING,
+            GoTokenTypes.RAW_STRING to STRING,
+            GoTokenTypes.CHAR to STRING,
+            GoTokenTypes.NUMBER to NUMBER,
+            GoTokenTypes.LINE_COMMENT to LINE_COMMENT,
+            GoTokenTypes.BLOCK_COMMENT to BLOCK_COMMENT,
+            GoTokenTypes.DIRECTIVE to DIRECTIVE,
+            GoTokenTypes.LBRACE to BRACES,
+            GoTokenTypes.RBRACE to BRACES,
+            GoTokenTypes.LPAREN to PARENTHESES,
+            GoTokenTypes.RPAREN to PARENTHESES,
+            GoTokenTypes.LBRACKET to BRACKETS,
+            GoTokenTypes.RBRACKET to BRACKETS,
+            GoTokenTypes.SEMICOLON to SEMICOLON,
+            GoTokenTypes.COMMA to COMMA,
+            GoTokenTypes.DOT to DOT,
+            GoTokenTypes.OPERATOR to OPERATOR,
+            TokenType.BAD_CHARACTER to BAD_CHARACTER,
+        )
+    }
+}
+
+class GoSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
+    override fun getSyntaxHighlighter(project: Project?, virtualFile: VirtualFile?): SyntaxHighlighter = GoSyntaxHighlighter()
+}
+
+/**
+ * Colours what the lexer cannot tell apart: predeclared identifiers, the names of declarations, calls. No resolve here: a shadowed
+ * `len` is still coloured as the builtin. The semantic tokens of gopls, where it runs, are laid over this.
+ */
+class GoIdentifierAnnotator : Annotator {
+    override fun annotate(element: PsiElement, holder: AnnotationHolder) {
+        if (element.elementType != GoTokenTypes.IDENTIFIER) return
+        val key = classify(element) ?: return
+        holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(element).textAttributes(key).create()
+    }
+
+    private fun classify(element: PsiElement): TextAttributesKey? {
+        val declaration = element.parent as? GoDeclaration
+        if (declaration != null && declaration.info?.nameRange == element.textRange) return when (declaration.kind) {
+            GoDeclarationKind.FUNCTION, GoDeclarationKind.METHOD, GoDeclarationKind.INTERFACE_METHOD -> GoSyntaxHighlighter.FUNCTION_DECLARATION
+            GoDeclarationKind.STRUCT, GoDeclarationKind.INTERFACE, GoDeclarationKind.TYPE -> GoSyntaxHighlighter.TYPE_DECLARATION
+            GoDeclarationKind.FIELD -> GoSyntaxHighlighter.FIELD
+            GoDeclarationKind.CONST -> GoSyntaxHighlighter.CONSTANT
+            GoDeclarationKind.VAR -> null
+        }
+        val afterDot = PsiTreeUtil.skipWhitespacesAndCommentsBackward(element).elementType == GoTokenTypes.DOT
+        val isCall = PsiTreeUtil.skipWhitespacesAndCommentsForward(element).elementType == GoTokenTypes.LPAREN
+        val text = element.text
+        return when {
+            !afterDot && text in GoTokenTypes.BUILTIN_TYPES -> GoSyntaxHighlighter.BUILTIN_TYPE
+            !afterDot && text in GoTokenTypes.BUILTIN_CONSTANTS -> GoSyntaxHighlighter.BUILTIN_CONSTANT
+            !afterDot && isCall && text in GoTokenTypes.BUILTIN_FUNCTIONS -> GoSyntaxHighlighter.BUILTIN_FUNCTION
+            isCall -> GoSyntaxHighlighter.FUNCTION_CALL
+            else -> null
+        }
+    }
+}
+
+class GoColorSettingsPage : ColorSettingsPage {
+    override fun getDisplayName(): String = "Go"
+    override fun getIcon(): Icon = GoIcons.File
+    override fun getHighlighter(): SyntaxHighlighter = GoSyntaxHighlighter()
+    override fun getAttributeDescriptors(): Array<AttributesDescriptor> = DESCRIPTORS
+    override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
+    override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey> = TAGS
+
+    override fun getDemoText(): String = """
+        //go:build linux
+
+        // Package shop sells things.
+        package shop
+
+        import "fmt"
+
+        const <const>DefaultPort</const> = 8080
+
+        /* A Server serves. */
+        type <type>Server</type> struct {
+            <field>Port</field> <bt>int</bt>
+            <field>name</field> <bt>string</bt> `json:"name"`
+        }
+
+        func (s *Server) <fn>Start</fn>(args ...<bt>string</bt>) <bt>error</bt> {
+            if <bf>len</bf>(args) == 0 || s == <bc>nil</bc> {
+                return fmt.<call>Errorf</call>("no arguments: %d, %q", 0x1F, 'x')
+            }
+            return <bc>nil</bc>
+        }
+    """.trimIndent()
+
+    private companion object {
+        val DESCRIPTORS = arrayOf(
+            AttributesDescriptor("Keyword", GoSyntaxHighlighter.KEYWORD),
+            AttributesDescriptor("String", GoSyntaxHighlighter.STRING),
+            AttributesDescriptor("Number", GoSyntaxHighlighter.NUMBER),
+            AttributesDescriptor("Comments//Line comment", GoSyntaxHighlighter.LINE_COMMENT),
+            AttributesDescriptor("Comments//Block comment", GoSyntaxHighlighter.BLOCK_COMMENT),
+            AttributesDescriptor("Comments//Compiler directive", GoSyntaxHighlighter.DIRECTIVE),
+            AttributesDescriptor("Braces and Operators//Braces", GoSyntaxHighlighter.BRACES),
+            AttributesDescriptor("Braces and Operators//Parentheses", GoSyntaxHighlighter.PARENTHESES),
+            AttributesDescriptor("Braces and Operators//Brackets", GoSyntaxHighlighter.BRACKETS),
+            AttributesDescriptor("Braces and Operators//Semicolon", GoSyntaxHighlighter.SEMICOLON),
+            AttributesDescriptor("Braces and Operators//Comma", GoSyntaxHighlighter.COMMA),
+            AttributesDescriptor("Braces and Operators//Dot", GoSyntaxHighlighter.DOT),
+            AttributesDescriptor("Braces and Operators//Operator", GoSyntaxHighlighter.OPERATOR),
+            AttributesDescriptor("Builtins//Type", GoSyntaxHighlighter.BUILTIN_TYPE),
+            AttributesDescriptor("Builtins//Constant", GoSyntaxHighlighter.BUILTIN_CONSTANT),
+            AttributesDescriptor("Builtins//Function", GoSyntaxHighlighter.BUILTIN_FUNCTION),
+            AttributesDescriptor("Declarations//Function", GoSyntaxHighlighter.FUNCTION_DECLARATION),
+            AttributesDescriptor("Declarations//Type", GoSyntaxHighlighter.TYPE_DECLARATION),
+            AttributesDescriptor("Declarations//Struct field", GoSyntaxHighlighter.FIELD),
+            AttributesDescriptor("Declarations//Constant", GoSyntaxHighlighter.CONSTANT),
+            AttributesDescriptor("Function call", GoSyntaxHighlighter.FUNCTION_CALL),
+            AttributesDescriptor("Bad character", GoSyntaxHighlighter.BAD_CHARACTER),
+        )
+
+        val TAGS = mapOf(
+            "bt" to GoSyntaxHighlighter.BUILTIN_TYPE, "bc" to GoSyntaxHighlighter.BUILTIN_CONSTANT, "bf" to GoSyntaxHighlighter.BUILTIN_FUNCTION,
+            "fn" to GoSyntaxHighlighter.FUNCTION_DECLARATION, "type" to GoSyntaxHighlighter.TYPE_DECLARATION, "field" to GoSyntaxHighlighter.FIELD,
+            "const" to GoSyntaxHighlighter.CONSTANT, "call" to GoSyntaxHighlighter.FUNCTION_CALL,
+        )
+    }
+}

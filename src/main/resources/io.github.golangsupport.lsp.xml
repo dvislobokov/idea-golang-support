@@ -1,0 +1,24 @@
+<!-- A content module of the plugin: everything that needs the LSP client of the platform lives here, so where it is absent
+     only this part is switched off and the rest of the plugin loads. Classes: io.github.golangsupport.lsp. -->
+<idea-plugin package="io.github.golangsupport.lsp">
+    <dependencies>
+        <module name="intellij.platform.lsp"/>
+        <!-- the extension point is declared by the implementation -->
+        <module name="intellij.platform.lsp.impl"/>
+    </dependencies>
+
+    <extensions defaultExtensionNs="io.github.golangsupport">
+        <languageServerControl implementation="io.github.golangsupport.lsp.GoplsControl"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.integrationProvider implementation="io.github.golangsupport.lsp.GoplsIntegrationProvider"/>
+    </extensions>
+
+    <actions>
+        <action id="Go.RestartLanguageServer" class="io.github.golangsupport.lsp.RestartGoplsAction" text="Restart Language Server"
+                icon="AllIcons.Actions.Restart" description="Stop gopls and start it again with the current settings">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

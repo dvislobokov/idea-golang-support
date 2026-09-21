@@ -1,0 +1,178 @@
+package io.github.golangsupport
+
+import com.google.gson.JsonParser
+import io.github.golangsupport.build.GoBuildOutputParser
+import io.github.golangsupport.cli.GoEnvironment
+import io.github.golangsupport.mod.GoModFile
+import io.github.golangsupport.run.DapMessageRewritingStream
+import io.github.golangsupport.run.DapSetBreakpoints
+import io.github.golangsupport.run.DapStartFailure
+import io.github.golangsupport.run.DapStartWatcher
+import io.github.golangsupport.run.BreakpointExtras
+import io.github.golangsupport.run.DlvDap
+import io.github.golangsupport.run.GoLaunchArguments
+import io.github.golangsupport.run.HitCondition
+import io.github.golangsupport.testing.GoTestEvents
+import io.github.golangsupport.testing.GoTestKind
+import io.github.golangsupport.testing.GoTests
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.io.ByteArrayOutputStream
+
+class GoToolingTest {
+    @Test fun goMod() {
+        val mod = GoModFile.parse(
+            """
+            module example.com/app // the app
+
+            go 1.24
+            toolchain go1.24.7
+
+            require (
+                github.com/BurntSushi/toml v1.3.2
+                golang.org/x/text v0.14.0 // indirect
+            )
+            require github.com/x/y v0.1.0
+
+            replace github.com/x/y => ../y
+            replace golang.org/x/text v0.14.0 => github.com/fork/text v0.14.1
+            tool golang.org/x/tools/cmd/stringer
+            """.trimIndent(),
+        )
+        assertEquals("example.com/app", mod.modulePath)
+        assertEquals("1.24", mod.goVersion)
+        assertEquals("go1.24.7", mod.toolchain)
+        assertEquals(listOf("github.com/BurntSushi/toml", "github.com/x/y"), mod.directRequires.map { it.path })
+        assertEquals(listOf("golang.org/x/text"), mod.indirectRequires.map { it.path })
+        assertEquals(6, mod.requires[0].line)
+        assertTrue(mod.replacementOf(mod.requires[2])!!.isLocal)
+        assertEquals("github.com/fork/text", mod.replacementOf(mod.requires[1])!!.newPath)
+        assertEquals(listOf("golang.org/x/tools/cmd/stringer"), mod.tools)
+        assertEquals("github.com/!burnt!sushi/toml@v1.3.2", GoModFile.cachePath("github.com/BurntSushi/toml", "v1.3.2"))
+    }
+
+    @Test fun goWork() = assertEquals(listOf("./api", "./worker"), GoModFile.parse("go 1.24\n\nuse (\n\t./api\n\t./worker\n)\n").uses)
+
+    @Test fun buildOutput() {
+        val message = GoBuildOutputParser.parseLine("store\\order.go:12:5: undefined: foo")!!
+        assertEquals(listOf("store\\order.go", 12, 5, "undefined: foo"), listOf(message.file, message.line, message.column, message.text))
+        assertEquals("C:\\src\\main.go", GoBuildOutputParser.parseLine("C:\\src\\main.go:7:2: \"os\" imported and not used")!!.file)
+        assertEquals(1, GoBuildOutputParser.parseLine("vet: ./a.go:3: oops")!!.column)
+        assertNull(GoBuildOutputParser.parseLine("# example.com/app/store"))
+        assertEquals("example.com/app/store", GoBuildOutputParser.packageOf("# example.com/app/store [example.com/app/store.test]"))
+    }
+
+    @Test fun goEnv() {
+        val environment = GoEnvironment.parse("""{"GOPATH":"C:\\Users\\me\\go","GOBIN":"","GOROOT":"C:\\Go","GOVERSION":"go1.24.7","GOMODCACHE":"D:\\mod"}""")
+        assertEquals("1.24.7", environment.goVersion)
+        assertEquals("D:\\mod", environment.goModCache)
+        assertTrue(environment.binDirectory!!.path.replace('\\', '/').endsWith("me/go/bin"))
+    }
+
+    @Test fun testFunctions() {
+        assertEquals(GoTestKind.TEST, GoTests.kindOf("TestTotal"))
+        assertEquals(GoTestKind.EXAMPLE, GoTests.kindOf("Example_suffix"))
+        assertEquals(GoTestKind.BENCHMARK, GoTests.kindOf("BenchmarkX"))
+        assertNull(GoTests.kindOf("Testing"))
+        assertNull(GoTests.kindOf("TestMain"))
+        assertEquals("^TestA$/^two_items\\.x$", GoTests.pattern(listOf("TestA/two_items.x")))
+        assertEquals("^(TestA|TestB)$", GoTests.pattern(listOf("TestA/x", "TestB", "TestA/y")))
+    }
+
+    @Test fun testEvents() {
+        val events = GoTestEvents { packagePath, test -> "hint:$packagePath|${test.orEmpty()}" }
+        fun event(action: String, test: String? = null, extra: String = "") =
+            events.convert("""{"Action":"$action","Package":"example.com/p"${if (test == null) "" else ""","Test":"$test""""}$extra}""")!!
+        assertNull(events.convert("FAIL\texample.com/p [build failed]"))
+        assertTrue(event("start").single().startsWith("##teamcity[testSuiteStarted name='example.com/p' nodeId='example.com/p' parentNodeId='0'"))
+        // `|` is the escape character of service messages, hence `||`
+        assertTrue(event("run", "TestA").single().contains("testStarted name='TestA' nodeId='example.com/p||TestA' parentNodeId='example.com/p'"))
+        assertTrue(event("run", "TestA/sub").single().contains("name='sub' nodeId='example.com/p||TestA/sub' parentNodeId='example.com/p||TestA'"))
+        assertTrue(event("output", "TestA/sub", ""","Output":"=== RUN   TestA/sub\n"""").isEmpty())
+        assertTrue(event("output", "TestA/sub", ""","Output":"    a_test.go:5: boom\n"""").single().contains("testStdOut"))
+        val failed = event("fail", "TestA/sub", ""","Elapsed":0.25""")
+        assertTrue(failed[0].contains("testFailed") && failed[1].contains("testFinished") && failed[1].contains("duration='250'"))
+        assertTrue(event("skip", "TestB").any { it.contains("testIgnored") })
+        // the package has a failed test: its own failure adds nothing
+        assertEquals(1, event("fail").size)
+    }
+
+    @Test fun packageThatDoesNotCompile() {
+        val events = GoTestEvents()
+        events.convert("""{"Action":"start","Package":"p"}""")
+        events.convert("""{"Action":"output","Package":"p","Output":"./a.go:3:2: undefined: x\n"}""")
+        val failed = events.convert("""{"Action":"fail","Package":"p"}""")!!
+        assertTrue(failed.any { it.contains("testFailed") && it.contains("undefined: x") })
+        assertTrue(failed.last().contains("testSuiteFinished"))
+    }
+
+    @Test fun launchArguments() {
+        val run = GoLaunchArguments.build(false, "C:/app/cmd", listOf("-v"), null, false, null, mapOf("A" to "1"), listOf("-tags=x", "-race"))
+        assertEquals("debug", run["mode"])
+        assertEquals(listOf("-v"), run["args"])
+        assertEquals("-tags=x -race", run["buildFlags"])
+        assertEquals("remote", run["outputMode"])
+        assertFalse("request" in run)
+        val test = GoLaunchArguments.build(true, "C:/app/store", emptyList(), "^TestA$", false, null, emptyMap(), emptyList())
+        assertEquals("test", test["mode"])
+        assertEquals(listOf("-test.v", "-test.run", "^TestA$"), test["args"])
+    }
+
+    @Test fun delve() {
+        assertEquals("127.0.0.1" to 63940, DlvDap.listeningAt("DAP server listening at: 127.0.0.1:63940"))
+        assertNull(DlvDap.listeningAt("2026-09-21T17:39:33+03:00 debug layer=dap DAP server pid = 36168"))
+        assertTrue("--check-go-version=false" in DlvDap.arguments(log = false, anyGoVersion = true))
+        assertTrue(DlvDap.arguments(log = true, anyGoVersion = false).none { it.startsWith("--log-dest") })
+    }
+
+    @Test fun hitConditions() {
+        assertTrue(listOf("", "5", ">= 3", "%10", "!=2").all(HitCondition::isValid))
+        assertFalse(HitCondition.isValid("abc") || HitCondition.isValid("0") || HitCondition.isValid("=> 3"))
+        assertEquals(">= 3", HitCondition.normalize(">=3"))
+        assertEquals("5", HitCondition.normalize(" 5 "))
+        assertNull(HitCondition.normalize(""))
+    }
+
+    private fun frame(json: String) = "Content-Length: ${json.toByteArray().size}\r\n\r\n$json".toByteArray()
+
+    @Test fun setBreakpointsGetTheirExtras() {
+        val request = """{"seq":5,"type":"request","command":"setBreakpoints","arguments":{"source":{"path":"C:/a.go"},"breakpoints":[{"line":7},{"line":9}]}}"""
+        val other = """{"seq":6,"type":"request","command":"threads"}"""
+        val target = ByteArrayOutputStream()
+        val stream = DapMessageRewritingStream(target) { body ->
+            DapSetBreakpoints.rewrite(body, { path, line -> if (path == "C:/a.go" && line == 9) BreakpointExtras(">=3", "total = {total}") else null })
+        }
+        // cut in the middle of a header and of a body
+        val bytes = frame(request) + frame(other)
+        stream.write(bytes, 0, 10)
+        stream.write(bytes, 10, bytes.size - 10)
+        val text = target.toString(Charsets.UTF_8)
+        val first = text.substringAfter("\r\n\r\n").substringBefore("Content-Length")
+        val breakpoints = JsonParser.parseString(first).asJsonObject.getAsJsonObject("arguments").getAsJsonArray("breakpoints")
+        assertFalse(breakpoints[0].asJsonObject.has("hitCondition"))
+        assertEquals(">= 3", breakpoints[1].asJsonObject.get("hitCondition").asString)
+        assertEquals("total = {total}", breakpoints[1].asJsonObject.get("logMessage").asString)
+        assertTrue(text.startsWith("Content-Length: ${first.toByteArray().size}\r\n"))
+        assertTrue(text.endsWith(other))
+    }
+
+    @Test fun failedLaunchIsReportedWithWhatTheCompilerSaid() {
+        val failure = """{"seq":3,"type":"response","request_seq":2,"success":false,"command":"launch","message":"Failed to launch","body":{"error":{"id":3000,"format":"Failed to launch: Build error: Check the debug console for details."}}}"""
+        assertEquals("Failed to launch: Build error: Check the debug console for details.", DapStartFailure.of(failure.toByteArray()))
+        assertNull(DapStartFailure.of("""{"type":"response","success":false,"command":"evaluate","message":"no"}""".toByteArray()))
+
+        var reported: String? = null
+        val watcher = DapStartWatcher { reported = it }
+        assertFalse(watcher.message("""{"type":"event","event":"output","body":{"category":"stderr","output":"./broken.go:3:17: undefined: undefinedCall\n"}}""".toByteArray()))
+        assertTrue(watcher.message(failure.toByteArray()))
+        assertTrue(reported!!.startsWith("Failed to launch") && reported!!.endsWith("undefined: undefinedCall"))
+
+        // a program that has started: its output is not collected, a failure of something else is not a failure to start
+        val running = DapStartWatcher { reported = "again" }
+        running.message("""{"type":"response","success":true,"command":"launch"}""".toByteArray())
+        assertFalse(running.message(failure.toByteArray()))
+    }
+}
