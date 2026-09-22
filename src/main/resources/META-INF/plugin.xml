@@ -129,6 +129,9 @@
                      description="Write every DAP message of the Go debug sessions to the log directory of the IDE (delve/protocol); menu Go | Debugger | Trace Debugger Protocol"/>
         <!-- CPU, memory, heap, GC and scheduler of a running program: the operating system and the GODEBUG traces of the runtime -->
         <toolWindow id="Go Monitor" anchor="right" icon="/icons/goMonitorToolWindow.svg" factoryClass="io.github.golangsupport.monitor.GoMonitorToolWindowFactory"/>
+        <!-- Run with Coverage: the executor of the platform coverage module, by its id; the stripes and the percentages are the plugin's own -->
+        <programRunner implementation="io.github.golangsupport.testing.GoCoverageRunner"/>
+        <projectViewNodeDecorator implementation="io.github.golangsupport.testing.GoCoverageProjectViewDecorator"/>
         <toolWindow id="Go Tests" anchor="bottom" icon="/icons/goTestsToolWindow.svg" factoryClass="io.github.golangsupport.testing.GoTestExplorerToolWindowFactory"/>
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
 
@@ -174,6 +177,14 @@
             <add-to-group group-id="MainMenu" anchor="after" relative-to-action="ToolsMenu"/>
         </group>
 
+        <action id="Go.RunWithCoverage" class="io.github.golangsupport.testing.RunGoTestsWithCoverageAction" text="Run Tests with Coverage"
+                icon="AllIcons.General.RunWithCoverage" description="go test -coverprofile for the package of the file, or the directory with the packages below it">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </action>
+        <action id="Go.HideCoverage" class="io.github.golangsupport.testing.HideGoCoverageAction" text="Hide Coverage" icon="AllIcons.Actions.Close"
+                description="Remove the coverage stripes and percentages">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </action>
         <action id="Go.Monitor" class="io.github.golangsupport.monitor.ShowGoMonitorAction" text="Monitor Go Process" icon="/icons/goMonitorToolWindow.svg"
                 description="CPU, memory, heap, garbage collections and goroutines of a running Go program">
             <add-to-group group-id="Go.MainMenu" anchor="last"/>
@@ -207,6 +218,7 @@
             <reference ref="Go.Build"/>
             <reference ref="Go.Vet"/>
             <reference ref="Go.ModTidy"/>
+            <reference ref="Go.RunWithCoverage"/>
             <separator/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="WeighingNewGroup"/>
         </group>

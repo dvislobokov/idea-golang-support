@@ -27,6 +27,7 @@ import io.github.golangsupport.monitor.GoProfile
 import io.github.golangsupport.monitor.GoProfiles
 import io.github.golangsupport.monitor.GoRuntimeTrace
 import io.github.golangsupport.settings.GoSettings
+import io.github.golangsupport.testing.GoCoverageFormat
 import io.github.golangsupport.testing.GoTestRunState
 import java.io.File
 
@@ -124,9 +125,11 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
     fun goArgumentList(): List<String> = GoSettings.getInstance().buildTagArguments() + ParametersListUtil.parse(options.goArguments.orEmpty())
 
     /** [profileDirectory]: where `go test` writes the profile of [GoRunConfigurationOptions.profile], when the run records one. */
-    fun buildCommandLine(profileDirectory: File? = null): GeneralCommandLine {
+    /** [coverProfile]: where `go test -coverprofile` writes the coverage, for a run with coverage. */
+    fun buildCommandLine(profileDirectory: File? = null, coverProfile: File? = null): GeneralCommandLine {
         val programArguments = ParametersListUtil.parse(options.programArguments.orEmpty())
-        val profile = profileDirectory?.let { GoProfiles.arguments(options.profile, it) }.orEmpty()
+        val cover = coverProfile?.let { listOf("-coverprofile=" + it.path) + GoCoverageFormat.modeArguments(goArgumentList() + GoSettings.getInstance().testArgumentList()) }.orEmpty()
+        val profile = profileDirectory?.let { GoProfiles.arguments(options.profile, it) }.orEmpty() + cover
         val arguments = when (options.command) {
             GoCommand.RUN -> listOf("run") + goArgumentList() + packageArgument() + programArguments
             GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + GoSettings.getInstance().testArgumentList() + testSelection() + profile + packageArgument() +

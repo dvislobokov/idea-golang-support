@@ -149,7 +149,14 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 7.10б | Go Monitor → **Goroutines** во время работы программы | Диалог со сводкой `N × функция` и списком `[Go N] …`; программа продолжает работать | да (робот) |
 | 7.10в | Go Monitor → галочка **All Go processes** → Refresh | В списке Go-программы машины (gopls, docker…) с версией Go и ревизией; для них CPU и память | да (робот, список) |
 | 7.10г | Go Monitor → **Debug** | Отладчик подключается к процессу | **нет** |
-| 7.10д | `go test store` → Profile: **CPU profile**, Run | После прогона уведомление «CPU profile of the tests is ready»; «Open in pprof» открывает браузер с pprof; «Execution trace» → `go tool trace` | уведомление — да; браузер — **нет** |
+| 7.10д | `go test store` → Profile: **CPU profile**, Run | После прогона уведомление «CPU profile of the tests is ready»; «Open» открывает вкладку профиля в Go Monitor; «Execution trace» → `go tool trace` | уведомление — да; браузер — **нет** |
+| 7.10е | ▶ у `func TestTotal` → Run with Coverage (или ПКМ по `store` → Go → Run Tests with Coverage) | Окно Cover с деревом тестов; в `order.go` зелёные полосы у выполненных строк и красная у `return nil` в `Validate`; в дереве проекта `store 80% statements`, `lint.go 0%`; уведомление «Coverage: 80%…» с Hide coverage | да |
+| 7.10ж | Go → Hide Coverage | Полосы и проценты исчезают | **нет** |
+| 7.10з | Structure (Alt+7) на `order.go` | Под `Order`: поля, затем `Add(item Item)`, `Total() int`, `Validate() error` | да |
+| 7.10и | Run `cmd/pprofdemo` (▶ у `func main`), Go Monitor → выбрать его | Через ≤5 с строка «pprof: http://127.0.0.1:6060/debug/pprof» и кнопки CPU 30s, Heap, Allocs, Goroutines, Mutex, Block, Trace 5s | **нет** |
+| 7.10к | Goroutines (строка pprof) | Вкладка «Goroutines …» в Go Monitor: `8 × main.main.func1 — in time.Sleep` и др., стек снизу (двойной клик — к исходнику); программа не останавливается | **нет** |
+| 7.10л | Heap; CPU 30s (идёт прогресс, можно отменить); Trace 5s | Вкладка профиля: Flame Graph (клик — зум, двойной клик — исходник) и Top; у Heap выбор inuse/alloc; «Open in Browser» — flame graph pprof без Graphviz; для trace — `go tool trace` | **нет** |
+| 7.10м | Go Monitor → `go run shop` (без pprof) | Через ~10 с подсказка «pprof is not served: import _ "net/http/pprof"…» | **нет** |
 | 7.11 | Edit Configurations → Go | Поля: Command, Package, Go tool arguments, Program arguments, Working directory, Environment, Test pattern, две галочки | нет |
 
 ## 8. Отладчик

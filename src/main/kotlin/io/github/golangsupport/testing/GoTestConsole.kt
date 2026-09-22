@@ -49,7 +49,12 @@ class GoTestRunState(private val configuration: GoRunConfiguration, environment:
     override fun startProcess(): ProcessHandler {
         val profile = configuration.options.profile
         val directory = if (profile == GoProfile.NONE) null else GoProfiles.newDirectory()
-        val handler = KillableColoredProcessHandler(configuration.buildCommandLine(directory)).also { ProcessTerminatedListener.attach(it) }
+        val coverProfile = if (GoCoverageRuns.isWanted(environment)) java.io.File.createTempFile("go-cover-", ".out") else null
+        val handler = KillableColoredProcessHandler(configuration.buildCommandLine(directory, coverProfile)).also { ProcessTerminatedListener.attach(it) }
+        // failed tests still write the profile: what did run is covered all the same
+        if (coverProfile != null) handler.addProcessListener(object : ProcessListener {
+            override fun processTerminated(event: ProcessEvent) = GoCoverageService.getInstance(environment.project).load(coverProfile, configuration.name)
+        })
         if (directory != null) handler.addProcessListener(object : ProcessListener {
             override fun processTerminated(event: ProcessEvent) = GoProfileServers.getInstance(environment.project).notifyReady(profile, directory)
         })

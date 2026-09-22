@@ -22,6 +22,7 @@ import com.intellij.xdebugger.XDebugProcess
 import com.intellij.xdebugger.XDebugProcessStarter
 import com.intellij.xdebugger.XDebugSession
 import com.intellij.xdebugger.XDebuggerManager
+import com.intellij.xdebugger.impl.XDebugSessionImpl
 import com.intellij.xdebugger.attach.LocalAttachHost
 import com.intellij.xdebugger.attach.XAttachDebugger
 import com.intellij.xdebugger.attach.XAttachDebuggerProvider
@@ -71,8 +72,11 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
                         val session = XDebuggerManager.getInstance(project).startSession(environment, object : XDebugProcessStarter() {
                             override fun start(session: XDebugSession): XDebugProcess = GoDebugProcess(session, adapter, start, GoDebuggerLogs.newProtocolTrace())
                         })
-                        // in the split mode of the debugger (2026.1) the session has no descriptor to hand over: asking logs an error
-                        result.setResult(if (SplitDebuggerMode.isSplitDebugger()) null else session.runContentDescriptor)
+                        // The descriptor is what registers the run with the IDE: the Stop button, the running status, the Debug tab. In the split
+                        // mode of the debugger (2026.1) `runContentDescriptor` logs an error and hands out the mock descriptor of the session;
+                        // that one is asked for directly. Null there left the session running without Stop and without a tab (seen live).
+                        val descriptor = if (SplitDebuggerMode.isSplitDebugger()) (session as? XDebugSessionImpl)?.getMockRunContentDescriptorIfInitialized() else null
+                        result.setResult(descriptor ?: session.runContentDescriptor)
                     } catch (e: Exception) {
                         adapter.stop(0)
                         result.setError(e)

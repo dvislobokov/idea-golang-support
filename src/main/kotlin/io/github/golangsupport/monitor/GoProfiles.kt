@@ -41,15 +41,17 @@ object GoProfiles {
 
     /** The flags of `go test` for [profile] into [directory]; empty for none. */
     fun arguments(profile: GoProfile, directory: File): List<String> =
-        if (profile == GoProfile.NONE) emptyList() else listOf("${profile.flag}=${File(directory, profile.fileName).path}")
+        // `-o`: with a profile go test keeps the test binary, by default as `pkg.test` in the directory of the package (seen live)
+        if (profile == GoProfile.NONE) emptyList()
+        else listOf("${profile.flag}=${File(directory, profile.fileName).path}", "-o", File(directory, "pkg.test" + if (com.intellij.openapi.util.SystemInfo.isWindows) ".exe" else "").path)
 
     /** `Serving web UI on http://localhost:53421`, the line of `go tool pprof -http`; `go tool trace` says `Parsing trace...` then the same words. */
     fun servedUrl(line: String): String? = Regex("""(?:Serving web UI on|listening on) (http://\S+)""").find(line)?.groupValues?.get(1)
 }
 
 /**
- * `go tool pprof -http` and `go tool trace` are web servers: one per opened profile, alive until the project closes. The browser is
- * opened with the address they print.
+ * The profiles the IDE has: pprof ones in tabs of Go Monitor; in the browser, `go tool pprof -http` and `go tool trace` are web servers,
+ * one per opened profile, alive until the project closes.
  */
 @Service(Service.Level.PROJECT)
 class GoProfileServers(private val project: Project) : Disposable {
@@ -62,17 +64,25 @@ class GoProfileServers(private val project: Project) : Disposable {
         val notification = NotificationGroupManager.getInstance().getNotificationGroup("Go").createNotification(
             "${profile.title} of the tests is ready", "${file.path} (${ChartFormats.bytes(file.length().toDouble())})", NotificationType.INFORMATION,
         )
-        notification.addAction(NotificationAction.createSimple(if (profile == GoProfile.TRACE) "Open in go tool trace" else "Open in pprof") { open(profile, file) })
+        notification.addAction(NotificationAction.createSimple(if (profile == GoProfile.TRACE) "Open in go tool trace" else "Open") { open(file, profile.title, profile == GoProfile.TRACE, "the tests") })
         notification.addAction(NotificationAction.createSimple("Show in ${RevealFileAction.getFileManagerName()}") { RevealFileAction.openFile(file) })
         notification.notify(project)
     }
 
-    fun open(profile: GoProfile, file: File) {
+    /** A pprof profile opens in a tab of Go Monitor; an execution trace is not pprof and only `go tool trace` shows it, in the browser. */
+    fun open(file: File, title: String, trace: Boolean, source: String) =
+        if (trace) openInBrowser(file, title, trace = true) else GoProfileLoader.open(project, file, title, "$title of $source")
+
+    /**
+     * [file] in `go tool trace` when [trace], in `go tool pprof -http` otherwise; the browser opens when the tool says where it serves.
+     * pprof starts on its flame graph: its default view, Graph, needs Graphviz (`Could not execute dot`, seen live).
+     */
+    fun openInBrowser(file: File, title: String, trace: Boolean) {
         // pprof with `-http=localhost:0` says "Serving web UI on http://localhost:0" and serves on some port it never names (seen live): a port is picked here
         val port = java.net.ServerSocket(0).use { it.localPort }
-        val arguments = if (profile == GoProfile.TRACE) listOf("tool", "trace", "-http=localhost:$port", file.path)
+        val arguments = if (trace) listOf("tool", "trace", "-http=localhost:$port", file.path)
         else listOf("tool", "pprof", "-http=localhost:$port", "-no_browser", file.path)
-        val commands = GoCli.commandLinesOrNotify(project, "Open ${profile.title}") { listOf(GoCli.commandLine(file.parent, *arguments.toTypedArray())) } ?: return
+        val commands = GoCli.commandLinesOrNotify(project, "Open $title") { listOf(GoCli.commandLine(file.parent, *arguments.toTypedArray())) } ?: return
         val handler = OSProcessHandler(commands.first())
         handlers += handler
         handler.addProcessListener(object : ProcessListener {
@@ -82,11 +92,11 @@ class GoProfileServers(private val project: Project) : Disposable {
                 if (opened) return
                 opened = true
                 // `go tool trace` opens the browser by itself; pprof is told not to
-                if (profile != GoProfile.TRACE) ApplicationManager.getApplication().invokeLater { BrowserUtil.browse(url) }
+                if (!trace) ApplicationManager.getApplication().invokeLater { BrowserUtil.browse(url.trimEnd('/') + "/ui/flamegraph") }
             }
             override fun processTerminated(event: ProcessEvent) {
                 handlers -= handler
-                if (!opened) GoCli.notifyError(project, "Open ${profile.title}", "go tool ${profile.tool} has exited with code ${event.exitCode}")
+                if (!opened) GoCli.notifyError(project, "Open $title", "go tool ${if (trace) "trace" else "pprof"} has exited with code ${event.exitCode}")
             }
         })
         handler.startNotify()

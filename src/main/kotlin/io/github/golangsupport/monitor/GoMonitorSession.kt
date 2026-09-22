@@ -115,6 +115,7 @@ class RunningGoProcesses {
     fun started(name: String, handler: ProcessHandler) {
         // a run with telemetry builds first: the program, and its id, come later
         if (handler is GoTelemetryProcessHandler) return handler.whenProgramStarted { pid -> add(name, pid, handler, handler.runtime) }
+        // the handler of a debug session is not a process of the IDE: that program is added by the debugger when delve starts it
         val pid = runCatching { (handler as? BaseProcessHandler<*>)?.process?.pid() }.getOrNull() ?: return
         add(name, pid, handler, null)
     }
@@ -130,6 +131,17 @@ class RunningGoProcesses {
             }
         })
         listeners.forEach { it(target) }
+    }
+
+    /**
+     * A program the IDE has started without a process handler of its own: under the debugger delve starts it and says its id in the
+     * `process` event. Returns what to call when the program is gone.
+     */
+    fun started(name: String, pid: Long): () -> Unit {
+        val target = MonitorTarget(pid, "$name ($pid)", withChildren = false)
+        targets.add(0, target)
+        listeners.forEach { it(target) }
+        return { if (targets.remove(target)) listeners.forEach { it(null) } }
     }
 
     companion object {

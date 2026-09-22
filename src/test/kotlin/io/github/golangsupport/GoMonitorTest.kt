@@ -98,8 +98,9 @@ class GoMonitorTest {
 
     @Test fun profiles() {
         val directory = File("C:/tmp/go-profile-1")
-        assertEquals(listOf("-cpuprofile=" + File(directory, "cpu.pprof").path), GoProfiles.arguments(GoProfile.CPU, directory))
-        assertEquals(listOf("-trace=" + File(directory, "trace.out").path), GoProfiles.arguments(GoProfile.TRACE, directory))
+        val binary = File(directory, "pkg.test" + if (com.intellij.openapi.util.SystemInfo.isWindows) ".exe" else "").path
+        assertEquals(listOf("-cpuprofile=" + File(directory, "cpu.pprof").path, "-o", binary), GoProfiles.arguments(GoProfile.CPU, directory))
+        assertEquals(listOf("-trace=" + File(directory, "trace.out").path, "-o", binary), GoProfiles.arguments(GoProfile.TRACE, directory))
         assertTrue(GoProfiles.arguments(GoProfile.NONE, directory).isEmpty())
         assertEquals("http://localhost:53421", GoProfiles.servedUrl("Serving web UI on http://localhost:53421\n"))
         assertEquals("http://127.0.0.1:8080", GoProfiles.servedUrl("2026/09/22 12:00:00 Trace viewer is listening on http://127.0.0.1:8080"))

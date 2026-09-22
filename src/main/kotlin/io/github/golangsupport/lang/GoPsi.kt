@@ -157,14 +157,37 @@ class GoStructureViewFactory : PsiStructureViewFactory {
         }
 
         override fun isAlwaysShowsPlus(element: StructureViewTreeElement): Boolean = false
-        override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean = (element.value as? GoDeclaration)?.kind?.let { it != GoDeclarationKind.STRUCT && it != GoDeclarationKind.INTERFACE } == true
+        override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean = (element.value as? GoDeclaration)?.kind?.isType == false
     }
 
-    class Element(element: PsiElement) : PsiTreeElementBase<PsiElement>(element) {
-        override fun getPresentableText(): String? = (element as? GoDeclaration)?.presentation?.presentableText ?: (element as? PsiFile)?.name
+    /**
+     * The file: its declarations, with the methods of a type of this file under that type, after its fields, as GoLand shows them.
+     * A method of a type declared in another file of the package stays at the top level.
+     */
+    class Element(element: PsiElement, private val underType: Boolean = false) : PsiTreeElementBase<PsiElement>(element) {
+        /** Under its type a method is `Add(item Item)`: the `(Order) ` of the top level would only repeat the node above. */
+        override fun getPresentableText(): String? {
+            val text = (element as? GoDeclaration)?.presentation?.presentableText ?: return (element as? PsiFile)?.name
+            val receiver = (element as? GoDeclaration)?.info?.receiver
+            return if (underType && receiver != null) text.removePrefix("($receiver) ") else text
+        }
 
-        override fun getChildrenBase(): Collection<StructureViewTreeElement> =
-            PsiTreeUtil.getChildrenOfTypeAsList(element, GoDeclaration::class.java).map(::Element)
+        override fun getChildrenBase(): Collection<StructureViewTreeElement> {
+            val element = element ?: return emptyList()
+            val own = PsiTreeUtil.getChildrenOfTypeAsList(element, GoDeclaration::class.java)
+            return when {
+                element is PsiFile -> {
+                    val types = own.filter { it.kind.isType == true }.mapNotNull { it.name }.toSet()
+                    own.filterNot { it.kind == GoDeclarationKind.METHOD && it.info?.receiver in types }.map(::Element)
+                }
+                element is GoDeclaration && element.kind.isType == true -> {
+                    val methods = PsiTreeUtil.getChildrenOfTypeAsList(element.containingFile, GoDeclaration::class.java)
+                        .filter { it.kind == GoDeclarationKind.METHOD && it.info?.receiver == element.name }
+                    own.map(::Element) + methods.map { Element(it, underType = true) }
+                }
+                else -> own.map(::Element)
+            }
+        }
     }
 }
 

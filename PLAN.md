@@ -75,7 +75,7 @@
 
 ## 3. Тесты (средне, высокая отдача для Go-разработчика)
 
-- [ ] **Покрытие.** `-coverprofile` разбирается тривиально; дальше подсветка в gutter и проценты в дереве проекта и в окне Go Tests.
+- [x] **Покрытие.** (сделано 2026-09-22, см. ROADMAP) Run with Coverage, полосы в gutter, проценты в дереве проекта; в окне Go Tests — нет.
 - [ ] **Table-driven тесты.** Запуск одного кейса из gutter у строки `{name: "empty", ...}`. Главный способ писать тесты в Go; сейчас запускается только функция целиком.
 - [ ] **Бенчмарки.** Таблица ns/op, B/op, allocs/op вместо текста и сравнение с прошлым прогоном (по сути `benchstat`).
 - [ ] **Auto-test.** Перезапуск тестов пакета при сохранении: в консоли уже есть, вынести в Go Tests.
@@ -95,6 +95,17 @@
   Не сделано: сессия отладчика в списке, `/debug/pprof` живого процесса (нужен импорт в коде).
 - [~] **pprof в один клик.** Для тестов: Profile в run configuration + «Open in pprof» — см. ROADMAP. Для запущенной программы без `net/http/pprof` профиль
   снять нечем; с ним — действие «Open pprof» по импорту в коде (не сделано).
+- [x] **pprof живого процесса: поиск по портам (сделано 2026-09-22, см. ROADMAP).** В Go Monitor для выбранного процесса в фоне:
+  1. Порты, которые слушает процесс: Windows — `GetExtendedTcpTable` через JNA (или `netstat -ano`), Linux — `/proc/<pid>/net/tcp{,6}` + inode сокетов
+     из `/proc/<pid>/fd`, macOS — `lsof -iTCP -sTCP:LISTEN -p <pid>`. Для `go run` — порты программы, а не команды `go` (как `pickApplication`).
+  2. На каждый порт `GET http://127.0.0.1:<port>/debug/pprof/` с таймаутом ~300 мс; pprof — если в ответе «Types of profiles available» и ссылки
+     `goroutine` / `heap` / `profile`. Заодно `/debug/vars` (expvar, memstats JSON).
+  3. Нашёлся — в мониторе строка «pprof: http://127.0.0.1:6060/debug/pprof» (клик — браузер) и кнопки **CPU 30s**, **Heap**, **Goroutines**, **Allocs**,
+     **Mutex**, **Block**: профиль скачивается в temp (`/debug/pprof/profile?seconds=30`, `/heap`, …) и открывается в `go tool pprof -http`
+     тем же `GoProfileServers`, что у тестов. Goroutines — ещё и текстом (`?debug=2`) со сводкой по функциям, как снимок delve, но без остановки процесса.
+  4. Не нашёлся — «pprof не найден на портах процесса» и подсказка про `import _ "net/http/pprof"` + `go http.ListenAndServe("localhost:6060", nil)`.
+  Ограничения: префикс, отличный от `/debug/pprof`, и авторизация не находятся — позже поле «адрес pprof» вручную. Варианты 2 (символы
+  `net/http/pprof.Index` в бинарнике) и 3 (импорты в исходниках, gutter-иконка у `ListenAndServe`) — дополнением потом.
 - [ ] **Analyze Go Stack Trace.** Вставляешь панику из лога — получаешь кликабельный стек. Дёшево: фильтр (`GoOutputLocations`) уже есть.
 - [ ] **Endpoints.** Маршруты `net/http`, chi, gin, echo с переходом к хендлеру.
 

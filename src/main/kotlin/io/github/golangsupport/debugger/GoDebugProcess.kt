@@ -57,6 +57,9 @@ class GoDebugProcess(
         private set
 
     @Volatile private var exitCode: Int? = null
+
+    /** Takes the program out of the Go Monitor list: set when delve has said which process it started. */
+    @Volatile private var forgetDebuggee: (() -> Unit)? = null
     @Volatile private var started = false
     private val shutdown = AtomicBoolean()
     private val stopped = AsyncPromise<Any>()
@@ -110,6 +113,11 @@ class GoDebugProcess(
             "continued" -> if (!session.isStopped) session.sessionResumed()
             "output" -> output(body)
             "breakpoint" -> body.getAsJsonObject("breakpoint")?.let(lineBreakpoints::update)
+            // the program under the debugger, for the Go Monitor: its handler here is not a process of the IDE, delve has started it
+            "process" -> body.int("systemProcessId")?.let { pid ->
+                forgetDebuggee?.invoke()
+                forgetDebuggee = io.github.golangsupport.monitor.RunningGoProcesses.getInstance(session.project).started(start.name, pid.toLong())
+            }
             "exited" -> exitCode = body.int("exitCode")
             "terminated" -> AppExecutorUtil.getAppExecutorService().execute { shutdown(detach = false, programGone = true) }
         }
@@ -248,6 +256,8 @@ class GoDebugProcess(
         } finally {
             connection.close()
             adapter.stop()
+            forgetDebuggee?.invoke()
+            forgetDebuggee = null
             handler.finish(exitCode)
             stopped.setResult(Unit)
         }

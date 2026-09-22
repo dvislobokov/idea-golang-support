@@ -36,7 +36,8 @@ import javax.swing.ScrollPaneConstants
 class GoMonitorToolWindowFactory : ToolWindowFactory, DumbAware {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val panel = GoMonitorPanel(project, toolWindow.disposable)
-        toolWindow.contentManager.addContent(toolWindow.contentManager.factory.createContent(panel, "", false))
+        // "Live": the charts; the profiles and goroutine dumps taken from it open as tabs after it (GoMonitorTabs)
+        toolWindow.contentManager.addContent(toolWindow.contentManager.factory.createContent(panel, "Live", false).apply { isCloseable = false })
     }
 
     companion object {
@@ -63,6 +64,28 @@ class GoMonitorPanel(private val project: Project, parent: Disposable) : JPanel(
     private val processes = ComboBox<MonitorTarget>()
     private val status = JBLabel().apply { foreground = UIUtil.getContextHelpForeground() }
     private var session: GoMonitorSession? = null
+
+    /** pprof of the process: found on its ports by [GoPprofWatcher]; the link and the buttons show when it is there. */
+    private var pprofWatcher: GoPprofWatcher? = null
+    @Volatile private var pprof: GoPprofEndpoint? = null
+    private val pprofLink = com.intellij.ui.components.ActionLink("") { pprof?.let { com.intellij.ide.BrowserUtil.browse(it.url) } }
+    private val pprofHint = JBLabel().apply { foreground = UIUtil.getContextHelpForeground() }
+    // WrapLayout: seven buttons do not fit a narrow panel in one row
+    private val pprofButtons = JPanel(com.intellij.util.ui.WrapLayout(FlowLayout.LEFT, JBUI.scale(6), JBUI.scale(4))).apply {
+        for (kind in GoPprofKind.entries) add(JButton(kind.title).apply {
+            toolTipText = when (kind) {
+                GoPprofKind.CPU -> "Record the CPU profile for 30 seconds and open it in a tab: flame graph and Top"
+                GoPprofKind.TRACE -> "Record the execution trace for 5 seconds and open it in go tool trace (browser)"
+                GoPprofKind.GOROUTINES -> "All goroutines grouped by stack, from pprof, in a tab: the program is not stopped"
+                else -> "Take the ${kind.title.lowercase()} profile and open it in a tab: flame graph and Top"
+            }
+            addActionListener { val endpoint = pprof; val current = session; if (endpoint != null && current != null) GoPprofProfiles.take(project, endpoint, kind, current.target.title) }
+        })
+    }
+    private val pprofPanel = JPanel(BorderLayout(0, JBUI.scale(2))).apply {
+        add(JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply { add(pprofLink); add(pprofHint) }, BorderLayout.NORTH)
+        add(pprofButtons, BorderLayout.CENTER)
+    }
     private var updatingList = false
 
     /** Off by default: the list needs `go version -m` of every executable of the machine the first time. */
@@ -109,13 +132,18 @@ class GoMonitorPanel(private val project: Project, parent: Disposable) : JPanel(
             add(snapshots, BorderLayout.CENTER)
             add(status, BorderLayout.SOUTH)
         }
+        val header = JPanel(BorderLayout(0, JBUI.scale(2))).apply {
+            add(top, BorderLayout.NORTH)
+            add(pprofPanel.apply { border = JBUI.Borders.empty(0, 8, 2, 8) }, BorderLayout.CENTER)
+        }
+        showPprof(null, 0)
         val column = JPanel(GridLayout(0, 1, 0, JBUI.scale(10))).apply {
             border = JBUI.Borders.empty(4, 8, 8, 8)
             charts.forEach { add(it) }
         }
         // NORTH: the charts keep their height instead of stretching over a tall panel
         val content = JPanel(BorderLayout()).apply { add(column, BorderLayout.NORTH) }
-        add(top, BorderLayout.NORTH)
+        add(header, BorderLayout.NORTH)
         add(ScrollPaneFactory.createScrollPane(content, true).apply { horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER }, BorderLayout.CENTER)
 
         processes.addActionListener { if (!updatingList) (processes.selectedItem as? MonitorTarget)?.let(::monitor) }
@@ -159,10 +187,43 @@ class GoMonitorPanel(private val project: Project, parent: Disposable) : JPanel(
         val started = GoMonitorSession(
             target,
             onSample = { sample -> ApplicationManager.getApplication().invokeLater({ show(target, sample) }, project.disposed) },
-            onEnd = { ApplicationManager.getApplication().invokeLater({ if (session?.target == target) { status.text = "${target.title} has exited"; session = null } }, project.disposed) },
+            onEnd = {
+                ApplicationManager.getApplication().invokeLater({
+                    if (session?.target == target) {
+                        status.text = "${target.title} has exited"
+                        session = null
+                        pprofWatcher?.let(Disposer::dispose)
+                        pprofWatcher = null
+                        showPprof(null, 0)
+                    }
+                }, project.disposed)
+            },
         )
         session = started
         started.start()
+        pprofWatcher?.let(Disposer::dispose)
+        showPprof(null, 0)
+        // the program and its children: `go run` serves from the child, a program may serve from a helper process
+        pprofWatcher = GoPprofWatcher({ ProcessSampler.tree(started.applicationPid).map { it.pid() }.toSet() + started.applicationPid }) { endpoint, attempts ->
+            ApplicationManager.getApplication().invokeLater({ if (session === started) showPprof(endpoint, attempts) }, project.disposed)
+        }.also { it.start() }
+    }
+
+    /** The link and the buttons of pprof, or, once the ports have been looked at twice to no avail, how to switch it on. */
+    private fun showPprof(endpoint: GoPprofEndpoint?, attempts: Int) {
+        pprof = endpoint
+        pprofLink.isVisible = endpoint != null
+        pprofButtons.isVisible = endpoint != null
+        if (endpoint != null) {
+            pprofLink.text = "pprof: " + endpoint.url.removeSuffix("/")
+            pprofHint.text = if (endpoint.hasExpvar) "  + expvar" else ""
+        } else {
+            pprofLink.text = ""
+            pprofHint.text = if (session != null && attempts >= 2) "pprof is not served: import _ \"net/http/pprof\" and go http.ListenAndServe(\"localhost:6060\", nil)" else ""
+        }
+        pprofHint.isVisible = pprofHint.text.isNotEmpty()
+        revalidate()
+        repaint()
     }
 
     private fun show(target: MonitorTarget, sample: MonitorSample) {
@@ -193,6 +254,8 @@ class GoMonitorPanel(private val project: Project, parent: Disposable) : JPanel(
     override fun dispose() {
         session?.dispose()
         session = null
+        pprofWatcher?.let(Disposer::dispose)
+        pprofWatcher = null
     }
 
     private companion object {
