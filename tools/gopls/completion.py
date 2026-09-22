@@ -73,4 +73,4 @@ column = offset - (text.rfind("\n", 0, offset) + 1)
 result = request(2, "textDocument/completion", {"textDocument": {"uri": uri(file)}, "position": {"line": line, "character": column}})["result"]
 for item in (result.get("items") or [])[:5]:
     edit = item.get("textEdit") or {}
-    print("%-12s format=%s  insert=%r" % (item["label"], item.get("insertTextFormat"), edit.get("newText", item.get("insertText"))))
+    print("%-12s format=%s  insert=%r  additional=%s" % (item["label"], item.get("insertTextFormat"), edit.get("newText", item.get("insertText")), json.dumps(item.get("additionalTextEdits"))[:160]))

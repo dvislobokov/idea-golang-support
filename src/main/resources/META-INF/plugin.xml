@@ -88,6 +88,8 @@
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.debugger.GoExpressionCompletionContributor"/>
         <registryKey key="go.debugger.protocol.trace" defaultValue="false"
                      description="Write every DAP message of the Go debug sessions to the log directory of the IDE (delve/protocol); menu Go | Debugger | Trace Debugger Protocol"/>
+        <!-- CPU, memory, heap, GC and scheduler of a running program: the operating system and the GODEBUG traces of the runtime -->
+        <toolWindow id="Go Monitor" anchor="right" icon="/icons/goMonitorToolWindow.svg" factoryClass="io.github.golangsupport.monitor.GoMonitorToolWindowFactory"/>
         <toolWindow id="Go Tests" anchor="bottom" icon="/icons/goTestsToolWindow.svg" factoryClass="io.github.golangsupport.testing.GoTestExplorerToolWindowFactory"/>
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
 
@@ -133,6 +135,10 @@
             <add-to-group group-id="MainMenu" anchor="after" relative-to-action="ToolsMenu"/>
         </group>
 
+        <action id="Go.Monitor" class="io.github.golangsupport.monitor.ShowGoMonitorAction" text="Monitor Go Process" icon="/icons/goMonitorToolWindow.svg"
+                description="CPU, memory, heap, garbage collections and goroutines of a running Go program">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </action>
         <group id="Go.Debugger" text="Debugger" popup="true" icon="AllIcons.Actions.StartDebugger">
             <action id="Go.Debugger.ShowLogs" class="io.github.golangsupport.debugger.ShowDebuggerLogsAction" text="Show Debugger Logs"
                     description="Open the directory with the logs of delve and the traces of the protocol"/>
@@ -152,5 +158,6 @@
 
     <projectListeners>
         <listener class="io.github.golangsupport.testing.GoTestStatuses$Listener" topic="com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener"/>
+        <listener class="io.github.golangsupport.monitor.GoProcessStartListener" topic="com.intellij.execution.ExecutionListener"/>
     </projectListeners>
 </idea-plugin>

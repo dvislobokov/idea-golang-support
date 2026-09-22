@@ -23,6 +23,9 @@ import com.intellij.openapi.util.NotNullLazyValue
 import com.intellij.util.execution.ParametersListUtil
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.monitor.GoProfile
+import io.github.golangsupport.monitor.GoProfiles
+import io.github.golangsupport.monitor.GoRuntimeTrace
 import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.testing.GoTestRunState
 import java.io.File
@@ -71,6 +74,12 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
     var workingDirectory by string()
     var environment by map<String, String>()
     var passParentEnvironment by property(true)
+
+    /** `go run` only: the program is built and started with `GODEBUG` traces for the Go Monitor tool window. */
+    var runtimeTelemetry by property(false)
+
+    /** `go test` only: what the tests record (`-cpuprofile` and the like), opened in pprof after the run. */
+    var profile by enum(GoProfile.NONE)
 }
 
 class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
@@ -91,6 +100,7 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
         // A debugger starts the program itself (see debugLaunchArguments), and the runner of the platform still executes the state first.
         executor.id == DefaultDebugExecutor.EXECUTOR_ID -> RunProfileState { _, _ -> null }
         options.command == GoCommand.TEST -> GoTestRunState(this, environment)
+        options.runtimeTelemetry -> GoTelemetryRunState(this, environment)
         else -> object : CommandLineState(environment) {
             override fun startProcess(): ProcessHandler = KillableColoredProcessHandler(buildCommandLine()).also { ProcessTerminatedListener.attach(it) }
         }
@@ -113,17 +123,30 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
 
     fun goArgumentList(): List<String> = GoSettings.getInstance().buildTagArguments() + ParametersListUtil.parse(options.goArguments.orEmpty())
 
-    fun buildCommandLine(): GeneralCommandLine {
+    /** [profileDirectory]: where `go test` writes the profile of [GoRunConfigurationOptions.profile], when the run records one. */
+    fun buildCommandLine(profileDirectory: File? = null): GeneralCommandLine {
         val programArguments = ParametersListUtil.parse(options.programArguments.orEmpty())
+        val profile = profileDirectory?.let { GoProfiles.arguments(options.profile, it) }.orEmpty()
         val arguments = when (options.command) {
             GoCommand.RUN -> listOf("run") + goArgumentList() + packageArgument() + programArguments
-            GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + GoSettings.getInstance().testArgumentList() + testSelection() + packageArgument() +
+            GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + GoSettings.getInstance().testArgumentList() + testSelection() + profile + packageArgument() +
                 (if (programArguments.isEmpty()) emptyList() else listOf("-args") + programArguments)
         }
-        return GoCli.commandLine(goDirectory(), *arguments.toTypedArray())
-            .withEnvironment(options.environment)
-            .withParentEnvironmentType(if (options.passParentEnvironment) GeneralCommandLine.ParentEnvironmentType.CONSOLE else GeneralCommandLine.ParentEnvironmentType.NONE)
+        return withEnvironment(GoCli.commandLine(goDirectory(), *arguments.toTypedArray()))
     }
+
+    /** `go build -o [binary]` of the package: the first step of a run with telemetry, so that `GODEBUG` reaches the program and not the go command. */
+    fun buildBinaryCommandLine(binary: File): GeneralCommandLine = withEnvironment(GoCli.commandLine(goDirectory(), *(listOf("build", "-o", binary.path) + goArgumentList() + packageArgument()).toTypedArray()))
+
+    /** The built [binary] with the arguments of the program, in the working directory of the configuration, with the `GODEBUG` traces added. */
+    fun binaryCommandLine(binary: File): GeneralCommandLine {
+        val line = withEnvironment(GeneralCommandLine(listOf(binary.path) + ParametersListUtil.parse(options.programArguments.orEmpty())).withWorkDirectory(goDirectory()))
+        val own = options.environment["GODEBUG"] ?: System.getenv("GODEBUG")?.takeIf { options.passParentEnvironment }
+        return line.withEnvironment("GODEBUG", listOfNotNull(own?.takeIf { it.isNotBlank() }, GoRuntimeTrace.GODEBUG).joinToString(","))
+    }
+
+    private fun withEnvironment(line: GeneralCommandLine): GeneralCommandLine = line.withEnvironment(options.environment)
+        .withParentEnvironmentType(if (options.passParentEnvironment) GeneralCommandLine.ParentEnvironmentType.CONSOLE else GeneralCommandLine.ParentEnvironmentType.NONE)
 
     private fun testSelection(): List<String> {
         val pattern = options.testPattern?.takeIf { it.isNotBlank() }

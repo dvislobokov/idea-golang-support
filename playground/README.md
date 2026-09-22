@@ -124,6 +124,11 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 7.8 | ▶ у `BenchmarkTotal` | Запуск с `-bench`, результат в консоли | нет |
 | 7.9 | Окно **Go Tests** (колба внизу) | Пакет, 5 функций, у бенчмарка иконка секундомера; после прогона — статусы (пропущенный — «ignored», не ошибка) | да, статус skip после правки — нет |
 | 7.10 | Go Tests: выделить два теста → Run; Run All; Debug | Запускается выбранное | нет |
+| 7.10а | Edit Configurations → `go run shop` → галочка **Collect runtime telemetry**, Run; окно **Go Monitor** справа | В консоли нет строк `gc N @…` и `SCHED`; в мониторе процесс `go run shop (pid)`, графики Memory/Heap/GC/Threads/Scheduler заполняются; статус «N GCs, GOMAXPROCS 12» | да (робот, `cmd/alloc`) |
+| 7.10б | Go Monitor → **Goroutines** во время работы программы | Диалог со сводкой `N × функция` и списком `[Go N] …`; программа продолжает работать | да (робот) |
+| 7.10в | Go Monitor → галочка **All Go processes** → Refresh | В списке Go-программы машины (gopls, docker…) с версией Go и ревизией; для них CPU и память | да (робот, список) |
+| 7.10г | Go Monitor → **Debug** | Отладчик подключается к процессу | **нет** |
+| 7.10д | `go test store` → Profile: **CPU profile**, Run | После прогона уведомление «CPU profile of the tests is ready»; «Open in pprof» открывает браузер с pprof; «Execution trace» → `go tool trace` | уведомление — да; браузер — **нет** |
 | 7.11 | Edit Configurations → Go | Поля: Command, Package, Go tool arguments, Program arguments, Working directory, Environment, Test pattern, две галочки | нет |
 
 ## 8. Отладчик
@@ -134,14 +139,16 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 8.2 | F8, F7 в `order.Total()`, Shift+F8, F9 | Шаги работают; «F8 ничего не делает» быть не должно | F8 — да |
 | 8.3 | Evaluate: `order.Currency`, `len(order.items)`, `order.Total()` | Значения; вызов функции работает без `call` | да |
 | 8.4 | F2 на `total` внутри `Total()` → `777` | Значение изменилось | да |
-| 8.5 | F2 на строковой переменной (`o.Currency` → `"USD"`) | Значение изменилось | **нет** |
+| 8.5 | F2 на строковой переменной (`o.Currency` → `"USD"`) | Значение изменилось | да (робот, через API) |
 | 8.6 | Навести мышь на переменную во время остановки | Всплывает значение | **нет** |
-| 8.7 | ПКМ по точке: Condition `item.Price > 500` в цикле `Total()` | Останавливается только на `cup` | **нет** |
-| 8.8 | ПКМ по точке → More: Hit count `2`; Log message `total = {total}` | Остановка на втором проходе; сообщение в консоли без остановки | **нет** |
-| 8.9 | Добавить `panic("boom")` в `main`, Debug | Остановка на панике (View Breakpoints → Go Panic Breakpoints включён) | **нет** |
+| 8.7 | ПКМ по точке: Condition `item.Price > 500` в цикле `Total()` | Останавливается только на `cup` | да (робот, `item.Name == "cup"`) |
+| 8.8 | ПКМ по точке → More: Hit count `2`; Log message `total = {total}` | Остановка на втором проходе; сообщение `> [Go 1]: total = 1600` в консоли без остановки | да (робот) — сам диалог свойств не проверен |
+| 8.9 | Добавить `panic("boom")` в `main`, Debug | Остановка в `runtime.fatalpanic`, в стеке `main.main main.go:21`; в консоли `panic: "boom"` и стек | остановка — да (робот); текст в консоли — **нет** |
 | 8.10 | Debug теста (▶ у `TestTotal` → Debug), точка в `Total()` | Остановка внутри теста | да |
 | 8.11 | Сломать компиляцию, Debug | Уведомление «Debug has not started» **с текстом ошибки компилятора**, сессия закрылась | без текста — да |
-| 8.12 | Stop во время остановки | Сессия закрывается, в диспетчере задач нет висящих `dlv.exe` и `__debug_bin*.exe` | нет |
+| 8.12 | Stop во время остановки | Сессия закрывается, в диспетчере задач нет висящих `dlv.exe` и `__debug_bin*.exe` | да (робот) |
+| 8.14 | Run → Attach to Process… | Группа «Go» со списком процессов; выбрать программу, собранную `go build` и запущенную вручную; точка срабатывает; Stop отсоединяет, программа живёт | **нет** |
+| 8.15 | В Evaluate набрать `ord` → Ctrl+Space; `order.` → Ctrl+Space | Подсказки: локальные переменные; поля `Currency`, `items` | **нет** |
 | 8.13 | Go → Debugger → Show Debugger Logs | Открывается папка с `dlv-*.log` | нет |
 
 ## 9. Настройки

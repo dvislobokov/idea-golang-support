@@ -8,6 +8,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.RawCommandLineEditor
 import com.intellij.ui.components.JBCheckBox
+import io.github.golangsupport.monitor.GoProfile
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
@@ -23,6 +24,8 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
     private val programArguments = RawCommandLineEditor()
     private val workingDirectory = TextFieldWithBrowseButton()
     private val environment = EnvironmentVariablesComponent()
+    private val runtimeTelemetry = JBCheckBox("Collect runtime telemetry for the Go Monitor")
+    private val profile = ComboBox(GoProfile.entries.toTypedArray())
 
     override fun createEditor(): JComponent {
         target.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor().withTitle("Package Directory or Go File"))
@@ -39,6 +42,8 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
             row("Test pattern:") { cell(testPattern).align(AlignX.FILL).comment("For <code>go test</code>: the <code>-run</code> expression, e.g. <code>^TestOrder</code> or <code>^TestOrder$/^empty$</code>") }
             row { cell(recursive) }
             row { cell(benchmark).comment("<code>-bench</code> with the pattern, and <code>-run ^$</code>") }
+            row { cell(runtimeTelemetry).comment("For <code>go run</code>: the program is built and started with <code>GODEBUG=gctrace=1,schedtrace=1000</code>; the heap, the collections and the scheduler show in the Go Monitor tool window, not in the console") }
+            row("Profile:") { cell(profile).comment("For <code>go test</code>: <code>-cpuprofile</code>, <code>-memprofile</code>, <code>-blockprofile</code>, <code>-mutexprofile</code> or <code>-trace</code>; after the run a notification opens it in <code>go tool pprof</code> / <code>go tool trace</code>") }
         }
     }
 
@@ -54,6 +59,8 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         workingDirectory.text = options.workingDirectory.orEmpty()
         environment.envs = options.environment
         environment.isPassParentEnvs = options.passParentEnvironment
+        runtimeTelemetry.isSelected = options.runtimeTelemetry
+        profile.selectedItem = options.profile
     }
 
     override fun applyEditorTo(configuration: GoRunConfiguration) {
@@ -68,5 +75,7 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         options.workingDirectory = workingDirectory.text.ifBlank { null }
         options.environment = environment.envs.toMutableMap()
         options.passParentEnvironment = environment.isPassParentEnvs
+        options.runtimeTelemetry = runtimeTelemetry.isSelected
+        options.profile = profile.selectedItem as GoProfile
     }
 }

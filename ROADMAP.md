@@ -40,16 +40,17 @@
 - [x] Автогенерация конфигураций для каталогов с `func main` (настройка; удалённая не возвращается) — робот
 - [ ] Бенчмарки: таблица результатов, сравнение прогонов
 
-## Отладчик (content-модуль `dap`, delve)
+## Отладчик (пакет `debugger`, delve)
+- [x] **Свой DAP-клиент** на XDebugger API вместо платформенного (`intellij.platform.dap` есть не во всех IDE и форках): перенесён из dotnet-плагина (`DapConnection` — транспорт, `GoDebugProcess`, фреймы, значения, точки), content-модуль `dap` и зависимость `bundledModule("intellij.platform.dap")` убраны. С ним отпали трюки вокруг закрытого клиента: переписывание `setBreakpoints` на потоке, подсматривание `variablesReference` из трафика, сторож неудачного `launch`, правка события `stopped`. Робот (2026-09-22): точка, стек, переменные, шаги (into / over / out), Evaluate с `call`, условие точки, hit count, log message (в консоль без остановки), Set Value строки и вложенного поля через указатель, остановка на панике с `exceptionInfo`, отказ сборки → уведомление и закрытая сессия; после Stop нет `dlv.exe` / `__debug_bin`
 - [x] Запуск `dlv dap` по TCP, launch для `go run` и `go test`, остановка на точке, стек, переменные, шаги, evaluate — робот
 - [x] Отказ запуска (не компилируется, версия Go) — уведомление с выводом компилятора, сессия закрывается — робот
-- [x] Лог delve на сессию, Show Debugger Logs, Trace Debugger Protocol
-- [~] Hit count и logpoints (переписывание `setBreakpoints`), условие точки, точки на паники
-- [~] Значение при наведении (`GoHoverExpression`)
-- [ ] Attach to Process
-- [x] Set Value: `setVariable`, контейнер переменной узнаётся из трафика (`DapVariableContainers`) — робот (int); строки и указатели не проверены
-- [x] Вызовы функций в Evaluate без префикса `call` (`GoEvaluate`) — робот: до delve доходит `call f()`. Метод, который нигде не вызывается, линкер выбрасывает, и delve его не знает
-- [ ] Completion в Evaluate / watches из остановленной программы
+- [x] Лог delve на сессию, Show Debugger Logs, Trace Debugger Protocol (свой трассировщик: `delve/protocol/protocol-*.log`, registry `go.debugger.protocol.trace`)
+- [x] Hit count, logpoints, условие точки, точки на паники — робот
+- [~] Значение при наведении (`GoHoverExpression`) — вживую не проверено; значения в редакторе рядом с кодом (`GoInlineValues`) — юнит-тест
+- [~] Attach to Process: Run | Attach to Process, группа «Go» со всеми процессами (какие из них Go, из списка не узнать), `attach` с `processId` — вживую не проверено
+- [x] Set Value: `setVariable` с контейнером, который клиент знает сам — робот: строка, число внутри `order.items[0]`
+- [x] Вызовы функций в Evaluate без префикса `call` (`GoEvaluate`) — робот: `order.Total()` = 1600. Точка внутри вызываемой функции прерывает вызов («call stopped») — так у delve
+- [~] Completion в Evaluate / watches из остановленной программы (`GoExpressionCompletionContributor`: локальные и поля после `value.`) — юнит-тест контекста, вживую не проверено
 
 ## Качество кода
 - [x] Reformat Code: gofmt / goimports; форматирование при сохранении (настройка, по умолчанию включено) — робот
@@ -60,8 +61,9 @@
 - [x] Окно «Go on This Machine» (go, модули, инструменты, `go env`) — робот; [~] уведомление, когда в проекте есть go.mod, а `go` не найден
 
 ## Мониторинг и прочее (по образцу dotnet-плагина)
-- [ ] Монитор процесса: `runtime/metrics` / pprof-эндпоинт, горутины, heap, GC
-- [ ] Профилирование: `go tool pprof` (CPU, heap) из run configuration
+- [x] **Go Monitor** (tool window справа, как .NET Monitor): процесс из списка (запущенные из IDE, с галочкой «All Go processes» — все Go-программы машины, найденные по build info `go version -m`), графики CPU, память (committed / working set / live heap), Heap (before GC / goal), GC pauses, GC collections + CPU in GC, Threads, Scheduler (runnable goroutines / idle procs). CPU и память — от ОС для любого процесса; остальное — телеметрия рантайма: в run configuration галочка «Collect runtime telemetry» → программа собирается `go build -o` и запускается сама с `GODEBUG=gctrace=1,schedtrace=1000` (через `go run` переменная попала бы и в команду go), строки рантайма уходят в монитор, не в консоль. Кнопки Goroutines (снимок delve: attach с `stopOnEntry`, `threads`, detach; диалог со сводкой по функциям и поиском) и Debug (attach). Робот (2026-09-22): графики с телеметрией, список процессов машины (3 Go-программы Docker/cowork), снимок горутин (36, `time.Sleep` × 20). Найдено вживую: у консольной программы на Windows дочерний `conhost.exe` — сэмплер его исключает; `executableCannonicalPath` платформы пуст на Windows — путь берётся из JVM или командной строки; поломанный вызов go нельзя кэшировать как «не Go»
+- [x] Профили тестов: в run configuration поле Profile (CPU / memory / block / mutex / execution trace) → `go test -cpuprofile=…` в temp-каталог; по окончании уведомление «CPU profile of the tests is ready» с «Open in pprof» (`go tool pprof -http=localhost:PORT -no_browser`, порт выбирает плагин: с `:0` pprof порт не называет — seen live) / «Open in go tool trace» и «Show in Explorer». Робот: уведомление с файлом; открытие в браузере не проверено
+- [ ] Монитор для сессии отладчика (pid из delve), `inittrace` как таблица старта, счётчик горутин без снимка (нет в `schedtrace`)
 - [ ] Endpoints: маршруты net/http, chi, gin, echo
 - [ ] Analyze Go Stack Trace (вставить панику — получить переходы)
 - [ ] New Go Project / модуль

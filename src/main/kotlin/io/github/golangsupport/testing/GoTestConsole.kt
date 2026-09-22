@@ -8,7 +8,9 @@ import com.intellij.execution.PsiLocation
 import com.intellij.execution.configurations.CommandLineState
 import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.process.KillableColoredProcessHandler
+import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
+import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
@@ -33,6 +35,9 @@ import com.intellij.psi.search.GlobalSearchScope
 import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.mod.GoModulesService
+import io.github.golangsupport.monitor.GoProfile
+import io.github.golangsupport.monitor.GoProfileServers
+import io.github.golangsupport.monitor.GoProfiles
 import io.github.golangsupport.run.GoRunConfiguration
 import jetbrains.buildServer.messages.serviceMessages.ServiceMessageVisitor
 
@@ -41,7 +46,15 @@ private const val LOCATION_PROTOCOL = "gotest"
 
 /** `go test -json` with the test tree instead of a plain console; the tree grows while the tests run. */
 class GoTestRunState(private val configuration: GoRunConfiguration, environment: ExecutionEnvironment) : CommandLineState(environment) {
-    override fun startProcess(): ProcessHandler = KillableColoredProcessHandler(configuration.buildCommandLine()).also { ProcessTerminatedListener.attach(it) }
+    override fun startProcess(): ProcessHandler {
+        val profile = configuration.options.profile
+        val directory = if (profile == GoProfile.NONE) null else GoProfiles.newDirectory()
+        val handler = KillableColoredProcessHandler(configuration.buildCommandLine(directory)).also { ProcessTerminatedListener.attach(it) }
+        if (directory != null) handler.addProcessListener(object : ProcessListener {
+            override fun processTerminated(event: ProcessEvent) = GoProfileServers.getInstance(environment.project).notifyReady(profile, directory)
+        })
+        return handler
+    }
 
     override fun execute(executor: Executor, runner: ProgramRunner<*>): ExecutionResult {
         val handler = startProcess()

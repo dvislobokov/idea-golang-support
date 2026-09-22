@@ -2,7 +2,7 @@
 
 Плагин «Go Project Support» (`io.github.golangsupport`) для IDE на платформе IntelliJ, в которых нет поддержки Go (IntelliJ IDEA, PyCharm, WebStorm, Rider…).
 Сделан по образцу `../idea-dotnet-support`, но устроен иначе: смысл кода даёт **gopls** (платформенный LSP-клиент), отладку — **delve** (`dlv dap`,
-платформенный DAP-клиент), остальное — команда `go` и инструменты экосистемы. Своего парсера Go нет: лексер + сканер верхнего уровня
+**свой** DAP-клиент на XDebugger API, как в dotnet-плагине: модуль `intellij.platform.dap` есть не во всех IDE и форках), остальное — команда `go` и инструменты экосистемы. Своего парсера Go нет: лексер + сканер верхнего уровня
 (`lang/GoDeclarations`), по которому строятся PSI-узлы `GoDeclaration` (Structure view, breadcrumbs, folding, Go to Symbol, gutter-иконки, строки для
 точек останова) — это работает и без gopls. Меняешь, что сканер считает объявлением, — подними `VERSION` у `GoDeclarationIndex`.
 
@@ -47,31 +47,33 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | `view` | узел Dependencies в Project view (исходники из module cache), иконки файлов |
 | `cli` | `GoCli` (поиск `go`, `commandLine`, `execute`, `runInBackground`, нотификации), `GoTool` (gopls, dlv, golangci-lint, goimports: поиск и `go install`), `GoEnvironment` (`go env -json`) |
 | `build` | действия меню Go (Build, Vet, Generate, Modules) → Build tool window, разбор вывода компилятора (`GoBuildOutputParser`) |
-| `run` | run configuration «Go» (`go run` / `go test`), редактор, producer и gutter-иконки, `GoLaunchArguments` (запрос `launch` для delve), `GoDebugSupport` — всё об отладке, чему не нужны классы DAP |
+| `run` | run configuration «Go» (`go run` / `go test`), редактор, producer и gutter-иконки, `GoLaunchArguments` (запрос `launch` для delve), `GoDebugSupport` — чистая часть отладки: аргументы `dlv`, строки для точек, выражение под мышью, `call`, hit conditions, контекст completion, inline values |
 | `testing` | `GoTestEvents` (`go test -json` → service messages, дерево по id, подтесты под родителем), консоль, локатор, Rerun Failed; окно Go Tests и `GoTestStatuses` (статусы прогонов копит слушатель проекта: окно создаётся лениво, позже запусков) |
 | `format` | gofmt / goimports за Reformat Code и при сохранении (в фоне: ждать процесс на EDT платформа запрещает — SEVERE в логе) |
 | `templates` | New → Go File, New Go Module |
 | `lint` | golangci-lint: разбор JSON-отчёта (`GoLintOutput`, v1 и v2), внешний аннотатор для сохранённых файлов; исправления к находкам (`GoLintFixes`: errcheck, `//nolint`), число результатов функции спрашивается у модуля с gopls через точку расширения `signatureProvider` |
 | `sdk` | окно «Go on This Machine», проверка toolchain при открытии проекта |
+| `monitor` | Go Monitor: `ProcessSampler` (CPU/память от ОС, JNA на Windows), `GoRuntimeTrace` (разбор `gctrace` / `schedtrace` / `inittrace`), `GoTelemetryProcessHandler` (сборка + запуск с `GODEBUG`, строки рантайма мимо консоли), `GoBuildInfo`/`GoProcesses` (Go-программы машины по `go version -m`), `GoSnapshot` (горутины через delve attach), `GoProfiles` (профили тестов, `go tool pprof`/`trace`), панель и графики (`TimeSeriesChart` из dotnet-плагина) |
 | `settings` | `GoSettings` (application-level) и страница Settings \| Tools \| Go; `GoplsCatalogue` + страница gopls под ней: настройки сервера берутся из `gopls api-json` установленной версии, своих списков опций не заводить; форма генерируется по типам опций (`GoplsSettingsConfigurable`), то, что плагин задаёт gopls сам, — `GoplsDefaults` (здесь, а не в `lsp`: страница показывает это как действующие значения), хранится только отличие от них |
 | `lsp` | **content-модуль**: gopls на `LspIntegrationProvider`; `GoplsNavigation` / `GoplsCodeVision` — чего нет в LSP-клиенте платформы: Go to Declaration через PSI-цели (ссылка под Ctrl + мышь), usages с объявления, implementations, счётчики над объявлениями; `GoplsCommands` — команды `gopls.*` (клик по линзе платформа шлёт уведомлением без ответа, здесь — запрос с прогрессом и ошибкой; `run_tests` → наш раннер, `generate` → Build window), `GoplsMenuActions` — подменю Go \| gopls, `GoplsLog` — окно лога сервера (stderr, logMessage, команды) и виджет статуса |
-| `dap` | **content-модуль**: delve на платформенном DAP-клиенте |
+| `debugger` | свой DAP-клиент: `DapConnection` (framing, `request_seq`, события, запросы адаптера, trace), `DelveProcess` (`dlv dap` по TCP), `GoDebugRunner` (Debug конфигурации «Go» и attach), `GoDebugProcess` (XDebugProcess: initialize → launch → на `initialized` точки и `configurationDone`), фреймы / значения / точки / редакторы выражений; логи в `GoDebuggerLogs` |
 
-Регистрация — `resources/META-INF/plugin.xml`. То, чему нужны платформенные LSP / DAP (есть не в каждой IDE), — content-модули `io.github.golangsupport.lsp`
-и `.dap`: дескрипторы `resources/io.github.golangsupport.{lsp,dap}.xml`, классы строго в одноимённых пакетах (у модуля свой загрузчик по префиксу пакета).
-Остальной код на эти пакеты и на `com.intellij.platform.lsp.*` / `com.intellij.platform.dap.*` ссылаться не должен: без модуля платформы часть не грузится,
-а плагин обязан работать. Обратная связь — через точки расширения плагина (`languageServerControl`).
+Регистрация — `resources/META-INF/plugin.xml`. То, чему нужен платформенный LSP (есть не в каждой IDE), — content-модуль `io.github.golangsupport.lsp`:
+дескриптор `resources/io.github.golangsupport.lsp.xml`, классы строго в одноимённом пакете (у модуля свой загрузчик по префиксу пакета).
+Остальной код на этот пакет и на `com.intellij.platform.lsp.*` ссылаться не должен: без модуля платформы часть не грузится, а плагин обязан работать.
+Обратная связь — через точки расширения плагина (`languageServerControl`). Платформенный DAP (`com.intellij.platform.dap.*`) не использовать вовсе: отладчик — свой клиент в пакете `debugger`.
 
 Отладчик, что важно знать (проверено вживую):
 - `dlv dap` работает только по TCP: `--listen=127.0.0.1:0`, порт — из первой строки stdout (`DAP server listening at:`). **`--log-dest` нельзя**: с ним и эта
   строка уходит в файл; лог сессии пишет `DelveHandle` из потока процесса.
 - Программу собирает сам delve (`mode: debug | test`), `outputMode: remote` — вывод программы приходит событиями протокола.
-- Клиент платформы не показывает отказ `launch` и оставляет сессию висеть: `DapStartWatcher` смотрит входящий поток, сообщает причину вместе с выводом
-  компилятора и убивает delve. Hit count и logpoints дописываются в `setBreakpoints` на исходящем потоке (`DapSetBreakpoints`), как в dotnet-плагине.
-- Остановившийся поток платформа ищет бинарным поиском по несортированному списку — `StoppedThread` + `GoPresentationFactory` берут id из события.
+- Отказ `launch` (сборка не прошла) приходит ответом `success: false` после событий `output` с текстом компилятора: `GoDebugProcess` копит их до старта и
+  показывает уведомление «Debug has not started» с ними, сессию закрывает. Hit count, logpoints и условие уходят в `setBreakpoints` напрямую (`GoLineBreakpointHandler`).
+- Горутина остановки — `threadId` события `stopped`; ids горутин идут не по порядку, угадывать по списку `threads` нельзя.
+- В split-режиме отладчика (2026.1) `XDebugSession.getRunContentDescriptor` пишет SEVERE: раннер отдаёт null (`SplitDebuggerMode.isSplitDebugger()`).
 - delve новее toolchain отказывается запускать программу («Go version … is too old») — по умолчанию передаётся `--check-go-version=false` (настройка).
-- Вызов функции в Evaluate у delve — `call f()`: префикс дописывает `GoEvaluate`. `setExpression` нет, а `setVariable` нужен `variablesReference` контейнера,
-  которого модель платформы не отдаёт: `DapVariableContainers` узнаёт его из проходящих запросов и ответов `variables` (по `evaluateName`).
+- Вызов функции в Evaluate у delve — `call f()`: префикс дописывает `GoEvaluate`; точка внутри вызываемой функции прерывает вызов («call stopped»). `setExpression` нет,
+  `setVariable` берёт `variablesReference` контейнера — `GoValue` знает его, потому что список запрашивал сам. Указатель у delve — одна дочерняя переменная с пустым именем.
 - Расширения платформы зовут наш код и на EDT, и на фоне без read action: файлы на EDT читать через `LoadTextUtil` (поток — slow operation), `element.project`
   и всё о PSI — внутри `ReadAction`, процессы на EDT не ждать. После проверки роботом смотреть в логе песочницы `Plugin to blame: Go` — должно быть 0.
 - Semantic tokens платформа по умолчанию спрашивает только у файлов без своей подсветки: для Go это включено в `GoplsDescriptor`, там же gopls называются его
