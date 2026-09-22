@@ -1,0 +1,219 @@
+<idea-plugin>
+    <id>io.github.golangsupport</id>
+    <name>Go Project Support</name>
+    <vendor>dvislobokov</vendor>
+
+    <description><![CDATA[
+        Go support for IntelliJ-based IDEs that have none, built on the tools of the Go ecosystem:
+        <ul>
+            <li><b>gopls</b> for errors, completion, navigation and refactorings (the LSP client of the platform)</li>
+            <li><b>delve</b> behind the Debug button (the DAP client of the platform)</li>
+            <li>the <b>go</b> command: build, vet, run, test with a test tree, modules and their dependencies</li>
+            <li>gofmt / goimports behind Reformat Code</li>
+            <li>syntax highlighting, Structure view, folding, Go to Symbol that work without any tool</li>
+        </ul>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <!-- GoLand, or the JetBrains Go plugin in IntelliJ IDEA: the same file type, and nothing this plugin could add -->
+    <incompatible-with>org.jetbrains.plugins.go</incompatible-with>
+
+    <!-- optional parts: a module is loaded only where its dependencies are (see the descriptor of the module next to META-INF) -->
+    <content>
+        <module name="io.github.golangsupport.lsp"/>
+    </content>
+
+    <extensionPoints>
+        <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->
+        <extensionPoint qualifiedName="io.github.golangsupport.languageServerControl" interface="io.github.golangsupport.settings.GoLanguageServerControl" dynamic="true"/>
+        <!-- what a function returns: asked by the fixes of the linter, answered by the module with gopls -->
+        <extensionPoint qualifiedName="io.github.golangsupport.signatureProvider" interface="io.github.golangsupport.lint.GoSignatureProvider" dynamic="true"/>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Go" implementationClass="io.github.golangsupport.lang.GoFileType" fieldName="INSTANCE" language="Go" extensions="go"/>
+        <fileType name="Go Module" implementationClass="io.github.golangsupport.mod.GoModFileType" fieldName="INSTANCE" language="GoModule"
+                  fileNames="go.mod;go.work"/>
+        <fileIconProvider implementation="io.github.golangsupport.view.GoFileIconProvider"/>
+        <!-- *_test.go are tests: the "Tests" scope of the platform, and with it the green background in the tree and the tabs -->
+        <testSourcesFilter implementation="io.github.golangsupport.testing.GoTestSourcesFilter"/>
+
+        <lang.parserDefinition language="Go" implementationClass="io.github.golangsupport.lang.GoParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="Go" implementationClass="io.github.golangsupport.lang.GoSyntaxHighlighterFactory"/>
+        <annotator language="Go" implementationClass="io.github.golangsupport.lang.GoIdentifierAnnotator"/>
+        <!-- on the declarations GoDeclarations finds by tokens -->
+        <lang.psiStructureViewFactory language="Go" implementationClass="io.github.golangsupport.lang.GoStructureViewFactory"/>
+        <breadcrumbsInfoProvider implementation="io.github.golangsupport.lang.GoBreadcrumbsProvider"/>
+        <lang.foldingBuilder language="Go" implementationClass="io.github.golangsupport.lang.GoFoldingBuilder"/>
+        <fileBasedIndex implementation="io.github.golangsupport.lang.GoDeclarationIndex"/>
+        <lang.findUsagesProvider language="Go" implementationClass="io.github.golangsupport.lang.GoFindUsagesProvider"/>
+        <gotoClassContributor implementation="io.github.golangsupport.lang.GoGotoClassContributor"/>
+        <gotoSymbolContributor implementation="io.github.golangsupport.lang.GoGotoSymbolContributor"/>
+        <lang.commenter language="Go" implementationClass="io.github.golangsupport.lang.GoCommenter"/>
+        <lang.braceMatcher language="Go" implementationClass="io.github.golangsupport.lang.GoBraceMatcher"/>
+        <lang.quoteHandler language="Go" implementationClass="io.github.golangsupport.lang.GoQuoteHandler"/>
+        <!-- indentation while typing, the way gofmt would have it; whole files are formatted by gofmt itself -->
+        <lineIndentProvider implementation="io.github.golangsupport.lang.GoLineIndentProvider"/>
+        <enterHandlerDelegate order="first" implementation="io.github.golangsupport.lang.GoEnterBetweenBracketsHandler"/>
+        <langCodeStyleSettingsProvider implementation="io.github.golangsupport.lang.GoCodeStyleSettingsProvider"/>
+        <!-- `if err != nil` and the `defer` that belongs to the line above, as grey text: rules, not a model -->
+        <inline.completion.provider implementation="io.github.golangsupport.lang.GoInlineIdiomsProvider"/>
+        <!-- the colours of Go in GoLand, where they differ from the defaults the keys inherit -->
+        <additionalTextAttributes scheme="Default" file="colorSchemes/GoDefault.xml"/>
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/GoDarcula.xml"/>
+        <colorSettingsPage implementation="io.github.golangsupport.lang.GoColorSettingsPage"/>
+        <defaultLiveTemplates file="/liveTemplates/Go.xml"/>
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoStructTagCompletionContributor"/>
+        <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
+        <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
+        <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoHandleErrorIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoCheckErrorIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoAddMissingReturnIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoCreateFunctionIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoAddStructTagsIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoImplementInterfaceIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoGenerateTestIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <liveTemplateContext contextId="GO" implementation="io.github.golangsupport.lang.GoTemplateContext"/>
+        <liveTemplateMacro implementation="io.github.golangsupport.lang.GoTypeNameMacro"/>
+
+        <lang.parserDefinition language="GoModule" implementationClass="io.github.golangsupport.mod.GoModParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="GoModule" implementationClass="io.github.golangsupport.mod.GoModSyntaxHighlighterFactory"/>
+        <lang.commenter language="GoModule" implementationClass="io.github.golangsupport.mod.GoModCommenter"/>
+
+        <treeStructureProvider implementation="io.github.golangsupport.view.GoDependenciesTreeProvider"/>
+        <notificationGroup id="Go" displayType="BALLOON"/>
+        <projectConfigurable parentId="tools" id="io.github.golangsupport.settings" displayName="Go"
+                             instance="io.github.golangsupport.settings.GoSettingsConfigurable"/>
+        <!-- every setting of the installed gopls, from `gopls api-json` -->
+        <projectConfigurable parentId="io.github.golangsupport.settings" id="io.github.golangsupport.settings.gopls" displayName="gopls"
+                             instance="io.github.golangsupport.settings.GoplsSettingsConfigurable"/>
+
+        <iconMapper mappingFile="GoIconMappings.json"/>
+        <!-- the debugger: the plugin's own DAP client to `dlv dap` on the XDebugger API, which every IDE has (the DAP module of the platform,
+             2026.1+, is absent from a number of IDEs and forks) -->
+        <programRunner implementation="io.github.golangsupport.debugger.GoDebugRunner"/>
+        <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoLineBreakpointType"/>
+        <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoPanicBreakpointType"/>
+        <xdebugger.attachDebuggerProvider implementation="io.github.golangsupport.debugger.GoAttachDebuggerProvider"/>
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.debugger.GoExpressionCompletionContributor"/>
+        <registryKey key="go.debugger.protocol.trace" defaultValue="false"
+                     description="Write every DAP message of the Go debug sessions to the log directory of the IDE (delve/protocol); menu Go | Debugger | Trace Debugger Protocol"/>
+        <!-- CPU, memory, heap, GC and scheduler of a running program: the operating system and the GODEBUG traces of the runtime -->
+        <toolWindow id="Go Monitor" anchor="right" icon="/icons/goMonitorToolWindow.svg" factoryClass="io.github.golangsupport.monitor.GoMonitorToolWindowFactory"/>
+        <toolWindow id="Go Tests" anchor="bottom" icon="/icons/goTestsToolWindow.svg" factoryClass="io.github.golangsupport.testing.GoTestExplorerToolWindowFactory"/>
+        <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
+
+        <configurationType implementation="io.github.golangsupport.run.GoConfigurationType"/>
+        <runConfigurationProducer implementation="io.github.golangsupport.run.GoRunConfigurationProducer"/>
+        <runLineMarkerContributor language="Go" implementationClass="io.github.golangsupport.run.GoRunLineMarkerContributor"/>
+        <formattingService implementation="io.github.golangsupport.format.GoFormattingService"/>
+        <actionOnSave implementation="io.github.golangsupport.format.GoFormatOnSave"/>
+        <postStartupActivity implementation="io.github.golangsupport.run.GoRunConfigurationStartupActivity"/>
+        <internalFileTemplate name="Go File"/>
+        <internalFileTemplate name="Go Program"/>
+        <internalFileTemplate name="Go Test"/>
+        <defaultTemplatePropertiesProvider implementation="io.github.golangsupport.templates.GoTemplatePropertiesProvider"/>
+        <!-- file.go:12 of the compiler, of tests and of panics, in every console of the project -->
+        <consoleFilterProvider implementation="io.github.golangsupport.run.GoConsoleFilterProvider"/>
+        <!-- golangci-lint on saved files -->
+        <externalAnnotator language="Go" implementationClass="io.github.golangsupport.lint.GoLintAnnotator"/>
+    </extensions>
+
+    <actions>
+        <action id="Go.NewFile" class="io.github.golangsupport.templates.CreateGoFileAction">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+
+        <!-- a menu of the main menu bar, next to Tools -->
+        <group id="Go.MainMenu" text="_Go" popup="true">
+            <action id="Go.Build" class="io.github.golangsupport.build.GoBuildAction" text="Build" icon="AllIcons.Actions.Compile"
+                    description="go build ./... in every module of the project"/>
+            <action id="Go.Vet" class="io.github.golangsupport.build.GoVetAction" text="Vet" description="go vet ./..."/>
+            <action id="Go.Generate" class="io.github.golangsupport.build.GoGenerateAction" text="Generate" description="go generate ./..."/>
+            <separator/>
+            <group id="Go.Modules" text="Modules" popup="true" icon="/icons/goMod.svg">
+                <action id="Go.ModTidy" class="io.github.golangsupport.build.GoModTidyAction" text="Tidy" description="go mod tidy"/>
+                <action id="Go.ModDownload" class="io.github.golangsupport.build.GoModDownloadAction" text="Download" icon="AllIcons.Actions.Download"
+                        description="go mod download: the sources of the dependencies appear in the project tree"/>
+                <action id="Go.ModVendor" class="io.github.golangsupport.build.GoModVendorAction" text="Vendor" description="go mod vendor"/>
+            </group>
+            <action id="Go.NewModule" class="io.github.golangsupport.templates.NewGoModuleAction" text="New Go Module..." icon="/icons/goMod.svg"
+                    description="go mod init in the selected directory"/>
+            <separator/>
+            <action id="Go.Environment" class="io.github.golangsupport.sdk.GoEnvironmentAction" text="Go on This Machine..."
+                    description="The toolchain and the tools the plugin uses, the modules of the project, go env"/>
+            <add-to-group group-id="MainMenu" anchor="after" relative-to-action="ToolsMenu"/>
+        </group>
+
+        <action id="Go.Monitor" class="io.github.golangsupport.monitor.ShowGoMonitorAction" text="Monitor Go Process" icon="/icons/goMonitorToolWindow.svg"
+                description="CPU, memory, heap, garbage collections and goroutines of a running Go program">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </action>
+        <group id="Go.GenerateGroup">
+            <separator/>
+            <action id="Go.Generate.Constructor" class="io.github.golangsupport.lang.GoGenerateConstructorAction" text="Constructor..." description="func NewT(...) *T for the struct at the caret"/>
+            <action id="Go.Generate.Getters" class="io.github.golangsupport.lang.GoGenerateGettersAction" text="Getters..."/>
+            <action id="Go.Generate.Setters" class="io.github.golangsupport.lang.GoGenerateSettersAction" text="Setters..."/>
+            <action id="Go.Generate.GettersSetters" class="io.github.golangsupport.lang.GoGenerateGettersAndSettersAction" text="Getters and Setters..."/>
+            <action id="Go.Generate.String" class="io.github.golangsupport.lang.GoGenerateStringAction" text="String() Method..."/>
+            <action id="Go.Generate.Tags" class="io.github.golangsupport.lang.GoGenerateStructTagsAction" text="Struct Tags..."/>
+            <action id="Go.Generate.Implement" class="io.github.golangsupport.lang.GoImplementInterfaceAction" text="Implement Interface..."/>
+            <action id="Go.Generate.Test" class="io.github.golangsupport.lang.GoGenerateTestAction" text="Test"/>
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </group>
+        <action id="Go.HelpPage" class="io.github.golangsupport.help.ShowGoHelpPageAction" text="Help Page" icon="AllIcons.Actions.Help"
+                description="What the plugin does and which keys do it">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+            <add-to-group group-id="HelpMenu" anchor="first"/>
+        </action>
+        <group id="Go.Debugger" text="Debugger" popup="true" icon="AllIcons.Actions.StartDebugger">
+            <action id="Go.Debugger.ShowLogs" class="io.github.golangsupport.debugger.ShowDebuggerLogsAction" text="Show Debugger Logs"
+                    description="Open the directory with the logs of delve and the traces of the protocol"/>
+            <action id="Go.Debugger.TraceProtocol" class="io.github.golangsupport.debugger.TraceDebuggerProtocolAction" text="Trace Debugger Protocol"
+                    description="Write every DAP message of the debug sessions that start from now on next to the debugger logs"/>
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </group>
+        <group id="Go.ProjectViewPopup">
+            <separator/>
+            <reference ref="Go.Build"/>
+            <reference ref="Go.Vet"/>
+            <reference ref="Go.ModTidy"/>
+            <separator/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="WeighingNewGroup"/>
+        </group>
+    </actions>
+
+    <projectListeners>
+        <listener class="io.github.golangsupport.testing.GoTestStatuses$Listener" topic="com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener"/>
+        <listener class="io.github.golangsupport.monitor.GoProcessStartListener" topic="com.intellij.execution.ExecutionListener"/>
+    </projectListeners>
+</idea-plugin>

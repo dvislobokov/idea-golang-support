@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The colours of Go in GoLand (light): what differs from the defaults the keys inherit. -->
+<list>
+    <option name="GO_FUNCTION_DECLARATION">
+        <value><option name="FOREGROUND" value="00627A"/></value>
+    </option>
+    <option name="GO_FUNCTION_CALL">
+        <value><option name="FOREGROUND" value="00627A"/></value>
+    </option>
+    <option name="GO_TYPE_DECLARATION">
+        <value><option name="FOREGROUND" value="007E8A"/></value>
+    </option>
+    <option name="GO_TYPE_REFERENCE">
+        <value><option name="FOREGROUND" value="007E8A"/></value>
+    </option>
+    <option name="GO_PACKAGE">
+        <value><option name="FOREGROUND" value="6B7A1F"/></value>
+    </option>
+    <option name="GO_FIELD">
+        <value><option name="FOREGROUND" value="871094"/></value>
+    </option>
+    <option name="GO_CONSTANT">
+        <value><option name="FOREGROUND" value="871094"/><option name="FONT_TYPE" value="2"/></value>
+    </option>
+    <option name="GO_PACKAGE_VARIABLE">
+        <value><option name="FONT_TYPE" value="2"/></value>
+    </option>
+</list>

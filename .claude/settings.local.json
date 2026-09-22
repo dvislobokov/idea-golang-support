@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jbr/Contents/Home/bin/java -version)",
+      "Bash(cp gradle/wrapper/gradle-wrapper.properties /tmp/claude-290220593/wrapper.bak)",
+      "Bash(cp gradle/wrapper/gradle-wrapper.properties gradle/wrapper/gradle-wrapper.properties.bak)"
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+<!-- A content module of the plugin: everything that needs the LSP client of the platform lives here, so where it is absent
+     only this part is switched off and the rest of the plugin loads. Classes: io.github.golangsupport.lsp. -->
+<idea-plugin package="io.github.golangsupport.lsp">
+    <dependencies>
+        <module name="intellij.platform.lsp"/>
+        <!-- the extension point is declared by the implementation -->
+        <module name="intellij.platform.lsp.impl"/>
+    </dependencies>
+
+    <extensions defaultExtensionNs="io.github.golangsupport">
+        <languageServerControl implementation="io.github.golangsupport.lsp.GoplsControl"/>
+        <signatureProvider implementation="io.github.golangsupport.lsp.GoplsSignatureProvider"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.integrationProvider implementation="io.github.golangsupport.lsp.GoplsIntegrationProvider"/>
+        <!-- what the LSP client of the platform does not do: a link under Ctrl + mouse, usages of a declaration, implementations, the counts above declarations -->
+        <gotoDeclarationHandler implementation="io.github.golangsupport.lsp.GoplsGotoDeclarationHandler"/>
+        <customUsageSearcher implementation="io.github.golangsupport.lsp.GoplsUsageSearcher"/>
+        <definitionsScopedSearch implementation="io.github.golangsupport.lsp.GoplsImplementationSearch"/>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsActionsIntention</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsActionsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <codeInsight.lineMarkerProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsImplementationLineMarkerProvider"/>
+        <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.lsp.GoplsUsagesCodeVisionProvider"/>
+        <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.lsp.GoplsImplementationsCodeVisionProvider"/>
+        <!-- the log of the server: its stderr (with the RPC trace when switched on), its messages, what the plugin sends it -->
+        <toolWindow id="gopls" anchor="bottom" icon="/icons/goplsToolWindow.svg" factoryClass="io.github.golangsupport.lsp.GoplsLogToolWindowFactory"
+                    doNotActivateOnStart="true" canCloseContents="false"/>
+    </extensions>
+
+    <actions>
+        <group id="Go.Gopls" text="gopls" popup="true" icon="/icons/gopls.svg">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+            <action id="Go.Gopls.AddImport" class="io.github.golangsupport.lsp.GoplsAddImportAction" text="Add Import..."
+                    description="Choose one of the packages gopls knows and import it into the file"/>
+            <action id="Go.Gopls.Documentation" class="io.github.golangsupport.lsp.GoplsBrowseDocumentationAction" text="Browse Documentation"
+                    description="The documentation of the package or the declaration at the caret, on the web pages of gopls"/>
+            <action id="Go.Gopls.Assembly" class="io.github.golangsupport.lsp.GoplsBrowseAssemblyAction" text="Browse Assembly"
+                    description="The assembly the compiler makes of the function at the caret"/>
+            <action id="Go.Gopls.FreeSymbols" class="io.github.golangsupport.lsp.GoplsBrowseFreeSymbolsAction" text="Browse Free Symbols of Selection"
+                    description="What the selected code refers to from outside itself: a preview of an extraction"/>
+            <action id="Go.Gopls.OptimizationDetails" class="io.github.golangsupport.lsp.GoplsToggleOptimizationDetailsAction" text="Toggle Compiler Optimization Details"
+                    description="Show or hide the decisions of the compiler about the package of the file as diagnostics: inlining, escapes to the heap, bounds checks"/>
+            <separator/>
+            <action id="Go.Gopls.CheckUpgrades" class="io.github.golangsupport.lsp.GoplsCheckUpgradesAction" text="Check for Dependency Upgrades"
+                    description="Ask gopls which of the requirements of go.mod have newer versions; the answer is shown in go.mod"/>
+            <action id="Go.Gopls.UpgradeAll" class="io.github.golangsupport.lsp.GoplsUpgradeAllAction" text="Upgrade All Dependencies"
+                    description="go get -u -t ./... by gopls, with go.mod updated in the editor"/>
+            <action id="Go.Gopls.Vulncheck" class="io.github.golangsupport.lsp.GoplsVulncheckAction" text="Run govulncheck"
+                    description="Known vulnerabilities reachable from the module, shown in go.mod"/>
+            <action id="Go.Gopls.ResetModDiagnostics" class="io.github.golangsupport.lsp.GoplsResetModDiagnosticsAction" text="Reset go.mod Diagnostics"
+                    description="Clear what the upgrade check and govulncheck have shown in go.mod"/>
+            <separator/>
+            <action id="Go.Gopls.Statistics" class="io.github.golangsupport.lsp.GoplsStatisticsAction" text="Show Statistics"
+                    description="Files, packages and diagnostics of the workspace and the memory of the server, in the log window"/>
+            <action id="Go.Gopls.ShowLog" class="io.github.golangsupport.lsp.ShowGoplsLogAction" text="Show Log" icon="/icons/goplsToolWindow.svg"
+                    description="The log window of gopls: its own log, its messages, the commands sent to it"/>
+            <action id="Go.Gopls.DebugPages" class="io.github.golangsupport.lsp.OpenGoplsDebugPagesAction" text="Open Debug Pages" icon="AllIcons.General.Web"
+                    description="The web pages of gopls about its sessions, memory and metrics; switched on in Settings | Tools | Go"/>
+            <action id="Go.Gopls.Settings" class="io.github.golangsupport.lsp.GoplsSettingsAction" text="Settings..." icon="AllIcons.General.Settings"
+                    description="Settings | Tools | Go"/>
+            <action id="Go.RestartLanguageServer" class="io.github.golangsupport.lsp.RestartGoplsAction" text="Restart"
+                    icon="AllIcons.Actions.Restart" description="Stop gopls and start it again with the current settings"/>
+        </group>
+    </actions>
+</idea-plugin>

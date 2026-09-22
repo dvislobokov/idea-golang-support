@@ -1,0 +1,9 @@
+{
+  "icons": {
+    "expui": {
+      "goTestsToolWindow.svg": "icons/goTestsToolWindow.svg",
+      "goMonitorToolWindow.svg": "icons/goMonitorToolWindow.svg",
+      "goplsToolWindow.svg": "icons/goplsToolWindow.svg"
+    }
+  }
+}

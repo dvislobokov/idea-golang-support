@@ -1,0 +1,4 @@
+data, err := os.ReadFile(name)
+if err != nil {
+	return nil, err
+}
