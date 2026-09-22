@@ -43,6 +43,27 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 2.9 | New → Go File → Program в `cmd/tool` | `package main`, `func main()` | нет |
 | 2.10 | Ctrl+Alt+L (Reformat Code) | gofmt, без ошибок | нет |
 
+## 2а. Генераторы, шаблоны, интеншены
+
+| # | Что сделать | Что должно быть | Робот |
+|---|---|---|---|
+| 2а.1 | В функции набрать `err.nil` + Tab; `os.Remove(p).err` + Tab; `items.for` + Tab; `load().var` + Tab | `if err == nil {}`; `if err := os.Remove(p); err != nil { return err }`; `for _, v := range items {}`; `v := load()` | да |
+| 2а.2 | Набрать `strings.ToUp`, выбрать `ToUpper` | Добавился `import "strings"` | да |
+| 2а.3 | `if x > 0` → Ctrl+Shift+Enter | `if x > 0 {` и каретка на пустой строке внутри | да |
+| 2а.4 | Каретка в `type Order struct` → Alt+Insert | Constructor…, Getters…, Setters…, Getters and Setters…, String() Method…, Struct Tags…, Implement Interface…, Test | список — да; диалоги — **нет** |
+| 2а.5 | Alt+Insert → Struct Tags… → json + db, snake_case, omitempty | Теги у экспортируемых полей; у неэкспортируемых только db; существующие теги дополняются | **нет** |
+| 2а.6 | Alt+Insert → Implement Interface… → `Priced` на новом типе | Методы интерфейса с `panic("not implemented")`, только недостающие | **нет** |
+| 2а.7 | В функции `Total` → Alt+Enter → Generate test | `order_test.go` открылся, в конце `TestOrder_Total` с таблицей | **нет** |
+| 2а.8 | `os.Remove(p)` отдельной строкой → Alt+Enter → Handle error | `if err := os.Remove(p); err != nil { return err }` | да |
+| 2а.9 | `data, err := os.ReadFile(n)` → Alt+Enter → Add if err != nil check | Проверка с `return nil, err` | да |
+| 2а.10 | Функция с результатом без `return` → Alt+Enter → Add missing return | `return 0, nil` перед `}` | да |
+| 2а.11 | `sum := add(a, 2)` без `add` → Alt+Enter → Create function 'add' | В конце файла `func add(a any, arg2 int) any { panic(...) }` | да (без результата — до правки) |
+| 2а.12 | Пустая строка над `func Total` → набрать `//` | `// Total ` | да |
+| 2а.13 | Settings → Tools → Go → Editor: снять «Start a doc comment with the name…» → снова `//` | Комментарий остаётся `//` | **нет** |
+| 2а.15 | В поле `Name string` набрать `` ` `` (IDE закроет кавычку), затем `js` | Список ключей; выбор `json` даёт `json:""` и список имён `name`…; Tab внутри кавычек **не** даёт двойных кавычек | да |
+| 2а.16 | В теге `validate:"required,` → Ctrl+Space; `gorm:"primaryKey;` → Ctrl+Space; `json:"name,` → Ctrl+Space | Правила validator (email, min=, oneof=…); настройки gorm (column:, index…); опции json (omitempty…) | да |
+| 2а.14 | Go → Help Page | Вкладка «Go Help»: шапка с градиентом, таблицы клавиш, подсказки; тема как у IDE | да |
+
 ## 3. gopls
 
 | # | Что сделать | Что должно быть | Робот |

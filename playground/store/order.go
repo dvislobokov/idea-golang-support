@@ -9,7 +9,7 @@ var ErrEmpty = errors.New("store: empty order")
 type (
 	// Item is a line of an order.
 	Item struct {
-		Name     string `json:"name"`
+		Name     string `json:"name" validate:""`
 		Price    int    `json:"price"`
 		Quantity int    `json:"quantity"`
 	}
@@ -26,6 +26,7 @@ type Order struct {
 	items    []Item
 }
 
+// NewOrder
 func NewOrder(currency string) *Order {
 	return &Order{Currency: currency}
 }

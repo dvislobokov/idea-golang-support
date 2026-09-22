@@ -108,9 +108,37 @@ object GoCommentRuns {
     private fun lineBreaks(text: CharSequence, from: Int, to: Int): Int = (from until to).count { text[it] == '\n' }
 }
 
-/** Where the live templates of `liveTemplates/Go.xml` apply: any place of a Go file. */
+/**
+ * Where the live templates of `liveTemplates/Go.xml` apply: the code of a Go file, not its strings and comments. Inside a struct tag
+ * `json` + Tab expanded the `json` template into the backquotes that were there already (seen live: ``json:""``).
+ */
 class GoTemplateContext : TemplateContextType("Go") {
-    override fun isInContext(templateActionContext: TemplateActionContext): Boolean = templateActionContext.file is GoFile
+    override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
+        val file = templateActionContext.file as? GoFile ?: return false
+        return !GoTemplateContexts.isInLiteralOrComment(file.viewProvider.contents, templateActionContext.startOffset)
+    }
+}
+
+object GoTemplateContexts {
+    /** Whether [offset] is inside a string, a rune or a comment; the token that ends at [offset] counts, the caret stands at its end while typing. */
+    fun isInLiteralOrComment(text: CharSequence, offset: Int): Boolean {
+        val lexer = GoLexer()
+        lexer.start(text, 0, text.length, 0)
+        while (true) {
+            val type = lexer.tokenType ?: return false
+            if (lexer.tokenStart >= offset) return false
+            val inside = offset > lexer.tokenStart && (offset < lexer.tokenEnd || offset == lexer.tokenEnd && !isClosed(text, lexer.tokenStart, lexer.tokenEnd, type))
+            if (inside && (type in GoTokenTypes.STRINGS || type in GoTokenTypes.COMMENTS)) return true
+            lexer.advance()
+        }
+    }
+
+    /** A string or a block comment that has its closing quote or `*` + `/`; a line comment never closes before the line ends. */
+    private fun isClosed(text: CharSequence, start: Int, end: Int, type: com.intellij.psi.tree.IElementType): Boolean = when {
+        type == GoTokenTypes.LINE_COMMENT || type == GoTokenTypes.DIRECTIVE -> false
+        type == GoTokenTypes.BLOCK_COMMENT -> end - start >= 4 && text[end - 1] == '/' && text[end - 2] == '*'
+        else -> end - start >= 2 && text[end - 1] == text[start]
+    }
 }
 
 /** `goTypeName()`: a pointer to the type declared last above the caret, the receiver the `meth` template most likely wants. */

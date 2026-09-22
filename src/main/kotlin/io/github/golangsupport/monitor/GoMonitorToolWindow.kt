@@ -141,7 +141,11 @@ class GoMonitorPanel(private val project: Project, parent: Disposable) : JPanel(
                 processes.selectedItem = current?.takeIf { it in own + others }
                 updatingList = false
                 val selected = processes.selectedItem as? MonitorTarget
-                if (selected == null) status.text = if (own.isEmpty() && !allProcesses.isSelected) "Run a Go configuration, or tick All Go processes" else "No Go processes"
+                if (selected == null) status.text = when {
+                    own.isEmpty() && others.isEmpty() && !allProcesses.isSelected -> "Run a Go configuration, or tick All Go processes"
+                    own.isEmpty() && others.isEmpty() -> "No Go processes"
+                    else -> "Choose a process above"
+                }
                 if (selected != null && selected != session?.target) monitor(selected)
             }, project.disposed)
         }

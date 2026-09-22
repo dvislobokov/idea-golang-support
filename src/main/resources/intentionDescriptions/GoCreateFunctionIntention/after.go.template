@@ -1,0 +1,3 @@
+func add(a any, arg2 int) {
+	panic("not implemented")
+}

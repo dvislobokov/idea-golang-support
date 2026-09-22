@@ -63,6 +63,45 @@
         <additionalTextAttributes scheme="Darcula" file="colorSchemes/GoDarcula.xml"/>
         <colorSettingsPage implementation="io.github.golangsupport.lang.GoColorSettingsPage"/>
         <defaultLiveTemplates file="/liveTemplates/Go.xml"/>
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoStructTagCompletionContributor"/>
+        <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
+        <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
+        <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoHandleErrorIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoCheckErrorIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoAddMissingReturnIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoCreateFunctionIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoAddStructTagsIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoImplementInterfaceIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoGenerateTestIntention</className>
+            <category>Go</category>
+        </intentionAction>
         <liveTemplateContext contextId="GO" implementation="io.github.golangsupport.lang.GoTemplateContext"/>
         <liveTemplateMacro implementation="io.github.golangsupport.lang.GoTypeNameMacro"/>
 
@@ -138,6 +177,23 @@
         <action id="Go.Monitor" class="io.github.golangsupport.monitor.ShowGoMonitorAction" text="Monitor Go Process" icon="/icons/goMonitorToolWindow.svg"
                 description="CPU, memory, heap, garbage collections and goroutines of a running Go program">
             <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </action>
+        <group id="Go.GenerateGroup">
+            <separator/>
+            <action id="Go.Generate.Constructor" class="io.github.golangsupport.lang.GoGenerateConstructorAction" text="Constructor..." description="func NewT(...) *T for the struct at the caret"/>
+            <action id="Go.Generate.Getters" class="io.github.golangsupport.lang.GoGenerateGettersAction" text="Getters..."/>
+            <action id="Go.Generate.Setters" class="io.github.golangsupport.lang.GoGenerateSettersAction" text="Setters..."/>
+            <action id="Go.Generate.GettersSetters" class="io.github.golangsupport.lang.GoGenerateGettersAndSettersAction" text="Getters and Setters..."/>
+            <action id="Go.Generate.String" class="io.github.golangsupport.lang.GoGenerateStringAction" text="String() Method..."/>
+            <action id="Go.Generate.Tags" class="io.github.golangsupport.lang.GoGenerateStructTagsAction" text="Struct Tags..."/>
+            <action id="Go.Generate.Implement" class="io.github.golangsupport.lang.GoImplementInterfaceAction" text="Implement Interface..."/>
+            <action id="Go.Generate.Test" class="io.github.golangsupport.lang.GoGenerateTestAction" text="Test"/>
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </group>
+        <action id="Go.HelpPage" class="io.github.golangsupport.help.ShowGoHelpPageAction" text="Help Page" icon="AllIcons.Actions.Help"
+                description="What the plugin does and which keys do it">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+            <add-to-group group-id="HelpMenu" anchor="first"/>
         </action>
         <group id="Go.Debugger" text="Debugger" popup="true" icon="AllIcons.Actions.StartDebugger">
             <action id="Go.Debugger.ShowLogs" class="io.github.golangsupport.debugger.ShowDebuggerLogsAction" text="Show Debugger Logs"

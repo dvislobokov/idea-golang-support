@@ -20,8 +20,6 @@ func main() {
 		fmt.Println("arguments:", os.Args[1:])
 	}
 
-	os.Stdout
-
 	fmt.Printf("order %s, total: %d %s\n", uuid.NewString(), order.Total(), order.Currency)
 
 	var priced store.Priced = store.Discounted{Order: order, Percent: 10}

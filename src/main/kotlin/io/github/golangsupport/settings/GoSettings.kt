@@ -54,6 +54,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** `if err != nil { ... }` and the `defer` of what was just opened, as grey text to accept with Tab. */
         var inlineIdioms by property(true)
+        /** `//` above a declaration becomes `// Name `. */
+        var docCommentNames by property(true)
         var lintOnTheFly by property(true)
 
         /** Added to every `go test`: `-race -count=1`. */
@@ -131,6 +133,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var formatter: GoFormatter
         get() = state.formatter
         set(value) { state.formatter = value }
+
+    var docCommentNames: Boolean
+        get() = state.docCommentNames
+        set(value) { state.docCommentNames = value }
 
     var formatOnSave: Boolean
         get() = state.formatOnSave
