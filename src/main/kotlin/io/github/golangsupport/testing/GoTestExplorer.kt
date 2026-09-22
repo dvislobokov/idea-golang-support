@@ -1,9 +1,5 @@
 package io.github.golangsupport.testing
 
-import com.intellij.execution.ProgramRunnerUtil
-import com.intellij.execution.RunManager
-import com.intellij.execution.executors.DefaultDebugExecutor
-import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsAdapter
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.icons.AllIcons
@@ -40,9 +36,7 @@ import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.mod.GoModulesService
-import io.github.golangsupport.run.GoCommand
-import io.github.golangsupport.run.GoConfigurationType
-import io.github.golangsupport.run.GoRunConfiguration
+import io.github.golangsupport.run.GoRunLauncher
 import java.awt.event.MouseEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -224,19 +218,8 @@ private class GoTestExplorerPanel(private val project: Project, toolWindow: Tool
         for (directory in GoModulesService.getInstance(project).commandDirectories()) start(directory, "go test ${directory.name}/...", null, benchmark = false, debug = false, recursive = true)
     }
 
-    private fun start(directory: VirtualFile, name: String, pattern: String?, benchmark: Boolean, debug: Boolean, recursive: Boolean = false) {
-        val runManager = RunManager.getInstance(project)
-        val settings = runManager.createConfiguration(name, GoConfigurationType.instance.factory)
-        (settings.configuration as GoRunConfiguration).options.apply {
-            command = GoCommand.TEST
-            target = directory.path
-            testPattern = pattern
-            this.benchmark = benchmark
-            this.recursive = recursive
-        }
-        runManager.setTemporaryConfiguration(settings)
-        ProgramRunnerUtil.executeConfiguration(settings, if (debug) DefaultDebugExecutor.getDebugExecutorInstance() else DefaultRunExecutor.getRunExecutorInstance())
-    }
+    private fun start(directory: VirtualFile, name: String, pattern: String?, benchmark: Boolean, debug: Boolean, recursive: Boolean = false) =
+        GoRunLauncher.runTests(project, directory.path, name, pattern, benchmark, debug, recursive)
 
     private fun action(text: String, icon: Icon, enabled: () -> Boolean, perform: () -> Unit): AnAction = object : AnAction(text, null, icon), DumbAware {
         override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT

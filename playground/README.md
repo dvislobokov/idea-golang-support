@@ -64,7 +64,18 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 3.13 | Наведение без Ctrl, Ctrl+Q | Документация от gopls | нет |
 | 3.14 | Alt+Enter на структуре, на вызове с ошибкой | Code actions gopls (fill struct, add tags…) | нет |
 | 3.15 | Settings → Tools → Go: включить Staticcheck, Apply | gopls перезапустился (виджет), предупреждений стало больше | нет |
-| 3.16 | Меню Go → Restart Language Server | Перезапуск без ошибок | нет |
+| 3.16 | Меню Go → gopls → Restart | Перезапуск без ошибок; в окне gopls строки «Stopped», «Starting: …», «Initialized: gopls v0.23.0» | лог — да |
+| 3.17 | Клик по виджету языковых сервисов в статус-баре | Строка gopls с иконкой Go; рядом Restart / Stop и **Show Log**; шестерёнка открывает Settings → Tools → Go | **нет** |
+| 3.18 | Меню Go → gopls → Show Log | Окно **gopls** внизу: лог сервера (Created View, go/packages.Load…), команды, кнопки Restart / Open Debug Pages / Settings | да |
+| 3.19 | `go.mod`: линза «Run go mod tidy»; «Check for upgrades» над `require` | Прогресс в статус-баре; в логе строка команды; после check — подсказка о новой версии uuid (если есть) | через API — да |
+| 3.20 | `go.mod`: «Upgrade direct dependencies» | Ошибка сети / успех — в балуне и в логе, IDE не зависает | ошибка — да |
+| 3.21 | Settings → gopls → Codelenses → включить `test`, Apply; в `order_test.go` линза «run test» | Запускается конфигурация `TestTotal` в раннере тестов, не в gopls | через API — да |
+| 3.22 | Над `//go:generate` в `zz_generated.consts.go` линза «run go generate» | `go generate` в Build window | через API — да |
+| 3.23 | Go → gopls → Check for Dependency Upgrades; Show Statistics | Диагностика в go.mod; в окне gopls JSON со статистикой (Files, Packages, HeapAlloc) | да |
+| 3.24 | Go → gopls → Add Import… в `main.go` | Попап со списком пакетов с поиском; выбор добавляет import | **нет** |
+| 3.25 | Каретка на `Total` → Go → gopls → Browse Documentation; Browse Assembly; выделить строки → Browse Free Symbols | Открывается браузер со страницей gopls | **нет** |
+| 3.26 | Go → gopls → Toggle Compiler Optimization Details | В файле появляются подсказки об inlining / escape; повтор — убирает | **нет** |
+| 3.27 | Settings → Tools → Go → «Serve the debug pages», «Log every message», Apply → Go → gopls → Open Debug Pages | Браузер с http://localhost:NNNNN; в окне gopls — весь протокол | **нет** |
 
 ## 4. Линтер
 

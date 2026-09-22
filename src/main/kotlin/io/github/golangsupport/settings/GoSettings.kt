@@ -41,6 +41,11 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** Setting of gopls -> its value as a JSON text, from the page with the catalogue of the server; wins over the switches above. */
         var goplsOverrides by map<String, String>()
 
+        /** `-rpc.trace`: every message of the protocol in the log window of gopls. Big; for looking into what the server was asked. */
+        var goplsTrace by property(false)
+        /** `-debug=localhost:0`: the web pages of gopls about its sessions, memory and metrics (menu Go | gopls | Open Debug Pages). */
+        var goplsDebugPages by property(false)
+
         var formatter by enum(GoFormatter.GOFMT)
 
         /** On: unformatted Go passes no review, so the formatter is not something to remember about. */
@@ -109,6 +114,14 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var goplsInlayHints: Boolean
         get() = state.goplsInlayHints
         set(value) { state.goplsInlayHints = value }
+
+    var goplsTrace: Boolean
+        get() = state.goplsTrace
+        set(value) { state.goplsTrace = value }
+
+    var goplsDebugPages: Boolean
+        get() = state.goplsDebugPages
+        set(value) { state.goplsDebugPages = value }
 
     var goplsOverrides: Map<String, String>
         get() = state.goplsOverrides.toMap()

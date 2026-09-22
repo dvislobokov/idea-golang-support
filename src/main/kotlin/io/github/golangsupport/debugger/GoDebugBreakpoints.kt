@@ -1,20 +1,15 @@
-package io.github.golangsupport.dap
+package io.github.golangsupport.debugger
 
+import com.google.gson.JsonObject
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.platform.dap.DapDebugSession
-import com.intellij.platform.dap.DapExceptionBreakpoint
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.xdebugger.XDebuggerManager
 import com.intellij.xdebugger.breakpoints.XBreakpoint
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler
 import com.intellij.xdebugger.breakpoints.XBreakpointProperties
@@ -24,14 +19,17 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpointType
 import com.intellij.xdebugger.breakpoints.ui.XBreakpointCustomPropertiesPanel
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import io.github.golangsupport.lang.GoFileType
-import io.github.golangsupport.run.BreakpointExtras
 import io.github.golangsupport.run.GoBreakpointLines
 import io.github.golangsupport.run.GoPanicFilter
 import io.github.golangsupport.run.HitCondition
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 import javax.swing.Icon
 import javax.swing.JComponent
 
-/** What delve can do with a line breakpoint and the DAP client of the platform has no place for. */
+// --- line breakpoints ---
+
+/** What delve can do with a line breakpoint beyond a condition: stop on a hit count, log instead of stopping. */
 class GoLineBreakpointProperties : XBreakpointProperties<GoLineBreakpointProperties.State>() {
     class State {
         @JvmField var hitCondition: String = ""
@@ -52,15 +50,17 @@ class GoLineBreakpointProperties : XBreakpointProperties<GoLineBreakpointPropert
     override fun loadState(state: State) { this.state = state }
 }
 
-/** Line breakpoints in `.go` files; registered with the debugger, because without one they would stop nothing. */
+typealias GoLineBreakpoint = XLineBreakpoint<GoLineBreakpointProperties>
+
+/** Line breakpoints in `.go` files. The id is the one of the breakpoints users have saved: it must not change. */
 class GoLineBreakpointType : XLineBreakpointType<GoLineBreakpointProperties>("go-line", "Go Line Breakpoints") {
     override fun createBreakpointProperties(file: VirtualFile, line: Int): GoLineBreakpointProperties = GoLineBreakpointProperties()
 
     /** For a breakpoint read from the workspace file: without it the saved hit count and log message are dropped on load. */
     override fun createProperties(): GoLineBreakpointProperties = GoLineBreakpointProperties()
 
-    /** With an editor for expressions the platform shows "Condition" for the breakpoint; the condition itself is sent by its DAP client. */
-    override fun getEditorsProvider(breakpoint: XLineBreakpoint<GoLineBreakpointProperties>, project: Project): XDebuggerEditorsProvider = GoEditorsProvider()
+    /** With an editor for expressions the platform shows "Condition" for the breakpoint; the condition goes to delve with it. */
+    override fun getEditorsProvider(breakpoint: GoLineBreakpoint, project: Project): XDebuggerEditorsProvider = GoEditorsProvider()
 
     override fun canPutAt(file: VirtualFile, line: Int, project: Project): Boolean {
         if (file.fileType != GoFileType) return false
@@ -71,10 +71,9 @@ class GoLineBreakpointType : XLineBreakpointType<GoLineBreakpointProperties>("go
         return line in cached.second
     }
 
-    override fun createCustomPropertiesPanel(project: Project): XBreakpointCustomPropertiesPanel<XLineBreakpoint<GoLineBreakpointProperties>> = PropertiesPanel()
+    override fun createCustomPropertiesPanel(project: Project): XBreakpointCustomPropertiesPanel<GoLineBreakpoint> = PropertiesPanel()
 
-    /** Hit count and log message: sent to delve with the breakpoint, see [extrasAt]. */
-    private class PropertiesPanel : XBreakpointCustomPropertiesPanel<XLineBreakpoint<GoLineBreakpointProperties>>() {
+    private class PropertiesPanel : XBreakpointCustomPropertiesPanel<GoLineBreakpoint>() {
         private val hitCondition = JBTextField().apply { emptyText.text = "Every hit" }
         private val logMessage = JBTextField().apply { emptyText.text = "Stop, do not log" }
 
@@ -88,12 +87,12 @@ class GoLineBreakpointType : XLineBreakpointType<GoLineBreakpointProperties>("go
             }
         }
 
-        override fun loadFrom(breakpoint: XLineBreakpoint<GoLineBreakpointProperties>) {
+        override fun loadFrom(breakpoint: GoLineBreakpoint) {
             hitCondition.text = breakpoint.properties?.hitCondition.orEmpty()
             logMessage.text = breakpoint.properties?.logMessage.orEmpty()
         }
 
-        override fun saveTo(breakpoint: XLineBreakpoint<GoLineBreakpointProperties>) {
+        override fun saveTo(breakpoint: GoLineBreakpoint) {
             val properties = breakpoint.properties ?: return
             // an invalid hit count is not kept: delve would refuse the whole breakpoint
             val hits = hitCondition.text.trim().takeIf { HitCondition.isValid(it) }.orEmpty()
@@ -101,25 +100,93 @@ class GoLineBreakpointType : XLineBreakpointType<GoLineBreakpointProperties>("go
             if (hits == properties.hitCondition && message == properties.logMessage) return
             properties.hitCondition = hits
             properties.logMessage = message
-            // the platform re-registers a breakpoint whose properties have changed: that is what sends it to the adapter again
+            // a breakpoint whose properties change is registered again: that is what sends it to delve again
             (breakpoint as? com.intellij.xdebugger.impl.breakpoints.XBreakpointBase<*, *, *>)?.fireBreakpointChanged()
         }
     }
 
-    companion object {
-        private val LINES: Key<Pair<Long, Set<Int>>> = Key.create("io.github.golangsupport.dap.breakpointLines")
+    private companion object {
+        val LINES: Key<Pair<Long, Set<Int>>> = Key.create("io.github.golangsupport.debugger.breakpointLines")
+    }
+}
 
-        /** The extras of the breakpoint of the IDE at [path] and the 1-based [line] of the protocol; null when there is none (Run to Cursor). */
-        fun extrasAt(project: Project, path: String, line: Int): BreakpointExtras? = ReadAction.compute<BreakpointExtras?, RuntimeException> {
-            if (project.isDisposed) return@compute null
-            val type = EXTENSION_POINT_NAME.findExtension(GoLineBreakpointType::class.java) ?: return@compute null
-            XDebuggerManager.getInstance(project).breakpointManager.getBreakpoints(type)
-                // the URL, not presentableFilePath: that one is relative to the project
-                .firstOrNull { it.line == line - 1 && FileUtil.pathsEqual(VfsUtilCore.urlToPath(it.fileUrl), path) }
-                ?.properties?.let { BreakpointExtras(it.hitCondition, it.logMessage) }
+/**
+ * The line breakpoints of a session: `setBreakpoints` is per file and replaces the whole list of the file, so every change sends the file
+ * again. The condition, the hit count and the log message go with each breakpoint. Delve answers in the order it was sent: that is how
+ * its ids are matched to the breakpoints of the IDE.
+ */
+class GoLineBreakpointHandler(private val process: GoDebugProcess) : XBreakpointHandler<GoLineBreakpoint>(GoLineBreakpointType::class.java) {
+    private val byFile = ConcurrentHashMap<String, MutableSet<GoLineBreakpoint>>()
+    private val byId = ConcurrentHashMap<Int, GoLineBreakpoint>()
+    /** Run to Cursor: file -> the 0-based line of a breakpoint of one stop. */
+    private val temporary = ConcurrentHashMap<String, Int>()
+
+    override fun registerBreakpoint(breakpoint: GoLineBreakpoint) {
+        val path = GoDebugProcess.pathOf(breakpoint.fileUrl)
+        byFile.computeIfAbsent(path) { ConcurrentHashMap.newKeySet() }.add(breakpoint)
+        if (process.configured) send(path)
+    }
+
+    override fun unregisterBreakpoint(breakpoint: GoLineBreakpoint, temporary: Boolean) {
+        val path = GoDebugProcess.pathOf(breakpoint.fileUrl)
+        byFile[path]?.remove(breakpoint)
+        if (process.configured) send(path)
+    }
+
+    fun sendAll(): CompletableFuture<*> = CompletableFuture.allOf(*(byFile.keys + temporary.keys).distinct().map(::send).toTypedArray())
+
+    fun find(id: Int): GoLineBreakpoint? = byId[id]
+
+    fun runTo(path: String, line: Int): CompletableFuture<*> {
+        temporary[path] = line
+        return send(path)
+    }
+
+    fun clearTemporary() {
+        val paths = temporary.keys.toList()
+        temporary.clear()
+        paths.forEach(::send)
+    }
+
+    /** `breakpoint` event: delve has verified (or moved, or refused) a breakpoint after the fact. */
+    fun update(breakpoint: JsonObject) {
+        val ide = breakpoint.int("id")?.let(byId::get) ?: return
+        mark(ide, breakpoint)
+    }
+
+    private fun send(path: String): CompletableFuture<*> {
+        val breakpoints = byFile[path].orEmpty().filter { it.isEnabled }.sortedBy { it.line }
+        val extra = temporary[path]?.takeIf { line -> breakpoints.none { it.line == line } }
+        val list = breakpoints.map { breakpointJson(it.line, it.conditionExpression?.expression, it.properties?.hitCondition, it.properties?.logMessage) } +
+            listOfNotNull(extra?.let { breakpointJson(it, null, null, null) })
+        val source = json("path" to path, "name" to path.substringAfterLast('/').substringAfterLast('\\'))
+        return process.connection.request("setBreakpoints", json("source" to source, "breakpoints" to list), GoDebugProcess.REQUEST_TIMEOUT_MS)
+            .thenAccept { answer ->
+                answer.objects("breakpoints").zip(breakpoints).forEach { (dap, ide) ->
+                    dap.int("id")?.let { byId[it] = ide }
+                    mark(ide, dap)
+                }
+            }
+            .exceptionally { error -> breakpoints.forEach { process.session.setBreakpointInvalid(it, GoDebugProcess.errorText(error)) }; null }
+    }
+
+    private fun mark(ide: GoLineBreakpoint, dap: JsonObject) {
+        if (dap.bool("verified") == true) process.session.setBreakpointVerified(ide)
+        else process.session.setBreakpointInvalid(ide, dap.string("message") ?: "The debugger has not bound the breakpoint (yet)")
+    }
+
+    companion object {
+        /** One breakpoint of `setBreakpoints`: the line of the protocol is 1-based; the empty parts are left out. */
+        fun breakpointJson(line: Int, condition: String?, hitCondition: String?, logMessage: String?): Map<String, Any> = buildMap {
+            put("line", line + 1)
+            condition?.trim()?.takeIf { it.isNotEmpty() }?.let { put("condition", it) }
+            HitCondition.normalize(hitCondition)?.let { put("hitCondition", it) }
+            logMessage?.trim()?.takeIf { it.isNotEmpty() }?.let { put("logMessage", it) }
         }
     }
 }
+
+// --- panic breakpoints ---
 
 /** Which of the two stops of delve at a dying program are wanted; both by default, as delve itself has them. */
 class GoPanicBreakpointProperties : XBreakpointProperties<GoPanicBreakpointProperties.State>() {
@@ -169,18 +236,31 @@ class GoPanicBreakpointType : XBreakpointType<GoPanicBreakpoint, GoPanicBreakpoi
     }
 }
 
-class GoPanicBreakpointHandler(private val session: DapDebugSession) : XBreakpointHandler<GoPanicBreakpoint>(GoPanicBreakpointType::class.java) {
-    /** What was registered, to take away exactly that: the properties may have changed since. */
-    private val registered = HashMap<GoPanicBreakpoint, List<DapExceptionBreakpoint>>()
+/**
+ * The panic breakpoints of a session as one `setExceptionBreakpoints` with the filters of delve (`unrecovered-panic`, `runtime-fatal-throw`).
+ * Sent even when empty: delve that has heard nothing applies its defaults and would stop although the breakpoint is off.
+ */
+class GoPanicBreakpointHandler(private val process: GoDebugProcess) : XBreakpointHandler<GoPanicBreakpoint>(GoPanicBreakpointType::class.java) {
+    private val registered = ConcurrentHashMap.newKeySet<GoPanicBreakpoint>()
 
     override fun registerBreakpoint(breakpoint: GoPanicBreakpoint) {
-        val filters = breakpoint.properties?.filters.orEmpty().map { DapExceptionBreakpoint.create(it.id, null, breakpoint) }
-        synchronized(registered) { registered[breakpoint] = filters }
-        session.commandProcessor.submitCommand { with(session.breakpointManager) { filters.forEach { addExceptionBreakpoint(it) } } }
+        registered.add(breakpoint)
+        if (process.configured) send()
     }
 
     override fun unregisterBreakpoint(breakpoint: GoPanicBreakpoint, temporary: Boolean) {
-        val filters = synchronized(registered) { registered.remove(breakpoint) } ?: return
-        session.commandProcessor.submitCommand { with(session.breakpointManager) { filters.forEach { removeExceptionBreakpoint(it) } } }
+        registered.remove(breakpoint)
+        if (process.configured) send()
+    }
+
+    /** The breakpoint of the IDE to report a stop at a panic with. */
+    fun first(): GoPanicBreakpoint? = registered.firstOrNull()
+
+    fun send(): CompletableFuture<*> =
+        process.connection.request("setExceptionBreakpoints", arguments(registered.flatMap { it.properties?.filters.orEmpty() }.toSet()), GoDebugProcess.REQUEST_TIMEOUT_MS)
+            .exceptionally { null }
+
+    companion object {
+        fun arguments(filters: Set<GoPanicFilter>): JsonObject = json("filters" to GoPanicFilter.entries.filter { it in filters }.map { it.id })
     }
 }

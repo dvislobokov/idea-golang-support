@@ -1,19 +1,12 @@
 package io.github.golangsupport
 
-import com.google.gson.JsonParser
 import io.github.golangsupport.build.GoBuildOutputParser
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.lint.GoLintIssue
 import io.github.golangsupport.lint.GoLintOutput
 import io.github.golangsupport.mod.GoModFile
-import io.github.golangsupport.run.DapVariableContainers
 import io.github.golangsupport.run.GoEvaluate
 import io.github.golangsupport.run.GoOutputLocations
-import io.github.golangsupport.run.DapMessageRewritingStream
-import io.github.golangsupport.run.DapSetBreakpoints
-import io.github.golangsupport.run.DapStartFailure
-import io.github.golangsupport.run.DapStartWatcher
-import io.github.golangsupport.run.BreakpointExtras
 import io.github.golangsupport.run.DlvDap
 import io.github.golangsupport.run.GoLaunchArguments
 import io.github.golangsupport.run.HitCondition
@@ -25,7 +18,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.ByteArrayOutputStream
 
 class GoToolingTest {
     @Test fun goMod() {
@@ -178,59 +170,5 @@ class GoToolingTest {
         assertEquals("call f()", GoEvaluate.expression("call f()"))
         assertEquals("order.Currency", GoEvaluate.expression("order.Currency"))
         assertEquals("a + f(x)", GoEvaluate.expression("a + f(x)"))
-    }
-
-    @Test fun variableContainersAreLearnedFromTheTraffic() {
-        val containers = DapVariableContainers()
-        containers.request("""{"seq":9,"type":"request","command":"variables","arguments":{"variablesReference":1001}}""".toByteArray())
-        containers.message("""{"seq":20,"type":"response","request_seq":9,"success":true,"command":"variables","body":{"variables":[{"name":"total","value":"5","type":"int","evaluateName":"total","variablesReference":0},{"name":"order","value":"*store.Order {...}","evaluateName":"order","variablesReference":1002}]}}""".toByteArray())
-        assertEquals(1001, containers.of("total")!!.variablesReference)
-        assertEquals("total", containers.of("total")!!.name)
-        assertFalse(containers.of("total")!!.hasChildren)
-        assertTrue(containers.of("order")!!.hasChildren)
-        assertNull(containers.of("missing"))
-        // references do not outlive a stop
-        containers.message("""{"type":"event","event":"continued","body":{"threadId":1}}""".toByteArray())
-        assertNull(containers.of("total"))
-    }
-
-    private fun frame(json: String) = "Content-Length: ${json.toByteArray().size}\r\n\r\n$json".toByteArray()
-
-    @Test fun setBreakpointsGetTheirExtras() {
-        val request = """{"seq":5,"type":"request","command":"setBreakpoints","arguments":{"source":{"path":"C:/a.go"},"breakpoints":[{"line":7},{"line":9}]}}"""
-        val other = """{"seq":6,"type":"request","command":"threads"}"""
-        val target = ByteArrayOutputStream()
-        val stream = DapMessageRewritingStream(target) { body ->
-            DapSetBreakpoints.rewrite(body, { path, line -> if (path == "C:/a.go" && line == 9) BreakpointExtras(">=3", "total = {total}") else null })
-        }
-        // cut in the middle of a header and of a body
-        val bytes = frame(request) + frame(other)
-        stream.write(bytes, 0, 10)
-        stream.write(bytes, 10, bytes.size - 10)
-        val text = target.toString(Charsets.UTF_8)
-        val first = text.substringAfter("\r\n\r\n").substringBefore("Content-Length")
-        val breakpoints = JsonParser.parseString(first).asJsonObject.getAsJsonObject("arguments").getAsJsonArray("breakpoints")
-        assertFalse(breakpoints[0].asJsonObject.has("hitCondition"))
-        assertEquals(">= 3", breakpoints[1].asJsonObject.get("hitCondition").asString)
-        assertEquals("total = {total}", breakpoints[1].asJsonObject.get("logMessage").asString)
-        assertTrue(text.startsWith("Content-Length: ${first.toByteArray().size}\r\n"))
-        assertTrue(text.endsWith(other))
-    }
-
-    @Test fun failedLaunchIsReportedWithWhatTheCompilerSaid() {
-        val failure = """{"seq":3,"type":"response","request_seq":2,"success":false,"command":"launch","message":"Failed to launch","body":{"error":{"id":3000,"format":"Failed to launch: Build error: Check the debug console for details."}}}"""
-        assertEquals("Failed to launch: Build error: Check the debug console for details.", DapStartFailure.of(failure.toByteArray()))
-        assertNull(DapStartFailure.of("""{"type":"response","success":false,"command":"evaluate","message":"no"}""".toByteArray()))
-
-        var reported: String? = null
-        val watcher = DapStartWatcher { reported = it }
-        assertFalse(watcher.message("""{"type":"event","event":"output","body":{"category":"stderr","output":"./broken.go:3:17: undefined: undefinedCall\n"}}""".toByteArray()))
-        assertTrue(watcher.message(failure.toByteArray()))
-        assertTrue(reported!!.startsWith("Failed to launch") && reported!!.endsWith("undefined: undefinedCall"))
-
-        // a program that has started: its output is not collected, a failure of something else is not a failure to start
-        val running = DapStartWatcher { reported = "again" }
-        running.message("""{"type":"response","success":true,"command":"launch"}""".toByteArray())
-        assertFalse(running.message(failure.toByteArray()))
     }
 }

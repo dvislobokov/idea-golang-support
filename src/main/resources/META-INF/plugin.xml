@@ -21,7 +21,6 @@
     <!-- optional parts: a module is loaded only where its dependencies are (see the descriptor of the module next to META-INF) -->
     <content>
         <module name="io.github.golangsupport.lsp"/>
-        <module name="io.github.golangsupport.dap"/>
     </content>
 
     <extensionPoints>
@@ -80,6 +79,15 @@
                              instance="io.github.golangsupport.settings.GoplsSettingsConfigurable"/>
 
         <iconMapper mappingFile="GoIconMappings.json"/>
+        <!-- the debugger: the plugin's own DAP client to `dlv dap` on the XDebugger API, which every IDE has (the DAP module of the platform,
+             2026.1+, is absent from a number of IDEs and forks) -->
+        <programRunner implementation="io.github.golangsupport.debugger.GoDebugRunner"/>
+        <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoLineBreakpointType"/>
+        <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoPanicBreakpointType"/>
+        <xdebugger.attachDebuggerProvider implementation="io.github.golangsupport.debugger.GoAttachDebuggerProvider"/>
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.debugger.GoExpressionCompletionContributor"/>
+        <registryKey key="go.debugger.protocol.trace" defaultValue="false"
+                     description="Write every DAP message of the Go debug sessions to the log directory of the IDE (delve/protocol); menu Go | Debugger | Trace Debugger Protocol"/>
         <toolWindow id="Go Tests" anchor="bottom" icon="/icons/goTestsToolWindow.svg" factoryClass="io.github.golangsupport.testing.GoTestExplorerToolWindowFactory"/>
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
 
@@ -125,6 +133,13 @@
             <add-to-group group-id="MainMenu" anchor="after" relative-to-action="ToolsMenu"/>
         </group>
 
+        <group id="Go.Debugger" text="Debugger" popup="true" icon="AllIcons.Actions.StartDebugger">
+            <action id="Go.Debugger.ShowLogs" class="io.github.golangsupport.debugger.ShowDebuggerLogsAction" text="Show Debugger Logs"
+                    description="Open the directory with the logs of delve and the traces of the protocol"/>
+            <action id="Go.Debugger.TraceProtocol" class="io.github.golangsupport.debugger.TraceDebuggerProtocolAction" text="Trace Debugger Protocol"
+                    description="Write every DAP message of the debug sessions that start from now on next to the debugger logs"/>
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </group>
         <group id="Go.ProjectViewPopup">
             <separator/>
             <reference ref="Go.Build"/>

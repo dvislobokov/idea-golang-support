@@ -1,7 +1,5 @@
 package io.github.golangsupport.run
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
@@ -9,15 +7,8 @@ import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoLexer
 import io.github.golangsupport.lang.GoTokenTypes
-import java.io.ByteArrayOutputStream
-import java.io.FilterInputStream
-import java.io.InputStream
-import java.io.OutputStream
 
-/**
- * What of debugging needs no DAP class of the platform: kept out of the module with the debugger, so that it is there for the tests
- * and for the rest of the plugin in an IDE without that module.
- */
+/** What of debugging is pure: how delve is started and what it says, which lines take a breakpoint, what an expression under the mouse is. */
 object DlvDap {
     private val LISTENING = Regex("""DAP server listening at:\s*(\S+):(\d+)""")
 
@@ -35,64 +26,6 @@ object DlvDap {
         if (anyGoVersion) add("--check-go-version=false")
         if (log) addAll(listOf("--log", "--log-output=dap,debugger"))
     }
-}
-
-/** The reason of a failed `launch` or `attach`, as delve words it; null for any other message. */
-object DapStartFailure {
-    fun of(body: ByteArray): String? {
-        val text = String(body, Charsets.UTF_8)
-        if (!text.contains("\"success\":false")) return null
-        val message = runCatching { JsonParser.parseString(text) as? JsonObject }.getOrNull() ?: return null
-        val command = message.get("command")?.takeIf { it.isJsonPrimitive }?.asString
-        if (command != "launch" && command != "attach") return null
-        val error = (message.get("body") as? JsonObject)?.get("error") as? JsonObject
-        return error?.get("format")?.takeIf { it.isJsonPrimitive }?.asString
-            ?: message.get("message")?.takeIf { it.isJsonPrimitive }?.asString
-            ?: "The debugger has refused to $command"
-    }
-}
-
-/**
- * Remembers what delve has printed before the program started (the errors of the compiler come as `output` events), because
- * "Build error: Check the debug console for details" points at a console that closes together with the failed session.
- */
-class DapStartWatcher(private val onStartFailed: (String) -> Unit) {
-    private val output = StringBuilder()
-    private var started = false
-
-    /** True when the message is a failed `launch` / `attach`: the caller ends the adapter. */
-    fun message(body: ByteArray): Boolean {
-        if (started) return false
-        val reason = DapStartFailure.of(body)
-        if (reason != null) {
-            onStartFailed((reason + "\n" + output.toString().trim()).trim())
-            return true
-        }
-        val text = String(body, Charsets.UTF_8)
-        when {
-            text.contains("\"event\":\"output\"") -> outputOf(text)?.let { if (output.length < MAX_OUTPUT) output.append(it) }
-            // the program runs: from here on its output is its own business
-            text.contains("\"command\":\"launch\"") || text.contains("\"command\":\"attach\"") -> started = true
-        }
-        return false
-    }
-
-    private fun outputOf(text: String): String? {
-        val message = runCatching { JsonParser.parseString(text) as? JsonObject }.getOrNull() ?: return null
-        return (message.get("body") as? JsonObject)?.get("output")?.takeIf { it.isJsonPrimitive }?.asString
-    }
-
-    private companion object {
-        const val MAX_OUTPUT = 4000
-    }
-}
-
-/** What the adapter sends, passed on as it is; [onMessage] gets the body of every complete message. A failure of the watcher never breaks the stream. */
-class DapMessageWatchingStream(source: InputStream, private val onMessage: (ByteArray) -> Unit) : FilterInputStream(source) {
-    private val copy = DapMessageRewritingStream(OutputStream.nullOutputStream()) { body -> body.also { runCatching { onMessage(it) } } }
-
-    override fun read(): Int = super.read().also { if (it >= 0) runCatching { copy.write(it) } }
-    override fun read(b: ByteArray, off: Int, len: Int): Int = super.read(b, off, len).also { if (it > 0) runCatching { copy.write(b, off, it) } }
 }
 
 /** The exception breakpoint filters of delve, as its `initialize` response lists them. */
@@ -177,61 +110,6 @@ object GoEvaluate {
     }
 }
 
-/**
- * Where the variables of the stopped program live, learned from the traffic: `setVariable`, the only way delve changes a value, wants
- * the reference of the container a variable is listed in, and the model of the platform keeps that to itself. Requests for `variables`
- * and the answers to them pass through the streams of the plugin, so a variable is found again by its expression (`evaluateName`).
- */
-class DapVariableContainers {
-    /** [hasChildren]: a struct, a slice, a map; delve assigns to such a value only when it is a string or a pointer. */
-    class Container(val variablesReference: Int, val name: String, val hasChildren: Boolean)
-
-    private val requests = HashMap<Int, Int>()
-    private val byExpression = HashMap<String, Container>()
-
-    /** A message of the client: a `variables` request is remembered by its `seq`. */
-    @Synchronized
-    fun request(body: ByteArray) {
-        val text = String(body, Charsets.UTF_8)
-        if (!text.contains("\"variables\"")) return
-        val message = parse(text)?.takeIf { it.string("command") == "variables" } ?: return
-        val reference = (message.get("arguments") as? JsonObject)?.get("variablesReference")?.takeIf { it.isJsonPrimitive }?.asInt ?: return
-        message.get("seq")?.takeIf { it.isJsonPrimitive }?.asInt?.let { requests[it] = reference }
-    }
-
-    /** A message of the adapter: the answer to a remembered request fills the map; the program going on empties it, references do not outlive a stop. */
-    @Synchronized
-    fun message(body: ByteArray) {
-        val text = String(body, Charsets.UTF_8)
-        if (text.contains("\"event\":\"continued\"") || text.contains("\"event\":\"stopped\"")) {
-            requests.clear()
-            byExpression.clear()
-            return
-        }
-        if (!text.contains("\"variables\"")) return
-        val message = parse(text)?.takeIf { it.string("command") == "variables" && it.string("type") == "response" } ?: return
-        val reference = requests.remove(message.get("request_seq")?.takeIf { it.isJsonPrimitive }?.asInt ?: return) ?: return
-        val variables = (message.get("body") as? JsonObject)?.get("variables")?.takeIf { it.isJsonArray }?.asJsonArray ?: return
-        for (variable in variables) {
-            val item = variable as? JsonObject ?: continue
-            val expression = item.string("evaluateName")?.takeIf { it.isNotBlank() } ?: continue
-            val children = item.get("variablesReference")?.takeIf { it.isJsonPrimitive }?.asInt ?: 0
-            byExpression[expression] = Container(reference, item.string("name") ?: continue, children > 0)
-        }
-    }
-
-    @Synchronized
-    fun of(evaluateName: String?): Container? = evaluateName?.let(byExpression::get)
-
-    private fun parse(text: String): JsonObject? = runCatching { JsonParser.parseString(text) as? JsonObject }.getOrNull()
-    private fun JsonObject.string(name: String): String? = get(name)?.takeIf { it.isJsonPrimitive }?.asString
-}
-
-/** What a line breakpoint has beyond the line and the condition, in the terms of the protocol: `hitCondition` and `logMessage`. */
-class BreakpointExtras(val hitCondition: String?, val logMessage: String?) {
-    val isEmpty: Boolean get() = hitCondition.isNullOrBlank() && logMessage.isNullOrBlank()
-}
-
 /** The hit conditions delve understands: a positive number, optionally after `==`, `!=`, `>=`, `>`, `<=`, `<` or `%`. */
 object HitCondition {
     private val SYNTAX = Regex("""(==|!=|>=|>|<=|<|%)?\s*([1-9]\d*)""")
@@ -247,103 +125,89 @@ object HitCondition {
 }
 
 /**
- * The DAP client of the platform sends `line`, `column` and `condition` of a breakpoint and nothing else, and its breakpoint handler is
- * final. The messages to the adapter, however, go through a stream the plugin creates itself: a `setBreakpoints` request gets its
- * `hitCondition` / `logMessage` on the way, and everything else passes untouched. The same trick as in the .NET sibling of this plugin.
+ * What is being completed in an expression typed for the debugger (Evaluate, a watch, a condition of a breakpoint). There is no parser
+ * behind it: the names come from the stopped program, so all that is needed is where the caret is - at a new name (locals, arguments)
+ * or after `value.` (the fields of that value).
  */
-object DapSetBreakpoints {
-    /** Adds the extras to the breakpoints of a `setBreakpoints` request; false when [message] is something else or nothing was added. */
-    fun addExtras(message: JsonObject, extras: (path: String, line: Int) -> BreakpointExtras?): Boolean {
-        if (message.get("command")?.takeIf { it.isJsonPrimitive }?.asString != "setBreakpoints") return false
-        val arguments = message.get("arguments") as? JsonObject ?: return false
-        val path = (arguments.get("source") as? JsonObject)?.get("path")?.takeIf { it.isJsonPrimitive }?.asString ?: return false
-        val breakpoints = arguments.get("breakpoints")?.takeIf { it.isJsonArray }?.asJsonArray ?: return false
-        var changed = false
-        for (breakpoint in breakpoints) {
-            val item = breakpoint as? JsonObject ?: continue
-            val line = item.get("line")?.takeIf { it.isJsonPrimitive }?.asInt ?: continue
-            val extra = extras(path, line)?.takeIf { !it.isEmpty } ?: continue
-            HitCondition.normalize(extra.hitCondition)?.let { item.addProperty("hitCondition", it) }
-            extra.logMessage?.takeIf { it.isNotBlank() }?.let { item.addProperty("logMessage", it) }
-            changed = true
+object GoDebugCompletion {
+    /** [qualifier] is the expression before the dot, null at a name that stands alone; [prefix] is what is typed of the name so far. */
+    class Context(val qualifier: String?, val prefix: String)
+
+    private class Token(val type: IElementType, val start: Int, val end: Int)
+
+    /**
+     * Null where names are not completed: in strings, comments and numbers, and after a dot whose left side is not a plain chain of
+     * names (`Make().`, `items[0].`): finding the fields would mean evaluating it, i.e. running code of the program while typing.
+     */
+    fun contextAt(text: CharSequence, offset: Int): Context? {
+        val tokens = ArrayList<Token>()
+        val lexer = GoLexer()
+        lexer.start(text, 0, text.length, 0)
+        while (true) {
+            val type = lexer.tokenType ?: break
+            if (lexer.tokenStart >= offset) break
+            // the caret inside or at the end of a literal or a comment
+            if ((type in GoTokenTypes.COMMENTS || type in GoTokenTypes.STRINGS) && offset <= lexer.tokenEnd) return null
+            if (type != TokenType.WHITE_SPACE && type !in GoTokenTypes.COMMENTS) tokens += Token(type, lexer.tokenStart, lexer.tokenEnd)
+            lexer.advance()
         }
-        return changed
+        val last = tokens.lastOrNull() ?: return Context(null, "")
+        if (last.type == GoTokenTypes.NUMBER && last.end >= offset) return null
+
+        val typing = last.end >= offset && (last.type == GoTokenTypes.IDENTIFIER || last.type == GoTokenTypes.KEYWORD)
+        val prefix = if (typing) text.subSequence(last.start, offset).toString() else ""
+        val before = if (typing) tokens.size - 2 else tokens.size - 1
+        if (before < 0 || tokens[before].type != GoTokenTypes.DOT) return Context(null, prefix)
+
+        // `name.`: the chain that ends with that name, found the way a hover finds it
+        val name = before - 1
+        if (name < 0) return null
+        val range = GoHoverExpression.rangeAt(text.subSequence(0, tokens[name].end), tokens[name].start) ?: return null
+        if (range.endOffset != tokens[name].end) return null
+        return Context(text.subSequence(range.startOffset, range.endOffset).toString(), prefix)
     }
 
-    /** The body of one DAP message, rewritten if it is a `setBreakpoints` request with extras; anything unexpected is returned as it came. */
-    fun rewrite(body: ByteArray, extras: (path: String, line: Int) -> BreakpointExtras?, onError: (Exception) -> Unit = {}): ByteArray = try {
-        // cheap check first: almost every message is something else
-        if (!String(body, Charsets.UTF_8).contains("\"setBreakpoints\"")) body
-        else {
-            val message = JsonParser.parseString(String(body, Charsets.UTF_8)) as? JsonObject
-            if (message != null && addExtras(message, extras)) message.toString().toByteArray(Charsets.UTF_8) else body
-        }
-    } catch (e: Exception) {
-        // the message goes out as the client wrote it: a breakpoint without its hit count is better than a broken session
-        onError(e)
-        body
-    }
+    /** Delve lists more than fields under a value: `[0]`, `[key]`. Only what can be typed is offered. */
+    fun isName(name: String): Boolean = name.isNotEmpty() && (name[0].isLetter() || name[0] == '_') && name.drop(1).all { it.isLetterOrDigit() || it == '_' }
 }
 
 /**
- * A stream of DAP messages (`Content-Length: N\r\n\r\n` and N bytes of JSON) that lets [transform] replace the body of every message.
- * The writer may cut the stream anywhere, so bytes are kept until a message is complete; a stream that does not look like DAP is passed on.
+ * Where the value of a variable is shown in the editor while the program stands at a line, as in GoLand: on the lines of the current
+ * function, up to the line of execution, that mention the variable. By tokens: there is no parser to tell a declaration from a use,
+ * and both are worth the value.
  */
-class DapMessageRewritingStream(private val target: OutputStream, private val transform: (ByteArray) -> ByteArray) : OutputStream() {
-    private val pending = ByteArrayOutputStream()
+object GoInlineValues {
+    /**
+     * Zero-based lines that mention [name] as a name of its own (`total`, not `order.total` and not `"total"`), inside the function that
+     * contains [currentLine] and not below that line: what is below has not happened yet, the value there would be a guess.
+     */
+    fun lines(text: CharSequence, name: String, currentLine: Int): List<Int> {
+        if (name.isEmpty()) return emptyList()
+        val lineStarts = ArrayList<Int>().apply { add(0); text.forEachIndexed { index, c -> if (c == '\n') add(index + 1) } }
+        if (currentLine !in lineStarts.indices) return emptyList()
+        val lineEnd = if (currentLine + 1 < lineStarts.size) lineStarts[currentLine + 1] else text.length
 
-    override fun write(b: Int) = write(byteArrayOf(b.toByte()), 0, 1)
+        // the function around the line: a method, a function, or the variable whose initializer is a function literal
+        val offset = lineStarts[currentLine]
+        val from = GoDeclarations.scan(text).declarations.filter { it.body != null || it.kind == GoDeclarationKind.VAR }
+            .filter { offset >= it.range.startOffset && offset < it.range.endOffset }.maxByOrNull { it.range.startOffset }?.range?.startOffset ?: 0
 
-    @Synchronized
-    override fun write(b: ByteArray, off: Int, len: Int) {
-        pending.write(b, off, len)
-        drain()
-    }
-
-    private fun drain() {
+        val result = LinkedHashSet<Int>()
+        val lexer = GoLexer()
+        lexer.start(text, 0, text.length, 0)
+        var previousCode: String? = null
+        var line = 0
+        var position = 0
         while (true) {
-            val bytes = pending.toByteArray()
-            val headerEnd = indexOf(bytes, HEADER_END)
-            if (headerEnd < 0) {
-                if (bytes.size > MAX_HEADER) passThrough(bytes) // not a DAP header: do not hold the stream back
-                return
-            }
-            val length = CONTENT_LENGTH.find(String(bytes, 0, headerEnd, Charsets.US_ASCII))?.groupValues?.get(1)?.toIntOrNull()
-            if (length == null) {
-                passThrough(bytes)
-                return
-            }
-            val bodyStart = headerEnd + HEADER_END.size
-            if (bytes.size < bodyStart + length) return
-            val body = transform(bytes.copyOfRange(bodyStart, bodyStart + length))
-            target.write("Content-Length: ${body.size}\r\n\r\n".toByteArray(Charsets.US_ASCII))
-            target.write(body)
-            pending.reset()
-            pending.write(bytes, bodyStart + length, bytes.size - bodyStart - length)
+            val type = lexer.tokenType ?: break
+            val start = lexer.tokenStart
+            if (start >= lineEnd) break
+            while (position < start) if (text[position++] == '\n') line++
+            val token = text.subSequence(start, lexer.tokenEnd).toString()
+            if (start >= from && type == GoTokenTypes.IDENTIFIER && token == name && previousCode != ".") result += line
+            if (type != TokenType.WHITE_SPACE && type !in GoTokenTypes.COMMENTS) previousCode = token
+            lexer.advance()
         }
-    }
-
-    private fun passThrough(bytes: ByteArray) {
-        target.write(bytes)
-        pending.reset()
-    }
-
-    @Synchronized
-    override fun flush() = target.flush()
-
-    override fun close() = target.close()
-
-    private companion object {
-        val HEADER_END = "\r\n\r\n".toByteArray(Charsets.US_ASCII)
-        val CONTENT_LENGTH = Regex("""(?i)Content-Length:\s*(\d+)""")
-        const val MAX_HEADER = 8192
-
-        fun indexOf(bytes: ByteArray, part: ByteArray): Int {
-            outer@ for (i in 0..bytes.size - part.size) {
-                for (j in part.indices) if (bytes[i + j] != part[j]) continue@outer
-                return i
-            }
-            return -1
-        }
+        return result.toList()
     }
 }

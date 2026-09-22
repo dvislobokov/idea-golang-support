@@ -97,6 +97,12 @@ COLOURED = {
   <path d="M8 9l2.6-3M6.5 1.7h3" fill="none" stroke="{GO}" stroke-width="1.3" stroke-linecap="round"/>""",
     "goFuzz": f"""
   <path d="M9.2 1.5L3.5 9h3.8l-.9 5.5L12.5 7H8.6z" fill="none" stroke="{GO}" stroke-width="1.2" stroke-linejoin="round"/>""",
+    # the language server: the Go badge with a plug, for the status bar widget and the menu
+    "gopls": f"""
+  <rect x="1" y="4" width="10" height="8" rx="2.5" fill="{GO}"/>
+  <path d="M4.6 7.1A1.4 1.4 0 1 0 4.7 8.9V8.2H3.8" fill="none" stroke="white" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="7.6" cy="8" r="1.3" fill="none" stroke="white" stroke-width="1.1"/>
+  <path d="M11 8H12.5M13.5 6V10M12.5 6.5H14.5M12.5 9.5H14.5" fill="none" stroke="{GO}" stroke-width="1.2" stroke-linecap="round"/>""",
     "goExample": f"""
   <rect x="2" y="2.5" width="12" height="11" rx="1.5" fill="none" stroke="{GO}"/>
   <path d="M4.5 6h7M4.5 8.5h7M4.5 11h4" fill="none" stroke="{GO}" stroke-linecap="round"/>""",
@@ -110,6 +116,10 @@ TOOL_WINDOWS = {
   <path d="M4.6 9.5H11.4" stroke="{c}"/>
   <circle cx="7" cy="12" r="0.9" fill="{c}"/>
   <circle cx="9.6" cy="11.2" r="0.6" fill="{c}"/>""",
+    "goplsToolWindow": """
+  <rect x="1.5" y="3.5" width="9" height="9" rx="2" stroke="{c}"/>
+  <path d="M4 7.5H6M4 9.5H7.5" stroke="{c}" stroke-linecap="round"/>
+  <path d="M10.5 8H12M13 6V10M12 6.5H14.5M12 9.5H14.5" stroke="{c}" stroke-linecap="round"/>""",
     "goMonitorToolWindow": """
   <rect x="1.5" y="2.5" width="13" height="11" rx="2" stroke="{c}"/>
   <path d="M3.5 9H5.5L7 5.5L9 11L10.5 8H12.5" stroke="{c}" stroke-linecap="round" stroke-linejoin="round"/>""",

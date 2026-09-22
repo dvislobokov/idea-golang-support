@@ -41,6 +41,9 @@ object GoIcons {
     @JvmField val Fuzz: Icon = load("goFuzz")
     @JvmField val Example: Icon = load("goExample")
 
+    /** The language server: the status bar widget, the menu of its commands. */
+    @JvmField val Gopls: Icon = load("gopls")
+
     private val GENERATED_SUFFIXES = listOf(".pb.go", ".pb.gw.go", "_gen.go", ".gen.go", "_generated.go", "_string.go", ".sql.go")
     private val TEMPLATE_EXTENSIONS = setOf("tmpl", "gotmpl", "gohtml", "gotxt")
     private val CONFIG_NAMES = Regex("""\.golangci\.(ya?ml|toml|json)|\.goreleaser\.ya?ml|\.air\.toml|\.mockery\.ya?ml|sqlc\.(ya?ml|json)|buf(\.gen|\.work)?\.yaml""")

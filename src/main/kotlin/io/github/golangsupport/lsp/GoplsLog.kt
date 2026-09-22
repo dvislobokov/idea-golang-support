@@ -1,0 +1,151 @@
+package io.github.golangsupport.lsp
+
+import com.intellij.execution.filters.TextConsoleBuilderFactory
+import com.intellij.execution.ui.ConsoleView
+import com.intellij.execution.ui.ConsoleViewContentType
+import com.intellij.ide.BrowserUtil
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionUpdateThread
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
+import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.content.ContentFactory
+import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.settings.GoSettingsConfigurable
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import javax.swing.JPanel
+import java.awt.BorderLayout
+
+/**
+ * The log window of gopls (tool window `gopls`): what the server writes to stderr (its own log, and the whole protocol with `-rpc.trace`),
+ * its `window/logMessage` and `window/showMessage`, and what the plugin does with it: starts, stops, the commands it sends. The console
+ * is made on EDT when the window is first shown; what comes before is kept, so the start of the server is there too.
+ */
+@Service(Service.Level.PROJECT)
+class GoplsLogService(private val project: Project) : Disposable {
+    private val pending = StringBuilder()
+    @Volatile private var console: ConsoleView? = null
+
+    /** `debug server listening at http://localhost:61674`, from stderr when the debug pages are on. */
+    @Volatile var debugPagesUrl: String? = null
+
+    fun info(text: String) = append("[${TIME.format(LocalTime.now())}] $text\n", ConsoleViewContentType.SYSTEM_OUTPUT)
+    fun error(text: String) = append("[${TIME.format(LocalTime.now())}] $text\n", ConsoleViewContentType.ERROR_OUTPUT)
+
+    /** A line of the server itself; a line about the debug pages is remembered for the action that opens them. */
+    fun server(text: String) {
+        GoplsLogLines.debugUrl(text)?.let { debugPagesUrl = it }
+        append(text, ConsoleViewContentType.NORMAL_OUTPUT)
+    }
+
+    @Synchronized
+    private fun append(text: String, type: ConsoleViewContentType) {
+        val view = console
+        if (view != null) view.print(text, type) else pending.append(text)
+    }
+
+    /** The console, made for the tool window. Its content before this point is printed as plain text: the kinds are not kept. */
+    @Synchronized
+    fun console(): ConsoleView = console ?: TextConsoleBuilderFactory.getInstance().createBuilder(project).console.also {
+        Disposer.register(this, it)
+        it.print(pending.toString(), ConsoleViewContentType.NORMAL_OUTPUT)
+        pending.setLength(0)
+        console = it
+    }
+
+    override fun dispose() {}
+
+    companion object {
+        private val TIME = DateTimeFormatter.ofPattern("HH:mm:ss")
+        fun getInstance(project: Project): GoplsLogService = project.service()
+    }
+}
+
+/** What is read out of the lines of gopls; pure, for the tests. */
+object GoplsLogLines {
+    private val DEBUG = Regex("""debug server listening at (http://\S+)""")
+    private val STAMP = Regex("""^\d{4}/\d\d/\d\d \d\d:\d\d:\d\d """)
+
+    fun debugUrl(line: String): String? = DEBUG.find(line)?.groupValues?.get(1)
+
+    /** The messages of gopls start with its own date and time; the log has a time of its own. */
+    fun withoutStamp(message: String): String = STAMP.replace(message, "")
+
+    /** The version in `serverInfo` of gopls is its whole build info as JSON (seen live): `v0.23.0` is `Main.Version` in it. */
+    fun version(serverInfoVersion: String?): String {
+        val raw = serverInfoVersion.orEmpty()
+        if (!raw.startsWith("{")) return raw
+        val main = runCatching { com.google.gson.JsonParser.parseString(raw).asJsonObject.getAsJsonObject("Main") }.getOrNull() ?: return raw
+        return main.get("Version")?.takeIf { it.isJsonPrimitive }?.asString ?: raw
+    }
+}
+
+class GoplsLogToolWindowFactory : ToolWindowFactory, DumbAware {
+    override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val console = GoplsLogService.getInstance(project).console()
+        val actions = DefaultActionGroup().apply {
+            add(ActionManager.getInstance().getAction("Go.RestartLanguageServer"))
+            add(ActionManager.getInstance().getAction("Go.Gopls.DebugPages"))
+            add(ActionManager.getInstance().getAction("Go.Gopls.Settings"))
+            addSeparator()
+            addAll(*console.createConsoleActions())
+        }
+        val toolbar = ActionManager.getInstance().createActionToolbar("GoplsLog", actions, false)
+        toolbar.targetComponent = console.component
+        val panel = JPanel(BorderLayout()).apply {
+            add(toolbar.component, BorderLayout.WEST)
+            add(console.component, BorderLayout.CENTER)
+        }
+        toolWindow.contentManager.addContent(ContentFactory.getInstance().createContent(panel, "", false))
+    }
+}
+
+class ShowGoplsLogAction : AnAction(), DumbAware {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabled = e.project != null
+    }
+    override fun actionPerformed(e: AnActionEvent) {
+        show(e.project ?: return)
+    }
+
+    companion object {
+        const val TOOL_WINDOW_ID = "gopls"
+        fun show(project: Project) {
+            ToolWindowManager.getInstance(project).getToolWindow(TOOL_WINDOW_ID)?.activate(null)
+        }
+    }
+}
+
+/** The web pages of gopls: on when the setting is, the address is in its log. */
+class OpenGoplsDebugPagesAction : AnAction(), DumbAware {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabled = e.project != null
+    }
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = e.project ?: return
+        val url = GoplsLogService.getInstance(project).debugPagesUrl
+        if (url == null) GoCli.notifyInfo(project, "gopls", "The debug pages are switched on in Settings | Tools | Go, Language Server; the server is restarted with them")
+        else BrowserUtil.browse(url)
+    }
+}
+
+class GoplsSettingsAction : AnAction(), DumbAware {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+    override fun actionPerformed(e: AnActionEvent) {
+        ApplicationManager.getApplication().invokeLater { ShowSettingsUtil.getInstance().showSettingsDialog(e.project, GoSettingsConfigurable::class.java) }
+    }
+}
