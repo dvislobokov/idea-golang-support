@@ -21,6 +21,7 @@ import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.run.GoEvaluate
 import org.jetbrains.concurrency.AsyncPromise
 import org.jetbrains.concurrency.Promise
+import java.io.File
 import java.io.OutputStream
 import java.io.Writer
 import java.util.concurrent.CompletableFuture
@@ -60,6 +61,9 @@ class GoDebugProcess(
     @Volatile private var started = false
     private val shutdown = AtomicBoolean()
     private val stopped = AsyncPromise<Any>()
+
+    /** The temp binary delve was told to build (see GoLaunchArguments); removed when the session ends so nothing is left behind. */
+    private val outputBinary: File? = (start.arguments["output"] as? String)?.let(::File)
 
     /** What delve printed before the program ran: the errors of the compiler, for the notification of a failed start. */
     private val startupOutput = StringBuilder()
@@ -250,6 +254,8 @@ class GoDebugProcess(
             adapter.stop()
             handler.finish(exitCode)
             stopped.setResult(Unit)
+            // the program has stopped by now, so the binary is unlocked; deleteOnExit covers a Windows handle that lingers
+            outputBinary?.let { bin -> runCatching { if (bin.exists() && !bin.delete()) bin.deleteOnExit() } }
         }
     }
 

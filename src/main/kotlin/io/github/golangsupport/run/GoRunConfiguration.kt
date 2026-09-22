@@ -20,7 +20,9 @@ import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NotNullLazyValue
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.execution.ParametersListUtil
+import java.util.UUID
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.monitor.GoProfile
@@ -177,6 +179,9 @@ object GoLaunchArguments {
         put("mode", if (test) "test" else "debug")
         // what the program prints comes as `output` events of the protocol, not from the streams of the delve process
         put("outputMode", "remote")
+        // delve builds the binary itself; by default as __debug_bin... inside the package directory. Put it in the temp directory
+        // instead, the way GoLand does, so nothing is left in the project; GoDebugProcess removes it when the session ends.
+        put("output", debugBinaryPath())
         if (settings != null) {
             put("showGlobalVariables", settings.debugShowGlobalVariables)
             put("hideSystemGoroutines", settings.debugHideSystemGoroutines)
@@ -197,4 +202,8 @@ object GoLaunchArguments {
     }
 
     fun attach(processId: Int): Map<String, Any> = mapOf("mode" to "local", "processId" to processId)
+
+    /** A unique path in the temp directory for the binary delve builds, so it is never left in the project tree. */
+    private fun debugBinaryPath(): String =
+        File(System.getProperty("java.io.tmpdir"), "__debug_bin" + UUID.randomUUID().toString().replace("-", "") + if (SystemInfo.isWindows) ".exe" else "").path
 }

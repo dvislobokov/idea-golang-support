@@ -113,6 +113,10 @@ class GoToolingTest {
         assertEquals("-tags=x -race", run["buildFlags"])
         assertEquals("remote", run["outputMode"])
         assertFalse("request" in run)
+        // delve builds into a temp binary, not into the package directory, so nothing is left in the project
+        val output = run["output"] as String
+        assertTrue("__debug_bin" in output)
+        assertFalse(output.startsWith("C:/app/cmd"))
         val test = GoLaunchArguments.build(true, "C:/app/store", emptyList(), "^TestA$", false, null, emptyMap(), emptyList())
         assertEquals("test", test["mode"])
         assertEquals(listOf("-test.v", "-test.run", "^TestA$"), test["args"])

@@ -131,6 +131,8 @@
         <toolWindow id="Go Monitor" anchor="right" icon="/icons/goMonitorToolWindow.svg" factoryClass="io.github.golangsupport.monitor.GoMonitorToolWindowFactory"/>
         <toolWindow id="Go Tests" anchor="bottom" icon="/icons/goTestsToolWindow.svg" factoryClass="io.github.golangsupport.testing.GoTestExplorerToolWindowFactory"/>
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
+        <!-- offer to switch off the bundled plugins a Go developer has no use for (Java, Maven, Python, Spring, GitHub, GitLab...) -->
+        <postStartupActivity implementation="io.github.golangsupport.sdk.GoPluginAdvisorActivity"/>
 
         <configurationType implementation="io.github.golangsupport.run.GoConfigurationType"/>
         <runConfigurationProducer implementation="io.github.golangsupport.run.GoRunConfigurationProducer"/>
@@ -142,6 +144,8 @@
         <internalFileTemplate name="Go Program"/>
         <internalFileTemplate name="Go Test"/>
         <defaultTemplatePropertiesProvider implementation="io.github.golangsupport.templates.GoTemplatePropertiesProvider"/>
+        <!-- New Project: a "Go" category in the module-based wizard (IDEA family, incl. forks like GIGA IDE), GoLand-style: GOROOT, module path, go mod init -->
+        <newProjectWizard.generator implementation="io.github.golangsupport.templates.GoNewProjectWizard"/>
         <!-- file.go:12 of the compiler, of tests and of panics, in every console of the project -->
         <consoleFilterProvider implementation="io.github.golangsupport.run.GoConsoleFilterProvider"/>
         <!-- golangci-lint on saved files -->
@@ -171,6 +175,8 @@
             <separator/>
             <action id="Go.Environment" class="io.github.golangsupport.sdk.GoEnvironmentAction" text="Go on This Machine..."
                     description="The toolchain and the tools the plugin uses, the modules of the project, go env"/>
+            <action id="Go.DisablePlugins" class="io.github.golangsupport.sdk.GoDisablePluginsAction" text="Disable Plugins Not Needed for Go..."
+                    description="Switch off the bundled plugins a Go developer has no use for (Java, Maven, Python, Spring, GitHub, GitLab...) to keep the IDE light"/>
             <add-to-group group-id="MainMenu" anchor="after" relative-to-action="ToolsMenu"/>
         </group>
 
@@ -211,6 +217,11 @@
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="WeighingNewGroup"/>
         </group>
     </actions>
+
+    <applicationListeners>
+        <!-- the plugin was enabled without a restart: offer the clean-up right away for the open Go projects -->
+        <listener class="io.github.golangsupport.sdk.GoPluginAdvisorListener" topic="com.intellij.ide.plugins.DynamicPluginListener"/>
+    </applicationListeners>
 
     <projectListeners>
         <listener class="io.github.golangsupport.testing.GoTestStatuses$Listener" topic="com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener"/>
