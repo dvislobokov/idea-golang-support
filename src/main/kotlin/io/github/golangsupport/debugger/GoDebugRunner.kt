@@ -31,6 +31,7 @@ import io.github.golangsupport.GoIcons
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.run.DlvDap
+import io.github.golangsupport.run.GoCommand
 import io.github.golangsupport.run.GoLaunchArguments
 import io.github.golangsupport.run.GoRunConfiguration
 import io.github.golangsupport.settings.GoSettings
@@ -56,15 +57,7 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 val start = debugStart(environment)
-                val delve = GoTool.DELVE.find() ?: run {
-                    GoTool.DELVE.offerInstallation(project, "Debug")
-                    throw ExecutionException("The debugger is not installed: dlv is not found. Install it with: go install ${GoTool.DELVE.module}@latest")
-                }
-                val directory = (environment.runProfile as? GoRunConfiguration)?.packageDirectory()
-                val log = GoDebuggerLogs.newAdapterLog()
-                LOG.info("Starting $delve in $directory, log: ${log ?: "off"}")
-                val commandLine = GoCli.toolCommandLine(delve.path, directory, *DlvDap.arguments(log != null, GoSettings.getInstance().debugAnyGoVersion).toTypedArray())
-                val adapter = DelveProcess(commandLine, log)
+                val adapter = adapter(environment)
                 ApplicationManager.getApplication().invokeLater({
                     try {
                         val session = XDebuggerManager.getInstance(project).startSession(environment, object : XDebugProcessStarter() {
@@ -86,9 +79,28 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
         return result
     }
 
+    /** A `dlv dap` of our own for everything but a remote configuration, which connects to one that runs elsewhere. */
+    private fun adapter(environment: ExecutionEnvironment): DelveAdapter {
+        val configuration = environment.runProfile as? GoRunConfiguration
+        if (configuration?.options?.command == GoCommand.REMOTE) {
+            val options = configuration.options
+            LOG.info("Connecting to dlv dap at ${options.remoteHost}:${options.remotePort}")
+            return RemoteDelve(options.remoteHost.orEmpty().ifBlank { "localhost" }, options.remotePort)
+        }
+        val delve = GoTool.DELVE.find() ?: run {
+            GoTool.DELVE.offerInstallation(environment.project, "Debug")
+            throw ExecutionException("The debugger is not installed: dlv is not found. Install it with: go install ${GoTool.DELVE.module}@latest")
+        }
+        val directory = configuration?.packageDirectory()?.takeIf { it.isNotBlank() }
+        val log = GoDebuggerLogs.newAdapterLog()
+        LOG.info("Starting $delve in $directory, log: ${log ?: "off"}")
+        val commandLine = GoCli.toolCommandLine(delve.path, directory, *DlvDap.arguments(log != null, GoSettings.getInstance().debugAnyGoVersion).toTypedArray())
+        return DelveProcess(commandLine, log)
+    }
+
     private fun debugStart(environment: ExecutionEnvironment): DebugStart = when (val profile = environment.runProfile) {
         is GoAttachProfile -> DebugStart(attach = true, arguments = GoLaunchArguments.attach(profile.processId), name = profile.name)
-        is GoRunConfiguration -> DebugStart(attach = false, arguments = profile.debugLaunchArguments(), name = profile.name)
+        is GoRunConfiguration -> DebugStart(attach = profile.debugIsAttach(), arguments = profile.debugLaunchArguments(), name = profile.name)
         else -> throw ExecutionException("${profile.name} cannot be debugged by delve")
     }
 }

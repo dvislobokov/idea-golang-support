@@ -64,6 +64,7 @@ object GoHelpPage {
             Row("Coverage", "Run configuration → Coverage, or <i>Run with Coverage</i> in Go Tests", "Green, red and yellow bars in the gutter; the percentage next to the packages of Go Tests"),
             Row("Benchmarks", "▶ at <code>BenchmarkXxx</code>, or Benchmark in the run configuration", "The <b>Benchmarks</b> tab of Go Tests: ns/op, B/op, allocs/op and the change against the run before"),
             Row("Goroutines", "Tab <b>Goroutines</b> of the debug session", "Grouped by function, with a search and the runtime ones hidden; open one for its frames, double-click to make it current"),
+            Row("Binary, core dump, remote", "Kind of the Go run configuration", "Debug a built binary, a core dump with its binary, or through a <code>dlv dap --listen</code> on another machine (attach to a process there or launch a binary there), with path substitutions"),
             Row("Stack traces", "Menu <b>Go | Analyze Stack Trace</b>", "Paste a panic or a goroutine dump: its <code>file.go:12</code> frames become links"),
             Row("Profile tests", "Run configuration → Profile", "CPU, memory, block, mutex, execution trace; a notification opens it in <code>go tool pprof</code> / <code>trace</code>"),
             Row("Monitor", "Tool window <b>Go Monitor</b>", "CPU, memory, heap, GC, threads, scheduler of a running program; tick <i>Collect runtime telemetry</i> in the run configuration; <i>Goroutines</i> takes a snapshot with delve"),

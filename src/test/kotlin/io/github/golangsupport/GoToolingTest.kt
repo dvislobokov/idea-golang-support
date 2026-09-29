@@ -126,6 +126,24 @@ class GoToolingTest {
         val test = GoLaunchArguments.build(true, "C:/app/store", emptyList(), "^TestA$", false, null, emptyMap(), emptyList())
         assertEquals("test", test["mode"])
         assertEquals(listOf("-test.v", "-test.run", "^TestA$"), test["args"])
+        // a binary, a core dump, a process on the remote machine: nothing is built, the paths are mapped
+        val substitutions = GoLaunchArguments.substitutions("C:/src/app=/go/src/app\n# a comment\nbroken line\n=/x\n")
+        assertEquals(listOf(mapOf("from" to "/go/src/app", "to" to "C:/src/app")), substitutions)
+        val exec = GoLaunchArguments.exec("/app/bin/server", listOf("--port", "80"), "/app", mapOf("ENV" to "prod"), substitutions)
+        assertEquals("exec", exec["mode"])
+        assertEquals("/app/bin/server", exec["program"])
+        assertEquals(listOf("--port", "80"), exec["args"])
+        assertEquals("/app", exec["cwd"])
+        assertEquals(substitutions, exec["substitutePath"])
+        assertFalse("output" in exec)
+        val core = GoLaunchArguments.core("C:/app/server.exe", "C:/app/server.dmp", emptyList())
+        assertEquals("core", core["mode"])
+        assertEquals("C:/app/server.dmp", core["coreFilePath"])
+        assertFalse("substitutePath" in core)
+        val attach = GoLaunchArguments.attach(4242, substitutions)
+        assertEquals("local", attach["mode"])
+        assertEquals(4242, attach["processId"])
+        assertEquals(substitutions, attach["substitutePath"])
     }
 
     @Test fun delve() {

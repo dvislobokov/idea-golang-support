@@ -47,7 +47,7 @@ private val LOG = logger<GoDebugProcess>()
  */
 class GoDebugProcess(
     session: XDebugSession,
-    private val adapter: DelveProcess,
+    private val adapter: DelveAdapter,
     private val start: DebugStart,
     trace: Writer?,
 ) : XDebugProcess(session), DapConnection.Listener {

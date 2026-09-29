@@ -20,12 +20,41 @@ private val LOG = logger<DelveProcess>()
  * makes it pick a free port). One process per session; it compiles the program itself. Stopped by killing the process tree: an adapter
  * busy with a long request answers nothing at all, `disconnect` included. The debuggee is a child of delve and goes with it.
  */
-class DelveProcess(commandLine: GeneralCommandLine, log: File?) {
+/** What the debug process talks to: the streams of a `dlv dap` server, started here or reached over the network. */
+interface DelveAdapter {
+    val input: InputStream
+    val output: OutputStream
+
+    /** [graceMs]: a moment for the server to exit by itself after `disconnect`, before it is killed (nothing to kill for a remote one). */
+    fun stop(graceMs: Long = 1500)
+}
+
+/**
+ * A `dlv dap --listen=host:port` running elsewhere (another machine, a container): only the socket, the server stays as it was.
+ * The requests are the same; `launch` with `mode: exec` and `attach` with `mode: local` act on the machine of the server, and paths of
+ * the program are its paths (`substitutePath` maps them onto the sources here).
+ */
+class RemoteDelve(host: String, port: Int) : DelveAdapter {
+    private val socket: Socket = try {
+        Socket(host, port).apply { tcpNoDelay = true }
+    } catch (e: Exception) {
+        throw ExecutionException("Cannot connect to dlv dap at $host:$port: ${e.message}. Start it there with: dlv dap --listen=$host:$port", e)
+    }
+
+    override val input: InputStream get() = socket.getInputStream()
+    override val output: OutputStream get() = socket.getOutputStream()
+
+    override fun stop(graceMs: Long) {
+        runCatching { socket.close() }
+    }
+}
+
+class DelveProcess(commandLine: GeneralCommandLine, log: File?) : DelveAdapter {
     private val process: Process = commandLine.withRedirectErrorStream(true).createProcess()
     private val socket: Socket
 
-    val input: InputStream get() = socket.getInputStream()
-    val output: OutputStream get() = socket.getOutputStream()
+    override val input: InputStream get() = socket.getInputStream()
+    override val output: OutputStream get() = socket.getOutputStream()
     val pid: Long get() = process.pid()
     val isAlive: Boolean get() = process.isAlive
 
@@ -62,7 +91,7 @@ class DelveProcess(commandLine: GeneralCommandLine, log: File?) {
     }
 
     /** A moment to exit by itself after `disconnect`, then the whole process tree. */
-    fun stop(graceMs: Long = 1500) {
+    override fun stop(graceMs: Long) {
         runCatching { socket.close() }
         if (process.waitFor(graceMs, TimeUnit.MILLISECONDS)) return
         LOG.info("dlv (pid ${process.pid()}) has not exited by itself, killing the process tree")

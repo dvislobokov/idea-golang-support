@@ -289,8 +289,8 @@ GoLand 2026.2 (июль 2026) — эталон. У GoLand свой полный 
 | Inline values, значение при наведении | да | да / не проверено | 🟡 |
 | Set Value | да | скаляры, строки, указатели | 🟡 |
 | Attach to local process | да | да (без пометки, какие процессы Go) | 🟡 |
-| Remote debug (`dlv --headless`, контейнер, SSH) | да | нет | ❌ |
-| Debug бинарника (`exec`), core dump | да | нет | ❌ |
+| Remote debug (`dlv --headless`, контейнер, SSH) | да | вид Remote dlv dap: сокет к `dlv dap --listen`, attach к pid или exec бинарника там, substitutePath; `--headless` нет | ✅ (частично) |
+| Debug бинарника (`exec`), core dump | да | виды Binary и Core dump конфигурации Go | ✅ |
 | Обратная отладка (rr) | да | нет | ❌ |
 | Отказ сборки с выводом компилятора | да | да | ✅ |
 | Логи отладчика, трасса протокола | скрыто | Show Debugger Logs, Trace Debugger Protocol | ➕ |

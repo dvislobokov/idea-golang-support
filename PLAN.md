@@ -104,7 +104,7 @@
   govulncheck (gopls `vulncheck` уже есть — результат показывать в таблице пометкой). Как: `mod/GoModuleUpdates` (парсер + тест), tool window или вкладка в узле Dependencies. 2–3 дня.
 - [x] (2026-09-29, робот) **Completion в go.mod.** Пути модулей — из `GOMODCACHE/cache/download` и `go list -m all`; версии — `GOPROXY/<path>/@v/list` (сеть, кэш на сессию); версии `go`
   — по установленному toolchain. Как: `CompletionContributor` для `GoModLanguage` (лексер даёт DIRECTIVE/WORD/VERSION). 2 дня.
-- [ ] **Remote debug и режимы delve.** Конфигурация «Go Remote»: host:port уже запущенного `dlv dap --listen` (пропустить `DelveProcess`, только сокет; `launch`/`attach`
+- [x] (2026-09-29, робот) **Remote debug и режимы delve.** Конфигурация «Go Remote»: host:port уже запущенного `dlv dap --listen` (пропустить `DelveProcess`, только сокет; `launch`/`attach`
   как сейчас) — день; «Go Exec» (`mode: exec`, путь к бинарнику, без сборки) — полдня; core dump (`mode: core`, `coreFilePath`) — полдня. Как: `GoRunConfigurationOptions.kind`,
   `GoDebugRunner`, `GoLaunchArguments`.
 - [ ] **Точки на функцию и watchpoints.** `setFunctionBreakpoints` (тип точки без строки, диалог «имя функции»), `setDataBreakpoints` через `dataBreakpointInfo` на переменной

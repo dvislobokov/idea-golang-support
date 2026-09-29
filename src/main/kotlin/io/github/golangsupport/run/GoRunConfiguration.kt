@@ -34,7 +34,18 @@ import java.io.File
 
 enum class GoCommand(val title: String) {
     RUN("go run"),
-    TEST("go test");
+    TEST("go test"),
+
+    /** A binary that is built already: run as it is, or debugged with `launch` in `exec` mode (delve builds nothing). */
+    EXEC("Binary"),
+
+    /** A core dump (a minidump on Windows) with the binary it came from: `launch` in `core` mode; Debug only. */
+    CORE("Core dump"),
+
+    /** A `dlv dap --listen=host:port` elsewhere: attach to a process there, or launch a binary of that machine; Debug only. */
+    REMOTE("Remote dlv dap");
+
+    val isDebugOnly: Boolean get() = this == CORE || this == REMOTE
 
     override fun toString(): String = title
 }
@@ -97,6 +108,21 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
 
     /** `go test` only: what the tests record (`-cpuprofile` and the like), opened in pprof after the run. */
     var profile by enum(GoProfile.NONE)
+
+    /** [GoCommand.EXEC] and [GoCommand.CORE]: the binary; [GoCommand.REMOTE]: the path of the binary on the remote machine to launch there. */
+    var binary by string()
+
+    /** [GoCommand.CORE]: the core dump. */
+    var coreFile by string()
+
+    var remoteHost by string("localhost")
+    var remotePort by property(2345)
+
+    /** [GoCommand.REMOTE]: a process of the remote machine to attach to; 0 launches [binary] there instead. */
+    var remotePid by property(0)
+
+    /** `local=remote`, a line each: where the sources of the program are here and where they were when it was built (`substitutePath` of delve). */
+    var pathSubstitutions by string()
 }
 
 class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
@@ -107,21 +133,41 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> = GoSettingsEditor(project)
 
     override fun checkConfiguration() {
-        val target = options.target
-        if (target.isNullOrBlank()) throw RuntimeConfigurationError("Package directory is not specified")
-        if (!File(target).exists()) throw RuntimeConfigurationError("Not found: $target")
-        if (GoCli.findExecutable() == null) throw RuntimeConfigurationError("The 'go' executable is not found on PATH")
+        when (options.command) {
+            GoCommand.RUN, GoCommand.TEST -> {
+                val target = options.target
+                if (target.isNullOrBlank()) throw RuntimeConfigurationError("Package directory is not specified")
+                if (!File(target).exists()) throw RuntimeConfigurationError("Not found: $target")
+                if (GoCli.findExecutable() == null) throw RuntimeConfigurationError("The 'go' executable is not found on PATH")
+            }
+            GoCommand.EXEC -> if (!File(options.binary.orEmpty()).isFile) throw RuntimeConfigurationError("The binary is not found: ${options.binary.orEmpty()}")
+            GoCommand.CORE -> {
+                if (!File(options.binary.orEmpty()).isFile) throw RuntimeConfigurationError("The binary the core dump came from is not found: ${options.binary.orEmpty()}")
+                if (!File(options.coreFile.orEmpty()).isFile) throw RuntimeConfigurationError("The core dump is not found: ${options.coreFile.orEmpty()}")
+            }
+            GoCommand.REMOTE -> {
+                if (options.remotePort !in 1..65535) throw RuntimeConfigurationError("The port of dlv dap is not set")
+                if (options.remotePid <= 0 && options.binary.isNullOrBlank()) throw RuntimeConfigurationError("Either a process id on the remote machine or the path of a binary there is needed")
+            }
+        }
     }
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState = when {
         // A debugger starts the program itself (see debugLaunchArguments), and the runner of the platform still executes the state first.
         executor.id == DefaultDebugExecutor.EXECUTOR_ID -> RunProfileState { _, _ -> null }
+        options.command.isDebugOnly -> throw com.intellij.execution.ExecutionException("${options.command.title}: only Debug makes sense here")
         options.command == GoCommand.TEST -> GoTestRunState(this, environment)
+        options.command == GoCommand.EXEC -> object : CommandLineState(environment) {
+            override fun startProcess(): ProcessHandler = KillableColoredProcessHandler(withEnvironment(GeneralCommandLine(listOf(options.binary.orEmpty()) + ParametersListUtil.parse(options.programArguments.orEmpty())).withWorkDirectory(execDirectory()))).also { ProcessTerminatedListener.attach(it) }
+        }
         options.runtimeTelemetry -> GoTelemetryRunState(this, environment)
         else -> object : CommandLineState(environment) {
             override fun startProcess(): ProcessHandler = KillableColoredProcessHandler(buildCommandLine()).also { ProcessTerminatedListener.attach(it) }
         }
     }
+
+    /** Where a binary runs: the working directory of the configuration, or its own directory. */
+    private fun execDirectory(): String = options.workingDirectory?.takeIf { it.isNotBlank() } ?: File(options.binary.orEmpty()).parent.orEmpty()
 
     /** The directory of the package: the target itself, or the directory of the file it is. */
     fun packageDirectory(): String = File(options.target.orEmpty()).let { if (it.isFile) it.parent.orEmpty() else it.path }
@@ -153,6 +199,8 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
             GoCommand.RUN -> listOf("run") + goArgumentList() + packageArgument() + programArguments
             GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + GoSettings.getInstance().testArgumentList() + testSelection() + profile + coverage + packageArgument() +
                 (if (programArguments.isEmpty()) emptyList() else listOf("-args") + programArguments)
+            // a binary and the debug-only kinds have no go command to run (see getState)
+            GoCommand.EXEC, GoCommand.CORE, GoCommand.REMOTE -> throw com.intellij.execution.ExecutionException("${options.command.title} is not run with the go command")
         }
         return withEnvironment(GoCli.commandLine(goDirectory(), *arguments.toTypedArray()))
     }
@@ -180,12 +228,26 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
         }
     }
 
-    /** The `launch` request for delve, see [GoLaunchArguments]. */
-    fun debugLaunchArguments(): Map<String, Any> = GoLaunchArguments.build(
-        test = options.command == GoCommand.TEST, program = if (isFileTarget()) options.target.orEmpty() else packageDirectory(),
-        programArguments = ParametersListUtil.parse(options.programArguments.orEmpty()), testPattern = options.testPattern, benchmark = options.benchmark,
-        workingDirectory = options.workingDirectory, environment = options.environment, buildFlags = goArgumentList(), settings = GoSettings.getInstance(),
-    )
+    /** A remote configuration with a process id attaches; everything else is a `launch`. */
+    fun debugIsAttach(): Boolean = options.command == GoCommand.REMOTE && options.remotePid > 0
+
+    /** The `launch` (or `attach`) request for delve, see [GoLaunchArguments]. */
+    fun debugLaunchArguments(): Map<String, Any> {
+        val settings = GoSettings.getInstance()
+        val substitutions = GoLaunchArguments.substitutions(options.pathSubstitutions.orEmpty())
+        val programArguments = ParametersListUtil.parse(options.programArguments.orEmpty())
+        return when (options.command) {
+            GoCommand.EXEC -> GoLaunchArguments.exec(options.binary.orEmpty(), programArguments, options.workingDirectory, options.environment, substitutions, settings)
+            GoCommand.CORE -> GoLaunchArguments.core(options.binary.orEmpty(), options.coreFile.orEmpty(), substitutions, settings)
+            GoCommand.REMOTE -> if (options.remotePid > 0) GoLaunchArguments.attach(options.remotePid, substitutions)
+                else GoLaunchArguments.exec(options.binary.orEmpty(), programArguments, options.workingDirectory, options.environment, substitutions, settings)
+            GoCommand.RUN, GoCommand.TEST -> GoLaunchArguments.build(
+                test = options.command == GoCommand.TEST, program = if (isFileTarget()) options.target.orEmpty() else packageDirectory(),
+                programArguments = programArguments, testPattern = options.testPattern, benchmark = options.benchmark,
+                workingDirectory = options.workingDirectory, environment = options.environment, buildFlags = goArgumentList(), settings = settings,
+            )
+        }
+    }
 }
 
 /**
@@ -222,7 +284,46 @@ object GoLaunchArguments {
         if (buildFlags.isNotEmpty()) put("buildFlags", buildFlags.joinToString(" "))
     }
 
-    fun attach(processId: Int): Map<String, Any> = mapOf("mode" to "local", "processId" to processId)
+    fun attach(processId: Int, substitutions: List<Map<String, String>> = emptyList()): Map<String, Any> = buildMap {
+        put("mode", "local")
+        put("processId", processId)
+        if (substitutions.isNotEmpty()) put("substitutePath", substitutions)
+    }
+
+    /** `launch` of a binary that exists: nothing is built, `program` is its path (on the machine of the delve that serves the request). */
+    fun exec(binary: String, programArguments: List<String>, workingDirectory: String?, environment: Map<String, String>, substitutions: List<Map<String, String>>, settings: GoSettings? = null): Map<String, Any> = buildMap {
+        put("mode", "exec")
+        put("outputMode", "remote")
+        put("program", binary)
+        if (settings != null) debugSettings(this, settings)
+        if (programArguments.isNotEmpty()) put("args", programArguments)
+        workingDirectory?.takeIf { it.isNotBlank() }?.let { put("cwd", it) }
+        if (environment.isNotEmpty()) put("env", environment)
+        if (substitutions.isNotEmpty()) put("substitutePath", substitutions)
+    }
+
+    /** `launch` of a core dump: the binary it came from and the dump; nothing runs, the stacks and the values are what there is. */
+    fun core(binary: String, coreFile: String, substitutions: List<Map<String, String>>, settings: GoSettings? = null): Map<String, Any> = buildMap {
+        put("mode", "core")
+        put("program", binary)
+        put("coreFilePath", coreFile)
+        if (settings != null) debugSettings(this, settings)
+        if (substitutions.isNotEmpty()) put("substitutePath", substitutions)
+    }
+
+    private fun debugSettings(arguments: MutableMap<String, Any>, settings: GoSettings) {
+        arguments["showGlobalVariables"] = settings.debugShowGlobalVariables
+        arguments["hideSystemGoroutines"] = settings.debugHideSystemGoroutines
+        arguments["stackTraceDepth"] = settings.debugStackTraceDepth
+    }
+
+    /** `local=remote` lines -> the `substitutePath` entries of delve (`from` is the path in the binary, `to` the path here); blank and broken lines are skipped. */
+    fun substitutions(text: String): List<Map<String, String>> = text.lines().map(String::trim).filter { it.isNotEmpty() && !it.startsWith("#") }.mapNotNull { line ->
+        val separator = line.indexOf('=').takeIf { it > 0 } ?: return@mapNotNull null
+        val local = line.substring(0, separator).trim()
+        val remote = line.substring(separator + 1).trim()
+        if (local.isEmpty() || remote.isEmpty()) null else mapOf("from" to remote, "to" to local)
+    }
 
     /** A unique path in the temp directory for the binary delve builds, so it is never left in the project tree. */
     private fun debugBinaryPath(): String =
