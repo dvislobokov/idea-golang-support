@@ -10,12 +10,18 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 /** What a package gives to those who import it: a function, a type, a constant or a variable with an upper-case name. */
-class GoSymbol(val name: String, val kind: GoDeclarationKind, val signature: String?)
+data class GoSymbol(val name: String, val kind: GoDeclarationKind, val signature: String?)
+
+/** The exported names of one file: what the index of the platform keeps for a file of the project. */
+data class GoFileExports(val packageName: String, val symbols: List<GoSymbol>)
 
 class GoPackageSymbols(val importPath: String, val name: String, val symbols: List<GoSymbol>)
 
-/** The packages of a module of one version, or of the standard library of one version of Go: what never changes once it is there. */
-class GoModuleSymbols(val key: String, val standard: Boolean, val packages: List<GoPackageSymbols>)
+/**
+ * The packages of a module of one version, or of the standard library of one version of Go: what never changes once it is there.
+ * Or the packages of the project itself ([project]), which change and are kept by the index of the platform, not by a file.
+ */
+class GoModuleSymbols(val key: String, val standard: Boolean, val packages: List<GoPackageSymbols>, val project: Boolean = false)
 
 /**
  * Reads the exported declarations of the packages under a directory, with the scanner of the plugin: no compiler, no `go list`.
@@ -54,20 +60,36 @@ object GoCatalogueScanner {
         name !in SKIPPED && !name.startsWith(".") && !name.startsWith("_") && !(topOfStandardLibrary && name == "cmd")
 
     /** The exported names of the files of one directory; null for a program and for a package that exports nothing. */
-    fun scanPackage(importPath: String, texts: List<CharSequence>): GoPackageSymbols? {
-        val files = texts.map { GoDeclarations.scan(it) }.filter { it.packageName != null }
+    fun scanPackage(importPath: String, texts: List<CharSequence>): GoPackageSymbols? = merge(importPath, texts.mapNotNull(::exportsOf))
+
+    /** What one file exports; null for a text without a package clause. A file that exports nothing still tells the name of its package. */
+    fun exportsOf(text: CharSequence): GoFileExports? {
+        val file = GoDeclarations.scan(text)
+        val symbols = file.declarations.filter { it.isExported && it.kind != GoDeclarationKind.METHOD }
+            .map { GoSymbol(it.name, it.kind, it.signature?.take(MAX_SIGNATURE)) }
+        return GoFileExports(file.packageName ?: return null, symbols)
+    }
+
+    /** The package the files of one directory make; null for a program and for a package that exports nothing. */
+    fun merge(importPath: String, files: Collection<GoFileExports>): GoPackageSymbols? {
         // a file of another package in the directory is a generator or an example kept out of the build
-        val name = files.groupingBy { it.packageName!! }.eachCount().maxByOrNull { it.value }?.key ?: return null
+        val name = files.groupingBy { it.packageName }.eachCount().maxByOrNull { it.value }?.key ?: return null
         if (name == "main") return null
         val symbols = LinkedHashMap<String, GoSymbol>()
-        for (file in files) {
-            if (file.packageName != name) continue
-            for (declaration in file.declarations) {
-                if (!declaration.isExported || declaration.kind == GoDeclarationKind.METHOD || declaration.name in symbols) continue
-                symbols[declaration.name] = GoSymbol(declaration.name, declaration.kind, declaration.signature?.take(MAX_SIGNATURE))
-            }
-        }
+        for (file in files) if (file.packageName == name) for (symbol in file.symbols) symbols.putIfAbsent(symbol.name, symbol)
         return if (symbols.isEmpty()) null else GoPackageSymbols(importPath, name, symbols.values.sortedBy { it.name })
+    }
+
+    /**
+     * Whether a package may be imported from another: `a/internal/b` is for the packages under `a` only. The rule of the `go`
+     * command, which matters for the packages of the project: the ones of the dependencies are left out when they are read.
+     */
+    fun isVisible(importPath: String, from: String?): Boolean {
+        val parts = importPath.split('/')
+        val internal = parts.lastIndexOf("internal")
+        if (internal < 0) return true
+        val parent = parts.take(internal).joinToString("/")
+        return from != null && (parent.isEmpty() || from == parent || from.startsWith("$parent/"))
     }
 }
 
@@ -134,20 +156,23 @@ object GoCatalogueFiles {
  * read: a sorted array and a binary search, so that a list for every key typed costs nothing.
  */
 class GoSymbolIndex(modules: List<GoModuleSymbols>) {
-    class Entry(val symbol: GoSymbol, val pack: GoPackageSymbols, val standard: Boolean) {
+    class Entry(val symbol: GoSymbol, val pack: GoPackageSymbols, val standard: Boolean, val project: Boolean = false) {
         internal val key: String = symbol.name.lowercase()
+
+        /** The packages of the project are what its code is written with; then the standard library; then the modules. */
+        internal val origin: Int get() = if (project) 0 else if (standard) 1 else 2
     }
 
-    private val entries: Array<Entry> = modules.flatMap { module -> module.packages.flatMap { pack -> pack.symbols.map { Entry(it, pack, module.standard) } } }
+    private val entries: Array<Entry> = modules.flatMap { module -> module.packages.flatMap { pack -> pack.symbols.map { Entry(it, pack, module.standard, module.project) } } }
         .sortedWith(compareBy<Entry> { it.key }.thenBy { it.pack.importPath }).toTypedArray()
 
     val size: Int get() = entries.size
     val packages: Int = modules.sumOf { it.packages.size }
 
-    /** The packages by the names they are used by, the standard library first, a shorter path before a longer one. */
+    /** The packages by the names they are used by: of the project, of the standard library, of the modules; a shorter path before a longer one. */
     private val byName: Map<String, List<Pair<GoPackageSymbols, Set<String>>>> by lazy {
-        modules.flatMap { module -> module.packages.map { module.standard to it } }
-            .sortedWith(compareBy<Pair<Boolean, GoPackageSymbols>> { !it.first }.thenBy { it.second.importPath.count { c -> c == '/' } }.thenBy { it.second.importPath })
+        modules.flatMap { module -> module.packages.map { (if (module.project) 0 else if (module.standard) 1 else 2) to it } }
+            .sortedWith(compareBy<Pair<Int, GoPackageSymbols>> { it.first }.thenBy { it.second.importPath.count { c -> c == '/' } }.thenBy { it.second.importPath })
             .groupBy({ it.second.name }) { it.second to it.second.symbols.mapTo(HashSet()) { s -> s.name } }
     }
 
@@ -160,9 +185,10 @@ class GoSymbolIndex(modules: List<GoModuleSymbols>) {
 
     /**
      * The names that begin with [prefix], whatever the case of the letters, the best first: the case as typed, a package of
-     * [preferred] (the ones the file imports), the standard library, a shorter name. No more than [limit].
+     * [preferred] (the ones the file imports), the project before the standard library before the modules, a shorter name. No more
+     * than [limit] of the ones [visible] lets through (a package of the file itself, an `internal` one of another tree).
      */
-    fun find(prefix: String, limit: Int, preferred: Set<String> = emptySet(), qualifier: String? = null): List<Entry> {
+    fun find(prefix: String, limit: Int, preferred: Set<String> = emptySet(), qualifier: String? = null, visible: (GoPackageSymbols) -> Boolean = { true }): List<Entry> {
         if (prefix.isEmpty() && qualifier == null) return emptyList()
         val wanted = prefix.lowercase()
         val found = ArrayList<Entry>()
@@ -179,8 +205,8 @@ class GoSymbolIndex(modules: List<GoModuleSymbols>) {
             var i = low
             while (i < entries.size && entries[i].key.startsWith(wanted) && found.size < MAX_MATCHES) found += entries[i++]
         }
-        return found.sortedWith(
-            compareBy<Entry> { !it.symbol.name.startsWith(prefix) }.thenBy { it.pack.importPath !in preferred }.thenBy { !it.standard }
+        return found.filter { visible(it.pack) }.sortedWith(
+            compareBy<Entry> { !it.symbol.name.startsWith(prefix) }.thenBy { it.pack.importPath !in preferred }.thenBy { it.origin }
                 .thenBy { it.symbol.name.length }.thenBy { it.pack.importPath.count { c -> c == '/' } }.thenBy { it.key }.thenBy { it.pack.importPath },
         ).take(limit)
     }

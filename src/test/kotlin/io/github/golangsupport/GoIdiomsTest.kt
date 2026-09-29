@@ -4,6 +4,7 @@ import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoIdioms
 import io.github.golangsupport.lang.GoSnippets
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -162,6 +163,116 @@ class GoIdiomsTest {
             """
         assertEquals("for rows.Next() {\n\t\t\n\t}", suggest(code))
         assertNull(suggest(code.replace("db.Query(q)", "os.Open(q)")))
+    }
+
+    @Test fun theBodyOfAnErrorCheckTypedByHand() {
+        val code = """
+            package store
+
+            func Load(name string) (*Order, error) {
+                f, err := os.Open(name)
+                if err != nil {
+                    <caret>
+                }
+                return parse(f)
+            }
+            """
+        assertEquals("\t\treturn nil, err", suggest(code))
+        assertEquals("turn nil, err", suggest(code.replace("<caret>", "re<caret>")))
+        // the error of the `if` itself
+        assertEquals("\t\treturn nil, err", suggest(code.replace("f, err := os.Open(name)\n", "").replace("if err != nil {", "if err := check(name); err != nil {")))
+        // a line added to a body that has something in it is not the whole of the body
+        assertNull(suggest(code.replace("<caret>\n", "<caret>\n        log.Println(err)\n")))
+        assertNull(suggest(code.replace("if err != nil {", "if f != nil {")))
+    }
+
+    @Test fun errorsAreWrappedWhereTheFileWrapsThem() {
+        val code = """
+            package store
+
+            func Save(o *Order) error {
+                data, err := json.Marshal(o)
+                if err != nil {
+                    return fmt.Errorf("marshal order: %w", err)
+                }
+                if err := os.WriteFile(path, data, 0o600); err != nil {
+                    return fmt.Errorf("write order: %w", err)
+                }
+                return nil
+            }
+
+            func Load(name string) (*Order, error) {
+                data, err := os.ReadFile(name)
+                <caret>
+            }
+            """
+        assertTrue(GoIdioms.wrapsErrors(code))
+        assertEquals("if err != nil {\n\t\treturn nil, fmt.Errorf(\"read file: %w\", err)\n\t}", suggest(code))
+        assertEquals("if err != nil {\n\t\treturn nil, fmt.Errorf(\"find user: %w\", err)\n\t}", suggest(code.replace("os.ReadFile(name)", "s.repo.FindUser(ctx, id)")))
+        // a test says where it is by itself
+        val test = code.replace("func Load(name string) (*Order, error) {", "func TestLoad(t *testing.T) {")
+        assertEquals("if err != nil {\n\t\tt.Fatal(err)\n\t}", suggest(test))
+        // one wrapped error among plain ones is not a habit
+        val plain = code.replace("return fmt.Errorf(\"marshal order: %w\", err)", "return err").replace("return fmt.Errorf(\"write order: %w\", err)", "return err")
+        assertFalse(GoIdioms.wrapsErrors(plain))
+        assertEquals("if err != nil {\n\t\treturn nil, err\n\t}", suggest(plain))
+    }
+
+    @Test fun whatHasFailedInWords() {
+        assertEquals("open", GoIdioms.failure("f, err := os.Open(name)"))
+        assertEquals("read file", GoIdioms.failure("data, err := os.ReadFile(name)"))
+        assertEquals("new request with context", GoIdioms.failure("req, err = http.NewRequestWithContext(ctx, m, u, nil)"))
+        assertEquals("parse url", GoIdioms.failure("u, err := url.ParseURL(raw)"))
+        assertEquals("find user", GoIdioms.failure("user, err := s.repo.FindUser(ctx, id)"))
+        assertEquals("check", GoIdioms.failure("err := check(name)"))
+        assertNull(GoIdioms.failure("err = lastError"))
+        assertNull(GoIdioms.failure(null))
+    }
+
+    @Test fun defersOfWhatIsStartedAndMade() {
+        assertEquals("defer span.End()", suggest("package main\n\nfunc f(ctx context.Context) {\n    ctx, span := tracer.Start(ctx, \"load\")\n    <caret>\n}"))
+        assertEquals("defer childSpan.End()", suggest("package main\n\nfunc f(ctx context.Context) {\n    _, childSpan := otel.Tracer(\"x\").Start(ctx, \"load\")\n    <caret>\n}"))
+        // a `Start` of something that is not a span
+        assertNull(suggest("package main\n\nfunc f() {\n    a, b := server.Start(ctx)\n    <caret>\n}"))
+        assertEquals("defer stop()", suggest("package main\n\nfunc main() {\n    ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)\n    <caret>\n}"))
+        assertEquals("defer signal.Stop(ch)", suggest("package main\n\nfunc main() {\n    signal.Notify(ch, os.Interrupt)\n    <caret>\n}"))
+        assertEquals("defer close(results)", suggest("package main\n\nfunc f() {\n    results := make(chan int, 8)\n    go func() {\n        <caret>\n    }()\n}"))
+        // the group of the goroutine goes first
+        assertEquals("defer wg.Done()", suggest("package main\n\nfunc f() {\n    results := make(chan int)\n    wg.Add(1)\n    go func() {\n        <caret>\n    }()\n}"))
+        val directory = """
+            package main
+
+            func f() error {
+                dir, err := os.MkdirTemp("", "x")
+                if err != nil {
+                    return err
+                }
+                <caret>
+            }
+            """
+        assertEquals("defer os.RemoveAll(dir)", suggest(directory))
+    }
+
+    @Test fun theLoopOfAScannerAndTheErrorAfterALoop() {
+        assertEquals("for scanner.Scan() {\n\t\t\n\t}", suggest("package main\n\nfunc f(r io.Reader) error {\n    scanner := bufio.NewScanner(r)\n    <caret>\n}"))
+        val lines = """
+            package main
+
+            func count(r io.Reader) (int, error) {
+                scanner := bufio.NewScanner(r)
+                n := 0
+                for scanner.Scan() {
+                    if scanner.Text() != "" {
+                        n++
+                    }
+                }
+                <caret>
+            }
+            """
+        assertEquals("if err := scanner.Err(); err != nil {\n\t\treturn 0, err\n\t}", suggest(lines))
+        assertEquals("if err := rows.Err(); err != nil {\n\t\treturn 0, err\n\t}", suggest(lines.replace("scanner.Scan()", "rows.Next()")))
+        // not after any loop
+        assertNull(suggest(lines.replace("for scanner.Scan() {", "for i := range items {")))
     }
 
     @Test fun signatures() {

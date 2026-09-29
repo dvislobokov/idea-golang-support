@@ -75,6 +75,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var docCommentNames by property(true)
         /** A Cyrillic letter typed in code is typed as the Latin character of its key. */
         var latinInCode by property(true)
+        /** Extract variable, Inline call, Add test... of gopls as items of Alt+Enter. */
+        var goplsActionsInMenu by property(true)
         var lintOnTheFly by property(true)
 
         /** Added to every `go test`: `-race -count=1`. */
@@ -196,6 +198,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var latinInCode: Boolean
         get() = state.latinInCode
         set(value) { state.latinInCode = value }
+
+    var goplsActionsInMenu: Boolean
+        get() = state.goplsActionsInMenu
+        set(value) { state.goplsActionsInMenu = value }
 
     var createRunConfigurations: Boolean
         get() = state.createRunConfigurations

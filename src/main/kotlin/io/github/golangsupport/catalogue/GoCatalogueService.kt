@@ -14,6 +14,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -39,14 +40,47 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * Not the indexes of the platform: library roots would have every index built for every file of every dependency, where one list of
  * exported names per package is all that is asked for.
+ *
+ * The packages of the project itself do change, and for them the index of the platform is the cache ([GoExportsIndex]): it is the
+ * platform that knows which file has changed. They are put together again when the index says it is not what it was.
  */
 @Service(Service.Level.PROJECT)
 class GoCatalogueService(private val project: Project) : Disposable {
     /** A directory of sources and the name its contents are kept by. */
     private class Source(val key: String, val directory: File, val modulePath: String, val standard: Boolean)
 
+    /** Everything there is, as it was put together last. */
     @Volatile var index: GoSymbolIndex = GoSymbolIndex.EMPTY
         private set
+
+    @Volatile private var dependencies: List<GoModuleSymbols> = emptyList()
+    @Volatile private var ownPackages: List<GoPackageSymbols> = emptyList()
+    @Volatile private var ownStamp = -1L
+
+    /**
+     * The catalogue for a completion list: what there is now, at once; the packages of the project are read again behind it when the
+     * index has changed, for the next list. Needs read access.
+     */
+    fun current(): GoSymbolIndex {
+        if (!DumbService.isDumb(project) && GoExportsIndex.stamp(project) != ownStamp) refreshProject()
+        return index
+    }
+
+    private fun refreshProject() {
+        ReadAction.nonBlocking<Pair<Long, List<GoPackageSymbols>>> { GoExportsIndex.stamp(project) to GoExportsIndex.projectPackages(project) }
+            .inSmartMode(project).expireWhen { project.isDisposed }.coalesceBy(this, "project")
+            .submit(AppExecutorUtil.getAppExecutorService())
+            .onSuccess { (stamp, packages) ->
+                ownStamp = stamp
+                ownPackages = packages
+                assemble()
+            }
+    }
+
+    @Synchronized
+    private fun assemble() {
+        index = GoSymbolIndex(dependencies + GoModuleSymbols("project", false, ownPackages, project = true))
+    }
 
     private val running = AtomicBoolean()
     private val again = AtomicBoolean()
@@ -69,6 +103,7 @@ class GoCatalogueService(private val project: Project) : Disposable {
     /** [rescan]: the files of the cache are not trusted, everything is read from the sources again. */
     fun refresh(rescan: Boolean) {
         if (project.isDisposed || !GoSettings.getInstance().completionCatalogue) return
+        refreshProject()
         if (!running.compareAndSet(false, true)) return again.set(true)
         ReadAction.nonBlocking<List<GoModule>> { GoModulesService.getInstance(project).modules() }
             .inSmartMode(project).expireWhen { project.isDisposed }
@@ -90,8 +125,10 @@ class GoCatalogueService(private val project: Project) : Disposable {
                     indicator.text2 = source.key
                     load(source, rescan) { scanned++ }
                 }
-                index = GoSymbolIndex(loaded)
-                LOG.info("Go catalogue: ${index.size} symbols of ${index.packages} packages in ${loaded.size} of ${sources.size} modules, $scanned scanned, ${System.currentTimeMillis() - started} ms")
+                dependencies = loaded
+                assemble()
+                LOG.info("Go catalogue: ${index.size} symbols of ${index.packages} packages (${ownPackages.size} of the project) in ${loaded.size} of ${sources.size} modules, " +
+                    "$scanned scanned, ${System.currentTimeMillis() - started} ms")
             }
 
             override fun onFinished() = finished()

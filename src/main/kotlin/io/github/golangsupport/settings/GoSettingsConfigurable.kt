@@ -105,6 +105,10 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                         .comment("<code>//</code> typed on an empty line right above <code>func</code>, <code>type</code>, <code>var</code> or <code>const</code> becomes <code>// Name </code>")
                 }
                 row {
+                    checkBox("Show the actions of gopls in the list of Alt+Enter").bindSelected(settings::goplsActionsInMenu)
+                        .comment("Extract variable, Inline call, Invert if, Add test and others, for the caret or the selection. Off: they are behind <b>Refactorings and actions of gopls...</b>")
+                }
+                row {
                     checkBox("Type Latin characters in code when the keyboard layout is Russian").bindSelected(settings::latinInCode)
                         .comment("<code>аьеюЗкштедт</code> is typed as <code>fmt.Println</code>. Strings, runes and comments keep what is typed")
                 }

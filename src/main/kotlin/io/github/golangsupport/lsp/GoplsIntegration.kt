@@ -25,6 +25,8 @@ import com.intellij.platform.lsp.api.LspIntegrationProvider
 import com.intellij.platform.lsp.api.LspServerListener
 import com.intellij.platform.lsp.api.LspServerNotificationsHandler
 import com.intellij.platform.lsp.api.ProjectWideLspClientDescriptor
+import com.intellij.platform.lsp.api.customization.LspCodeActionsCustomizer
+import com.intellij.platform.lsp.api.customization.LspCodeActionsSupport
 import com.intellij.platform.lsp.api.customization.LspCodeLensCustomizer
 import com.intellij.platform.lsp.api.customization.LspCodeLensSupport
 import com.intellij.platform.lsp.api.customization.LspCommandsCustomizer
@@ -160,6 +162,14 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         }
 
         override val completionCustomizer: LspCompletionCustomizer = GoplsCompletionSupport()
+
+        /**
+         * The fixes of the errors of gopls are the ones of the platform; its actions for a place are [GoplsIntention]: the platform asks
+         * for them in a way gopls answers with nothing, every time the caret moves.
+         */
+        override val codeActionsCustomizer: LspCodeActionsCustomizer = object : LspCodeActionsSupport() {
+            override val intentionActionsSupport: Boolean get() = false
+        }
 
         /** A clicked lens and the command of a code action: [GoplsCommands], not the fire-and-forget notification of the platform. */
         override val codeLensCustomizer: LspCodeLensCustomizer = object : LspCodeLensSupport() {

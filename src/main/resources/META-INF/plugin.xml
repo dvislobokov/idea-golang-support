@@ -46,6 +46,8 @@
         <breadcrumbsInfoProvider implementation="io.github.golangsupport.lang.GoBreadcrumbsProvider"/>
         <lang.foldingBuilder language="Go" implementationClass="io.github.golangsupport.lang.GoFoldingBuilder"/>
         <fileBasedIndex implementation="io.github.golangsupport.lang.GoDeclarationIndex"/>
+        <!-- what every file of the project exports: the packages of the project in the catalogue of completion -->
+        <fileBasedIndex implementation="io.github.golangsupport.catalogue.GoExportsIndex"/>
         <lang.findUsagesProvider language="Go" implementationClass="io.github.golangsupport.lang.GoFindUsagesProvider"/>
         <gotoClassContributor implementation="io.github.golangsupport.lang.GoGotoClassContributor"/>
         <gotoSymbolContributor implementation="io.github.golangsupport.lang.GoGotoSymbolContributor"/>

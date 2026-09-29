@@ -22,8 +22,8 @@ type (
 
 // Order is a list of items in one currency.
 type Order struct {
-	Currency string
-	items    []Item
+	Currency string `json:"currency" yaml:"currency" xml:"currency" db:"currency" mapstructure:"currency" toml:"currency"`
+	items    []Item `db:"items" mapstructure:"items" toml:"items"`
 }
 
 // NewOrder

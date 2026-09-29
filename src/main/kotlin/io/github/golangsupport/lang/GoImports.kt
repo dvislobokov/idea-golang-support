@@ -48,6 +48,22 @@ object GoImports {
         return text.subSequence(wordStart, i).toString() !in DECLARING
     }
 
+    /**
+     * Whether [offset] is in the imports of the file: on a line of an import, from the first `import` to the end of the last one and
+     * the bracket that closes its block. Where Alt+Enter is pressed for the imports to be put in order.
+     */
+    fun isInImports(text: CharSequence, offset: Int): Boolean {
+        val imports = GoDeclarations.scan(text).imports
+        if (imports.isEmpty()) return false
+        val keyword = text.toString().lastIndexOf("import", imports.first().range.startOffset)
+        val start = lineStart(text, if (keyword >= 0) keyword else imports.first().range.startOffset)
+        var end = lineEnd(text, imports.last().range.endOffset)
+        var next = end
+        while (next < text.length && text[next].isWhitespace()) next++
+        if (next < text.length && text[next] == ')') end = lineEnd(text, next)
+        return offset in start..end
+    }
+
     /** The name an import is used by in the file: its alias, or the name of the package as its path tells it. */
     fun nameOf(import: GoImport): String? = when (import.alias) {
         null -> GoSemanticColors.packageName(import.path)

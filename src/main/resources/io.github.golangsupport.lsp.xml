@@ -22,6 +22,74 @@
         <lang.expressionTypeProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsExpressionTypeProvider"/>
         <customUsageSearcher implementation="io.github.golangsupport.lsp.GoplsUsageSearcher"/>
         <definitionsScopedSearch implementation="io.github.golangsupport.lsp.GoplsImplementationSearch"/>
+        <!-- the actions of gopls for the caret, an item of Alt+Enter each: an item is a class, so there are as many of them as there are classes -->
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention0</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention1</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention2</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention3</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention4</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention5</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention6</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention7</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention8</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsIntention9</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsIntention</descriptionDirectoryName>
+        </intentionAction>
+        <!-- Alt+Enter | Optimize Imports on the imports: gopls has it as an action of the file, which the platform does not show there -->
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsOrganizeImportsIntention</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsOrganizeImportsIntention</descriptionDirectoryName>
+        </intentionAction>
         <!-- Alt+Enter | Fill All Fields: the code action of gopls by its own name, the braces written where they are missing -->
         <intentionAction>
             <language>Go</language>

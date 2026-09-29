@@ -34,6 +34,19 @@ class GoImportsTest {
         assertEquals("package main\n\nimport (\n\t\"fmt\"\n\n\t\"github.com/google/uuid\"\n)\n", imported("package main\n\nimport (\n\t\"github.com/google/uuid\"\n)\n", "fmt"))
     }
 
+    @Test fun whereTheImportsAre() {
+        fun inImports(code: String): Boolean = GoImports.isInImports(code.replace("|", ""), code.indexOf('|'))
+        assertTrue(inImports("package main\n\nimport (\n\t\"os\"\n\t\"so|rt\"\n)\n\nfunc main() {}\n"))
+        assertTrue(inImports("package main\n\nimport (\n\t\"os\"\n\t\"sort\"|\n)\n"))
+        assertTrue(inImports("package main\n\nimp|ort (\n\t\"os\"\n)\n"))
+        assertTrue(inImports("package main\n\nimport (\n\t\"os\"\n)|\n"))
+        assertTrue(inImports("package main\n\nimport \"o|s\"\nimport \"sort\"\n"))
+        assertTrue(inImports("package main\n\nimport \"os\"\nimport f \"so|rt\"\n"))
+        assertFalse(inImports("package ma|in\n\nimport \"os\"\n"))
+        assertFalse(inImports("package main\n\nimport (\n\t\"os\"\n)\n\nfunc ma|in() {}\n"))
+        assertFalse(inImports("package main\n\nfunc ma|in() {}\n"))
+    }
+
     @Test fun whereANameMayBeAPackage() {
         assertTrue(GoImports.isPackagePlace("\tc := htt", 6))
         assertTrue(GoImports.isPackagePlace("\treturn htt", 8))

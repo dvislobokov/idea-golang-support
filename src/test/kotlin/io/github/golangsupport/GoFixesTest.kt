@@ -88,6 +88,36 @@ class GoFixesTest {
         assertFalse("usePlaceholders" in options)
         assertEquals(true, options["staticcheck"])
         assertEquals(true, options["semanticTokens"])
+        // the last part of an import path is a package for gopls: the path is left a string, of one colour
+        assertEquals(mapOf("namespace" to false), options["semanticTokenTypes"])
+    }
+
+    @Test fun actionsOfGoplsInTheListOfAltEnter() {
+        // what gopls gives for a place of a function, seen with tools/gopls/probe.py
+        assertTrue(listOf("refactor.extract.variable", "refactor.inline.call", "refactor.rewrite.invertIf", "refactor.rewrite.changeQuote", "source.addTest", null).all(GoplsActionKinds::isIntention))
+        // pages of the browser
+        assertFalse(listOf("source.doc", "source.assembly", "source.splitPackage", "source.toggleCompilerOptDetails", "gopls.doc.features").any(GoplsActionKinds::isIntention))
+        // these have items of their own
+        assertFalse(listOf("source.organizeImports", "refactor.rewrite.fillStruct").any(GoplsActionKinds::isIntention))
+    }
+
+    @Test fun anActionOfGoplsIsNotShownNextToTheSameOfThePlugin() {
+        val tags = GoplsActionKinds.Offered("io.github.golangsupport.lang.GoAddStructTagsIntention", "Add struct tags...")
+        val test = GoplsActionKinds.Offered("io.github.golangsupport.lang.GoGenerateTestIntention", "Generate test")
+        val handle = GoplsActionKinds.Offered("io.github.golangsupport.lang.GoHandleErrorIntention", "Handle error")
+        // by the kind, whatever the names
+        assertTrue(GoplsActionKinds.isOffered("refactor.rewrite.addTags", "Add struct tags", listOf(tags)))
+        assertTrue(GoplsActionKinds.isOffered("source.addTest", "Add test for total", listOf(test)))
+        // by the name, whatever the kind: for the pairs nobody has thought of
+        assertTrue(GoplsActionKinds.isOffered("refactor.rewrite.somethingNew", "handle error", listOf(handle)))
+        assertTrue(GoplsActionKinds.isOffered(null, "Add Struct Tags…", listOf(tags)))
+        // where the intention of the plugin is not offered, the action of gopls is the only one
+        assertFalse(GoplsActionKinds.isOffered("refactor.rewrite.addTags", "Add struct tags", listOf(test, handle)))
+        assertFalse(GoplsActionKinds.isOffered("source.addTest", "Add test for total", emptyList()))
+        // what the plugin has nothing of
+        assertFalse(GoplsActionKinds.isOffered("refactor.rewrite.removeTags", "Remove struct tags", listOf(tags, test)))
+        assertFalse(GoplsActionKinds.isOffered("refactor.extract.variable", "Extract variable", listOf(tags, test, handle)))
+        assertFalse(GoplsActionKinds.isOffered("refactor.inline.call", null, listOf(tags)))
     }
 
     @Test fun actionsOfGoplsWorthShowing() {

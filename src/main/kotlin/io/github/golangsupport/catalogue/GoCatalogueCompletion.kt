@@ -19,6 +19,7 @@ import io.github.golangsupport.lang.GoImports
 import io.github.golangsupport.lang.GoPrefixMatcher
 import io.github.golangsupport.lang.GoStructLiterals
 import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoSettings
 import javax.swing.Icon
 
@@ -65,8 +66,10 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         val text = parameters.editor.document.immutableCharSequence
         val typed = GoCompletionOrder.typed(text, parameters.offset)
         if (typed.length < MIN_TYPED || !GoImports.isPackagePlace(text, parameters.offset - typed.length)) return
-        val index = GoCatalogueService.getInstance(file.project).index
+        val index = GoCatalogueService.getInstance(file.project).current()
         if (index.size == 0) return
+        // the names of the package of the file are the business of the language server, and `internal` is not for everyone
+        val own = file.virtualFile?.parent?.let { GoModulesService.getInstance(file.project).moduleOf(it)?.importPath(it) }
         val imports = GoDeclarations.scan(text).imports
         val matcher = GoPrefixMatcher(typed)
         val names = result.withPrefixMatcher(matcher)
@@ -75,7 +78,8 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         // with the Russian layout on the dot is a letter, and `аьеюЗкште` is one word: `fmt.Print`
         val qualifier = matcher.latin.substringBeforeLast('.', "").takeIf { it.isNotEmpty() }
         val wanted = matcher.latin.substringAfterLast('.')
-        index.find(wanted, LIMIT, imports.mapTo(HashSet()) { it.path }, qualifier).forEachIndexed { rank, entry ->
+        val found = index.find(wanted, LIMIT, imports.mapTo(HashSet()) { it.path }, qualifier) { it.importPath != own && GoCatalogueScanner.isVisible(it.importPath, own) }
+        found.forEachIndexed { rank, entry ->
             val insertion = GoCatalogueInsertion.of(entry, imports) ?: return@forEachIndexed
             val item = LookupElementBuilder.create(entry, entry.symbol.name)
                 .withLookupString(entry.pack.name + "." + entry.symbol.name)

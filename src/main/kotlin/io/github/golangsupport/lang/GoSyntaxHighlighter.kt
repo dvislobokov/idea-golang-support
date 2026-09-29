@@ -149,12 +149,16 @@ class GoIdentifierAnnotator : Annotator {
             GoDeclarationKind.CONST -> GoSyntaxHighlighter.CONSTANT
             GoDeclarationKind.VAR -> null
         }
-        val afterDot = PsiTreeUtil.skipWhitespacesAndCommentsBackward(element).elementType == GoTokenTypes.DOT
+        val previous = PsiTreeUtil.skipWhitespacesAndCommentsBackward(element)
+        val afterDot = previous.elementType == GoTokenTypes.DOT
         val next = PsiTreeUtil.skipWhitespacesAndCommentsForward(element).elementType
         val isCall = next == GoTokenTypes.LPAREN
         val text = element.text
         return when {
-            // `fmt.` where the file imports something named fmt: a package; a variable that shadows it gopls repaints
+            // the names of packages are coloured here and not by gopls, which is told not to (GoplsDefaults): the clause of the file,
+            // the name an import is given, and `fmt.` where the file imports something named fmt; a variable that shadows it gopls repaints
+            previous?.text == "package" -> GoSyntaxHighlighter.PACKAGE
+            (next == GoTokenTypes.STRING || next == GoTokenTypes.RAW_STRING) && isImportAlias(element) -> GoSyntaxHighlighter.PACKAGE
             !afterDot && next == GoTokenTypes.DOT && text in importedNames(element) -> GoSyntaxHighlighter.PACKAGE
             !afterDot && text in GoTokenTypes.BUILTIN_TYPES -> GoSyntaxHighlighter.BUILTIN_TYPE
             !afterDot && text in GoTokenTypes.BUILTIN_CONSTANTS -> GoSyntaxHighlighter.BUILTIN_CONSTANT
@@ -164,6 +168,10 @@ class GoIdentifierAnnotator : Annotator {
         }
     }
 }
+
+/** `f` of `import f "fmt"`: the import begins with it. */
+private fun isImportAlias(element: PsiElement): Boolean =
+    GoStructure.of(element.containingFile).imports.any { it.alias != null && it.range.startOffset == element.textRange.startOffset }
 
 private fun importedNames(element: PsiElement): Set<String> =
     GoStructure.of(element.containingFile).imports.mapTo(HashSet()) { it.alias?.takeIf { alias -> alias != "_" && alias != "." } ?: GoSemanticColors.packageName(it.path) }

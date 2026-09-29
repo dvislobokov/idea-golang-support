@@ -2,6 +2,7 @@ package io.github.golangsupport.lsp
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.codeInsight.intention.LowPriorityAction
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.command.WriteCommandAction
@@ -30,6 +31,33 @@ object GoplsActionKinds {
     private val BROWSING = listOf("source.doc", "source.assembly", "source.freesymbols", "source.toggleCompilerOptDetails", "source.splitPackage", "gopls.doc")
 
     fun isEditing(kind: String?): Boolean = kind == null || BROWSING.none { kind == it || kind.startsWith("$it.") }
+
+    /** These have items of their own, which do more: the imports are put in order on the imports only, a struct is filled with its imports. */
+    private val OWN = listOf("source.organizeImports", "refactor.rewrite.fillStruct")
+
+    /** What is shown as an item of the list of Alt+Enter ([GoplsIntention]). */
+    fun isIntention(kind: String?): Boolean = isEditing(kind) && (kind == null || OWN.none { kind == it || kind.startsWith("$it.") })
+
+    /** An intention of the plugin that is offered at the place: its class and its name in the list. */
+    class Offered(val className: String, val text: String)
+
+    /** The actions of gopls that do what an intention of the plugin does under another name. */
+    private val SAME_AS = mapOf("source.addTest" to "GoGenerateTestIntention", "refactor.rewrite.addTags" to "GoAddStructTagsIntention")
+
+    /**
+     * Whether the list has the action of gopls already, as an intention of the plugin: by the kind of the action, or by its name,
+     * `Add struct tags` being `Add struct tags...` (reported by the user: both were in the list). The one of the plugin stays: it is
+     * the one with the choices. Where it is not offered, the one of gopls is.
+     */
+    fun isOffered(kind: String?, title: String?, offered: Collection<Offered>): Boolean {
+        val same = SAME_AS.entries.firstOrNull { (k, _) -> kind == k || kind?.startsWith("$k.") == true }?.value
+        if (same != null && offered.any { it.className.substringAfterLast('.') == same }) return true
+        val name = name(title)
+        return name.isNotEmpty() && offered.any { name(it.text) == name }
+    }
+
+    /** A name without what differs by habit: the case of the letters, the dots of a dialog to come. */
+    private fun name(text: String?): String = text.orEmpty().trim().trimEnd('.', '…', ' ').lowercase()
 }
 
 /**
@@ -45,7 +73,8 @@ object GoplsEdits {
         if (prepared == null) return HintManager.getInstance().showInformationHint(editor, "gopls has not given an edit for \"${action.title}\"")
         val before = editor.document.immutableCharSequence
         prepared.invoke(project, editor, file)
-        importWritten(project, editor, client, file, before)
+        // what has put the imports in order has nothing to import
+        if (action.kind?.startsWith(ORGANIZE) != true) importWritten(project, editor, client, file, before)
     }
 
     /**
@@ -94,7 +123,7 @@ object GoplsEdits {
         return emptyList()
     }
 
-    private const val ORGANIZE = "source.organizeImports"
+    const val ORGANIZE = "source.organizeImports"
     private const val TIMEOUT_MS = 3_000
     private const val ATTEMPTS = 3
     private const val RETRY_MS = 400L
@@ -110,7 +139,7 @@ object GoplsEdits {
  * So the question is asked here, without a filter on the kind; applying an action is left to the platform (`LspIntentionAction`
  * resolves the edit, applies it and runs the command).
  */
-class GoplsActionsIntention : IntentionAction {
+class GoplsActionsIntention : IntentionAction, LowPriorityAction {
     override fun getText(): String = "Refactorings and actions of gopls..."
     override fun getFamilyName(): String = "gopls"
     override fun startInWriteAction(): Boolean = false

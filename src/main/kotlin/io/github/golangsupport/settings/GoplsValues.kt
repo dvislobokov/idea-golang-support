@@ -22,6 +22,10 @@ object GoplsDefaults {
         put("codelenses", mapOf("generate" to true, "regenerate_cgo" to true, "tidy" to true, "upgrade_dependency" to true, "vendor" to true, "vulncheck" to true))
         // No `usePlaceholders`: with it a completed call comes as `os.Open(name string)`, the signature as text to type over (seen live).
         put("semanticTokens", true)
+        // Not the packages: gopls marks the last part of an import path as one, and a path in two colours reads worse than a string
+        // (asked by the user); a token has no place for the plugin to tell an import from a call. The names of packages in the code
+        // are coloured by the annotator of the plugin.
+        put("semanticTokenTypes", mapOf("namespace" to false))
         if (settings.goplsInlayHints) put("hints", HINTS.associateWith { true })
     }
 
