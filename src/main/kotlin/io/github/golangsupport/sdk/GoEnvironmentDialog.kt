@@ -106,7 +106,8 @@ class GoToolchainCheckActivity : ProjectActivity {
 
     private fun offerMissingTools(project: Project) {
         if (PropertiesComponent.getInstance().getBoolean(DISMISSED_KEY)) return
-        val missing = GoTool.entries.filter { it.find() == null }
+        // govulncheck serves one button of the Go Dependencies window: offered there, not at every start
+        val missing = GoTool.entries.filter { it != GoTool.GOVULNCHECK && it.find() == null }
         if (missing.isEmpty()) return
         val names = missing.joinToString(", ") { "<code>${it.command}</code>" }
         NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)

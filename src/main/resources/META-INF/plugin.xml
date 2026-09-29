@@ -109,6 +109,10 @@
         <lang.syntaxHighlighterFactory language="GoModule" implementationClass="io.github.golangsupport.mod.GoModSyntaxHighlighterFactory"/>
         <lang.commenter language="GoModule" implementationClass="io.github.golangsupport.mod.GoModCommenter"/>
         <lang.foldingBuilder language="GoModule" implementationClass="io.github.golangsupport.mod.GoModFoldingBuilder"/>
+        <!-- directives, the module paths of the cache, versions from the cache and the proxy -->
+        <completion.contributor language="GoModule" implementationClass="io.github.golangsupport.mod.GoModCompletionContributor"/>
+        <!-- the requirements of a module with their updates and vulnerabilities -->
+        <toolWindow id="Go Dependencies" anchor="bottom" icon="/icons/goMod.svg" factoryClass="io.github.golangsupport.mod.GoDependenciesToolWindowFactory" doNotActivateOnStart="true"/>
         <!-- go.mod saved with other requirements than before: the banner with `go mod tidy` -->
         <editorNotificationProvider implementation="io.github.golangsupport.mod.GoModNotificationProvider"/>
 
@@ -174,6 +178,9 @@
                 <action id="Go.ModDownload" class="io.github.golangsupport.build.GoModDownloadAction" text="Download" icon="AllIcons.Actions.Download"
                         description="go mod download: the sources of the dependencies appear in the project tree"/>
                 <action id="Go.ModVendor" class="io.github.golangsupport.build.GoModVendorAction" text="Vendor" description="go mod vendor"/>
+                <separator/>
+                <action id="Go.Dependencies" class="io.github.golangsupport.mod.GoDependenciesAction" text="Dependencies..." icon="AllIcons.Nodes.PpLibFolder"
+                        description="The requirements of the module: newer versions, upgrades, govulncheck"/>
             </group>
             <action id="Go.NewModule" class="io.github.golangsupport.templates.NewGoModuleAction" text="New Go Module..." icon="/icons/goMod.svg"
                     description="go mod init in the selected directory"/>

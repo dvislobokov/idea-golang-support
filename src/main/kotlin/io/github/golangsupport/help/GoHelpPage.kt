@@ -74,7 +74,8 @@ object GoHelpPage {
             Row("gopls", "Menu <b>Go | gopls</b>", "Add Import, Browse Documentation / Assembly / Free Symbols, Toggle Compiler Optimization Details, Check for Dependency Upgrades, Upgrade All, Run govulncheck, Show Statistics, Show Log, Open Debug Pages, Restart"),
             Row("Code lenses", "In <code>go.mod</code> and above <code>//go:generate</code>", "Tidy, vendor, vulncheck, check for upgrades, upgrade; run go generate"),
             Row("golangci-lint", "Findings in the editor after save", "They stay while typing, until the next save; with fixes: handle error, ignore explicitly, <code>//nolint</code>; the config of the project is used"),
-            Row("go.mod", "Banner after a save that changed the requirements", "Run go mod tidy / Download; the blocks of go.mod fold"),
+            Row("go.mod", "Banner after a save that changed the requirements", "Run go mod tidy / Download; the blocks of go.mod fold; completion of directives, module paths (from the module cache) and versions (cache and proxy)"),
+            Row("Dependencies", "Menu <b>Go | Modules | Dependencies</b>", "Every requirement with the newer version the proxy has; Upgrade, Tidy, govulncheck, a double click leads to go.mod"),
             Row("Settings", "Settings | Tools | Go", "Toolchain, language server (with a page for every setting of gopls), debugger, editor, code quality, tools with Install buttons"),
         )
         val bg = if (dark) "#1E1F22" else "#FFFFFF"

@@ -236,11 +236,12 @@ GoLand 2026.2 (июль 2026) — эталон. У GoLand свой полный 
 | Возможность | GoLand | Плагин | Статус |
 |---|---|---|---|
 | Подсветка go.mod / go.work, folding блоков (2025.3) | да | подсветка, commenter, folding блоков | ✅ |
-| Completion в go.mod (пути модулей, версии из proxy) | да | нет | ❌ |
+| Completion в go.mod (пути модулей, версии из proxy) | да | директивы, пути из module cache, версии из кэша и GOPROXY, версии go | ✅ |
 | Quick doc, навигация из go.mod | да | нет | ❌ |
 | Инспекции go.mod (неиспользуемые require, обновления) | да | линзы и диагностика gopls: tidy, upgrades, vulncheck | 🟡 |
 | Автоматическое `go mod tidy` / подсказка после правки | да (Sync) | баннер над go.mod после сохранения с другими require: Tidy / Download | ✅ |
-| Vulnerability checker (Package Checker) | да | govulncheck через gopls в go.mod | 🟡 |
+| Vulnerability checker (Package Checker) | да | govulncheck через gopls в go.mod и кнопкой в окне Go Dependencies (уязвимые модули помечены) | 🟡 |
+| Окно зависимостей с обновлениями и upgrade | да (Dependencies tool window) | окно Go Dependencies: `go list -m -u`, Upgrade Selected / All, Tidy, govulncheck | ✅ |
 | Dependency diagram | да | нет | ❌ |
 | Vendoring, GOPATH-режим | да | vendor (команда); GOPATH-режим ❌ | 🟡 |
 | Workspaces (go.work): узел, Add module to workspace | да | разбор `use`, gopls открывает; UI ❌ | 🟡 |

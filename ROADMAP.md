@@ -47,7 +47,12 @@
 - [x] Folding блоков `require (…)`, `replace (…)` и остальных в go.mod / go.work (`GoModFoldingBuilder`) — робот
 - [~] Узел Dependencies в Project view с исходниками из module cache (в playground нет зависимостей — не проверено)
 - [x] Меню Go → Modules: Tidy, Download, Vendor
-- [ ] Окно зависимостей: обновления (`go list -m -u all`), `go get`, уязвимости (`govulncheck`)
+- [x] Окно **Go Dependencies** (Go | Modules | Dependencies…): требования модуля из `go list -m -u -json all` (`GoModuleList`, юнит-тест) — версия, новее, direct / indirect,
+  замена; Upgrade Selected / Upgrade All (`go get path@version`), Tidy, Check Vulnerabilities (`govulncheck ./...`, инструмент предлагается поставить; модули из `Found in:` помечаются),
+  Open go.mod, двойной клик — строка require — робот (uuid v1.6.0, «all up to date»; upgrade и govulncheck вживую не проверены: нечего обновлять, инструмент не стоит)
+- [x] Completion в go.mod / go.work (`GoModCompletionContributor`, контексты — юнит-тест): директивы в начале строки; после `require` / `replace` / `exclude` / `tool` (и в их блоках) —
+  пути модулей из `GOMODCACHE/cache/download`; после пути — версии из `@v/list` кэша и с GOPROXY (один запрос на модуль, таймаут 3 с, только при явном вызове);
+  после `go` / `toolchain` — установленная версия — робот (пути `github.com/google/…`, версии uuid v1.0.0…v1.6.0, `go1.24.7`)
 - [x] Баннер над go.mod после сохранения с другими require / replace / exclude: «Run go mod tidy | Download | Dismiss» (`GoModSaveListener`
   сравнивает текст с диском до записи, `GoModNotificationProvider`) — робот: баннер после добавления require, tidy из баннера убрал строку и баннер
 

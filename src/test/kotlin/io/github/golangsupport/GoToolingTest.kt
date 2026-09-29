@@ -4,8 +4,12 @@ import io.github.golangsupport.build.GoBuildOutputParser
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.lint.GoLintIssue
 import io.github.golangsupport.lint.GoLintOutput
+import io.github.golangsupport.mod.GoModCompletion
+import io.github.golangsupport.mod.GoModContext
 import io.github.golangsupport.mod.GoModDependencies
 import io.github.golangsupport.mod.GoModFile
+import io.github.golangsupport.mod.GoModSources
+import io.github.golangsupport.mod.GoModuleList
 import io.github.golangsupport.run.DelveGoVersion
 import io.github.golangsupport.run.GoEvaluate
 import io.github.golangsupport.run.GoOutputLocations
@@ -177,6 +181,57 @@ class GoToolingTest {
         assertEquals(DelveGoVersion.Kind.GO_TOO_NEW, new.kind)
         assertTrue(new.explain(null).contains("up to 1.24:"))
         assertNull(DelveGoVersion.find("could not launch process: fork/exec"))
+    }
+
+    @Test fun moduleListAndVulnerabilities() {
+        val modules = GoModuleList.parse(
+            """
+            {
+            	"Path": "example.com/app",
+            	"Main": true,
+            	"Dir": "C:\\app"
+            }
+            {
+            	"Path": "github.com/google/uuid",
+            	"Version": "v1.5.0",
+            	"Update": {"Path": "github.com/google/uuid", "Version": "v1.6.0"},
+            	"Dir": "C:\\mod\\uuid@v1.5.0"
+            }
+            {
+            	"Path": "golang.org/x/text",
+            	"Version": "v0.20.0",
+            	"Indirect": true,
+            	"Replace": {"Path": "../text", "Dir": "C:\\text"}
+            }
+            """.trimIndent(),
+        )
+        assertEquals(listOf(true, false, false), modules.map { it.isMain })
+        assertEquals("github.com/google/uuid@v1.6.0", modules[1].updateTarget())
+        assertNull(modules[2].update)
+        assertTrue(modules[2].indirect)
+        assertEquals("../text", modules[2].replacedBy)
+        val report = "Vulnerability #1: GO-2024-1234\n    Module: golang.org/x/text\n      Found in: golang.org/x/text@v0.3.7\n      Fixed in: golang.org/x/text@v0.3.8\n"
+        assertEquals(mapOf("golang.org/x/text" to "v0.3.7"), GoModuleList.vulnerableModules(report))
+    }
+
+    @Test fun goModCompletionContexts() {
+        val mod = "module example.com/app\n\ngo 1.24\n\nrequire github.com/google/uuid v1.6.0\n\nrequire (\n\tgolang.org/x/text v0.20.0\n\t\n)\n\nre"
+        assertTrue(GoModCompletion.contextAt(mod, mod.length) is GoModContext.Directive)
+        val path = GoModCompletion.contextAt(mod, mod.indexOf("github.com/google/uuid") + 6) as GoModContext.ModulePath
+        assertEquals("require", path.directive)
+        assertEquals("github", path.typed)
+        val version = GoModCompletion.contextAt(mod, mod.indexOf("v1.6.0") + 2) as GoModContext.Version
+        assertEquals("github.com/google/uuid", version.modulePath)
+        val inBlock = GoModCompletion.contextAt(mod, mod.indexOf("\t\n)") + 1) as GoModContext.ModulePath
+        assertEquals("require", inBlock.directive)
+        assertEquals("", inBlock.typed)
+        val blockVersion = GoModCompletion.contextAt(mod, mod.indexOf("v0.20.0") + 1) as GoModContext.Version
+        assertEquals("golang.org/x/text", blockVersion.modulePath)
+        assertTrue(GoModCompletion.contextAt(mod, mod.indexOf("1.24") + 1) is GoModContext.GoVersion)
+        assertNull(GoModCompletion.contextAt("module example.com/app // re", 28))
+        assertEquals("github.com/!big!corp/lib", GoModSources.escape("github.com/BigCorp/lib"))
+        assertEquals("github.com/BigCorp/lib", GoModSources.unescape("github.com/!big!corp/lib"))
+        assertEquals(listOf("v0.9.0", "v1.0.0-rc1", "v1.0.0", "v1.10.0"), listOf("v1.10.0", "v1.0.0", "v0.9.0", "v1.0.0-rc1").sortedWith(GoModSources::compareVersions))
     }
 
     @Test fun goModDependenciesChange() {

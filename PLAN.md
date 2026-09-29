@@ -100,9 +100,9 @@
 - [x] (2026-09-29, робот; без «где создана» и меток) **Горутины в отладчике.** Отдельная вкладка «Goroutines» в Debug window: группировка по функции верхнего фрейма и состоянию (`Running`, `waiting`, `chan receive`…),
   фильтр пользовательских (не `runtime.*`), поиск, «где создана» (delve отдаёт в имени `[Go N] fn (state)`; для created-by нужен `stackTrace` каждой — лениво),
   двойной клик — переключить стек. Как: `GoDebugFrames` + `XDebugSessionTab` extra content. 2–3 дня.
-- [ ] **Окно зависимостей.** `go list -m -u -json all` → таблица модуль / версия / доступное обновление / прямая-косвенная; кнопки Upgrade (`go get path@ver`), Tidy,
+- [x] (2026-09-29, робот) **Окно зависимостей.** `go list -m -u -json all` → таблица модуль / версия / доступное обновление / прямая-косвенная; кнопки Upgrade (`go get path@ver`), Tidy,
   govulncheck (gopls `vulncheck` уже есть — результат показывать в таблице пометкой). Как: `mod/GoModuleUpdates` (парсер + тест), tool window или вкладка в узле Dependencies. 2–3 дня.
-- [ ] **Completion в go.mod.** Пути модулей — из `GOMODCACHE/cache/download` и `go list -m all`; версии — `GOPROXY/<path>/@v/list` (сеть, кэш на сессию); версии `go`
+- [x] (2026-09-29, робот) **Completion в go.mod.** Пути модулей — из `GOMODCACHE/cache/download` и `go list -m all`; версии — `GOPROXY/<path>/@v/list` (сеть, кэш на сессию); версии `go`
   — по установленному toolchain. Как: `CompletionContributor` для `GoModLanguage` (лексер даёт DIRECTIVE/WORD/VERSION). 2 дня.
 - [ ] **Remote debug и режимы delve.** Конфигурация «Go Remote»: host:port уже запущенного `dlv dap --listen` (пропустить `DelveProcess`, только сокет; `launch`/`attach`
   как сейчас) — день; «Go Exec» (`mode: exec`, путь к бинарнику, без сборки) — полдня; core dump (`mode: core`, `coreFilePath`) — полдня. Как: `GoRunConfigurationOptions.kind`,
