@@ -99,8 +99,24 @@ class GoToolingTest {
         val failed = event("fail", "TestA/sub", ""","Elapsed":0.25""")
         assertTrue(failed[0].contains("testFailed") && failed[1].contains("testFinished") && failed[1].contains("duration='250'"))
         assertTrue(event("skip", "TestB").any { it.contains("testIgnored") })
-        // the package has a failed test: its own failure adds nothing
-        assertEquals(1, event("fail").size)
+        // a benchmark gets no pass of its own (seen live): it is finished, passed, when the package ends; the package has a failed test, so its own failure adds nothing
+        event("run", "BenchmarkTotal")
+        val packageDone = event("fail")
+        assertTrue(packageDone.any { it.contains("testFailed name='BenchmarkTotal'") })
+        assertTrue(packageDone.any { it.contains("testFinished name='BenchmarkTotal'") })
+        assertTrue(packageDone.last().contains("testSuiteFinished"))
+        // TestA of this synthetic stream never passed either: the package closes it too, and nothing else is said about the package
+        assertTrue(packageDone.any { it.contains("testFinished name='TestA'") })
+        assertFalse(packageDone.any { it.contains("(package)") })
+    }
+
+    @Test fun benchmarkPassesWithItsPackage() {
+        val events = GoTestEvents()
+        events.convert("""{"Action":"start","Package":"example.com/p"}""")
+        events.convert("""{"Action":"run","Package":"example.com/p","Test":"BenchmarkTotal"}""")
+        val done = events.convert("""{"Action":"pass","Package":"example.com/p"}""")!!
+        assertTrue(done.any { it.contains("testFinished name='BenchmarkTotal'") })
+        assertFalse(done.any { it.contains("testFailed") })
     }
 
     @Test fun packageThatDoesNotCompile() {

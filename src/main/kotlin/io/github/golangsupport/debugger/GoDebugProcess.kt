@@ -101,8 +101,12 @@ class GoDebugProcess(
             capabilities = answer
             connection.request(if (start.attach) "attach" else "launch", DapConnection.GSON.toJsonTree(start.arguments))
         }.whenComplete { _, error ->
-            if (error == null) started = true
-            else if (!shutdown.get()) startFailed(errorText(error))
+            if (error == null) {
+                started = true
+                // delve sends no `process` event for an attach (seen live): the process is known from the request, when it is on this machine
+                val pid = (start.arguments["processId"] as? Number)?.toLong()
+                if (start.attach && pid != null && adapter !is RemoteDelve) RunningGoProcesses.getInstance(session.project).started("Debug: ${session.sessionName}", pid, handler)
+            } else if (!shutdown.get()) startFailed(errorText(error))
         }
     }
 

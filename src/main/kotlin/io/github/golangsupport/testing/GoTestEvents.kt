@@ -45,6 +45,9 @@ class GoTestEvents(
 ) {
     private val startedPackages = LinkedHashSet<String>()
     private val startedTests = HashSet<String>()
+
+    /** Started and not finished yet, by package: a benchmark gets no `pass` of its own (seen live), the package ends it. */
+    private val openTests = HashMap<String, LinkedHashMap<String, String>>()
     private val failedPackages = HashSet<String>()
     private val packageOutput = HashMap<String, StringBuilder>()
 
@@ -70,7 +73,9 @@ class GoTestEvents(
             if (!startedTests.add(id)) return
             val parent = if ('/' in test) "$packagePath|${test.substringBeforeLast('/')}" else packagePath
             result += ServiceMessageBuilder.testStarted(test.substringAfterLast('/')).id(id, parent).hint(locationHint(packagePath, test)).toString()
+            openTests.getOrPut(packagePath, ::LinkedHashMap)[id] = test.substringAfterLast('/')
         }
+        if (action == "pass" || action == "fail" || action == "skip" || action == "bench") openTests[packagePath]?.remove(id)
         when (action) {
             "run" -> ensureStarted()
             "output" -> {
@@ -107,6 +112,11 @@ class GoTestEvents(
                 packageOutput.getOrPut(packagePath, ::StringBuilder).append(output)
             }
             "pass", "fail", "skip", "build-fail" -> {
+                // what is still open when the package ends (a benchmark, a test the package died in) ends with it: passed with the package, failed otherwise
+                openTests.remove(packagePath)?.forEach { (id, name) ->
+                    if (action != "pass") result += ServiceMessageBuilder.testFailed(name).addAttribute("nodeId", id).addAttribute("message", "").toString()
+                    result += ServiceMessageBuilder.testFinished(name).addAttribute("nodeId", id).toString()
+                }
                 // a package that fails without a failed test did not compile, or died in TestMain or in a panic: what it printed is the reason
                 if ((action == "fail" || action == "build-fail") && packagePath !in failedPackages) {
                     val id = "$packagePath|$PACKAGE_FAILURE"

@@ -164,12 +164,14 @@ object GoplsServerArguments {
 private class LoggingNotificationsHandler(private val delegate: LspServerNotificationsHandler, private val log: GoplsLogService) : LspServerNotificationsHandler by delegate {
     override fun logMessage(params: MessageParams) {
         write(params)
-        delegate.logMessage(params)
+        // the platform shows a log message of the Error kind as a balloon (seen live): the ones about a half-typed go.mod stay in the log
+        if (!GoplsLogLines.isTypingNoise(params.message)) delegate.logMessage(params)
     }
 
     override fun showMessage(params: MessageParams) {
         write(params, "showMessage: ")
-        delegate.showMessage(params)
+        // a go.mod that is being typed fails every code lens of gopls, one balloon each (seen live): the log keeps them, the user is not told five times
+        if (!GoplsLogLines.isTypingNoise(params.message)) delegate.showMessage(params)
     }
 
     private fun write(params: MessageParams, prefix: String = "") {

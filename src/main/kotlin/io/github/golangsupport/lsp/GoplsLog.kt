@@ -83,6 +83,11 @@ object GoplsLogLines {
     /** The messages of gopls start with its own date and time; the log has a time of its own. */
     fun withoutStamp(message: String): String = STAMP.replace(message, "")
 
+    private val TYPING_NOISE = Regex("""go\.(mod|work):\d+: |code lens \S+ failed|failed to compute document links""")
+
+    /** What gopls says while a go.mod is half typed: every code lens fails with the parse error, one message each; nothing the user can act on. */
+    fun isTypingNoise(message: String): Boolean = TYPING_NOISE.containsMatchIn(message)
+
     /** The version in `serverInfo` of gopls is its whole build info as JSON (seen live): `v0.23.0` is `Main.Version` in it. */
     fun version(serverInfoVersion: String?): String {
         val raw = serverInfoVersion.orEmpty()

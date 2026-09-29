@@ -38,6 +38,13 @@ class GoplsCommandsTest {
         assertFalse(GoplsCommandArguments.generate(listOf(JsonParser.parseString("""{"Dir": "file:///C:/p/gen"}""")))!!.recursive)
     }
 
+    @Test fun typingNoise() {
+        assertTrue(GoplsLogLines.isTypingNoise("2026/09/29 05:32:12 code lens tidy failed: C:\\app\\go.mod:6: unknown directive: quire"))
+        assertTrue(GoplsLogLines.isTypingNoise("failed to compute document links: C:\\app\\go.mod:6: unknown directive: quire\tURI=file:///C:/app/go.mod"))
+        assertFalse(GoplsLogLines.isTypingNoise("Found 0 actionable vulnerabilities and 45 standard library vulnerabilities affecting your dependencies"))
+        assertFalse(GoplsLogLines.isTypingNoise("gopls has exited with code 2"))
+    }
+
     @Test fun failureOfACommand() {
         val server = ResponseErrorException(ResponseError(-32603, "err: exit status 1: go: module x not found", null))
         assertEquals("err: exit status 1: go: module x not found", GoplsCommandArguments.failure(RuntimeException("wrapped", server)))
