@@ -4,7 +4,9 @@ import io.github.golangsupport.build.GoBuildOutputParser
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.lint.GoLintIssue
 import io.github.golangsupport.lint.GoLintOutput
+import io.github.golangsupport.mod.GoModDependencies
 import io.github.golangsupport.mod.GoModFile
+import io.github.golangsupport.run.DelveGoVersion
 import io.github.golangsupport.run.GoEvaluate
 import io.github.golangsupport.run.GoOutputLocations
 import io.github.golangsupport.run.DlvDap
@@ -164,6 +166,25 @@ class GoToolingTest {
         assertTrue(paths("nothing here: go:12").isEmpty())
         val location = GoOutputLocations.find("    order_test.go:39: x").single()
         assertEquals("order_test.go:39", "    order_test.go:39: x".substring(location.start, location.end))
+    }
+
+    @Test fun delveAndGoOutOfStep() {
+        val old = DelveGoVersion.find("Version of Go is too old for this version of Delve (minimum supported version 1.23, suppress this error with --check-go-version=false)")!!
+        assertEquals(DelveGoVersion.Kind.GO_TOO_OLD, old.kind)
+        assertEquals("1.23", old.limit)
+        assertTrue(old.explain("1.22.5").startsWith("This delve needs Go 1.23 or newer, and Go 1.22.5 is installed"))
+        val new = DelveGoVersion.find("Version of Go is too new for this version of Delve (maximum supported version 1.24, suppress this error with --check-go-version=false)")!!
+        assertEquals(DelveGoVersion.Kind.GO_TOO_NEW, new.kind)
+        assertTrue(new.explain(null).contains("up to 1.24:"))
+        assertNull(DelveGoVersion.find("could not launch process: fork/exec"))
+    }
+
+    @Test fun goModDependenciesChange() {
+        val mod = "module example.com/app\n\ngo 1.24\n\nrequire github.com/google/uuid v1.6.0\n"
+        assertFalse(GoModDependencies.changed(mod, "// a comment\n$mod\n"))
+        assertTrue(GoModDependencies.changed(mod, mod + "require golang.org/x/sync v0.10.0\n"))
+        assertTrue(GoModDependencies.changed(mod, mod.replace("v1.6.0", "v1.5.0")))
+        assertTrue(GoModDependencies.changed(mod, mod + "replace github.com/google/uuid => ../uuid\n"))
     }
 
     @Test fun functionCallsAreEvaluatedWithCall() {

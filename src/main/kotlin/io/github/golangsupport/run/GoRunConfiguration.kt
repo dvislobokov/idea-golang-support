@@ -70,8 +70,20 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
     /** `-bench` with the pattern instead of `-run`. */
     var benchmark by property(false)
 
+    /** `-fuzz` with the pattern: fuzzing, which runs until it finds a failing input or is stopped (`-fuzztime` goes to the go tool arguments). */
+    var fuzz by property(false)
+
+    /** `go test` only: `-coverprofile`, shown in the editors and in the Go Tests window after the run. */
+    var coverage by property(false)
+
     /** Flags of the go command itself: `-race`, `-count=1`, `-ldflags=...`. */
     var goArguments by string()
+
+    /** `-race`: the race detector, for run and test alike. */
+    var race by property(false)
+
+    /** `go test` only: `-count=1`, the tests run instead of their cached result. */
+    var noTestCache by property(false)
     var programArguments by string()
     var workingDirectory by string()
     var environment by map<String, String>()
@@ -123,15 +135,20 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
         else -> packageDirectory()
     }
 
-    fun goArgumentList(): List<String> = GoSettings.getInstance().buildTagArguments() + ParametersListUtil.parse(options.goArguments.orEmpty())
+    fun goArgumentList(): List<String> = GoSettings.getInstance().buildTagArguments() + listOfNotNull("-race".takeIf { options.race }) +
+        listOfNotNull("-count=1".takeIf { options.noTestCache && options.command == GoCommand.TEST }) + ParametersListUtil.parse(options.goArguments.orEmpty())
 
-    /** [profileDirectory]: where `go test` writes the profile of [GoRunConfigurationOptions.profile], when the run records one. */
-    fun buildCommandLine(profileDirectory: File? = null): GeneralCommandLine {
+    /**
+     * [profileDirectory]: where `go test` writes the profile of [GoRunConfigurationOptions.profile], when the run records one;
+     * [coverageFile]: where it writes the coverage profile, when the run collects one.
+     */
+    fun buildCommandLine(profileDirectory: File? = null, coverageFile: File? = null): GeneralCommandLine {
         val programArguments = ParametersListUtil.parse(options.programArguments.orEmpty())
         val profile = profileDirectory?.let { GoProfiles.arguments(options.profile, it) }.orEmpty()
+        val coverage = coverageFile?.let { listOf("-coverprofile=${it.path}") }.orEmpty()
         val arguments = when (options.command) {
             GoCommand.RUN -> listOf("run") + goArgumentList() + packageArgument() + programArguments
-            GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + GoSettings.getInstance().testArgumentList() + testSelection() + profile + packageArgument() +
+            GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + GoSettings.getInstance().testArgumentList() + testSelection() + profile + coverage + packageArgument() +
                 (if (programArguments.isEmpty()) emptyList() else listOf("-args") + programArguments)
         }
         return withEnvironment(GoCli.commandLine(goDirectory(), *arguments.toTypedArray()))
@@ -154,6 +171,7 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
         val pattern = options.testPattern?.takeIf { it.isNotBlank() }
         return when {
             options.benchmark -> listOf("-run", "^$", "-bench", pattern ?: ".")
+            options.fuzz -> listOf("-run", "^$", "-fuzz", pattern ?: ".")
             pattern != null -> listOf("-run", pattern)
             else -> emptyList()
         }

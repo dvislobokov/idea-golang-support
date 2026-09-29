@@ -32,7 +32,7 @@ class GoFormattingService : AsyncDocumentFormattingService() {
 
             override fun run() {
                 try {
-                    val commandLine = GoCli.toolCommandLine(executable.path, directory)
+                    val commandLine = commandLine(executable, directory)
                     val process = CapturingProcessHandler(commandLine).also { handler = it }
                     process.processInput.use { it.write(request.documentText.toByteArray(StandardCharsets.UTF_8)) }
                     val output = process.runProcess(30_000)
@@ -56,10 +56,17 @@ class GoFormattingService : AsyncDocumentFormattingService() {
         /** gofmt lies next to `go`: in `bin` of the toolchain. */
         fun formatter(): File? = when (GoSettings.getInstance().formatter) {
             GoFormatter.GOIMPORTS -> GoTool.GOIMPORTS.find()
+            GoFormatter.GOLANGCI_LINT_FMT -> GoTool.GOLANGCI_LINT.find()
             GoFormatter.GOFMT -> listOfNotNull(GoCli.findExecutable()?.let { File(it).parentFile }, GoEnvironment.quick().goRoot?.let { File(it, "bin") })
                 .map { File(it, GoCli.executableName("gofmt")) }.firstOrNull { it.isFile }
             GoFormatter.NONE -> null
         }
+
+        /** The text comes on stdin, the result on stdout, for every formatter; golangci-lint needs to be told so (`fmt --stdin`, v2). */
+        fun arguments(formatter: GoFormatter): List<String> = if (formatter == GoFormatter.GOLANGCI_LINT_FMT) listOf("fmt", "--stdin") else emptyList()
+
+        /** In the directory of the file: golangci-lint finds its `.golangci.yml` from there, goimports its module. */
+        fun commandLine(executable: File, directory: String?) = GoCli.toolCommandLine(executable.path, directory, *arguments(GoSettings.getInstance().formatter).toTypedArray())
 
         /** `<standard input>:12:3: expected ...` -> `12:3: expected ...`, the first of them. */
         fun errorMessage(stderr: String): String = stderr.lineSequence().firstOrNull { it.isNotBlank() }?.removePrefix("<standard input>:")?.trim() ?: "The formatter has failed"

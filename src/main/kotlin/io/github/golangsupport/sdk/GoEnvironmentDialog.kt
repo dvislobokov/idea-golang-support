@@ -1,6 +1,7 @@
 package io.github.golangsupport.sdk
 
 import com.intellij.ide.BrowserUtil
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -82,20 +83,41 @@ private class GoEnvironmentDialog(project: Project, private val report: GoEnviro
     override fun createActions(): Array<Action> = arrayOf(okAction)
 }
 
-/** A project with Go code and no `go` to be found: said once when the project opens, with the way out. */
+/**
+ * A project with Go code and no `go` to be found: said once when the project opens, with the way out. With `go` in place, the tools
+ * the plugin drives that are missing are named in one notification with one Install All, instead of one balloon per tool as each is needed.
+ */
 class GoToolchainCheckActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
+        val hasGo = ReadAction.compute<Boolean, RuntimeException> { !project.isDisposed && GoModulesService.getInstance(project).modules().isNotEmpty() }
         if (GoCli.findExecutable() != null) {
-            // while at it: warm up `go env`, so that the first thing that needs GOMODCACHE on EDT has it
+            // while at it: warm up `go env`, so that the first thing that needs GOMODCACHE on EDT has it (and the tools are looked for in GOBIN)
             GoEnvironment.get()
+            if (hasGo) offerMissingTools(project)
             return
         }
-        val hasGo = ReadAction.compute<Boolean, RuntimeException> { !project.isDisposed && GoModulesService.getInstance(project).modules().isNotEmpty() }
         if (!hasGo) return
         NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
             .createNotification("Go is not found", "The project has a go.mod, but there is no <code>go</code> on PATH. Build, run, tests and the language server need it.", NotificationType.WARNING)
             .addAction(NotificationAction.createSimple("Download Go") { BrowserUtil.browse("https://go.dev/dl/") })
             .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoSettingsConfigurable::class.java) })
             .notify(project)
+    }
+
+    private fun offerMissingTools(project: Project) {
+        if (PropertiesComponent.getInstance().getBoolean(DISMISSED_KEY)) return
+        val missing = GoTool.entries.filter { it.find() == null }
+        if (missing.isEmpty()) return
+        val names = missing.joinToString(", ") { "<code>${it.command}</code>" }
+        NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
+            .createNotification("Go tools are missing", "$names: ${missing.joinToString("; ") { it.purpose.substringBefore(':').lowercase() }}. Installed with <code>go install</code> into GOBIN.", NotificationType.INFORMATION)
+            .addAction(NotificationAction.createSimpleExpiring("Install All") { GoTool.installAll(project, missing) })
+            .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoSettingsConfigurable::class.java) })
+            .addAction(NotificationAction.createSimpleExpiring("Don't Ask Again") { PropertiesComponent.getInstance().setValue(DISMISSED_KEY, true) })
+            .notify(project)
+    }
+
+    private companion object {
+        const val DISMISSED_KEY = "io.github.golangsupport.tools.dismissed"
     }
 }

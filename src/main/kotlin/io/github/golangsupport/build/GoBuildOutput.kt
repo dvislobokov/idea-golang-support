@@ -48,6 +48,7 @@ class BuildViewCommandOutput(private val project: Project, private val title: St
     private var failed = false
     private var workDirectory: String? = null
     private var kind = MessageEvent.Kind.ERROR
+    private var collectsProblems = false
 
     private fun view(): BuildViewManager = project.service()
 
@@ -55,7 +56,10 @@ class BuildViewCommandOutput(private val project: Project, private val title: St
         if (project.isDisposed) return
         workDirectory = command.workDirectory?.path
         // what vet finds does not stop a build
-        kind = if (command.parametersList.list.firstOrNull() == "vet") MessageEvent.Kind.WARNING else MessageEvent.Kind.ERROR
+        val verb = command.parametersList.list.firstOrNull()
+        kind = if (verb == "vet") MessageEvent.Kind.WARNING else MessageEvent.Kind.ERROR
+        collectsProblems = verb == "build" || verb == "vet"
+        if (collectsProblems) GoBuildProblems.getInstance(project).clear(workDirectory)
         if (!started) {
             started = true
             val descriptor = DefaultBuildDescriptor(buildId, title, workDirectory.orEmpty(), System.currentTimeMillis()).apply {
@@ -83,6 +87,7 @@ class BuildViewCommandOutput(private val project: Project, private val title: St
         val message = GoBuildOutputParser.parseLine(line) ?: return
         val position = FilePosition(message.resolveFile(workDirectory), (message.line - 1).coerceAtLeast(0), (message.column - 1).coerceAtLeast(0))
         view().onEvent(buildId, FileMessageEventImpl(buildId, kind, "Go", message.text, line.trim(), position))
+        if (collectsProblems) GoBuildProblems.getInstance(project).add(message, workDirectory, kind)
     }
 
     override fun commandFinished(exitCode: Int) {
@@ -94,5 +99,6 @@ class BuildViewCommandOutput(private val project: Project, private val title: St
         if (project.isDisposed || !started) return
         val ok = succeeded && !failed
         view().onEvent(buildId, FinishBuildEventImpl(buildId, null, System.currentTimeMillis(), if (ok) "finished" else "failed", if (ok) SuccessResultImpl() else FailureResultImpl()))
+        if (collectsProblems) GoBuildProblems.getInstance(project).finished()
     }
 }

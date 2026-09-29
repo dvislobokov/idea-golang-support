@@ -8,6 +8,7 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.RangeMarker
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
@@ -84,8 +85,11 @@ object GoLintOutput {
  * the linter reads the disk, and positions in a changed text would point at the wrong code. Runs after the syntax pass, in the
  * background; the language server keeps reporting what it knows while typing.
  */
-class GoLintAnnotator : ExternalAnnotator<GoLintAnnotator.Request, List<GoLintIssue>>() {
-    class Request(val file: VirtualFile, val stamp: Long, val executable: File, val workDirectory: VirtualFile, val packagePath: String)
+class GoLintAnnotator : ExternalAnnotator<GoLintAnnotator.Request, GoLintAnnotator.Result>() {
+    /** [stale]: the text has changed since the save, so the last findings are shown where their markers have moved to, and nothing is run. */
+    class Request(val file: VirtualFile, val stamp: Long, val executable: File, val workDirectory: VirtualFile, val packagePath: String, val stale: Boolean)
+
+    class Result(val issues: List<GoLintIssue>, val fresh: Boolean)
 
     /** With errors in the file as well: the default skips such files, and half of what a linter says is about code that is being written. */
     override fun collectInformation(file: PsiFile, editor: Editor, hasErrors: Boolean): Request? = collectInformation(file)
@@ -93,41 +97,53 @@ class GoLintAnnotator : ExternalAnnotator<GoLintAnnotator.Request, List<GoLintIs
     override fun collectInformation(file: PsiFile): Request? {
         if (file !is GoFile || !GoSettings.getInstance().lintOnTheFly) return null
         val virtualFile = file.virtualFile?.takeIf { it.isInLocalFileSystem } ?: return null
-        if (FileDocumentManager.getInstance().isFileModified(virtualFile)) return null
+        val modified = FileDocumentManager.getInstance().isFileModified(virtualFile)
+        // typed on since the save: the findings of the saved text stay, moved along with the code, until the next save (they used to vanish at the first keystroke)
+        if (modified && virtualFile.getUserData(MARKERS).isNullOrEmpty()) return null
         val executable = GoTool.GOLANGCI_LINT.find() ?: return null
         val directory = virtualFile.parent ?: return null
         val root = GoModulesService.getInstance(file.project).moduleOf(virtualFile)?.root ?: directory
         val relative = VfsUtilCore.getRelativePath(directory, root).orEmpty()
-        return Request(virtualFile, virtualFile.modificationStamp, executable, root, if (relative.isEmpty()) "." else "./$relative")
+        return Request(virtualFile, virtualFile.modificationStamp, executable, root, if (relative.isEmpty()) "." else "./$relative", modified)
     }
 
-    override fun doAnnotate(request: Request): List<GoLintIssue> {
-        request.file.getUserData(RESULT)?.takeIf { it.first == request.stamp }?.let { return it.second }
+    override fun doAnnotate(request: Request): Result {
+        if (request.stale) return Result(emptyList(), fresh = false)
+        request.file.getUserData(RESULT)?.takeIf { it.first == request.stamp }?.let { return Result(it.second, fresh = true) }
         return try {
             val arguments = GoLintOutput.arguments(majorVersion(request.executable), GoSettings.getInstance().tagList(), request.packagePath)
             val output = GoCli.execute(GoCli.toolCommandLine(request.executable.path, request.workDirectory.path, *arguments.toTypedArray()), TIMEOUT_MS)
-            if (output.isTimeout) return emptyList()
+            if (output.isTimeout) return Result(emptyList(), fresh = false)
             val all = GoLintOutput.parse(output.stdout)
             LOG.info("golangci-lint ${request.packagePath} in ${request.workDirectory.path}: exit code ${output.exitCode}, ${all.size} issues")
             if (all.isEmpty() && output.exitCode != 0) LOG.info("golangci-lint has failed with exit code ${output.exitCode}: ${output.stderr.lines().lastOrNull { it.isNotBlank() }.orEmpty()}")
             val issues = all.filter { FileUtil.pathsEqual(File(request.workDirectory.path, it.file).path, request.file.path) || FileUtil.pathsEqual(it.file, request.file.path) }
             request.file.putUserData(RESULT, request.stamp to issues)
-            issues
+            Result(issues, fresh = true)
         } catch (e: Exception) {
             LOG.info("golangci-lint has failed: ${e.message}")
-            emptyList()
+            Result(emptyList(), fresh = false)
         }
     }
 
-    override fun apply(file: PsiFile, issues: List<GoLintIssue>, holder: AnnotationHolder) {
+    override fun apply(file: PsiFile, result: Result, holder: AnnotationHolder) {
         val document = file.viewProvider.document ?: return
-        for (issue in issues) {
-            val range = rangeOf(document, issue) ?: continue
+        val virtualFile = file.virtualFile ?: return
+        val placed: List<Pair<TextRange, GoLintIssue>> = if (result.fresh) {
+            virtualFile.getUserData(MARKERS)?.forEach { it.first.dispose() }
+            val fresh = result.issues.mapNotNull { issue -> rangeOf(document, issue)?.let { it to issue } }
+            virtualFile.putUserData(MARKERS, fresh.map { (range, issue) -> document.createRangeMarker(range) to issue })
+            fresh
+        } else {
+            virtualFile.getUserData(MARKERS).orEmpty().filter { it.first.isValid }.map { (marker, issue) -> marker.textRange to issue }.filter { !it.first.isEmpty }
+        }
+        for ((range, issue) in placed) {
+            val line = document.getLineNumber(range.startOffset)
             val message = if (issue.linter.isEmpty()) issue.text else "${issue.linter}: ${issue.text}"
             var annotation = holder.newAnnotation(if (issue.isError) HighlightSeverity.ERROR else HighlightSeverity.WARNING, message).range(range)
-            if (issue.linter == "errcheck") annotation = annotation.withFix(GoErrcheckFix(handle = true, issue.line - 1)).withFix(GoErrcheckFix(handle = false, issue.line - 1))
+            if (issue.linter == "errcheck") annotation = annotation.withFix(GoErrcheckFix(handle = true, line)).withFix(GoErrcheckFix(handle = false, line))
             // a finding of the type checker is an error of the code, not an opinion to argue with
-            if (issue.linter.isNotEmpty() && issue.linter != "typecheck") annotation = annotation.withFix(GoNolintFix(issue.linter, issue.line - 1))
+            if (issue.linter.isNotEmpty() && issue.linter != "typecheck") annotation = annotation.withFix(GoNolintFix(issue.linter, line))
             annotation.create()
         }
     }
@@ -144,6 +160,8 @@ class GoLintAnnotator : ExternalAnnotator<GoLintAnnotator.Request, List<GoLintIs
         const val TIMEOUT_MS = 90_000
         val LOG = logger<GoLintAnnotator>()
         val RESULT: Key<Pair<Long, List<GoLintIssue>>> = Key.create("io.github.golangsupport.lint.result")
+        /** Where the findings of the last run stand now: the markers follow the edits, so the warnings stay put while typing. */
+        val MARKERS: Key<List<Pair<RangeMarker, GoLintIssue>>> = Key.create("io.github.golangsupport.lint.markers")
         val VERSIONS = ConcurrentHashMap<String, Int>()
 
         fun majorVersion(executable: File): Int = VERSIONS.getOrPut(executable.path + ":" + executable.lastModified()) {

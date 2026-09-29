@@ -39,6 +39,7 @@ import io.github.golangsupport.monitor.GoProfile
 import io.github.golangsupport.monitor.GoProfileServers
 import io.github.golangsupport.monitor.GoProfiles
 import io.github.golangsupport.run.GoRunConfiguration
+import io.github.golangsupport.run.GoTestOutputFilter
 import jetbrains.buildServer.messages.serviceMessages.ServiceMessageVisitor
 
 const val TEST_FRAMEWORK_NAME = "GoTest"
@@ -49,9 +50,13 @@ class GoTestRunState(private val configuration: GoRunConfiguration, environment:
     override fun startProcess(): ProcessHandler {
         val profile = configuration.options.profile
         val directory = if (profile == GoProfile.NONE) null else GoProfiles.newDirectory()
-        val handler = KillableColoredProcessHandler(configuration.buildCommandLine(directory)).also { ProcessTerminatedListener.attach(it) }
+        val coverageFile = if (configuration.options.coverage) GoCoverage.newFile() else null
+        val handler = KillableColoredProcessHandler(configuration.buildCommandLine(directory, coverageFile)).also { ProcessTerminatedListener.attach(it) }
         if (directory != null) handler.addProcessListener(object : ProcessListener {
             override fun processTerminated(event: ProcessEvent) = GoProfileServers.getInstance(environment.project).notifyReady(profile, directory)
+        })
+        if (coverageFile != null) handler.addProcessListener(object : ProcessListener {
+            override fun processTerminated(event: ProcessEvent) = GoCoverageService.getInstance(environment.project).load(coverageFile, configuration.packageDirectory())
         })
         return handler
     }
@@ -74,6 +79,8 @@ class GoTestConsoleProperties(private val configuration: GoRunConfiguration, exe
         // The platform hides passed tests until "Show Passed" is pressed: a green run would look like an empty tree.
         setIfUndefined(TestConsoleProperties.HIDE_PASSED_TESTS, false)
         setIfUndefined(TestConsoleProperties.HIDE_IGNORED_TEST, false)
+        // `order_test.go:39` of a package whose file name the project has more than once: the run knows the package
+        addStackTraceFilter(GoTestOutputFilter(configuration.project, configuration.packageDirectory()))
     }
 
     override fun createTestEventsConverter(testFrameworkName: String, consoleProperties: TestConsoleProperties): OutputToGeneralTestEventsConverter {
@@ -116,10 +123,15 @@ object GoTestLocator : SMTestLocator {
         val psiManager = PsiManager.getInstance(project)
         if (test.isEmpty()) return listOfNotNull(psiManager.findDirectory(directory)?.let { PsiLocation(it) })
         val function = test.substringBefore('/')
+        val subtest = test.substringAfter('/', "").substringBefore('/')
         for (file in directory.children.filter { it.name.endsWith(GoFile.TEST_SUFFIX) }) {
             val text = runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: continue
             val declaration = GoDeclarations.scan(text).declarations.firstOrNull { it.name == function && it.receiver == null } ?: continue
-            val element = psiManager.findFile(file)?.findElementAt(declaration.nameRange.startOffset) ?: continue
+            val psiFile = psiManager.findFile(file) ?: continue
+            // a subtest leads to its `t.Run("name", ...)` or to its case of the table, when that line can be told; otherwise to the function
+            val offset = subtest.takeIf { it.isNotEmpty() }?.let { name -> GoSubtests.find(text, declaration).firstOrNull { it.name == name }?.nameRange?.startOffset }
+                ?: declaration.nameRange.startOffset
+            val element = psiFile.findElementAt(offset) ?: continue
             return listOf(PsiLocation(element))
         }
         return emptyList()

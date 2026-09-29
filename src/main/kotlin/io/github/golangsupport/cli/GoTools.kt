@@ -110,6 +110,15 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
         GoCli.runInBackground(project, title, commands, onSuccess = onSuccess)
     }
 
+    companion object {
+        /** Installs [tools] one after another in one background task; the language server, when among them, is restarted afterwards by its module. */
+        fun installAll(project: Project, tools: List<GoTool>, onSuccess: () -> Unit = {}) {
+            val title = "Installing " + tools.joinToString(", ") { it.command }
+            val commands = GoCli.commandLinesOrNotify(project, title) { tools.map { GoCli.commandLine(null, *it.installCommand().toTypedArray()) } } ?: return
+            GoCli.runInBackground(project, title, commands, onSuccess = { GoEnvironment.reset(); onSuccess() })
+        }
+    }
+
     /** "The tool is not installed" with the buttons to install it and to read about it. */
     fun offerInstallation(project: Project, title: String, onInstalled: () -> Unit = {}) {
         NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)

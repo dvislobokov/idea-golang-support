@@ -157,14 +157,30 @@ class GoStructureViewFactory : PsiStructureViewFactory {
         }
 
         override fun isAlwaysShowsPlus(element: StructureViewTreeElement): Boolean = false
-        override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean = (element.value as? GoDeclaration)?.kind?.let { it != GoDeclarationKind.STRUCT && it != GoDeclarationKind.INTERFACE } == true
+        override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean = (element.value as? GoDeclaration)?.kind?.isType == false
     }
 
+    /**
+     * The methods of a type stand under it, as in GoLand, when the type is declared in the same file; a method of a type from another file
+     * stays on the top level, where it is in the text.
+     */
     class Element(element: PsiElement) : PsiTreeElementBase<PsiElement>(element) {
         override fun getPresentableText(): String? = (element as? GoDeclaration)?.presentation?.presentableText ?: (element as? PsiFile)?.name
 
-        override fun getChildrenBase(): Collection<StructureViewTreeElement> =
-            PsiTreeUtil.getChildrenOfTypeAsList(element, GoDeclaration::class.java).map(::Element)
+        override fun getChildrenBase(): Collection<StructureViewTreeElement> {
+            val element = element ?: return emptyList()
+            if (element is PsiFile) {
+                val declarations = PsiTreeUtil.getChildrenOfTypeAsList(element, GoDeclaration::class.java)
+                val types = declarations.filter { it.kind.isType }.mapNotNull { it.name }.toSet()
+                return declarations.filter { it.kind != GoDeclarationKind.METHOD || it.info?.receiver !in types }.map(::Element)
+            }
+            val declaration = element as? GoDeclaration ?: return emptyList()
+            val members = PsiTreeUtil.getChildrenOfTypeAsList(declaration, GoDeclaration::class.java)
+            if (!declaration.kind.isType) return members.map(::Element)
+            val methods = PsiTreeUtil.getChildrenOfTypeAsList(declaration.containingFile, GoDeclaration::class.java)
+                .filter { it.kind == GoDeclarationKind.METHOD && it.info?.receiver == declaration.name }
+            return (members + methods).map(::Element)
+        }
     }
 }
 

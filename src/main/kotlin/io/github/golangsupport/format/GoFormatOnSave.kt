@@ -8,7 +8,6 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
-import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.settings.GoFormatter
 import io.github.golangsupport.settings.GoSettings
@@ -47,7 +46,7 @@ class GoFormatOnSave : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
             val directory = file.parent?.path
             ApplicationManager.getApplication().executeOnPooledThread {
                 val formatter = GoFormattingService.formatter() ?: return@executeOnPooledThread
-                val replacement = format(formatter.path, directory, text)?.let { GoTextDiff.minimal(text, it) } ?: return@executeOnPooledThread
+                val replacement = format(formatter, directory, text)?.let { GoTextDiff.minimal(text, it) } ?: return@executeOnPooledThread
                 ApplicationManager.getApplication().invokeLater({
                     // typed on since: the next save formats what is there then
                     if (document.modificationStamp != stamp || !file.isValid) return@invokeLater
@@ -59,8 +58,8 @@ class GoFormatOnSave : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
         }
     }
 
-    private fun format(executable: String, directory: String?, text: String): String? = try {
-        val handler = CapturingProcessHandler(GoCli.toolCommandLine(executable, directory))
+    private fun format(executable: java.io.File, directory: String?, text: String): String? = try {
+        val handler = CapturingProcessHandler(GoFormattingService.commandLine(executable, directory))
         handler.processInput.use { it.write(text.toByteArray(StandardCharsets.UTF_8)) }
         val output = handler.runProcess(TIMEOUT_MS)
         // a syntax error is the business of the editor, not of saving

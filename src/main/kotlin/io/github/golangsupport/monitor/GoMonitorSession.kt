@@ -119,8 +119,11 @@ class RunningGoProcesses {
         add(name, pid, handler, null)
     }
 
-    private fun add(name: String, pid: Long, handler: ProcessHandler, runtime: GoRuntimeState?) {
-        val target = MonitorTarget(pid, "$name ($pid)", withChildren = true, runtime = runtime)
+    /** A process whose id is known from elsewhere: the one delve reports for a debug session; it goes when [handler] ends. */
+    fun started(name: String, pid: Long, handler: ProcessHandler) = add(name, pid, handler, null, withChildren = false)
+
+    private fun add(name: String, pid: Long, handler: ProcessHandler, runtime: GoRuntimeState?, withChildren: Boolean = true) {
+        val target = MonitorTarget(pid, "$name ($pid)", withChildren = withChildren, runtime = runtime)
         if (handler.isProcessTerminated) return
         targets.add(0, target)
         handler.addProcessListener(object : ProcessListener {

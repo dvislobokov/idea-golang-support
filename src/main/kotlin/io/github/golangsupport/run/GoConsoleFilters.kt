@@ -8,6 +8,7 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
@@ -31,6 +32,30 @@ object GoOutputLocations {
 
 class GoConsoleFilterProvider : ConsoleFilterProvider {
     override fun getDefaultFilters(project: Project): Array<Filter> = arrayOf(GoConsoleFilter(project))
+}
+
+/**
+ * In the console of a test run the package is known: the bare `order_test.go:39` of `t.Errorf` is looked for under the directory of the run,
+ * which settles a name the project has several of ([GoConsoleFilter] links such a name only when it is the one file of the project with it).
+ */
+class GoTestOutputFilter(private val project: Project, private val packageDirectory: String) : Filter {
+    override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
+        if (".go:" !in line) return null
+        val root = LocalFileSystem.getInstance().findFileByPath(packageDirectory.replace('\\', '/')) ?: return null
+        val lineStart = entireLength - line.length
+        val items = GoOutputLocations.find(line).filter { '/' !in it.path && '\\' !in it.path && !File(it.path).isAbsolute }.mapNotNull { location ->
+            val file = ReadAction.compute<VirtualFile?, RuntimeException> {
+                if (project.isDisposed || DumbService.isDumb(project)) return@compute null
+                // the file the other filter would link: on the top of a module or of the project, or the only one of the project
+                val roots = GoModulesService.getInstance(project).commandDirectories() + listOfNotNull(project.guessProjectDir())
+                if (roots.any { it.findChild(location.path) != null }) return@compute null
+                val candidates = FilenameIndex.getVirtualFilesByName(location.path, GlobalSearchScope.projectScope(project))
+                if (candidates.size < 2) null else candidates.singleOrNull { VfsUtilCore.isAncestor(root, it, false) }
+            } ?: return@mapNotNull null
+            Filter.ResultItem(lineStart + location.start, lineStart + location.end, OpenFileHyperlinkInfo(project, file, location.line - 1, location.column - 1))
+        }
+        return if (items.isEmpty()) null else Filter.Result(items)
+    }
 }
 
 class GoConsoleFilter(private val project: Project) : Filter {

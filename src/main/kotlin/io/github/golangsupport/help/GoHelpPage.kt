@@ -34,12 +34,12 @@ object GoHelpPage {
     fun html(dark: Boolean): String {
         val editing = listOf(
             Row("Complete a statement", key("EditorCompleteStatement", "Ctrl+Shift+Enter"), "Adds the braces of <code>if</code>, <code>for</code>, <code>func</code>, <code>switch</code>, the parentheses of a call, and puts the caret inside"),
-            Row("Postfix templates", "<code>.if</code> <code>.else</code> <code>.nil</code> <code>.notnil</code> <code>.err</code> <code>.errv</code> <code>.return</code> <code>.rr</code> <code>.var</code> <code>.for</code> <code>.fori</code> <code>.forr</code> <code>.range</code> <code>.len</code> <code>.print</code> <code>.printf</code> <code>.panic</code> <code>.go</code> <code>.defer</code> <code>.append</code> <code>.not</code> <code>.switch</code> <code>.wrap</code>", "Type an expression, a dot and the key: <code>items.for</code> becomes <code>for _, v := range items {}</code>"),
+            Row("Postfix templates", "<code>.if</code> <code>.else</code> <code>.nil</code> <code>.notnil</code> <code>.err</code> <code>.errn</code> <code>.errv</code> <code>.return</code> <code>.rr</code> <code>.var</code> <code>.for</code> <code>.fori</code> <code>.forr</code> <code>.range</code> <code>.len</code> <code>.print</code> <code>.printf</code> <code>.panic</code> <code>.go</code> <code>.defer</code> <code>.append</code> <code>.not</code> <code>.switch</code> <code>.wrap</code> <code>.sort</code>", "Type an expression, a dot and the key: <code>items.for</code> becomes <code>for _, v := range items {}</code>"),
             Row("Live templates", "<code>err</code> <code>errw</code> <code>errn</code> <code>ife</code> <code>forr</code> <code>fori</code> <code>main</code> <code>meth</code> <code>fn</code> <code>test</code> <code>ttest</code> <code>bench</code> <code>gof</code> <code>deff</code> <code>sel</code> <code>pf</code> <code>ctx</code> <code>str</code> <code>inter</code> <code>enum</code> <code>init</code> <code>hf</code> <code>mu</code> <code>wg</code> <code>mk</code> <code>sw</code>", "Type the name and press Tab; Settings | Editor | Live Templates | Go lists them all"),
-            Row("Next idiomatic line", "Tab", "<code>if err != nil { return … }</code> after an assigned error, <code>defer cancel()</code>, <code>defer mu.Unlock()</code>, <code>defer f.Close()</code> appear as grey text"),
+            Row("Next idiomatic line", "Tab", "<code>if err != nil { return … }</code> after an assigned error, <code>if !ok</code> after a comma-ok, <code>defer cancel()</code>, <code>defer mu.Unlock()</code>, <code>defer wg.Done()</code>, <code>defer f.Close()</code>, <code>for rows.Next()</code> appear as grey text"),
             Row("Doc comment", "<code>//</code> above a declaration", "Becomes <code>// Name </code> for the declaration below; off in Settings | Tools | Go, Editor"),
             Row("Auto-import", "Completion", "A name of a package that is not imported yet (<code>strings.ToUpper</code>) adds its import"),
-            Row("Reformat", key("ReformatCode", "Ctrl+Alt+L"), "gofmt or goimports; on save by default"),
+            Row("Reformat", key("ReformatCode", "Ctrl+Alt+L"), "gofmt, goimports or <code>golangci-lint fmt</code>; on save by default"),
             Row("Optimize imports", key("OptimizeImports", "Ctrl+Alt+O"), "Through gopls"),
         )
         val generate = listOf(
@@ -49,25 +49,30 @@ object GoHelpPage {
         )
         val navigation = listOf(
             Row("Go to declaration", key("GotoDeclaration", "Ctrl+B") + " or Ctrl+click", ""),
-            Row("Go to implementation", key("GotoImplementation", "Ctrl+Alt+B"), "From a declaration; the <code>I</code> icons in the gutter lead to and from interfaces"),
-            Row("Find usages", key("FindUsages", "Alt+F7"), "From a declaration; the counts above declarations are clickable"),
+            Row("Go to implementation", key("GotoImplementation", "Ctrl+Alt+B"), "From a declaration or a use of it; the <code>I</code> icons in the gutter lead to and from interfaces"),
+            Row("Go to type declaration", key("GotoTypeDeclaration", "Ctrl+Shift+B"), "The type of the variable, field or result under the caret"),
+            Row("Type info", key("ExpressionTypeInfo", "Ctrl+Shift+P"), "The declaration of the name under the caret, as gopls sees it"),
+            Row("Find usages", key("FindUsages", "Alt+F7"), "From a declaration or a use of it; the counts above declarations are clickable"),
             Row("Go to class / symbol", key("GotoClass", "Ctrl+N") + " / " + key("GotoSymbol", "Ctrl+Alt+Shift+N"), "Types, functions, methods, fields of the project"),
             Row("Structure", key("FileStructurePopup", "Ctrl+F12"), ""),
             Row("Quick documentation", key("QuickJavaDoc", "Ctrl+Q"), "From gopls"),
             Row("Parameter info", key("ParameterInfo", "Ctrl+P"), ""),
         )
         val running = listOf(
-            Row("Run / debug", "▶ in the gutter at <code>func main</code>, tests and benchmarks", "The Go run configuration: <code>go run</code> and <code>go test</code>; Debug builds with delve"),
-            Row("Tests", "Tool window <b>Go Tests</b>", "All tests of the project with their last results; run, debug, rerun failed"),
+            Row("Run / debug", "▶ in the gutter at <code>func main</code>, tests, benchmarks, <code>t.Run(\"name\")</code> and the cases of a table", "The Go run configuration: <code>go run</code> and <code>go test</code>; Debug builds with delve; the icon shows how the test went last time; a fuzz function has <i>Run Fuzzing</i>"),
+            Row("Tests", "Tool window <b>Go Tests</b>", "All tests of the project with their last results; run, debug, run with coverage, rerun failed, rerun the package on save"),
+            Row("Coverage", "Run configuration → Coverage, or <i>Run with Coverage</i> in Go Tests", "Green, red and yellow bars in the gutter; the percentage next to the packages of Go Tests"),
+            Row("Stack traces", "Menu <b>Go | Analyze Stack Trace</b>", "Paste a panic or a goroutine dump: its <code>file.go:12</code> frames become links"),
             Row("Profile tests", "Run configuration → Profile", "CPU, memory, block, mutex, execution trace; a notification opens it in <code>go tool pprof</code> / <code>trace</code>"),
             Row("Monitor", "Tool window <b>Go Monitor</b>", "CPU, memory, heap, GC, threads, scheduler of a running program; tick <i>Collect runtime telemetry</i> in the run configuration; <i>Goroutines</i> takes a snapshot with delve"),
-            Row("Debugger", "Breakpoints in the gutter", "Conditions, hit counts, log messages (right-click a breakpoint), panic breakpoints, Evaluate with function calls, Set Value, Attach to Process (Run | Attach to Process, group Go)"),
+            Row("Debugger", "Breakpoints in the gutter", "Conditions, hit counts, log messages (right-click a breakpoint), panic breakpoints, Evaluate with function calls, Set Value, <code>[]byte</code> and errors as text, the full value of a long string, Attach to Process (Run | Attach to Process, group Go); the process is in the Go Monitor"),
             Row("Build, vet, generate, modules", "Menu <b>Go</b>", "Build, Vet, Generate, Modules (tidy, download, vendor), New Go Module, Go on This Machine"),
         )
         val tools = listOf(
             Row("gopls", "Menu <b>Go | gopls</b>", "Add Import, Browse Documentation / Assembly / Free Symbols, Toggle Compiler Optimization Details, Check for Dependency Upgrades, Upgrade All, Run govulncheck, Show Statistics, Show Log, Open Debug Pages, Restart"),
             Row("Code lenses", "In <code>go.mod</code> and above <code>//go:generate</code>", "Tidy, vendor, vulncheck, check for upgrades, upgrade; run go generate"),
-            Row("golangci-lint", "Findings in the editor after save", "With fixes: handle error, ignore explicitly, <code>//nolint</code>; the config of the project is used"),
+            Row("golangci-lint", "Findings in the editor after save", "They stay while typing, until the next save; with fixes: handle error, ignore explicitly, <code>//nolint</code>; the config of the project is used"),
+            Row("go.mod", "Banner after a save that changed the requirements", "Run go mod tidy / Download; the blocks of go.mod fold"),
             Row("Settings", "Settings | Tools | Go", "Toolchain, language server (with a page for every setting of gopls), debugger, editor, code quality, tools with Install buttons"),
         )
         val bg = if (dark) "#1E1F22" else "#FFFFFF"

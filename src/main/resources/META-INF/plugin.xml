@@ -108,6 +108,9 @@
         <lang.parserDefinition language="GoModule" implementationClass="io.github.golangsupport.mod.GoModParserDefinition"/>
         <lang.syntaxHighlighterFactory language="GoModule" implementationClass="io.github.golangsupport.mod.GoModSyntaxHighlighterFactory"/>
         <lang.commenter language="GoModule" implementationClass="io.github.golangsupport.mod.GoModCommenter"/>
+        <lang.foldingBuilder language="GoModule" implementationClass="io.github.golangsupport.mod.GoModFoldingBuilder"/>
+        <!-- go.mod saved with other requirements than before: the banner with `go mod tidy` -->
+        <editorNotificationProvider implementation="io.github.golangsupport.mod.GoModNotificationProvider"/>
 
         <treeStructureProvider implementation="io.github.golangsupport.view.GoDependenciesTreeProvider"/>
         <notificationGroup id="Go" displayType="BALLOON"/>
@@ -150,6 +153,8 @@
         <consoleFilterProvider implementation="io.github.golangsupport.run.GoConsoleFilterProvider"/>
         <!-- golangci-lint on saved files -->
         <externalAnnotator language="Go" implementationClass="io.github.golangsupport.lint.GoLintAnnotator"/>
+        <!-- the errors of the last Go | Build / Vet in the editor, where there is no language server to show them -->
+        <externalAnnotator language="Go" implementationClass="io.github.golangsupport.build.GoBuildProblemsAnnotator"/>
     </extensions>
 
     <actions>
@@ -173,7 +178,10 @@
             <action id="Go.NewModule" class="io.github.golangsupport.templates.NewGoModuleAction" text="New Go Module..." icon="/icons/goMod.svg"
                     description="go mod init in the selected directory"/>
             <separator/>
-            <action id="Go.Environment" class="io.github.golangsupport.sdk.GoEnvironmentAction" text="Go on This Machine..."
+            <action id="Go.AnalyzeStackTrace" class="io.github.golangsupport.run.GoAnalyzeStackTraceAction" text="Analyze Stack Trace..."
+                description="Paste a panic or a goroutine dump from a log: its file.go:12 frames become links"/>
+        <separator/>
+        <action id="Go.Environment" class="io.github.golangsupport.sdk.GoEnvironmentAction" text="Go on This Machine..."
                     description="The toolchain and the tools the plugin uses, the modules of the project, go env"/>
             <action id="Go.DisablePlugins" class="io.github.golangsupport.sdk.GoDisablePluginsAction" text="Disable Plugins Not Needed for Go..."
                     description="Switch off the bundled plugins a Go developer has no use for (Java, Maven, Python, Spring, GitHub, GitLab...) to keep the IDE light"/>
@@ -221,6 +229,8 @@
     <applicationListeners>
         <!-- the plugin was enabled without a restart: offer the clean-up right away for the open Go projects -->
         <listener class="io.github.golangsupport.sdk.GoPluginAdvisorListener" topic="com.intellij.ide.plugins.DynamicPluginListener"/>
+        <!-- go.mod is being saved with other requirements: the banner with `go mod tidy` -->
+        <listener class="io.github.golangsupport.mod.GoModSaveListener" topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
     </applicationListeners>
 
     <projectListeners>

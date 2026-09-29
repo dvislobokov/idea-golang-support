@@ -17,8 +17,18 @@ import com.intellij.xdebugger.XSourcePosition
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.intellij.xdebugger.frame.XSuspendContext
+import com.intellij.ide.BrowserUtil
+import com.intellij.notification.NotificationAction
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
+import com.intellij.openapi.options.ShowSettingsUtil
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoEnvironment
+import io.github.golangsupport.cli.GoTool
+import io.github.golangsupport.monitor.RunningGoProcesses
+import io.github.golangsupport.run.DelveGoVersion
 import io.github.golangsupport.run.GoEvaluate
+import io.github.golangsupport.settings.GoSettingsConfigurable
 import org.jetbrains.concurrency.AsyncPromise
 import org.jetbrains.concurrency.Promise
 import java.io.File
@@ -101,7 +111,17 @@ class GoDebugProcess(
     private fun startFailed(reason: String) {
         val output = synchronized(startupOutput) { startupOutput.toString().trim() }
         print("Cannot start debugging: $reason\n", ProcessOutputTypes.STDERR)
-        GoCli.notifyError(session.project, "Debug has not started", listOf(reason, output).filter { it.isNotEmpty() }.joinToString("\n"))
+        val mismatch = DelveGoVersion.find(reason + "\n" + output)
+        val lines = listOfNotNull(reason, output, mismatch?.explain(GoEnvironment.quick().goVersion)).filter { it.isNotEmpty() }
+        val notification = NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
+            .createNotification("Debug has not started", lines.joinToString("\n").replace("\n", "<br>"), NotificationType.ERROR)
+        when (mismatch?.kind) {
+            DelveGoVersion.Kind.GO_TOO_OLD -> notification.addAction(NotificationAction.createSimple("Download Go") { BrowserUtil.browse("https://go.dev/dl/") })
+            DelveGoVersion.Kind.GO_TOO_NEW -> notification.addAction(NotificationAction.createSimpleExpiring("Update delve") { GoTool.DELVE.install(session.project) })
+            null -> Unit
+        }
+        if (mismatch != null) notification.addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(session.project, GoSettingsConfigurable::class.java) })
+        notification.notify(session.project)
         session.stop()
     }
 
@@ -115,6 +135,8 @@ class GoDebugProcess(
             "output" -> output(body)
             "breakpoint" -> body.getAsJsonObject("breakpoint")?.let(lineBreakpoints::update)
             "exited" -> exitCode = body.int("exitCode")
+            // the program delve has started or attached to: CPU and memory of it in the Go Monitor, next to the runs
+            "process" -> body.int("systemProcessId")?.let { pid -> RunningGoProcesses.getInstance(session.project).started("Debug: ${session.sessionName}", pid.toLong(), handler) }
             "terminated" -> AppExecutorUtil.getAppExecutorService().execute { shutdown(detach = false, programGone = true) }
         }
     }

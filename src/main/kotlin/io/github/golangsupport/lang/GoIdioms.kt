@@ -23,7 +23,8 @@ object GoIdioms {
         val above = previous.firstOrNull() ?: return null
         val indent = before.takeWhile { it == ' ' || it == '\t' }.ifEmpty { above.indent }
 
-        val suggestion = errorCheck(text, offset, above, indent, unit) ?: deferAfter(above) ?: deferAfterErrorCheck(previous) ?: return null
+        val suggestion = errorCheck(text, offset, above, indent, unit) ?: okCheck(text, offset, above, indent, unit) ?: deferAfter(above) ?: deferInGoroutine(previous)
+            ?: deferAfterErrorCheck(previous) ?: rowsLoop(previous, indent, unit) ?: return null
         // not twice: the line below may be what would be suggested
         val below = text.subSequence(lineEnd, text.length).lineSequence().map { it.trim() }.firstOrNull { it.isNotEmpty() }
         if (below != null && below == suggestion.lineSequence().first().trim()) return null
@@ -82,6 +83,30 @@ object GoIdioms {
             }
         }
         return "return " + values.joinToString(", ")
+    }
+
+    // --- if !ok ---
+
+    /** `v, ok := m[key]`, `s, ok := x.(string)`, `v, ok := <-ch`: the comma-ok forms, and what stands on the right. */
+    private val COMMA_OK = Regex("""^[\w.\[\]*]+\s*,\s*(ok\w*)\s*:?=\s*(.+)$""")
+    private val MAP_LOOKUP = Regex("""^([\w.]+)\[(.+)\]$""")
+    private val TYPE_ASSERTION = Regex("""^([\w.()]+)\.\((.+)\)$""")
+
+    private fun okCheck(text: CharSequence, offset: Int, above: Line, indent: String, unit: String): String? {
+        if (above.code.startsWith("if ") || above.code.startsWith("for ")) return null
+        val match = COMMA_OK.matchEntire(above.code) ?: return null
+        val (ok, right) = match.destructured
+        val lookup = MAP_LOOKUP.matchEntire(right)
+        val assertion = TYPE_ASSERTION.matchEntire(right)
+        if (lookup == null && assertion == null && !right.startsWith("<-")) return null
+        // what to say when it is not there: the key of a map, the type that was expected; a closed channel is not an error
+        val error = when {
+            lookup != null -> "fmt.Errorf(\"unknown %v\", ${lookup.groupValues[2].trim()})"
+            assertion != null -> "fmt.Errorf(\"unexpected type %T\", ${assertion.groupValues[1]})"
+            else -> "nil"
+        }
+        val statement = returnStatement(text, offset, error).let { if (error == "nil" && it.endsWith("Fatal(nil)")) "return" else it }
+        return "if !$ok {\n$indent$unit$statement\n$indent}"
     }
 
     class Parameter(val name: String?, val type: String)
@@ -145,6 +170,26 @@ object GoIdioms {
         LOCK.matchEntire(above.code)?.let { return "defer ${it.groupValues[1]}.${it.groupValues[2]}Unlock()" }
         STOPPABLE.matchEntire(above.code)?.let { return "defer ${it.groupValues[1]}.Stop()" }
         return null
+    }
+
+    private val GO_FUNC = Regex("""^go func\(.*\)\s*\{$""")
+    private val WAIT_GROUP_ADD = Regex("""^([\w.]+)\.Add\(""")
+
+    /** The first line of `go func() {` below a `wg.Add(1)`: `defer wg.Done()`, before anything can return early. */
+    private fun deferInGoroutine(previous: List<Line>): String? {
+        if (!GO_FUNC.matches(previous.firstOrNull()?.code.orEmpty())) return null
+        val group = previous.drop(1).firstNotNullOfOrNull { WAIT_GROUP_ADD.find(it.code)?.groupValues?.get(1) } ?: return null
+        return "defer $group.Done()"
+    }
+
+    private val CLOSED_ROWS = Regex("""^defer (\w+)\.Close\(\)$""")
+    private val QUERIED = Regex("""^(\w+),\s*\w*[eE]rr\w*\s*:?=\s*[\w.]+\.(Query|QueryContext)\(.*\)$""")
+
+    /** After `defer rows.Close()` of what `Query` returned: the loop over the rows (the caret lands after the block; its body is the next thing to write). */
+    private fun rowsLoop(previous: List<Line>, indent: String, unit: String): String? {
+        val rows = CLOSED_ROWS.matchEntire(previous.firstOrNull()?.code.orEmpty())?.groupValues?.get(1) ?: return null
+        if (previous.drop(1).none { QUERIED.matchEntire(it.code)?.groupValues?.get(1) == rows }) return null
+        return "for $rows.Next() {\n$indent$unit\n$indent}"
     }
 
     private val OPENED = Regex("""^(\w+),\s*\w*[eE]rr\w*\s*:?=\s*([\w.]+)\(.*\)$""")

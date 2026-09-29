@@ -12,6 +12,9 @@ enum class GoFormatter(val title: String) {
     GOFMT("gofmt"),
     GOIMPORTS("goimports"),
 
+    /** `golangci-lint fmt --stdin` (v2): the formatters of `.golangci.yml` (gofumpt, goimports, gci, golines...) in one go. */
+    GOLANGCI_LINT_FMT("golangci-lint fmt"),
+
     /** Reformat Code is left to the language server, or to nobody. */
     NONE("None");
 

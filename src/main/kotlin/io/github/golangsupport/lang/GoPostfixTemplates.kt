@@ -39,6 +39,8 @@ class GoPostfixTemplateProvider : PostfixTemplateProvider {
         GoPostfixTemplate("switch", "switch expr {}", "switch \$EXPR$ {\ncase \$CASE$:\n\t\$END$\n}", this, "CASE" to ""),
         GoPostfixTemplate("range", "for range expr {}", "for range \$EXPR$ {\n\t\$END$\n}", this),
         GoPostfixTemplate("wrap", "fmt.Errorf(\"…: %w\", expr)", "fmt.Errorf(\"\$MESSAGE$: %w\", \$EXPR$)\$END$", this, "MESSAGE" to ""),
+        GoPostfixTemplate("errn", "if err := expr; err != nil { return nil, err }", "if err := \$EXPR$; err != nil {\n\treturn nil, err\n}\$END$", this),
+        GoPostfixTemplate("sort", "sort.Slice(expr, func(i, j int) bool {})", "sort.Slice(\$EXPR$, func(i, j int) bool {\n\treturn \$EXPR$[i]\$FIELD$ < \$EXPR$[j]\$FIELD$\n})\$END$", this, "FIELD" to ""),
     )
 
     override fun getTemplates(): Set<PostfixTemplate> = templates

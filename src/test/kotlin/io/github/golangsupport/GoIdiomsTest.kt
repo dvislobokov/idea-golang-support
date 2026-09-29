@@ -129,6 +129,38 @@ class GoIdiomsTest {
         assertNull(after("_, err := os.Open(name)"))
     }
 
+    @Test fun okCheckAfterACommaOkForm() {
+        fun after(statement: String, signature: String = "(*Order, error)") = suggest("package main\n\nfunc f() $signature {\n    $statement\n    <caret>\n}")
+        assertEquals("if !ok {\n\t\treturn nil, fmt.Errorf(\"unknown %v\", name)\n\t}", after("v, ok := m[name]"))
+        assertEquals("if !ok {\n\t\treturn nil, fmt.Errorf(\"unexpected type %T\", x)\n\t}", after("s, ok := x.(string)"))
+        assertEquals("if !ok {\n\t\treturn nil, nil\n\t}", after("v, ok := <-ch"))
+        assertEquals("if !ok {\n\t\treturn\n\t}", after("v, ok := <-ch", signature = ""))
+        assertNull(after("v, ok := lookup(name)"))
+        assertNull(after("if v, ok := m[name]; ok {"))
+    }
+
+    @Test fun deferDoneInAGoroutineOfAWaitGroup() {
+        assertEquals("defer wg.Done()", suggest("package main\n\nfunc f() {\n    wg.Add(1)\n    go func() {\n        <caret>\n    }()\n}"))
+        assertNull(suggest("package main\n\nfunc f() {\n    go func() {\n        <caret>\n    }()\n}"))
+    }
+
+    @Test fun loopOverTheRowsOnceTheyAreDeferredClosed() {
+        val code = """
+            package main
+
+            func f() error {
+                rows, err := db.Query(q)
+                if err != nil {
+                    return err
+                }
+                defer rows.Close()
+                <caret>
+            }
+            """
+        assertEquals("for rows.Next() {\n\t\t\n\t}", suggest(code))
+        assertNull(suggest(code.replace("db.Query(q)", "os.Open(q)")))
+    }
+
     @Test fun signatures() {
         val (parameters, results) = GoIdioms.splitSignature("[T any](ctx context.Context, items ...T) (map[string][]T, error)")
         assertEquals(listOf("ctx" to "context.Context", "items" to "...T"), parameters.map { it.name to it.type })

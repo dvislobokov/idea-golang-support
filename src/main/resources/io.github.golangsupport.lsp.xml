@@ -16,6 +16,10 @@
         <platform.lsp.integrationProvider implementation="io.github.golangsupport.lsp.GoplsIntegrationProvider"/>
         <!-- what the LSP client of the platform does not do: a link under Ctrl + mouse, usages of a declaration, implementations, the counts above declarations -->
         <gotoDeclarationHandler implementation="io.github.golangsupport.lsp.GoplsGotoDeclarationHandler"/>
+        <!-- the declaration behind a name in use: Find Usages, Go to Implementation and the highlighting of usages start from there -->
+        <targetElementEvaluator language="Go" implementationClass="io.github.golangsupport.lsp.GoplsTargetElementEvaluator"/>
+        <typeDeclarationProvider implementation="io.github.golangsupport.lsp.GoplsTypeDeclarationProvider"/>
+        <lang.expressionTypeProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsExpressionTypeProvider"/>
         <customUsageSearcher implementation="io.github.golangsupport.lsp.GoplsUsageSearcher"/>
         <definitionsScopedSearch implementation="io.github.golangsupport.lsp.GoplsImplementationSearch"/>
         <intentionAction>

@@ -28,6 +28,32 @@ object DlvDap {
     }
 }
 
+/**
+ * Delve and the toolchain out of step: what delve says when it refuses (`Version of Go is too old for this version of Delve (minimum supported
+ * version 1.23, ...)`, or `too new ... (maximum supported version 1.24, ...)`), turned into a sentence with the way out. `--check-go-version=false`
+ * silences the check, but a delve far off the toolchain then fails in less clear ways, so the refusal is worth explaining when it does come.
+ */
+object DelveGoVersion {
+    enum class Kind { GO_TOO_OLD, GO_TOO_NEW }
+
+    class Mismatch(val kind: Kind, val limit: String) {
+        /** [goVersion]: the toolchain the plugin uses, when known. */
+        fun explain(goVersion: String?): String {
+            val installed = goVersion?.let { ", and Go $it is installed" }.orEmpty()
+            return when (kind) {
+                Kind.GO_TOO_OLD -> "This delve needs Go $limit or newer$installed: update Go, or install a delve of that time (go install github.com/go-delve/delve/cmd/dlv@vX.Y.Z)."
+                Kind.GO_TOO_NEW -> "This delve supports Go up to $limit$installed: update delve (Settings | Tools | Go, or go install github.com/go-delve/delve/cmd/dlv@latest)."
+            }
+        }
+    }
+
+    private val TOO_OLD = Regex("""too old for this version of Delve \(minimum supported version (\d+(?:\.\d+)*)""")
+    private val TOO_NEW = Regex("""too new for this version of Delve \(maximum supported version (\d+(?:\.\d+)*)""")
+
+    fun find(text: String): Mismatch? =
+        TOO_OLD.find(text)?.let { Mismatch(Kind.GO_TOO_OLD, it.groupValues[1]) } ?: TOO_NEW.find(text)?.let { Mismatch(Kind.GO_TOO_NEW, it.groupValues[1]) }
+}
+
 /** The exception breakpoint filters of delve, as its `initialize` response lists them. */
 enum class GoPanicFilter(val id: String, val title: String) {
     UNRECOVERED_PANIC("unrecovered-panic", "Unrecovered panics"),

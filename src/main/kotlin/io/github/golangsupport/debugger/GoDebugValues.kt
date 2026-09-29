@@ -8,6 +8,7 @@ import com.intellij.util.ThreeState
 import com.intellij.xdebugger.XDebuggerUtil
 import com.intellij.xdebugger.XExpression
 import com.intellij.xdebugger.frame.XCompositeNode
+import com.intellij.xdebugger.frame.XFullValueEvaluator
 import com.intellij.xdebugger.frame.XInlineDebuggerDataCallback
 import com.intellij.xdebugger.frame.XNamedValue
 import com.intellij.xdebugger.frame.XValueChildrenList
@@ -40,8 +41,19 @@ class GoValue(
     /** The reference of the list this variable came from; null for the result of an expression. */
     private val container: Int?,
 ) : XNamedValue(name) {
-    override fun computePresentation(node: XValueNode, place: XValuePlace) =
-        node.setPresentation(icon(), XRegularValuePresentation(value, type?.takeIf { it.isNotBlank() }), reference > 0)
+    override fun computePresentation(node: XValueNode, place: XValuePlace) {
+        val shown = GoValuePresentation.of(type, value)
+        node.setPresentation(icon(), XRegularValuePresentation(shown.value, shown.type), reference > 0)
+        // delve cuts long strings and slices short; the whole value is one request away (the "clipboard" context of delve loads it all)
+        val expression = evaluateName?.takeIf { it.isNotBlank() }
+        if (expression != null && GoValuePresentation.isCut(value)) node.setFullValueEvaluator(object : XFullValueEvaluator() {
+            override fun startEvaluation(callback: XFullValueEvaluationCallback) {
+                process.evaluate(expression, frameId, "clipboard").whenComplete { answer, error ->
+                    if (error != null) callback.errorOccurred(GoDebugProcess.errorText(error)) else callback.evaluated(answer.string("result").orEmpty())
+                }
+            }
+        })
+    }
 
     private fun icon(): Icon = when {
         name.startsWith("[") -> AllIcons.Debugger.Value
@@ -91,6 +103,43 @@ class GoValue(
             variable.int("variablesReference") ?: 0, variable.int("indexedVariables"), variable.string("evaluateName"), frameId, container,
         )
     }
+}
+
+/**
+ * What delve prints, made readable where its raw form says little: `[]uint8 len: 5, cap: 5, [104,105]` is the text `"hi"`, an
+ * `*errors.errorString {s: "boom"}` is `"boom"`. Pure text, so it is testable; `time.Time` delve formats itself.
+ */
+object GoValuePresentation {
+    class Shown(val value: String, val type: String?)
+
+    private val BYTES = Regex("""^\[\]uint8 len: (\d+), cap: \d+, \[([\d,]*)(,\.\.\.\+\d+ more)?]$""")
+    private val ERROR_MESSAGE = Regex("""\b(?:s|msg|message|Message|text|Text): ("(?:[^"\\]|\\.)*")""")
+    private val CUT = Regex("""\.\.\."?\+\d+ more|\.\.\."$""")
+
+    fun of(type: String?, value: String): Shown {
+        val kind = type?.takeIf { it.isNotBlank() }
+        byteText(value)?.let { (text, length) -> return Shown(text, "[]byte len $length") }
+        if (kind != null && (kind == "error" || kind.startsWith("error(") || kind.endsWith("Error") || kind.endsWith("error"))) {
+            ERROR_MESSAGE.find(value)?.let { return Shown(it.groupValues[1], kind) }
+        }
+        return Shown(value, kind)
+    }
+
+    /** The bytes of a `[]byte` as a string, when every one of them is text; `…` when delve has not sent them all. */
+    fun byteText(value: String): Pair<String, Int>? {
+        val match = BYTES.matchEntire(value) ?: return null
+        val length = match.groupValues[1].toInt()
+        val bytes = match.groupValues[2].split(',').filter { it.isNotEmpty() }.map { it.toIntOrNull() ?: return null }
+        if (bytes.isEmpty()) return null
+        if (bytes.any { it < 0 || it > 255 }) return null
+        val text = String(ByteArray(bytes.size) { bytes[it].toByte() }, Charsets.UTF_8)
+        if (text.any { it == '\uFFFD' || it.isISOControl() && it != '\n' && it != '\t' && it != '\r' }) return null
+        val escaped = text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r")
+        return "\"$escaped" + (if (match.groupValues[3].isNotEmpty()) "…" else "") + "\"" to length
+    }
+
+    /** `"abc..."+13 more`, `[1,2,3,...+61 more]`: delve loads 64 elements or runes and says how many it left out. */
+    fun isCut(value: String): Boolean = CUT.containsMatchIn(value)
 }
 
 /** The children of a reference, a page at a time with `start` / `count`: a slice of a million elements is not read whole. "Show more" asks for the next page. */
