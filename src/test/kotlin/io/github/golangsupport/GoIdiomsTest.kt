@@ -220,6 +220,125 @@ class GoIdiomsTest {
         assertEquals("if err != nil {\n\t\treturn nil, err\n\t}", suggest(plain))
     }
 
+    @Test fun aHandlerAnswersAndReturns() {
+        val handler = """
+            package api
+
+            func (s *Server) create(w http.ResponseWriter, r *http.Request) {
+                order, err := s.store.Create(r.Context())
+                <caret>
+            }
+            """
+        assertEquals("if err != nil {\n\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n\t\treturn\n\t}", suggest(handler))
+        // what the caller has sent cannot be read: the request is bad
+        assertEquals(
+            "if err != nil {\n\t\thttp.Error(rw, err.Error(), http.StatusBadRequest)\n\t\treturn\n\t}",
+            suggest(handler.replace("w http.ResponseWriter", "rw http.ResponseWriter").replace("order, err := s.store.Create(r.Context())", "err := json.NewDecoder(r.Body).Decode(&order)")),
+        )
+        // the body of a check typed by hand
+        val byHand = "package api\n\nfunc create(w http.ResponseWriter, r *http.Request) {\n    order, err := load(r)\n    if err != nil {\n        <caret>\n    }\n    _ = order\n}"
+        assertEquals("http.Error(w, err.Error(), http.StatusInternalServerError)\n\t\treturn", suggest(byHand))
+        assertEquals(
+            "if err != nil {\n\t\tc.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{\"error\": err.Error()})\n\t\treturn\n\t}",
+            suggest(handler.replace("(w http.ResponseWriter, r *http.Request)", "(c *gin.Context)").replace("r.Context()", "c")),
+        )
+        // a function that takes a writer and returns an error returns it
+        assertEquals("if err != nil {\n\t\treturn err\n\t}", suggest(handler.replace("r *http.Request) {", "r *http.Request) error {")))
+    }
+
+    @Test fun aServiceOfGrpcAnswersWithAStatus() {
+        val service = """
+            package api
+
+            func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.Order, error) {
+                if req.Id == "" {
+                    return nil, status.Error(codes.InvalidArgument, "id is required")
+                }
+                order, err := s.store.Find(ctx, req.Id)
+                if err != nil {
+                    return nil, status.Errorf(codes.Internal, "find: %v", err)
+                }
+                return order, nil
+            }
+
+            func (s *Server) List(ctx context.Context, req *pb.ListRequest) (*pb.Orders, error) {
+                orders, err := s.store.ListOrders(ctx)
+                <caret>
+            }
+            """
+        assertTrue(GoIdioms.answersWithStatus(service))
+        assertEquals("if err != nil {\n\t\treturn nil, status.Errorf(codes.Internal, \"list orders: %v\", err)\n\t}", suggest(service))
+        assertEquals(
+            "if err != nil {\n\t\treturn nil, status.Errorf(codes.InvalidArgument, \"parse filter: %v\", err)\n\t}",
+            suggest(service.replace("orders, err := s.store.ListOrders(ctx)", "filter, err := ParseFilter(req.Filter)")),
+        )
+        // a file that returns its errors as they are is not one of a service
+        assertFalse(GoIdioms.answersWithStatus(service.replace("status.Errorf(codes.Internal, \"find: %v\", err)", "err")))
+    }
+
+    @Test fun theReceiverOfAMethod() {
+        val code = """
+            package api
+
+            type Server struct {
+                store Store
+            }
+
+            func (srv *Server) Start() error { return nil }
+
+            <caret>
+            """
+        assertEquals("srv *Server) ", suggest(code.replace("<caret>", "func (<caret>")))
+        // the bracket the editor has closed by itself
+        assertEquals("srv *Server", suggest(code.replace("<caret>", "func (<caret>)")))
+        assertEquals("v *Server) ", suggest(code.replace("<caret>", "func (sr<caret>")))
+        assertNull(suggest(code.replace("<caret>", "func (x<caret>")))
+        assertNull(suggest(code.replace("<caret>", "func <caret>")))
+        // no method yet: the first letter of the type, by pointer
+        assertEquals("s *Server) ", suggest(code.replace("func (srv *Server) Start() error { return nil }\n", "").replace("<caret>", "func (<caret>")))
+        // by value, as the methods of the type are
+        assertEquals("o Order) ", suggest("package store\n\ntype Order struct{}\n\nfunc (o Order) Total() int { return 0 }\n\nfunc (<caret>"))
+        // the type that is nearest above, and not an interface
+        val server = "package api\n\ntype Server struct {\n    store Store\n}\n\nfunc (srv *Server) Start() error { return nil }\n\n"
+        assertEquals("c *Client) ", suggest(server + "type Client struct{}\n\nfunc (<caret>"))
+        assertEquals("srv *Server) ", suggest(server + "type Doer interface {\n    Do()\n}\n\nfunc (<caret>"))
+        assertNull(suggest("package store\n\ntype Priced interface {\n    Total() int\n}\n\nfunc (<caret>"))
+        // inside a function it is a function literal
+        assertNull(suggest(server + "func f() {\n    go func (<caret>\n}"))
+    }
+
+    @Test fun theTagOfAFieldAsTheFieldsAboveHaveIt() {
+        val snake = """
+            package store
+
+            type User struct {
+                ID        int    `json:"id" db:"id"`
+                FirstName string `json:"first_name,omitempty" db:"first_name" validate:"required"`
+                <caret>
+            }
+            """
+        assertEquals("`json:\"last_name,omitempty\" db:\"last_name\"`", suggest(snake.replace("<caret>", "LastName string <caret>")))
+        // a type that is whole as it is typed needs no space after it
+        assertEquals(" `json:\"last_name,omitempty\" db:\"last_name\"`", suggest(snake.replace("<caret>", "LastName string<caret>")))
+        assertEquals("`json:\"created_at,omitempty\" db:\"created_at\"`", suggest(snake.replace("<caret>", "CreatedAt *timestamppb.Timestamp <caret>")))
+        assertNull(suggest(snake.replace("<caret>", "LastName stri<caret>")))
+        assertNull(suggest(snake.replace("<caret>", "lastName string <caret>")))
+        assertNull(suggest(snake.replace("<caret>", "LastName <caret>")))
+
+        val camel = """
+            package api
+
+            type Request struct {
+                UserName string `json:"userName"`
+                <caret>
+            }
+            """
+        assertEquals("`json:\"orderId\"`", suggest(camel.replace("<caret>", "OrderId int64 <caret>")))
+        // no tags above, or not a struct
+        assertNull(suggest("package api\n\ntype Request struct {\n    UserName string\n    OrderId int64 <caret>\n}"))
+        assertNull(suggest("package api\n\nfunc f() {\n    Name string <caret>\n}"))
+    }
+
     @Test fun whatHasFailedInWords() {
         assertEquals("open", GoIdioms.failure("f, err := os.Open(name)"))
         assertEquals("read file", GoIdioms.failure("data, err := os.ReadFile(name)"))

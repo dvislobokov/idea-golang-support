@@ -114,7 +114,7 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                 }
                 row {
                     checkBox("Suggest the idiomatic next line as grey text (Tab to accept)").bindSelected(settings::inlineIdioms)
-                        .comment("<code>if err != nil { return ... }</code> after an assigned error, with the return values of the function and the error wrapped where the file wraps its errors; <code>defer cancel()</code>, <code>defer mu.Unlock()</code>, <code>defer f.Close()</code>, <code>defer span.End()</code> after what needs them; the loop of a scanner and the error after it")
+                        .comment("<code>if err != nil { return ... }</code> after an assigned error, with the return values of the function and the error wrapped where the file wraps its errors; <code>defer cancel()</code>, <code>defer mu.Unlock()</code>, <code>defer f.Close()</code>, <code>defer span.End()</code> after what needs them; the loop of a scanner and the error after it; the answer of an HTTP handler and the status of a gRPC method; the receiver after <code>func (</code>; the tag of a field as the fields above have it")
                 }
             }
             group("Completion") {

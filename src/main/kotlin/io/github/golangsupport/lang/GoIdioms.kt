@@ -16,16 +16,20 @@ object GoIdioms {
         while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--
         var lineEnd = offset
         while (lineEnd < text.length && text[lineEnd] != '\n') lineEnd++
-        if (text.subSequence(offset, lineEnd).isNotBlank()) return null
         val before = text.subSequence(lineStart, offset).toString()
+        val rest = text.subSequence(offset, lineEnd).toString().trim()
+        // the bracket the editor has closed by itself is not something written after the caret
+        receiver(text, lineStart, before, rest)?.let { return it }
+        if (rest.isNotEmpty()) return null
         val typed = before.trimStart()
         val previous = linesBefore(text, lineStart)
+        fieldTag(before, previous)?.let { return it }
         val above = previous.firstOrNull() ?: return null
         // a line without an indent of its own is as deep as the line above, and a level deeper below what opens a block
         val indent = before.takeWhile { it == ' ' || it == '\t' }.ifEmpty { above.indent + if (above.code.endsWith("{")) unit else "" }
 
         val below = text.subSequence(lineEnd, text.length).lineSequence().map { it.trim() }.firstOrNull { it.isNotEmpty() }
-        val suggestion = errorCheck(text, offset, above, indent, unit) ?: returnInErrorCheck(text, offset, previous, below) ?: okCheck(text, offset, above, indent, unit)
+        val suggestion = errorCheck(text, offset, above, indent, unit) ?: returnInErrorCheck(text, offset, previous, below, indent) ?: okCheck(text, offset, above, indent, unit)
             ?: deferAfter(above) ?: deferInGoroutine(previous) ?: deferAfterErrorCheck(previous) ?: errorAfterLoop(text, offset, previous, indent, unit)
             ?: scannerLoop(above, indent, unit) ?: rowsLoop(previous, indent, unit) ?: return null
         // not twice: the line below may be what would be suggested
@@ -59,20 +63,20 @@ object GoIdioms {
     private fun errorCheck(text: CharSequence, offset: Int, above: Line, indent: String, unit: String): String? {
         if (above.code.startsWith("if ") || above.code.startsWith("for ") || above.code.startsWith("switch ") || above.code.startsWith("}")) return null
         val error = ERROR_ASSIGNMENT.matchEntire(above.code)?.groupValues?.get(1) ?: return null
-        return "if $error != nil {\n$indent$unit${errorReturn(text, offset, error, above.code)}\n$indent}"
+        return "if $error != nil {\n$indent$unit${errorExit(text, offset, error, above.code).joinToString("\n$indent$unit")}\n$indent}"
     }
 
     /**
      * The body of an `if err != nil {` that was typed by hand and is still empty: the statement that leaves the function. Not above
      * something that is in the block already: a line added to a body is not the whole of it.
      */
-    private fun returnInErrorCheck(text: CharSequence, offset: Int, previous: List<Line>, below: String?): String? {
+    private fun returnInErrorCheck(text: CharSequence, offset: Int, previous: List<Line>, below: String?, indent: String): String? {
         val check = previous.firstOrNull() ?: return null
         val error = ERROR_CHECK.matchEntire(check.code)?.groupValues?.get(1) ?: return null
         if (below != null && !below.startsWith("}")) return null
         // what has failed is in the `if` itself (`if err := f(); err != nil {`), or in the statement above it
         val failed = if (';' in check.code) check.code.substringAfter("if ").substringBefore(';') else previous.getOrNull(1)?.code?.takeIf { ERROR_ASSIGNMENT.matches(it) }
-        return errorReturn(text, offset, error, failed)
+        return errorExit(text, offset, error, failed).joinToString("\n$indent")
     }
 
     // --- the way the file returns its errors ---
@@ -97,13 +101,116 @@ object GoIdioms {
         return called.split(HUMPS).filter { it.isNotEmpty() }.joinToString(" ") { it.lowercase() }.takeIf { it.isNotEmpty() }
     }
 
-    /** [returnStatement] with the error wrapped where the file wraps its errors; [failed] is the statement the error has come from. */
-    private fun errorReturn(text: CharSequence, offset: Int, error: String, failed: String?): String {
+    private val STATUS = Regex("""status\.Errorf?\(codes\.""")
+
+    /** The caller has sent what cannot be read: the request is bad, not the server. */
+    private val BAD_INPUT = Regex("""(decode|unmarshal|parse|atoi|bind|validate)""", RegexOption.IGNORE_CASE)
+
+    /**
+     * Whether the file answers with the errors of gRPC, `status.Errorf(codes.Internal, ...)`: more often than it returns errors as
+     * they are, and not less often than it wraps them. The methods of a gRPC service are written so.
+     */
+    fun answersWithStatus(text: CharSequence): Boolean {
+        val statuses = STATUS.findAll(text).count()
+        return statuses >= MIN_WRAPPED && statuses > RETURNED_AS_IS.findAll(text).count() && statuses >= WRAPPED.findAll(text).count()
+    }
+
+    /**
+     * How the function around [offset] is left with the error, a line each. The way of the place it is written in:
+     * - a handler of `net/http` (or of gin) answers and returns: it has no result to return the error in;
+     * - a test fails, `main` dies ([returnStatement]);
+     * - a file of a gRPC service returns a status;
+     * - a file that wraps its errors returns the error wrapped, with what has failed in words ([failed] is the statement);
+     * - the rest return the error as it is.
+     */
+    private fun errorExit(text: CharSequence, offset: Int, error: String, failed: String?): List<String> {
+        val badInput = BAD_INPUT.containsMatchIn(failed.orEmpty())
+        val parameters = enclosing(text, offset)?.takeIf { (_, results) -> results.isEmpty() }?.first.orEmpty()
+        parameters.firstOrNull { it.type == "http.ResponseWriter" }?.name?.let { writer ->
+            return listOf("http.Error($writer, $error.Error(), http.${if (badInput) "StatusBadRequest" else "StatusInternalServerError"})", "return")
+        }
+        parameters.firstOrNull { it.type == "*gin.Context" }?.name?.let { context ->
+            return listOf("$context.AbortWithStatusJSON(http.${if (badInput) "StatusBadRequest" else "StatusInternalServerError"}, gin.H{\"error\": $error.Error()})", "return")
+        }
         val plain = returnStatement(text, offset, error)
         // `t.Fatal(err)` and `log.Fatal(err)` say where they are by themselves
-        if (!plain.startsWith("return ") || !wrapsErrors(text)) return plain
-        val message = failure(failed) ?: return plain
-        return returnStatement(text, offset, "fmt.Errorf(\"$message: %w\", $error)")
+        val message = failure(failed)?.takeIf { plain.startsWith("return ") } ?: return listOf(plain)
+        return listOf(when {
+            answersWithStatus(text) -> returnStatement(text, offset, "status.Errorf(codes.${if (badInput) "InvalidArgument" else "Internal"}, \"$message: %v\", $error)")
+            wrapsErrors(text) -> returnStatement(text, offset, "fmt.Errorf(\"$message: %w\", $error)")
+            else -> plain
+        })
+    }
+
+    /** The parameters and the results of the function the offset is in the body of. */
+    private fun enclosing(text: CharSequence, offset: Int): Pair<List<Parameter>, List<Parameter>>? =
+        GoDeclarations.scan(text).declarations.lastOrNull { it.body != null && offset > it.body.startOffset && offset <= it.body.endOffset && it.signature != null }
+            ?.let { splitSignature(it.signature.orEmpty()) }
+
+    // --- the receiver of a method ---
+
+    private val RECEIVER_TYPED = Regex("""^func \(([\w *.]*)$""")
+    private val METHOD = Regex("""^func \((\w+) (\*?)(\w+)(?:\[[^\]]*])?\) """, RegexOption.MULTILINE)
+    private val TYPE = Regex("""^type (\w+)(?:\[[^\]]*])? (\w+)""", RegexOption.MULTILINE)
+
+    /**
+     * `func (` at the top of a file: the receiver, `s *Server) `. Of the type that is nearest above, by a method of it or by its
+     * declaration; named and taken by pointer or by value as the methods of the type in the file are.
+     */
+    private fun receiver(text: CharSequence, lineStart: Int, before: String, rest: String): String? {
+        val typed = RECEIVER_TYPED.matchEntire(before)?.groupValues?.get(1) ?: return null
+        if (rest.isNotEmpty() && rest != ")") return null
+        val above = text.subSequence(0, lineStart)
+        val method = METHOD.findAll(above).lastOrNull()
+        val declared = TYPE.findAll(above).lastOrNull()
+        // an interface has no methods to write: the type of the methods above it is the one that goes on
+        val isInterface = declared?.groupValues?.get(2) == "interface"
+        val type = when {
+            method != null && (declared == null || isInterface || method.range.first > declared.range.first) -> method.groupValues[3]
+            declared != null && !isInterface -> declared.groupValues[1]
+            else -> return null
+        }
+        val habit = METHOD.findAll(text).firstOrNull { it.groupValues[3] == type }
+        val inside = (habit?.groupValues?.get(1) ?: type.take(1).lowercase()) + " " + (habit?.groupValues?.get(2) ?: "*") + type
+        if (!inside.startsWith(typed) || inside == typed && rest == ")") return null
+        return inside.substring(typed.length) + if (rest == ")") "" else ") "
+    }
+
+    // --- the tag of a field ---
+
+    private val FIELD = Regex("""^(\w+)[ \t]+([\w.\[\]*]+)([ \t]*)$""")
+    private val TAGGED = Regex("""^(\w+)\s+\S.*?\s+`([^`]+)`$""")
+    private val TAG_PAIR = Regex("""(\w+):"([^"]*)"""")
+
+    /** The ways the name of a field is written in a tag; the first that fits every field of the struct is its way. */
+    private val NAMINGS: List<(String) -> String> = listOf(
+        { GoGenerators.snakeCase(it) }, { GoGenerators.camelCase(it) }, { it.lowercase() }, { it }, { GoGenerators.snakeCase(it).replace('_', '-') }, { GoGenerators.snakeCase(it).uppercase() },
+    )
+
+    /** Types that are whole as they are typed: `int` may become `int64`, and it is a type before it does. */
+    private val WHOLE_TYPES = setOf("string", "bool", "error", "any", "byte", "rune", "int", "int32", "int64", "uint", "uint32", "uint64", "float32", "float64", "time.Time", "time.Duration")
+
+    /**
+     * A field typed in a struct whose fields have tags: the tag, with the keys of the field above, the name written as the names of
+     * the struct are (`user_name` or `userName`) and the options of the field above (`omitempty`). A key whose value is not a name of
+     * the field, `validate:"required"`, is not repeated: what it says is about one field.
+     */
+    private fun fieldTag(before: String, previous: List<Line>): String? {
+        val indent = before.takeWhile { it == ' ' || it == '\t' }
+        val (name, type, space) = FIELD.matchEntire(before.trimStart())?.destructured ?: return null
+        if (!name[0].isUpperCase() || (space.isEmpty() && type !in WHOLE_TYPES)) return null
+        val opener = previous.firstOrNull { it.indent.length < indent.length }?.takeIf { it.code.endsWith("struct {") } ?: return null
+        val fields = previous.takeWhile { it !== opener }.filter { it.indent == indent }.mapNotNull { TAGGED.matchEntire(it.code)?.destructured }
+            .map { (field, tag) -> field to TAG_PAIR.findAll(tag).associate { it.groupValues[1] to it.groupValues[2] } }
+        val nearest = fields.firstOrNull() ?: return null
+        val pairs = nearest.second.mapNotNull { (key, value) ->
+            val written = fields.mapNotNull { (field, tags) -> tags[key]?.substringBefore(',')?.takeIf { it.isNotEmpty() && it != "-" }?.let { field to it } }
+            val naming = NAMINGS.firstOrNull { naming -> written.isNotEmpty() && written.all { (field, value) -> naming(field) == value } } ?: return@mapNotNull null
+            val options = value.substringAfter(',', "")
+            "$key:\"${naming(name)}${if (options.isEmpty()) "" else ",$options"}\""
+        }
+        if (pairs.isEmpty()) return null
+        return (if (space.isEmpty()) " " else "") + "`" + pairs.joinToString(" ") + "`"
     }
 
     /** What leaves the function around [offset] with the error: `return nil, err`, `return total, err`, `t.Fatal(err)`, `log.Fatal(err)`. */
@@ -291,7 +398,7 @@ object GoIdioms {
         val (name, method) = LOOP.matchEntire(previous[open].code)?.destructured ?: return null
         // what a wrapped error says has failed: `scan`, `read rows`
         val failed = if (method == "Scan") "scan()" else "readRows()"
-        return "if err := $name.Err(); err != nil {\n$indent$unit${errorReturn(text, offset, "err", failed)}\n$indent}"
+        return "if err := $name.Err(); err != nil {\n$indent$unit${errorExit(text, offset, "err", failed).joinToString("\n$indent$unit")}\n$indent}"
     }
 
     private val CLOSED_ROWS = Regex("""^defer (\w+)\.Close\(\)$""")
