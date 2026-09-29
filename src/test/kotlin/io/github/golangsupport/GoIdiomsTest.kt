@@ -177,10 +177,12 @@ class GoIdiomsTest {
                 return parse(f)
             }
             """
-        assertEquals("\t\treturn nil, err", suggest(code))
+        assertEquals("return nil, err", suggest(code))
         assertEquals("turn nil, err", suggest(code.replace("<caret>", "re<caret>")))
         // the error of the `if` itself
-        assertEquals("\t\treturn nil, err", suggest(code.replace("f, err := os.Open(name)\n", "").replace("if err != nil {", "if err := check(name); err != nil {")))
+        assertEquals("return nil, err", suggest(code.replace("f, err := os.Open(name)\n", "").replace("if err != nil {", "if err := check(name); err != nil {")))
+        // a line that has lost its indent gets the one of the body
+        assertEquals("\t\treturn nil, err", suggest(code.replace("        <caret>", "<caret>")))
         // a line added to a body that has something in it is not the whole of the body
         assertNull(suggest(code.replace("<caret>\n", "<caret>\n        log.Println(err)\n")))
         assertNull(suggest(code.replace("if err != nil {", "if f != nil {")))

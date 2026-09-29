@@ -55,7 +55,7 @@
 - [x] **Ссылки в консоли тестов для неоднозначных имён.** В тестовой консоли пакет известен (`gotest://<pkgDir>|…`), `order_test.go:39` резолвить относительно
   каталога пакета текущего узла. Как: `GoTestConsole` ставит свой `Filter` с приоритетом над `GoConsoleFilterProvider`. Часы.
 - [x] **Правила идиом серым текстом:** `if !ok` после comma-ok (`v, ok := m[k]`, `x, ok := y.(T)`), `defer wg.Done()` первой строкой в `go func()` после `wg.Add`,
-  `defer close(ch)`, `for rows.Next()` после `Query`. Как: `GoIdioms` — новые регулярки, юнит-тесты в `GoIdiomsTest`. По часу на правило.
+  `defer close(ch)` (сделано 2026-09-29 вместе с остальным по серому тексту, см. ROADMAP), `for rows.Next()` после `Query`. Как: `GoIdioms` — новые регулярки, юнит-тесты в `GoIdiomsTest`. По часу на правило.
 - [x] **Постфиксы `.sort`, `.rrv`** (`sort.Slice(x, func(i, j int) bool {…})`, `return x, nil` с переменной). `GoPostfixTemplates`, полчаса.
 - [x] **Structure view: методы под типом.** Группировать `METHOD` под объявление типа с тем же именем получателя (в этом файле); прочие — как сейчас.
   Как: `GoStructureViewFactory`, дети у STRUCT/INTERFACE/TYPE. Часы. Проверка: робот, Alt+7.

@@ -21,7 +21,8 @@ object GoIdioms {
         val typed = before.trimStart()
         val previous = linesBefore(text, lineStart)
         val above = previous.firstOrNull() ?: return null
-        val indent = before.takeWhile { it == ' ' || it == '\t' }.ifEmpty { above.indent }
+        // a line without an indent of its own is as deep as the line above, and a level deeper below what opens a block
+        val indent = before.takeWhile { it == ' ' || it == '\t' }.ifEmpty { above.indent + if (above.code.endsWith("{")) unit else "" }
 
         val below = text.subSequence(lineEnd, text.length).lineSequence().map { it.trim() }.firstOrNull { it.isNotEmpty() }
         val suggestion = errorCheck(text, offset, above, indent, unit) ?: returnInErrorCheck(text, offset, previous, below) ?: okCheck(text, offset, above, indent, unit)
@@ -245,7 +246,7 @@ object GoIdioms {
     private val STOPPABLE = Regex("""^(\w+)\s*:?=\s*time\.New(?:Ticker|Timer)\(.*\)$""")
 
     /** `ctx, span := tracer.Start(ctx, "name")` of OpenTelemetry: by the name of the variable, a `Start` alone means many things. */
-    private val SPAN = Regex("""^\w+,\s*(\w*[sS]pan\w*)\s*:?=\s*[\w.]+\.Start\(.*\)$""")
+    private val SPAN = Regex("""^\w+,\s*(\w*[sS]pan\w*)\s*:?=\s*.+\.Start\(.*\)$""")
     private val SIGNALS = Regex("""^signal\.Notify\((\w+),.*\)$""")
 
     private fun deferAfter(above: Line): String? {
