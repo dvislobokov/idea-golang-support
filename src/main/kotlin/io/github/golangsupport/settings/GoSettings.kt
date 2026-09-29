@@ -73,6 +73,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var completionCatalogue by property(true)
         /** `//` above a declaration becomes `// Name `. */
         var docCommentNames by property(true)
+        /** A Cyrillic letter typed in code is typed as the Latin character of its key. */
+        var latinInCode by property(true)
         var lintOnTheFly by property(true)
 
         /** Added to every `go test`: `-race -count=1`. */
@@ -190,6 +192,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var completionCatalogue: Boolean
         get() = state.completionCatalogue
         set(value) { state.completionCatalogue = value }
+
+    var latinInCode: Boolean
+        get() = state.latinInCode
+        set(value) { state.latinInCode = value }
 
     var createRunConfigurations: Boolean
         get() = state.createRunConfigurations

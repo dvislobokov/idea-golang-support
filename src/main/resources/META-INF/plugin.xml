@@ -72,6 +72,9 @@
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
         <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
         <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>
+        <!-- a Cyrillic letter typed in code is a key of the Russian layout left on: the handlers of the platform are given its Latin
+             character. The last of the handlers of the editor is the one around the others, the completion list among them -->
+        <editorTypedHandler implementationClass="io.github.golangsupport.lang.GoLayoutTypedHandler" id="Go.Layout" order="last"/>
         <intentionAction>
             <language>Go</language>
             <className>io.github.golangsupport.lang.GoHandleErrorIntention</className>

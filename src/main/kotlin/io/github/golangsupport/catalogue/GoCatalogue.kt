@@ -162,18 +162,23 @@ class GoSymbolIndex(modules: List<GoModuleSymbols>) {
      * The names that begin with [prefix], whatever the case of the letters, the best first: the case as typed, a package of
      * [preferred] (the ones the file imports), the standard library, a shorter name. No more than [limit].
      */
-    fun find(prefix: String, limit: Int, preferred: Set<String> = emptySet()): List<Entry> {
-        if (prefix.isEmpty()) return emptyList()
+    fun find(prefix: String, limit: Int, preferred: Set<String> = emptySet(), qualifier: String? = null): List<Entry> {
+        if (prefix.isEmpty() && qualifier == null) return emptyList()
         val wanted = prefix.lowercase()
-        var low = 0
-        var high = entries.size
-        while (low < high) {
-            val middle = (low + high) ushr 1
-            if (entries[middle].key < wanted) low = middle + 1 else high = middle
-        }
         val found = ArrayList<Entry>()
-        var i = low
-        while (i < entries.size && entries[i].key.startsWith(wanted) && found.size < MAX_MATCHES) found += entries[i++]
+        if (qualifier != null) {
+            // the names of the packages of one name: few enough to look through all there is
+            for (entry in entries) if (entry.pack.name.equals(qualifier, ignoreCase = true) && entry.key.startsWith(wanted)) found += entry
+        } else {
+            var low = 0
+            var high = entries.size
+            while (low < high) {
+                val middle = (low + high) ushr 1
+                if (entries[middle].key < wanted) low = middle + 1 else high = middle
+            }
+            var i = low
+            while (i < entries.size && entries[i].key.startsWith(wanted) && found.size < MAX_MATCHES) found += entries[i++]
+        }
         return found.sortedWith(
             compareBy<Entry> { !it.symbol.name.startsWith(prefix) }.thenBy { it.pack.importPath !in preferred }.thenBy { !it.standard }
                 .thenBy { it.symbol.name.length }.thenBy { it.pack.importPath.count { c -> c == '/' } }.thenBy { it.key }.thenBy { it.pack.importPath },

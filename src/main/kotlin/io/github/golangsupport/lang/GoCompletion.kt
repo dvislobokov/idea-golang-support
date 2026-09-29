@@ -83,6 +83,6 @@ class GoReturnCompletionContributor : CompletionContributor() {
         val text = parameters.editor.document.immutableCharSequence
         val values = GoIdioms.returnValues(text, parameters.offset) ?: return
         val item = LookupElementBuilder.create(values).bold().withIcon(AllIcons.Actions.StepOut).withTypeText("return values", true)
-        result.withPrefixMatcher(GoCompletionOrder.typed(text, parameters.offset)).addElement(PrioritizedLookupElement.withPriority(item, GoCompletionOrder.RETURN_VALUES))
+        result.withPrefixMatcher(GoPrefixMatcher(GoCompletionOrder.typed(text, parameters.offset))).addElement(PrioritizedLookupElement.withPriority(item, GoCompletionOrder.RETURN_VALUES))
     }
 }

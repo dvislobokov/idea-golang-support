@@ -105,6 +105,10 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                         .comment("<code>//</code> typed on an empty line right above <code>func</code>, <code>type</code>, <code>var</code> or <code>const</code> becomes <code>// Name </code>")
                 }
                 row {
+                    checkBox("Type Latin characters in code when the keyboard layout is Russian").bindSelected(settings::latinInCode)
+                        .comment("<code>аьеюЗкштедт</code> is typed as <code>fmt.Println</code>. Strings, runes and comments keep what is typed")
+                }
+                row {
                     checkBox("Suggest the idiomatic next line as grey text (Tab to accept)").bindSelected(settings::inlineIdioms)
                         .comment("<code>if err != nil { return ... }</code> after an assigned error, with the return values of the function; <code>defer cancel()</code>, <code>defer mu.Unlock()</code>, <code>defer f.Close()</code> after what needs them")
                 }

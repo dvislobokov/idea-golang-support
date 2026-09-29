@@ -16,6 +16,7 @@ import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoIdioms
 import io.github.golangsupport.lang.GoImport
 import io.github.golangsupport.lang.GoImports
+import io.github.golangsupport.lang.GoPrefixMatcher
 import io.github.golangsupport.lang.GoStructLiterals
 import io.github.golangsupport.lang.GoTokenTypes
 import io.github.golangsupport.settings.GoSettings
@@ -67,17 +68,24 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         val index = GoCatalogueService.getInstance(file.project).index
         if (index.size == 0) return
         val imports = GoDeclarations.scan(text).imports
-        val names = result.withPrefixMatcher(typed)
-        index.find(typed, LIMIT, imports.mapTo(HashSet()) { it.path }).forEachIndexed { rank, entry ->
+        val matcher = GoPrefixMatcher(typed)
+        val names = result.withPrefixMatcher(matcher)
+        // the list is a part of what there is: more letters may bring other names into it
+        result.restartCompletionOnAnyPrefixChange()
+        // with the Russian layout on the dot is a letter, and `аьеюЗкште` is one word: `fmt.Print`
+        val qualifier = matcher.latin.substringBeforeLast('.', "").takeIf { it.isNotEmpty() }
+        val wanted = matcher.latin.substringAfterLast('.')
+        index.find(wanted, LIMIT, imports.mapTo(HashSet()) { it.path }, qualifier).forEachIndexed { rank, entry ->
             val insertion = GoCatalogueInsertion.of(entry, imports) ?: return@forEachIndexed
             val item = LookupElementBuilder.create(entry, entry.symbol.name)
+                .withLookupString(entry.pack.name + "." + entry.symbol.name)
                 .withPresentableText(insertion.text.removeSuffix("()"))
                 .withTailText(tail(entry), true)
                 .withTypeText(entry.pack.importPath, true)
                 .withIcon(icon(entry.symbol.kind))
                 .withInsertHandler(INSERT)
             // below what the file itself has under the same beginning, above what gopls has matched by letters in the middle
-            names.addElement(PrioritizedLookupElement.withPriority(item, GoCompletionOrder.priority(typed, entry.symbol.name) - BELOW - rank * STEP))
+            names.addElement(PrioritizedLookupElement.withPriority(item, GoCompletionOrder.priority(wanted, entry.symbol.name) - BELOW - rank * STEP))
         }
     }
 

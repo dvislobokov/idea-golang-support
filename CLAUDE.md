@@ -91,6 +91,7 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
   модификаторы (`struct`, `interface`, …) — без этого сервер их не шлёт. Что именно он отдаёт — `tools/gopls/semantic_tokens.py`. Снимку робота, снятому сразу
   после открытия файла или при закрытии IDE, в вопросе цветов не верить: цвета приходят позже разметки (так было принято за ошибку то, что работало).
 - Code action gopls применять через `GoplsEdits.apply`: `LspIntentionAction.invoke` платформы без вызова `isAvailable` перед ним (в фоне, под read action) молча ничего не делает — правка запрашивается (`codeAction/resolve`) и документы ищутся именно там.
+- Подменить набираемый символ можно только обёрткой `editorTypedHandler` (`GoLayoutTypedHandler`, конструктор с исходным `TypedActionHandler`, `order="last"` — снаружи остальных). Из `TypedHandlerDelegate` нельзя: повторный `TypedAction.actionPerformed` — это вложенный вход в `DefaultRawTypedHandler` и `runForEachCaret`, платформа бросает исключение, символ теряется; пока открыт список completion, делегаты не вызываются вовсе. Точка расширения не динамическая: установка плагина требует перезапуска IDE.
 - `SMTestProxy.isDefect` истинно и для пропущенных тестов: сначала проверять `isIgnored`. errcheck указывает колонкой на скобку вызова, а не на имя.
 
 Действия: `Go.MainMenu` — меню **Go** в главной строке (после Tools); `Go.ProjectViewPopup` — ПКМ в дереве проекта. Content-модули добавляют свои

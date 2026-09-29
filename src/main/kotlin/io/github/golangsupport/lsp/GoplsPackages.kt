@@ -18,6 +18,7 @@ import io.github.golangsupport.GoIcons
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoImports
+import io.github.golangsupport.lang.GoPrefixMatcher
 import io.github.golangsupport.lang.GoSemanticColors
 import io.github.golangsupport.lang.GoTokenTypes
 import io.github.golangsupport.settings.GoSettings
@@ -86,13 +87,14 @@ class GoplsPackageCompletionContributor : CompletionContributor() {
         val typed = GoCompletionOrder.typed(text, parameters.offset)
         if (typed.isEmpty() || !GoImports.isPackagePlace(text, parameters.offset - typed.length)) return
         val client = Gopls.client(file.project) ?: return
-        val names = result.withPrefixMatcher(typed)
+        val matcher = GoPrefixMatcher(typed)
+        val names = result.withPrefixMatcher(matcher)
         for (path in GoplsKnownPackages.getInstance(file.project).of(client, virtualFile)) {
             val name = GoSemanticColors.packageName(path)
-            if (!name.startsWith(typed, ignoreCase = true)) continue
+            if (!name.startsWith(matcher.latin, ignoreCase = true)) continue
             val item = LookupElementBuilder.create(path, name).withIcon(GoIcons.Package).withTailText("  $path", true).withTypeText("import", true).withInsertHandler(IMPORT)
             // below the names of the file that begin the same way, above what gopls has matched by letters in the middle
-            val priority = GoCompletionOrder.priority(typed, name) - (if (GoImports.isStandard(path)) STANDARD else OTHER)
+            val priority = GoCompletionOrder.priority(matcher.latin, name) -(if (GoImports.isStandard(path)) STANDARD else OTHER)
             names.addElement(PrioritizedLookupElement.withPriority(item, priority))
         }
     }

@@ -87,7 +87,8 @@ object GoIdioms {
 
     // --- return ---
 
-    private val RETURN_TYPED = Regex("""^return[ \t]+\w*$""")
+    // any letter: what is typed may be of the other layout
+    private val RETURN_TYPED = Regex("""^return[ \t]+[\w\p{L}]*$""")
     private val ERROR_CHECK = Regex("""^(?:\}\s*else\s+)?if\s+(?:.*;\s*)?(\w*[eE]rr\w*)\s*!=\s*nil\s*\{$""")
 
     /**
