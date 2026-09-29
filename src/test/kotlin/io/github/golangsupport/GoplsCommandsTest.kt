@@ -69,4 +69,24 @@ class GoplsCommandsTest {
         assertEquals("0.24.0", GoplsLogLines.version("0.24.0"))
         assertEquals("", GoplsLogLines.version(null))
     }
+
+    @Test fun workspaceLoadFailure() {
+        assertTrue(GoplsLogLines.isLoadFailure("Error loading workspace"))
+        assertFalse(GoplsLogLines.isLoadFailure("Setting up workspace"))
+        assertFalse(GoplsLogLines.isLoadFailure(null))
+        // the message of gopls for a vendor directory that does not match go.mod, seen live
+        val message = "packages.Load error: err: exit status 1: stderr: go: inconsistent vendoring in C:\\app:\n" +
+            "\tgithub.com/google/uuid@v1.6.0: is explicitly required in go.mod, but not marked as explicit in vendor/modules.txt\n\n\tTo sync the vendor directory, run:\n\t\tgo mod vendor\n"
+        val text = GoplsLogLines.loadFailure(message)
+        assertTrue(text, text.startsWith("go: inconsistent vendoring in C:\\app:\n\tgithub.com"))
+        assertTrue(text, text.endsWith("go mod vendor"))
+        assertEquals("no go.mod file found", GoplsLogLines.loadFailure("no go.mod file found"))
+        // the log messages gopls sends along, seen live
+        assertTrue(GoplsLogLines.isLoadFailureEcho("2026/09/29 11:20:14 go/packages.Load #1: err: exit status 1: stderr: go: inconsistent vendoring in C:\\app"))
+        assertTrue(GoplsLogLines.isLoadFailureEcho("2026/09/29 11:20:15 MetadataForFile: packages.Load error: err: exit status 1: stderr: go: inconsistent vendoring"))
+        assertTrue(GoplsLogLines.isLoadFailureEcho("2026/09/29 11:20:14 initial workspace load failed: packages.Load error: err: exit status 1"))
+        assertTrue(GoplsLogLines.isLoadFailureEcho("2026/09/29 11:20:15 errors loading workspace: packages.Load error: err: exit status 1"))
+        assertFalse(GoplsLogLines.isLoadFailureEcho("2026/09/29 11:18:33 go/packages.Load #1\n\tpackages=6\n\tduration=386.8213ms"))
+        assertEquals("a &lt;b&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;c", GoplsLogLines.html("a <b>\r\n\tc"))
+    }
 }

@@ -131,6 +131,6 @@
 - [x] Сборка на локальной IDEA, UI-робот (`tools/ui-robot`), зонд delve (`tools/dlv-dap`)
 - [x] Юнит-тесты чистой логики
 - [x] Платформенные тесты: загрузка plugin.xml, состав меню Go, типы файлов, тип конфигурации (`GoPluginTest`)
-- [x] Иконки в стиле и по назначениям dotnet-плагина (`tools/icons/generate.py`, таблица соответствий в его шапке): go / _test, go.mod ↔ project, go.work ↔ solution, зависимость ↔ nuget (+ indirect), бинарник ↔ assembly, конфиги инструментов ↔ config, сгенерированный код ↔ msbuild, шаблоны ↔ settingsJson, go.sum, vendor, benchmark / fuzz / example, окна инструментов (4 цвета + 20x20)
+- [x] Иконки на языке нового UI (`tools/icons/generate.py`, семейства описаны в его шапке; `--preview` — лист для просмотра): обводка 1px и тонированная заливка, светлый и тёмный вариант каждой; знак «go» с модификатором под буквой o (файл, _test, сгенерированный код, run, new, gopls), шестиугольник модуля (go.mod, go.work, go.sum, зависимость + indirect, vendor), шаблоны, конфиги инструментов, бинарник, benchmark / fuzz / example, окна инструментов (4 цвета, 20x20 нарисованы отдельно; у Go Dependencies своя монохромная), иконка плагина (`META-INF/pluginIcon.svg`)
 - [x] UI-робот на своём порту 8083 с проверкой, что IDE — песочница этого проекта (8082 занят песочницей dotnet-плагина)
 - [ ] Иконки узлов Structure view свои, а не из AllIcons

@@ -88,6 +88,25 @@ object GoplsLogLines {
     /** What gopls says while a go.mod is half typed: every code lens fails with the parse error, one message each; nothing the user can act on. */
     fun isTypingNoise(message: String): Boolean = TYPING_NOISE.containsMatchIn(message)
 
+    /** The title of the progress gopls keeps while the workspace is not loaded. */
+    const val LOAD_FAILURE = "Error loading workspace"
+
+    fun isLoadFailure(title: String?): Boolean = title?.trim() == LOAD_FAILURE
+
+    private val LOAD_ECHO = Regex("""packages\.Load\b.*\berr|workspace load failed|errors loading workspace""")
+
+    /** The same failure as log messages, one for every load and every file that has asked (seen live: nine for one broken vendor directory). */
+    fun isLoadFailureEcho(message: String): Boolean = LOAD_ECHO.containsMatchIn(message)
+
+    private val LOAD_PREFIX =Regex("""^.*?\bstderr: """, RegexOption.DOT_MATCHES_ALL)
+
+    /** What `go` has said: gopls puts `packages.Load error: err: exit status 1: stderr: ` before it; a message without it stays as it is. */
+    fun loadFailure(message: String): String = LOAD_PREFIX.replaceFirst(message, "").trim().ifEmpty { message.trim() }
+
+    /** For a balloon: the lines and the indents of the text are kept. */
+    fun html(text: String): String =
+        com.intellij.openapi.util.text.StringUtil.escapeXmlEntities(text).replace("\r", "").replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;").replace("\n", "<br>")
+
     /** The version in `serverInfo` of gopls is its whole build info as JSON (seen live): `v0.23.0` is `Main.Version` in it. */
     fun version(serverInfoVersion: String?): String {
         val raw = serverInfoVersion.orEmpty()

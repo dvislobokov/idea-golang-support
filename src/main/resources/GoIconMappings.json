@@ -3,7 +3,8 @@
     "expui": {
       "goTestsToolWindow.svg": "icons/goTestsToolWindow.svg",
       "goMonitorToolWindow.svg": "icons/goMonitorToolWindow.svg",
-      "goplsToolWindow.svg": "icons/goplsToolWindow.svg"
+      "goplsToolWindow.svg": "icons/goplsToolWindow.svg",
+      "goDependenciesToolWindow.svg": "icons/goDependenciesToolWindow.svg"
     }
   }
 }

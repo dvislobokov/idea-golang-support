@@ -5,6 +5,10 @@ import com.intellij.execution.process.BaseProcessHandler
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.process.ProcessOutputType
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -50,7 +54,12 @@ import org.eclipse.lsp4j.ConfigurationItem
 import org.eclipse.lsp4j.InitializeResult
 import org.eclipse.lsp4j.MessageParams
 import org.eclipse.lsp4j.MessageType
+import org.eclipse.lsp4j.ProgressParams
+import org.eclipse.lsp4j.WorkDoneProgressBegin
+import org.eclipse.lsp4j.WorkDoneProgressEnd
+import org.eclipse.lsp4j.WorkDoneProgressReport
 import java.awt.event.MouseEvent
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /** Starts gopls for the project when a Go file (or a go.mod / go.work, which gopls checks too) is opened. */
@@ -100,9 +109,11 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         }
     }
 
+    private val failures = GoplsWorkspaceFailures(project)
+
     /** `window/logMessage` and `window/showMessage` of the server go to the log window too, on their way to the platform. */
     override fun createLsp4jClient(handler: LspServerNotificationsHandler): Lsp4jClient =
-        super.createLsp4jClient(LoggingNotificationsHandler(handler, GoplsLogService.getInstance(project)))
+        super.createLsp4jClient(LoggingNotificationsHandler(handler, GoplsLogService.getInstance(project), failures))
 
     override val lspServerListener: LspServerListener = object : LspServerListener {
         override fun serverInitialized(params: InitializeResult) {
@@ -110,6 +121,7 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
             GoplsLogService.getInstance(project).info("Initialized: ${info?.name ?: "gopls"} ${GoplsLogLines.version(info?.version)}")
         }
         override fun serverStopped(shutdownNormally: Boolean) {
+            failures.forget()
             val log = GoplsLogService.getInstance(project)
             if (shutdownNormally) log.info("Stopped") else log.error("Stopped unexpectedly: see the lines above. The platform restarts the server a few times, then gives up until Go | gopls | Restart")
         }
@@ -161,11 +173,18 @@ object GoplsServerArguments {
 }
 
 /** The notifications of the server, with `window/logMessage` and `window/showMessage` copied to the log window. */
-private class LoggingNotificationsHandler(private val delegate: LspServerNotificationsHandler, private val log: GoplsLogService) : LspServerNotificationsHandler by delegate {
+private class LoggingNotificationsHandler(
+    private val delegate: LspServerNotificationsHandler, private val log: GoplsLogService, private val failures: GoplsWorkspaceFailures,
+) : LspServerNotificationsHandler by delegate {
+    override fun notifyProgress(params: ProgressParams) {
+        if (!failures.taken(params)) delegate.notifyProgress(params)
+    }
+
     override fun logMessage(params: MessageParams) {
         write(params)
-        // the platform shows a log message of the Error kind as a balloon (seen live): the ones about a half-typed go.mod stay in the log
-        if (!GoplsLogLines.isTypingNoise(params.message)) delegate.logMessage(params)
+        // the platform shows a log message of the Error kind as a balloon (seen live): the ones about a half-typed go.mod stay in the log,
+        // and so do the ones about a workspace that has not loaded, which is told once by GoplsWorkspaceFailures
+        if (!GoplsLogLines.isTypingNoise(params.message) && !GoplsLogLines.isLoadFailureEcho(params.message)) delegate.logMessage(params)
     }
 
     override fun showMessage(params: MessageParams) {
@@ -177,6 +196,51 @@ private class LoggingNotificationsHandler(private val delegate: LspServerNotific
     private fun write(params: MessageParams, prefix: String = "") {
         val text = prefix + GoplsLogLines.withoutStamp(params.message.trimEnd())
         if (params.type == MessageType.Error || params.type == MessageType.Warning) log.error(text) else log.info(text)
+    }
+}
+
+/**
+ * A workspace that has not loaded is a progress that does not end: `Error loading workspace` is its title, the error is its message, and
+ * the end comes when the workspace loads. The platform shows it as a process that runs forever, with the error cut to a line (seen live:
+ * `go: inconsistent ven...`). Here it is an error in the log and a balloon with the whole text, which goes away when the server ends it.
+ */
+private class GoplsWorkspaceFailures(private val project: Project) {
+    private class Shown(val text: String, val notification: Notification)
+
+    private val shown = ConcurrentHashMap<String, Shown>()
+
+    /** True for a progress of a failed load: the platform is not told about it. */
+    fun taken(params: ProgressParams): Boolean {
+        val token = params.token?.let { if (it.isLeft) it.left else it.right?.toString() } ?: return false
+        when (val progress = params.value?.takeIf { it.isLeft }?.left) {
+            is WorkDoneProgressBegin -> if (GoplsLogLines.isLoadFailure(progress.title)) show(token, progress.message.orEmpty()) else return false
+            // gopls reports when the error has changed
+            is WorkDoneProgressReport -> if (shown.containsKey(token)) progress.message?.let { show(token, it) } else return false
+            is WorkDoneProgressEnd -> {
+                (shown.remove(token) ?: return false).notification.expire()
+                GoplsLogService.getInstance(project).info("${GoplsLogLines.LOAD_FAILURE}: over" + progress.message?.let { ", $it" }.orEmpty())
+            }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun show(token: String, message: String) {
+        val text = GoplsLogLines.loadFailure(message)
+        if (shown[token]?.text == text) return
+        GoplsLogService.getInstance(project).error("${GoplsLogLines.LOAD_FAILURE}: $message")
+        val notification = NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
+            .createNotification("gopls: ${GoplsLogLines.LOAD_FAILURE}", GoplsLogLines.html(text), NotificationType.ERROR)
+            .addAction(NotificationAction.createSimple("Show Log") { ShowGoplsLogAction.show(project) })
+            .addAction(NotificationAction.createSimple("Restart gopls") { GoplsIntegrationProvider.restart(project) })
+        shown.put(token, Shown(text, notification))?.notification?.expire()
+        notification.notify(project)
+    }
+
+    /** The server has stopped: what it has said is not true any more. */
+    fun forget() {
+        shown.values.forEach { it.notification.expire() }
+        shown.clear()
     }
 }
 

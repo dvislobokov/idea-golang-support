@@ -112,7 +112,7 @@
         <!-- directives, the module paths of the cache, versions from the cache and the proxy -->
         <completion.contributor language="GoModule" implementationClass="io.github.golangsupport.mod.GoModCompletionContributor"/>
         <!-- the requirements of a module with their updates and vulnerabilities -->
-        <toolWindow id="Go Dependencies" anchor="bottom" icon="/icons/goMod.svg" factoryClass="io.github.golangsupport.mod.GoDependenciesToolWindowFactory" doNotActivateOnStart="true"/>
+        <toolWindow id="Go Dependencies" anchor="bottom" icon="/icons/goDependenciesToolWindow.svg" factoryClass="io.github.golangsupport.mod.GoDependenciesToolWindowFactory" doNotActivateOnStart="true"/>
         <!-- go.mod saved with other requirements than before: the banner with `go mod tidy` -->
         <editorNotificationProvider implementation="io.github.golangsupport.mod.GoModNotificationProvider"/>
 
