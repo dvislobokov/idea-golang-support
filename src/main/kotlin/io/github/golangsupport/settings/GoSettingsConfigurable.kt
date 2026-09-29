@@ -118,6 +118,26 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                     checkBox("Names that begin with what is typed go first").bindSelected(settings::completionPrefixFirst)
                         .comment("gopls matches fuzzily and orders by its own score: <code>ni</code> gives <code>net.IP</code> above <code>nil</code>. Off: the order of gopls")
                 }
+                row {
+                    checkBox("Show the values of the expected type in bold").bindSelected(settings::completionByType)
+                        .comment("An argument of a call, a value of <code>return</code>, of a typed <code>var</code>. Smart completion (Ctrl+Shift+Space) leaves only such values. Needs gopls")
+                }
+                row {
+                    checkBox("Offer functions and types of packages by their names").bindSelected(settings::completionCatalogue)
+                        .comment("<code>Printl</code> gives <code>fmt.Println</code>, with the import: the standard library and the modules go.mod requires directly. Read once for a version, works without gopls")
+                }
+                row {
+                    checkBox("Offer packages that are not imported").bindSelected(settings::completionUnimportedPackages)
+                        .comment("By the name of the package: <code>htt</code> gives <code>http</code> of <code>net/http</code>, and the import is written when it is chosen. Needs gopls")
+                }
+                row {
+                    checkBox("Write the braces of a literal after a struct type").bindSelected(settings::completionStructBraces)
+                        .comment("Where a value is expected: <code>c := http.Client{}</code>, caret between the braces, ready for Fill All Fields. Needs gopls")
+                }
+                row {
+                    checkBox("Offer the arguments of a completed call").bindSelected(settings::completionArguments)
+                        .comment("The parameters are shown above the caret and the list opens for the first argument, then after every <code>, </code>. Needs gopls")
+                }
             }
             group("Code Quality") {
                 row("Reformat Code with:") { comboBox(GoFormatter.entries).bindItem(settings::formatter.toNullableProperty()) }

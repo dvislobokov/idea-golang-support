@@ -1,0 +1,1 @@
+client := <spot>http.Client</spot>

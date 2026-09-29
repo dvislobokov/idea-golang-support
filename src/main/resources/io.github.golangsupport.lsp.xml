@@ -22,6 +22,15 @@
         <lang.expressionTypeProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsExpressionTypeProvider"/>
         <customUsageSearcher implementation="io.github.golangsupport.lsp.GoplsUsageSearcher"/>
         <definitionsScopedSearch implementation="io.github.golangsupport.lsp.GoplsImplementationSearch"/>
+        <!-- Alt+Enter | Fill All Fields: the code action of gopls by its own name, the braces written where they are missing -->
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lsp.GoplsFillStructIntention</className>
+            <category>Go</category>
+            <descriptionDirectoryName>GoplsFillStructIntention</descriptionDirectoryName>
+        </intentionAction>
+        <!-- packages that are not imported, by their names; the import is written when one is chosen -->
+        <completion.contributor language="Go" implementationClass="io.github.golangsupport.lsp.GoplsPackageCompletionContributor"/>
         <intentionAction>
             <language>Go</language>
             <className>io.github.golangsupport.lsp.GoplsActionsIntention</className>
@@ -31,6 +40,8 @@
         <codeInsight.lineMarkerProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsImplementationLineMarkerProvider"/>
         <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.lsp.GoplsUsagesCodeVisionProvider"/>
         <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.lsp.GoplsImplementationsCodeVisionProvider"/>
+        <!-- `, ` inside a call: the completion list for the next argument -->
+        <typedHandler implementation="io.github.golangsupport.lsp.GoplsArgumentTypedHandler"/>
         <!-- the server in the status bar for as long as its process lives, with its memory and CPU next to the icon -->
         <statusBarWidgetFactory id="Go.Gopls.Status" implementation="io.github.golangsupport.lsp.GoplsStatusWidgetFactory"/>
         <!-- the log of the server: its stderr (with the RPC trace when switched on), its messages, what the plugin sends it -->

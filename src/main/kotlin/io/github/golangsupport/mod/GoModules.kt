@@ -1,5 +1,7 @@
 package io.github.golangsupport.mod
 
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -11,6 +13,7 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.util.concurrency.AppExecutorUtil
 
 /** A directory with a go.mod. */
 class GoModule(val root: VirtualFile, val modFile: VirtualFile, val content: GoModFile) {
@@ -36,13 +39,30 @@ class GoModulesService(private val project: Project) {
         return null
     }
 
-    /** Every module of the project. Needs the index: while it is built, only the module of the project directory is known. */
+    /** The go.mod files the index has given last: what EDT is answered with. */
+    @Volatile private var known: List<VirtualFile>? = null
+
+    /**
+     * Every module of the project. Needs the index: while it is built, only the module of the project directory is known (or what was
+     * found before). On EDT the index is not asked, a slow operation there is a SEVERE in the log (seen live, from an action and from
+     * `runWhenSmart`): the modules found last are given, and looked for again in the background.
+     */
     fun modules(): List<GoModule> {
         val baseModule = project.guessProjectDir()?.findChild(GoModFileType.GO_MOD)?.let(::module)
-        if (DumbService.isDumb(project)) return listOfNotNull(baseModule)
-        val files = FilenameIndex.getVirtualFilesByName(GoModFileType.GO_MOD, GlobalSearchScope.projectScope(project))
-        return files.filter { !it.isDirectory && VENDOR !in it.path }.sortedBy { it.path }.map(::module)
+        val remembered = known?.filter { it.isValid }?.map(::module)
+        if (DumbService.isDumb(project)) return remembered ?: listOfNotNull(baseModule)
+        val application = ApplicationManager.getApplication()
+        if (application.isDispatchThread && !application.isUnitTestMode) {
+            ReadAction.nonBlocking<List<VirtualFile>> { find() }.inSmartMode(project).expireWhen { project.isDisposed }.coalesceBy(this)
+                .submit(AppExecutorUtil.getAppExecutorService())
+            return remembered ?: listOfNotNull(baseModule)
+        }
+        return find().map(::module)
     }
+
+    private fun find(): List<VirtualFile> =
+        FilenameIndex.getVirtualFilesByName(GoModFileType.GO_MOD, GlobalSearchScope.projectScope(project))
+            .filter { !it.isDirectory && VENDOR !in it.path }.sortedBy { it.path }.also { known = it }
 
     /** The go.work of the project directory, when there is one. */
     fun workspace(): GoModFile? = project.guessProjectDir()?.findChild(GoModFileType.GO_WORK)?.let(::parse)

@@ -39,6 +39,8 @@ import org.eclipse.lsp4j.LocationLink
 import org.eclipse.lsp4j.Position
 import org.eclipse.lsp4j.ReferenceContext
 import org.eclipse.lsp4j.ReferenceParams
+import org.eclipse.lsp4j.SignatureHelp
+import org.eclipse.lsp4j.SignatureHelpParams
 import org.eclipse.lsp4j.TypeDefinitionParams
 import org.eclipse.lsp4j.jsonrpc.messages.Either
 import org.eclipse.lsp4j.services.LanguageServer
@@ -72,6 +74,9 @@ object Gopls {
 
     fun typeDefinition(client: LspClient, file: VirtualFile, position: Position, timeoutMs: Int): List<Place> =
         locations(client, request(client, timeoutMs) { it.textDocumentService.typeDefinition(TypeDefinitionParams(client.getDocumentIdentifier(file), position)) })
+
+    fun signatureHelp(client: LspClient, file: VirtualFile, position: Position, timeoutMs: Int): SignatureHelp? =
+        request(client, timeoutMs) { it.textDocumentService.signatureHelp(SignatureHelpParams(client.getDocumentIdentifier(file), position)) }
 
     fun references(client: LspClient, file: VirtualFile, position: Position, timeoutMs: Int): List<Place> {
         val params = ReferenceParams(client.getDocumentIdentifier(file), position, ReferenceContext(false))

@@ -2,6 +2,7 @@ package io.github.golangsupport
 
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoIdioms
+import io.github.golangsupport.lang.GoSnippets
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -202,6 +203,21 @@ class GoIdiomsTest {
         // one value is what the server completes
         assertNull(returnValues("package main\n\nfunc f() error {\n    if err != nil {\n        return <caret>\n    }\n}"))
         assertNull(returnValues("package main\n\nfunc f() {\n    return <caret>\n}"))
+    }
+
+    @Test fun theSnippetsOfGopls() {
+        // what gopls offers for the function `sort.Slice` takes, seen with tools/gopls/completion.py
+        assertEquals("func(i, j int) bool {\$0}", GoSnippets.unescape("func(i, j int) bool {\$0\\}"))
+        assertEquals("func(r rune) rune {\$0}", GoSnippets.unescape("func(r rune) rune {\$0\\}"))
+        // nothing to do with a call and with a name
+        assertEquals("Split(\${1:})", GoSnippets.unescape("Split(\${1:})"))
+        assertEquals("Client", GoSnippets.unescape("Client"))
+        // a backslash of the code itself, and a dollar that is not a variable
+        assertEquals("a\\b", GoSnippets.unescape("a\\\\b"))
+        assertEquals("cost \\\$5", GoSnippets.unescape("cost \\\$5"))
+        // inside a placeholder the brace would end it
+        assertEquals("f(\${1:m map[string]struct{\\}})", GoSnippets.unescape("f(\${1:m map[string]struct{\\}})"))
+        assertEquals("f(\${1:a}) {\$0}", GoSnippets.unescape("f(\${1:a}) {\$0\\}"))
     }
 
     @Test fun namesThatBeginWithWhatIsTypedGoFirst() {

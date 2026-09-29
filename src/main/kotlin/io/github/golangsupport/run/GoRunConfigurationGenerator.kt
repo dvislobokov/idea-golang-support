@@ -8,7 +8,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
-import com.intellij.openapi.project.DumbService
+import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.newvfs.RefreshQueue
 import com.intellij.openapi.vfs.VirtualFile
@@ -30,17 +30,20 @@ class GoRunConfigurationGenerator(private val project: Project) {
     fun schedule() {
         if (!GoSettings.getInstance().createRunConfigurations) return
         // a directory made while the IDE was closed is not in the VFS yet (seen live: a new cmd/x got no configuration until a refresh); the
-        // refresh is asked for once the indexes are there, and the scan waits for its events to have been applied
-        DumbService.getInstance(project).runWhenSmart {
-            val roots = ReadAction.compute<List<VirtualFile>, RuntimeException> { if (project.isDisposed) emptyList() else GoModulesService.getInstance(project).commandDirectories() }
-            RefreshQueue.getInstance().refresh(true, true, {
-                ApplicationManager.getApplication().executeOnPooledThread {
-                    if (project.isDisposed) return@executeOnPooledThread
-                    val targets = ReadAction.computeBlocking<List<Target>, RuntimeException> { if (project.isDisposed) emptyList() else collectTargets() }
-                    if (targets.isNotEmpty()) ApplicationManager.getApplication().invokeLater({ register(targets) }, project.disposed)
-                }
-            }, *roots.toTypedArray())
-        }
+        // refresh is asked for once the indexes are there, and the scan waits for its events to have been applied. The modules are looked
+        // for in the background: `runWhenSmart` runs its code on EDT, where asking the index is a slow operation (SEVERE, seen live)
+        ReadAction.nonBlocking<List<VirtualFile>> { GoModulesService.getInstance(project).commandDirectories() }
+            .inSmartMode(project).expireWhen { project.isDisposed }
+            .submit(AppExecutorUtil.getAppExecutorService())
+            .onSuccess { roots ->
+                RefreshQueue.getInstance().refresh(true, true, {
+                    ApplicationManager.getApplication().executeOnPooledThread {
+                        if (project.isDisposed) return@executeOnPooledThread
+                        val targets = ReadAction.computeBlocking<List<Target>, RuntimeException> { if (project.isDisposed) emptyList() else collectTargets() }
+                        if (targets.isNotEmpty()) ApplicationManager.getApplication().invokeLater({ register(targets) }, project.disposed)
+                    }
+                }, *roots.toTypedArray())
+            }
     }
 
     fun collectTargets(): List<Target> {

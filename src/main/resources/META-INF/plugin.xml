@@ -64,6 +64,9 @@
         <colorSettingsPage implementation="io.github.golangsupport.lang.GoColorSettingsPage"/>
         <defaultLiveTemplates file="/liveTemplates/Go.xml"/>
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoStructTagCompletionContributor"/>
+        <!-- functions and types of the standard library and of the modules of go.mod by their own names: `Printl` is `fmt.Println` -->
+        <completion.contributor language="Go" implementationClass="io.github.golangsupport.catalogue.GoCatalogueCompletionContributor"/>
+        <postStartupActivity implementation="io.github.golangsupport.catalogue.GoCatalogueStartupActivity"/>
         <!-- `nil, err` after `return`: the values of the function as one item -->
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoReturnCompletionContributor"/>
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
@@ -175,6 +178,8 @@
                     description="go build ./... in every module of the project"/>
             <action id="Go.Vet" class="io.github.golangsupport.build.GoVetAction" text="Vet" description="go vet ./..."/>
             <action id="Go.Generate" class="io.github.golangsupport.build.GoGenerateAction" text="Generate" description="go generate ./..."/>
+            <action id="Go.RebuildCatalogue" class="io.github.golangsupport.catalogue.GoRebuildCatalogueAction" text="Read Packages Again"
+                    description="Read the exported names of the standard library and of the modules of go.mod from their sources again: what completion offers by a name"/>
             <separator/>
             <group id="Go.Modules" text="Modules" popup="true" icon="/icons/goMod.svg">
                 <action id="Go.ModTidy" class="io.github.golangsupport.build.GoModTidyAction" text="Tidy" description="go mod tidy"/>

@@ -1,8 +1,5 @@
 package io.github.golangsupport.lsp
 
-import com.intellij.codeInsight.completion.CompletionParameters
-import com.intellij.codeInsight.completion.PrioritizedLookupElement
-import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.BaseProcessHandler
 import com.intellij.execution.process.ProcessEvent
@@ -33,7 +30,6 @@ import com.intellij.platform.lsp.api.customization.LspCodeLensSupport
 import com.intellij.platform.lsp.api.customization.LspCommandsCustomizer
 import com.intellij.platform.lsp.api.customization.LspCommandsSupport
 import com.intellij.platform.lsp.api.customization.LspCompletionCustomizer
-import com.intellij.platform.lsp.api.customization.LspCompletionSupport
 import com.intellij.platform.lsp.api.customization.LspCustomization
 import com.intellij.platform.lsp.api.lsWidget.LspClientWidgetItem
 import com.intellij.platform.lsp.api.customization.LspGoToDefinitionCustomizer
@@ -42,7 +38,6 @@ import com.intellij.platform.lsp.api.customization.LspGoToDefinitionDisabled
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensCustomizer
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
 import com.intellij.psi.PsiFile
-import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoSemanticColors
 import io.github.golangsupport.cli.GoCli
@@ -54,7 +49,6 @@ import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.settings.GoplsCatalogue
 import io.github.golangsupport.settings.GoplsDefaults
 import org.eclipse.lsp4j.Command
-import org.eclipse.lsp4j.CompletionItem
 import org.eclipse.lsp4j.ConfigurationItem
 import org.eclipse.lsp4j.InitializeResult
 import org.eclipse.lsp4j.MessageParams
@@ -165,15 +159,7 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
             override fun getTextAttributesKey(tokenType: String, modifiers: List<String>): TextAttributesKey? = GoSemanticColors.key(tokenType, modifiers)
         }
 
-        /** The order of the list: [GoCompletionOrder]; the weigher of the platform (the order of the server) comes after the priority of an item. */
-        override val completionCustomizer: LspCompletionCustomizer = object : LspCompletionSupport() {
-            override fun createLookupElement(parameters: CompletionParameters, item: CompletionItem): LookupElement? {
-                val element = super.createLookupElement(parameters, item) ?: return null
-                if (!GoSettings.getInstance().completionPrefixFirst) return element
-                val typed = GoCompletionOrder.typed(parameters.editor.document.immutableCharSequence, parameters.offset)
-                return PrioritizedLookupElement.withPriority(element, GoCompletionOrder.priority(typed, item.filterText ?: item.label))
-            }
-        }
+        override val completionCustomizer: LspCompletionCustomizer = GoplsCompletionSupport()
 
         /** A clicked lens and the command of a code action: [GoplsCommands], not the fire-and-forget notification of the platform. */
         override val codeLensCustomizer: LspCodeLensCustomizer = object : LspCodeLensSupport() {

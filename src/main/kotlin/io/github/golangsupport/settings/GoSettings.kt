@@ -61,6 +61,16 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var completeReturnValues by property(true)
         /** Names that begin with what is typed go above the fuzzy matches of gopls. */
         var completionPrefixFirst by property(true)
+        /** Values of the type the code wants: bold, and the only ones in smart completion. */
+        var completionByType by property(true)
+        /** After a completed call: its parameters, and the list for an argument. */
+        var completionArguments by property(true)
+        /** `http` of `net/http` in the list before it is imported; the import is written when it is chosen. */
+        var completionUnimportedPackages by property(true)
+        /** `http.Client` chosen where a value is expected becomes `http.Client{}`. */
+        var completionStructBraces by property(true)
+        /** `Printl` gives `fmt.Println`: the names of the standard library and of the modules of go.mod. */
+        var completionCatalogue by property(true)
         /** `//` above a declaration becomes `// Name `. */
         var docCommentNames by property(true)
         var lintOnTheFly by property(true)
@@ -160,6 +170,26 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var completionPrefixFirst: Boolean
         get() = state.completionPrefixFirst
         set(value) { state.completionPrefixFirst = value }
+
+    var completionByType: Boolean
+        get() = state.completionByType
+        set(value) { state.completionByType = value }
+
+    var completionArguments: Boolean
+        get() = state.completionArguments
+        set(value) { state.completionArguments = value }
+
+    var completionUnimportedPackages: Boolean
+        get() = state.completionUnimportedPackages
+        set(value) { state.completionUnimportedPackages = value }
+
+    var completionStructBraces: Boolean
+        get() = state.completionStructBraces
+        set(value) { state.completionStructBraces = value }
+
+    var completionCatalogue: Boolean
+        get() = state.completionCatalogue
+        set(value) { state.completionCatalogue = value }
 
     var createRunConfigurations: Boolean
         get() = state.createRunConfigurations

@@ -2,7 +2,16 @@ package io.github.golangsupport.lsp
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiDocumentManager
+import io.github.golangsupport.catalogue.GoCatalogueService
+import io.github.golangsupport.lang.GoImports
+import io.github.golangsupport.lang.GoSemanticColors
+import org.eclipse.lsp4j.Position
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
@@ -21,6 +30,75 @@ object GoplsActionKinds {
     private val BROWSING = listOf("source.doc", "source.assembly", "source.freesymbols", "source.toggleCompilerOptDetails", "source.splitPackage", "gopls.doc")
 
     fun isEditing(kind: String?): Boolean = kind == null || BROWSING.none { kind == it || kind.startsWith("$it.") }
+}
+
+/**
+ * A code action of gopls, applied. The class of the platform that applies one ([LspIntentionAction]) asks the server for the edit and
+ * finds the documents when it is asked whether it is available, in the background; its `invoke` without that question before it does
+ * nothing at all, silently (seen live: Fill All Fields did nothing). So the question is asked first, under a progress.
+ */
+object GoplsEdits {
+    fun apply(project: Project, editor: Editor, file: PsiFile, client: LspClient, action: CodeAction) {
+        val prepared = ProgressManager.getInstance().runProcessWithProgressSynchronously<LspIntentionAction?, RuntimeException>({
+            LspIntentionAction(client, action).takeIf { intention -> ReadAction.compute<Boolean, RuntimeException> { intention.isAvailable(project, editor, file) } }
+        }, "Asking gopls for the Edit", true, project)
+        if (prepared == null) return HintManager.getInstance().showInformationHint(editor, "gopls has not given an edit for \"${action.title}\"")
+        val before = editor.document.immutableCharSequence
+        prepared.invoke(project, editor, file)
+        importWritten(project, editor, client, file, before)
+    }
+
+    /**
+     * The imports of what the edit has written. gopls fills a struct with `URL: &url.URL{}` and leaves the import to the one who
+     * asked (checked with its answer: no edit of the imports in it; reported by the user). The package is found by its name and by
+     * the names taken of it: in the catalogue at once, and what is not there (a module required indirectly) is asked of gopls, whose
+     * Organize Imports knows it; of its answer only what it adds is taken, nothing is removed.
+     */
+    private fun importWritten(project: Project, editor: Editor, client: LspClient, file: PsiFile, before: CharSequence) {
+        val document = editor.document
+        val written = GoImports.written(before, document.immutableCharSequence) ?: return
+        val missing = GoImports.missing(document.immutableCharSequence, written)
+        if (missing.isEmpty()) return
+        val index = GoCatalogueService.getInstance(project).index
+        val found = missing.mapNotNull { (name, symbols) -> index.packageOf(name, symbols) }
+        import(project, editor, found)
+        val unknown = missing.keys.filter { name -> found.none { GoSemanticColors.packageName(it) == name } && index.packageOf(name, missing.getValue(name)) == null }
+        val virtualFile = file.virtualFile
+        if (unknown.isEmpty() || virtualFile == null) return
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val paths = organized(client, virtualFile).filter { GoSemanticColors.packageName(it) in unknown }
+            if (paths.isNotEmpty()) ApplicationManager.getApplication().invokeLater({ import(project, editor, paths) }, project.disposed)
+        }
+    }
+
+    private fun import(project: Project, editor: Editor, paths: List<String>) {
+        if (paths.isEmpty() || editor.isDisposed) return
+        WriteCommandAction.runWriteCommandAction(project, "Add Imports", null, {
+            for (path in paths) GoImports.add(editor.document.immutableCharSequence, path)?.let { editor.document.insertString(it.offset, it.text) }
+            PsiDocumentManager.getInstance(project).commitDocument(editor.document)
+        })
+    }
+
+    /** The import paths in what Organize Imports of gopls would write; asked again after a moment, the edit may not have reached the server. */
+    private fun organized(client: LspClient, file: VirtualFile): List<String> {
+        val start = Position(0, 0)
+        val params = CodeActionParams(client.getDocumentIdentifier(file), Range(start, start), CodeActionContext(emptyList()).apply { only = listOf(ORGANIZE) })
+        repeat(ATTEMPTS) { attempt ->
+            val edits = Gopls.codeActions(client, params, TIMEOUT_MS).filter { it.kind?.startsWith(ORGANIZE) == true }.mapNotNull { it.edit }
+            val texts = edits.flatMap { it.documentChanges.orEmpty() }.mapNotNull { it.takeIf { change -> change.isLeft }?.left }.flatMap { it.edits.orEmpty() }.mapNotNull { it.newText } +
+                edits.flatMap { it.changes?.values.orEmpty() }.flatten().mapNotNull { it.newText }
+            val paths = texts.flatMap { text -> QUOTED.findAll(text).map { it.groupValues[1] }.toList() }
+            if (paths.isNotEmpty()) return paths
+            if (attempt < ATTEMPTS - 1) Thread.sleep(RETRY_MS)
+        }
+        return emptyList()
+    }
+
+    private const val ORGANIZE = "source.organizeImports"
+    private const val TIMEOUT_MS = 3_000
+    private const val ATTEMPTS = 3
+    private const val RETRY_MS = 400L
+    private val QUOTED = Regex("\"([^\"\\s]+)\"")
 }
 
 /**
@@ -58,7 +136,7 @@ class GoplsActionsIntention : IntentionAction {
             .setTitle("gopls")
             .setRenderer(com.intellij.ui.SimpleListCellRenderer.create("") { it.title })
             .setNamerForFiltering { it.title }
-            .setItemChosenCallback { LspIntentionAction(client, it).invoke(project, editor, file) }
+            .setItemChosenCallback { GoplsEdits.apply(project, editor, file, client, it) }
             .createPopup().showInBestPositionFor(editor)
     }
 

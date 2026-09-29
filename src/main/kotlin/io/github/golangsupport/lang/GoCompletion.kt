@@ -16,6 +16,9 @@ import io.github.golangsupport.settings.GoSettings
 object GoCompletionOrder {
     const val RETURN_VALUES = 1000.0
 
+    /** Added to the priority of a value of the type the code wants: above the others that begin the same way, below a better beginning. */
+    const val FITS = 0.5
+
     /** The identifier that ends at [offset]: what the completion is asked for. */
     fun typed(text: CharSequence, offset: Int): String {
         var start = offset.coerceIn(0, text.length)
@@ -28,6 +31,48 @@ object GoCompletionOrder {
         name.startsWith(typed) -> 2.0
         name.startsWith(typed, ignoreCase = true) -> 1.0
         else -> 0.0
+    }
+}
+
+/**
+ * The snippets of gopls, made ready for the platform. A snippet of the protocol escapes `}` and `\` with a backslash, and gopls does:
+ * the function it offers where one is expected is `func(i, j int) bool {$0\}` (checked with its answer). The converter of the
+ * platform leaves the backslash in the code (seen live: `{\` and the brace on the next line), so it is taken away here. Inside a
+ * placeholder (`${1:...}`) the text is left as it is: there the brace would end the placeholder.
+ */
+object GoSnippets {
+    fun unescape(snippet: String): String {
+        if ('\\' !in snippet) return snippet
+        val result = StringBuilder(snippet.length)
+        var depth = 0
+        var i = 0
+        while (i < snippet.length) {
+            val c = snippet[i]
+            val next = snippet.getOrNull(i + 1)
+            when {
+                c == '\\' && depth == 0 && (next == '}' || next == '\\') -> {
+                    result.append(next)
+                    i++
+                }
+                // an escaped character of a placeholder, and `\$` anywhere: a dollar without it would begin a variable
+                c == '\\' && next != null -> {
+                    result.append(c).append(next)
+                    i++
+                }
+                c == '$' && next == '{' -> {
+                    depth++
+                    result.append("\${")
+                    i++
+                }
+                c == '}' && depth > 0 -> {
+                    depth--
+                    result.append(c)
+                }
+                else -> result.append(c)
+            }
+            i++
+        }
+        return result.toString()
     }
 }
 

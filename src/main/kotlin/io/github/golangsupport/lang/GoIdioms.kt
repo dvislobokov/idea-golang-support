@@ -172,6 +172,12 @@ object GoIdioms {
         return result.asReversed()
     }
 
+    /** A type any value may turn out to fit, as far as a name tells: `any`, an interface literal, the interfaces known by their names. */
+    fun isInterfaceLike(type: String): Boolean {
+        val t = type.trim()
+        return t == "any" || t.startsWith("interface") || t in KNOWN_INTERFACES || INTERFACE_LIKE.containsMatchIn(t.substringAfterLast('.'))
+    }
+
     fun zeroValue(type: String): String {
         val t = type.trim()
         return when {
