@@ -151,7 +151,8 @@
         <internalFileTemplate name="Go Program"/>
         <internalFileTemplate name="Go Test"/>
         <defaultTemplatePropertiesProvider implementation="io.github.golangsupport.templates.GoTemplatePropertiesProvider"/>
-        <!-- New Project: a "Go" category in the module-based wizard (IDEA family, incl. forks like GIGA IDE), GoLand-style: GOROOT, module path, go mod init -->
+        <!-- New Project, GoLand-style: GOROOT, module path, go mod init. The dialog of IntelliJ IDEA lists generator wizards, not directory generators -->
+        <directoryProjectGenerator implementation="io.github.golangsupport.templates.GoProjectGenerator"/>
         <newProjectWizard.generator implementation="io.github.golangsupport.templates.GoNewProjectWizard"/>
         <!-- file.go:12 of the compiler, of tests and of panics, in every console of the project -->
         <consoleFilterProvider implementation="io.github.golangsupport.run.GoConsoleFilterProvider"/>

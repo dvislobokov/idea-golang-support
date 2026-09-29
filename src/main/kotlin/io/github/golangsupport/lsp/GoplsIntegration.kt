@@ -211,6 +211,8 @@ private class GoplsWorkspaceFailures(private val project: Project) {
 
     /** True for a progress of a failed load: the platform is not told about it. */
     fun taken(params: ProgressParams): Boolean {
+        // the last progress of the server comes after the project is closed (seen live): its services are gone by then
+        if (project.isDisposed) return true
         val token = params.token?.let { if (it.isLeft) it.left else it.right?.toString() } ?: return false
         when (val progress = params.value?.takeIf { it.isLeft }?.left) {
             is WorkDoneProgressBegin -> if (GoplsLogLines.isLoadFailure(progress.title)) show(token, progress.message.orEmpty()) else return false
