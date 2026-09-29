@@ -73,7 +73,10 @@
   с процентом и Hide Coverage, процент у пакетов в Go Tests (`GoCoverageService`) — робот: 72,7 % по `store`, 20 полос в order.go, уведомление, процент в окне
 - [~] Fuzz как режим: галочка Fuzz в конфигурации (`-run ^$ -fuzz <паттерн>`), в gutter у `FuzzX` — Run Fuzzing (`GoFuzzAction`) — не проверено
 - [x] Галочки Race (`-race`) и `-count=1` в конфигурации — робот (`go test -json -race -count=1 .` в консоли)
-- [x] Автогенерация конфигураций для каталогов с `func main` (настройка; удалённая не возвращается) — робот
+- [x] Автогенерация конфигураций для каталогов с `func main` (настройка; удалённая не возвращается) — робот; каталог, появившийся пока IDE была закрыта, тоже:
+  сканирование после индексации и асинхронного refresh VFS корней с колбэком (синхронный refresh из фоновой активности его не видел — seen live) — робот
+- [x] Бенчмарк в дереве тестов — passed, а не terminated: `go test -json` не шлёт ему `pass`, открытые узлы закрываются событием пакета (fail пакета — failed) — робот
+- [x] Балуны gopls о полунабранном go.mod («unknown directive» на каждую линзу, `logMessage` уровня Error) остаются в окне лога и не показываются (`GoplsLogLines.isTypingNoise`) — робот
 - [x] Бенчмарки таблицей: строки `BenchmarkX-N iterations ns/op B/op allocs/op` (и любые другие метрики, `MB/s`) собираются из `go test -json` (`GoBenchmarkCollector`:
   строка приходит двумя событиями `output`, склеивается по `\n` — seen live), по окончании прогона — вкладка **Benchmarks** в окне Go Tests с колонками и Δ % против
   прошлого прогона того же пакета (последние два прогона хранятся в workspace, `GoBenchmarkResults`); галочка `-benchmem` в конфигурации (по умолчанию включена) — робот (два прогона, Δ −3,0 %)
@@ -86,13 +89,14 @@
 - [x] Виды конфигурации **Binary** (`launch` в режиме `exec`: готовый бинарник, Run запускает его как есть), **Core dump** (`mode: core`, бинарник + дамп; на Windows minidump,
   снять можно `dlv exec … --init` с `dump`), **Remote dlv dap** (без своего процесса: сокет к `dlv dap --listen=host:port`, `RemoteDelve`; attach к pid той машины или `exec`
   бинарника там), у всех `substitutePath` из строк `local=remote` (`GoLaunchArguments`, юнит-тесты); поля редактора показываются по виду — робот (все три остановились
-  на `main.go:17`, значения читаются; remote — `dlv dap` на 127.0.0.1:2345). Не сделано: `dlv --headless` (JSON-RPC) как цель remote
+  на `main.go:17`, значения читаются; remote — `dlv dap` на 127.0.0.1:2345). Не сделано: `dlv --headless` (JSON-RPC) как цель remote; SSH одной кнопкой (туннель, scp, `dlv dap` там)
+- [x] Сессия attach в Go Monitor: delve не шлёт `process` при attach, pid берётся из запроса (только для локального delve) — робот (`Debug: attached wait (pid)`)
 - [~] Отладочный бинарь собирается во временный каталог (`output` в launch: `$TMPDIR/__debug_bin<uuid>`), а не в каталог пакета, как в GoLand; удаляется по завершении сессии (`deleteOnExit` на случай блокировки в Windows) — юнит-тест на путь, вживую не проверено
 - [x] Отказ запуска (не компилируется, версия Go) — уведомление с выводом компилятора, сессия закрывается — робот
 - [x] Лог delve на сессию, Show Debugger Logs, Trace Debugger Protocol (свой трассировщик: `delve/protocol/protocol-*.log`, registry `go.debugger.protocol.trace`)
 - [x] Hit count, logpoints, условие точки, точки на паники — робот
 - [~] Значение при наведении (`GoHoverExpression`) — вживую не проверено; значения в редакторе рядом с кодом (`GoInlineValues`) — юнит-тест
-- [x] Attach to Process: Run | Attach to Process, группа «Go» со всеми процессами (какие из них Go, из списка не узнать), `attach` с `processId` — робот (`GoAttachProfile` к запущенному бинарнику, остановка на точке, значения; диалог выбора процесса не открывался). Не сделано: сессия attach не попадает в Go Monitor (delve не шлёт `process`)
+- [x] Attach to Process: Run | Attach to Process, группа «Go» со всеми процессами (какие из них Go, из списка не узнать), `attach` с `processId` — робот (`GoAttachProfile` к запущенному бинарнику, остановка на точке, значения; диалог выбора процесса не открывался)
 - [x] Set Value: `setVariable` с контейнером, который клиент знает сам — робот: строка, число внутри `order.items[0]`
 - [x] Вкладка **Goroutines** в окне отладки (`GoGoroutinesTabLayouter`, `createTabLayouter`): горутины остановки по функции верхнего фрейма с числом, состояние из имени
   delve (`* [Go 1] f (Thread N)` — seen live), поиск, галочка «Hide runtime goroutines» (`runtime.*`, `os/signal.*`), раскрытие узла — 8 верхних фреймов по запросу,
