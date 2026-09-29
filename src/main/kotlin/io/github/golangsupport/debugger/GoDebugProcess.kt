@@ -17,6 +17,7 @@ import com.intellij.xdebugger.XSourcePosition
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.intellij.xdebugger.frame.XSuspendContext
+import com.intellij.xdebugger.ui.XDebugTabLayouter
 import com.intellij.ide.BrowserUtil
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
@@ -79,6 +80,7 @@ class GoDebugProcess(
     private val startupOutput = StringBuilder()
 
     override fun getEditorsProvider(): XDebuggerEditorsProvider = editors
+    override fun createTabLayouter(): XDebugTabLayouter = GoGoroutinesTabLayouter(this)
     override fun getBreakpointHandlers(): Array<XBreakpointHandler<*>> = arrayOf(lineBreakpoints, panicBreakpoints)
     override fun doGetProcessHandler(): ProcessHandler = handler
 

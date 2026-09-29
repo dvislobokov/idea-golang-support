@@ -20,6 +20,7 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
     private val recursive = JBCheckBox("Packages below the directory as well (./...)")
     private val testPattern = JBTextField()
     private val benchmark = JBCheckBox("Run benchmarks instead of tests")
+    private val benchmem = JBCheckBox("Memory allocations of the benchmarks (-benchmem)")
     private val fuzz = JBCheckBox("Fuzz instead of testing (-fuzz with the pattern)")
     private val coverage = JBCheckBox("Collect coverage (-coverprofile), shown in the editor and in the Go Tests window")
     private val race = JBCheckBox("Race detector (-race)")
@@ -45,7 +46,8 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
             row { cell(environment).align(AlignX.FILL) }
             row("Test pattern:") { cell(testPattern).align(AlignX.FILL).comment("For <code>go test</code>: the <code>-run</code> expression, e.g. <code>^TestOrder</code> or <code>^TestOrder$/^empty$</code>") }
             row { cell(recursive) }
-            row { cell(benchmark).comment("<code>-bench</code> with the pattern, and <code>-run ^$</code>") }
+            row { cell(benchmark).comment("<code>-bench</code> with the pattern, and <code>-run ^$</code>; the results go to the Benchmarks tab of the Go Tests window, next to the run before") }
+            row { cell(benchmem) }
             row { cell(fuzz).comment("Runs until a failing input is found or the run is stopped; <code>-fuzztime=30s</code> in the go tool arguments bounds it") }
             row { cell(coverage) }
             row { cell(race) }
@@ -62,6 +64,7 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         recursive.isSelected = options.recursive
         testPattern.text = options.testPattern.orEmpty()
         benchmark.isSelected = options.benchmark
+        benchmem.isSelected = options.benchmem
         race.isSelected = options.race
         noTestCache.isSelected = options.noTestCache
         fuzz.isSelected = options.fuzz
@@ -82,6 +85,7 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         options.recursive = recursive.isSelected
         options.testPattern = testPattern.text.trim().ifEmpty { null }
         options.benchmark = benchmark.isSelected
+        options.benchmem = benchmem.isSelected
         options.race = race.isSelected
         options.noTestCache = noTestCache.isSelected
         options.fuzz = fuzz.isSelected

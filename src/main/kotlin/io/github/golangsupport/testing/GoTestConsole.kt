@@ -64,6 +64,10 @@ class GoTestRunState(private val configuration: GoRunConfiguration, environment:
     override fun execute(executor: Executor, runner: ProgramRunner<*>): ExecutionResult {
         val handler = startProcess()
         val properties = GoTestConsoleProperties(configuration, executor)
+        // the benchmark lines collected along the way are recorded, and shown, once the run is over
+        handler.addProcessListener(object : ProcessListener {
+            override fun processTerminated(event: ProcessEvent) = properties.benchmarks.finish()
+        })
         val console = SMTestRunnerConnectionUtil.createAndAttachConsole(TEST_FRAMEWORK_NAME, handler, properties)
         val rerunFailed = properties.createRerunFailedTestsAction(console)
         rerunFailed.setModelProvider { (console as SMTRunnerConsoleView).resultsViewer }
@@ -73,6 +77,7 @@ class GoTestRunState(private val configuration: GoRunConfiguration, environment:
 
 class GoTestConsoleProperties(private val configuration: GoRunConfiguration, executor: Executor) :
     SMTRunnerConsoleProperties(configuration, TEST_FRAMEWORK_NAME, executor), SMCustomMessagesParsing {
+    val benchmarks = GoBenchmarkCollector(configuration.project)
 
     init {
         isIdBasedTestTree = true
@@ -86,12 +91,12 @@ class GoTestConsoleProperties(private val configuration: GoRunConfiguration, exe
     override fun createTestEventsConverter(testFrameworkName: String, consoleProperties: TestConsoleProperties): OutputToGeneralTestEventsConverter {
         val directory = LocalFileSystem.getInstance().findFileByPath(configuration.packageDirectory().replace('\\', '/'))
         val module = GoModulesService.getInstance(configuration.project).moduleOf(directory)
-        return GoTestEventsConverter(testFrameworkName, consoleProperties) { packagePath, test ->
+        return GoTestEventsConverter(testFrameworkName, consoleProperties, { packagePath, test ->
             // example.com/app/store -> <module root>/store; a package outside the module is looked for in the directory of the run
             val packageDirectory = module?.takeIf { packagePath == it.path || packagePath.startsWith(it.path + "/") }
                 ?.let { it.root.path + packagePath.removePrefix(it.path) } ?: configuration.packageDirectory()
             locationHint(packageDirectory, test)
-        }
+        }, benchmarks::line)
     }
 
     override fun getTestLocator(): SMTestLocator = GoTestLocator
@@ -103,9 +108,10 @@ class GoTestConsoleProperties(private val configuration: GoRunConfiguration, exe
     }
 }
 
-class GoTestEventsConverter(testFrameworkName: String, consoleProperties: TestConsoleProperties, locationHint: (String, String?) -> String?) :
-    OutputToGeneralTestEventsConverter(testFrameworkName, consoleProperties) {
-    private val events = GoTestEvents(locationHint)
+class GoTestEventsConverter(
+    testFrameworkName: String, consoleProperties: TestConsoleProperties, locationHint: (String, String?) -> String?, onOutput: (String, String) -> Unit = { _, _ -> },
+) : OutputToGeneralTestEventsConverter(testFrameworkName, consoleProperties) {
+    private val events = GoTestEvents(locationHint, onOutput)
 
     override fun processServiceMessages(text: String, outputType: Key<*>, visitor: ServiceMessageVisitor): Boolean {
         val messages = events.convert(text) ?: return super.processServiceMessages(text, outputType, visitor)

@@ -62,6 +62,8 @@ object GoHelpPage {
             Row("Run / debug", "▶ in the gutter at <code>func main</code>, tests, benchmarks, <code>t.Run(\"name\")</code> and the cases of a table", "The Go run configuration: <code>go run</code> and <code>go test</code>; Debug builds with delve; the icon shows how the test went last time; a fuzz function has <i>Run Fuzzing</i>"),
             Row("Tests", "Tool window <b>Go Tests</b>", "All tests of the project with their last results; run, debug, run with coverage, rerun failed, rerun the package on save"),
             Row("Coverage", "Run configuration → Coverage, or <i>Run with Coverage</i> in Go Tests", "Green, red and yellow bars in the gutter; the percentage next to the packages of Go Tests"),
+            Row("Benchmarks", "▶ at <code>BenchmarkXxx</code>, or Benchmark in the run configuration", "The <b>Benchmarks</b> tab of Go Tests: ns/op, B/op, allocs/op and the change against the run before"),
+            Row("Goroutines", "Tab <b>Goroutines</b> of the debug session", "Grouped by function, with a search and the runtime ones hidden; open one for its frames, double-click to make it current"),
             Row("Stack traces", "Menu <b>Go | Analyze Stack Trace</b>", "Paste a panic or a goroutine dump: its <code>file.go:12</code> frames become links"),
             Row("Profile tests", "Run configuration → Profile", "CPU, memory, block, mutex, execution trace; a notification opens it in <code>go tool pprof</code> / <code>trace</code>"),
             Row("Monitor", "Tool window <b>Go Monitor</b>", "CPU, memory, heap, GC, threads, scheduler of a running program; tick <i>Collect runtime telemetry</i> in the run configuration; <i>Goroutines</i> takes a snapshot with delve"),

@@ -70,6 +70,9 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
     /** `-bench` with the pattern instead of `-run`. */
     var benchmark by property(false)
 
+    /** `-benchmem`: B/op and allocs/op next to ns/op. */
+    var benchmem by property(true)
+
     /** `-fuzz` with the pattern: fuzzing, which runs until it finds a failing input or is stopped (`-fuzztime` goes to the go tool arguments). */
     var fuzz by property(false)
 
@@ -170,7 +173,7 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
     private fun testSelection(): List<String> {
         val pattern = options.testPattern?.takeIf { it.isNotBlank() }
         return when {
-            options.benchmark -> listOf("-run", "^$", "-bench", pattern ?: ".")
+            options.benchmark -> listOf("-run", "^$", "-bench", pattern ?: ".") + listOfNotNull("-benchmem".takeIf { options.benchmem })
             options.fuzz -> listOf("-run", "^$", "-fuzz", pattern ?: ".")
             pattern != null -> listOf("-run", pattern)
             else -> emptyList()

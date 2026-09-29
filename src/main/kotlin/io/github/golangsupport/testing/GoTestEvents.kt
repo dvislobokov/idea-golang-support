@@ -38,7 +38,11 @@ object GoTests {
  * The stream of `go test -json` as TeamCity service messages, for the test tree of the platform. Ids make the tree: a package is a
  * suite, a test a node under its package, a subtest (`TestA/case`) a node under its parent test, which Go finishes after its children.
  */
-class GoTestEvents(private val locationHint: (packagePath: String, test: String?) -> String? = { _, _ -> null }) {
+class GoTestEvents(
+    private val locationHint: (packagePath: String, test: String?) -> String? = { _, _ -> null },
+    /** Every line a test or a package prints: the results of benchmarks are among them ([GoBenchmarks.parseLine]). */
+    private val onOutput: (packagePath: String, line: String) -> Unit = { _, _ -> },
+) {
     private val startedPackages = LinkedHashSet<String>()
     private val startedTests = HashSet<String>()
     private val failedPackages = HashSet<String>()
@@ -71,6 +75,7 @@ class GoTestEvents(private val locationHint: (packagePath: String, test: String?
             "run" -> ensureStarted()
             "output" -> {
                 val output = event.string("Output").orEmpty()
+                onOutput(packagePath, output)
                 // the framing of the verbose mode repeats what the tree shows
                 if (FRAMING.any { output.trimStart().startsWith(it) }) return
                 ensureStarted()
@@ -96,7 +101,11 @@ class GoTestEvents(private val locationHint: (packagePath: String, test: String?
 
     private fun packageEvent(action: String, packagePath: String, event: JsonObject, result: MutableList<String>) {
         when (action) {
-            "output", "build-output" -> packageOutput.getOrPut(packagePath, ::StringBuilder).append(event.string("Output").orEmpty())
+            "output", "build-output" -> {
+                val output = event.string("Output").orEmpty()
+                onOutput(packagePath, output)
+                packageOutput.getOrPut(packagePath, ::StringBuilder).append(output)
+            }
             "pass", "fail", "skip", "build-fail" -> {
                 // a package that fails without a failed test did not compile, or died in TestMain or in a panic: what it printed is the reason
                 if ((action == "fail" || action == "build-fail") && packagePath !in failedPackages) {

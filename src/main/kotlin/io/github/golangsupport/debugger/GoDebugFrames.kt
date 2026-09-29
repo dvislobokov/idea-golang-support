@@ -30,6 +30,9 @@ class GoSuspendContext(
 
     val topFrameId: Int? get() = active?.topFrame?.let { (it as? GoStackFrame)?.id }
 
+    /** Every goroutine of the stop, for the Goroutines tab. */
+    val goroutines: List<GoExecutionStack> get() = stacks
+
     override fun getActiveExecutionStack(): XExecutionStack? = active
 
     // the stopped goroutine first, as GoLand lists it
