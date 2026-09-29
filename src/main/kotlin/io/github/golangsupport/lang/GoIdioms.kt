@@ -85,6 +85,33 @@ object GoIdioms {
         return "return " + values.joinToString(", ")
     }
 
+    // --- return ---
+
+    private val RETURN_TYPED = Regex("""^return[ \t]+\w*$""")
+    private val ERROR_CHECK = Regex("""^(?:\}\s*else\s+)?if\s+(?:.*;\s*)?(\w*[eE]rr\w*)\s*!=\s*nil\s*\{$""")
+
+    /**
+     * The values of the `return` that is being typed at [offset], for the completion list: the zero values of the results with the error
+     * of the `if err != nil` around (`nil, err`), with `nil` for the error elsewhere. Null where the function returns less than two
+     * values: one name is what the language server completes.
+     */
+    fun returnValues(text: CharSequence, offset: Int): String? {
+        if (offset < 0 || offset > text.length) return null
+        var lineStart = offset
+        while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--
+        var lineEnd = offset
+        while (lineEnd < text.length && text[lineEnd] != '\n') lineEnd++
+        if (text.subSequence(offset, lineEnd).isNotBlank()) return null
+        val before = text.subSequence(lineStart, offset).toString()
+        if (!RETURN_TYPED.matches(before.trimStart())) return null
+        val indent = before.takeWhile { it == ' ' || it == '\t' }
+        // the line that opens the block of the caret: the nearest one above with a smaller indent
+        val opener = linesBefore(text, lineStart).firstOrNull { it.indent.length < indent.length }
+        val error = opener?.let { ERROR_CHECK.matchEntire(it.code) }?.groupValues?.get(1) ?: "nil"
+        val statement = returnStatement(text, offset, error)
+        return statement.removePrefix("return ").takeIf { statement.startsWith("return ") && ", " in it }
+    }
+
     // --- if !ok ---
 
     /** `v, ok := m[key]`, `s, ok := x.(string)`, `v, ok := <-ch`: the comma-ok forms, and what stands on the right. */

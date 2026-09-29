@@ -1,8 +1,10 @@
 package io.github.golangsupport
 
+import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoIdioms
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GoIdiomsTest {
@@ -166,5 +168,49 @@ class GoIdiomsTest {
         assertEquals(listOf("ctx" to "context.Context", "items" to "...T"), parameters.map { it.name to it.type })
         assertEquals(listOf(null to "map[string][]T", null to "error"), results.map { it.name to it.type })
         assertEquals(listOf("error"), GoIdioms.splitSignature("() error").second.map { it.type })
+    }
+
+    /** The values offered at `<caret>`, which is cut out of [code]. */
+    private fun returnValues(code: String): String? {
+        val text = code.trimIndent().replace("    ", "\t")
+        return GoIdioms.returnValues(text.replace("<caret>", ""), text.indexOf("<caret>"))
+    }
+
+    @Test fun returnValuesInsideAnErrorCheck() {
+        val code = """
+            package main
+
+            func (s *Server) DeleteUser(ctx context.Context, req interface{}) (interface{}, error) {
+                _, err := os.Open("123")
+                if err != nil {
+                    return ni<caret>
+                }
+                return nil, nil
+            }
+            """
+        assertEquals("nil, err", returnValues(code))
+        assertEquals("nil, err", returnValues(code.replace("return ni<caret>", "return <caret>")))
+        assertEquals("nil, openErr", returnValues(code.replace("err :=", "openErr :=").replace("err !=", "openErr !=")))
+        // not after `return`, and not in the middle of what is written
+        assertNull(returnValues(code.replace("return ni<caret>", "ni<caret>")))
+        assertNull(returnValues(code.replace("return ni<caret>", "return <caret>nil, err")))
+    }
+
+    @Test fun returnValuesOutsideAnErrorCheck() {
+        assertEquals("0, \"\", nil", returnValues("package main\n\nfunc f() (int, string, error) {\n    return <caret>\n}"))
+        assertEquals("nil, nil", returnValues("package main\n\nfunc f(p *T) (*T, error) {\n    if p != nil {\n        return <caret>\n    }\n}"))
+        // one value is what the server completes
+        assertNull(returnValues("package main\n\nfunc f() error {\n    if err != nil {\n        return <caret>\n    }\n}"))
+        assertNull(returnValues("package main\n\nfunc f() {\n    return <caret>\n}"))
+    }
+
+    @Test fun namesThatBeginWithWhatIsTypedGoFirst() {
+        assertEquals("ni", GoCompletionOrder.typed("\treturn ni", 10))
+        assertEquals("Op", GoCompletionOrder.typed("os.Op", 5))
+        assertEquals("", GoCompletionOrder.typed("return ", 7))
+        assertTrue(GoCompletionOrder.priority("ni", "nil") > GoCompletionOrder.priority("ni", "net.IP"))
+        assertTrue(GoCompletionOrder.priority("op", "open") > GoCompletionOrder.priority("op", "Open"))
+        assertTrue(GoCompletionOrder.priority("op", "Open") > GoCompletionOrder.priority("op", "os.Pipe"))
+        assertEquals(GoCompletionOrder.priority("", "nil"), GoCompletionOrder.priority("", "net.IP"), 0.0)
     }
 }

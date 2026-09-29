@@ -109,6 +109,16 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                         .comment("<code>if err != nil { return ... }</code> after an assigned error, with the return values of the function; <code>defer cancel()</code>, <code>defer mu.Unlock()</code>, <code>defer f.Close()</code> after what needs them")
                 }
             }
+            group("Completion") {
+                row {
+                    checkBox("Offer the values of a return statement as one item").bindSelected(settings::completeReturnValues)
+                        .comment("<code>nil, err</code> after <code>return</code> inside <code>if err != nil</code>: the zero values of the results of the function, and the error")
+                }
+                row {
+                    checkBox("Names that begin with what is typed go first").bindSelected(settings::completionPrefixFirst)
+                        .comment("gopls matches fuzzily and orders by its own score: <code>ni</code> gives <code>net.IP</code> above <code>nil</code>. Off: the order of gopls")
+                }
+            }
             group("Code Quality") {
                 row("Reformat Code with:") { comboBox(GoFormatter.entries).bindItem(settings::formatter.toNullableProperty()) }
                 row { checkBox("Format Go files on save").bindSelected(settings::formatOnSave).comment("With the formatter above; goimports also adds and removes imports. A file with a syntax error is saved as it is") }

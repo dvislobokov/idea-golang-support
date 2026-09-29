@@ -64,6 +64,8 @@
         <colorSettingsPage implementation="io.github.golangsupport.lang.GoColorSettingsPage"/>
         <defaultLiveTemplates file="/liveTemplates/Go.xml"/>
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoStructTagCompletionContributor"/>
+        <!-- `nil, err` after `return`: the values of the function as one item -->
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoReturnCompletionContributor"/>
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
         <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
         <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>

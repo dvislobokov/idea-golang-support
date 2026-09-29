@@ -10,6 +10,7 @@ import com.intellij.ide.wizard.NewProjectWizardChainStep.Companion.nextStep
 import com.intellij.ide.wizard.NewProjectWizardStep
 import com.intellij.ide.wizard.RootNewProjectWizardStep
 import com.intellij.openapi.application.WriteAction
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.Module
@@ -42,9 +43,16 @@ import javax.swing.JComponent
  * Finish runs `go mod init <path>` and, optionally, writes main.go.
  */
 class GoNewProjectWizard : GeneratorNewProjectWizard {
-    override val id: String = "Go"
-    override val name: String = "Go"
-    override val icon: Icon = GoIcons.File
+    init {
+        // GIGA IDE has the dialog of IntelliJ IDEA and lists ".NET" of the sibling plugin in it, but not "Go" (seen live): the line tells
+        // whether the dialog has asked for the wizard at all
+        LOG.info("New Project wizard of Go is created; the platform is ${PlatformUtils.getPlatformPrefix()}, enabled: ${isEnabled()}")
+    }
+
+    // not "Go": that is the id of the wizard the dialog advertises for the Go plugin of JetBrains, which a fork may hide
+    override val id: String get() = "io.github.golangsupport.newProject"
+    override val name: String get() = "Go"
+    override val icon: Icon get() = GoIcons.File
     override val description: String get() = "A Go module: go.mod with the module path and, optionally, main.go"
 
     // the other IDEs show the directory generator; both at once would be two "Go" entries
@@ -69,6 +77,10 @@ class GoNewProjectWizard : GeneratorNewProjectWizard {
         override fun setupProject(project: Project) {
             GoProjectCreator.create(project, project.basePath ?: return, rows.settings)
         }
+    }
+
+    private companion object {
+        val LOG = logger<GoNewProjectWizard>()
     }
 }
 
@@ -112,14 +124,19 @@ class GoProjectPanel(project: Project?) {
 
     fun addRows(builder: Panel) {
         with(builder) {
-            row("GOROOT:") { cell(goRoot).align(AlignX.FILL).comment("Where Go is installed; empty falls back to PATH and the default directories") }
-            row("Module path:") { cell(modulePath).align(AlignX.FILL).comment("The go.mod module line: what other modules import this one by. Empty uses the project name") }
+            // short lines: a comment wider than the dialog gives it a horizontal scroll bar and cuts the fields (seen live)
+            row("GOROOT:") { cell(goRoot).align(AlignX.FILL).comment("Where Go is installed; empty: PATH and the default directories", COMMENT_WIDTH) }
+            row("Module path:") { cell(modulePath).align(AlignX.FILL).comment("What other modules import this one by; empty: the project name", COMMENT_WIDTH) }
             row { cell(sampleCode) }
         }
     }
 
     private fun detectGoRoot(): String =
         GoEnvironment.quick().goRoot ?: GoCli.findExecutable()?.let { File(it).parentFile?.parent }.orEmpty()
+
+    private companion object {
+        const val COMMENT_WIDTH = 50
+    }
 }
 
 /** What Finish of both dialogs does: `go mod init` in the directory of the project, then main.go. The plugin has one toolchain, in its settings. */

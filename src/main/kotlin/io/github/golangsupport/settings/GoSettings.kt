@@ -57,6 +57,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** `if err != nil { ... }` and the `defer` of what was just opened, as grey text to accept with Tab. */
         var inlineIdioms by property(true)
+        /** `nil, err` as one item of the completion list after `return`. */
+        var completeReturnValues by property(true)
+        /** Names that begin with what is typed go above the fuzzy matches of gopls. */
+        var completionPrefixFirst by property(true)
         /** `//` above a declaration becomes `// Name `. */
         var docCommentNames by property(true)
         var lintOnTheFly by property(true)
@@ -148,6 +152,14 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var inlineIdioms: Boolean
         get() = state.inlineIdioms
         set(value) { state.inlineIdioms = value }
+
+    var completeReturnValues: Boolean
+        get() = state.completeReturnValues
+        set(value) { state.completeReturnValues = value }
+
+    var completionPrefixFirst: Boolean
+        get() = state.completionPrefixFirst
+        set(value) { state.completionPrefixFirst = value }
 
     var createRunConfigurations: Boolean
         get() = state.createRunConfigurations
