@@ -19,8 +19,8 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.util.Key
+import com.intellij.platform.lang.lsWidget.LanguageServiceWidgetItem
 import com.intellij.platform.lsp.api.Lsp4jClient
 import com.intellij.platform.lsp.api.LspClient
 import com.intellij.platform.lsp.api.LspClientManager
@@ -42,7 +42,6 @@ import com.intellij.platform.lsp.api.customization.LspGoToDefinitionDisabled
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensCustomizer
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
 import com.intellij.psi.PsiFile
-import io.github.golangsupport.GoIcons
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoSemanticColors
@@ -52,7 +51,6 @@ import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.mod.GoModFileType
 import io.github.golangsupport.settings.GoLanguageServerControl
 import io.github.golangsupport.settings.GoSettings
-import io.github.golangsupport.settings.GoSettingsConfigurable
 import io.github.golangsupport.settings.GoplsCatalogue
 import io.github.golangsupport.settings.GoplsDefaults
 import org.eclipse.lsp4j.Command
@@ -81,8 +79,13 @@ class GoplsIntegrationProvider : LspIntegrationProvider {
         clientStarter.ensureClientStarted(GoplsDescriptor(project))
     }
 
-    /** The item of the status bar widget: the icon of the plugin, its settings page, the log window among the actions. */
-    override fun createWidgetItem(lspClient: LspClient, currentFile: VirtualFile?): LspClientWidgetItem = GoplsWidgetItem(lspClient, currentFile)
+    /**
+     * No row in the widget of language services: the server has a widget of its own in the status bar ([GoplsStatusWidget]), and the
+     * row of the platform names gopls by its `serverInfo.version`, a page of JSON (seen live).
+     */
+    override fun createWidgetItems(project: Project, currentFile: VirtualFile?): List<LanguageServiceWidgetItem> = emptyList()
+
+    override fun createWidgetItem(lspClient: LspClient, currentFile: VirtualFile?): LspClientWidgetItem? = null
 
     companion object {
         private val OFFERED = AtomicBoolean()
@@ -107,12 +110,19 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         log.debugPagesUrl = null
         return super.startServerProcess().also { handler ->
             log.info("Starting: " + handler.commandLine)
+            val state = GoplsServerState.getInstance(project)
+            val process = handler.process.toHandle()
             handler.addProcessListener(object : ProcessListener {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                     if (ProcessOutputType.isStderr(outputType)) log.server(event.text)
                 }
-                override fun processTerminated(event: ProcessEvent) = log.info("gopls has exited with code ${event.exitCode}")
+                override fun processTerminated(event: ProcessEvent) {
+                    log.info("gopls has exited with code ${event.exitCode}")
+                    // the project may be closing: its services are gone then, and so is its status bar
+                    if (!project.isDisposed) state.stopped(process)
+                }
             })
+            state.started(process)
         }
     }
 
@@ -126,6 +136,7 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         override fun serverInitialized(params: InitializeResult) {
             val info = params.serverInfo
             GoplsLogService.getInstance(project).info("Initialized: ${info?.name ?: "gopls"} ${GoplsLogLines.version(info?.version)}")
+            GoplsServerState.getInstance(project).buildInfo = info?.version
         }
         override fun serverStopped(shutdownNormally: Boolean) {
             failures.forget()
@@ -261,11 +272,6 @@ private class GoplsWorkspaceFailures(private val project: Project) {
         shown.values.forEach { it.notification.expire() }
         shown.clear()
     }
-}
-
-/** The line of gopls in the status bar widget, with the settings of the plugin behind its gear and the log window next to Restart. */
-private class GoplsWidgetItem(client: LspClient, file: VirtualFile?) : LspClientWidgetItem(client, file, GoIcons.Gopls, GoSettingsConfigurable::class.java) {
-    override fun createAdditionalInlineActions(): List<AnAction> = listOf(ActionManager.getInstance().getAction("Go.Gopls.ShowLog"))
 }
 
 /** The settings of gopls (https://go.dev/gopls/settings) the page Settings | Tools | Go has switches for. */

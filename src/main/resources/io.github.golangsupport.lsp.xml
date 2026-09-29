@@ -31,6 +31,8 @@
         <codeInsight.lineMarkerProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsImplementationLineMarkerProvider"/>
         <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.lsp.GoplsUsagesCodeVisionProvider"/>
         <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.lsp.GoplsImplementationsCodeVisionProvider"/>
+        <!-- the server in the status bar for as long as its process lives, with its memory and CPU next to the icon -->
+        <statusBarWidgetFactory id="Go.Gopls.Status" implementation="io.github.golangsupport.lsp.GoplsStatusWidgetFactory"/>
         <!-- the log of the server: its stderr (with the RPC trace when switched on), its messages, what the plugin sends it -->
         <toolWindow id="gopls" anchor="bottom" icon="/icons/goplsToolWindow.svg" factoryClass="io.github.golangsupport.lsp.GoplsLogToolWindowFactory"
                     doNotActivateOnStart="true" canCloseContents="false"/>

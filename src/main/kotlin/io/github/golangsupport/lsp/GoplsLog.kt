@@ -114,6 +114,13 @@ object GoplsLogLines {
         val main = runCatching { com.google.gson.JsonParser.parseString(raw).asJsonObject.getAsJsonObject("Main") }.getOrNull() ?: return raw
         return main.get("Version")?.takeIf { it.isJsonPrimitive }?.asString ?: raw
     }
+
+    /** `go1.26.8` of the same build info: what gopls was built with; null when the version is a plain one. */
+    fun goVersion(serverInfoVersion: String?): String? {
+        val raw = serverInfoVersion.orEmpty()
+        if (!raw.startsWith("{")) return null
+        return runCatching { com.google.gson.JsonParser.parseString(raw).asJsonObject.get("GoVersion") }.getOrNull()?.takeIf { it.isJsonPrimitive }?.asString?.takeIf { it.isNotEmpty() }
+    }
 }
 
 class GoplsLogToolWindowFactory : ToolWindowFactory, DumbAware {
