@@ -10,6 +10,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoFindUsagesProvider
 import io.github.golangsupport.lang.GoTokenTypes
 import org.eclipse.lsp4j.Position
 
@@ -25,7 +26,10 @@ class GoplsTargetElementEvaluator : TargetElementEvaluatorEx2() {
         val client = Gopls.client(element.project) ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
         val place = Gopls.definition(client, file, Gopls.position(document, element.textRange.startOffset), TIMEOUT_MS).firstOrNull() ?: return null
-        return Gopls.element(element.project, place) as? GoDeclaration
+        // a declaration of the file structure, or the identifier that declares a local: Find Usages accepts both (GoFindUsagesProvider);
+        // a package name leads to a directory or a package clause, which is no target to search from
+        val target = Gopls.element(element.project, place) ?: return null
+        return target as? GoDeclaration ?: target.takeIf { GoFindUsagesProvider.isLocalName(it) && it.containingFile == element.containingFile }
     }
 
     private companion object {

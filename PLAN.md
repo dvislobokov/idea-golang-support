@@ -19,12 +19,12 @@
 ## Уровень 0. Проверить написанное (полдня–день, робот)
 
 Всё из `playground/README.md` с «нет» в колонке «Робот», в порядке риска:
-- [ ] Ctrl+наведение на идентификатор: подчёркивание и переход (`GoplsGotoDeclarationHandler`) — 3.7
-- [ ] Клики по gutter I↓/I↑ и по code vision — 3.5, 3.6, 3.6б
-- [ ] Попап «Refactorings and actions of gopls…» на выделении — 4.1г
-- [ ] Диалоги Generate: Struct Tags, Implement Interface, Test — 2а.5–2а.7
+- [ ] Ctrl+наведение на идентификатор: подчёркивание и переход (`GoplsGotoDeclarationHandler`) — 3.7; роботом не проверяется (AWT Robot в RDP-сессии не даёт подсветки), смотреть вживую
+- [x] Клики по gutter I↓/I↑ — робот (2026-09-29); [ ] клики по code vision — 3.5, 3.6
+- [x] Попап «Refactorings and actions of gopls…» — робот (2026-09-29)
+- [x] Диалог Struct Tags — робот (2026-09-29); [ ] Implement Interface, Test — 2а.6–2а.7
 - [ ] Apply на странице gopls с перезапуском сервера; Build flags / Env словами — 9.1б, 9.1в
-- [ ] Attach to Process, completion в Evaluate, значение при наведении — 8.14, 8.15, 8.6
+- [x] Attach to Process — робот (2026-09-29); [ ] completion в Evaluate, значение при наведении — 8.15, 8.6
 - [ ] Узел Dependencies с раскрытием (нужен проект с зависимостью: добавить в playground) — 5.2
 - [ ] New Project «Go», New Go Module…, Go | Build с переходом к ошибке — 5.5, 6.1–6.4
 - [ ] Add Import…, Browse Documentation/Assembly, Toggle Optimization Details, Open Debug Pages — 3.24–3.27

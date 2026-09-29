@@ -75,13 +75,27 @@ abstract class GoGotoContributor(private val types: Boolean, private val members
  * Lets Find Usages and Show Usages start from a declaration. The usages themselves come from gopls (the searcher is in the module with
  * the language server); without it there are none, and the IDE says so instead of refusing the action.
  */
+/**
+ * Find Usages starts from a declaration of the file structure, or from the identifier that declares a local variable, a parameter or a
+ * field of a struct literal (a bare token: the scanner does not look inside functions, and the language server tells where the name is declared).
+ */
 class GoFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner? = null
-    override fun canFindUsagesFor(element: PsiElement): Boolean = element is GoDeclaration
+    override fun canFindUsagesFor(element: PsiElement): Boolean = element is GoDeclaration || isLocalName(element)
     override fun getHelpId(element: PsiElement): String? = null
-    override fun getType(element: PsiElement): String = (element as? GoDeclaration)?.kind?.title.orEmpty()
-    override fun getDescriptiveName(element: PsiElement): String = (element as? GoDeclaration)?.let { listOf(it.containerName, it.name.orEmpty()).filter(String::isNotEmpty).joinToString(".") }.orEmpty()
+    override fun getType(element: PsiElement): String = (element as? GoDeclaration)?.kind?.title ?: if (isLocalName(element)) "variable" else ""
+    override fun getDescriptiveName(element: PsiElement): String =
+        (element as? GoDeclaration)?.let { listOf(it.containerName, it.name.orEmpty()).filter(String::isNotEmpty).joinToString(".") } ?: element.text
     override fun getNodeText(element: PsiElement, useFullName: Boolean): String = (element as? GoDeclaration)?.info?.presentation ?: element.text.take(40)
+
+    companion object {
+        /**
+         * An identifier token of a Go file that is not the name of a scanned declaration: a local, a parameter, a receiver. The tokens of a
+         * function body are children of the node of the function, so the parent being a declaration says nothing; its name does.
+         */
+        fun isLocalName(element: PsiElement): Boolean =
+            element.containingFile is GoFile && element.node?.elementType == GoTokenTypes.IDENTIFIER && (element.parent as? GoDeclaration)?.nameIdentifier != element
+    }
 }
 
 /** Go to Class: structs, interfaces and the other named types. */

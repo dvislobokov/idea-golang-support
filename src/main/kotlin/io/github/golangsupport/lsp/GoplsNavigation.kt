@@ -25,6 +25,7 @@ import com.intellij.util.Processor
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoFindUsagesProvider
 import io.github.golangsupport.lang.GoTokenTypes
 import io.github.golangsupport.lint.GoSignatureProvider
 import io.github.golangsupport.lint.GoSignatures
@@ -164,9 +165,10 @@ class GoplsGotoDeclarationHandler : GotoDeclarationHandler {
 /** Find Usages and Show Usages of a declaration: `textDocument/references` of gopls, as usages of the IDE. */
 class GoplsUsageSearcher : CustomUsageSearcher() {
     override fun processElementUsages(element: PsiElement, processor: Processor<in Usage>, options: FindUsagesOptions) {
-        val declaration = element as? GoDeclaration ?: return
         // called on a background thread without a read action (seen live): everything about the element is read in one
-        val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> { GoplsTargets.of(declaration) } ?: return
+        val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> {
+            if (element is GoDeclaration || GoFindUsagesProvider.isLocalName(element)) GoplsTargets.of(element) else null
+        } ?: return
         val client = Gopls.client(project) ?: return
         for (place in Gopls.references(client, file, position, TIMEOUT_MS)) {
             val usage = ReadAction.compute<Usage?, RuntimeException> {
@@ -202,11 +204,11 @@ class GoplsImplementationSearch : QueryExecutorBase<PsiElement, DefinitionsScope
 }
 
 object GoplsTargets {
-    /** The project, the file and the position of the name of a declaration: what a request about it is made with. Needs read access. */
-    fun of(declaration: GoDeclaration): Triple<Project, VirtualFile, Position>? {
-        if (!declaration.isValid) return null
-        val file = declaration.containingFile?.virtualFile ?: return null
+    /** The project, the file and the position of the name of a declaration (or of a bare identifier): what a request about it is made with. Needs read access. */
+    fun of(element: PsiElement): Triple<Project, VirtualFile, Position>? {
+        if (!element.isValid) return null
+        val file = element.containingFile?.virtualFile ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
-        return Triple(declaration.project, file, Gopls.position(document, declaration.textOffset))
+        return Triple(element.project, file, Gopls.position(document, element.textOffset))
     }
 }

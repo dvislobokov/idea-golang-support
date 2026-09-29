@@ -18,11 +18,16 @@
 
 ```sh
 export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
-./gradlew.bat test buildPlugin -q      # основная проверка перед тем, как сказать «готово»
-./gradlew.bat compileKotlin -q         # быстрая проверка компиляции
-./gradlew.bat test --tests "io.github.golangsupport.GoToolingTest" -q
+./gradlew.bat test buildPlugin -q --offline   # основная проверка перед тем, как сказать «готово»
+./gradlew.bat compileKotlin -q                # быстрая проверка компиляции
+./gradlew.bat test --tests "io.github.golangsupport.GoToolingTest" -q --offline
 ./gradlew.bat runIde --args="C:/Users/dvislobokov/idea-golang-support/playground"   # песочница для пользователя
 ```
+
+- **`--offline` для test / buildPlugin**: без него Gradle пытается разрешить `java-compiler-ant-tasks` для инструментирования тестов, через прокси этой машины
+  это не проходит, и падение выглядит как ошибка сериализации configuration cache. `runIdeForUiTests` запускать с `--no-configuration-cache` (задача
+  RunIde не сериализуется). В shell заданы `HTTP_PROXY`/`HTTPS_PROXY`: `robot.py` прокси игнорирует сам, для curl к роботу нужен `--noproxy '*'`
+  (`session.sh` экспортирует `NO_PROXY`).
 
 - Целевая платформа — локальная IntelliJ IDEA 2026.1.4 (`localIdePath` в `gradle.properties`), ничего не скачивается. `sinceBuild = 261`: с 2026.1 API
   LSP-клиента называется `LspIntegrationProvider` / `LspClientDescriptor` (старые `LspServer*` — Deprecated) и есть модуль DAP.
@@ -30,7 +35,11 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 - Упавшие тесты: `build/test-results/test/TEST-*.xml` (grep по `<failure`).
 - **GUI агент проверяет сам через UI-робота**: `./gradlew.bat runIdeForUiTests` (в фоне) поднимает песочницу с Remote Robot на `127.0.0.1:8083` (**не 8082**: там песочница dotnet-плагина, и два агента иначе управляют IDE друг друга и закрывают её; другой порт — `-ProbotPort=N` и `ROBOT_PORT=N`),
   `tools/ui-robot/robot.py` открывает проект, ставит точки останова, запускает Run/Debug, снимает окно IDE; `. tools/ui-robot/scripts/session.sh` даёт
-  `state`, `evaluate "выражение" [дети]`, `stop_all`. Работать на копии: `build/ui-robot/playground` (без `.idea`). Плагин в песочнице обновляется
+  `state`, `evaluate "выражение" [дети]`, `stop_all`, `invoke ACTION_ID`, `setting Name value`, `toolwindow ID`, `openfile store/x.go [строка]` и `robot_js скрипт.js "s|__X__|…|"`
+  для скриптов из `tools/ui-robot/scripts` (markers, structure, coverage, gomod_banner, targets, test_results, replace_text, monitor_targets…; к каждому
+  подклеивается `prelude.js` с `cls("io.github…")` — классы плагина Rhino иначе не видит; `const` в цикле Rhino хранит первое значение — писать `var`;
+  `robot.py action` не срабатывает, если фокус на невидимом компоненте, — тогда `invoke`; format on save платформа зовёт только из `saveAllDocuments`).
+  Скрипт `highlights.js` не видит подсветок аннотаторов в новом UI — смотреть снимок редактора. Работать на копии: `build/ui-robot/playground` (без `.idea`). Плагин в песочнице обновляется
   только перезапуском задачи; перед перезапуском закрыть IDE (`robot.py action Exit`, затем клик по `Exit` в диалоге). После проверки песочницу закрыть:
   порт даёт выполнять код внутри IDE. Логи песочницы — `.intellijPlatform/sandbox/idea-golang-support/IU-*/log_runIdeForUiTests/idea.log`, логи delve — рядом в `delve/`.
   Чего так не видно (подсказки по наведению, ощущение скорости), просить пользователя посмотреть вживую и прямо говорить, что не проверено.

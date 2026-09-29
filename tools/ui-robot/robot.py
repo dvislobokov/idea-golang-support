@@ -29,6 +29,8 @@ import urllib.error
 import urllib.request
 
 BASE = "http://127.0.0.1:" + os.environ.get("ROBOT_PORT", "8083")
+# HTTP_PROXY of the shell would route 127.0.0.1 through the proxy, which answers 403 (seen live): never a proxy for the robot
+urllib.request.install_opener(urllib.request.build_opener(urllib.request.ProxyHandler({})))
 MAIN_WINDOWS = ["//div[@class='IdeFrameImpl']", "//div[@class='FlatWelcomeFrame']"]
 DIALOGS = "//div[@class='MyDialog']"
 

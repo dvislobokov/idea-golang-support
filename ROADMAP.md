@@ -24,9 +24,10 @@
 - [x] Страница Settings | Tools | Go | gopls: форма, сгенерированная из каталога установленного gopls (`gopls api-json`): группы документации (Build, Formatting, Completion, Diagnostics…), галочка / список / поле по типу опции, списки и `NAME=value` без JSON, галочки для ключей словарей (линзы, подсказки), диалог с поиском для 244 анализаторов, экспериментальные опции в сворачиваемых подгруппах, поиск, Reset all. Контролы показывают действующее значение (умолчание gopls или то, что задаёт плагин — `GoplsDefaults`), хранится только отличие — юнит-тесты (`GoplsValuesTest`, `GoplsCatalogueTest`), страница и диалог анализаторов просмотрены роботом; Apply с перезапуском сервера вживую не проверен
 - [x] Usages / implementations над объявлениями, Find Usages и Go to Implementation с объявления, Go to Declaration через PSI-цели (чего нет в LSP-клиенте платформы) — робот; подсветка под Ctrl + мышь вживую не проверена
 - [~] С места использования: `GoplsTargetElementEvaluator` (`targetElementEvaluator` для Go) резолвит имя в объявление через `definition` gopls — Find Usages, Go to Implementation
-  и подсветка использований стартуют с любого места, где имя — объявление верхнего уровня (`NewOrder(`, `.Total()`; для локальной переменной и имени пакета — нет);
-  Go to Type Declaration (`typeDefinition`) — робот (`order` → `struct Order`); Type Info Ctrl+Shift+P (первая строка hover) — не проверено
-- [x] Gutter-иконки I↓ / I↑: реализации интерфейса и его методов, интерфейсы типа и его методов (один запрос `implementation` в обе стороны) — робот, клик не проверен
+  и подсветка использований стартуют с любого места: объявление верхнего уровня (`NewOrder(`, `.Total()`) или локальная переменная / параметр (цель — токен её объявления,
+  `GoFindUsagesProvider.isLocalName`) — робот (6 usages `order` из main.go); имя пакета — нет. Go to Type Declaration (`typeDefinition`) — робот (`order` → `struct Order`);
+  Type Info Ctrl+Shift+P (первая строка hover) — не проверено
+- [x] Gutter-иконки I↓ / I↑: реализации интерфейса и его методов, интерфейсы типа и его методов (один запрос `implementation` в обе стороны) — робот, клик по I↓ у `Priced` даёт попап «Implementations of Priced»: Order, Discounted
 - [x] Code lens gopls и команды `gopls.*`: линзы показывает платформа (go.mod: tidy, vendor, vulncheck, check for upgrades / upgrade; `//go:generate`), но клик она отправляла уведомлением без ответа — теперь клик идёт через `GoplsCommands`: `run_tests` запускает наш раннер тестов, `generate` — `go generate` в Build window, остальное — запрос с прогрессом в статус-баре, ошибка — в балун и в лог. Подменю **Go | gopls**: Add Import… (список известных пакетов), Browse Documentation / Assembly / Free Symbols (веб-страницы gopls), Toggle Compiler Optimization Details, Check for Dependency Upgrades, Upgrade All, Run govulncheck, Reset go.mod Diagnostics, Show Statistics, Show Log, Open Debug Pages, Settings, Restart. Проверено роботом: tidy, ошибка upgrade несуществующего модуля (в логе), `run test` → конфигурация TestTotal в раннере, generate, Check for Upgrades, Statistics; линза `test` у gopls по умолчанию выключена (у нас есть gutter) — включается на странице gopls; действия Browse*/Add Import/Toggle вживую не проверены
 - [x] Виджет статуса и окно с логом сервера: элемент виджета Language Services с иконкой gopls, страницей настроек Go и действием Show Log; tool window **gopls** — stderr сервера (с `-rpc.trace` по настройке — весь протокол), `window/logMessage` и `showMessage`, старт / инициализация с версией / остановка («Stopped unexpectedly» с подсказкой), отправленные команды и их ошибки; кнопки Restart, Open Debug Pages (`-debug=localhost:0` по настройке, адрес из лога), Settings. Роботом просмотрено окно и лог падения gopls (паника при пустом URI — воспроизводилась только скриптом робота); попап виджета робот не открыл
 
@@ -35,7 +36,7 @@
 - [x] Постфиксные шаблоны (`GoPostfixTemplates`): `.if .else .nil .notnil .err .errv .return .rr .var .for .fori .forr .range .len .print .printf .panic .go .defer .append .not .switch .wrap`; выражение слева от точки — по тексту (цепочки, вызовы, индексы, литералы) — робот: `.nil`, `.err`, `.for`, `.var`, `.return`
 - [x] Live templates: 41 шаблон (`err errw errn ife fn main init meth str inter enum ctx tctx hf mu wg ch mk sw tsw ticker lf test ttest tr helper bench fuzz example tmain errt erras sentinel opt gof deff sel pf forr fori`)
 - [x] Complete Statement (Ctrl+Shift+Enter, `GoSmartEnterProcessor`): `{}` после `if/for/func/switch/select/type … struct`, закрытие скобок вызова, каретка внутрь — робот
-- [x] Alt+Insert (`GoGenerateActions`): Constructor, Getters, Setters, Getters and Setters, String() Method (с выбором полей), Struct Tags (json/yaml/xml/db/mapstructure/toml, snake/camel/как есть/lowercase, omitempty), Implement Interface (интерфейсы проекта, только недостающие методы), Test (табличный, в `_test.go` рядом) — робот: пункты в Generate; тексты — юнит-тесты; диалоги вживую не открывались
+- [x] Alt+Insert (`GoGenerateActions`): Constructor, Getters, Setters, Getters and Setters, String() Method (с выбором полей), Struct Tags (json/yaml/xml/db/mapstructure/toml, snake/camel/как есть/lowercase, omitempty), Implement Interface (интерфейсы проекта, только недостающие методы), Test (табличный, в `_test.go` рядом) — робот: пункты в Generate, диалог Struct Tags (OK → `json:"currency"`); попап Implement Interface и остальные диалоги вживую не открывались
 - [x] Alt+Enter (`GoIntentions`): Handle error на одиночном вызове (число результатов из hover gopls), Add if err != nil check после присваивания ошибки, Add missing return, Create function из вызова (параметры по аргументам, результаты по левой части `a, err :=`, метод при `s.name()` в методе), Add struct tags, Implement interface, Generate test — робот: первые четыре
 - [x] Дополнение в struct-тегах (`GoStructTags`): ключи (json, yaml, xml, toml, db, bson, mapstructure, koanf, msgpack, csv, validate, binding, form, query, param, uri, header, url, env, envDefault, envPrefix, default, gorm, description, example) → `key:""` с кареткой внутри и новым списком; имя поля в snake/camel/lower/как есть/kebab (для env — UPPER_SNAKE); опции после запятой (omitempty, omitzero, string, inline, squash…); правила go-playground/validator для validate/binding (через `,` и `|`); настройки gorm через `;`. Live templates больше не разворачиваются внутри строк и комментариев (`json` + Tab внутри кавычек давал ``json:""`` — найдено пользователем) — робот
 - [x] Док-комментарий: `//` на пустой строке над `func/type/var/const` → `// Name ` (настройка Editor, по умолчанию включено) — робот
@@ -57,16 +58,16 @@
 - [x] Консольные фильтры: `file.go:12` компилятора, тестов и стеков паник кликабельны — робот (консоль тестов). Голое имя файла находится, только если оно одно в проекте;
   [~] в консоли тестов неоднозначное имя ищется под каталогом прогона (`GoTestOutputFilter`) — вживую не проверено
 - [x] Окно Go Tests: пакеты и тестовые функции проекта, Run / Debug выбранного, Run All, статусы последних прогонов (`GoTestStatuses`, слушатель проекта) — робот;
-  [x] Run with Coverage, процент у пакета, переключатель «Rerun the Tests of a Package on Save» (`GoAutoTest`, пауза 1,5 с после сохранения) — робот; [~] дерево обновляется само при правке `_test.go` — не проверено
+  [x] Run with Coverage, процент у пакета, переключатель «Rerun the Tests of a Package on Save» (`GoAutoTest`, пауза 1,5 с после сохранения) — робот; дерево обновляется само при появлении `_test.go` — робот
 - [x] Статус последнего прогона в gutter ▶ теста (зелёный / красный / жёлтый для skip; daemon перезапускается при новом статусе) — робот
 - [~] **Подтесты и кейсы табличных тестов**: ▶ у `t.Run("name", …)` и у `{name: "case", …}` (поля `name desc description testName title scenario tc caseName label`),
   паттерн `^TestX$/^case$`, пробелы → `_`, литералы с `%` и `\` пропускаются; переход из дерева тестов к строке подтеста (`GoSubtests`, юнит-тест) — робот: ▶ на строках кейсов,
-  запуск `TestTotal/empty` из контекста каретки с паттерном `^TestTotal$/^empty$`; переход к строке подтеста не проверен
+  запуск `TestTotal/empty` из контекста каретки с паттерном `^TestTotal$/^empty$`, локатор `TestTotal/empty` ведёт на строку кейса
 - [~] **Покрытие**: галочка Coverage в конфигурации и Run with Coverage в Go Tests → `-coverprofile` во временный файл, разбор (`GoCoverage`, юнит-тест), полосы
   в gutter открытых файлов (зелёная / красная / жёлтая для строк, попавших в блоки с разным счётчиком; цвета `CodeInsightColors.LINE_*_COVERAGE`), уведомление
   с процентом и Hide Coverage, процент у пакетов в Go Tests (`GoCoverageService`) — робот: 72,7 % по `store`, 20 полос в order.go, уведомление, процент в окне
 - [~] Fuzz как режим: галочка Fuzz в конфигурации (`-run ^$ -fuzz <паттерн>`), в gutter у `FuzzX` — Run Fuzzing (`GoFuzzAction`) — не проверено
-- [~] Галочки Race (`-race`) и `-count=1` в конфигурации — не проверено
+- [x] Галочки Race (`-race`) и `-count=1` в конфигурации — робот (`go test -json -race -count=1 .` в консоли)
 - [x] Автогенерация конфигураций для каталогов с `func main` (настройка; удалённая не возвращается) — робот
 - [ ] Бенчмарки: таблица результатов, сравнение прогонов
 - [x] Go | Analyze Stack Trace…: диалог платформы (`Unscramble`) — робот (диалог открывается; ссылки в его консоли не проверены)
@@ -80,7 +81,7 @@
 - [x] Лог delve на сессию, Show Debugger Logs, Trace Debugger Protocol (свой трассировщик: `delve/protocol/protocol-*.log`, registry `go.debugger.protocol.trace`)
 - [x] Hit count, logpoints, условие точки, точки на паники — робот
 - [~] Значение при наведении (`GoHoverExpression`) — вживую не проверено; значения в редакторе рядом с кодом (`GoInlineValues`) — юнит-тест
-- [~] Attach to Process: Run | Attach to Process, группа «Go» со всеми процессами (какие из них Go, из списка не узнать), `attach` с `processId` — вживую не проверено
+- [x] Attach to Process: Run | Attach to Process, группа «Go» со всеми процессами (какие из них Go, из списка не узнать), `attach` с `processId` — робот (`GoAttachProfile` к запущенному бинарнику, остановка на точке, значения; диалог выбора процесса не открывался). Не сделано: сессия attach не попадает в Go Monitor (delve не шлёт `process`)
 - [x] Set Value: `setVariable` с контейнером, который клиент знает сам — робот: строка, число внутри `order.items[0]`
 - [x] Вызовы функций в Evaluate без префикса `call` (`GoEvaluate`) — робот: `order.Total()` = 1600. Точка внутри вызываемой функции прерывает вызов («call stopped») — так у delve
 - [~] Completion в Evaluate / watches из остановленной программы (`GoExpressionCompletionContributor`: локальные и поля после `value.`) — юнит-тест контекста, вживую не проверено
@@ -93,7 +94,7 @@
 - [x] Reformat Code: gofmt / goimports; форматирование при сохранении (настройка, по умолчанию включено) — робот; [x] третий вариант `golangci-lint fmt` (`fmt --stdin`, v2) — робот (format on save)
 - [x] golangci-lint в редакторе: сохранённые файлы, пакет файла, v1 и v2, настройка — робот; [x] находки не пропадают при наборе: держатся на `RangeMarker` до следующего сохранения — робот (строка вставлена сверху, подчёркивание errcheck ушло на строку ниже)
 - [x] Исправления к находкам линтера: «Handle error» / «Ignore error explicitly» для errcheck, «Suppress with //nolint» для любого правила — робот
-- [x] Alt+Enter → «Refactorings and actions of gopls...»: code actions сервера для каретки или выделения — пункт виден роботу, попап не проверен
+- [x] Alt+Enter → «Refactorings and actions of gopls...»: code actions сервера для каретки или выделения — робот: попап со списком действий (Add test for main…) открывается
 - [ ] golangci-lint по проекту (в Build tool window), автоисправления из отчёта
 - [x] Окно «Go on This Machine» (go, модули, инструменты, `go env`) — робот; [~] уведомление, когда в проекте есть go.mod, а `go` не найден
 - [~] Недостающие инструменты одним уведомлением при открытии Go-проекта: «Go tools are missing: dlv, goimports — Install All / Configure / Don't Ask Again» (`GoTool.installAll`, одна фоновая задача) — не проверено

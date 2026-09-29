@@ -219,9 +219,9 @@ GoLand 2026.2 (июль 2026) — эталон. У GoLand свой полный 
 |---|---|---|---|
 | Go to Declaration (Ctrl+B, Ctrl+клик) | да | gopls, PSI-цели, подсветка ссылки | ✅ (Ctrl+наведение вживую 🟡) |
 | Go to Implementation с объявления | да | gopls `implementation` | ✅ |
-| Go to Implementation с места использования | да | `targetElementEvaluator` резолвит имя через gopls (объявления верхнего уровня; локальные переменные — нет) | ✅ (частично) |
+| Go to Implementation с места использования | да | `targetElementEvaluator` резолвит имя через gopls: объявления и локальные переменные; имена пакетов — нет | ✅ |
 | Find Usages с объявления, группировка read/write | да | gopls references, без группировки | ✅ / группировка ❌ |
-| Find Usages с места использования | да | `targetElementEvaluator` резолвит имя через gopls (объявления верхнего уровня; локальные переменные — нет) | ✅ (частично) |
+| Find Usages с места использования | да | `targetElementEvaluator` резолвит имя через gopls: объявления и локальные переменные; имена пакетов — нет | ✅ |
 | Code vision usages/implementations | да | да | ✅ |
 | Gutter implements / implemented by | да | да | ✅ |
 | Go to Type Declaration, Super Method, Related Symbol | да | Go to Type Declaration через `typeDefinition` gopls; остальное нет | ✅ / ❌ |
