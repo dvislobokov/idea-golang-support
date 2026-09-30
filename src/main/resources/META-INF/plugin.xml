@@ -71,6 +71,8 @@
         <!-- functions and types of the standard library and of the modules of go.mod by their own names: `Printl` is `fmt.Println` -->
         <completion.contributor language="Go" implementationClass="io.github.golangsupport.catalogue.GoCatalogueCompletionContributor"/>
         <postStartupActivity implementation="io.github.golangsupport.catalogue.GoCatalogueStartupActivity"/>
+        <!-- the interfaces of the project are read once the index is there: Implement Interface opens at once -->
+        <postStartupActivity implementation="io.github.golangsupport.lang.GoProjectInterfacesStartup"/>
         <!-- the page about the plugin, once after the installation and after every update -->
         <postStartupActivity implementation="io.github.golangsupport.help.GoWelcomePageActivity"/>
         <!-- `nil, err` after `return`: the values of the function as one item -->

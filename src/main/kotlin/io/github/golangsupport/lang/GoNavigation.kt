@@ -5,6 +5,8 @@ import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.navigation.ChooseByNameContributorEx
 import com.intellij.navigation.NavigationItem
 import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
@@ -23,7 +25,8 @@ import com.intellij.util.io.KeyDescriptor
 
 /**
  * Names of the declarations of every Go file of the project, for Go to Class and Go to Symbol when gopls is not there (with it the
- * platform adds `workspace/symbol` results of its own). The key carries the kind (`T:Server`, `M:Start`), so that one index serves both.
+ * platform adds `workspace/symbol` results of its own). The key carries the kind (`T:Server`, `I:Handler`, `M:Start`), so that one
+ * index serves both, and the files that declare an interface are known without a scan (Implement Interface).
  */
 class GoDeclarationIndex : ScalarIndexExtension<String>() {
     override fun getName(): ID<String, Void> = NAME
@@ -33,32 +36,50 @@ class GoDeclarationIndex : ScalarIndexExtension<String>() {
     override fun getInputFilter(): FileBasedIndex.InputFilter = DefaultFileTypeSpecificInputFilter(GoFileType)
 
     override fun getIndexer(): DataIndexer<String, Void, FileContent> = DataIndexer { content ->
-        GoDeclarations.scan(content.contentAsText).all().associate { key(it.kind.isType, it.name) to null }
+        GoDeclarations.scan(content.contentAsText).all().associate { key(it.kind, it.name) to null }
     }
 
     companion object {
         val NAME: ID<String, Void> = ID.create("golang.declarations")
 
         // bump when GoDeclarations starts to see declarations differently
-        private const val VERSION = 1
+        private const val VERSION = 2
         const val TYPE_PREFIX = "T:"
+        const val INTERFACE_PREFIX = "I:"
         const val MEMBER_PREFIX = "M:"
 
-        fun key(isType: Boolean, name: String): String = (if (isType) TYPE_PREFIX else MEMBER_PREFIX) + name
+        fun key(kind: GoDeclarationKind, name: String): String = when {
+            kind == GoDeclarationKind.INTERFACE -> INTERFACE_PREFIX
+            kind.isType -> TYPE_PREFIX
+            else -> MEMBER_PREFIX
+        } + name
+
+        fun isTypeKey(key: String): Boolean = key.startsWith(TYPE_PREFIX) || key.startsWith(INTERFACE_PREFIX)
+
+        /** The Go files of [scope] that declare an interface: what Implement Interface reads. Needs the index (smart mode). */
+        fun filesWithInterfaces(project: Project, scope: GlobalSearchScope): Set<VirtualFile> {
+            val index = FileBasedIndex.getInstance()
+            val keys = ArrayList<String>()
+            index.processAllKeys(NAME, { key -> if (key.startsWith(INTERFACE_PREFIX)) keys.add(key); true }, scope, null)
+            return keys.flatMapTo(LinkedHashSet()) { index.getContainingFiles(NAME, it, scope) }
+        }
     }
 }
 
 abstract class GoGotoContributor(private val types: Boolean, private val members: Boolean) : ChooseByNameContributorEx, DumbAware {
     override fun processNames(processor: Processor<in String>, scope: GlobalSearchScope, filter: IdFilter?) {
         FileBasedIndex.getInstance().processAllKeys(GoDeclarationIndex.NAME, { key ->
-            val isType = key.startsWith(GoDeclarationIndex.TYPE_PREFIX)
+            val isType = GoDeclarationIndex.isTypeKey(key)
             if (if (isType) types else members) processor.process(key.substring(GoDeclarationIndex.TYPE_PREFIX.length)) else true
         }, scope, filter)
     }
 
     override fun processElementsWithName(name: String, processor: Processor<in NavigationItem>, parameters: FindSymbolParameters) {
         val index = FileBasedIndex.getInstance()
-        val keys = listOfNotNull(GoDeclarationIndex.key(true, name).takeIf { types }, GoDeclarationIndex.key(false, name).takeIf { members })
+        val keys = listOfNotNull(
+            GoDeclarationIndex.key(GoDeclarationKind.STRUCT, name).takeIf { types }, GoDeclarationIndex.key(GoDeclarationKind.INTERFACE, name).takeIf { types },
+            GoDeclarationIndex.key(GoDeclarationKind.FUNCTION, name).takeIf { members },
+        )
         val files = keys.flatMapTo(LinkedHashSet()) { index.getContainingFiles(GoDeclarationIndex.NAME, it, parameters.searchScope) }
         val psiManager = PsiManager.getInstance(parameters.project)
         for (file in files) {

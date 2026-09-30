@@ -11,12 +11,9 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.fileEditor.impl.LoadTextUtil
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
@@ -25,7 +22,6 @@ import com.intellij.ui.SimpleTextAttributes
 import io.github.golangsupport.catalogue.GoCatalogueScanner
 import io.github.golangsupport.catalogue.GoCatalogueService
 import io.github.golangsupport.catalogue.GoInterfaceSources
-import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoSettings
 import javax.swing.JList
 import javax.swing.ListCellRenderer
@@ -67,7 +63,7 @@ object GoInterfaceChooser {
         val existing = existingMethods(context, type.name)
         // The candidates are collected before the popup, under a progress of their own: the popup computes its list as a read task with
         // write action priority and starts over on every write action, so a long scan under it never finished on a big project (seen
-        // live: an empty popup, with "Searching..." at the bottom as the only sign). The index is not asked: nothing to wait for while it is built.
+        // live: an empty popup, with "Searching..." at the bottom as the only sign). GoProjectInterfaces keeps what was read.
         var collected: Candidates? = null
         val finished = ProgressManager.getInstance().runProcessWithProgressSynchronously({
             collected = collect(context, own, existing, type.name, ProgressManager.getInstance().progressIndicator)
@@ -134,51 +130,21 @@ object GoInterfaceChooser {
     }
 
     private fun collect(context: GenerateContext, own: String?, existing: Set<String>, typeName: String, indicator: ProgressIndicator?): Candidates {
-        indicator?.text = "Looking for Go files"
-        val files = ReadAction.compute<List<VirtualFile>, RuntimeException> {
-            val result = ArrayList<VirtualFile>()
-            ProjectFileIndex.getInstance(context.project).iterateContent { file -> result.add(file); true }
-            result.filter { !it.isDirectory && it.extension == GoFileType.defaultExtension }
-        }
-        val project = projectInterfaces(context, files, own, existing, typeName, indicator)
+        indicator?.text = "Reading the interfaces of the project"
+        val project = projectInterfaces(context, own, existing, typeName, indicator)
         indicator?.text = "Reading the catalogue"
         indicator?.text2 = ""
         val catalogue = ReadAction.compute<List<GoInterfaceCandidate>, RuntimeException> { catalogueInterfaces(context, own) }
         return Candidates(project, catalogue)
     }
 
-    /**
-     * Every interface of the Go files of the project, with its own methods counted. The files are scanned by the plugin's scanner from
-     * their text, one read action each: the index knows names and not kinds, and PSI for every file of the project is memory for nothing.
-     */
-    private fun projectInterfaces(context: GenerateContext, files: List<VirtualFile>, own: String?, existing: Set<String>, typeName: String, indicator: ProgressIndicator?): List<GoInterfaceCandidate> {
-        val result = ArrayList<GoInterfaceCandidate>()
-        val modules = GoModulesService.getInstance(context.project)
-        val documents = FileDocumentManager.getInstance()
-        indicator?.isIndeterminate = false
-        for ((i, file) in files.withIndex()) {
-            indicator?.checkCanceled()
-            indicator?.fraction = i.toDouble() / files.size
-            indicator?.text = "Scanning Go files"
-            indicator?.text2 = file.path
-            val directory = file.parent ?: continue
-            val importPath = modules.moduleOf(directory)?.importPath(directory)
-            if (importPath != null && !GoCatalogueScanner.isVisible(importPath, own)) continue
-            ReadAction.run<RuntimeException> {
-                if (!file.isValid) return@run
-                val text = documents.getCachedDocument(file)?.immutableCharSequence ?: LoadTextUtil.loadText(file)
-                val structure = GoDeclarations.scan(text)
-                for (declaration in structure.declarations) {
-                    if (declaration.kind != GoDeclarationKind.INTERFACE || declaration.body == null) continue
-                    if (declaration.name == typeName && file == context.file.virtualFile) continue
-                    val body = GoInterfaces.parseBody(text.subSequence(declaration.body.startOffset, declaration.body.endOffset))
-                    if (body.methods.isEmpty() && body.embedded.isEmpty()) continue
-                    val implemented = body.embedded.isEmpty() && body.methods.all { (name, _) -> name in existing }
-                    result += GoInterfaceCandidate(declaration.name, importPath, structure.packageName ?: directory.name, directory, body.methods.size, body.embedded.isNotEmpty(), implemented)
-                }
-            }
-        }
-        return result.sortedWith(compareBy({ it.directory != context.file.virtualFile?.parent }, { it.name }))
+    /** Every interface of the project ([GoProjectInterfaces] keeps them read), as seen from the file: `internal` of another tree is left out. */
+    private fun projectInterfaces(context: GenerateContext, own: String?, existing: Set<String>, typeName: String, indicator: ProgressIndicator?): List<GoInterfaceCandidate> {
+        val file = context.file.virtualFile
+        return GoProjectInterfaces.getInstance(context.project).entries(indicator)
+            .filter { entry -> !(entry.name == typeName && entry.file == file) && (entry.importPath == null || GoCatalogueScanner.isVisible(entry.importPath, own)) }
+            .map { entry -> GoInterfaceCandidate(entry.name, entry.importPath, entry.packageName, entry.directory, entry.methods.size, entry.embeds, !entry.embeds && entry.methods.all { it in existing }) }
+            .sortedWith(compareBy({ it.directory != file?.parent }, { it.name }))
     }
 
     private fun catalogueInterfaces(context: GenerateContext, own: String?): List<GoInterfaceCandidate> =
