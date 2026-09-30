@@ -19,6 +19,7 @@ import com.intellij.psi.PsiFile
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoReorderFieldsIntention
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoSettings
 import java.io.File
@@ -142,6 +143,7 @@ class GoLintAnnotator : ExternalAnnotator<GoLintAnnotator.Request, GoLintAnnotat
             val message = if (issue.linter.isEmpty()) issue.text else "${issue.linter}: ${issue.text}"
             var annotation = holder.newAnnotation(if (issue.isError) HighlightSeverity.ERROR else HighlightSeverity.WARNING, message).range(range)
             if (issue.linter == "errcheck") annotation = annotation.withFix(GoErrcheckFix(handle = true, line)).withFix(GoErrcheckFix(handle = false, line))
+            if (issue.linter == "govet" && "fieldalignment" in issue.text) annotation = annotation.withFix(GoReorderFieldsIntention(line))
             // a finding of the type checker is an error of the code, not an opinion to argue with
             if (issue.linter.isNotEmpty() && issue.linter != "typecheck") annotation = annotation.withFix(GoNolintFix(issue.linter, line))
             annotation.create()

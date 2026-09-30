@@ -61,7 +61,7 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
                 ApplicationManager.getApplication().invokeLater({
                     try {
                         val session = XDebuggerManager.getInstance(project).startSession(environment, object : XDebugProcessStarter() {
-                            override fun start(session: XDebugSession): XDebugProcess = GoDebugProcess(session, adapter, start, GoDebuggerLogs.newProtocolTrace())
+                            override fun start(session: XDebugSession): XDebugProcess = GoDebugProcess(session, adapter, start, GoDebuggerLogs.newProtocolTrace(), environment)
                         })
                         // Hand the descriptor over always, as the .NET plugin does: a split-mode frontend that builds its own UI (vanilla
                         // IDEA 2026.1) ignores it, but a fork whose split frontend does not (GIGA IDE) shows nothing on null. Returning it

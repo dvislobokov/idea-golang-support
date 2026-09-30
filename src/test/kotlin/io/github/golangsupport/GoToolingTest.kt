@@ -10,6 +10,7 @@ import io.github.golangsupport.mod.GoModDependencies
 import io.github.golangsupport.mod.GoModFile
 import io.github.golangsupport.mod.GoModSources
 import io.github.golangsupport.mod.GoModuleList
+import io.github.golangsupport.run.DebugBinaryRefusal
 import io.github.golangsupport.run.DelveGoVersion
 import io.github.golangsupport.run.GoEvaluate
 import io.github.golangsupport.run.GoOutputLocations
@@ -217,6 +218,11 @@ class GoToolingTest {
     }
 
     @Test fun delveAndGoOutOfStep() {
+        // a binary that could not start is told from a build that failed: only the former is worth another directory
+        assertTrue(DebugBinaryRefusal.isExecutionRefused("Failed to launch: could not launch process: fork/exec C:\\Temp\\__debug_bin1.exe: Access is denied."))
+        assertTrue(DebugBinaryRefusal.isExecutionRefused("could not launch process: fork/exec /tmp/__debug_bin1: permission denied"))
+        assertFalse(DebugBinaryRefusal.isExecutionRefused("Build Error: go build -o ...\n# app\n./main.go:6:1: syntax error (exit status 1)"))
+        assertFalse(DebugBinaryRefusal.isExecutionRefused("Failed to launch: Version of Go is too old for this version of Delve"))
         val old = DelveGoVersion.find("Version of Go is too old for this version of Delve (minimum supported version 1.23, suppress this error with --check-go-version=false)")!!
         assertEquals(DelveGoVersion.Kind.GO_TOO_OLD, old.kind)
         assertEquals("1.23", old.limit)

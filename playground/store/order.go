@@ -26,6 +26,13 @@ type Order struct {
 	items    []Item `db:"items" mapstructure:"items" toml:"items"`
 }
 
+// Flags is padded by the compiler: 24 bytes where 16 would do (Alt+Enter: Reorder fields; fieldalignment of golangci-lint says so too).
+type Flags struct {
+	Debug   bool
+	Timeout int64
+	Verbose bool
+}
+
 // NewOrder
 func NewOrder(currency string) *Order {
 	return &Order{Currency: currency}

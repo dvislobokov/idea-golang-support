@@ -58,6 +58,7 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 2а.9 | `data, err := os.ReadFile(n)` → Alt+Enter → Add if err != nil check | Проверка с `return nil, err` | да |
 | 2а.10 | Функция с результатом без `return` → Alt+Enter → Add missing return | `return 0, nil` перед `}` | да |
 | 2а.11 | `sum := add(a, 2)` без `add` → Alt+Enter → Create function 'add' | В конце файла `func add(a any, arg2 int) any { panic(...) }` | да (без результата — до правки) |
+| 2а.11а | Курсор в `Flags` (`order.go`) → Alt+Enter → Reorder fields for a smaller struct (24 → 16 bytes) | `Timeout` первым, `Debug`, `Verbose` следом; после сохранения с `fieldalignment` в `.golangci.yml` та же правка — исправление к находке govet | **нет** |
 | 2а.12 | Пустая строка над `func Total` → набрать `//` | `// Total ` | да |
 | 2а.13 | Settings → Tools → Go → Editor: снять «Start a doc comment with the name…» → снова `//` | Комментарий остаётся `//` | **нет** |
 | 2а.15 | В поле `Name string` набрать `` ` `` (IDE закроет кавычку), затем `js` | Список ключей; выбор `json` даёт `json:""` и список имён `name`…; Tab внутри кавычек **не** даёт двойных кавычек | да |
@@ -167,6 +168,7 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 8.9 | Добавить `panic("boom")` в `main`, Debug | Остановка в `runtime.fatalpanic`, в стеке `main.main main.go:21`; в консоли `panic: "boom"` и стек | остановка — да (робот); текст в консоли — **нет** |
 | 8.10 | Debug теста (▶ у `TestTotal` → Debug), точка в `Total()` | Остановка внутри теста | да |
 | 8.11 | Сломать компиляцию, Debug | В консоли сессии строки `> dlv dap …`, `> go build -gcflags=…`, вывод компилятора; в окне Build задача «Debug: имя» с кликабельными ошибками; балун в одну строку с кнопкой Show Build Window | робот |
+| 8.11б | Temp без права запуска (робот подменяет `java.io.tmpdir` на каталог с `icacls /deny …:(X)`), Debug | Уведомление «Debug binaries are built in the package directory now» с Keep Temp Directory / Configure, настройка на Package directory, сессия перезапущена и программа отработала; в Temp бинаря не осталось | робот |
 | 8.12 | Stop во время остановки | Сессия закрывается, в диспетчере задач нет висящих `dlv.exe` и `__debug_bin*.exe` | да (робот) |
 | 8.14 | Run → Attach to Process… | Группа «Go» со списком процессов; выбрать программу, собранную `go build` и запущенную вручную; точка срабатывает; Stop отсоединяет, программа живёт | **нет** |
 | 8.15 | В Evaluate набрать `ord` → Ctrl+Space; `order.` → Ctrl+Space | Подсказки: локальные переменные; поля `Currency`, `items` | **нет** |

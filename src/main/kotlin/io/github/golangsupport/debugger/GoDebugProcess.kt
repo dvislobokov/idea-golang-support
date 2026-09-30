@@ -26,6 +26,13 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.execution.runners.ExecutionUtil
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
+import io.github.golangsupport.run.DebugBinaryRefusal
+import io.github.golangsupport.settings.GoDebugBinaryLocation
+import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.build.BuildViewCommandOutput
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
@@ -55,6 +62,8 @@ class GoDebugProcess(
     private val adapter: DelveAdapter,
     private val start: DebugStart,
     trace: Writer?,
+    /** What started the session: for starting it again with the binary elsewhere; null for a session with no configuration behind it. */
+    private val environment: ExecutionEnvironment? = null,
 ) : XDebugProcess(session), DapConnection.Listener {
     val connection = DapConnection(adapter.input, adapter.output, this, trace)
     private val handler = DebuggeeProcessHandler()
@@ -144,6 +153,7 @@ class GoDebugProcess(
         val output = synchronized(startupOutput) { startupOutput.toString().trim() }
         exitCode = 1
         print("Cannot start debugging: $reason\n", ProcessOutputTypes.STDERR)
+        if (restartFromPackageDirectory(reason, output)) return
         val mismatch = DelveGoVersion.find(reason + "\n" + output)
         val explanation = mismatch?.explain(GoEnvironment.quick().goVersion)
         val project = session.project
@@ -165,6 +175,35 @@ class GoDebugProcess(
         if (mismatch != null) notification.addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(session.project, GoDebuggerConfigurable::class.java) })
         notification.notify(session.project)
         session.stop()
+    }
+
+    /**
+     * The binary was built in the temp directory and could not be started from there (a policy, an antivirus, a `noexec` mount): the
+     * setting moves to the package directory, the session is started again there, and a notification says so, with the way back.
+     * Once: a session that fails from the package directory as well fails the usual way.
+     */
+    private fun restartFromPackageDirectory(reason: String, output: String): Boolean {
+        val settings = GoSettings.getInstance()
+        val environment = environment ?: return false
+        if (start.attach || outputBinary == null || settings.debugBinaryLocation != GoDebugBinaryLocation.TEMP) return false
+        if (!DebugBinaryRefusal.isExecutionRefused(reason + "\n" + output)) return false
+        settings.debugBinaryLocation = GoDebugBinaryLocation.PACKAGE
+        val project = session.project
+        val summary = reason.lineSequence().firstOrNull { it.isNotBlank() }?.trim() ?: reason
+        print("The program could not be started from the temp directory; starting again with the binary in the package directory.\n", ProcessOutputTypes.SYSTEM)
+        LOG.info("Debug binary refused in the temp directory ($summary): switching to the package directory and restarting ${start.name}")
+        val notification = NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP).createNotification(
+            "Debug binaries are built in the package directory now",
+            "The program could not be started from the temp directory: $summary<br>" +
+                "From now on delve builds __debug_bin… next to the sources of the package (removed when the session ends); the session is started again.",
+            NotificationType.WARNING,
+        )
+        notification.addAction(NotificationAction.createSimpleExpiring("Keep Temp Directory") { settings.debugBinaryLocation = GoDebugBinaryLocation.TEMP })
+        notification.addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoDebuggerConfigurable::class.java) })
+        notification.notify(project)
+        session.stop()
+        ApplicationManager.getApplication().invokeLater({ if (!project.isDisposed) ExecutionUtil.restart(environment) }, ModalityState.nonModal())
+        return true
     }
 
     // --- events of the adapter ---

@@ -1,0 +1,5 @@
+type Flags struct {
+	Debug   bool
+	Timeout int64
+	Verbose bool
+}

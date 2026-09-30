@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.lint.GoErrcheckFixes
 import io.github.golangsupport.lint.GoSignatureProvider
@@ -210,4 +211,44 @@ class GoGenerateTestIntention : IntentionAction {
     override fun startInWriteAction(): Boolean = false
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean = file is GoFile && !file.isTestFile && editor != null && GenerateContext(project, editor, file).functionAtCaret != null
     override fun invoke(project: Project, editor: Editor?, file: PsiFile?) = GoGenerateTestAction.generate(GenerateContext(project, editor!!, file as GoFile))
+}
+
+/**
+ * Alt+Enter inside a struct the compiler pads more than it has to: the fields in the order that wastes the least ([GoFieldAlignment]),
+ * what `fieldalignment` of `go vet` asks for. Also the fix of that finding of golangci-lint, for the struct around the line it names.
+ */
+class GoReorderFieldsIntention(private val line: Int? = null) : IntentionAction {
+    private var analysis: Pair<GoDeclarationInfo, GoFieldAlignment.Result>? = null
+
+    override fun getText(): String = analysis?.let { (_, result) -> "Reorder fields for a smaller struct (${result.currentSize} → ${result.optimalSize} bytes)" } ?: "Reorder fields for a smaller struct"
+    override fun getFamilyName(): String = "Go: reorder struct fields"
+    override fun startInWriteAction(): Boolean = true
+
+    override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
+        if (file !is GoFile || editor == null) return false
+        analysis = analyze(GenerateContext(project, editor, file))
+        return analysis != null
+    }
+
+    private fun analyze(context: GenerateContext): Pair<GoDeclarationInfo, GoFieldAlignment.Result>? {
+        val text = context.document.immutableCharSequence
+        val structure = context.structure
+        val struct = if (line == null) context.structAtCaret else {
+            if (line !in 0 until context.document.lineCount) return null
+            val offset = context.document.getLineStartOffset(line)
+            structure.declarations.lastOrNull { it.kind == GoDeclarationKind.STRUCT && it.range.contains(offset) }
+        } ?: return null
+        val body = struct.body ?: return null
+        val result = GoFieldAlignment.analyze(text.subSequence(body.startOffset + 1, body.endOffset - 1), GoFieldAlignment.localTypes(structure, text)) ?: return null
+        return (struct to result).takeIf { result.saves }
+    }
+
+    override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
+        if (file !is GoFile || editor == null) return
+        val (struct, result) = analyze(GenerateContext(project, editor, file)) ?: return
+        val body = struct.body ?: return
+        val document = editor.document
+        document.replaceString(body.startOffset + 1, body.endOffset - 1, GoFieldAlignment.rewrite(document.immutableCharSequence.subSequence(body.startOffset + 1, body.endOffset - 1), result))
+        PsiDocumentManager.getInstance(project).commitDocument(document)
+    }
 }

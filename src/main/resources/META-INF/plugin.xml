@@ -113,6 +113,11 @@
         </intentionAction>
         <intentionAction>
             <language>Go</language>
+            <className>io.github.golangsupport.lang.GoReorderFieldsIntention</className>
+            <category>Go</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Go</language>
             <className>io.github.golangsupport.lang.GoImplementInterfaceIntention</className>
             <category>Go</category>
         </intentionAction>

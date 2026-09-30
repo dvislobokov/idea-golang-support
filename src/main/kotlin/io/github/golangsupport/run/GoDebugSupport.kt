@@ -54,6 +54,20 @@ object DelveGoVersion {
         TOO_OLD.find(text)?.let { Mismatch(Kind.GO_TOO_OLD, it.groupValues[1]) } ?: TOO_NEW.find(text)?.let { Mismatch(Kind.GO_TOO_NEW, it.groupValues[1]) }
 }
 
+/**
+ * A program delve built but could not start: a temp directory that policy (AppLocker, SRP), an antivirus or a `noexec` mount keeps
+ * binaries from running in. Told apart from a build that failed, which has the messages of the compiler with it.
+ */
+object DebugBinaryRefusal {
+    private val BUILD = Regex("""Build Error|\.go:\d+(?::\d+)?: """)
+    private val REFUSED = Regex(
+        """(?i)access is denied|blocked by group policy|contains a virus|permission denied|operation not permitted|could not launch process|""" +
+            """could not fork/exec|exec format error|not allowed by|0x800704EC|error 1260""",
+    )
+
+    fun isExecutionRefused(text: String): Boolean = !BUILD.containsMatchIn(text) && REFUSED.containsMatchIn(text)
+}
+
 /** The exception breakpoint filters of delve, as its `initialize` response lists them. */
 enum class GoPanicFilter(val id: String, val title: String) {
     UNRECOVERED_PANIC("unrecovered-panic", "Unrecovered panics"),

@@ -330,6 +330,7 @@ footer a { color: var(--text-2); }
         <tr><td>Add missing return</td><td>Функция с результатом без <code>return</code></td><td>Добавляет <code>return</code> с нулевыми значениями.</td></tr>
         <tr><td>Create function</td><td>Вызов несуществующей функции</td><td>Создаёт функцию с параметрами по аргументам вызова.</td></tr>
         <tr><td>Add struct tags…</td><td>Структура или её поле</td><td>Диалог: ключи, стиль имён, <code>omitempty</code>.</td></tr>
+        <tr><td>Reorder fields for a smaller struct <span class="new">новое</span></td><td>Структура, которую компилятор выравнивает с лишними пробелами</td><td>Поля в порядке, дающем наименьший размер (сначала самые выровненные и крупные), в тексте пункта — размер до и после; комментарии остаются при своих полях. Размеры считаются по тексту: базовые типы, указатели, срезы, map, chan, func, известные типы stdlib (<code>time.Time</code>, <code>sync.Mutex</code>…) и типы этого файла; с неизвестным типом пункт не появляется. То же — исправление к находке <code>fieldalignment</code> линтера (govet). Позиционные литералы структуры править вручную.</td></tr>
         <tr><td>Implement interface…</td><td>Тип</td><td>Попап с поиском по интерфейсам проекта и, с галочкой Non-project, стандартной библиотеки и зависимостей; дописывает недостающие методы. Тот же попап — <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
         <tr><td>Generate test</td><td>Функция или метод</td><td>Табличный тест в файле <code>_test.go</code>.</td></tr>
         <tr><td>Fill all fields <span class="new">новое</span></td><td>Литерал структуры или имя типа</td><td>Заполняет поля нулевыми значениями и добавляет импорты. На имени типа без скобок сначала дописывает <code>{}</code>.</td></tr>
@@ -590,7 +591,7 @@ footer a { color: var(--text-2); }
         <tr><td>Hide system goroutines</td><td>Скрывает служебные горутины.</td></tr>
         <tr><td>Stack trace depth</td><td>Сколько кадров стека запрашивать.</td></tr>
         <tr><td>Debug programs of a Go version this delve does not support</td><td>Разрешает отладку, когда Delve старше версии Go. Надёжнее обновить Delve.</td></tr>
-        <tr><td>Build debug binaries in</td><td>Куда delve кладёт собранный для отладки <code>__debug_bin…</code>: System temp directory (в проекте ничего не остаётся), Package directory (рядом с исходниками, как <code>dlv debug</code>) или Custom directory — свой путь, относительный считается от каталога пакета. После сессии файл удаляется в любом случае.</td></tr>
+        <tr><td>Build debug binaries in</td><td>Куда delve кладёт собранный для отладки <code>__debug_bin…</code>: System temp directory (в проекте ничего не остаётся), Package directory (рядом с исходниками, как <code>dlv debug</code>) или Custom directory — свой путь, относительный считается от каталога пакета. После сессии файл удаляется в любом случае. Если собранная в Temp программа не запускается (запрет политикой, антивирус, <code>noexec</code>), настройка сама переключается на Package directory, сессия запускается заново, об этом говорит уведомление с кнопкой Keep Temp Directory.</td></tr>
         <tr><td>Write the log of delve for every debug session</td><td>Журналы открываются из меню Go, Debugger.</td></tr>
       </tbody>
     </table></div>
