@@ -209,6 +209,8 @@ footer a { color: var(--text-2); }
       <thead><tr><th>Что</th><th>Как</th><th>Пояснение</th></tr></thead>
       <tbody>
         <tr><td>К объявлению</td><td><kbd data-action="GotoDeclaration">Ctrl+B</kbd> или <kbd>Ctrl</kbd> и клик</td><td>С объявления показывает его использования.</td></tr>
+        <tr><td>К тесту и обратно</td><td><kbd data-action="GotoTest">Ctrl+Shift+T</kbd></td><td>Из <code>x.go</code> в <code>x_test.go</code> и назад; из функции <code>F</code> к <code>TestF</code>, <code>TestT_F</code>, <code>BenchmarkF</code>, из теста к тому, что он проверяет. Теста нет — предложение создать его (Generate test).</td></tr>
+        <tr><td>К методу интерфейса</td><td><kbd data-action="GotoSuperMethod">Ctrl+U</kbd></td><td>От метода к методу интерфейса, который он реализует, от типа к его интерфейсам (gopls); несколько — список.</td></tr>
         <tr><td>К реализации</td><td><kbd data-action="GotoImplementation">Ctrl+Alt+B</kbd></td><td>Реализации интерфейса и его методов. Те же переходы дают значки на полях редактора.</td></tr>
         <tr><td>Иерархия вызовов <span class="new">новое</span></td><td><kbd data-action="CallHierarchy">Ctrl+Alt+H</kbd></td><td>Кто вызывает функцию под курсором и кого вызывает она, на любую глубину; с объявления и с места вызова. Дерево строит gopls.</td></tr>
         <tr><td>Иерархия типов <span class="new">новое</span></td><td><kbd data-action="TypeHierarchy">Ctrl+H</kbd></td><td>Реализации интерфейса, интерфейсы типа, вложенные интерфейсы.</td></tr>
@@ -328,7 +330,7 @@ footer a { color: var(--text-2); }
         <tr><td>Handle error</td><td>Вызов отдельной строкой</td><td>Оборачивает вызов в проверку ошибки.</td></tr>
         <tr><td>Add if err != nil check</td><td>После присваивания ошибки</td><td>Добавляет проверку с <code>return</code>.</td></tr>
         <tr><td>Add missing return</td><td>Функция с результатом без <code>return</code></td><td>Добавляет <code>return</code> с нулевыми значениями.</td></tr>
-        <tr><td>Create function</td><td>Вызов несуществующей функции</td><td>Создаёт функцию с параметрами по аргументам вызова.</td></tr>
+        <tr><td>Create function</td><td>Вызов несуществующей функции</td><td>Создаёт функцию с параметрами по аргументам вызова. С работающим gopls в списке его исправление «Create function name» с настоящими типами параметров и результатов; наш пункт с типами по аргументам остаётся для работы без сервера.</td></tr>
         <tr><td>Add struct tags…</td><td>Структура или её поле</td><td>Диалог: ключи, стиль имён, <code>omitempty</code>.</td></tr>
         <tr><td>Reorder fields for a smaller struct <span class="new">новое</span></td><td>Структура, которую компилятор выравнивает с лишними пробелами</td><td>Поля в порядке, дающем наименьший размер (сначала самые выровненные и крупные), в тексте пункта — размер до и после; комментарии остаются при своих полях. Размеры считаются по тексту: базовые типы, указатели, срезы, map, chan, func, известные типы stdlib (<code>time.Time</code>, <code>sync.Mutex</code>…) и типы этого файла; с неизвестным типом пункт не появляется. То же — исправление к находке <code>fieldalignment</code> линтера (govet). Позиционные литералы структуры править вручную.</td></tr>
         <tr><td>Implement interface…</td><td>Тип</td><td>Попап с поиском по интерфейсам проекта и, с галочкой Non-project, стандартной библиотеки и зависимостей; дописывает недостающие методы. Тот же попап — <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
@@ -367,7 +369,7 @@ footer a { color: var(--text-2); }
     <div class="table"><table class="two">
       <thead><tr><th>Сокращение</th><th>Заготовка</th></tr></thead>
       <tbody>
-        <tr><td><code>err</code>, <code>errn</code>, <code>errw</code></td><td>Проверка ошибки: с <code>return</code>, с <code>return nil, err</code>, с обёрткой через <code>fmt.Errorf</code>.</td></tr>
+        <tr><td><code>err</code>, <code>errn</code>, <code>errw</code></td><td>Проверка ошибки: <code>err</code> подставляет выход по результатам функции (<code>return nil, err</code>, именованные результаты, <code>t.Fatal(err)</code> в тесте, <code>log.Fatal(err)</code> в <code>main</code>), <code>errn</code> — всегда <code>return nil, err</code>, <code>errw</code> — с обёрткой через <code>fmt.Errorf</code>.</td></tr>
         <tr><td><code>ife</code></td><td><code>if v, err := f(); err != nil {}</code></td></tr>
         <tr><td><code>errt</code>, <code>erras</code></td><td>Проверки <code>errors.Is</code> и <code>errors.As</code>.</td></tr>
         <tr><td><code>fn</code>, <code>meth</code>, <code>main</code>, <code>init</code></td><td>Функция, метод, <code>func main</code>, <code>func init</code>.</td></tr>
@@ -533,6 +535,7 @@ footer a { color: var(--text-2); }
         <tr><td>Collect coverage</td><td>Покрытие: отметки у строк в редакторе и процент в окне Go Tests.</td></tr>
         <tr><td>Race detector</td><td><code>-race</code></td></tr>
         <tr><td>Always run the tests</td><td><code>-count=1</code>: без результата из кэша.</td></tr>
+        <tr><td>Skip the long-running tests, Stop after the first failing test, Timeout</td><td><code>-short</code>, <code>-failfast</code>, <code>-timeout=30s</code>; при отладке уходят тестовому бинарю как <code>-test.short</code> и т. д. Вывод всегда подробный: <code>-json</code> подразумевает <code>-v</code>.</td></tr>
         <tr><td>Collect runtime telemetry for the Go Monitor</td><td>Показатели сборки мусора и планировщика в окне Go Monitor.</td></tr>
       </tbody>
     </table></div>

@@ -53,6 +53,10 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 2а.4 | Каретка в `type Order struct` → Alt+Insert | Constructor…, Getters…, Setters…, Getters and Setters…, String() Method…, Struct Tags…, Implement Interface…, Test | список — да; диалоги — **нет** |
 | 2а.5 | Alt+Insert → Struct Tags… → json + db, snake_case, omitempty | Теги у экспортируемых полей; у неэкспортируемых только db; существующие теги дополняются | **нет** |
 | 2а.6 | Alt+Insert → Implement Interface… → `Priced` на новом типе; Ctrl+I → галочка Non-project → `http.Handler` | Попап «Choose interface to implement:» с поиском; методы с `panic("not implemented")`, только недостающие; для `Handler` — `ServeHTTP(w http.ResponseWriter, r *http.Request)` и импорт `net/http` | робот |
+| 2а.8 | На вызове несуществующей функции → Alt+Enter | Один пункт «Create function compute» от gopls (типы настоящие: `*store.Order, string, int`); свой «Create function 'compute'» показывается только без сервера | робот |
+| 2а.9 | В `func (o *Order) Total` → Ctrl+U (Go to Super Method); Ctrl+Shift+T (Go to Test); из `TestTotal` → Ctrl+Shift+T | Переход к `Total() int` интерфейса `Priced`; к `TestTotal` в `order_test.go`; обратно к методу | робот |
+| 2а.10 | Свёртки в `order.go` | Регионы `{...}` у тел функций и у блоков `for`/`if` внутри них, `(...)` у групп, без дублей «...» от gopls | робот |
+| 7.1б | Конфигурация теста: Skip long-running, Stop after first failing, Timeout 45s | `go test -json -short -failfast -timeout=45s .`; при отладке `-test.short -test.failfast -test.timeout=45s` | робот |
 | 2а.7 | В функции `Total` → Alt+Enter → Generate test | `order_test.go` открылся, в конце `TestOrder_Total` с таблицей | **нет** |
 | 2а.8 | `os.Remove(p)` отдельной строкой → Alt+Enter → Handle error | `if err := os.Remove(p); err != nil { return err }` | да |
 | 2а.9 | `data, err := os.ReadFile(n)` → Alt+Enter → Add if err != nil check | Проверка с `return nil, err` | да |

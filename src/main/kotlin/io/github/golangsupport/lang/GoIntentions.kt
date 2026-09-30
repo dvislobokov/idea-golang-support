@@ -1,7 +1,9 @@
 package io.github.golangsupport.lang
 
+import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerImpl
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
@@ -137,12 +139,17 @@ class GoAddMissingReturnIntention : IntentionAction {
  * arguments, at the end of the file; a method when the call is `s.name(...)` on a receiver of this file. The types of the parameters are
  * a guess (`any` for anything but a literal) and the first thing to change.
  */
+/**
+ * Create function: the quick fix of gopls for `undefined: name` writes it with the real types of the arguments and of the assignment,
+ * and the platform shows that fix under Alt+Enter with the diagnostic (`Create function name`). This one, with the types guessed
+ * from the text (`any`), is for when there is no such fix: no server, or a call the server does not see as one.
+ */
 class GoCreateFunctionIntention : IntentionAction {
     private var name: String = ""
 
     override fun getText(): String = if (name.isEmpty()) "Create function" else "Create function '$name'"
     override fun getFamilyName(): String = "Go: create function"
-    override fun startInWriteAction(): Boolean = true
+    override fun startInWriteAction(): Boolean = false
 
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
         if (file !is GoFile || editor == null) return false
@@ -153,7 +160,16 @@ class GoCreateFunctionIntention : IntentionAction {
         // a function of this file, a builtin, a package (`fmt.Println`): not ours to create
         if (called in BUILTINS || structure.declarations.any { it.name == called && (qualifier == null && it.kind == GoDeclarationKind.FUNCTION || qualifier != null && it.kind == GoDeclarationKind.METHOD) }) return false
         if (qualifier != null && structure.imports.any { (it.alias ?: it.path.substringAfterLast('/')) == qualifier }) return false
-        return true
+        return !hasServerFix(project, editor, called)
+    }
+
+    /** Whether the fix of the language server for this call is in the list already: a quick fix of an error at the caret with the same name. */
+    private fun hasServerFix(project: Project, editor: Editor, called: String): Boolean {
+        val offset = editor.caretModel.offset
+        val wanted = "create function $called"
+        return DaemonCodeAnalyzerImpl.getHighlights(editor.document, HighlightSeverity.ERROR, project)
+            .filter { offset >= it.startOffset && offset <= it.endOffset }
+            .any { info -> info.findRegisteredQuickFix<Boolean> { descriptor, _ -> true.takeIf { descriptor.action.text.trim().equals(wanted, ignoreCase = true) } } == true }
     }
 
     override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
@@ -161,6 +177,10 @@ class GoCreateFunctionIntention : IntentionAction {
         val text = document.immutableCharSequence
         val offset = editor.caretModel.offset
         val (called, qualifier) = GoGenerators.calledName(text, offset) ?: return
+        WriteCommandAction.runWriteCommandAction(project, "Create Function", null, { writeOwn(document, text, offset, called, qualifier, editor) }, file)
+    }
+
+    private fun writeOwn(document: Document, text: CharSequence, offset: Int, called: String, qualifier: String?, editor: Editor) {
         var nameStart = offset
         while (nameStart > 0 && (text[nameStart - 1].isLetterOrDigit() || text[nameStart - 1] == '_')) nameStart--
         val call = GoGenerators.callText(text, nameStart) ?: return

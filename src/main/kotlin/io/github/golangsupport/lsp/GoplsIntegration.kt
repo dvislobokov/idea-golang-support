@@ -35,6 +35,8 @@ import com.intellij.platform.lsp.api.customization.LspCompletionCustomizer
 import com.intellij.platform.lsp.api.customization.LspCustomization
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsCustomizer
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsSupport
+import com.intellij.platform.lsp.api.customization.LspFoldingRangeCustomizer
+import com.intellij.platform.lsp.api.customization.LspFoldingRangeDisabled
 import com.intellij.platform.lsp.api.lsWidget.LspClientWidgetItem
 import com.intellij.platform.lsp.api.customization.LspGoToDefinitionCustomizer
 import com.intellij.openapi.editor.colors.TextAttributesKey
@@ -152,6 +154,12 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
     /** Go to Declaration is [GoplsGotoDeclarationHandler]: with both, every target would be offered twice. */
     override val lspCustomization: LspCustomization = object : LspCustomization() {
         override val goToDefinitionCustomizer: LspGoToDefinitionCustomizer get() = LspGoToDefinitionDisabled
+
+        /**
+         * Folding is [io.github.golangsupport.lang.GoFoldingBuilder]: bodies, blocks inside them, groups, comments. The regions of gopls
+         * would come on top of the same ranges (seen live: every body twice, `{...}` and `...`), plus ones of a single line for parameters.
+         */
+        override val foldingRangeCustomizer: LspFoldingRangeCustomizer get() = LspFoldingRangeDisabled
 
         /**
          * The colours of the editor beyond what a lexer can tell: packages, references to types, fields, constants, parameters. The

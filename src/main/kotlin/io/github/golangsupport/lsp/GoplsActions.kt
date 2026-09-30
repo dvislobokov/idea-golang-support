@@ -56,8 +56,8 @@ object GoplsActionKinds {
         return name.isNotEmpty() && offered.any { name(it.text) == name }
     }
 
-    /** A name without what differs by habit: the case of the letters, the dots of a dialog to come. */
-    private fun name(text: String?): String = text.orEmpty().trim().trimEnd('.', '…', ' ').lowercase()
+    /** A name without what differs by habit: the case of the letters, the dots of a dialog to come, the quotes around a name (`Create function 'f'`). */
+    private fun name(text: String?): String = text.orEmpty().trim().trimEnd('.', '…', ' ').replace("'", "").lowercase()
 }
 
 /**

@@ -28,6 +28,9 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
     private val coverage = JBCheckBox("Collect coverage (-coverprofile), shown in the editor and in the Go Tests window")
     private val race = JBCheckBox("Race detector (-race)")
     private val noTestCache = JBCheckBox("Always run the tests, never their cached result (-count=1)")
+    private val short = JBCheckBox("Skip the long-running tests (-short)")
+    private val failFast = JBCheckBox("Stop after the first failing test (-failfast)")
+    private val timeout = JBTextField()
     private val goArguments = RawCommandLineEditor()
     private val programArguments = RawCommandLineEditor()
     private val workingDirectory = TextFieldWithBrowseButton()
@@ -79,6 +82,9 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
             row { cell(coverage) }.visibleIf(test)
             row { cell(race) }.visibleIf(goCommand)
             row { cell(noTestCache) }.visibleIf(test)
+            row { cell(short) }.visibleIf(test)
+            row { cell(failFast) }.visibleIf(test)
+            row("Timeout:") { cell(timeout.apply { columns = 10 }).comment("<code>-timeout</code>: <code>30s</code>, <code>5m</code>; empty is the default of go test, 10 minutes. The output is always verbose: <code>-json</code> implies <code>-v</code>") }.visibleIf(test)
             row { cell(runtimeTelemetry).comment("For <code>go run</code>: the program is built and started with <code>GODEBUG=gctrace=1,schedtrace=1000</code>; the heap, the collections and the scheduler show in the Go Monitor tool window, not in the console") }.visibleIf(goCommand)
             row("Profile:") { cell(profile).comment("For <code>go test</code>: <code>-cpuprofile</code>, <code>-memprofile</code>, <code>-blockprofile</code>, <code>-mutexprofile</code> or <code>-trace</code>; after the run a notification opens it in <code>go tool pprof</code> / <code>go tool trace</code>") }.visibleIf(test)
         }
@@ -94,6 +100,9 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         benchmem.isSelected = options.benchmem
         race.isSelected = options.race
         noTestCache.isSelected = options.noTestCache
+        short.isSelected = options.short
+        failFast.isSelected = options.failFast
+        timeout.text = options.timeout.orEmpty()
         fuzz.isSelected = options.fuzz
         coverage.isSelected = options.coverage
         goArguments.text = options.goArguments.orEmpty()
@@ -121,6 +130,9 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         options.benchmem = benchmem.isSelected
         options.race = race.isSelected
         options.noTestCache = noTestCache.isSelected
+        options.short = short.isSelected
+        options.failFast = failFast.isSelected
+        options.timeout = timeout.text.trim().ifEmpty { null }
         options.fuzz = fuzz.isSelected
         options.coverage = coverage.isSelected
         options.goArguments = goArguments.text.ifBlank { null }

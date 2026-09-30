@@ -1,18 +1,16 @@
-// The file and the caret of the selected editor, and the element under the caret as the PSI sees it.
+// Where the caret of the selected editor is: the file, the line number and the text of the line.
 importClass(com.intellij.openapi.project.ProjectManager)
+importClass(com.intellij.openapi.application.ReadAction)
 importClass(com.intellij.openapi.fileEditor.FileEditorManager)
 importClass(com.intellij.openapi.fileEditor.FileDocumentManager)
-importClass(com.intellij.psi.PsiDocumentManager)
-importClass(com.intellij.openapi.application.ReadAction)
-const projects = ProjectManager.getInstance().getOpenProjects()
-const project = projects[projects.length - 1]
+var projects = ProjectManager.getInstance().getOpenProjects()
+var project = projects[projects.length - 1]
 ReadAction.compute(function () {
-    const editor = FileEditorManager.getInstance(project).getSelectedTextEditor()
-    const document = editor.getDocument()
-    const offset = editor.getCaretModel().getOffset()
-    const line = document.getLineNumber(offset)
-    const psi = PsiDocumentManager.getInstance(project).getPsiFile(document)
-    const element = psi.findElementAt(offset)
-    return FileDocumentManager.getInstance().getFile(document).getName() + ":" + (line + 1) + ":" + (offset - document.getLineStartOffset(line) + 1) +
-        "  element=" + element + " parent=" + element.getParent()
+    var editor = FileEditorManager.getInstance(project).getSelectedTextEditor()
+    if (editor == null) return "no editor"
+    var document = editor.getDocument()
+    var file = FileDocumentManager.getInstance().getFile(document)
+    var offset = editor.getCaretModel().getOffset()
+    var line = document.getLineNumber(offset)
+    return (file == null ? "?" : file.getName()) + ":" + (line + 1) + ": " + String(document.getText().substring(document.getLineStartOffset(line), document.getLineEndOffset(line))).replace(/\t/g, "<TAB>")
 })

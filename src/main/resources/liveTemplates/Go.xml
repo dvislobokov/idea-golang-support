@@ -1,6 +1,6 @@
 <templateSet group="Go">
-  <template name="err" value="if err != nil {&#10;&#9;return $RESULT$&#10;}$END$" description="if err != nil { return ... }" toReformat="false" toShortenFQNames="false">
-    <variable name="RESULT" expression="" defaultValue='"err"' alwaysStopAt="true"/>
+  <template name="err" value="if err != nil {&#10;&#9;$RESULT$&#10;}$END$" description="if err != nil { return ... }" toReformat="false" toShortenFQNames="false">
+    <variable name="RESULT" expression="goErrorReturn()" defaultValue='"return err"' alwaysStopAt="true"/>
     <context><option name="GO" value="true"/></context>
   </template>
   <template name="errw" value="if err != nil {&#10;&#9;return fmt.Errorf(&quot;$MESSAGE$: %w&quot;, err)&#10;}$END$" description="if err != nil { return fmt.Errorf(...: %w) }" toReformat="false" toShortenFQNames="false">

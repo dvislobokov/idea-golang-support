@@ -16,6 +16,7 @@ import io.github.golangsupport.run.GoEvaluate
 import io.github.golangsupport.run.GoOutputLocations
 import io.github.golangsupport.run.DlvDap
 import io.github.golangsupport.run.GoLaunchArguments
+import io.github.golangsupport.run.GoTestFlags
 import io.github.golangsupport.run.HitCondition
 import io.github.golangsupport.testing.GoTestEvents
 import io.github.golangsupport.testing.GoTestKind
@@ -149,10 +150,13 @@ class GoToolingTest {
         assertEquals("run: C:/app/cmd -v", described[1])
         assertEquals("env: A=1", described[2])
         assertEquals(listOf("attach to process 42"), GoLaunchArguments.describe(GoLaunchArguments.attach(42), attach = true))
-        val test = GoLaunchArguments.build(true, "C:/app/store", emptyList(), "^TestA$", false, null, emptyMap(), emptyList())
+        val test = GoLaunchArguments.build(true, "C:/app/store", emptyList(), "^TestA$", false, null, emptyMap(), emptyList(), testFlags = GoTestFlags.forBinary(GoTestFlags.forGoTest(true, true, "30s")))
         assertEquals("test", test["mode"])
+        // the boxes of the configuration: go test flags, and the same for the binary delve runs
+        assertEquals(listOf("-short", "-failfast", "-timeout=30s"), GoTestFlags.forGoTest(true, true, " 30s "))
+        assertEquals(emptyList<String>(), GoTestFlags.forGoTest(false, false, ""))
+        assertEquals(listOf("-test.short", "-test.failfast", "-test.timeout=30s", "-test.v", "-test.run", "^TestA$"), test["args"])
         assertTrue(GoLaunchArguments.describe(test, attach = false)[0].startsWith("go test -c -gcflags=\"all=-N -l\" -o "))
-        assertEquals(listOf("-test.v", "-test.run", "^TestA$"), test["args"])
         // a binary, a core dump, a process on the remote machine: nothing is built, the paths are mapped
         val substitutions = GoLaunchArguments.substitutions("C:/src/app=/go/src/app\n# a comment\nbroken line\n=/x\n")
         assertEquals(listOf(mapOf("from" to "/go/src/app", "to" to "C:/src/app")), substitutions)

@@ -45,6 +45,8 @@
         <lang.psiStructureViewFactory language="Go" implementationClass="io.github.golangsupport.lang.GoStructureViewFactory"/>
         <breadcrumbsInfoProvider implementation="io.github.golangsupport.lang.GoBreadcrumbsProvider"/>
         <lang.foldingBuilder language="Go" implementationClass="io.github.golangsupport.lang.GoFoldingBuilder"/>
+        <testFinder implementation="io.github.golangsupport.lang.GoTestFinder"/>
+        <testCreator language="Go" implementationClass="io.github.golangsupport.lang.GoTestCreator"/>
         <fileBasedIndex implementation="io.github.golangsupport.lang.GoDeclarationIndex"/>
         <!-- what every file of the project exports: the packages of the project in the catalogue of completion -->
         <fileBasedIndex implementation="io.github.golangsupport.catalogue.GoExportsIndex"/>
@@ -128,6 +130,7 @@
         </intentionAction>
         <liveTemplateContext contextId="GO" implementation="io.github.golangsupport.lang.GoTemplateContext"/>
         <liveTemplateMacro implementation="io.github.golangsupport.lang.GoTypeNameMacro"/>
+        <liveTemplateMacro implementation="io.github.golangsupport.lang.GoErrorReturnMacro"/>
 
         <lang.parserDefinition language="GoModule" implementationClass="io.github.golangsupport.mod.GoModParserDefinition"/>
         <lang.syntaxHighlighterFactory language="GoModule" implementationClass="io.github.golangsupport.mod.GoModSyntaxHighlighterFactory"/>

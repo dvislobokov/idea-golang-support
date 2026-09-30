@@ -38,9 +38,10 @@ if (chosen != null) {
     const done = new CompletableFuture()
     ApplicationManager.getApplication().invokeLater(new java.lang.Runnable({ run: function () {
         try {
-            if (chosen.startInWriteAction()) com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(project, new java.lang.Runnable({ run: function () { chosen.invoke(project, editor, found[0]) } }))
-            else chosen.invoke(project, editor, found[0])
-            done.complete("ok")
+            // the way Alt+Enter invokes one: inside a command, in a write action when the action asks for it (a quick fix of the platform
+            // invoked directly throws "Must not change document outside command")
+            var invoked = com.intellij.codeInsight.intention.impl.ShowIntentionActionsHandler.chooseActionAndInvoke(found[0], editor, chosen, String(chosen.getText()))
+            done.complete(invoked ? "ok" : "not invoked")
         } catch (e) { done.complete("threw " + e) }
     } }))
     out += "invoked __INVOKE__: " + done.get(60, TimeUnit.SECONDS) + "\n"

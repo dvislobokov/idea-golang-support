@@ -56,6 +56,9 @@ class GoFoldingBuilder : FoldingBuilderEx(), DumbAware {
             if (valid) result += FoldingDescriptor(root.node, range, null, placeholder)
         }
         structure.all().mapNotNull { it.body }.forEach { add(it, "{...}") }
+        val text = document.immutableCharSequence
+        structure.declarations.filter { it.kind == GoDeclarationKind.FUNCTION || it.kind == GoDeclarationKind.METHOD }.mapNotNull { it.body }
+            .forEach { body -> GoBlockFolds.find(text, body).forEach { add(it, "{...}") } }
         structure.groups.forEach { add(it, "(...)") }
         GoCommentRuns.find(document.immutableCharSequence).forEach { (range, placeholder) -> add(range, placeholder) }
         return result.toTypedArray()
@@ -63,6 +66,27 @@ class GoFoldingBuilder : FoldingBuilderEx(), DumbAware {
 
     override fun getPlaceholderText(node: ASTNode): String = "..."
     override fun isCollapsedByDefault(node: ASTNode): Boolean = false
+}
+
+/**
+ * The braces inside the body of a function: `if`, `for`, `switch`, `select`, a function literal, a composite literal. Every pair but
+ * the body itself; which of them fold is for the caller to decide by their lines.
+ */
+object GoBlockFolds {
+    fun find(text: CharSequence, body: TextRange): List<TextRange> {
+        val lexer = GoLexer()
+        lexer.start(text, body.startOffset, body.endOffset, 0)
+        val open = ArrayList<Int>()
+        val result = ArrayList<TextRange>()
+        while (lexer.tokenType != null) {
+            when (lexer.tokenType) {
+                GoTokenTypes.LBRACE -> open += lexer.tokenStart
+                GoTokenTypes.RBRACE -> open.removeLastOrNull()?.let { start -> if (start != body.startOffset) result += TextRange(start, lexer.tokenEnd) }
+            }
+            lexer.advance()
+        }
+        return result.sortedBy { it.startOffset }
+    }
 }
 
 /** What of the comments folds: every block comment, and two or more line comments in a row that have their lines to themselves. */
@@ -139,6 +163,19 @@ object GoTemplateContexts {
         type == GoTokenTypes.BLOCK_COMMENT -> end - start >= 4 && text[end - 1] == '/' && text[end - 2] == '*'
         else -> end - start >= 2 && text[end - 1] == text[start]
     }
+}
+
+/**
+ * `goErrorReturn()`: what leaves the function at the caret with `err`, for the `err` template: `return nil, err`, `return total, err`
+ * (named results), `t.Fatal(err)` in a test, `log.Fatal(err)` in `main`; `return err` when the function is not found.
+ */
+class GoErrorReturnMacro : MacroBase("goErrorReturn", "goErrorReturn()") {
+    override fun calculateResult(params: Array<Expression>, context: ExpressionContext, quick: Boolean): Result? {
+        val text = context.editor?.document?.immutableCharSequence ?: context.psiElementAtStartOffset?.containingFile?.viewProvider?.contents ?: return null
+        return TextResult(GoIdioms.returnStatement(text, context.startOffset, "err"))
+    }
+
+    override fun isAcceptableInContext(context: TemplateContextType?): Boolean = context is GoTemplateContext
 }
 
 /** `goTypeName()`: a pointer to the type declared last above the caret, the receiver the `meth` template most likely wants. */

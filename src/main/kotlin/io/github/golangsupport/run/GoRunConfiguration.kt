@@ -98,6 +98,11 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
 
     /** `go test` only: `-count=1`, the tests run instead of their cached result. */
     var noTestCache by property(false)
+
+    /** `go test` only: `-short`, `-failfast`, `-timeout`. */
+    var short by property(false)
+    var failFast by property(false)
+    var timeout by string()
     var programArguments by string()
     var workingDirectory by string()
     var environment by map<String, String>()
@@ -197,7 +202,7 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
         val coverage = coverageFile?.let { listOf("-coverprofile=${it.path}") }.orEmpty()
         val arguments = when (options.command) {
             GoCommand.RUN -> listOf("run") + goArgumentList() + packageArgument() + programArguments
-            GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + GoSettings.getInstance().testArgumentList() + testSelection() + profile + coverage + packageArgument() +
+            GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + testFlags() + GoSettings.getInstance().testArgumentList() + testSelection() + profile + coverage + packageArgument() +
                 (if (programArguments.isEmpty()) emptyList() else listOf("-args") + programArguments)
             // a binary and the debug-only kinds have no go command to run (see getState)
             GoCommand.EXEC, GoCommand.CORE, GoCommand.REMOTE -> throw com.intellij.execution.ExecutionException("${options.command.title} is not run with the go command")
@@ -217,6 +222,9 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
 
     private fun withEnvironment(line: GeneralCommandLine): GeneralCommandLine = line.withEnvironment(options.environment)
         .withParentEnvironmentType(if (options.passParentEnvironment) GeneralCommandLine.ParentEnvironmentType.CONSOLE else GeneralCommandLine.ParentEnvironmentType.NONE)
+
+    /** `-short`, `-failfast`, `-timeout=...` of the configuration, as `go test` takes them. */
+    fun testFlags(): List<String> = GoTestFlags.forGoTest(options.short, options.failFast, options.timeout)
 
     private fun testSelection(): List<String> {
         val pattern = options.testPattern?.takeIf { it.isNotBlank() }
@@ -247,9 +255,20 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
                 workingDirectory = options.workingDirectory, environment = options.environment, buildFlags = goArgumentList(), settings = settings,
                 // created here: go build does not make the directory of -o
                 binaryDirectory = settings.debugBinaryDirectory(packageDirectory())?.also { File(it).mkdirs() },
+                testFlags = GoTestFlags.forBinary(testFlags()),
             )
         }
     }
+}
+
+/** The flags of `go test` a configuration has boxes for, and the same flags for the test binary delve runs. Pure. */
+object GoTestFlags {
+    fun forGoTest(short: Boolean, failFast: Boolean, timeout: String?): List<String> = listOfNotNull(
+        "-short".takeIf { short }, "-failfast".takeIf { failFast }, timeout?.trim()?.takeIf { it.isNotEmpty() }?.let { "-timeout=$it" },
+    )
+
+    /** `-short` of `go test` is `-test.short` of the binary: what `go test` passes on, delve does not. */
+    fun forBinary(flags: List<String>): List<String> = flags.map { "-test." + it.removePrefix("-") }
 }
 
 /**
@@ -260,6 +279,8 @@ object GoLaunchArguments {
     fun build(
         test: Boolean, program: String, programArguments: List<String>, testPattern: String?, benchmark: Boolean,
         workingDirectory: String?, environment: Map<String, String>, buildFlags: List<String>, settings: GoSettings? = null, binaryDirectory: String? = null,
+        /** The flags of the test binary (`-test.short`, ...), see [GoTestFlags.forBinary]. */
+        testFlags: List<String> = emptyList(),
     ): Map<String, Any> = buildMap {
         put("mode", if (test) "test" else "debug")
         // what the program prints comes as `output` events of the protocol, not from the streams of the delve process
@@ -281,7 +302,7 @@ object GoLaunchArguments {
             pattern != null -> listOf("-test.v", "-test.run", pattern)
             else -> listOf("-test.v")
         }
-        (testArguments + programArguments).takeIf { it.isNotEmpty() }?.let { put("args", it) }
+        ((if (test) testFlags else emptyList()) + testArguments + programArguments).takeIf { it.isNotEmpty() }?.let { put("args", it) }
         workingDirectory?.takeIf { it.isNotBlank() }?.let { put("cwd", it) }
         if (environment.isNotEmpty()) put("env", environment)
         if (buildFlags.isNotEmpty()) put("buildFlags", buildFlags.joinToString(" "))

@@ -461,4 +461,12 @@ class GoIdiomsTest {
         assertTrue(GoCompletionOrder.priority("op", "Open") > GoCompletionOrder.priority("op", "os.Pipe"))
         assertEquals(GoCompletionOrder.priority("", "nil"), GoCompletionOrder.priority("", "net.IP"), 0.0)
     }
+    /** The `err` live template fills its statement with this: the function around the caret decides what leaves it with the error. */
+    @Test fun errorReturnForTheTemplate() {
+        val source = "package p\n\nfunc load(name string) ([]byte, error) {\n\tf, err := open(name)\n\t\n}\n\nfunc TestLoad(t *testing.T) {\n\t\n}\n\nfunc plain() {\n\t\n}\n"
+        assertEquals("return nil, err", GoIdioms.returnStatement(source, source.indexOf("open(name)\n\t") + "open(name)\n\t".length, "err"))
+        assertEquals("t.Fatal(err)", GoIdioms.returnStatement(source, source.indexOf("testing.T) {\n\t") + "testing.T) {\n\t".length, "err"))
+        assertEquals("return", GoIdioms.returnStatement(source, source.indexOf("plain() {\n\t") + "plain() {\n\t".length, "err"))
+        assertEquals("return err", GoIdioms.returnStatement(source, 0, "err"))
+    }
 }
