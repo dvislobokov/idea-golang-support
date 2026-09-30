@@ -85,6 +85,7 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                 row { checkBox("Staticcheck analyzers").bindSelected(settings::goplsStaticcheck) }
                 row { checkBox("Format with gofumpt, a stricter gofmt").bindSelected(settings::goplsGofumpt) }
                 row { checkBox("Inlay hints: parameter names, types of variables, values of constants").bindSelected(settings::goplsInlayHints) }
+                row { checkBox("Highlight the usages of the name at the caret and the exit points of a function").bindSelected(settings::goplsHighlightUsages).comment("Reads and writes in their colours; on <code>func</code> or <code>return</code> — every <code>return</code> of the function") }
                 row { checkBox("Log every message of the protocol").bindSelected(settings::goplsTrace).comment("<code>-rpc.trace</code> in the log window of gopls (menu Go | gopls | Show Log); big") }
                 row { checkBox("Serve the debug pages of gopls").bindSelected(settings::goplsDebugPages).comment("Sessions, memory, metrics and the RPC log of the server in a browser (menu Go | gopls | Open Debug Pages)") }
                 row { comment("Every other setting of the server: the <b>gopls</b> page below this one. What is set there wins over these switches") }

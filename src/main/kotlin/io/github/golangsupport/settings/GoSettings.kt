@@ -40,6 +40,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var goplsStaticcheck by property(true)
         var goplsGofumpt by property(false)
         var goplsInlayHints by property(true)
+        /** The usages of the name at the caret and, on `func` or `return`, the exit points of the function: highlighted by gopls. */
+        var goplsHighlightUsages by property(true)
 
         /** Setting of gopls -> its value as a JSON text, from the page with the catalogue of the server; wins over the switches above. */
         var goplsOverrides by map<String, String>()
@@ -127,6 +129,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var languageServerEnabled: Boolean
         get() = state.languageServerEnabled
         set(value) { state.languageServerEnabled = value }
+
+    var goplsHighlightUsages: Boolean
+        get() = state.goplsHighlightUsages
+        set(value) { state.goplsHighlightUsages = value }
 
     var goplsStaticcheck: Boolean
         get() = state.goplsStaticcheck

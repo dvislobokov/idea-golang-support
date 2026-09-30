@@ -1,6 +1,8 @@
 """Asks gopls, without an IDE, what it offers: diagnostics of a file and the code actions at places of it. Not a part of the plugin build.
 
-    python tools/gopls/probe.py PROJECT_DIR FILE [LINE[:COL[-LINE:COL]] ...] [--options JSON]
+    python tools/gopls/probe.py PROJECT_DIR FILE [LINE[:COL[-LINE:COL]] ...] [--options JSON] [--highlight]
+
+`--highlight` asks for the document highlights at the positions (usages of the name, exit points on `func`) instead of code actions.
 
 LINE and COL are 1-based; a single position is an empty range (the caret), `7:2-7:14` is a selection. Without positions only the
 diagnostics are printed. `--options` are the `initializationOptions`, as the plugin sends them (see GoplsOptions in the lsp package).
@@ -18,6 +20,9 @@ if "--options" in args:
     i = args.index("--options")
     options = json.loads(args[i + 1])
     del args[i:i + 2]
+highlight = "--highlight" in args
+if highlight:
+    args.remove("--highlight")
 if len(args) < 2:
     raise SystemExit(__doc__)
 root, file = os.path.abspath(args[0]), os.path.abspath(args[1])
@@ -106,6 +111,13 @@ def position(spec):
 for spec in args[2:]:
     start, _, end = spec.partition("-")
     rng = {"start": position(start), "end": position(end or start)}
+    if highlight:
+        # what the editor highlights at the caret: usages (kind 2 read, 3 write) and, on `func` or a result type, the exit points
+        answer = request("textDocument/documentHighlight", {"textDocument": {"uri": uri(file)}, "position": rng["start"]})
+        print("highlights at %s: %d" % (spec, len(answer.get("result") or [])), answer.get("error", ""))
+        for h in answer.get("result") or []:
+            print("  %d:%d-%d:%d kind %s" % (h["range"]["start"]["line"] + 1, h["range"]["start"]["character"] + 1, h["range"]["end"]["line"] + 1, h["range"]["end"]["character"] + 1, h.get("kind")))
+        continue
     inside = [d for d in found if d["range"]["start"]["line"] <= rng["start"]["line"] <= d["range"]["end"]["line"]]
     answer = request("textDocument/codeAction", {"textDocument": {"uri": uri(file)}, "range": rng, "context": {"diagnostics": inside}})
     print("code actions at %s: %d" % (spec, len(answer.get("result") or [])))

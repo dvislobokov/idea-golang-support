@@ -209,6 +209,9 @@ footer a { color: var(--text-2); }
       <tbody>
         <tr><td>К объявлению</td><td><kbd data-action="GotoDeclaration">Ctrl+B</kbd> или <kbd>Ctrl</kbd> и клик</td><td>С объявления показывает его использования.</td></tr>
         <tr><td>К реализации</td><td><kbd data-action="GotoImplementation">Ctrl+Alt+B</kbd></td><td>Реализации интерфейса и его методов. Те же переходы дают значки на полях редактора.</td></tr>
+        <tr><td>Иерархия вызовов <span class="new">новое</span></td><td><kbd data-action="CallHierarchy">Ctrl+Alt+H</kbd></td><td>Кто вызывает функцию под курсором и кого вызывает она, на любую глубину; с объявления и с места вызова. Дерево строит gopls.</td></tr>
+        <tr><td>Иерархия типов <span class="new">новое</span></td><td><kbd data-action="TypeHierarchy">Ctrl+H</kbd></td><td>Реализации интерфейса, интерфейсы типа, вложенные интерфейсы.</td></tr>
+        <tr><td>Подсветка использований <span class="new">новое</span></td><td><kbd data-action="HighlightUsagesInFile">Ctrl+Shift+F7</kbd></td><td>Использования имени под курсором в файле, чтение и запись разными цветами; на <code>func</code> или <code>return</code> — все выходы из функции. Подсвечивается и само, при остановке курсора.</td></tr>
         <tr><td>К объявлению типа</td><td><kbd data-action="GotoTypeDeclaration">Ctrl+Shift+B</kbd></td><td>Тип переменной, поля или результата под курсором.</td></tr>
         <tr><td>Тип выражения</td><td><kbd data-action="ExpressionTypeInfo">Ctrl+Shift+P</kbd></td><td>Объявление имени под курсором.</td></tr>
         <tr><td>Найти использования</td><td><kbd data-action="FindUsages">Alt+F7</kbd></td><td>Число использований над объявлением тоже открывает их список.</td></tr>
@@ -562,6 +565,7 @@ footer a { color: var(--text-2); }
     <div class="table"><table class="two">
       <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
       <tbody>
+        <tr><td>Highlight the usages of the name at the caret and the exit points of a function <span class="new">новое</span></td><td>Подсветка использований и выходов из функции силами gopls.</td></tr>
         <tr><td>Use gopls for errors, completion, navigation and refactorings</td><td>Включает сервер языка. Без него остаются подсветка, структура, шаблоны, серый текст и подсказки по имени.</td></tr>
         <tr><td>Staticcheck analyzers</td><td>Дополнительные проверки кода.</td></tr>
         <tr><td>Format with gofumpt</td><td>Более строгое форматирование, чем у gofmt.</td></tr>

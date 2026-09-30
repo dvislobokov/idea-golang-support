@@ -33,6 +33,8 @@ import com.intellij.platform.lsp.api.customization.LspCommandsCustomizer
 import com.intellij.platform.lsp.api.customization.LspCommandsSupport
 import com.intellij.platform.lsp.api.customization.LspCompletionCustomizer
 import com.intellij.platform.lsp.api.customization.LspCustomization
+import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsCustomizer
+import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsSupport
 import com.intellij.platform.lsp.api.lsWidget.LspClientWidgetItem
 import com.intellij.platform.lsp.api.customization.LspGoToDefinitionCustomizer
 import com.intellij.openapi.editor.colors.TextAttributesKey
@@ -162,6 +164,14 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         }
 
         override val completionCustomizer: LspCompletionCustomizer = GoplsCompletionSupport()
+
+        /**
+         * The usages of the name at the caret, reads and writes apart, and the exit points of a function on `func` or `return`: the
+         * platform asks a server for them only where a file has no language of its own (TextMate), so a Go file is named here.
+         */
+        override val documentHighlightsCustomizer: LspDocumentHighlightsCustomizer = object : LspDocumentHighlightsSupport() {
+            override fun shouldAskServerForDocumentHighlights(psiFile: PsiFile): Boolean = psiFile is GoFile && GoSettings.getInstance().goplsHighlightUsages
+        }
 
         /**
          * The fixes of the errors of gopls are the ones of the platform; its actions for a place are [GoplsIntention]: the platform asks

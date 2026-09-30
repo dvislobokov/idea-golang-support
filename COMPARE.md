@@ -225,7 +225,7 @@ GoLand 2026.2 (июль 2026) — эталон. У GoLand свой полный 
 | Code vision usages/implementations | да | да | ✅ |
 | Gutter implements / implemented by | да | да | ✅ |
 | Go to Type Declaration, Super Method, Related Symbol | да | Go to Type Declaration через `typeDefinition` gopls; остальное нет | ✅ / ❌ |
-| Type Hierarchy, Call Hierarchy | да | нет (gopls умеет call hierarchy, платформа не показывает) | ❌ |
+| Type Hierarchy, Call Hierarchy | да | провайдеры платформы для LSP + gopls; проверено 2026-09-30 | ✅ |
 | Go to Class / Symbol / File | да | да (по индексу + `workspace/symbol`) | ✅ |
 | Recent locations, bookmarks | платформа | платформа | ✅ |
 | Навигация внутри go.mod (модуль → исходники, версии) | да | узел Dependencies; в самом go.mod ❌ | 🟡 |
