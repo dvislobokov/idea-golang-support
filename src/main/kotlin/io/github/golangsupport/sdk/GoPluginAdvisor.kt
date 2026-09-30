@@ -17,6 +17,7 @@ import com.intellij.openapi.application.ex.ApplicationManagerEx
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
@@ -29,6 +30,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.dsl.builder.panel
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.lang.GoFileType
+import io.github.golangsupport.mod.GoModFileType
 import io.github.golangsupport.mod.GoModulesService
 import javax.swing.JComponent
 
@@ -112,9 +114,14 @@ object GoPluginAdvisor {
     }
 
     /** A go.mod anywhere, or at least one .go file: the module check works in dumb mode and short-circuits before the index. Under a read action. */
+    /**
+     * Both index questions are about the content roots of the project, which a freshly opened directory does not always have yet
+     * (seen live: a project of a go.mod and a main.go called "has no go.mod and no Go files"): the directory itself is looked at then.
+     */
     private fun worksWithGo(project: Project): Boolean =
         GoModulesService.getInstance(project).modules().isNotEmpty() ||
-            FileTypeIndex.containsFileOfType(GoFileType, GlobalSearchScope.projectScope(project))
+            FileTypeIndex.containsFileOfType(GoFileType, GlobalSearchScope.projectScope(project)) ||
+            project.guessProjectDir()?.children.orEmpty().any { it.name == GoModFileType.GO_MOD || (!it.isDirectory && it.extension == GoFileType.defaultExtension) }
 
     private class Dialog(project: Project, private val plugins: List<IdeaPluginDescriptor>) : DialogWrapper(project) {
         private val checks = plugins.map { JBCheckBox(it.name, true) }

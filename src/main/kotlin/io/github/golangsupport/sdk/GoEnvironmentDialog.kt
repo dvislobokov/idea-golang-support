@@ -23,6 +23,7 @@ import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.mod.GoModulesService
+import io.github.golangsupport.settings.GoLanguageServerControl
 import io.github.golangsupport.settings.GoSettingsConfigurable
 import java.awt.Dimension
 import javax.swing.Action
@@ -112,7 +113,8 @@ class GoToolchainCheckActivity : ProjectActivity {
         val names = missing.joinToString(", ") { "<code>${it.command}</code>" }
         NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
             .createNotification("Go tools are missing", "$names: ${missing.joinToString("; ") { it.purpose.substringBefore(':').lowercase() }}. Installed with <code>go install</code> into GOBIN.", NotificationType.INFORMATION)
-            .addAction(NotificationAction.createSimpleExpiring("Install All") { GoTool.installAll(project, missing) })
+            // the language server among them: started for the open files once it is there, not at the next opening of a file
+            .addAction(NotificationAction.createSimpleExpiring("Install All") { GoTool.installAll(project, missing) { GoLanguageServerControl.restartAll(project) } })
             .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoSettingsConfigurable::class.java) })
             .addAction(NotificationAction.createSimpleExpiring("Don't Ask Again") { PropertiesComponent.getInstance().setValue(DISMISSED_KEY, true) })
             .notify(project)

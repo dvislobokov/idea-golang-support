@@ -13,6 +13,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VirtualFile
@@ -47,6 +48,7 @@ import com.intellij.psi.PsiFile
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoSemanticColors
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.mod.GoModFileType
@@ -72,6 +74,17 @@ class GoplsIntegrationProvider : LspIntegrationProvider {
     override fun fileOpened(project: Project, file: VirtualFile, clientStarter: LspIntegrationProvider.LspClientStarter) {
         if (!isGoplsFile(file) || !GoSettings.getInstance().languageServerEnabled) return
         if (GoTool.GOPLS.find() == null) {
+            // gopls is looked for on PATH and in GOBIN / GOPATH/bin, and GOPATH is a guess until `go env` has been read: asking for
+            // it here and starting again is what makes the first Go file of a session work (seen live: gopls started only when the
+            // user opened go.mod a minute later, by which time something else had read the environment).
+            if (!GoEnvironment.isKnown()) {
+                GoEnvironment.whenKnown {
+                    ApplicationManager.getApplication().invokeLater({
+                        if (!project.isDisposed && GoTool.GOPLS.find() != null) LspClientManager.getInstance(project).startClientsIfNeeded(GoplsIntegrationProvider::class.java)
+                    }, project.disposed)
+                }
+                return
+            }
             // once per session: the notification has an Install button, and every opened file would stack another one
             if (OFFERED.compareAndSet(false, true)) GoTool.GOPLS.offerInstallation(project, "Go language server") { restart(project) }
             return
@@ -92,7 +105,12 @@ class GoplsIntegrationProvider : LspIntegrationProvider {
 
         fun isGoplsFile(file: VirtualFile): Boolean = file.fileType == GoFileType || file.fileType == GoModFileType
 
-        fun restart(project: Project) = LspClientManager.getInstance(project).stopAndRestartClientsIfNeeded(GoplsIntegrationProvider::class.java)
+        /** A running server is started anew; when there is none (gopls was just installed, or was not found at the first file), one is started for the open files. */
+        fun restart(project: Project) {
+            val manager = LspClientManager.getInstance(project)
+            manager.stopAndRestartClientsIfNeeded(GoplsIntegrationProvider::class.java)
+            manager.startClientsIfNeeded(GoplsIntegrationProvider::class.java)
+        }
     }
 }
 

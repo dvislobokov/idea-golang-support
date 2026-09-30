@@ -8,6 +8,7 @@ import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.process.ProcessOutputTypes
 import com.intellij.ide.BrowserUtil
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -54,6 +55,22 @@ class GoEnvironment(val values: Map<String, String>) {
             System.getenv("GOBIN")?.let { put("GOBIN", it) }
             put("GOPATH", System.getenv("GOPATH") ?: File(System.getProperty("user.home"), "go").path)
         })
+
+        /** Whether `go env` has been read: until then [quick] guesses GOPATH, and a tool installed elsewhere is not found. */
+        fun isKnown(): Boolean = cached != null
+
+        /**
+         * Reads `go env` in the background, once, and calls [onReady] when it is there (at once when it is already). GOPATH is not
+         * always `$HOME/go` and GOBIN is not always on PATH (seen live: a machine where `go env GOPATH` was under another home, so
+         * gopls was "not installed" until something else had asked `go env`).
+         */
+        fun whenKnown(onReady: () -> Unit) {
+            if (isKnown()) return onReady()
+            ApplicationManager.getApplication().executeOnPooledThread {
+                get()
+                if (isKnown()) onReady()
+            }
+        }
 
         fun reset() {
             cached = null
