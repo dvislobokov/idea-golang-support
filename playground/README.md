@@ -7,8 +7,8 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 ./gradlew.bat runIde --args="C:/Users/dvislobokov/idea-golang-support/playground"
 ```
 
-Отметки в колонке «Робот»: **да** — уже проверено UI-роботом, **API** — проверено вызовом API IDE без кликов, **нет** — не проверялось вообще, смотреть
-в первую очередь. `TestFailing` в `store/order_test.go` падает нарочно, `TestSkipped` пропускается нарочно.
+Отметки в колонке «Робот»: **да** — уже проверено UI-роботом, **API** — проверено вызовом API IDE без кликов, **нет** — роботом не проверялось.
+Пункты с «нет» пользователь проверил вживую 2026-09-30; колонка говорит только о роботе. `TestFailing` в `store/order_test.go` падает нарочно, `TestSkipped` пропускается нарочно.
 
 ## 1. Редактор и язык
 

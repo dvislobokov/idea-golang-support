@@ -143,6 +143,10 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                         .comment("Where a value is expected: <code>c := http.Client{}</code>, caret between the braces, ready for Fill All Fields. Needs gopls")
                 }
                 row {
+                    checkBox("Offer what a keyword can begin").bindSelected(settings::completionKeywordTemplates)
+                        .comment("<code>ty</code> at the top of a file gives <code>type Name struct {...}</code>, <code>fo</code> in a body gives <code>for i, x := range xs</code> for the slices in sight; Tab walks the stops. Works without gopls")
+                }
+                row {
                     checkBox("Offer the arguments of a completed call").bindSelected(settings::completionArguments)
                         .comment("The parameters are shown above the caret and the list opens for the first argument, then after every <code>, </code>. Needs gopls")
                 }

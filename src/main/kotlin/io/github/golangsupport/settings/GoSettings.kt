@@ -71,6 +71,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var completionStructBraces by property(true)
         /** `Printl` gives `fmt.Println`: the names of the standard library and of the modules of go.mod. */
         var completionCatalogue by property(true)
+        /** `type Name struct {...}`, `for i, x := range xs` as items of the list where a keyword can begin. */
+        var completionKeywordTemplates by property(true)
         /** `//` above a declaration becomes `// Name `. */
         var docCommentNames by property(true)
         /** A Cyrillic letter typed in code is typed as the Latin character of its key. */
@@ -194,6 +196,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var completionCatalogue: Boolean
         get() = state.completionCatalogue
         set(value) { state.completionCatalogue = value }
+
+    var completionKeywordTemplates: Boolean
+        get() = state.completionKeywordTemplates
+        set(value) { state.completionKeywordTemplates = value }
 
     var latinInCode: Boolean
         get() = state.latinInCode

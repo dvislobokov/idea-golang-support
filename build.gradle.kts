@@ -71,6 +71,18 @@ val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
     }
 }
 
+// The pages of the plugin have one source each, in docs/ (opened from the repository for demos): the page about the plugin and the
+// reference of its keys, actions and settings. The plugin carries them in welcome/ and shows them in an editor tab (GoPages).
+tasks.processResources {
+    from("docs/demo.html") {
+        into("welcome")
+        rename { "index.html" }
+    }
+    from("docs/guide.html") {
+        into("welcome")
+    }
+}
+
 intellijPlatform {
     buildSearchableOptions = false
     pluginConfiguration {

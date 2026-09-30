@@ -69,8 +69,12 @@
         <!-- functions and types of the standard library and of the modules of go.mod by their own names: `Printl` is `fmt.Println` -->
         <completion.contributor language="Go" implementationClass="io.github.golangsupport.catalogue.GoCatalogueCompletionContributor"/>
         <postStartupActivity implementation="io.github.golangsupport.catalogue.GoCatalogueStartupActivity"/>
+        <!-- the page about the plugin, once after the installation and after every update -->
+        <postStartupActivity implementation="io.github.golangsupport.help.GoWelcomePageActivity"/>
         <!-- `nil, err` after `return`: the values of the function as one item -->
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoReturnCompletionContributor"/>
+        <!-- `type Name struct {...}`, `for i, x := range xs`: what a keyword can begin here, expanded as live templates -->
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoKeywordCompletionContributor"/>
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
         <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
         <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>
@@ -225,9 +229,13 @@
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </group>
         <action id="Go.HelpPage" class="io.github.golangsupport.help.ShowGoHelpPageAction" text="Help Page" icon="AllIcons.Actions.Help"
-                description="What the plugin does and which keys do it">
+                description="The keys, the actions, the settings and the features of the plugin, on one page">
             <add-to-group group-id="Go.MainMenu" anchor="last"/>
             <add-to-group group-id="HelpMenu" anchor="first"/>
+        </action>
+        <action id="Go.Welcome" class="io.github.golangsupport.help.ShowGoWelcomePageAction" text="Welcome to Go Project Support"
+                description="What the plugin is for, with its features shown at work">
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
         </action>
         <group id="Go.Debugger" text="Debugger" popup="true" icon="AllIcons.Actions.StartDebugger">
             <action id="Go.Debugger.ShowLogs" class="io.github.golangsupport.debugger.ShowDebuggerLogsAction" text="Show Debugger Logs"

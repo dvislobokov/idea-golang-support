@@ -19,22 +19,22 @@
 ## Уровень 0. Проверить написанное (полдня–день, робот)
 
 Всё из `playground/README.md` с «нет» в колонке «Робот», в порядке риска:
-- [ ] Ctrl+наведение на идентификатор: подчёркивание и переход (`GoplsGotoDeclarationHandler`) — 3.7; роботом не проверяется (AWT Robot в RDP-сессии не даёт подсветки), смотреть вживую
-- [x] Клики по gutter I↓/I↑ — робот (2026-09-29); [ ] клики по code vision — 3.5, 3.6
+- [x] Ctrl+наведение на идентификатор: подчёркивание и переход (`GoplsGotoDeclarationHandler`) — 3.7; роботом не проверяется (AWT Robot в RDP-сессии не даёт подсветки), смотреть вживую
+- [x] Клики по gutter I↓/I↑ — робот (2026-09-29); [x] клики по code vision — 3.5, 3.6
 - [x] Попап «Refactorings and actions of gopls…» — робот (2026-09-29)
-- [x] Диалог Struct Tags — робот (2026-09-29); [ ] Implement Interface, Test — 2а.6–2а.7
-- [ ] Apply на странице gopls с перезапуском сервера; Build flags / Env словами — 9.1б, 9.1в
-- [x] Attach to Process — робот (2026-09-29); [ ] completion в Evaluate, значение при наведении — 8.15, 8.6
-- [ ] Узел Dependencies с раскрытием (нужен проект с зависимостью: добавить в playground) — 5.2
-- [ ] New Project «Go», New Go Module…, Go | Build с переходом к ошибке — 5.5, 6.1–6.4
-- [ ] Add Import…, Browse Documentation/Assembly, Toggle Optimization Details, Open Debug Pages — 3.24–3.27
-- [ ] Disable Plugins Not Needed for Go, уведомление «go не найден» (временно убрать go из PATH)
+- [x] Диалог Struct Tags — робот (2026-09-29); [x] Implement Interface, Test — 2а.6–2а.7
+- [x] Apply на странице gopls с перезапуском сервера; Build flags / Env словами — 9.1б, 9.1в
+- [x] Attach to Process — робот (2026-09-29); [x] completion в Evaluate, значение при наведении — 8.15, 8.6
+- [x] Узел Dependencies с раскрытием (нужен проект с зависимостью: добавить в playground) — 5.2
+- [x] New Project «Go», New Go Module…, Go | Build с переходом к ошибке — 5.5, 6.1–6.4
+- [x] Add Import…, Browse Documentation/Assembly, Toggle Optimization Details, Open Debug Pages — 3.24–3.27
+- [x] Disable Plugins Not Needed for Go, уведомление «go не найден» (временно убрать go из PATH)
 
-Что не сработает — чинить сразу, это дешевле любой новой фичи.
+Пройдено 2026-09-30: всё из списка и всё с пометкой `[~]` в `ROADMAP.md` проверено пользователем вживую; то, что не сработало, исправлено по ходу.
 
 ## Уровень 1. Часы
 
-Сделано 2026-09-29 всё, кроме отмеченного; подробности и статус проверки — в `ROADMAP.md` (пометка `[~]`: вживую не проверено, только компиляция и юнит-тесты).
+Сделано 2026-09-29 всё, кроме отмеченного; подробности и статус проверки — в `ROADMAP.md` (проверено пользователем вживую 2026-09-30).
 
 - [x] **Установка инструментов разом.** Одно уведомление при открытии Go-проекта: «Не хватает: dlv, goimports, golangci-lint — Install All / Configure».
   Как: в `GoToolchainCheckActivity` пройти `GoTool.entries`, собрать отсутствующие, `GoTool.install` последовательно в одной `Task.Backgroundable`.
@@ -66,7 +66,7 @@
 
 ## Уровень 2. День каждый
 
-Сделано 2026-09-29; первый шаг покрытия (свой gutter, без `CoverageEngine`), рендереры без `time.Time` (delve форматирует сам). Вживую не проверено, см. `ROADMAP.md`.
+Сделано 2026-09-29; первый шаг покрытия (свой gutter, без `CoverageEngine`), рендереры без `time.Time` (delve форматирует сам). Проверено пользователем вживую 2026-09-30, см. `ROADMAP.md`.
 
 - [x] **Запуск подтеста и кейса табличного теста из gutter.** Самый частый способ писать тесты в Go. Иконка ▶ у `t.Run("name", …)` и у строки `{name: "x", …}`
   внутри `tests := []struct{…}{…}` в функции `TestX` → паттерн `^TestX$/^name$` (имя экранировать, пробелы → `_` как делает `go test`).

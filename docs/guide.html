@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go Project Support: справочник</title>
+<meta name="description" content="Клавиши, действия, настройки и возможности плагина Go Project Support.">
+<meta name="color-scheme" content="dark light">
+<!-- no request for an icon: the page asks the network for nothing -->
+<link rel="icon" href="data:,">
+<!-- Self-contained on purpose: the same file is shown inside the IDE (welcome/guide.html of the plugin, Go | Help Page), where there
+     is no network and no repository around. No external fonts, scripts or images. Links into the repository carry the class "repo".
+     A key is a kbd element with the attribute data-action, the id of its action: inside the IDE the plugin writes the key of its keymap there (GoPages.forIde); what stands in
+     the markup is the key of the default keymap of Windows and Linux. -->
+<style>
+:root {
+  --bg: #19191c;
+  --bg-raised: #222327;
+  --panel: #2b2d30;
+  --panel-2: #1e1f22;
+  --line: #3a3c41;
+  --text: #ffffff;
+  --text-2: #c3c5cc;
+  --text-3: #8b8e97;
+  --violet: #7b61ff;
+  --magenta: #ff318c;
+  --orange: #ff8a1f;
+  --ok: #57c78a;
+  --warn: #f2c037;
+  --no: #ff6b6b;
+  --grad: linear-gradient(100deg, var(--violet), var(--magenta) 52%, var(--orange));
+  --sans: "Inter", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Code", Consolas, "SF Mono", monospace;
+  --nav-h: 56px;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #ffffff; --bg-raised: #f5f5f7; --panel: #ffffff; --panel-2: #f7f8fa; --line: #d9dbe1;
+    --text: #19191c; --text-2: #45474f; --text-3: #70737d;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #ffffff; --bg-raised: #f5f5f7; --panel: #ffffff; --panel-2: #f7f8fa; --line: #d9dbe1;
+  --text: #19191c; --text-2: #45474f; --text-3: #70737d;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 17px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(2.2rem, 4.6vw, 3.6rem); font-weight: 700; line-height: 1.04; letter-spacing: -.035em; }
+h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 700; line-height: 1.08; letter-spacing: -.03em; }
+h3 { font-size: 1.15rem; font-weight: 600; letter-spacing: -.01em; margin-top: 40px; }
+/* no ligatures: `:=` and `!=` are read as they are typed */
+code, kbd, pre { font-family: var(--mono); font-variant-ligatures: none; }
+code { font-size: .86em; color: var(--text); background: color-mix(in srgb, var(--text) 9%, transparent); border-radius: 5px; padding: .1em .38em; }
+kbd { font-size: .8em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: .08em .45em; background: var(--bg-raised); white-space: nowrap; color: var(--text); }
+.wrap { width: min(1200px, 100% - 40px); margin-inline: auto; }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 6px; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--violet); color: #fff; padding: 8px 12px; border-radius: 8px; z-index: 100; }
+.skip:focus { left: 8px; }
+:root[data-host="ide"] .repo { display: none; }
+:root:not([data-host="ide"]) .ide { display: none; }
+
+/* nav */
+.nav { position: sticky; top: 0; z-index: 50; height: var(--nav-h); background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); }
+.nav .wrap { height: 100%; display: flex; align-items: center; gap: 20px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.mark { width: 28px; height: 28px; border-radius: 7px; background: var(--grad); display: grid; place-items: center; color: #fff; font: 700 12px/1 var(--mono); }
+.nav ul { display: flex; gap: 2px; margin: 0 0 0 auto; padding: 0; list-style: none; }
+.nav li a { display: block; padding: 7px 11px; border-radius: 999px; text-decoration: none; color: var(--text-2); font-size: .88rem; white-space: nowrap; }
+.nav li a:hover, .nav li a.active { color: var(--text); background: color-mix(in srgb, var(--text) 10%, transparent); }
+.icon-btn { background: none; border: 1px solid var(--line); color: var(--text); border-radius: 999px; width: 36px; height: 36px; cursor: pointer; display: grid; place-items: center; flex: 0 0 auto; }
+.icon-btn svg { width: 16px; height: 16px; }
+@media (max-width: 1180px) { .nav ul { display: none; } .icon-btn { margin-left: auto; } }
+
+/* head of the page */
+.hero { position: relative; overflow: hidden; padding: clamp(48px, 7vw, 88px) 0 clamp(40px, 5vw, 64px); }
+.hero::before { content: ""; position: absolute; width: 900px; height: 900px; right: -260px; top: -520px; border-radius: 50%; background: var(--grad); filter: blur(120px); opacity: .36; pointer-events: none; }
+.hero .wrap { position: relative; }
+.hero p.lead { margin-top: 20px; font-size: clamp(1.05rem, 1.5vw, 1.25rem); color: var(--text-2); max-width: 44em; }
+.find { margin-top: 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.find input { flex: 1 1 320px; max-width: 520px; font: inherit; font-size: 1rem; color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 12px 20px; }
+.find input::placeholder { color: var(--text-3); }
+.find span { color: var(--text-3); font-size: .92rem; }
+.note { margin-top: 20px; color: var(--text-3); font-size: .92rem; max-width: 60em; }
+
+/* the list of the sections */
+.index { border-top: 1px solid var(--line); padding: clamp(28px, 4vw, 44px) 0; background: var(--bg-raised); }
+.index .wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px 40px; }
+.index a { text-decoration: none; display: block; }
+.index b { display: block; font-weight: 600; }
+.index span { color: var(--text-2); font-size: .92rem; }
+.index a:hover b { text-decoration: underline; }
+
+/* sections and tables */
+.band { padding: clamp(48px, 6vw, 80px) 0; border-top: 1px solid var(--line); }
+.band > .wrap > p { margin-top: 14px; color: var(--text-2); font-size: 1.05rem; max-width: 46em; }
+.table { margin-top: 20px; overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: .95rem; }
+th, td { text-align: left; padding: 12px 20px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--text-3); font-weight: 500; font-size: .86rem; }
+td { color: var(--text-2); }
+td:first-child { font-weight: 600; color: var(--text); width: 27%; }
+td:nth-child(2) { width: 30%; }
+table.two td:first-child { width: 34%; }
+table.two td:nth-child(2) { width: auto; }
+/* in a narrow window (a split editor, a phone) a row is a card: nothing to scroll sideways */
+@media (max-width: 720px) {
+  table { min-width: 0; }
+  thead { display: none; }
+  tbody tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  tbody td, tbody td:first-child, tbody td:nth-child(2), table.two td:first-child, table.two td:nth-child(2) { display: block; width: auto; padding: 2px 0; border: 0; }
+  tbody td:empty { display: none; }
+}
+tr.gone, section.gone, h3.gone, .table.gone { display: none; }
+.new { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; font-size: .72rem; font-weight: 600; line-height: 1.7; color: #fff; background: var(--violet); vertical-align: 2px; white-space: nowrap; }
+.empty { display: none; margin-top: 28px; color: var(--text-2); }
+.empty.on { display: block; }
+footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--text-3); font-size: .9rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; }
+footer a { color: var(--text-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">К содержимому</a>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true">Go</span>Справочник</a>
+    <ul id="navLinks">
+      <li><a href="#keys">Клавиши</a></li>
+      <li><a href="#ghost">Серый текст</a></li>
+      <li><a href="#completion">Подсказки</a></li>
+      <li><a href="#actions">Действия</a></li>
+      <li><a href="#templates">Шаблоны</a></li>
+      <li><a href="#menu">Меню Go</a></li>
+      <li><a href="#windows">Окна</a></li>
+      <li><a href="#run">Запуск</a></li>
+      <li><a href="#settings">Настройки</a></li>
+      <li><a href="#trouble">Если не работает</a></li>
+    </ul>
+    <button class="icon-btn" id="themeToggle" aria-label="Переключить тему" title="Переключить тему">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="wrap">
+    <h1>Клавиши, действия и настройки</h1>
+    <p class="lead">Всё, что плагин добавляет в IDE, на одной странице: что нажать, где найти и что это делает.</p>
+    <div class="find">
+      <input id="filter" type="search" placeholder="Найти: defer, покрытие, Alt+Enter" aria-label="Поиск по справочнику" autocomplete="off">
+      <span id="found" aria-live="polite"></span>
+    </div>
+    <p class="note ide">Клавиши показаны по раскладке клавиатуры этой IDE.</p>
+    <p class="note repo">Клавиши показаны по стандартной раскладке Windows и Linux. Внутри IDE страница показывает клавиши её раскладки: меню Go, пункт Help Page.</p>
+    <p class="note">Пометка <span class="new">новое</span> стоит у возможностей, добавленных в версии 0.1.0 последними: они ещё проверяются в работе.</p>
+  </div>
+</section>
+
+<nav class="index" aria-label="Разделы">
+  <div class="wrap">
+    <a href="#keys"><b>Клавиши</b><span>Редактирование, навигация, запуск</span></a>
+    <a href="#ghost"><b>Серый текст</b><span>Следующая строка по Tab</span></a>
+    <a href="#completion"><b>Подсказки</b><span>Список по Ctrl+Space</span></a>
+    <a href="#actions"><b>Действия</b><span>Alt+Enter и Generate</span></a>
+    <a href="#templates"><b>Шаблоны</b><span>Сокращения и постфиксы</span></a>
+    <a href="#menu"><b>Меню Go</b><span>Все пункты</span></a>
+    <a href="#windows"><b>Окна</b><span>Тесты, монитор, зависимости</span></a>
+    <a href="#run"><b>Запуск и отладка</b><span>Конфигурация Go</span></a>
+    <a href="#settings"><b>Настройки</b><span>Settings, Tools, Go</span></a>
+    <a href="#trouble"><b>Если не работает</b><span>Куда смотреть</span></a>
+  </div>
+</nav>
+
+<section class="band" id="keys">
+  <div class="wrap">
+    <h2>Клавиши</h2>
+    <p>Плагин не вводит своих сочетаний: работают привычные клавиши IDE.</p>
+
+    <h3>Редактирование</h3>
+    <div class="table"><table>
+      <thead><tr><th>Что</th><th>Как</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td>Список подсказок</td><td><kbd data-action="CodeCompletion">Ctrl+Space</kbd></td><td>Открывается и сам при наборе. Выбор: <kbd>Enter</kbd> вставляет, <kbd>Tab</kbd> заменяет слово под курсором.</td></tr>
+        <tr><td>Только подходящее по типу <span class="new">новое</span></td><td><kbd data-action="SmartTypeCompletion">Ctrl+Shift+Space</kbd></td><td>В списке остаются значения того типа, которого ждёт код.</td></tr>
+        <tr><td>Принять серый текст</td><td><kbd>Tab</kbd></td><td>Любой другой символ убирает подсказку.</td></tr>
+        <tr><td>Завершить конструкцию</td><td><kbd data-action="EditorCompleteStatement">Ctrl+Shift+Enter</kbd></td><td>Дописывает скобки <code>if</code>, <code>for</code>, <code>func</code>, <code>switch</code> и вызова, ставит курсор внутрь.</td></tr>
+        <tr><td>Действия и исправления</td><td><kbd data-action="ShowIntentionActions">Alt+Enter</kbd></td><td>Список зависит от места: см. раздел «Действия».</td></tr>
+        <tr><td>Generate</td><td><kbd data-action="Generate">Alt+Insert</kbd></td><td>Конструктор, методы доступа, <code>String()</code>, теги, методы интерфейса, тест.</td></tr>
+        <tr><td>Переименовать</td><td><kbd data-action="RenameElement">Shift+F6</kbd></td><td>По всему модулю. Нужен gopls.</td></tr>
+        <tr><td>Переформатировать</td><td><kbd data-action="ReformatCode">Ctrl+Alt+L</kbd></td><td>Выбранным в настройках инструментом. По умолчанию выполняется и при сохранении.</td></tr>
+        <tr><td>Упорядочить импорты</td><td><kbd data-action="OptimizeImports">Ctrl+Alt+O</kbd></td><td>Убирает неиспользуемые, добавляет недостающие. Нужен gopls.</td></tr>
+        <tr><td>Закомментировать</td><td><kbd data-action="CommentByLineComment">Ctrl+/</kbd>, <kbd data-action="CommentByBlockComment">Ctrl+Shift+/</kbd></td><td>Строку и выделенный блок.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Навигация</h3>
+    <div class="table"><table>
+      <thead><tr><th>Что</th><th>Как</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td>К объявлению</td><td><kbd data-action="GotoDeclaration">Ctrl+B</kbd> или <kbd>Ctrl</kbd> и клик</td><td>С объявления показывает его использования.</td></tr>
+        <tr><td>К реализации</td><td><kbd data-action="GotoImplementation">Ctrl+Alt+B</kbd></td><td>Реализации интерфейса и его методов. Те же переходы дают значки на полях редактора.</td></tr>
+        <tr><td>К объявлению типа</td><td><kbd data-action="GotoTypeDeclaration">Ctrl+Shift+B</kbd></td><td>Тип переменной, поля или результата под курсором.</td></tr>
+        <tr><td>Тип выражения</td><td><kbd data-action="ExpressionTypeInfo">Ctrl+Shift+P</kbd></td><td>Объявление имени под курсором.</td></tr>
+        <tr><td>Найти использования</td><td><kbd data-action="FindUsages">Alt+F7</kbd></td><td>Число использований над объявлением тоже открывает их список.</td></tr>
+        <tr><td>Тип или символ по имени</td><td><kbd data-action="GotoClass">Ctrl+N</kbd>, <kbd data-action="GotoSymbol">Ctrl+Alt+Shift+N</kbd></td><td>Типы, функции, методы и поля проекта. Работает и без gopls.</td></tr>
+        <tr><td>Структура файла</td><td><kbd data-action="FileStructurePopup">Ctrl+F12</kbd></td><td>Методы показаны под своим типом.</td></tr>
+        <tr><td>Документация</td><td><kbd data-action="QuickJavaDoc">Ctrl+Q</kbd></td><td>Нужен gopls.</td></tr>
+        <tr><td>Параметры вызова</td><td><kbd data-action="ParameterInfo">Ctrl+P</kbd></td><td>После выбора функции из списка показываются сами.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Запуск и отладка</h3>
+    <div class="table"><table>
+      <thead><tr><th>Что</th><th>Как</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td>Запустить, отладить</td><td><kbd data-action="Run">Shift+F10</kbd>, <kbd data-action="Debug">Shift+F9</kbd></td><td>Выбранную конфигурацию. Значок запуска на полях запускает то, у чего он стоит.</td></tr>
+        <tr><td>Точка останова</td><td><kbd data-action="ToggleLineBreakpoint">Ctrl+F8</kbd> или клик на полях</td><td>Условие, счётчик попаданий и сообщение в журнал задаются правым кликом по точке.</td></tr>
+        <tr><td>Шаг, шаг внутрь</td><td><kbd data-action="StepOver">F8</kbd>, <kbd data-action="StepInto">F7</kbd></td><td></td></tr>
+        <tr><td>Продолжить</td><td><kbd data-action="Resume">F9</kbd></td><td></td></tr>
+        <tr><td>Вычислить выражение</td><td><kbd data-action="EvaluateExpression">Alt+F8</kbd></td><td>Можно вызывать функции и методы: <code>order.Total()</code>.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="ghost">
+  <div class="wrap">
+    <h2>Серый текст</h2>
+    <p>Следующая строка, когда продолжение однозначно. Подсказка появляется после <kbd>Enter</kbd> или при наборе её начала. Работает по правилам и без gopls.</p>
+
+    <h3>Ошибки</h3>
+    <div class="table"><table>
+      <thead><tr><th>Ситуация</th><th>Подсказка</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td>После <code>x, err := f()</code></td><td><code>if err != nil { return … }</code></td><td>Значения <code>return</code> подбираются под результаты функции.</td></tr>
+        <tr><td>Внутри пустого <code>if err != nil {</code> <span class="new">новое</span></td><td><code>return nil, err</code></td><td>Когда условие набрано вручную.</td></tr>
+        <tr><td>В тесте и в <code>main</code></td><td><code>t.Fatal(err)</code>, <code>log.Fatal(err)</code></td><td>Вместо <code>return</code>.</td></tr>
+        <tr><td>В обработчике HTTP <span class="new">новое</span></td><td><code>http.Error(w, …)</code> и <code>return</code></td><td>Код ответа 400, если не разобраны присланные данные, иначе 500. Для gin используется <code>c.AbortWithStatusJSON</code>.</td></tr>
+        <tr><td>В файле сервиса gRPC <span class="new">новое</span></td><td><code>status.Errorf(codes.Internal, …)</code></td><td>Если файл уже отвечает статусами.</td></tr>
+        <tr><td>В файле, где ошибки оборачивают <span class="new">новое</span></td><td><code>fmt.Errorf("read file: %w", err)</code></td><td>Если в файле так принято. Текст берётся из названия вызова.</td></tr>
+        <tr><td>После <code>v, ok := m[k]</code></td><td><code>if !ok { return … }</code></td><td>Также для приведения типа и чтения из канала.</td></tr>
+        <tr><td>После цикла по <code>Scan()</code> или <code>Next()</code> <span class="new">новое</span></td><td><code>if err := x.Err(); err != nil { … }</code></td><td>Ошибка, на которой цикл остановился.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Освобождение ресурсов</h3>
+    <div class="table"><table>
+      <thead><tr><th>Ситуация</th><th>Подсказка</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td>Файл, соединение, запрос к базе</td><td><code>defer f.Close()</code></td><td>После проверки ошибки открытия.</td></tr>
+        <tr><td>Ответ HTTP</td><td><code>defer resp.Body.Close()</code></td><td></td></tr>
+        <tr><td>Транзакция</td><td><code>defer tx.Rollback()</code></td><td></td></tr>
+        <tr><td>Контекст с отменой</td><td><code>defer cancel()</code></td><td>Также после <code>signal.NotifyContext</code>.</td></tr>
+        <tr><td>Мьютекс</td><td><code>defer mu.Unlock()</code></td><td>Для <code>RLock</code> предлагается <code>RUnlock</code>.</td></tr>
+        <tr><td>Таймер и тикер</td><td><code>defer ticker.Stop()</code></td><td></td></tr>
+        <tr><td>Временный каталог <span class="new">новое</span></td><td><code>defer os.RemoveAll(dir)</code></td><td></td></tr>
+        <tr><td>Трассировка <span class="new">новое</span></td><td><code>defer span.End()</code></td><td>В имени переменной должно быть слово span.</td></tr>
+        <tr><td>Горутина</td><td><code>defer wg.Done()</code>, <code>defer close(ch)</code></td><td>Первой строкой <code>go func() {</code>.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Заготовки</h3>
+    <div class="table"><table>
+      <thead><tr><th>Ситуация</th><th>Подсказка</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td>Набрано <code>func (</code> <span class="new">новое</span></td><td><code>s *Server) </code></td><td>Получатель как у остальных методов типа.</td></tr>
+        <tr><td>Поле структуры с тегами <span class="new">новое</span></td><td><code>`json:"last_name"`</code></td><td>После типа и пробела. Ключи и стиль имён как у соседних полей.</td></tr>
+        <tr><td>После <code>bufio.NewScanner</code> <span class="new">новое</span></td><td><code>for scanner.Scan() { }</code></td><td></td></tr>
+        <tr><td>После <code>defer rows.Close()</code></td><td><code>for rows.Next() { }</code></td><td></td></tr>
+        <tr><td><code>//</code> над объявлением</td><td><code>// Name </code></td><td>Начало документирующего комментария.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="completion">
+  <div class="wrap">
+    <h2>Подсказки</h2>
+    <p>Список собирается из ответа gopls и из того, что плагин знает сам. Возможности из этого раздела отключаются по отдельности в настройках.</p>
+    <div class="table"><table>
+      <thead><tr><th>Что</th><th>Пример</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td>Импорт при выборе</td><td><code>strings.ToUp</code> даёт <code>ToUpper</code></td><td>Пакет подключается сам.</td></tr>
+        <tr><td>Функции и типы по имени <span class="new">новое</span></td><td><code>Printl</code> даёт <code>fmt.Println</code></td><td>Стандартная библиотека, прямые зависимости и пакеты проекта. Работает без gopls.</td></tr>
+        <tr><td>Пакеты по имени <span class="new">новое</span></td><td><code>htt</code> даёт <code>http</code></td><td>Импорт добавляется при выборе.</td></tr>
+        <tr><td>Значения <code>return</code> <span class="new">новое</span></td><td><code>return ni</code> даёт <code>nil, err</code></td><td>Все значения функции одним пунктом.</td></tr>
+        <tr><td>Подходящее по типу <span class="new">новое</span></td><td>Жирным в списке</td><td>В аргументе вызова, в <code>return</code>, в <code>var x T =</code>.</td></tr>
+        <tr><td>Порядок списка <span class="new">новое</span></td><td><code>ni</code>: сначала <code>nil</code></td><td>Имена, начинающиеся с набранного, стоят выше остальных.</td></tr>
+        <tr><td>Аргументы вызова <span class="new">новое</span></td><td>Список после <code>(</code> и после <code>, </code></td><td>Открывается сам, вместе с подсказкой о параметрах.</td></tr>
+        <tr><td>Скобки после типа <span class="new">новое</span></td><td><code>c := http.Client{}</code></td><td>Там, где ожидается значение. Курсор встаёт между скобками.</td></tr>
+        <tr><td>Заготовки по ключевому слову <span class="new">новое</span></td><td><code>ty</code> даёт <code>type Name struct {...}</code></td><td>В начале строки. Наверху файла: <code>type</code>, <code>func</code> (и метод для каждого типа файла), <code>var</code>, <code>const</code>, <code>import</code>, в <code>_test.go</code> — <code>Test</code>, табличный тест, <code>Benchmark</code>, <code>Fuzz</code>. В теле: <code>for</code> по срезам, картам и каналам, объявленным выше, <code>if err != nil</code>, comma-ok, <code>switch</code>, <code>select</code>, <code>go</code>, <code>defer</code>, <code>chan</code>, <code>map</code>; в тесте — <code>t.Run</code>, <code>t.Parallel</code>, <code>t.Cleanup</code>. <kbd>Tab</kbd> переводит по местам для ввода. Работает без gopls.</td></tr>
+        <tr><td>Регистр букв <span class="new">новое</span></td><td><code>client</code> даёт <code>http.Client</code></td><td>Для пунктов плагина не учитывается. Для пунктов gopls действует настройка IDE Match case.</td></tr>
+        <tr><td>Русская раскладка <span class="new">новое</span></td><td><code>аьею</code> печатается как <code>fmt.</code></td><td>В коде. В строках и комментариях текст остаётся русским.</td></tr>
+        <tr><td>Теги структуры</td><td>Внутри обратных кавычек</td><td>Ключи, имя поля в разных стилях, опции ключа.</td></tr>
+        <tr><td>Файл <code>go.mod</code></td><td>Директивы, пути, версии</td><td>Пути берутся из кэша модулей, версии также у прокси модулей.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="actions">
+  <div class="wrap">
+    <h2>Действия</h2>
+    <p>Список по <kbd data-action="ShowIntentionActions">Alt+Enter</kbd> показывает то, что применимо в месте курсора.</p>
+
+    <h3>Alt+Enter</h3>
+    <div class="table"><table>
+      <thead><tr><th>Пункт</th><th>Где доступен</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Handle error</td><td>Вызов отдельной строкой</td><td>Оборачивает вызов в проверку ошибки.</td></tr>
+        <tr><td>Add if err != nil check</td><td>После присваивания ошибки</td><td>Добавляет проверку с <code>return</code>.</td></tr>
+        <tr><td>Add missing return</td><td>Функция с результатом без <code>return</code></td><td>Добавляет <code>return</code> с нулевыми значениями.</td></tr>
+        <tr><td>Create function</td><td>Вызов несуществующей функции</td><td>Создаёт функцию с параметрами по аргументам вызова.</td></tr>
+        <tr><td>Add struct tags…</td><td>Структура или её поле</td><td>Диалог: ключи, стиль имён, <code>omitempty</code>.</td></tr>
+        <tr><td>Implement interface…</td><td>Тип</td><td>Дописывает недостающие методы выбранного интерфейса проекта.</td></tr>
+        <tr><td>Generate test</td><td>Функция или метод</td><td>Табличный тест в файле <code>_test.go</code>.</td></tr>
+        <tr><td>Fill all fields <span class="new">новое</span></td><td>Литерал структуры или имя типа</td><td>Заполняет поля нулевыми значениями и добавляет импорты. На имени типа без скобок сначала дописывает <code>{}</code>.</td></tr>
+        <tr><td>Optimize imports <span class="new">новое</span></td><td>Строки импортов</td><td>Убирает неиспользуемые, добавляет недостающие, сортирует.</td></tr>
+        <tr><td>Действия gopls <span class="new">новое</span></td><td>Курсор или выделение</td><td>Extract variable, Extract function, Inline call, Invert if, Add test и другие, под своими именами. Извлечение доступно при выделении.</td></tr>
+        <tr><td>Refactorings and actions of gopls…</td><td>Любое место</td><td>Те же действия отдельным списком. Стоит внизу.</td></tr>
+        <tr><td>Исправления линтера</td><td>Замечание golangci-lint</td><td>Handle error, Ignore error explicitly, Suppress with <code>//nolint</code>.</td></tr>
+        <tr><td>Исправления gopls</td><td>Ошибка или предупреждение</td><td>Исправления, которые сервер языка предлагает к своим замечаниям.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Generate</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Пункт</th><th>Что создаёт</th></tr></thead>
+      <tbody>
+        <tr><td>Constructor…</td><td>Функцию <code>NewT</code> с выбранными полями.</td></tr>
+        <tr><td>Getters…, Setters…, Getters and Setters…</td><td>Методы доступа к выбранным полям.</td></tr>
+        <tr><td>String() Method…</td><td>Метод <code>String()</code> с выбранными полями.</td></tr>
+        <tr><td>Struct Tags…</td><td>Теги полей: ключи, стиль имён, <code>omitempty</code>.</td></tr>
+        <tr><td>Implement Interface…</td><td>Методы интерфейса проекта, которых у типа ещё нет.</td></tr>
+        <tr><td>Test</td><td>Тест для функции под курсором.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="templates">
+  <div class="wrap">
+    <h2>Шаблоны</h2>
+    <p>Сокращение и <kbd>Tab</kbd> разворачиваются в заготовку. Постфикс пишется после выражения через точку.</p>
+
+    <h3>Сокращения</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Сокращение</th><th>Заготовка</th></tr></thead>
+      <tbody>
+        <tr><td><code>err</code>, <code>errn</code>, <code>errw</code></td><td>Проверка ошибки: с <code>return</code>, с <code>return nil, err</code>, с обёрткой через <code>fmt.Errorf</code>.</td></tr>
+        <tr><td><code>ife</code></td><td><code>if v, err := f(); err != nil {}</code></td></tr>
+        <tr><td><code>errt</code>, <code>erras</code></td><td>Проверки <code>errors.Is</code> и <code>errors.As</code>.</td></tr>
+        <tr><td><code>fn</code>, <code>meth</code>, <code>main</code>, <code>init</code></td><td>Функция, метод, <code>func main</code>, <code>func init</code>.</td></tr>
+        <tr><td><code>str</code>, <code>inter</code>, <code>enum</code></td><td>Структура, интерфейс, константы с <code>iota</code>.</td></tr>
+        <tr><td><code>forr</code>, <code>fori</code></td><td>Цикл по диапазону и цикл с индексом.</td></tr>
+        <tr><td><code>sw</code>, <code>tsw</code>, <code>sel</code></td><td><code>switch</code>, <code>switch</code> по типу, <code>select</code>.</td></tr>
+        <tr><td><code>mk</code>, <code>ch</code></td><td><code>make</code> для карты, среза и канала.</td></tr>
+        <tr><td><code>gof</code>, <code>deff</code></td><td>Горутина и <code>defer</code> с анонимной функцией.</td></tr>
+        <tr><td><code>wg</code>, <code>mu</code></td><td><code>sync.WaitGroup</code> с горутиной; блокировка с <code>defer</code> разблокировки.</td></tr>
+        <tr><td><code>ctx</code>, <code>tctx</code></td><td>Параметр <code>ctx context.Context</code>; контекст с таймаутом и <code>defer cancel()</code>.</td></tr>
+        <tr><td><code>ticker</code></td><td><code>time.NewTicker</code> с циклом.</td></tr>
+        <tr><td><code>hf</code></td><td>Обработчик HTTP.</td></tr>
+        <tr><td><code>opt</code></td><td>Функциональная опция.</td></tr>
+        <tr><td><code>pf</code>, <code>json</code></td><td><code>fmt.Printf</code>; тег <code>json</code>.</td></tr>
+        <tr><td><code>test</code>, <code>ttest</code>, <code>helper</code>, <code>tmain</code></td><td>Тест, табличный тест, вспомогательная функция теста, <code>TestMain</code>.</td></tr>
+        <tr><td><code>bench</code>, <code>fuzz</code>, <code>example</code></td><td>Бенчмарк, фаззинг-тест, функция-пример.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Постфиксы</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Постфикс</th><th>Что получается из <code>expr</code></th></tr></thead>
+      <tbody>
+        <tr><td><code>.if</code>, <code>.else</code>, <code>.not</code></td><td><code>if expr {}</code>, <code>if !expr {}</code>, <code>!expr</code></td></tr>
+        <tr><td><code>.nil</code>, <code>.notnil</code></td><td><code>if expr == nil {}</code>, <code>if expr != nil {}</code></td></tr>
+        <tr><td><code>.err</code>, <code>.errn</code>, <code>.errv</code></td><td>Проверка ошибки выражения: с блоком, с <code>return nil, err</code>, с сохранением значения.</td></tr>
+        <tr><td><code>.wrap</code></td><td><code>fmt.Errorf("…: %w", expr)</code></td></tr>
+        <tr><td><code>.return</code>, <code>.rr</code></td><td><code>return expr</code>, <code>return expr, nil</code></td></tr>
+        <tr><td><code>.var</code></td><td><code>v := expr</code></td></tr>
+        <tr><td><code>.for</code>, <code>.range</code>, <code>.fori</code>, <code>.forr</code></td><td>Цикл по значениям, по диапазону, с индексом, с индексом в обратном порядке.</td></tr>
+        <tr><td><code>.len</code>, <code>.append</code>, <code>.sort</code></td><td><code>len(expr)</code>, <code>expr = append(expr, v)</code>, <code>sort.Slice(expr, …)</code></td></tr>
+        <tr><td><code>.print</code>, <code>.printf</code>, <code>.panic</code></td><td><code>fmt.Println(expr)</code>, <code>fmt.Printf</code>, <code>panic(expr)</code></td></tr>
+        <tr><td><code>.go</code>, <code>.defer</code></td><td><code>go expr</code>, <code>defer expr</code></td></tr>
+        <tr><td><code>.switch</code></td><td><code>switch expr {}</code></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="menu">
+  <div class="wrap">
+    <h2>Меню Go</h2>
+    <p>Находится в главном меню после Tools. Команды выполняются в каждом модуле проекта.</p>
+
+    <h3>Сборка и модули</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Пункт</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Build</td><td><code>go build ./...</code>. Ошибки показаны в окне Build со ссылками на код.</td></tr>
+        <tr><td>Vet</td><td><code>go vet ./...</code></td></tr>
+        <tr><td>Generate</td><td><code>go generate ./...</code></td></tr>
+        <tr><td>Modules, Tidy</td><td><code>go mod tidy</code></td></tr>
+        <tr><td>Modules, Download</td><td><code>go mod download</code>. Исходники зависимостей появляются в дереве проекта.</td></tr>
+        <tr><td>Modules, Vendor</td><td><code>go mod vendor</code></td></tr>
+        <tr><td>Modules, Dependencies…</td><td>Окно Go Dependencies.</td></tr>
+        <tr><td>Modules, New Go Module…</td><td><code>go mod init</code> в выбранном каталоге.</td></tr>
+        <tr><td>Read Packages Again <span class="new">новое</span></td><td>Заново читает имена пакетов, по которым работают подсказки по имени.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Анализ и окружение</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Пункт</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Analyze Stack Trace…</td><td>Вставьте текст паники или дамп горутин: строки вида <code>file.go:12</code> станут ссылками.</td></tr>
+        <tr><td>Monitor Go Process</td><td>Открывает окно Go Monitor.</td></tr>
+        <tr><td>Go on This Machine…</td><td>Найденный Go, инструменты и их версии, модули проекта, <code>go env</code>.</td></tr>
+        <tr><td>Disable Plugins Not Needed for Go…</td><td>Предлагает отключить встроенные плагины, не нужные для Go.</td></tr>
+        <tr><td>Debugger, Show Debugger Logs</td><td>Каталог с журналами Delve.</td></tr>
+        <tr><td>Debugger, Trace Debugger Protocol</td><td>Записывает обмен с отладчиком для следующих сеансов.</td></tr>
+        <tr><td>Help Page</td><td>Эта страница. Есть и в меню Help.</td></tr>
+        <tr><td>Welcome to Go Project Support</td><td>Страница о плагине.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Подменю gopls</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Пункт</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Add Import…</td><td>Список пакетов, известных серверу; выбранный импортируется в файл.</td></tr>
+        <tr><td>Browse Documentation</td><td>Документация пакета или объявления под курсором в браузере.</td></tr>
+        <tr><td>Browse Assembly</td><td>Ассемблер функции под курсором.</td></tr>
+        <tr><td>Browse Free Symbols of Selection</td><td>На что выделенный код ссылается снаружи: что потребуется при его извлечении.</td></tr>
+        <tr><td>Toggle Compiler Optimization Details</td><td>Решения компилятора по пакету: встраивание, уход в кучу, проверки границ.</td></tr>
+        <tr><td>Check for Dependency Upgrades</td><td>Новые версии зависимостей, результат показан в <code>go.mod</code>.</td></tr>
+        <tr><td>Upgrade All Dependencies</td><td>Обновляет все зависимости.</td></tr>
+        <tr><td>Run govulncheck</td><td>Известные уязвимости, достижимые из кода модуля.</td></tr>
+        <tr><td>Reset go.mod Diagnostics</td><td>Убирает из <code>go.mod</code> результаты двух предыдущих пунктов.</td></tr>
+        <tr><td>Show Statistics</td><td>Файлы, пакеты и память сервера, в окне журнала.</td></tr>
+        <tr><td>Show Log</td><td>Окно журнала gopls.</td></tr>
+        <tr><td>Open Debug Pages</td><td>Служебные страницы gopls. Включаются в настройках.</td></tr>
+        <tr><td>Settings…</td><td>Settings, Tools, Go.</td></tr>
+        <tr><td>Restart</td><td>Перезапускает сервер языка с текущими настройками.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Другие места</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Где</th><th>Что</th></tr></thead>
+      <tbody>
+        <tr><td>File, New, Project</td><td>Пункт Go: путь к Go, путь модуля, файл <code>main.go</code>.</td></tr>
+        <tr><td>New в дереве проекта</td><td>Go File: пустой файл, программа или тест. Имя пакета берётся из соседних файлов.</td></tr>
+        <tr><td>Run, Attach to Process</td><td>Группа Go: отладка уже работающего процесса.</td></tr>
+        <tr><td>Над <code>go.mod</code> после сохранения</td><td>Полоса с командами Run go mod tidy и Download, если изменились зависимости.</td></tr>
+        <tr><td>В <code>go.mod</code> и над <code>//go:generate</code></td><td>Ссылки команд: tidy, vendor, проверка обновлений и уязвимостей, запуск генерации.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="windows">
+  <div class="wrap">
+    <h2>Окна</h2>
+    <div class="table"><table>
+      <thead><tr><th>Окно</th><th>Где</th><th>Что показывает</th></tr></thead>
+      <tbody>
+        <tr><td>Go Tests</td><td>Внизу</td><td>Пакеты и тесты проекта с результатом последнего прогона. Запуск, отладка, запуск с покрытием, повтор упавших, повтор тестов пакета при сохранении. Вкладка Benchmarks: время и память на операцию.</td></tr>
+        <tr><td>Go Monitor</td><td>Справа</td><td>Работающая программа: процессор, память, куча, сборка мусора, потоки. Кнопка Goroutines снимает список горутин, Debug подключает отладчик.</td></tr>
+        <tr><td>Go Dependencies</td><td>Внизу</td><td>Зависимости модуля: версия, более новая версия, прямая или косвенная. Обновление и проверка уязвимостей.</td></tr>
+        <tr><td>gopls</td><td>Внизу</td><td>Журнал сервера языка: его сообщения и отправленные ему команды.</td></tr>
+        <tr><td>Debug, вкладка Goroutines</td><td>Окно отладки</td><td>Горутины, сгруппированные по функции. Поиск, скрытие служебных, двойной клик делает горутину текущей.</td></tr>
+        <tr><td>Значок gopls <span class="new">новое</span></td><td>Статус-бар</td><td>Память и загрузка процессора сервера языка. По клику: версия, время работы, Restart, Log, Settings.</td></tr>
+        <tr><td>Structure</td><td><kbd>Alt+7</kbd></td><td>Объявления файла, методы под своим типом.</td></tr>
+        <tr><td>Project, узел Dependencies</td><td>Дерево проекта</td><td>Исходники зависимостей из кэша модулей.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="run">
+  <div class="wrap">
+    <h2>Запуск и отладка</h2>
+    <p>Конфигурация Go создаётся значком запуска на полях редактора или вручную. Для программ проекта конфигурации создаются сами.</p>
+
+    <h3>Что запускается</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Kind</th><th>Назначение</th></tr></thead>
+      <tbody>
+        <tr><td>go run</td><td>Программа: каталог пакета или отдельный файл.</td></tr>
+        <tr><td>go test</td><td>Тесты, бенчмарки или фаззинг пакета.</td></tr>
+        <tr><td>Binary</td><td>Уже собранный исполняемый файл.</td></tr>
+        <tr><td>Core dump</td><td>Дамп памяти вместе с исполняемым файлом, из которого он получен. Только отладка.</td></tr>
+        <tr><td>Remote dlv dap</td><td>Отладка через <code>dlv dap</code>, запущенный на другой машине: подключение к процессу или запуск файла там. Поля dlv dap at, Process id there и Path substitutions.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Поля и галочки</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Поле</th><th>Что задаёт</th></tr></thead>
+      <tbody>
+        <tr><td>Package, Binary, Core dump</td><td>Что запускать, в зависимости от Kind.</td></tr>
+        <tr><td>Go tool arguments</td><td>Флаги команды <code>go</code>.</td></tr>
+        <tr><td>Program arguments</td><td>Аргументы программы. Для тестов передаются после <code>-args</code>.</td></tr>
+        <tr><td>Working directory</td><td>Рабочий каталог. По умолчанию каталог пакета.</td></tr>
+        <tr><td>Test pattern</td><td>Выражение для <code>-run</code>.</td></tr>
+        <tr><td>Profile</td><td>Профиль тестов: процессор, память, блокировки, мьютексы, трассировка выполнения. После прогона уведомление открывает его в <code>go tool pprof</code> или <code>go tool trace</code>.</td></tr>
+        <tr><td>Packages below the directory as well</td><td>Пакеты вложенных каталогов: <code>./...</code></td></tr>
+        <tr><td>Run benchmarks instead of tests</td><td>Бенчмарки. Вторая галочка добавляет расход памяти: <code>-benchmem</code>.</td></tr>
+        <tr><td>Fuzz instead of testing</td><td>Фаззинг по шаблону из Test pattern.</td></tr>
+        <tr><td>Collect coverage</td><td>Покрытие: отметки у строк в редакторе и процент в окне Go Tests.</td></tr>
+        <tr><td>Race detector</td><td><code>-race</code></td></tr>
+        <tr><td>Always run the tests</td><td><code>-count=1</code>: без результата из кэша.</td></tr>
+        <tr><td>Collect runtime telemetry for the Go Monitor</td><td>Показатели сборки мусора и планировщика в окне Go Monitor.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Отладчик</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Возможность</th><th>Как</th></tr></thead>
+      <tbody>
+        <tr><td>Условие, счётчик попаданий, сообщение в журнал</td><td>Правый клик по точке останова.</td></tr>
+        <tr><td>Остановка на панике</td><td>Точки останова на паники в окне Breakpoints.</td></tr>
+        <tr><td>Изменение значения</td><td>Set Value на переменной.</td></tr>
+        <tr><td>Вызов функции</td><td>В окне Evaluate, без дополнительных слов: <code>order.Total()</code>.</td></tr>
+        <tr><td>Подключение к процессу</td><td>Run, Attach to Process или кнопка Debug в окне Go Monitor.</td></tr>
+        <tr><td>Если отладка не началась</td><td>Уведомление показывает вывод компилятора или несовместимость версий Go и Delve.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="settings">
+  <div class="wrap">
+    <h2>Настройки</h2>
+    <p>Settings, Tools, Go. Настройки действуют на все проекты. Страница gopls под ней содержит все параметры установленной версии сервера.</p>
+
+    <h3>Toolchain</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Path to go</td><td>Путь к команде <code>go</code>. Пусто: поиск в PATH, GOROOT и стандартных каталогах.</td></tr>
+        <tr><td>Build tags</td><td>Теги сборки для анализа кода, сборки и тестов.</td></tr>
+        <tr><td>Create run configurations for the programs of the project</td><td>Создаёт конфигурацию для каждого каталога с <code>func main</code>. Удалённая вручную не создаётся снова.</td></tr>
+        <tr><td>Test arguments</td><td>Добавляются к каждому <code>go test</code>.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Language Server (gopls)</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Use gopls for errors, completion, navigation and refactorings</td><td>Включает сервер языка. Без него остаются подсветка, структура, шаблоны, серый текст и подсказки по имени.</td></tr>
+        <tr><td>Staticcheck analyzers</td><td>Дополнительные проверки кода.</td></tr>
+        <tr><td>Format with gofumpt</td><td>Более строгое форматирование, чем у gofmt.</td></tr>
+        <tr><td>Inlay hints</td><td>Имена параметров, типы переменных и значения констант рядом с кодом.</td></tr>
+        <tr><td>Log every message of the protocol</td><td>Полный обмен с сервером в окне журнала. Для разбора неполадок.</td></tr>
+        <tr><td>Serve the debug pages of gopls</td><td>Служебные страницы сервера, открываются из меню gopls.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Debugger (delve)</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Show global variables of the package</td><td>Переменные пакета в окне Variables.</td></tr>
+        <tr><td>Hide system goroutines</td><td>Скрывает служебные горутины.</td></tr>
+        <tr><td>Stack trace depth</td><td>Сколько кадров стека запрашивать.</td></tr>
+        <tr><td>Debug programs of a Go version this delve does not support</td><td>Разрешает отладку, когда Delve старше версии Go. Надёжнее обновить Delve.</td></tr>
+        <tr><td>Write the log of delve for every debug session</td><td>Журналы открываются из меню Go, Debugger.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Editor</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Start a doc comment with the name of the declaration</td><td><code>//</code> над объявлением становится <code>// Name </code>.</td></tr>
+        <tr><td>Suggest the idiomatic next line as grey text</td><td>Серый текст, см. одноимённый раздел.</td></tr>
+        <tr><td>Show the actions of gopls in the list of Alt+Enter <span class="new">новое</span></td><td>Действия сервера отдельными пунктами. Без галочки они остаются в пункте Refactorings and actions of gopls…</td></tr>
+        <tr><td>Type Latin characters in code when the keyboard layout is Russian <span class="new">новое</span></td><td>Русская буква в коде печатается латинским символом той же клавиши.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Completion</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Offer the values of a return statement as one item <span class="new">новое</span></td><td>Пункт <code>nil, err</code> после <code>return</code>.</td></tr>
+        <tr><td>Names that begin with what is typed go first <span class="new">новое</span></td><td>Порядок списка. Без галочки действует порядок gopls.</td></tr>
+        <tr><td>Show the values of the expected type in bold <span class="new">новое</span></td><td>Выделение подходящих значений и список только из них по <kbd data-action="SmartTypeCompletion">Ctrl+Shift+Space</kbd>.</td></tr>
+        <tr><td>Offer functions and types of packages by their names <span class="new">новое</span></td><td>Подсказки по имени без указания пакета.</td></tr>
+        <tr><td>Offer packages that are not imported <span class="new">новое</span></td><td>Имена пакетов в списке.</td></tr>
+        <tr><td>Write the braces of a literal after a struct type <span class="new">новое</span></td><td>Скобки <code>{}</code> после выбранного типа.</td></tr>
+        <tr><td>Offer what a keyword can begin <span class="new">новое</span></td><td>Заготовки <code>type Name struct {...}</code>, <code>for i, x := range xs</code> в списке.</td></tr>
+        <tr><td>Offer the arguments of a completed call <span class="new">новое</span></td><td>Список для аргументов открывается сам.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Code Quality</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Reformat Code with</td><td>gofmt, goimports, <code>golangci-lint fmt</code> или None. goimports также правит импорты.</td></tr>
+        <tr><td>Format Go files on save</td><td>Форматирование при сохранении. Файл с синтаксической ошибкой сохраняется как есть.</td></tr>
+        <tr><td>Show golangci-lint warnings in the editor</td><td>Замечания линтера после сохранения файла. Используется конфигурация проекта.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Tools</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Инструмент</th><th>Для чего нужен</th></tr></thead>
+      <tbody>
+        <tr><td>gopls</td><td>Ошибки, подсказки, навигация, рефакторинги.</td></tr>
+        <tr><td>dlv</td><td>Отладка.</td></tr>
+        <tr><td>golangci-lint</td><td>Замечания линтера в редакторе.</td></tr>
+        <tr><td>goimports</td><td>Форматирование с правкой импортов.</td></tr>
+        <tr><td>govulncheck</td><td>Проверка зависимостей на известные уязвимости.</td></tr>
+      </tbody>
+    </table></div>
+    <p>У каждого инструмента показан найденный путь. Путь можно задать вручную, инструмент можно установить или обновить кнопкой: выполняется <code>go install</code>.</p>
+  </div>
+</section>
+
+<section class="band" id="trouble">
+  <div class="wrap">
+    <h2>Если не работает</h2>
+    <div class="table"><table>
+      <thead><tr><th>Что видно</th><th>Куда смотреть</th><th>Что сделать</th></tr></thead>
+      <tbody>
+        <tr><td>Нет подсказок, навигации и ошибок</td><td>Значок gopls в статус-баре; меню Go, gopls, Show Log</td><td>Go, gopls, Restart. Если сервера нет, установить его в настройках, раздел Tools.</td></tr>
+        <tr><td>Уведомление Error loading workspace</td><td>Текст уведомления: это сообщение команды <code>go</code></td><td>Чаще всего помогает Go, Modules, Tidy или Download.</td></tr>
+        <tr><td>Нет подсказок по имени из других пакетов</td><td>Help, Show Log: строка Go catalogue</td><td>Go, Read Packages Again. Проверить галочку в настройках, раздел Completion.</td></tr>
+        <tr><td>Отладка не начинается</td><td>Уведомление Debug has not started; Go, Debugger, Show Debugger Logs</td><td>Исправить ошибку сборки или обновить Delve под версию Go.</td></tr>
+        <tr><td>Нет замечаний линтера</td><td>Настройки, раздел Code Quality и Tools</td><td>Замечания появляются после сохранения файла. Проверить, что golangci-lint установлен.</td></tr>
+        <tr><td>Команда <code>go</code> не найдена</td><td>Go, Go on This Machine…</td><td>Указать путь в настройках, раздел Toolchain.</td></tr>
+        <tr><td>В коде не набирается русская буква</td><td>Настройки, раздел Editor</td><td>Снять галочку о русской раскладке. В строках и комментариях русский текст набирается всегда.</td></tr>
+        <tr><td>Серый текст или список мешают</td><td>Настройки, разделы Editor и Completion</td><td>Каждая возможность отключается своей галочкой.</td></tr>
+        <tr><td>Ошибка плагина</td><td>Help, Show Log: строки с <code>golangsupport</code></td><td>Приложить эти строки к сообщению об ошибке.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="empty" id="empty">Ничего не найдено. Попробуйте другое слово.</p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.1.0</span>
+    <span>Редакция страницы 2026-09-29.1</span>
+    <a class="repo" href="demo.html">О плагине</a>
+    <a class="repo" href="../COMPARE.md">Сравнение с GoLand</a>
+    <a class="repo" href="../ROADMAP.md">Roadmap</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var theme = document.getElementById('themeToggle');
+  try { var saved = localStorage.getItem('demo-theme'); if (saved && !root.getAttribute('data-host')) root.setAttribute('data-theme', saved); } catch (err) {}
+  theme.addEventListener('click', function () {
+    var current = root.getAttribute('data-theme');
+    var dark = current === 'dark' || (!current && !window.matchMedia('(prefers-color-scheme: light)').matches);
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('demo-theme', next); } catch (err) {}
+  });
+
+  var anchors = Array.prototype.slice.call(document.querySelectorAll('#navLinks a'));
+  var sections = anchors.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  // inside the IDE the page has no address of its own: an anchor is scrolled to by hand
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!link) return;
+    var target = document.querySelector(link.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  });
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        anchors.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id); });
+      });
+    }, { rootMargin: '-30% 0px -65% 0px' });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+
+// The search: the rows that have every word typed stay, and so do the tables and the sections that have such rows.
+(function () {
+  var input = document.getElementById('filter'), found = document.getElementById('found'), empty = document.getElementById('empty');
+  if (!input) return;
+  // a row is found by its own words and by the ones of the headings it stands under: "alt+enter" finds the list of Alt+Enter
+  var rows = Array.prototype.slice.call(document.querySelectorAll('main tbody tr')).map(function (row) {
+    var table = row.closest('.table'), band = row.closest('section.band');
+    var heading = table && table.previousElementSibling && table.previousElementSibling.tagName === 'H3' ? table.previousElementSibling.textContent : '';
+    var title = band && band.querySelector('h2') ? band.querySelector('h2').textContent : '';
+    return { row: row, text: (row.textContent + ' ' + heading + ' ' + title).toLowerCase().replace(/\s+/g, ' ') };
+  });
+  var tables = Array.prototype.slice.call(document.querySelectorAll('main .table'));
+  var bands = Array.prototype.slice.call(document.querySelectorAll('main section.band'));
+
+  function plural(count) {
+    var last = count % 10, two = count % 100;
+    if (last === 1 && two !== 11) return count + ' строка';
+    if (last >= 2 && last <= 4 && (two < 12 || two > 14)) return count + ' строки';
+    return count + ' строк';
+  }
+
+  function apply() {
+    var words = input.value.toLowerCase().split(/\s+/).filter(Boolean), shown = 0;
+    rows.forEach(function (r) {
+      var match = words.every(function (word) { return r.text.indexOf(word) >= 0; });
+      r.row.classList.toggle('gone', !match);
+      if (match) shown++;
+    });
+    tables.forEach(function (table) {
+      var any = !!table.querySelector('tbody tr:not(.gone)');
+      table.classList.toggle('gone', !any);
+      // the heading of a table is the h3 right before it
+      var heading = table.previousElementSibling;
+      if (heading && heading.tagName === 'H3') heading.classList.toggle('gone', !any);
+    });
+    bands.forEach(function (band) { band.classList.toggle('gone', !band.querySelector('tbody tr:not(.gone)')); });
+    // the last section holds the message, so it stays when nothing is found
+    if (!shown) bands[bands.length - 1].classList.remove('gone');
+    empty.classList.toggle('on', !shown);
+    found.textContent = words.length ? plural(shown) : '';
+  }
+
+  input.addEventListener('input', apply);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Escape') { input.value = ''; apply(); } });
+})();
+</script>
+</body>
+</html>
