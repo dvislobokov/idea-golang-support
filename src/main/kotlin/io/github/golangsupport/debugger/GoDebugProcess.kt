@@ -9,6 +9,8 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.xdebugger.XDebugProcess
@@ -110,11 +112,27 @@ class GoDebugProcess(
         }.whenComplete { _, error ->
             if (error == null) {
                 started = true
+                refreshBinary()
                 // delve sends no `process` event for an attach (seen live): the process is known from the request, when it is on this machine
                 val pid = (start.arguments["processId"] as? Number)?.toLong()
                 if (start.attach && pid != null && adapter !is RemoteDelve) RunningGoProcesses.getInstance(session.project).started("Debug: ${session.sessionName}", pid, handler)
             } else if (!shutdown.get()) startFailed(errorText(error))
         }
+    }
+
+    /**
+     * The binary delve built (or removed) is told to the VFS at once: built into the project tree, it showed in the Project view only
+     * when the file watcher or the next refresh on focus got to it, seconds after the session was running (seen live).
+     */
+    private fun refreshBinary() {
+        var directory = outputBinary?.parentFile ?: return
+        var known = LocalFileSystem.getInstance().findFileByIoFile(directory)
+        // a custom directory made for this session is not in the VFS yet: the nearest one that is, with what is below it
+        while (known == null) {
+            directory = directory.parentFile ?: return
+            known = LocalFileSystem.getInstance().findFileByIoFile(directory)
+        }
+        VfsUtil.markDirtyAndRefresh(true, directory != outputBinary.parentFile, true, known)
     }
 
     /**
@@ -302,6 +320,7 @@ class GoDebugProcess(
             stopped.setResult(Unit)
             // the program has stopped by now, so the binary is unlocked; deleteOnExit covers a Windows handle that lingers
             outputBinary?.let { bin -> runCatching { if (bin.exists() && !bin.delete()) bin.deleteOnExit() } }
+            refreshBinary()
         }
     }
 
