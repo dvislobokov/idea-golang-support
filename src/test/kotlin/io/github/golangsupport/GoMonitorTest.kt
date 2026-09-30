@@ -103,6 +103,9 @@ class GoMonitorTest {
         assertTrue(GoProfiles.arguments(GoProfile.NONE, directory).isEmpty())
         assertEquals("http://localhost:53421", GoProfiles.servedUrl("Serving web UI on http://localhost:53421\n"))
         assertEquals("http://127.0.0.1:8080", GoProfiles.servedUrl("2026/09/22 12:00:00 Trace viewer is listening on http://127.0.0.1:8080"))
+        // the tab is named by the time of the run for a file of the plugin, by the file for any other
+        assertEquals("11:45:23", GoProfiles.stamp(java.io.File("/tmp/go-profile-20260930-114523-1234/cpu.pprof")))
+        assertEquals("server.pb.gz", GoProfiles.stamp(java.io.File("/home/me/server.pb.gz")))
         assertNull(GoProfiles.servedUrl("Parsing trace..."))
     }
 

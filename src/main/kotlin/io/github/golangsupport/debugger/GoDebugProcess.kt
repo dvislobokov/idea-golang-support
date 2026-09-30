@@ -55,6 +55,7 @@ class GoDebugProcess(
     private val handler = DebuggeeProcessHandler()
     private val lineBreakpoints = GoLineBreakpointHandler(this)
     private val panicBreakpoints = GoPanicBreakpointHandler(this)
+    private val functionBreakpoints = GoFunctionBreakpointHandler(this)
     private val editors = GoEditorsProvider()
 
     @Volatile var capabilities: JsonObject = JsonObject()
@@ -81,7 +82,7 @@ class GoDebugProcess(
 
     override fun getEditorsProvider(): XDebuggerEditorsProvider = editors
     override fun createTabLayouter(): XDebugTabLayouter = GoGoroutinesTabLayouter(this)
-    override fun getBreakpointHandlers(): Array<XBreakpointHandler<*>> = arrayOf(lineBreakpoints, panicBreakpoints)
+    override fun getBreakpointHandlers(): Array<XBreakpointHandler<*>> = arrayOf(lineBreakpoints, panicBreakpoints, functionBreakpoints)
     override fun doGetProcessHandler(): ProcessHandler = handler
 
     /**
@@ -155,7 +156,7 @@ class GoDebugProcess(
     private fun configure() {
         // first: a breakpoint set while the lists below are on their way sends its file itself instead of waiting for the next change
         configured = true
-        CompletableFuture.allOf(lineBreakpoints.sendAll(), panicBreakpoints.send())
+        CompletableFuture.allOf(lineBreakpoints.sendAll(), panicBreakpoints.send(), functionBreakpoints.send())
             .handle { _, _ -> null }
             .thenCompose { connection.request("configurationDone") }
             .exceptionally { error -> LOG.info("configurationDone: ${errorText(error)}"); null }
@@ -183,7 +184,7 @@ class GoDebugProcess(
 
     /** A breakpoint of the IDE when the stop is one: the platform then logs, counts and decides whether to stay suspended. */
     private fun reached(context: GoSuspendContext, body: JsonObject) {
-        val breakpoint = body.getAsJsonArray("hitBreakpointIds")?.firstNotNullOfOrNull { lineBreakpoints.find(it.asInt) }
+        val breakpoint = body.getAsJsonArray("hitBreakpointIds")?.firstNotNullOfOrNull { lineBreakpoints.find(it.asInt) ?: functionBreakpoints.find(it.asInt) }
             ?: if (body.string("reason") == "exception") panicBreakpoints.first() else null
         if (breakpoint == null) return session.positionReached(context)
         val expression = breakpoint.logExpressionObject?.expression?.takeIf { it.isNotBlank() }

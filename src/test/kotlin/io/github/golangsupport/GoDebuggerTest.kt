@@ -16,6 +16,8 @@ import io.github.golangsupport.debugger.string
 import io.github.golangsupport.run.GoDebugCompletion
 import io.github.golangsupport.run.GoInlineValues
 import io.github.golangsupport.run.GoPanicFilter
+import io.github.golangsupport.debugger.GoFunctionBreakpointHandler
+import io.github.golangsupport.debugger.GoFunctionNames
 import io.github.golangsupport.run.HitCondition
 import junit.framework.TestCase
 import java.io.ByteArrayInputStream
@@ -28,6 +30,29 @@ import java.util.concurrent.TimeUnit
 
 /** The plugin's own DAP client against a fake adapter on pipes, and the pure parts of the debugger. No process is started. */
 class GoDebuggerTest : TestCase() {
+    fun testTheNameDelveGivesTheFunctionAtACaret() {
+        val text = """
+            package store
+
+            type Order struct{}
+
+            func NewOrder() *Order { return nil }
+
+            func (o *Order) Total() int {
+            	return 0
+            }
+
+            func (o Order) Empty() bool { return true }
+
+            var x = 1
+        """.trimIndent()
+        assertEquals("store.NewOrder", GoFunctionNames.at(text, text.indexOf("return nil")))
+        assertEquals("store.(*Order).Total", GoFunctionNames.at(text, text.indexOf("return 0")))
+        assertEquals("store.Order.Empty", GoFunctionNames.at(text, text.indexOf("Empty")))
+        assertNull("not in a function", GoFunctionNames.at(text, text.indexOf("var x")))
+        assertEquals("main.main", GoFunctionNames.at("package main\n\nfunc main() {\n}\n", 22))
+    }
+
     /** A fake adapter: reads what the client sends, writes what the test tells it to. */
     private inner class FakeAdapter {
         val toClient = PipedOutputStream()
@@ -142,6 +167,8 @@ class GoDebuggerTest : TestCase() {
         // a bare number is `== N` for delve; what it would refuse the whole breakpoint for is not sent
         assertEquals(mapOf("line" to 5, "hitCondition" to "5"), GoLineBreakpointHandler.breakpointJson(4, " ", "5", ""))
         assertEquals(mapOf("line" to 5), GoLineBreakpointHandler.breakpointJson(4, null, "abc", null))
+        assertEquals(mapOf("name" to "store.(*Order).Total", "condition" to "o.Currency == \"EUR\"", "hitCondition" to ">= 3"), GoFunctionBreakpointHandler.breakpointJson(" store.(*Order).Total ", " o.Currency == \"EUR\" ", ">=3"))
+        assertEquals(mapOf("name" to "/Total$/"), GoFunctionBreakpointHandler.breakpointJson("/Total$/", "", "abc"))
         for (valid in listOf("", "  ", "5", "==5", ">= 3", ">3", "<=10", "< 2", "% 10", "!= 3")) assertTrue(valid, HitCondition.isValid(valid))
         for (invalid in listOf("0", "-1", "abc", "5 times", ">=", "3 >", "1.5")) assertFalse(invalid, HitCondition.isValid(invalid))
     }

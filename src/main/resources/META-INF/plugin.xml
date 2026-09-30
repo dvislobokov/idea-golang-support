@@ -75,6 +75,8 @@
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoReturnCompletionContributor"/>
         <!-- `type Name struct {...}`, `for i, x := range xs`: what a keyword can begin here, expanded as live templates -->
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoKeywordCompletionContributor"/>
+        <!-- `404` → `http.StatusNotFound`; the layouts of time.Parse / Format inside the string -->
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoValueCompletionContributor"/>
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
         <codeInsight.implementMethod language="Go" implementationClass="io.github.golangsupport.lang.GoImplementMethodsHandler"/>
         <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
@@ -145,6 +147,7 @@
         <programRunner implementation="io.github.golangsupport.debugger.GoDebugRunner"/>
         <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoLineBreakpointType"/>
         <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoPanicBreakpointType"/>
+        <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoFunctionBreakpointType"/>
         <xdebugger.attachDebuggerProvider implementation="io.github.golangsupport.debugger.GoAttachDebuggerProvider"/>
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.debugger.GoExpressionCompletionContributor"/>
         <registryKey key="go.debugger.protocol.trace" defaultValue="false"
@@ -205,6 +208,8 @@
             <separator/>
             <action id="Go.AnalyzeStackTrace" class="io.github.golangsupport.run.GoAnalyzeStackTraceAction" text="Analyze Stack Trace..."
                 description="Paste a panic or a goroutine dump from a log: its file.go:12 frames become links"/>
+            <action id="Go.OpenProfile" class="io.github.golangsupport.monitor.GoOpenProfileAction" text="Open Profile..."
+                description="A pprof file in a tab of the editor: flame graph, top, graph, source"/>
         <separator/>
         <action id="Go.Environment" class="io.github.golangsupport.sdk.GoEnvironmentAction" text="Go on This Machine..."
                     description="The toolchain and the tools the plugin uses, the modules of the project, go env"/>
@@ -240,6 +245,8 @@
             <add-to-group group-id="Go.MainMenu" anchor="last"/>
         </action>
         <group id="Go.Debugger" text="Debugger" popup="true" icon="AllIcons.Actions.StartDebugger">
+            <action id="Go.Debugger.AddFunctionBreakpoint" class="io.github.golangsupport.debugger.GoAddFunctionBreakpointAction" text="Add Function Breakpoint..."
+                    description="A breakpoint on a function by its name, as delve names it; no file and line"/>
             <action id="Go.Debugger.ShowLogs" class="io.github.golangsupport.debugger.ShowDebuggerLogsAction" text="Show Debugger Logs"
                     description="Open the directory with the logs of delve and the traces of the protocol"/>
             <action id="Go.Debugger.TraceProtocol" class="io.github.golangsupport.debugger.TraceDebuggerProtocolAction" text="Trace Debugger Protocol"

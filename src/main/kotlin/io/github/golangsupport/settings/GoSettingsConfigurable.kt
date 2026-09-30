@@ -148,6 +148,10 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                         .comment("<code>ty</code> at the top of a file gives <code>type Name struct {...}</code>, <code>fo</code> in a body gives <code>for i, x := range xs</code> for the slices in sight; Tab walks the stops. Works without gopls")
                 }
                 row {
+                    checkBox("Offer HTTP status constants and time layouts").bindSelected(settings::completionValues)
+                        .comment("<code>404</code> in <code>WriteHeader</code>, <code>http.Error</code> or a comparison with <code>StatusCode</code> gives <code>http.StatusNotFound</code>; inside the string of <code>time.Parse</code> or <code>Format</code> — the layouts and their parts")
+                }
+                row {
                     checkBox("Offer the arguments of a completed call").bindSelected(settings::completionArguments)
                         .comment("The parameters are shown above the caret and the list opens for the first argument, then after every <code>, </code>. Needs gopls")
                 }

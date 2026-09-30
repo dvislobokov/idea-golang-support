@@ -303,6 +303,8 @@ footer a { color: var(--text-2); }
         <tr><td>Скобки после типа <span class="new">новое</span></td><td><code>c := http.Client{}</code></td><td>Там, где ожидается значение. Курсор встаёт между скобками.</td></tr>
         <tr><td>Тип из JSON <span class="new">новое</span></td><td><code>ty</code> даёт <code>type from JSON...</code></td><td>Структуры с тегами <code>json</code> по документу из буфера обмена или из диалога: вложенные объекты — свои типы, массивы — срезы, даты RFC 3339 — <code>time.Time</code> с импортом. Есть и в Alt+Insert.</td></tr>
         <tr><td>Недостающие методы интерфейса <span class="new">новое</span></td><td><code>fu</code> даёт <code>func (o *Order) Total() int {...}</code></td><td>Для типа файла, у которого есть часть методов интерфейса проекта, но не все.</td></tr>
+        <tr><td>Константы HTTP <span class="new">новое</span></td><td><code>WriteHeader(40</code> даёт <code>http.StatusNotFound</code></td><td>Число там, где ждут статус: <code>WriteHeader</code>, <code>http.Error</code>, сравнение с <code>StatusCode</code>, <code>c.JSON(</code>, <code>case</code>. Импорт <code>net/http</code> добавляется.</td></tr>
+        <tr><td>Раскладка времени <span class="new">новое</span></td><td><code>time.Parse("20</code> даёт <code>2006-01-02</code></td><td>Внутри строки <code>time.Parse</code> / <code>t.Format</code>: целые раскладки (RFC 3339, дата, время, <code>02.01.2006</code>) и их части с подписью — <code>Jan</code> месяц, <code>15</code> час, <code>Z07:00</code> смещение.</td></tr>
         <tr><td>Заготовки по ключевому слову <span class="new">новое</span></td><td><code>ty</code> даёт <code>type Name struct {...}</code></td><td>В начале строки. Наверху файла: <code>type</code>, <code>func</code> (и метод для каждого типа файла), <code>var</code>, <code>const</code>, <code>import</code>, в <code>_test.go</code> — <code>Test</code>, табличный тест, <code>Benchmark</code>, <code>Fuzz</code>. В теле: <code>for</code> по срезам, картам и каналам, объявленным выше, <code>if err != nil</code>, comma-ok, <code>switch</code>, <code>select</code>, <code>go</code>, <code>defer</code>, <code>chan</code>, <code>map</code>; в тесте — <code>t.Run</code>, <code>t.Parallel</code>, <code>t.Cleanup</code>. <kbd>Tab</kbd> переводит по местам для ввода. Работает без gopls.</td></tr>
         <tr><td>Регистр букв <span class="new">новое</span></td><td><code>client</code> даёт <code>http.Client</code></td><td>Для пунктов плагина не учитывается. Для пунктов gopls действует настройка IDE Match case.</td></tr>
         <tr><td>Русская раскладка <span class="new">новое</span></td><td><code>аьею</code> печатается как <code>fmt.</code></td><td>В коде. В строках и комментариях текст остаётся русским.</td></tr>
@@ -428,10 +430,12 @@ footer a { color: var(--text-2); }
     <div class="table"><table class="two">
       <thead><tr><th>Пункт</th><th>Что делает</th></tr></thead>
       <tbody>
+        <tr><td>Open Profile… <span class="new">новое</span></td><td>Любой файл pprof (с сервера, из CI) во вкладке редактора: flame graph, Top, Graph, Source. Сервер <code>go tool pprof</code> живёт, пока открыта вкладка.</td></tr>
         <tr><td>Analyze Stack Trace…</td><td>Вставьте текст паники или дамп горутин: строки вида <code>file.go:12</code> станут ссылками.</td></tr>
         <tr><td>Monitor Go Process</td><td>Открывает окно Go Monitor.</td></tr>
         <tr><td>Go on This Machine…</td><td>Найденный Go, инструменты и их версии, модули проекта, <code>go env</code>.</td></tr>
         <tr><td>Disable Plugins Not Needed for Go…</td><td>Предлагает отключить встроенные плагины, не нужные для Go.</td></tr>
+        <tr><td>Debugger, Add Function Breakpoint… <span class="new">новое</span></td><td>Точка останова на функцию по имени, как её называет Delve.</td></tr>
         <tr><td>Debugger, Show Debugger Logs</td><td>Каталог с журналами Delve.</td></tr>
         <tr><td>Debugger, Trace Debugger Protocol</td><td>Записывает обмен с отладчиком для следующих сеансов.</td></tr>
         <tr><td>Help Page</td><td>Эта страница. Есть и в меню Help.</td></tr>
@@ -519,7 +523,7 @@ footer a { color: var(--text-2); }
         <tr><td>Program arguments</td><td>Аргументы программы. Для тестов передаются после <code>-args</code>.</td></tr>
         <tr><td>Working directory</td><td>Рабочий каталог. По умолчанию каталог пакета.</td></tr>
         <tr><td>Test pattern</td><td>Выражение для <code>-run</code>.</td></tr>
-        <tr><td>Profile</td><td>Профиль тестов: процессор, память, блокировки, мьютексы, трассировка выполнения. После прогона уведомление открывает его в <code>go tool pprof</code> или <code>go tool trace</code>.</td></tr>
+        <tr><td>Profile</td><td>Профиль тестов: процессор, память, блокировки, мьютексы, трассировка выполнения. После прогона уведомление открывает его во вкладке редактора (Open in IDE: flame graph, Top, Graph, Peek, Source — интерфейс <code>go tool pprof</code>; трассировка — в браузере, <code>go tool trace</code> иначе не умеет) или в браузере.</td></tr>
         <tr><td>Packages below the directory as well</td><td>Пакеты вложенных каталогов: <code>./...</code></td></tr>
         <tr><td>Run benchmarks instead of tests</td><td>Бенчмарки. Вторая галочка добавляет расход памяти: <code>-benchmem</code>.</td></tr>
         <tr><td>Fuzz instead of testing</td><td>Фаззинг по шаблону из Test pattern.</td></tr>
@@ -536,6 +540,7 @@ footer a { color: var(--text-2); }
       <tbody>
         <tr><td>Условие, счётчик попаданий, сообщение в журнал</td><td>Правый клик по точке останова.</td></tr>
         <tr><td>Остановка на панике</td><td>Точки останова на паники в окне Breakpoints.</td></tr>
+        <tr><td>Точка на функцию <span class="new">новое</span></td><td>Go, Debugger, Add Function Breakpoint… (имя подставляется по функции под курсором) или «+» в окне Breakpoints: <code>main.main</code>, <code>store.(*Order).Total</code>, <code>net/http.(*Server).Serve</code>, а также <code>имя:строка</code>. Без файла и строки: переживает правки, ловит код зависимостей; условие и счётчик попаданий как у обычной.</td></tr>
         <tr><td>Изменение значения</td><td>Set Value на переменной.</td></tr>
         <tr><td>Вызов функции</td><td>В окне Evaluate, без дополнительных слов: <code>order.Total()</code>.</td></tr>
         <tr><td>Подключение к процессу</td><td>Run, Attach to Process или кнопка Debug в окне Go Monitor.</td></tr>
@@ -608,6 +613,7 @@ footer a { color: var(--text-2); }
         <tr><td>Offer functions and types of packages by their names <span class="new">новое</span></td><td>Подсказки по имени без указания пакета.</td></tr>
         <tr><td>Offer packages that are not imported <span class="new">новое</span></td><td>Имена пакетов в списке.</td></tr>
         <tr><td>Write the braces of a literal after a struct type <span class="new">новое</span></td><td>Скобки <code>{}</code> после выбранного типа.</td></tr>
+        <tr><td>Offer HTTP status constants and time layouts <span class="new">новое</span></td><td>Константы <code>http.Status…</code> вместо чисел и раскладки времени в строках.</td></tr>
         <tr><td>Offer what a keyword can begin <span class="new">новое</span></td><td>Заготовки <code>type Name struct {...}</code>, <code>for i, x := range xs</code> в списке.</td></tr>
         <tr><td>Offer the arguments of a completed call <span class="new">новое</span></td><td>Список для аргументов открывается сам.</td></tr>
       </tbody>
