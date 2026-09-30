@@ -194,6 +194,7 @@ footer a { color: var(--text-2); }
         <tr><td>Только подходящее по типу <span class="new">новое</span></td><td><kbd data-action="SmartTypeCompletion">Ctrl+Shift+Space</kbd></td><td>В списке остаются значения того типа, которого ждёт код.</td></tr>
         <tr><td>Принять серый текст</td><td><kbd>Tab</kbd></td><td>Любой другой символ убирает подсказку.</td></tr>
         <tr><td>Завершить конструкцию</td><td><kbd data-action="EditorCompleteStatement">Ctrl+Shift+Enter</kbd></td><td>Дописывает скобки <code>if</code>, <code>for</code>, <code>func</code>, <code>switch</code> и вызова, ставит курсор внутрь.</td></tr>
+        <tr><td>Обернуть выделенное <span class="new">новое</span></td><td><kbd data-action="SurroundWith">Ctrl+Alt+T</kbd></td><td>Выделенные строки — в <code>if</code>, <code>if … else</code>, <code>for</code>, <code>for {}</code>, <code>func() {}()</code>, <code>go func() {}()</code>, <code>defer func() {}()</code>, блок <code>{}</code>; кусок строки — в <code>(…)</code> или <code>!(…)</code>. Строки получают отступ, курсор встаёт на условие.</td></tr>
         <tr><td>Действия и исправления</td><td><kbd data-action="ShowIntentionActions">Alt+Enter</kbd></td><td>Список зависит от места: см. раздел «Действия».</td></tr>
         <tr><td>Generate</td><td><kbd data-action="Generate">Alt+Insert</kbd></td><td>Конструктор, методы доступа, <code>String()</code>, теги, методы интерфейса, тест.</td></tr>
         <tr><td>Переименовать</td><td><kbd data-action="RenameElement">Shift+F6</kbd></td><td>По всему модулю. Нужен gopls.</td></tr>

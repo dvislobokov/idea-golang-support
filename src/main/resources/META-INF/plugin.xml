@@ -80,6 +80,8 @@
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
         <codeInsight.implementMethod language="Go" implementationClass="io.github.golangsupport.lang.GoImplementMethodsHandler"/>
         <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
+        <!-- Ctrl+Alt+T: the selected lines into if / for / func() {}() by the text -->
+        <lang.surroundDescriptor language="Go" implementationClass="io.github.golangsupport.lang.GoSurroundDescriptor"/>
         <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>
         <!-- a Cyrillic letter typed in code is a key of the Russian layout left on: the handlers of the platform are given its Latin
              character. The last of the handlers of the editor is the one around the others, the completion list among them -->
