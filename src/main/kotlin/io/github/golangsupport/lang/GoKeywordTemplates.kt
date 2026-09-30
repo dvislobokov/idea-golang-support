@@ -9,6 +9,14 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.codeInsight.template.TemplateManager
 import com.intellij.codeInsight.template.impl.ConstantNode
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
+import com.intellij.psi.PsiManager
+import com.intellij.psi.search.FileTypeIndex
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import io.github.golangsupport.settings.GoSettings
 
 /**
@@ -22,7 +30,13 @@ import io.github.golangsupport.settings.GoSettings
  */
 object GoKeywordTemplates {
     /** [keyword] is what is typed to get the item; [lookups] are other words that find it (`test` for `func TestX`). */
-    class Item(val keyword: String, val label: String, val template: String, val typeText: String, val lookups: List<String> = emptyList(), vararg val stops: Pair<String, String>)
+    class Item(val keyword: String, val label: String, val template: String, val typeText: String, val lookups: List<String> = emptyList(), val action: String? = null, vararg val stops: Pair<String, String>)
+
+    /** The item that opens Type from JSON instead of expanding a template. */
+    const val JSON = "json"
+
+    /** An interface of the project, for the methods a type of the file lacks: name and signature of each method. */
+    class InterfaceInfo(val name: String, val methods: List<Pair<String, String>>)
 
     /** Where the caret is: only the two places where a statement or a declaration begins. */
     enum class Place { TOP, BODY }
@@ -41,6 +55,8 @@ object GoKeywordTemplates {
         val maps: List<String> = emptyList(),
         val channels: List<String> = emptyList(),
         val hasContext: Boolean = false,
+        /** The methods every type of the file has, by the name of the type. */
+        val methods: Map<String, Set<String>> = emptyMap(),
     )
 
     class TypeInfo(val name: String, val isStruct: Boolean, val pointerReceiver: Boolean)
@@ -67,7 +83,10 @@ object GoKeywordTemplates {
         }
         val wantsMain = structure.isMainPackage && structure.mainFunction == null
         val enclosing = structure.all().firstOrNull { it.range.contains(typedStart) && it.range.startOffset < typedStart }
-        if (enclosing == null) return Context(Place.TOP, isTestFile, wantsMain, types)
+        if (enclosing == null) {
+            val methods = structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver != null }.groupBy({ it.receiver!! }, { it.name }).mapValues { it.value.toSet() }
+            return Context(Place.TOP, isTestFile, wantsMain, types, methods = methods)
+        }
         val body = enclosing.body ?: return null
         if ((enclosing.kind != GoDeclarationKind.FUNCTION && enclosing.kind != GoDeclarationKind.METHOD) || typedStart <= body.startOffset || typedStart >= body.endOffset) return null
         val above = text.subSequence(maxOf(body.startOffset, lineStart(text, lineStart, MAX_LINES_BACK)), lineStart)
@@ -88,6 +107,7 @@ object GoKeywordTemplates {
         add(Item("type", "type Name func(...)", "type \$NAME\$ func(\$PARAMS\$) \$END\$", "function type"))
         add(Item("type", "type Name = T", "type \$NAME\$ = \$TYPE\$\$END\$", "alias"))
         add(Item("type", "type (...)", "type (\n\t\$END\$\n)", "group"))
+        add(Item("type", "type from JSON...", "", "the clipboard or a dialog", listOf("json"), action = JSON))
         add(Item("func", "func name() {...}", "func \$NAME\$(\$PARAMS\$) \$END\${\n\t\n}", "function"))
         for (type in context.types) {
             val receiver = type.name.first().lowercaseChar()
@@ -128,13 +148,32 @@ object GoKeywordTemplates {
         if (context.hasContext) add(Item("select", "select { case <-ctx.Done(): ... }", "select {\ncase <-ctx.Done():\n\treturn \$RESULT\$\n\$END\$\n}", "wait with context", stops = arrayOf("RESULT" to "ctx.Err()")))
         add(Item("go", "go func() {...}()", "go func() {\n\t\$END\$\n}()", "goroutine"))
         add(Item("defer", "defer func() {...}()", "defer func() {\n\t\$END\$\n}()", "deferred call"))
-        add(Item("chan", "ch := make(chan T)", "\$CH\$ := make(chan \$T\$\$END\$)", "channel", listOf("make"), "CH" to "ch"))
-        add(Item("map", "m := make(map[K]V)", "\$M\$ := make(map[\$K\$]\$V\$\$END\$)", "map", listOf("make"), "M" to "m"))
+        add(Item("chan", "ch := make(chan T)", "\$CH\$ := make(chan \$T\$\$END\$)", "channel", listOf("make"), stops = arrayOf("CH" to "ch")))
+        add(Item("map", "m := make(map[K]V)", "\$M\$ := make(map[\$K\$]\$V\$\$END\$)", "map", listOf("make"), stops = arrayOf("M" to "m")))
         if (context.inTest) {
             add(Item("t.Run", "t.Run(\"name\", func(t *testing.T) {...})", "t.Run(\"\$NAME\$\", func(t *testing.T) {\n\t\$END\$\n})", "subtest", listOf("Run")))
             add(Item("t.Parallel", "t.Parallel()", "t.Parallel()\$END\$", "parallel", listOf("Parallel")))
             add(Item("t.Cleanup", "t.Cleanup(func() {...})", "t.Cleanup(func() {\n\t\$END\$\n})", "cleanup", listOf("Cleanup")))
             add(Item("t.Helper", "t.Helper()", "t.Helper()\$END\$", "helper", listOf("Helper")))
+        }
+    }
+
+    /**
+     * The methods a type of the file lacks to implement an interface it has begun to implement: at least one method of the interface
+     * is there by name, at least one is not. Every type of the file with every interface, so the list stays short by that rule.
+     */
+    fun interfaceItems(context: Context, interfaces: List<InterfaceInfo>): List<Item> = buildList {
+        if (context.place != Place.TOP) return@buildList
+        for (type in context.types) {
+            val has = context.methods[type.name] ?: continue
+            val receiver = "${GoGenerators.receiverName(type.name)} ${if (type.pointerReceiver) "*" else ""}${type.name}"
+            for (iface in interfaces) {
+                val missing = iface.methods.filter { (name, _) -> name !in has }
+                if (missing.size == iface.methods.size || missing.isEmpty()) continue
+                for ((name, signature) in missing) {
+                    add(Item("func", "func ($receiver) $name$signature {...}", "func ($receiver) $name$signature {\n\t\$END\$\n}", "missing method of ${iface.name}", listOf(name)))
+                }
+            }
         }
     }
 
@@ -182,11 +221,36 @@ class GoKeywordCompletionContributor : CompletionContributor() {
         val typed = GoKeywordTemplates.typed(text, parameters.offset)
         if (typed.isEmpty() && !parameters.isExtendedCompletion) return
         val items = result.withPrefixMatcher(GoPrefixMatcher(typed))
-        for (item in GoKeywordTemplates.items(context)) {
+        val missingMethods = if (context.place == GoKeywordTemplates.Place.TOP && context.methods.isNotEmpty()) GoKeywordTemplates.interfaceItems(context, interfacesOf(file)) else emptyList()
+        for (item in missingMethods + GoKeywordTemplates.items(context)) {
             val element = LookupElementBuilder.create(item, item.keyword).withLookupStrings(item.lookups).withPresentableText(item.label).withTypeText(item.typeText, true)
-                .withIcon(AllIcons.Nodes.Template).withInsertHandler { context, _ -> expand(context, item) }
-            items.addElement(PrioritizedLookupElement.withPriority(element, PRIORITY))
+                .withIcon(if (item.action != null) AllIcons.Actions.Edit else if (item in missingMethods) AllIcons.Gutter.ImplementingMethod else AllIcons.Nodes.Template)
+                .withInsertHandler { context, _ -> if (item.action == GoKeywordTemplates.JSON) fromJson(context, file) else expand(context, item) }
+            items.addElement(PrioritizedLookupElement.withPriority(element, if (item in missingMethods) PRIORITY + 1 else PRIORITY))
         }
+    }
+
+    /** The interfaces of the project with their methods, read again when any file changes: one walk of the files per change, not per list. */
+    private fun interfacesOf(file: GoFile): List<GoKeywordTemplates.InterfaceInfo> = CachedValuesManager.getManager(file.project).getCachedValue(file.project) {
+        val project = file.project
+        val interfaces = ArrayList<GoKeywordTemplates.InterfaceInfo>()
+        // the index knows names, not kinds: every Go file of the project, its declarations from the cache of the file
+        for (virtualFile in FileTypeIndex.getFiles(GoFileType, GlobalSearchScope.projectScope(project))) {
+            val psi = PsiManager.getInstance(project).findFile(virtualFile) as? GoFile ?: continue
+            for (declaration in GoStructure.of(psi).declarations) {
+                if (declaration.kind != GoDeclarationKind.INTERFACE) continue
+                val methods = declaration.children.filter { it.kind == GoDeclarationKind.INTERFACE_METHOD }.map { it.name to it.signature.orEmpty() }
+                if (methods.isNotEmpty()) interfaces += GoKeywordTemplates.InterfaceInfo(declaration.name, methods)
+            }
+        }
+        CachedValueProvider.Result.create(interfaces.sortedBy { it.name }, PsiModificationTracker.MODIFICATION_COUNT)
+    }
+
+    /** The keyword goes away; the dialog opens after the lookup has closed, outside its write command. */
+    private fun fromJson(context: InsertionContext, file: GoFile) {
+        context.document.deleteString(context.startOffset, context.tailOffset)
+        val at = context.startOffset
+        ApplicationManager.getApplication().invokeLater({ if (!context.editor.isDisposed) GoTypeFromJsonAction.generate(context.project, context.editor, file, at) }, ModalityState.defaultModalityState())
     }
 
     private fun expand(context: InsertionContext, item: GoKeywordTemplates.Item) {

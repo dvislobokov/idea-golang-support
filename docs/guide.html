@@ -298,6 +298,8 @@ footer a { color: var(--text-2); }
         <tr><td>Порядок списка <span class="new">новое</span></td><td><code>ni</code>: сначала <code>nil</code></td><td>Имена, начинающиеся с набранного, стоят выше остальных.</td></tr>
         <tr><td>Аргументы вызова <span class="new">новое</span></td><td>Список после <code>(</code> и после <code>, </code></td><td>Открывается сам, вместе с подсказкой о параметрах.</td></tr>
         <tr><td>Скобки после типа <span class="new">новое</span></td><td><code>c := http.Client{}</code></td><td>Там, где ожидается значение. Курсор встаёт между скобками.</td></tr>
+        <tr><td>Тип из JSON <span class="new">новое</span></td><td><code>ty</code> даёт <code>type from JSON...</code></td><td>Структуры с тегами <code>json</code> по документу из буфера обмена или из диалога: вложенные объекты — свои типы, массивы — срезы, даты RFC 3339 — <code>time.Time</code> с импортом. Есть и в Alt+Insert.</td></tr>
+        <tr><td>Недостающие методы интерфейса <span class="new">новое</span></td><td><code>fu</code> даёт <code>func (o *Order) Total() int {...}</code></td><td>Для типа файла, у которого есть часть методов интерфейса проекта, но не все.</td></tr>
         <tr><td>Заготовки по ключевому слову <span class="new">новое</span></td><td><code>ty</code> даёт <code>type Name struct {...}</code></td><td>В начале строки. Наверху файла: <code>type</code>, <code>func</code> (и метод для каждого типа файла), <code>var</code>, <code>const</code>, <code>import</code>, в <code>_test.go</code> — <code>Test</code>, табличный тест, <code>Benchmark</code>, <code>Fuzz</code>. В теле: <code>for</code> по срезам, картам и каналам, объявленным выше, <code>if err != nil</code>, comma-ok, <code>switch</code>, <code>select</code>, <code>go</code>, <code>defer</code>, <code>chan</code>, <code>map</code>; в тесте — <code>t.Run</code>, <code>t.Parallel</code>, <code>t.Cleanup</code>. <kbd>Tab</kbd> переводит по местам для ввода. Работает без gopls.</td></tr>
         <tr><td>Регистр букв <span class="new">новое</span></td><td><code>client</code> даёт <code>http.Client</code></td><td>Для пунктов плагина не учитывается. Для пунктов gopls действует настройка IDE Match case.</td></tr>
         <tr><td>Русская раскладка <span class="new">новое</span></td><td><code>аьею</code> печатается как <code>fmt.</code></td><td>В коде. В строках и комментариях текст остаётся русским.</td></tr>
@@ -322,7 +324,7 @@ footer a { color: var(--text-2); }
         <tr><td>Add missing return</td><td>Функция с результатом без <code>return</code></td><td>Добавляет <code>return</code> с нулевыми значениями.</td></tr>
         <tr><td>Create function</td><td>Вызов несуществующей функции</td><td>Создаёт функцию с параметрами по аргументам вызова.</td></tr>
         <tr><td>Add struct tags…</td><td>Структура или её поле</td><td>Диалог: ключи, стиль имён, <code>omitempty</code>.</td></tr>
-        <tr><td>Implement interface…</td><td>Тип</td><td>Дописывает недостающие методы выбранного интерфейса проекта.</td></tr>
+        <tr><td>Implement interface…</td><td>Тип</td><td>Попап с поиском по интерфейсам проекта и, с галочкой Non-project, стандартной библиотеки и зависимостей; дописывает недостающие методы. Тот же попап — <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
         <tr><td>Generate test</td><td>Функция или метод</td><td>Табличный тест в файле <code>_test.go</code>.</td></tr>
         <tr><td>Fill all fields <span class="new">новое</span></td><td>Литерал структуры или имя типа</td><td>Заполняет поля нулевыми значениями и добавляет импорты. На имени типа без скобок сначала дописывает <code>{}</code>.</td></tr>
         <tr><td>Optimize imports <span class="new">новое</span></td><td>Строки импортов</td><td>Убирает неиспользуемые, добавляет недостающие, сортирует.</td></tr>
@@ -341,7 +343,8 @@ footer a { color: var(--text-2); }
         <tr><td>Getters…, Setters…, Getters and Setters…</td><td>Методы доступа к выбранным полям.</td></tr>
         <tr><td>String() Method…</td><td>Метод <code>String()</code> с выбранными полями.</td></tr>
         <tr><td>Struct Tags…</td><td>Теги полей: ключи, стиль имён, <code>omitempty</code>.</td></tr>
-        <tr><td>Implement Interface…</td><td>Методы интерфейса проекта, которых у типа ещё нет.</td></tr>
+        <tr><td>Implement Interface…</td><td>Методы выбранного интерфейса (проект, stdlib, зависимости), которых у типа ещё нет: типы чужого пакета получают его имя, пакет импортируется, встроенные интерфейсы раскрываются. Также <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
+        <tr><td>Type from JSON… <span class="new">новое</span></td><td>Структуры с тегами <code>json</code> по документу из буфера обмена или из диалога.</td></tr>
         <tr><td>Test</td><td>Тест для функции под курсором.</td></tr>
       </tbody>
     </table></div>

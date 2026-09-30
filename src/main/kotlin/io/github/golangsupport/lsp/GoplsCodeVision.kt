@@ -68,6 +68,8 @@ class GoplsCountsService(private val project: Project) {
                 counts[key(declaration)] = GoplsCounts(usages, implementations)
             }
             entries[file.url] = Entry(stamp, counts)
+            // a restart that lands in the highlighting of the next test of the shared project is an assertion there (seen in the test run)
+            if (ApplicationManager.getApplication().isUnitTestMode) return
             ApplicationManager.getApplication().invokeLater({
                 if (file.isValid) PsiManager.getInstance(project).findFile(file)?.let { DaemonCodeAnalyzer.getInstance(project).restart(it) }
             }, project.disposed)

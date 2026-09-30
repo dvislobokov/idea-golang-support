@@ -76,6 +76,7 @@
         <!-- `type Name struct {...}`, `for i, x := range xs`: what a keyword can begin here, expanded as live templates -->
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoKeywordCompletionContributor"/>
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
+        <codeInsight.implementMethod language="Go" implementationClass="io.github.golangsupport.lang.GoImplementMethodsHandler"/>
         <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
         <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>
         <!-- a Cyrillic letter typed in code is a key of the Russian layout left on: the handlers of the platform are given its Latin
@@ -226,6 +227,7 @@
             <action id="Go.Generate.Tags" class="io.github.golangsupport.lang.GoGenerateStructTagsAction" text="Struct Tags..."/>
             <action id="Go.Generate.Implement" class="io.github.golangsupport.lang.GoImplementInterfaceAction" text="Implement Interface..."/>
             <action id="Go.Generate.Test" class="io.github.golangsupport.lang.GoGenerateTestAction" text="Test"/>
+            <action id="Go.Generate.TypeFromJson" class="io.github.golangsupport.lang.GoTypeFromJsonAction" text="Type from JSON..." description="Structs with json tags for a JSON document: the clipboard or a dialog"/>
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </group>
         <action id="Go.HelpPage" class="io.github.golangsupport.help.ShowGoHelpPageAction" text="Help Page" icon="AllIcons.Actions.Help"

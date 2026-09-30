@@ -44,6 +44,21 @@ class GoKeywordTemplatesTest {
     }
 
     @Test
+    fun theMissingMethodsOfAnInterfaceATypeHasBegunToImplement() {
+        val context = context("package store\n\ntype Order struct{}\n\nfunc (o *Order) Total() int { return 0 }\n\ntype Note struct{}\n\nfu|\n")!!
+        assertEquals(mapOf("Order" to setOf("Total")), context.methods)
+        val priced = GoKeywordTemplates.InterfaceInfo("Priced", listOf("Total" to "() int", "Currency" to "() string"))
+        val named = GoKeywordTemplates.InterfaceInfo("Named", listOf("Name" to "() string"))
+        val items = GoKeywordTemplates.interfaceItems(context, listOf(priced, named))
+        assertEquals(listOf("func (o *Order) Currency() string {...}"), items.map { it.label })
+        assertEquals("missing method of Priced", items.single().typeText)
+        assertTrue(items.single().template, items.single().template.startsWith("func (o *Order) Currency() string {\n"))
+        // Note has no method of any interface, and a body is not the place
+        assertTrue(GoKeywordTemplates.interfaceItems(context("package a\n\nfunc f() {\n\tfu|\n}\n")!!, listOf(priced)).isEmpty())
+        assertTrue("the JSON item is a type item", GoKeywordTemplates.items(context).any { it.action == GoKeywordTemplates.JSON && it.keyword == "type" })
+    }
+
+    @Test
     fun aTestFileOffersTests() {
         val labels = labels("package store\n\nfu|\n", test = true)
         assertTrue(labels.toString(), "func TestName(t *testing.T) {...}" in labels && "func BenchmarkName(b *testing.B) {...}" in labels && "func FuzzName(f *testing.F) {...}" in labels)

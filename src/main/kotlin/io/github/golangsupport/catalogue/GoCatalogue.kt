@@ -169,6 +169,9 @@ class GoSymbolIndex(modules: List<GoModuleSymbols>) {
     val size: Int get() = entries.size
     val packages: Int = modules.sumOf { it.packages.size }
 
+    /** Every symbol of one kind: the interfaces there are to implement. */
+    fun all(kind: GoDeclarationKind): List<Entry> = entries.filter { it.symbol.kind == kind }
+
     /** The packages by the names they are used by: of the project, of the standard library, of the modules; a shorter path before a longer one. */
     private val byName: Map<String, List<Pair<GoPackageSymbols, Set<String>>>> by lazy {
         modules.flatMap { module -> module.packages.map { (if (module.project) 0 else if (module.standard) 1 else 2) to it } }

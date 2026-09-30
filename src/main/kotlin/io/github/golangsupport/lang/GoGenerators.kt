@@ -118,12 +118,14 @@ object GoGenerators {
     }
 
     /** The methods of [iface] for [typeName], each with a body that panics: what Implement Interface writes. */
-    fun interfaceStubs(typeName: String, iface: GoDeclarationInfo, pointer: Boolean = true): String {
+    fun interfaceStubs(typeName: String, iface: GoDeclarationInfo, pointer: Boolean = true): String =
+        methodStubs(typeName, iface.children.filter { it.kind == GoDeclarationKind.INTERFACE_METHOD }.map { it.name to it.signature.orEmpty() }, pointer)
+
+    /** A stub per (name, signature) of [methods]. */
+    fun methodStubs(typeName: String, methods: List<Pair<String, String>>, pointer: Boolean = true): String {
         val r = receiverName(typeName)
         val receiver = if (pointer) "*$typeName" else typeName
-        return iface.children.filter { it.kind == GoDeclarationKind.INTERFACE_METHOD }.joinToString("\n") { method ->
-            "func ($r $receiver) ${method.name}${method.signature.orEmpty()} {\n\tpanic(\"not implemented\")\n}\n"
-        }
+        return methods.joinToString("\n") { (name, signature) -> "func ($r $receiver) $name$signature {\n\tpanic(\"not implemented\")\n}\n" }
     }
 
     /** The methods a type has already, so that Implement Interface adds only what is missing. */

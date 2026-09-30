@@ -14,11 +14,9 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiManager
 import com.intellij.ui.CheckBoxList
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.dsl.builder.panel
@@ -67,7 +65,9 @@ class GenerateContext(val project: Project, val editor: Editor, val file: GoFile
         val text = document.immutableCharSequence
         if (declaration == null) return text.length
         val methods = structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver == declaration.name }
-        val after = (methods + declaration).maxOf { it.range.endOffset }
+        // a type of a `type (...)` group: after the group, not inside it (seen live: a method written between the specs)
+        val group = structure.groups.firstOrNull { it.contains(declaration.range) }
+        val after = (methods.map { it.range.endOffset } + (group?.endOffset ?: declaration.range.endOffset)).max()
         val lineEnd = text.indexOf('\n', after).let { if (it < 0) text.length else it }
         return lineEnd.coerceAtMost(text.length)
     }
@@ -76,8 +76,15 @@ class GenerateContext(val project: Project, val editor: Editor, val file: GoFile
     fun insertAfter(declaration: GoDeclarationInfo?, code: String, title: String) {
         val at = insertionOffset(declaration)
         val text = document.immutableCharSequence
-        val prefix = if (at == 0 || text[at - 1] == '\n' && (at < 2 || text[at - 2] == '\n')) "" else if (at >= text.length && !text.endsWith("\n")) "\n\n" else "\n"
-        val block = "$prefix$code"
+        // one blank line between the declaration and the code: none when the line at [at] is blank already, one when [at] begins a blank line
+        val prefix = when {
+            at == 0 -> ""
+            text[at - 1] == '\n' -> if (at >= 2 && text[at - 2] == '\n') "" else "\n"
+            else -> "\n\n"
+        }
+        // the code ends its last line; when a blank line follows [at] already, its own does not add a second one
+        val blankLineFollows = text.startsWith("\n\n", at) || at == text.length - 1 && text[at] == '\n'
+        val block = prefix + if (code.endsWith("\n") && blankLineFollows) code.dropLast(1) else code
         WriteCommandAction.runWriteCommandAction(project, title, null, {
             document.insertString(at, block)
             PsiDocumentManager.getInstance(project).commitDocument(document)
@@ -165,40 +172,21 @@ class GoGenerateStructTagsAction : GoGenerateAction() {
     }
 }
 
-/** Implement Interface: the interfaces of the project by name, from the index; the missing methods of the chosen one are written after the type. */
+/** Implement Interface: the popup of [GoInterfaceChooser] for the type at the caret. */
 class GoImplementInterfaceAction : GoGenerateAction() {
     override fun isAvailable(context: GenerateContext): Boolean = context.typeAtCaret != null
     override fun perform(context: GenerateContext) = implement(context)
 
     companion object {
-        fun implement(context: GenerateContext) {
-            val type = context.typeAtCaret ?: return context.hint("Put the caret inside a type declaration")
-            val interfaces = interfaces(context.project, context.file)
-            if (interfaces.isEmpty()) return context.hint("No interfaces are found in the project")
-            JBPopupFactory.getInstance().createPopupChooserBuilder(interfaces)
-                .setTitle("Implement Interface")
-                .setRenderer(com.intellij.ui.SimpleListCellRenderer.create("") { it.title })
-                .setNamerForFiltering { it.title }
-                .setItemChosenCallback { chosen ->
-                    val existing = context.structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver == type.name }.map { it.name }.toSet()
-                    val missing = GoGenerators.missingMethods(chosen.declaration, existing)
-                    if (missing.children.isEmpty()) return@setItemChosenCallback context.hint("${type.name} has every method of ${chosen.declaration.name}")
-                    context.insertAfter(type, GoGenerators.interfaceStubs(type.name, missing), "Implement Interface")
-                }
-                .createPopup().showInBestPositionFor(context.editor)
-        }
+        fun implement(context: GenerateContext) = GoInterfaceChooser.show(context)
 
-        class Candidate(val declaration: GoDeclarationInfo, val fileName: String, val packageName: String?) {
-            val title: String get() = (if (packageName != null) "$packageName." else "") + declaration.name + "  " + fileName
-        }
+        class Candidate(val declaration: GoDeclarationInfo, val fileName: String, val packageName: String?)
 
-        /** Every interface with methods in the Go files of the project: the ones of this file first, then by name. */
+        /** Every interface with methods in the Go files of the project (the index knows names, not kinds): for the keyword templates. */
         fun interfaces(project: Project, current: GoFile): List<Candidate> {
             val result = ArrayList<Candidate>()
-            val scope = com.intellij.psi.search.GlobalSearchScope.projectScope(project)
-            // the index knows names, not kinds: every Go file of the project is looked at, once per Implement Interface
-            for (file in com.intellij.psi.search.FileTypeIndex.getFiles(GoFileType, scope)) {
-                val psi = PsiManager.getInstance(project).findFile(file) as? GoFile ?: continue
+            for (file in com.intellij.psi.search.FileTypeIndex.getFiles(GoFileType, com.intellij.psi.search.GlobalSearchScope.projectScope(project))) {
+                val psi = com.intellij.psi.PsiManager.getInstance(project).findFile(file) as? GoFile ?: continue
                 val structure = GoStructure.of(psi)
                 structure.declarations.filter { it.kind == GoDeclarationKind.INTERFACE && it.children.any { m -> m.kind == GoDeclarationKind.INTERFACE_METHOD } }
                     .forEach { result += Candidate(it, file.name, structure.packageName) }

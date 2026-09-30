@@ -52,7 +52,7 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 | 2а.3 | `if x > 0` → Ctrl+Shift+Enter | `if x > 0 {` и каретка на пустой строке внутри | да |
 | 2а.4 | Каретка в `type Order struct` → Alt+Insert | Constructor…, Getters…, Setters…, Getters and Setters…, String() Method…, Struct Tags…, Implement Interface…, Test | список — да; диалоги — **нет** |
 | 2а.5 | Alt+Insert → Struct Tags… → json + db, snake_case, omitempty | Теги у экспортируемых полей; у неэкспортируемых только db; существующие теги дополняются | **нет** |
-| 2а.6 | Alt+Insert → Implement Interface… → `Priced` на новом типе | Методы интерфейса с `panic("not implemented")`, только недостающие | **нет** |
+| 2а.6 | Alt+Insert → Implement Interface… → `Priced` на новом типе; Ctrl+I → галочка Non-project → `http.Handler` | Попап «Choose interface to implement:» с поиском; методы с `panic("not implemented")`, только недостающие; для `Handler` — `ServeHTTP(w http.ResponseWriter, r *http.Request)` и импорт `net/http` | робот |
 | 2а.7 | В функции `Total` → Alt+Enter → Generate test | `order_test.go` открылся, в конце `TestOrder_Total` с таблицей | **нет** |
 | 2а.8 | `os.Remove(p)` отдельной строкой → Alt+Enter → Handle error | `if err := os.Remove(p); err != nil { return err }` | да |
 | 2а.9 | `data, err := os.ReadFile(n)` → Alt+Enter → Add if err != nil check | Проверка с `return nil, err` | да |

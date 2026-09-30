@@ -54,6 +54,7 @@ class GoCatalogueService(private val project: Project) : Disposable {
         private set
 
     @Volatile private var dependencies: List<GoModuleSymbols> = emptyList()
+    @Volatile private var roots: List<Source> = emptyList()
     @Volatile private var ownPackages: List<GoPackageSymbols> = emptyList()
     @Volatile private var ownStamp = -1L
 
@@ -117,6 +118,7 @@ class GoCatalogueService(private val project: Project) : Disposable {
             override fun run(indicator: ProgressIndicator) {
                 val started = System.currentTimeMillis()
                 val sources = sources(modules)
+                roots = sources
                 indicator.isIndeterminate = false
                 var scanned = 0
                 val loaded = sources.mapIndexedNotNull { i, source ->
@@ -138,6 +140,19 @@ class GoCatalogueService(private val project: Project) : Disposable {
     private fun finished() {
         running.set(false)
         if (again.compareAndSet(true, false)) refreshLater()
+    }
+
+    /**
+     * The directory of the sources of a package the catalogue knows: under `GOROOT/src`, or under the module of the cache whose path
+     * begins the import path. Null for a package of the project and for one of a module go.mod does not require directly. Runs
+     * `go env` when the catalogue has not been built (the setting is off): not for EDT.
+     */
+    fun packageDirectory(importPath: String): File? {
+        val sources = roots.ifEmpty { sources(GoModulesService.getInstance(project).modules()).also { roots = it } }
+        val module = sources.filter { !it.standard && (importPath == it.modulePath || importPath.startsWith(it.modulePath + "/")) }.maxByOrNull { it.modulePath.length }
+        val directory = if (module != null) File(module.directory, importPath.removePrefix(module.modulePath).trimStart('/'))
+        else sources.firstOrNull { it.standard }?.let { File(it.directory, importPath) }
+        return directory?.takeIf { it.isDirectory }
     }
 
     private fun sources(modules: List<GoModule>): List<Source> {
