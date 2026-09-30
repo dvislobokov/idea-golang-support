@@ -5,9 +5,13 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
@@ -41,24 +45,37 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
         val install = JButton("Install").apply { addActionListener { runInstallation() } }
         val status = JBLabel().apply { foreground = UIUtil.getContextHelpForeground() }
 
-        /** The page lives in a modal dialog, which hides the Build tool window: the command runs here and its last line is shown. */
+        /**
+         * A progress in the status bar of the IDE, as every other long command of the plugin has (asked by the user), and the last
+         * line of the output here: the page is a modal dialog, which hides both the Build tool window and the status bar behind it.
+         */
         private fun runInstallation() {
             install.isEnabled = false
             status.text = "Running: go ${tool.installCommand().joinToString(" ")}"
-            ApplicationManager.getApplication().executeOnPooledThread {
-                val output = StringBuffer()
-                val exitCode = tool.installBlocking { output.append(it) }
-                ApplicationManager.getApplication().invokeLater({
-                    install.isEnabled = true
-                    if (exitCode == 0) refresh() else status.text = "Failed: " + output.lines().lastOrNull { it.isNotBlank() }.orEmpty().trim()
-                }, ModalityState.any())
-            }
+            val title = "${if (tool.find() == null) "Installing" else "Updating"} ${tool.command}"
+            ProgressManager.getInstance().run(object : Task.Backgroundable(project, title, true) {
+                override fun run(indicator: ProgressIndicator) {
+                    indicator.isIndeterminate = true
+                    indicator.text = "go " + tool.installCommand().joinToString(" ")
+                    val output = StringBuffer()
+                    val exitCode = tool.installBlocking { text ->
+                        output.append(text)
+                        text.lines().lastOrNull { it.isNotBlank() }?.let { indicator.text2 = it.trim() }
+                    }
+                    ApplicationManager.getApplication().invokeLater({
+                        install.isEnabled = true
+                        if (exitCode == 0) refresh() else status.text = "Failed: " + output.lines().lastOrNull { it.isNotBlank() }.orEmpty().trim()
+                    }, ModalityState.any())
+                }
+            })
         }
 
         fun refresh() {
             val found = tool.find()
             status.text = found?.path ?: "Not installed: go install ${tool.module}@latest"
             install.text = if (found == null) "Install" else "Update"
+            // the field holds an override and stays empty while the plugin finds the tool itself: what it found is the text of the empty field
+            (path.textField as? JBTextField)?.emptyText?.text = found?.path ?: "Not installed"
         }
     }
 
@@ -94,8 +111,10 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
             val executable = GoCli.findExecutable()
             val environment = GoEnvironment.get()
             val text = if (executable == null) "go is not found" else "$executable  —  Go ${environment.goVersion ?: "?"}, GOROOT ${environment.goRoot ?: "?"}"
+            val placeholder = executable ?: "Not found"
             ApplicationManager.getApplication().invokeLater({
                 goStatus.text = text
+                (goPath.textField as? JBTextField)?.emptyText?.text = placeholder
                 toolRows.values.forEach { it.refresh() }
             }, ModalityState.any())
         }

@@ -38,7 +38,21 @@ object GoCli {
     private const val TIMEOUT_MS = 10 * 60 * 1000
 
     /** The executable to run: the one from Settings | Tools | Go, otherwise the auto-detected one. */
-    fun findExecutable(): String? = GoSettings.getInstance().goPath.takeIf { it.isNotEmpty() && File(it).isFile } ?: detectExecutable()
+    fun findExecutable(): String? {
+        val configured = GoSettings.getInstance().goPath.takeIf { it.isNotEmpty() && File(it).isFile }
+        val found = configured ?: detectExecutable()
+        // on change only: this is asked before every command and by every tool lookup
+        if (LAST_GO.getAndSet(found ?: "-") != (found ?: "-")) {
+            if (found != null) GoLog.LOG.info("go: $found (${if (configured != null) "the path from the settings" else "found by the plugin"})")
+            else {
+                GoLog.LOG.warn("go is not found: not on the PATH of the IDE, not in GOROOT and not in the usual installation directories")
+                GoLog.describeSearchOnce()
+            }
+        }
+        return found
+    }
+
+    private val LAST_GO = java.util.concurrent.atomic.AtomicReference("")
 
     /** PATH first, then GOROOT and the default installation directories. */
     fun detectExecutable(): String? {

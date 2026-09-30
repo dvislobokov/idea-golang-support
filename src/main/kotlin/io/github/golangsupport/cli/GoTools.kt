@@ -9,15 +9,42 @@ import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.process.ProcessOutputTypes
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.SystemInfo
+import com.intellij.util.EnvironmentUtil
 import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.settings.GoSettingsConfigurable
 import java.io.File
+
+/**
+ * One logger for everything about finding Go and its tools: where the plugin looked and what it took. The questions from a user are
+ * always "it is installed, why does the plugin not see it" (seen live: a GOPATH under another home, tools on a PATH the IDE was not
+ * started with), and the log has to answer them without a debugger.
+ */
+object GoLog {
+    val LOG = logger<GoLog>()
+
+    private val DESCRIBED = java.util.concurrent.atomic.AtomicBoolean()
+
+    /**
+     * Once per session, when something was not found: the PATH the plugin searches. The IDE takes it from a login shell
+     * ([EnvironmentUtil]), which a desktop launcher does not give it and which is loaded a moment after the start; when that fails,
+     * the PATH is the one of the process and a tool the user has in the shell is invisible. The log is the only way to tell which.
+     */
+    fun describeSearchOnce() {
+        if (!DESCRIBED.compareAndSet(false, true)) return
+        val ide = EnvironmentUtil.getEnvironmentMap()["PATH"].orEmpty()
+        val process = System.getenv("PATH").orEmpty()
+        LOG.info("PATH of the IDE (${ide.split(File.pathSeparatorChar).size} entries, ${if (ide == process) "the same as the process, the shell environment may not be loaded" else "from the shell"}): $ide")
+        LOG.info("GOPATH=${System.getenv("GOPATH")}, GOBIN=${System.getenv("GOBIN")}, HOME=${System.getProperty("user.home")}")
+    }
+}
 
 /** What `go env -json` says: where Go lives and where `go install` puts the tools. */
 class GoEnvironment(val values: Map<String, String>) {
@@ -42,11 +69,25 @@ class GoEnvironment(val values: Map<String, String>) {
 
         /** Of the `go` the plugin uses; asked once per executable. Blocks on the first call: not for EDT. */
         fun get(): GoEnvironment {
-            val executable = GoCli.findExecutable() ?: return EMPTY
+            val executable = GoCli.findExecutable()
+            if (executable == null) {
+                GoLog.LOG.info("go env: no go executable, nothing to ask")
+                return EMPTY
+            }
             cached?.takeIf { it.first == executable }?.let { return it.second }
-            val output = runCatching { GoCli.execute(GoCli.commandLine(null, "env", "-json"), 15_000) }.getOrNull()
+            val started = System.currentTimeMillis()
+            val output = runCatching { GoCli.execute(GoCli.commandLine(null, "env", "-json"), 15_000) }
+                .onFailure { GoLog.LOG.info("go env has failed to start: ${it.message}") }.getOrNull()
             val environment = if (output != null && output.exitCode == 0) parse(output.stdout) else EMPTY
-            if (environment !== EMPTY) cached = executable to environment
+            if (environment !== EMPTY) {
+                cached = executable to environment
+                GoLog.LOG.info(
+                    "go env of $executable in ${System.currentTimeMillis() - started} ms: GOVERSION=${environment.goVersion}, GOROOT=${environment.goRoot}, " +
+                        "GOPATH=${environment.goPath}, GOBIN=${environment.values["GOBIN"]}, tools are looked for in ${environment.binDirectory}",
+                )
+            } else {
+                GoLog.LOG.warn("go env of $executable gave nothing: exit code ${output?.exitCode}, ${output?.stderr?.lines()?.firstOrNull { it.isNotBlank() }.orEmpty()}")
+            }
             return environment
         }
 
@@ -92,12 +133,38 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
     /** The path set in the settings, when the file is there. */
     fun configured(): File? = GoSettings.getInstance().toolPath(command).takeIf { it.isNotEmpty() }?.let(::File)?.takeIf { it.isFile }
 
+    /**
+     * PATH (the one the IDE was started with, which a desktop launcher does not take from the shell profile), then GOBIN / GOPATH/bin,
+     * then the places `go install` and the package managers use. [GoEnvironment.quick] only guesses GOPATH until `go env` has been read,
+     * so a tool may be "not installed" for the first seconds of a session — [GoEnvironment.whenKnown] is how the callers wait for that.
+     */
     fun detect(): File? {
         val name = GoCli.executableName(command)
-        return PathEnvironmentVariableUtil.findInPath(name) ?: GoEnvironment.quick().binDirectory?.let { File(it, name) }?.takeIf { it.isFile }
+        PathEnvironmentVariableUtil.findInPath(name)?.let { return it }
+        return searchDirectories().map { File(it, name) }.firstOrNull { it.isFile }
     }
 
-    fun find(): File? = configured() ?: detect()
+    /** Where a tool is looked for besides PATH, in order; also what the log names when nothing is found. */
+    fun searchDirectories(): List<File> {
+        val home = System.getProperty("user.home")
+        val environment = GoEnvironment.quick()
+        val wellKnown = if (SystemInfo.isWindows) listOf("$home\\go\\bin") else listOf("$home/go/bin", "$home/.local/bin", "/usr/local/bin", "/opt/homebrew/bin", "/usr/local/go/bin")
+        return (listOfNotNull(environment.binDirectory) + wellKnown.map(::File)).distinctBy { it.path }
+    }
+
+    fun find(): File? {
+        val found = configured() ?: detect()
+        // on change only: find() is asked on every file opened, on every annotator run and before every command
+        val previous = LAST_FOUND.put(this, found?.path ?: NOT_FOUND)
+        if (previous != (found?.path ?: NOT_FOUND)) {
+            if (found != null) GoLog.LOG.info("$command: $found (${if (configured() != null) "the path from the settings" else "found by the plugin"})")
+            else {
+                GoLog.LOG.info("$command is not found: not on the PATH of the IDE and not in ${searchDirectories().joinToString(", ")}; `go env` read: ${GoEnvironment.isKnown()}")
+                GoLog.describeSearchOnce()
+            }
+        }
+        return found
+    }
 
     fun installCommand(): List<String> = listOf("install", "$module@latest")
 
@@ -129,6 +196,11 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
     }
 
     companion object {
+        private const val NOT_FOUND = "-"
+
+        /** What [find] gave last for each tool, so that the log has a line when it changes and not on every call. */
+        private val LAST_FOUND = java.util.concurrent.ConcurrentHashMap<GoTool, String>()
+
         /** Installs [tools] one after another in one background task; the language server, when among them, is restarted afterwards by its module. */
         fun installAll(project: Project, tools: List<GoTool>, onSuccess: () -> Unit = {}) {
             val title = "Installing " + tools.joinToString(", ") { it.command }
