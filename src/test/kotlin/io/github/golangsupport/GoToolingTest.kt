@@ -139,8 +139,18 @@ class GoToolingTest {
         val output = run["output"] as String
         assertTrue("__debug_bin" in output)
         assertFalse(output.startsWith("C:/app/cmd"))
+        // the configuration can say where instead: the binary goes there, still under a unique name, and is removed after the session all the same
+        val inProject = GoLaunchArguments.build(false, "C:/app/cmd", emptyList(), null, false, null, emptyMap(), emptyList(), binaryDirectory = "C:/app/build")["output"] as String
+        assertTrue(inProject, inProject.replace('\\', '/').startsWith("C:/app/build/__debug_bin"))
+        // the console of the session tells what delve builds and runs, the way GoLand shows its commands
+        val described = GoLaunchArguments.describe(run, attach = false)
+        assertEquals("go build -gcflags=\"all=-N -l\" -tags=x -race -o ${if (' ' in output) "\"$output\"" else output} C:/app/cmd", described[0])
+        assertEquals("run: C:/app/cmd -v", described[1])
+        assertEquals("env: A=1", described[2])
+        assertEquals(listOf("attach to process 42"), GoLaunchArguments.describe(GoLaunchArguments.attach(42), attach = true))
         val test = GoLaunchArguments.build(true, "C:/app/store", emptyList(), "^TestA$", false, null, emptyMap(), emptyList())
         assertEquals("test", test["mode"])
+        assertTrue(GoLaunchArguments.describe(test, attach = false)[0].startsWith("go test -c -gcflags=\"all=-N -l\" -o "))
         assertEquals(listOf("-test.v", "-test.run", "^TestA$"), test["args"])
         // a binary, a core dump, a process on the remote machine: nothing is built, the paths are mapped
         val substitutions = GoLaunchArguments.substitutions("C:/src/app=/go/src/app\n# a comment\nbroken line\n=/x\n")

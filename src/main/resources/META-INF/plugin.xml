@@ -140,8 +140,16 @@
         <projectConfigurable parentId="tools" id="io.github.golangsupport.settings" displayName="Go"
                              instance="io.github.golangsupport.settings.GoSettingsConfigurable"/>
         <!-- every setting of the installed gopls, from `gopls api-json` -->
-        <projectConfigurable parentId="io.github.golangsupport.settings" id="io.github.golangsupport.settings.gopls" displayName="gopls"
+        <projectConfigurable parentId="io.github.golangsupport.settings" id="io.github.golangsupport.settings.languageServer" displayName="Language Server"
+                             instance="io.github.golangsupport.settings.GoLanguageServerConfigurable"/>
+        <projectConfigurable parentId="io.github.golangsupport.settings.languageServer" id="io.github.golangsupport.settings.gopls" displayName="gopls"
                              instance="io.github.golangsupport.settings.GoplsSettingsConfigurable"/>
+        <projectConfigurable parentId="io.github.golangsupport.settings" id="io.github.golangsupport.settings.debugger" displayName="Debugger"
+                             instance="io.github.golangsupport.settings.GoDebuggerConfigurable"/>
+        <projectConfigurable parentId="io.github.golangsupport.settings" id="io.github.golangsupport.settings.editor" displayName="Editor and Completion"
+                             instance="io.github.golangsupport.settings.GoEditorConfigurable"/>
+        <projectConfigurable parentId="io.github.golangsupport.settings" id="io.github.golangsupport.settings.codeQuality" displayName="Code Quality"
+                             instance="io.github.golangsupport.settings.GoCodeQualityConfigurable"/>
 
         <iconMapper mappingFile="GoIconMappings.json"/>
         <!-- the debugger: the plugin's own DAP client to `dlv dap` on the XDebugger API, which every IDE has (the DAP module of the platform,
@@ -195,6 +203,8 @@
             <action id="Go.Generate" class="io.github.golangsupport.build.GoGenerateAction" text="Generate" description="go generate ./..."/>
             <action id="Go.RebuildCatalogue" class="io.github.golangsupport.catalogue.GoRebuildCatalogueAction" text="Read Packages Again"
                     description="Read the exported names of the standard library and of the modules of go.mod from their sources again: what completion offers by a name"/>
+            <action id="Go.Reanalyze" class="io.github.golangsupport.build.GoReanalyzeAction" text="Reanalyze Project"
+                    description="Index the Go files again, restart the language server, read the packages again and highlight the open files anew, without a restart of the IDE"/>
             <separator/>
             <group id="Go.Modules" text="Modules" popup="true" icon="/icons/goMod.svg">
                 <action id="Go.ModTidy" class="io.github.golangsupport.build.GoModTidyAction" text="Tidy" description="go mod tidy"/>

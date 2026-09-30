@@ -5,6 +5,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.run.DlvDap
 import java.io.File
 import java.io.InputStream
@@ -25,6 +26,12 @@ interface DelveAdapter {
     val input: InputStream
     val output: OutputStream
 
+    /** What was started or connected to, for the first line of the console of the session. */
+    val description: String
+
+    /** The directory the adapter runs in: where the paths of the compiler are relative to; null for a remote one. */
+    val workDirectory: String? get() = null
+
     /** [graceMs]: a moment for the server to exit by itself after `disconnect`, before it is killed (nothing to kill for a remote one). */
     fun stop(graceMs: Long = 1500)
 }
@@ -35,6 +42,7 @@ interface DelveAdapter {
  * the program are its paths (`substitutePath` maps them onto the sources here).
  */
 class RemoteDelve(host: String, port: Int) : DelveAdapter {
+    override val description: String = "dlv dap at $host:$port"
     private val socket: Socket = try {
         Socket(host, port).apply { tcpNoDelay = true }
     } catch (e: Exception) {
@@ -51,6 +59,8 @@ class RemoteDelve(host: String, port: Int) : DelveAdapter {
 
 class DelveProcess(commandLine: GeneralCommandLine, log: File?) : DelveAdapter {
     private val process: Process = commandLine.withRedirectErrorStream(true).createProcess()
+    override val workDirectory: String? = commandLine.workDirectory?.path
+    override val description: String = GoCli.displayString(commandLine) + (workDirectory?.let { " (in $it)" } ?: "")
     private val socket: Socket
 
     override val input: InputStream get() = socket.getInputStream()

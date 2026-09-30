@@ -53,12 +53,17 @@ class BuildViewCommandOutput(private val project: Project, private val title: St
     private fun view(): BuildViewManager = project.service()
 
     override fun commandStarted(command: GeneralCommandLine) {
-        if (project.isDisposed) return
-        workDirectory = command.workDirectory?.path
         // what vet finds does not stop a build
         val verb = command.parametersList.list.firstOrNull()
-        kind = if (verb == "vet") MessageEvent.Kind.WARNING else MessageEvent.Kind.ERROR
-        collectsProblems = verb == "build" || verb == "vet"
+        started(GoCli.displayString(command), command.workDirectory?.path, isVet = verb == "vet", problems = verb == "build" || verb == "vet")
+    }
+
+    /** A command that was not run by [GoCli] itself: the build delve does for a debug session, told by its line and its directory. */
+    fun started(display: String, directory: String?, isVet: Boolean = false, problems: Boolean = false) {
+        if (project.isDisposed) return
+        workDirectory = directory
+        kind = if (isVet) MessageEvent.Kind.WARNING else MessageEvent.Kind.ERROR
+        collectsProblems = problems
         if (collectsProblems) GoBuildProblems.getInstance(project).clear(workDirectory)
         if (!started) {
             started = true
@@ -68,7 +73,7 @@ class BuildViewCommandOutput(private val project: Project, private val title: St
             }
             view().onEvent(buildId, StartBuildEventImpl(descriptor, "running..."))
         }
-        view().onEvent(buildId, OutputBuildEventImpl(buildId, "> ${GoCli.displayString(command)}\n", true))
+        view().onEvent(buildId, OutputBuildEventImpl(buildId, "> $display\n", true))
     }
 
     override fun text(text: String, isError: Boolean) {

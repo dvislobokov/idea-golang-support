@@ -8,6 +8,20 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.service
 import com.intellij.util.execution.ParametersListUtil
 
+/** Where delve builds the binary of a debug session. */
+enum class GoDebugBinaryLocation(val title: String) {
+    /** The way GoLand does it: nothing is left in the project. */
+    TEMP("System temp directory"),
+
+    /** The way `dlv debug` does it: next to the sources, `__debug_bin...` in the directory of the package. */
+    PACKAGE("Package directory"),
+
+    /** [GoSettings.debugBinaryDirectory]; a relative path is from the directory of the package. */
+    CUSTOM("Custom directory");
+
+    override fun toString(): String = title
+}
+
 enum class GoFormatter(val title: String) {
     GOFMT("gofmt"),
     GOIMPORTS("goimports"),
@@ -98,6 +112,11 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** On by default while the debugger is young: a session that went wrong cannot be logged afterwards. */
         var debugAdapterLog by property(true)
+
+        var debugBinaryLocation by enum(GoDebugBinaryLocation.TEMP)
+
+        /** [GoDebugBinaryLocation.CUSTOM]: the directory, a relative path is from the package directory. */
+        var debugBinaryDirectory by string("")
     }
 
     var debugShowGlobalVariables: Boolean
@@ -119,6 +138,21 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var debugAdapterLog: Boolean
         get() = state.debugAdapterLog
         set(value) { state.debugAdapterLog = value }
+
+    var debugBinaryLocation: GoDebugBinaryLocation
+        get() = state.debugBinaryLocation
+        set(value) { state.debugBinaryLocation = value }
+
+    var debugBinaryDirectory: String
+        get() = state.debugBinaryDirectory.orEmpty()
+        set(value) { state.debugBinaryDirectory = value.trim() }
+
+    /** The directory delve is to build the binary of a session into, for the package in [packageDirectory]; null is the temp directory of the system. */
+    fun debugBinaryDirectory(packageDirectory: String): String? = when (debugBinaryLocation) {
+        GoDebugBinaryLocation.TEMP -> null
+        GoDebugBinaryLocation.PACKAGE -> packageDirectory
+        GoDebugBinaryLocation.CUSTOM -> debugBinaryDirectory.takeIf { it.isNotBlank() }?.let { java.io.File(packageDirectory).resolve(it).path } ?: packageDirectory
+    }
 
     var goPath: String
         get() = state.goPath.orEmpty()

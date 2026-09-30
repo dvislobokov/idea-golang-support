@@ -11,20 +11,22 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.impl.LoadTextUtil
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiManager
-import com.intellij.psi.search.FileTypeIndex
-import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import io.github.golangsupport.catalogue.GoCatalogueScanner
 import io.github.golangsupport.catalogue.GoCatalogueService
 import io.github.golangsupport.catalogue.GoInterfaceSources
 import io.github.golangsupport.mod.GoModulesService
+import io.github.golangsupport.settings.GoSettings
 import javax.swing.JList
 import javax.swing.ListCellRenderer
 
@@ -62,11 +64,27 @@ object GoInterfaceChooser {
     fun show(context: GenerateContext) {
         val type = context.typeAtCaret ?: return context.hint("Put the caret inside a type declaration")
         val own = GoInterfaceSources.importPathOf(context.project, context.file)
-        val model = Model(context, own, existingMethods(context, type.name), type.name)
+        val existing = existingMethods(context, type.name)
+        // The candidates are collected before the popup, under a progress of their own: the popup computes its list as a read task with
+        // write action priority and starts over on every write action, so a long scan under it never finished on a big project (seen
+        // live: an empty popup, with "Searching..." at the bottom as the only sign). The index is not asked: nothing to wait for while it is built.
+        var collected: Candidates? = null
+        val finished = ProgressManager.getInstance().runProcessWithProgressSynchronously({
+            collected = collect(context, own, existing, type.name, ProgressManager.getInstance().progressIndicator)
+        }, "Collecting Interfaces", true, context.project)
+        if (!finished) return
+        val candidates = collected ?: return
+        val model = Model(candidates)
         val popup = ChooseByNamePopup.createPopup(context.project, model, context.file)
         popup.setShowListForEmptyPattern(true)
         popup.setSearchInAnyPlace(true)
-        popup.setAdText("Non-project: the standard library and the modules go.mod requires")
+        popup.setAdText(
+            when {
+                !GoSettings.getInstance().completionCatalogue -> "Non-project interfaces need the completion catalogue (Settings | Tools | Go)"
+                candidates.catalogue.isEmpty() -> "The catalogue of the standard library and the modules is still being read"
+                else -> "Non-project: the standard library and the modules go.mod requires"
+            }
+        )
         // Ctrl+I opens the popup and, in it, ticks the box: as in GoLand
         ActionManager.getInstance().getAction("ImplementMethods")?.shortcutSet?.let { popup.setCheckBoxShortcut(it) }
         popup.invoke(object : ChooseByNamePopupComponent.Callback() {
@@ -111,22 +129,45 @@ object GoInterfaceChooser {
         }, context.file)
     }
 
-    private class Model(val context: GenerateContext, val own: String?, val existing: Set<String>, val typeName: String) : ChooseByNameModel {
-        private val projectOnes: List<GoInterfaceCandidate> by lazy { ReadAction.compute<List<GoInterfaceCandidate>, RuntimeException> { projectInterfaces() } }
-        private val catalogueOnes: List<GoInterfaceCandidate> by lazy { ReadAction.compute<List<GoInterfaceCandidate>, RuntimeException> { catalogueInterfaces() } }
-        private fun candidates(nonProject: Boolean): List<GoInterfaceCandidate> = if (nonProject) projectOnes + catalogueOnes else projectOnes
+    private class Candidates(val project: List<GoInterfaceCandidate>, val catalogue: List<GoInterfaceCandidate>) {
+        fun of(nonProject: Boolean): List<GoInterfaceCandidate> = if (nonProject) project + catalogue else project
+    }
 
-        /** Every interface of the Go files of the project (the index knows names, not kinds), with its own methods counted. */
-        private fun projectInterfaces(): List<GoInterfaceCandidate> {
-            val result = ArrayList<GoInterfaceCandidate>()
-            val modules = GoModulesService.getInstance(context.project)
-            for (file in FileTypeIndex.getFiles(GoFileType, GlobalSearchScope.projectScope(context.project))) {
-                val psi = PsiManager.getInstance(context.project).findFile(file) as? GoFile ?: continue
-                val structure = GoStructure.of(psi)
-                val text = psi.viewProvider.contents
-                val directory = file.parent ?: continue
-                val importPath = modules.moduleOf(directory)?.importPath(directory)
-                if (importPath != null && !GoCatalogueScanner.isVisible(importPath, own)) continue
+    private fun collect(context: GenerateContext, own: String?, existing: Set<String>, typeName: String, indicator: ProgressIndicator?): Candidates {
+        indicator?.text = "Looking for Go files"
+        val files = ReadAction.compute<List<VirtualFile>, RuntimeException> {
+            val result = ArrayList<VirtualFile>()
+            ProjectFileIndex.getInstance(context.project).iterateContent { file -> result.add(file); true }
+            result.filter { !it.isDirectory && it.extension == GoFileType.defaultExtension }
+        }
+        val project = projectInterfaces(context, files, own, existing, typeName, indicator)
+        indicator?.text = "Reading the catalogue"
+        indicator?.text2 = ""
+        val catalogue = ReadAction.compute<List<GoInterfaceCandidate>, RuntimeException> { catalogueInterfaces(context, own) }
+        return Candidates(project, catalogue)
+    }
+
+    /**
+     * Every interface of the Go files of the project, with its own methods counted. The files are scanned by the plugin's scanner from
+     * their text, one read action each: the index knows names and not kinds, and PSI for every file of the project is memory for nothing.
+     */
+    private fun projectInterfaces(context: GenerateContext, files: List<VirtualFile>, own: String?, existing: Set<String>, typeName: String, indicator: ProgressIndicator?): List<GoInterfaceCandidate> {
+        val result = ArrayList<GoInterfaceCandidate>()
+        val modules = GoModulesService.getInstance(context.project)
+        val documents = FileDocumentManager.getInstance()
+        indicator?.isIndeterminate = false
+        for ((i, file) in files.withIndex()) {
+            indicator?.checkCanceled()
+            indicator?.fraction = i.toDouble() / files.size
+            indicator?.text = "Scanning Go files"
+            indicator?.text2 = file.path
+            val directory = file.parent ?: continue
+            val importPath = modules.moduleOf(directory)?.importPath(directory)
+            if (importPath != null && !GoCatalogueScanner.isVisible(importPath, own)) continue
+            ReadAction.run<RuntimeException> {
+                if (!file.isValid) return@run
+                val text = documents.getCachedDocument(file)?.immutableCharSequence ?: LoadTextUtil.loadText(file)
+                val structure = GoDeclarations.scan(text)
                 for (declaration in structure.declarations) {
                     if (declaration.kind != GoDeclarationKind.INTERFACE || declaration.body == null) continue
                     if (declaration.name == typeName && file == context.file.virtualFile) continue
@@ -136,13 +177,17 @@ object GoInterfaceChooser {
                     result += GoInterfaceCandidate(declaration.name, importPath, structure.packageName ?: directory.name, directory, body.methods.size, body.embedded.isNotEmpty(), implemented)
                 }
             }
-            return result.sortedWith(compareBy({ it.directory != context.file.virtualFile?.parent }, { it.name }))
         }
+        return result.sortedWith(compareBy({ it.directory != context.file.virtualFile?.parent }, { it.name }))
+    }
 
-        private fun catalogueInterfaces(): List<GoInterfaceCandidate> =
-            GoCatalogueService.getInstance(context.project).current().all(GoDeclarationKind.INTERFACE)
-                .filter { !it.project && GoCatalogueScanner.isVisible(it.pack.importPath, own) }
-                .map { GoInterfaceCandidate(it.symbol.name, it.pack.importPath, it.pack.name, null, null, false, false) }
+    private fun catalogueInterfaces(context: GenerateContext, own: String?): List<GoInterfaceCandidate> =
+        GoCatalogueService.getInstance(context.project).current().all(GoDeclarationKind.INTERFACE)
+            .filter { !it.project && GoCatalogueScanner.isVisible(it.pack.importPath, own) }
+            .map { GoInterfaceCandidate(it.symbol.name, it.pack.importPath, it.pack.name, null, null, false, false) }
+
+    private class Model(val candidates: Candidates) : ChooseByNameModel {
+        private fun candidates(nonProject: Boolean): List<GoInterfaceCandidate> = candidates.of(nonProject)
 
         override fun getPromptText(): String = "Choose interface to implement:"
         override fun getNotInMessage(): String = "No interfaces of the project match"

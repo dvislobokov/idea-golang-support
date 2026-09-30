@@ -4,18 +4,14 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.dsl.builder.AlignX
-import com.intellij.ui.dsl.builder.bindIntText
-import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.builder.toNullableProperty
 import com.intellij.util.ui.UIUtil
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
@@ -32,9 +28,8 @@ interface GoLanguageServerControl {
     }
 }
 
-/** Settings | Tools | Go. Only what has an implementation behind it. */
-class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("Go") {
-    private val settings get() = GoSettings.getInstance()
+/** Settings | Tools | Go: the toolchain and the tools; the areas of the plugin are the pages under it ([GoSettingsPage]). Only what has an implementation behind it. */
+class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
     private val goPath = TextFieldWithBrowseButton()
     private val goStatus = JBLabel().apply { foreground = UIUtil.getContextHelpForeground() }
     private val toolRows = GoTool.entries.associateWith { ToolRow(it) }
@@ -80,90 +75,6 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                 row { checkBox("Create run configurations for the programs of the project").bindSelected(settings::createRunConfigurations).comment("One per directory with a <code>func main</code>, when the project is opened; a deleted one does not come back") }
                 row("Test arguments:") { textField().align(AlignX.FILL).bindText(settings::testArguments).comment("Added to every <code>go test</code>: <code>-race -count=1</code>") }
             }
-            group("Language Server (gopls)") {
-                row { checkBox("Use gopls for errors, completion, navigation and refactorings").bindSelected(settings::languageServerEnabled) }
-                row { checkBox("Staticcheck analyzers").bindSelected(settings::goplsStaticcheck) }
-                row { checkBox("Format with gofumpt, a stricter gofmt").bindSelected(settings::goplsGofumpt) }
-                row { checkBox("Inlay hints: parameter names, types of variables, values of constants").bindSelected(settings::goplsInlayHints) }
-                row { checkBox("Highlight the usages of the name at the caret and the exit points of a function").bindSelected(settings::goplsHighlightUsages).comment("Reads and writes in their colours; on <code>func</code> or <code>return</code> — every <code>return</code> of the function") }
-                row { checkBox("Log every message of the protocol").bindSelected(settings::goplsTrace).comment("<code>-rpc.trace</code> in the log window of gopls (menu Go | gopls | Show Log); big") }
-                row { checkBox("Serve the debug pages of gopls").bindSelected(settings::goplsDebugPages).comment("Sessions, memory, metrics and the RPC log of the server in a browser (menu Go | gopls | Open Debug Pages)") }
-                row { comment("Every other setting of the server: the <b>gopls</b> page below this one. What is set there wins over these switches") }
-            }
-            group("Debugger (delve)") {
-                row { checkBox("Show global variables of the package").bindSelected(settings::debugShowGlobalVariables) }
-                row { checkBox("Hide system goroutines").bindSelected(settings::debugHideSystemGoroutines).comment("The ones of the runtime: garbage collector, finalizers, the scheduler") }
-                row("Stack trace depth:") { intTextField(1..1000).bindIntText(settings::debugStackTraceDepth) }
-                row {
-                    checkBox("Debug programs of a Go version this delve does not support").bindSelected(settings::debugAnyGoVersion)
-                        .comment("<code>--check-go-version=false</code>. Usually works; the dependable fix is a delve that matches the toolchain")
-                }
-                row { checkBox("Write the log of delve for every debug session").bindSelected(settings::debugAdapterLog).comment("Menu Go | Show Debugger Logs") }
-            }
-            group("Editor") {
-                row {
-                    checkBox("Start a doc comment with the name of the declaration").bindSelected(settings::docCommentNames)
-                        .comment("<code>//</code> typed on an empty line right above <code>func</code>, <code>type</code>, <code>var</code> or <code>const</code> becomes <code>// Name </code>")
-                }
-                row {
-                    checkBox("Show the actions of gopls in the list of Alt+Enter").bindSelected(settings::goplsActionsInMenu)
-                        .comment("Extract variable, Inline call, Invert if, Add test and others, for the caret or the selection. Off: they are behind <b>Refactorings and actions of gopls...</b>")
-                }
-                row {
-                    checkBox("Type Latin characters in code when the keyboard layout is Russian").bindSelected(settings::latinInCode)
-                        .comment("<code>аьеюЗкштедт</code> is typed as <code>fmt.Println</code>. Strings, runes and comments keep what is typed")
-                }
-                row {
-                    checkBox("Suggest the idiomatic next line as grey text (Tab to accept)").bindSelected(settings::inlineIdioms)
-                        .comment("<code>if err != nil { return ... }</code> after an assigned error, with the return values of the function and the error wrapped where the file wraps its errors; <code>defer cancel()</code>, <code>defer mu.Unlock()</code>, <code>defer f.Close()</code>, <code>defer span.End()</code> after what needs them; the loop of a scanner and the error after it; the answer of an HTTP handler and the status of a gRPC method; the receiver after <code>func (</code>; the tag of a field as the fields above have it")
-                }
-            }
-            group("Completion") {
-                row {
-                    checkBox("Offer the values of a return statement as one item").bindSelected(settings::completeReturnValues)
-                        .comment("<code>nil, err</code> after <code>return</code> inside <code>if err != nil</code>: the zero values of the results of the function, and the error")
-                }
-                row {
-                    checkBox("Names that begin with what is typed go first").bindSelected(settings::completionPrefixFirst)
-                        .comment("gopls matches fuzzily and orders by its own score: <code>ni</code> gives <code>net.IP</code> above <code>nil</code>. Off: the order of gopls")
-                }
-                row {
-                    checkBox("Show the values of the expected type in bold").bindSelected(settings::completionByType)
-                        .comment("An argument of a call, a value of <code>return</code>, of a typed <code>var</code>. Smart completion (Ctrl+Shift+Space) leaves only such values. Needs gopls")
-                }
-                row {
-                    checkBox("Offer functions and types of packages by their names").bindSelected(settings::completionCatalogue)
-                        .comment("<code>Printl</code> gives <code>fmt.Println</code>, with the import: the standard library and the modules go.mod requires directly. Read once for a version, works without gopls")
-                }
-                row {
-                    checkBox("Offer packages that are not imported").bindSelected(settings::completionUnimportedPackages)
-                        .comment("By the name of the package: <code>htt</code> gives <code>http</code> of <code>net/http</code>, and the import is written when it is chosen. Needs gopls")
-                }
-                row {
-                    checkBox("Write the braces of a literal after a struct type").bindSelected(settings::completionStructBraces)
-                        .comment("Where a value is expected: <code>c := http.Client{}</code>, caret between the braces, ready for Fill All Fields. Needs gopls")
-                }
-                row {
-                    checkBox("Offer what a keyword can begin").bindSelected(settings::completionKeywordTemplates)
-                        .comment("<code>ty</code> at the top of a file gives <code>type Name struct {...}</code>, <code>fo</code> in a body gives <code>for i, x := range xs</code> for the slices in sight; Tab walks the stops. Works without gopls")
-                }
-                row {
-                    checkBox("Offer HTTP status constants and time layouts").bindSelected(settings::completionValues)
-                        .comment("<code>404</code> in <code>WriteHeader</code>, <code>http.Error</code> or a comparison with <code>StatusCode</code> gives <code>http.StatusNotFound</code>; inside the string of <code>time.Parse</code> or <code>Format</code> — the layouts and their parts")
-                }
-                row {
-                    checkBox("Offer the arguments of a completed call").bindSelected(settings::completionArguments)
-                        .comment("The parameters are shown above the caret and the list opens for the first argument, then after every <code>, </code>. Needs gopls")
-                }
-            }
-            group("Code Quality") {
-                row("Reformat Code with:") { comboBox(GoFormatter.entries).bindItem(settings::formatter.toNullableProperty()) }
-                row { checkBox("Format Go files on save").bindSelected(settings::formatOnSave).comment("With the formatter above; goimports also adds and removes imports. A file with a syntax error is saved as it is") }
-                row {
-                    checkBox("Show golangci-lint warnings in the editor").bindSelected(settings::lintOnTheFly)
-                        .comment("For saved files, with the <code>.golangci.yml</code> of the repository; the linter is run for the package of the file")
-                }
-            }
             group("Tools") {
                 for (row in toolRows.values) {
                     row(row.tool.command + ":") {
@@ -173,6 +84,7 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
                     row("") { cell(row.status) }
                 }
             }
+            row { comment("The language server, the debugger, the editor and completion, formatting and the linter: the pages under this one") }
         }
     }
 
@@ -196,7 +108,6 @@ class GoSettingsConfigurable(private val project: Project) : BoundConfigurable("
         settings.goPath = goPath.text
         toolRows.values.forEach { settings.setToolPath(it.tool.command, it.path.text) }
         refreshGoStatus()
-        GoLanguageServerControl.restartAll(project)
     }
 
     override fun reset() {

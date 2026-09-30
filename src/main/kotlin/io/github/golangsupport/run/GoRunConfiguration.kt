@@ -245,6 +245,8 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
                 test = options.command == GoCommand.TEST, program = if (isFileTarget()) options.target.orEmpty() else packageDirectory(),
                 programArguments = programArguments, testPattern = options.testPattern, benchmark = options.benchmark,
                 workingDirectory = options.workingDirectory, environment = options.environment, buildFlags = goArgumentList(), settings = settings,
+                // created here: go build does not make the directory of -o
+                binaryDirectory = settings.debugBinaryDirectory(packageDirectory())?.also { File(it).mkdirs() },
             )
         }
     }
@@ -257,14 +259,15 @@ class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
 object GoLaunchArguments {
     fun build(
         test: Boolean, program: String, programArguments: List<String>, testPattern: String?, benchmark: Boolean,
-        workingDirectory: String?, environment: Map<String, String>, buildFlags: List<String>, settings: GoSettings? = null,
+        workingDirectory: String?, environment: Map<String, String>, buildFlags: List<String>, settings: GoSettings? = null, binaryDirectory: String? = null,
     ): Map<String, Any> = buildMap {
         put("mode", if (test) "test" else "debug")
         // what the program prints comes as `output` events of the protocol, not from the streams of the delve process
         put("outputMode", "remote")
         // delve builds the binary itself; by default as __debug_bin... inside the package directory. Put it in the temp directory
-        // instead, the way GoLand does, so nothing is left in the project; GoDebugProcess removes it when the session ends.
-        put("output", debugBinaryPath())
+        // instead, the way GoLand does, so nothing is left in the project, or where the configuration says (a temp directory on another
+        // drive or with noexec is not where a program runs from); GoDebugProcess removes it when the session ends either way.
+        put("output", debugBinaryPath(binaryDirectory))
         if (settings != null) {
             put("showGlobalVariables", settings.debugShowGlobalVariables)
             put("hideSystemGoroutines", settings.debugHideSystemGoroutines)
@@ -311,6 +314,33 @@ object GoLaunchArguments {
         if (substitutions.isNotEmpty()) put("substitutePath", substitutions)
     }
 
+    /**
+     * The request as lines for the console of the session, the way GoLand shows what it runs: the build delve does (`go build
+     * -gcflags="all=-N -l" ...`, the flags delve adds itself) and the program it starts with its arguments, or the process it attaches to.
+     */
+    fun describe(arguments: Map<String, Any?>, attach: Boolean): List<String> {
+        val mode = arguments["mode"] as? String
+        val program = arguments["program"] as? String
+        val args = (arguments["args"] as? List<*>)?.joinToString(" ") { quote(it.toString()) }.orEmpty()
+        val lines = ArrayList<String>()
+        when {
+            attach -> lines += "attach to process ${arguments["processId"] ?: "?"}"
+            mode == "debug" || mode == "test" -> {
+                val tool = if (mode == "test") "go test -c" else "go build"
+                val flags = listOfNotNull("-gcflags=\"all=-N -l\"", (arguments["buildFlags"] as? String)?.takeIf { it.isNotBlank() }, (arguments["output"] as? String)?.let { "-o ${quote(it)}" })
+                lines += "$tool ${flags.joinToString(" ")} ${quote(program.orEmpty())}"
+                lines += "run: ${quote(program.orEmpty())} $args".trimEnd()
+            }
+            mode == "core" -> lines += "core dump ${arguments["coreFilePath"]} of ${program.orEmpty()}"
+            else -> lines += "run: ${quote(program.orEmpty())} $args".trimEnd()
+        }
+        (arguments["cwd"] as? String)?.takeIf { it.isNotBlank() }?.let { lines += "in $it" }
+        (arguments["env"] as? Map<*, *>)?.takeIf { it.isNotEmpty() }?.let { env -> lines += "env: " + env.entries.joinToString(" ") { "${it.key}=${it.value}" } }
+        return lines
+    }
+
+    private fun quote(s: String): String = if (' ' in s) "\"$s\"" else s
+
     private fun debugSettings(arguments: MutableMap<String, Any>, settings: GoSettings) {
         arguments["showGlobalVariables"] = settings.debugShowGlobalVariables
         arguments["hideSystemGoroutines"] = settings.debugHideSystemGoroutines
@@ -325,7 +355,7 @@ object GoLaunchArguments {
         if (local.isEmpty() || remote.isEmpty()) null else mapOf("from" to remote, "to" to local)
     }
 
-    /** A unique path in the temp directory for the binary delve builds, so it is never left in the project tree. */
-    private fun debugBinaryPath(): String =
-        File(System.getProperty("java.io.tmpdir"), "__debug_bin" + UUID.randomUUID().toString().replace("-", "") + if (SystemInfo.isWindows) ".exe" else "").path
+    /** A unique path for the binary delve builds: in [directory], or in the temp directory, so it is never left in the project tree. */
+    fun debugBinaryPath(directory: String? = null): String =
+        File(directory ?: System.getProperty("java.io.tmpdir"), "__debug_bin" + UUID.randomUUID().toString().replace("-", "") + if (SystemInfo.isWindows) ".exe" else "").path
 }

@@ -22,7 +22,7 @@ import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentFactory
 import io.github.golangsupport.cli.GoCli
-import io.github.golangsupport.settings.GoSettingsConfigurable
+import io.github.golangsupport.settings.GoLanguageServerConfigurable
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import javax.swing.JPanel
@@ -177,6 +177,6 @@ class OpenGoplsDebugPagesAction : AnAction(), DumbAware {
 class GoplsSettingsAction : AnAction(), DumbAware {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
     override fun actionPerformed(e: AnActionEvent) {
-        ApplicationManager.getApplication().invokeLater { ShowSettingsUtil.getInstance().showSettingsDialog(e.project, GoSettingsConfigurable::class.java) }
+        ApplicationManager.getApplication().invokeLater { ShowSettingsUtil.getInstance().showSettingsDialog(e.project, GoLanguageServerConfigurable::class.java) }
     }
 }

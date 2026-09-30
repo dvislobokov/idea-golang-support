@@ -123,7 +123,7 @@ Go to Symbol, gutter-иконки запуска, генераторы кода 
 ### 2.5 Отладчик (`debugger`, собственный DAP-клиент к `dlv dap`)
 
 - Запуск: `dlv dap --listen=127.0.0.1:0 [--check-go-version=false] [--log --log-output=dap,debugger]`; `launch` mode `debug`/`test`, `outputMode: remote`, бинарь во временном каталоге `__debug_bin<uuid>` (удаляется по завершении), `-test.v`, `-test.run`, `-test.bench`, `buildFlags` (теги + Go tool arguments), `cwd`, `env`. Настройки: Show global variables (off), Hide system goroutines (on), Stack trace depth (50), Debug any Go version (on), Write delve log (on).
-- Отказ сборки → уведомление «Debug has not started» с выводом компилятора, сессия закрыта.
+- Консоль сессии начинается с команд: `> dlv dap …`, `> go build -gcflags="all=-N -l" …`, `> run: …` (как GoLand показывает свои). Отказ сборки → вывод компилятора в консоли и задачей «Debug: имя» в окне Build (ошибки — ссылки на код), балун в одну строку с Show Build Window, сессия закрыта с кодом 1.
 - Точки: строчные (только на строках кода в телах функций / инициализаторах var), условие, hit count (`==,!=,>,>=,<,<=,% N`), log message (`{expr}` интерполирует delve, без остановки), точка на паники (Unrecovered panics, Fatal throws; включена по умолчанию) с `exceptionInfo` в консоль. Нет: точек на функцию, watchpoints, точек на recovered panic, точек на горутину.
 - Управление: Resume, Step Over/Into/Out, Pause, Run to Cursor (временная точка), Stop (`terminate`/`disconnect`), для attach — Detach по умолчанию. Нет: Smart Step Into, Set Next Statement, Drop Frame, Restart, обратной отладки.
 - Горутины: каждая — стек в списке потоков (остановленная первой), плоский список без группировки/статуса/меток; фреймы страницами по 50 (до 2000), серые для runtime.
@@ -452,7 +452,7 @@ Toolchain: Path to go, Build tags, Create run configurations, Test arguments · 
 |---|---|
 | Нет completion / ошибок | статус-бар → виджет Language Services; Go \| gopls \| Show Log («Stopped unexpectedly»); Settings \| Tools \| Go → Use gopls; Restart |
 | Нет предупреждений линтера | файл сохранён? golangci-lint установлен (Settings \| Tools \| Go \| Tools)? 90 с таймаут на большой пакет |
-| Отладка не стартует | балун «Debug has not started» с выводом компилятора; Go \| Debugger \| Show Debugger Logs (`delve/dlv-*.log`); Trace Debugger Protocol для полной трассы |
+| Отладка не стартует | консоль сессии и окно Build с выводом компилятора, балун «Debug has not started» в одну строку; Go \| Debugger \| Show Debugger Logs (`delve/dlv-*.log`); Trace Debugger Protocol для полной трассы |
 | «Go version … is too old» от delve | Settings \| Tools \| Go \| Debug programs of a Go version this delve does not support (по умолчанию включено) |
 | Нет `go` | Settings \| Tools \| Go \| Path to go; Go \| Go on This Machine… |
 | Форматирование не применилось | синтаксическая ошибка в файле (форматтер молчит); Settings → Reformat with |

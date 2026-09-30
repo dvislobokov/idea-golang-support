@@ -23,13 +23,16 @@ import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.wm.ToolWindowManager
+import io.github.golangsupport.build.BuildViewCommandOutput
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.monitor.RunningGoProcesses
 import io.github.golangsupport.run.DelveGoVersion
 import io.github.golangsupport.run.GoEvaluate
-import io.github.golangsupport.settings.GoSettingsConfigurable
+import io.github.golangsupport.run.GoLaunchArguments
+import io.github.golangsupport.settings.GoDebuggerConfigurable
 import org.jetbrains.concurrency.AsyncPromise
 import org.jetbrains.concurrency.Promise
 import java.io.File
@@ -93,6 +96,9 @@ class GoDebugProcess(
 
     override fun sessionInitialized() {
         handler.startNotify()
+        // what runs, as GoLand prints its commands: the adapter, the build delve does and the program it starts
+        print("> ${adapter.description}\n", ProcessOutputTypes.SYSTEM)
+        for (line in GoLaunchArguments.describe(start.arguments, start.attach)) print("> $line\n", ProcessOutputTypes.SYSTEM)
         connection.start()
         connection.request("initialize", json(
             "clientID" to "intellij", "clientName" to "IntelliJ Platform", "adapterID" to "go", "locale" to "en-us",
@@ -112,22 +118,33 @@ class GoDebugProcess(
     }
 
     /**
-     * The program has not started: the reason of delve with what the compiler said, in a balloon, because the console closes together
-     * with the session, and "Build error: Check the debug console for details" would point at nothing (seen live with the old client).
+     * The program has not started. The reason of delve and what the compiler said are in the console of the session already (they came
+     * as `output` events) and go to the Build tool window as well, where the messages of the compiler are links to the code: the console
+     * goes away with the session in some IDEs (seen live with the old client), a build task stays. The balloon says only that, in one line.
      */
     private fun startFailed(reason: String) {
         val output = synchronized(startupOutput) { startupOutput.toString().trim() }
+        exitCode = 1
         print("Cannot start debugging: $reason\n", ProcessOutputTypes.STDERR)
         val mismatch = DelveGoVersion.find(reason + "\n" + output)
-        val lines = listOfNotNull(reason, output, mismatch?.explain(GoEnvironment.quick().goVersion)).filter { it.isNotEmpty() }
+        val explanation = mismatch?.explain(GoEnvironment.quick().goVersion)
+        val project = session.project
+        val build = BuildViewCommandOutput(project, "Debug: ${start.name}")
+        build.started(GoLaunchArguments.describe(start.arguments, start.attach).firstOrNull() ?: adapter.description, adapter.workDirectory ?: start.arguments["cwd"] as? String)
+        if (output.isNotEmpty()) build.text(output + "\n", true)
+        build.text(listOfNotNull(reason, explanation).joinToString("\n") + "\n", true)
+        build.commandFinished(1)
+        build.finished(false)
+        val summary = reason.lineSequence().firstOrNull { it.isNotBlank() }?.trim() ?: "delve has not started the program"
         val notification = NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
-            .createNotification("Debug has not started", lines.joinToString("\n").replace("\n", "<br>"), NotificationType.ERROR)
+            .createNotification("Debug has not started", listOfNotNull(summary, explanation).joinToString("<br>") + "<br>The output is in the Build window.", NotificationType.ERROR)
+        notification.addAction(NotificationAction.createSimple("Show Build Window") { ToolWindowManager.getInstance(project).getToolWindow("Build")?.activate(null) })
         when (mismatch?.kind) {
             DelveGoVersion.Kind.GO_TOO_OLD -> notification.addAction(NotificationAction.createSimple("Download Go") { BrowserUtil.browse("https://go.dev/dl/") })
             DelveGoVersion.Kind.GO_TOO_NEW -> notification.addAction(NotificationAction.createSimpleExpiring("Update delve") { GoTool.DELVE.install(session.project) })
             null -> Unit
         }
-        if (mismatch != null) notification.addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(session.project, GoSettingsConfigurable::class.java) })
+        if (mismatch != null) notification.addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(session.project, GoDebuggerConfigurable::class.java) })
         notification.notify(session.project)
         session.stop()
     }

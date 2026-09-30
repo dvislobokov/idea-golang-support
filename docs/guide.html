@@ -424,6 +424,7 @@ footer a { color: var(--text-2); }
         <tr><td>Modules, Dependencies…</td><td>Окно Go Dependencies.</td></tr>
         <tr><td>Modules, New Go Module…</td><td><code>go mod init</code> в выбранном каталоге.</td></tr>
         <tr><td>Read Packages Again <span class="new">новое</span></td><td>Заново читает имена пакетов, по которым работают подсказки по имени.</td></tr>
+        <tr><td>Reanalyze Project <span class="new">новое</span></td><td>Всё, что плагин знает о проекте, заново и без перезапуска IDE: индексы Go-файлов и go.mod, каталог пакетов, перезапуск gopls, результаты сборки, подсветка открытых файлов. Индексы остальной IDE — File, Invalidate Caches.</td></tr>
       </tbody>
     </table></div>
 
@@ -554,7 +555,7 @@ footer a { color: var(--text-2); }
 <section class="band" id="settings">
   <div class="wrap">
     <h2>Настройки</h2>
-    <p>Settings, Tools, Go. Настройки действуют на все проекты. Страница gopls под ней содержит все параметры установленной версии сервера.</p>
+    <p>Settings, Tools, Go. Настройки действуют на все проекты. Каждый раздел ниже — своя страница под Go: Toolchain и Tools на самой странице Go, дальше Language Server (под ней — gopls со всеми параметрами установленной версии сервера), Debugger, Editor and Completion, Code Quality.</p>
 
     <h3>Toolchain</h3>
     <div class="table"><table class="two">
@@ -589,6 +590,7 @@ footer a { color: var(--text-2); }
         <tr><td>Hide system goroutines</td><td>Скрывает служебные горутины.</td></tr>
         <tr><td>Stack trace depth</td><td>Сколько кадров стека запрашивать.</td></tr>
         <tr><td>Debug programs of a Go version this delve does not support</td><td>Разрешает отладку, когда Delve старше версии Go. Надёжнее обновить Delve.</td></tr>
+        <tr><td>Build debug binaries in</td><td>Куда delve кладёт собранный для отладки <code>__debug_bin…</code>: System temp directory (в проекте ничего не остаётся), Package directory (рядом с исходниками, как <code>dlv debug</code>) или Custom directory — свой путь, относительный считается от каталога пакета. После сессии файл удаляется в любом случае.</td></tr>
         <tr><td>Write the log of delve for every debug session</td><td>Журналы открываются из меню Go, Debugger.</td></tr>
       </tbody>
     </table></div>
@@ -654,7 +656,7 @@ footer a { color: var(--text-2); }
         <tr><td>Нет подсказок, навигации и ошибок</td><td>Значок gopls в статус-баре; меню Go, gopls, Show Log</td><td>Go, gopls, Restart. Если сервера нет, установить его в настройках, раздел Tools.</td></tr>
         <tr><td>Уведомление Error loading workspace</td><td>Текст уведомления: это сообщение команды <code>go</code></td><td>Чаще всего помогает Go, Modules, Tidy или Download.</td></tr>
         <tr><td>Нет подсказок по имени из других пакетов</td><td>Help, Show Log: строка Go catalogue</td><td>Go, Read Packages Again. Проверить галочку в настройках, раздел Completion.</td></tr>
-        <tr><td>Отладка не начинается</td><td>Уведомление Debug has not started; Go, Debugger, Show Debugger Logs</td><td>Исправить ошибку сборки или обновить Delve под версию Go.</td></tr>
+        <tr><td>Отладка не начинается</td><td>Консоль сессии (команда delve, сборка, вывод компилятора), окно Build с ошибками по ссылкам, уведомление Debug has not started; Go, Debugger, Show Debugger Logs</td><td>Исправить ошибку сборки или обновить Delve под версию Go.</td></tr>
         <tr><td>Нет замечаний линтера</td><td>Настройки, раздел Code Quality и Tools</td><td>Замечания появляются после сохранения файла. Проверить, что golangci-lint установлен.</td></tr>
         <tr><td>Команда <code>go</code> не найдена</td><td>Go, Go on This Machine…</td><td>Указать путь в настройках, раздел Toolchain.</td></tr>
         <tr><td>В коде не набирается русская буква</td><td>Настройки, раздел Editor</td><td>Снять галочку о русской раскладке. В строках и комментариях русский текст набирается всегда.</td></tr>

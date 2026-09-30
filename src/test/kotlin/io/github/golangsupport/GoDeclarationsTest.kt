@@ -130,4 +130,14 @@ class GoDeclarationsTest {
         assertNull(at(".b", 1))
         assertNull(at("g("))
     }
+
+    /** The indexer runs the scanner on every file of the project: it must finish on anything, a file cut anywhere or not Go at all. */
+    @Test(timeout = 10_000) fun scannerTerminatesOnBrokenInput() {
+        for (end in source.indices) GoDeclarations.scan(source.substring(0, end))
+        for (start in source.indices) GoDeclarations.scan(source.substring(start))
+        val random = java.util.Random(7)
+        val pieces = listOf("package", "import", "func", "type", "struct", "interface", "var", "const", "map", "chan", "(", ")", "[", "]", "{", "}",
+            ".", ",", ";", "=", "\n", "\t", " ", "\"", "'", "`", "/", "*", "a1", "x", "_")
+        repeat(200) { GoDeclarations.scan((0 until 200).joinToString("") { pieces[random.nextInt(pieces.size)] }) }
+    }
 }
