@@ -18,6 +18,8 @@
         <gotoDeclarationHandler implementation="io.github.golangsupport.lsp.GoplsGotoDeclarationHandler"/>
         <!-- the declaration behind a name in use: Find Usages, Go to Implementation and the highlighting of usages start from there -->
         <targetElementEvaluator language="Go" implementationClass="io.github.golangsupport.lsp.GoplsTargetElementEvaluator"/>
+        <!-- usages of the name at the caret and the exit points of a function, from gopls; before the handler of the platform, which drops the exit points -->
+        <highlightUsagesHandlerFactory implementation="io.github.golangsupport.lsp.GoplsHighlightUsagesHandlerFactory" order="first"/>
         <typeDeclarationProvider implementation="io.github.golangsupport.lsp.GoplsTypeDeclarationProvider"/>
         <lang.expressionTypeProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsExpressionTypeProvider"/>
         <customUsageSearcher implementation="io.github.golangsupport.lsp.GoplsUsageSearcher"/>

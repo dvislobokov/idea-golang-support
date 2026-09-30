@@ -29,9 +29,12 @@ import io.github.golangsupport.lang.GoFindUsagesProvider
 import io.github.golangsupport.lang.GoTokenTypes
 import io.github.golangsupport.lint.GoSignatureProvider
 import io.github.golangsupport.lint.GoSignatures
+import com.intellij.openapi.util.TextRange
 import org.eclipse.lsp4j.CodeAction
 import org.eclipse.lsp4j.CodeActionParams
 import org.eclipse.lsp4j.DefinitionParams
+import org.eclipse.lsp4j.DocumentHighlightKind
+import org.eclipse.lsp4j.DocumentHighlightParams
 import org.eclipse.lsp4j.HoverParams
 import org.eclipse.lsp4j.ImplementationParams
 import org.eclipse.lsp4j.Location
@@ -77,6 +80,18 @@ object Gopls {
 
     fun signatureHelp(client: LspClient, file: VirtualFile, position: Position, timeoutMs: Int): SignatureHelp? =
         request(client, timeoutMs) { it.textDocumentService.signatureHelp(SignatureHelpParams(client.getDocumentIdentifier(file), position)) }
+
+    /** The ranges of the file to highlight for the caret at [position], with whether each is a write; ranges as offsets of [document]. */
+    fun documentHighlights(client: LspClient, file: VirtualFile, document: Document, position: Position, timeoutMs: Int): List<Pair<TextRange, Boolean>> {
+        val params = DocumentHighlightParams(client.getDocumentIdentifier(file), position)
+        return request(client, timeoutMs) { it.textDocumentService.documentHighlight(params) }.orEmpty().mapNotNull { highlight ->
+            val range = highlight.range
+            if (range.start.line >= document.lineCount || range.end.line >= document.lineCount) return@mapNotNull null
+            val start = document.getLineStartOffset(range.start.line) + range.start.character
+            val end = document.getLineStartOffset(range.end.line) + range.end.character
+            if (start < 0 || end > document.textLength || start >= end) null else TextRange(start, end) to (highlight.kind == DocumentHighlightKind.Write)
+        }
+    }
 
     fun references(client: LspClient, file: VirtualFile, position: Position, timeoutMs: Int): List<Place> {
         val params = ReferenceParams(client.getDocumentIdentifier(file), position, ReferenceContext(false))
