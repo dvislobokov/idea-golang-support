@@ -13,6 +13,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.AlignY
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
@@ -95,8 +96,10 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
             group("Tools") {
                 for (row in toolRows.values) {
                     row(row.tool.command + ":") {
-                        cell(row.path).align(AlignX.FILL).comment(row.tool.purpose)
-                        cell(row.install)
+                        // resizableColumn: in a row of several cells the free width goes to the one that asks for it, and without it
+                        // the field keeps its preferred size while the page grows (seen live: a path field of ten characters)
+                        cell(row.path).align(AlignX.FILL).resizableColumn().comment(row.tool.purpose)
+                        cell(row.install).align(AlignY.TOP)
                     }
                     row("") { cell(row.status) }
                 }
