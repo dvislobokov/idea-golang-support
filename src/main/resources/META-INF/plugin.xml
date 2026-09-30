@@ -233,7 +233,7 @@
         <separator/>
         <action id="Go.Environment" class="io.github.golangsupport.sdk.GoEnvironmentAction" text="Go on This Machine..."
                     description="The toolchain and the tools the plugin uses, the modules of the project, go env"/>
-            <action id="Go.DisablePlugins" class="io.github.golangsupport.sdk.GoDisablePluginsAction" text="Disable Plugins Not Needed for Go..."
+            <action id="Go.Optimize" class="io.github.golangsupport.sdk.GoDisablePluginsAction" text="Optimize IDE for Go..."
                     description="Switch off the bundled plugins a Go developer has no use for (Java, Maven, Python, Spring, GitHub, GitLab...) to keep the IDE light"/>
             <add-to-group group-id="MainMenu" anchor="after" relative-to-action="ToolsMenu"/>
         </group>

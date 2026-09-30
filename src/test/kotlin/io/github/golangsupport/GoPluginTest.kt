@@ -24,7 +24,7 @@ class GoPluginTest : BasePlatformTestCase() {
         collect(menu)
         val expected = listOf(
             "Go.Build", "Go.Vet", "Go.Generate", "Go.ModTidy", "Go.ModDownload", "Go.ModVendor", "Go.NewModule", "Go.AnalyzeStackTrace", "Go.Environment",
-            "Go.DisablePlugins", "Go.Monitor", "Go.HelpPage", "Go.Debugger.ShowLogs", "Go.Debugger.TraceProtocol",
+            "Go.Optimize", "Go.Monitor", "Go.HelpPage", "Go.Debugger.ShowLogs", "Go.Debugger.TraceProtocol",
         )
         assertEquals(emptyList<String>(), expected.filter { it !in ids })
         for (id in listOf("Go.NewFile", "Go.Generate.Constructor", "Go.Generate.Test", "Go.ProjectViewPopup")) assertNotNull(id, actions.getAction(id))

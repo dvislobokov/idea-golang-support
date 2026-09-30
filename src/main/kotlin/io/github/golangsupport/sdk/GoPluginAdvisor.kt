@@ -17,6 +17,8 @@ import com.intellij.openapi.application.ex.ApplicationManagerEx
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.openapi.ui.DialogWrapper
@@ -33,10 +35,12 @@ import javax.swing.JComponent
 /**
  * Offers to switch off the bundled plugins a Go developer has no use for (Java, Maven, Python and its frameworks, Spring, the GIGA
  * "Elements"/"Endpoints" tools, GitHub, GitLab — the last two are unreachable here anyway) to keep the IDE light. Shown on startup when
- * the project is a Go one, and right away when the plugin is enabled without a restart; reachable later from Go | Disable Plugins Not
- * Needed for Go. Only plugins that are actually installed and still enabled are listed, and "Don't ask again" stops the balloon for good.
+ * the project is a Go one, and right away when the plugin is enabled without a restart; reachable later from Go | Optimize IDE for
+ * Go.... Only plugins that are actually installed and still enabled are listed, and "Don't ask again" stops the balloon for good.
  */
 object GoPluginAdvisor {
+    private val LOG = logger<GoPluginAdvisor>()
+
     /** Curated by the ids of GIGA IDE 2026.1; absent ids are simply skipped, so this is safe on plain IntelliJ IDEA and other forks. */
     private val TARGET_IDS = listOf(
         "com.intellij.java", "com.intellij.java.ide", "com.intellij.java-i18n",  // Java
@@ -56,17 +60,23 @@ object GoPluginAdvisor {
 
     private fun dismissed(): Boolean = PropertiesComponent.getInstance().getBoolean(DISMISSED, false)
 
-    /** The balloon, once per startup of a Go project, unless it was dismissed for good or nothing on the list is enabled. */
+    /**
+     * The balloon, once per startup of a Go project, unless it was dismissed for good or nothing on the list is enabled. After the
+     * indexing: the Go check asks the index when go.mod is not at the root of the project, and while the index is built that throws
+     * (seen on a fresh machine: no balloon, nothing in the log).
+     */
     fun suggest(project: Project) {
         if (ApplicationManager.getApplication().isUnitTestMode || dismissed() || project.isDisposed) return
-        // off the caller's thread (a startup coroutine, or the EDT of the plugin-loaded event): the Go check reads the index
-        ApplicationManager.getApplication().executeOnPooledThread {
-            if (project.isDisposed) return@executeOnPooledThread
-            val go = ReadAction.nonBlocking<Boolean> { !project.isDisposed && worksWithGo(project) }.executeSynchronously()
-            if (!go) return@executeOnPooledThread
-            val found = candidates()
-            if (found.isEmpty()) return@executeOnPooledThread
-            ApplicationManager.getApplication().invokeLater({ notify(project, found) }, project.disposed)
+        DumbService.getInstance(project).runWhenSmart {
+            // off EDT: the Go check reads the index
+            ApplicationManager.getApplication().executeOnPooledThread {
+                if (project.isDisposed) return@executeOnPooledThread
+                val go = ReadAction.nonBlocking<Boolean> { !project.isDisposed && worksWithGo(project) }.executeSynchronously()
+                if (!go) return@executeOnPooledThread LOG.info("Optimize IDE for Go: ${project.name} has no go.mod and no Go files, nothing suggested")
+                val found = candidates()
+                if (found.isEmpty()) return@executeOnPooledThread LOG.info("Optimize IDE for Go: none of the plugins of the list is enabled in this IDE, nothing suggested")
+                ApplicationManager.getApplication().invokeLater({ notify(project, found) }, project.disposed)
+            }
         }
     }
 
@@ -78,7 +88,7 @@ object GoPluginAdvisor {
                 "${found.size} plugins you likely don't need are enabled (Java, Maven, Python, Spring, GitHub, GitLab and the like). Disabling them makes the IDE lighter.",
                 NotificationType.INFORMATION,
             )
-            .addAction(NotificationAction.createSimple("Review and disable…") { showDialog(project) })
+            .addAction(NotificationAction.createSimple("Optimize…") { showDialog(project) })
             .addAction(NotificationAction.createSimple("Don't ask again") { PropertiesComponent.getInstance().setValue(DISMISSED, true) })
             .notify(project)
     }
@@ -87,7 +97,7 @@ object GoPluginAdvisor {
     fun showDialog(project: Project) {
         val found = candidates()
         if (found.isEmpty()) {
-            Messages.showInfoMessage(project, "No plugins from the Go clean-up list are enabled.", "Nothing to Disable")
+            Messages.showInfoMessage(project, "None of the plugins a Go developer usually does without (Java, Maven, Python, Spring, GitHub, GitLab...) is enabled: nothing to switch off.", "Optimize IDE for Go")
             return
         }
         val dialog = Dialog(project, found)
@@ -110,12 +120,12 @@ object GoPluginAdvisor {
         private val checks = plugins.map { JBCheckBox(it.name, true) }
 
         init {
-            title = "Disable Plugins Not Needed for Go"
+            title = "Optimize IDE for Go"
             init()
         }
 
         override fun createCenterPanel(): JComponent = panel {
-            row { label("These plugins are enabled but a Go developer usually doesn't need them. Unchecked plugins stay on.") }
+            row { label("These plugins are enabled, and a Go developer usually has no use for them: every one costs memory and startup time. Unchecked plugins stay on.") }
             plugins.indices.forEach { i -> row { cell(checks[i]) } }
         }
 
@@ -138,7 +148,7 @@ class GoPluginAdvisorListener : DynamicPluginListener {
     }
 }
 
-/** Go | Disable Plugins Not Needed for Go: opens the list at any time, also after the balloon was dismissed. */
+/** Go | Optimize IDE for Go...: opens the list at any time, also after the balloon was dismissed. */
 class GoDisablePluginsAction : AnAction(), DumbAware {
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
     override fun update(e: AnActionEvent) { e.presentation.isEnabled = e.project != null }

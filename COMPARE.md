@@ -160,7 +160,7 @@ Go to Symbol, gutter-иконки запуска, генераторы кода 
 - Поиск `go`: настройка → PATH → `GOROOT/bin` → стандартные каталоги (Windows: `%ProgramFiles%\Go`, `C:\Go`, `~\go\go`, `~\sdk\go`; Unix: `/usr/local/go`, `/usr/lib/go`, `/opt/homebrew/bin`, `/snap/bin`, `~/sdk/go`). Нет `go` при наличии go.mod — предупреждение с Download Go / Configure. Загрузки SDK из IDE нет.
 - Инструменты (gopls, dlv, golangci-lint, goimports): путь из настроек → PATH → GOBIN/GOPATH/bin; Install/Update кнопкой (`go install …@latest`) на странице настроек или из уведомления. Установка «всех разом» — нет.
 - Окно **Go on This Machine**: go, модули проекта, инструменты, `go env` (важные первыми).
-- **Disable Plugins Not Needed for Go**: уведомление при старте на Go-проекте и действие в меню; список id (Java, Maven, Python + фреймворки GIGA, Spring, Elements/Endpoints, GitHub, GitLab), диалог с чекбоксами, `PluginEnabler`, перезапуск, Don't ask again.
+- **Optimize IDE for Go**: уведомление при старте на Go-проекте и действие в меню; список id (Java, Maven, Python + фреймворки GIGA, Spring, Elements/Endpoints, GitHub, GitLab), диалог с чекбоксами, `PluginEnabler`, перезапуск, Don't ask again.
 - Settings | Tools | Go — группы Toolchain (path to go, build tags, create run configurations, test arguments), Language Server (enable, staticcheck, gofumpt, inlay hints, rpc trace, debug pages), Debugger (globals, hide system goroutines, stack depth, any Go version, delve log), Editor (doc comment names, inline idioms), Code Quality (formatter, format on save, golangci-lint), Tools (пути и Install). Подстраница gopls — см. 2.2. Все 22 поля хранятся application-level в `golang-support.xml`.
 - **Go | Help Page** (и Help-меню): HTML-вкладка (JCEF) с клавишами из текущей раскладки, разделы Editing / Generate and fix / Navigation / Run, test, debug, monitor / Tools / Tips.
 
@@ -419,7 +419,7 @@ GoLand 2026.2 (июль 2026) — эталон. У GoLand свой полный 
 
 ### 5.5 Меню Go
 
-Build · Vet · Generate · Modules (Tidy, Download, Vendor) · New Go Module… · Go on This Machine… · Disable Plugins Not Needed for Go… · Monitor Go Process · Help Page · Debugger (Show Debugger Logs, Trace Debugger Protocol) · gopls (Add Import…, Browse Documentation / Assembly / Free Symbols, Toggle Compiler Optimization Details, Check for Dependency Upgrades, Upgrade All Dependencies, Run govulncheck, Reset go.mod Diagnostics, Show Statistics, Show Log, Open Debug Pages, Settings…, Restart).
+Build · Vet · Generate · Modules (Tidy, Download, Vendor) · New Go Module… · Go on This Machine… · Optimize IDE for Go… · Monitor Go Process · Help Page · Debugger (Show Debugger Logs, Trace Debugger Protocol) · gopls (Add Import…, Browse Documentation / Assembly / Free Symbols, Toggle Compiler Optimization Details, Check for Dependency Upgrades, Upgrade All Dependencies, Run govulncheck, Reset go.mod Diagnostics, Show Statistics, Show Log, Open Debug Pages, Settings…, Restart).
 ПКМ в дереве проекта: Build, Vet, Tidy для модуля выбранного файла; New → Go File.
 
 ### 5.6 Окна инструментов
@@ -456,7 +456,7 @@ Toolchain: Path to go, Build tags, Create run configurations, Test arguments · 
 | «Go version … is too old» от delve | Settings \| Tools \| Go \| Debug programs of a Go version this delve does not support (по умолчанию включено) |
 | Нет `go` | Settings \| Tools \| Go \| Path to go; Go \| Go on This Machine… |
 | Форматирование не применилось | синтаксическая ошибка в файле (форматтер молчит); Settings → Reformat with |
-| Медленно / много лишних плагинов | Go \| Disable Plugins Not Needed for Go… |
+| Медленно / много лишних плагинов | Go \| Optimize IDE for Go… |
 | Ошибки платформы | idea.log, искать `Plugin to blame: Go` |
 
 ### 5.10 Инструменты, которые ставит плагин
