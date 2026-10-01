@@ -23,6 +23,7 @@ import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import io.github.golangsupport.GoBundle
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.JComponent
@@ -49,18 +50,18 @@ class GoplsSettingsConfigurable(private val project: Project) : Configurable, Co
     /** What the plugin sets by itself, as JSON texts. */
     private var pluginDefaults: Map<String, String> = emptyMap()
 
-    private val status = JBLabel("Asking gopls for its settings...").apply { foreground = UIUtil.getContextHelpForeground() }
+    private val status = JBLabel(GoBundle.message("gopls.asking")).apply { foreground = UIUtil.getContextHelpForeground() }
     private val filter = SearchTextField(false)
     private val content = JPanel(BorderLayout())
 
     override fun getDisplayName(): String = "gopls"
 
     override fun createComponent(): JComponent {
-        filter.textEditor.emptyText.text = "Search settings"
+        filter.textEditor.emptyText.text = GoBundle.message("gopls.search")
         filter.addDocumentListener(object : DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) = rebuild()
         })
-        val reset = ActionLink("Reset all to defaults") {
+        val reset = ActionLink(GoBundle.message("gopls.reset")) {
             edited.clear()
             invalid.clear()
             rebuild()
@@ -136,7 +137,7 @@ class GoplsSettingsConfigurable(private val project: Project) : Configurable, Co
                 regular.forEach { option(it, text) }
                 if (special.isNotEmpty()) {
                     // what gopls itself calls experimental, advanced or for debugging: out of the way until looked for or changed
-                    collapsibleGroup("Experimental and advanced") { special.forEach { option(it, text) } }
+                    collapsibleGroup(GoBundle.message("gopls.advanced")) { special.forEach { option(it, text) } }
                         .apply { expanded = text.isNotEmpty() || special.any { it.name in edited } }
                 }
             }

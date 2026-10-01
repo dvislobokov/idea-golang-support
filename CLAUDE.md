@@ -101,7 +101,7 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 ## Соглашения кода
 
 Как в `../idea-dotnet-support`: Kotlin, строки до ~180 символов, плотный стиль, однострочные функции-выражения. Комментарии и KDoc — по-английски, короткие,
-объясняют «почему» (находки вживую помечать «seen live»). Тексты UI — английские, действия в Title Case. Действия: `AnAction(), DumbAware`, `BGT`; в контекстном
+объясняют «почему» (находки вживую помечать «seen live»). Тексты UI — английские, действия в Title Case; тексты **страниц настроек** — через `GoBundle.message("ключ")`, обе строки класть в `messages/GoBundle.properties` и `GoBundle_ru.properties` (`GoBundleTest` сверяет ключи). `toString()` перечисления, которое хранится в настройках, не переводить — его читает сериализатор; для списка заводить `label`. Действия: `AnAction(), DumbAware`, `BGT`; в контекстном
 меню неподходящее скрывать, в главном — выключать (`e.isFromContextMenu`). Команды `go`: `GoCli.commandLinesOrNotify { GoCli.commandLine(dir, ...) }` +
 `GoCli.runInBackground`; инструменты — `GoCli.toolCommandLine` (добавляет каталог `go` в PATH). Блокирующие вызовы — не на EDT. Парсинг вывода и файлов —
 чистыми функциями, чтобы тестировать без процесса. Новую фичу отмечать в `ROADMAP.md`.

@@ -7,6 +7,8 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.service
 import com.intellij.util.execution.ParametersListUtil
+import io.github.golangsupport.GoBundle
+import io.github.golangsupport.PluginLanguage
 
 /** Where delve builds the binary of a debug session. */
 enum class GoDebugBinaryLocation(val title: String) {
@@ -18,6 +20,9 @@ enum class GoDebugBinaryLocation(val title: String) {
 
     /** [GoSettings.debugBinaryDirectory]; a relative path is from the directory of the package. */
     CUSTOM("Custom directory");
+
+    /** What the combo shows; [toString] is what the settings file keeps, so it stays English. */
+    val label: String get() = GoBundle.messageOr("debugger.binaryLocation.$name", title)
 
     override fun toString(): String = title
 }
@@ -41,6 +46,7 @@ enum class GoFormatter(val title: String) {
 class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings()) {
     class Settings : BaseState() {
         /** Empty: the executable is looked up on PATH and in the default installation directories. */
+        var language by enum(PluginLanguage.AUTO)
         var goPath by string("")
 
         /** Name of a tool -> its executable; a tool without an entry is looked up on PATH, in GOBIN and in GOPATH/bin. */
@@ -153,6 +159,11 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         GoDebugBinaryLocation.PACKAGE -> packageDirectory
         GoDebugBinaryLocation.CUSTOM -> debugBinaryDirectory.takeIf { it.isNotBlank() }?.let { java.io.File(packageDirectory).resolve(it).path } ?: packageDirectory
     }
+
+    /** The language of the settings pages; the rest of the plugin speaks the language of the IDE. */
+    var language: PluginLanguage
+        get() = state.language
+        set(value) { state.language = value }
 
     var goPath: String
         get() = state.goPath.orEmpty()

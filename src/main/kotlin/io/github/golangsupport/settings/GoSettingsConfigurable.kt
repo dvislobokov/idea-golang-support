@@ -12,12 +12,17 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
+import com.intellij.ui.SimpleListCellRenderer
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.AlignY
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
+import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.builder.toNullableProperty
 import com.intellij.util.ui.UIUtil
+import io.github.golangsupport.GoBundle
+import io.github.golangsupport.PluginLanguage
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
@@ -34,16 +39,16 @@ interface GoLanguageServerControl {
 }
 
 /** Settings | Tools | Go: the toolchain and the tools; the areas of the plugin are the pages under it ([GoSettingsPage]). Only what has an implementation behind it. */
-class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
+class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "page.go") {
     private val goPath = TextFieldWithBrowseButton()
     private val goStatus = JBLabel().apply { foreground = UIUtil.getContextHelpForeground() }
     private val toolRows = GoTool.entries.associateWith { ToolRow(it) }
 
     private inner class ToolRow(val tool: GoTool) {
         val path = TextFieldWithBrowseButton().apply {
-            addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle("${tool.command} Executable"))
+            addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle(GoBundle.message("settings.tools.chooser", tool.command)))
         }
-        val install = JButton("Install").apply { addActionListener { runInstallation() } }
+        val install = JButton(GoBundle.message("settings.tools.install")).apply { addActionListener { runInstallation() } }
         val status = JBLabel().apply { foreground = UIUtil.getContextHelpForeground() }
 
         /**
@@ -52,8 +57,8 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
          */
         private fun runInstallation() {
             install.isEnabled = false
-            status.text = "Running: go ${tool.installCommand().joinToString(" ")}"
-            val title = "${if (tool.find() == null) "Installing" else "Updating"} ${tool.command}"
+            status.text = GoBundle.message("settings.tools.running", tool.installCommand().joinToString(" "))
+            val title = GoBundle.message(if (tool.find() == null) "settings.tools.installing" else "settings.tools.updating", tool.command)
             ProgressManager.getInstance().run(object : Task.Backgroundable(project, title, true) {
                 override fun run(indicator: ProgressIndicator) {
                     indicator.isIndeterminate = true
@@ -65,7 +70,7 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
                     }
                     ApplicationManager.getApplication().invokeLater({
                         install.isEnabled = true
-                        if (exitCode == 0) refresh() else status.text = "Failed: " + output.lines().lastOrNull { it.isNotBlank() }.orEmpty().trim()
+                        if (exitCode == 0) refresh() else status.text = GoBundle.message("settings.tools.failed", output.lines().lastOrNull { it.isNotBlank() }.orEmpty().trim())
                     }, ModalityState.any())
                 }
             })
@@ -73,38 +78,41 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
 
         fun refresh() {
             val found = tool.find()
-            status.text = found?.path ?: "Not installed: go install ${tool.module}@latest"
-            install.text = if (found == null) "Install" else "Update"
+            status.text = found?.path ?: GoBundle.message("settings.tools.notInstalled", tool.module)
+            install.text = GoBundle.message(if (found == null) "settings.tools.install" else "settings.tools.update")
             // the field holds an override and stays empty while the plugin finds the tool itself: what it found is the text of the empty field
-            (path.textField as? JBTextField)?.emptyText?.text = found?.path ?: "Not installed"
+            (path.textField as? JBTextField)?.emptyText?.text = found?.path ?: GoBundle.message("settings.tools.missing")
         }
     }
 
     override fun createPanel(): DialogPanel {
-        goPath.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle("go Executable"))
+        goPath.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle(GoBundle.message("settings.goPath.chooser")))
         return panel {
-            group("Toolchain") {
-                row("Path to go:") { cell(goPath).align(AlignX.FILL).comment("Empty: PATH, GOROOT and the default installation directories") }
+            group(GoBundle.message("settings.toolchain")) {
+                row(GoBundle.message("settings.goPath")) { cell(goPath).align(AlignX.FILL).comment(GoBundle.message("settings.goPath.comment")) }
                 row { cell(goStatus) }
-                row("Build tags:") {
-                    textField().align(AlignX.FILL).bindText(settings::buildTags)
-                        .comment("<code>-tags</code> of build, run, test and vet, of the language server, the linter and the debugger")
+                row(GoBundle.message("settings.buildTags")) {
+                    textField().align(AlignX.FILL).bindText(settings::buildTags).comment(GoBundle.message("settings.buildTags.comment"))
                 }
-                row { checkBox("Create run configurations for the programs of the project").bindSelected(settings::createRunConfigurations).comment("One per directory with a <code>func main</code>, when the project is opened; a deleted one does not come back") }
-                row("Test arguments:") { textField().align(AlignX.FILL).bindText(settings::testArguments).comment("Added to every <code>go test</code>: <code>-race -count=1</code>") }
+                row { checkBox(GoBundle.message("settings.runConfigurations")).bindSelected(settings::createRunConfigurations).comment(GoBundle.message("settings.runConfigurations.comment")) }
+                row(GoBundle.message("settings.testArguments")) { textField().align(AlignX.FILL).bindText(settings::testArguments).comment(GoBundle.message("settings.testArguments.comment")) }
+                // the pages are rebuilt when the dialog is reopened: said here, since the texts around do not change at once
+                row(GoBundle.message("settings.language")) {
+                    comboBox(PluginLanguage.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::language.toNullableProperty())
+                }
             }
-            group("Tools") {
+            group(GoBundle.message("settings.tools")) {
                 for (row in toolRows.values) {
                     row(row.tool.command + ":") {
                         // resizableColumn: in a row of several cells the free width goes to the one that asks for it, and without it
                         // the field keeps its preferred size while the page grows (seen live: a path field of ten characters)
-                        cell(row.path).align(AlignX.FILL).resizableColumn().comment(row.tool.purpose)
+                        cell(row.path).align(AlignX.FILL).resizableColumn().comment(GoBundle.messageOr("tool.${row.tool.command}.purpose", row.tool.purpose))
                         cell(row.install).align(AlignY.TOP)
                     }
                     row("") { cell(row.status) }
                 }
             }
-            row { comment("The language server, the debugger, the editor and completion, formatting and the linter: the pages under this one") }
+            row { comment(GoBundle.message("settings.pagesBelow")) }
         }
     }
 
@@ -113,8 +121,10 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "Go") {
             GoEnvironment.reset()
             val executable = GoCli.findExecutable()
             val environment = GoEnvironment.get()
-            val text = if (executable == null) "go is not found" else "$executable  —  Go ${environment.goVersion ?: "?"}, GOROOT ${environment.goRoot ?: "?"}"
-            val placeholder = executable ?: "Not found"
+            val unknown = GoBundle.message("settings.unknown")
+            val text = if (executable == null) GoBundle.message("settings.go.notFound")
+            else GoBundle.message("settings.go.found", executable, environment.goVersion ?: unknown, environment.goRoot ?: unknown)
+            val placeholder = executable ?: GoBundle.message("settings.notFound")
             ApplicationManager.getApplication().invokeLater({
                 goStatus.text = text
                 (goPath.textField as? JBTextField)?.emptyText?.text = placeholder
