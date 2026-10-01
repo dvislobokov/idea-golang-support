@@ -3,5 +3,11 @@
 .intellijPlatform/
 .kotlin/
 build/
+# but keep the packaged plugin so a built release is tracked in the repository
+!build/
+build/*
+!build/distributions/
+build/distributions/*
+!build/distributions/*.zip
 out/
 *.iml

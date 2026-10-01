@@ -83,9 +83,46 @@ tasks.processResources {
     }
 }
 
+// The change-notes shown in the Plugins dialog are the latest section of CHANGELOG.md (the single source), rendered to the small
+// subset of HTML the dialog accepts. No `org.jetbrains.changelog` plugin: adding one would need a fresh resolve from the plugin
+// portal, which the proxy on this machine blocks (`--offline` builds).
+fun latestChangeNotes(): String {
+    val lines = file("CHANGELOG.md").readLines()
+    val start = lines.indexOfFirst { it.startsWith("## [") }
+    if (start < 0) return ""
+    val body = lines.drop(start + 1).takeWhile { !it.startsWith("## [") }
+    fun inline(s: String) = s
+        .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        .replace(Regex("`([^`]+)`"), "<code>$1</code>")
+        .replace(Regex("\\[([^\\]]+)]\\([^)]+\\)"), "$1")
+    val html = StringBuilder()
+    var inList = false
+    for (raw in body) {
+        val line = raw.trim()
+        when {
+            line.isEmpty() -> {}
+            line.startsWith("### ") -> {
+                if (inList) { html.append("</ul>"); inList = false }
+                html.append("<p><b>").append(inline(line.removePrefix("### "))).append("</b></p>")
+            }
+            line.startsWith("- ") -> {
+                if (!inList) { html.append("<ul>"); inList = true }
+                html.append("<li>").append(inline(line.removePrefix("- "))).append("</li>")
+            }
+            else -> {
+                if (inList) { html.append("</ul>"); inList = false }
+                html.append("<p>").append(inline(line)).append("</p>")
+            }
+        }
+    }
+    if (inList) html.append("</ul>")
+    return html.toString()
+}
+
 intellijPlatform {
     buildSearchableOptions = false
     pluginConfiguration {
+        changeNotes = provider { latestChangeNotes() }
         ideaVersion {
             // 2026.1: the platform with the LSP client API under its new names (LspIntegrationProvider) and with the DAP module
             sinceBuild = "261"

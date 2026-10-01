@@ -176,6 +176,8 @@
         <toolWindow id="Go Monitor" anchor="right" icon="/icons/goMonitorToolWindow.svg" factoryClass="io.github.golangsupport.monitor.GoMonitorToolWindowFactory"/>
         <toolWindow id="Go Tests" anchor="bottom" icon="/icons/goTestsToolWindow.svg" factoryClass="io.github.golangsupport.testing.GoTestExplorerToolWindowFactory"/>
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
+        <!-- a user/leftover association can shadow the declarative .go / go.mod one: tell the user in a dialog and offer to claim it back -->
+        <postStartupActivity implementation="io.github.golangsupport.sdk.GoFileTypeCheckActivity"/>
         <!-- offer to switch off the bundled plugins a Go developer has no use for (Java, Maven, Python, Spring, GitHub, GitLab...) -->
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoPluginAdvisorActivity"/>
 
