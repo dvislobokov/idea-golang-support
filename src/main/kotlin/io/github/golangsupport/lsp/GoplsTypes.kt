@@ -9,9 +9,11 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.lang.GoDeclaration
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoFindUsagesProvider
 import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.settings.GoFeature
 import org.eclipse.lsp4j.Position
 
 /**
@@ -22,6 +24,8 @@ class GoplsTargetElementEvaluator : TargetElementEvaluatorEx2() {
     override fun getNamedElement(element: PsiElement): PsiElement? {
         if (element.containingFile !is GoFile || element.elementType != GoTokenTypes.IDENTIFIER) return null
         (element.parent as? GoDeclaration)?.takeIf { it.nameIdentifier == element }?.let { return it }
+        // the native PSI resolves the name itself (MIGRATION.md, step 1)
+        if (GoFeatures.native(GoFeature.NAVIGATION, element.project)) return null
         val file = element.containingFile.virtualFile ?: return null
         val client = Gopls.client(element.project) ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
@@ -42,6 +46,7 @@ class GoplsTypeDeclarationProvider : TypeDeclarationProvider {
     override fun getSymbolTypeDeclarations(symbol: PsiElement): Array<PsiElement>? {
         val leaf = if (symbol is GoDeclaration) symbol.nameIdentifier else symbol
         if (leaf == null || leaf.containingFile !is GoFile) return null
+        if (GoFeatures.native(GoFeature.NAVIGATION, leaf.project)) return null
         val file = leaf.containingFile.virtualFile ?: return null
         val client = Gopls.client(leaf.project) ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
@@ -56,8 +61,9 @@ class GoplsTypeDeclarationProvider : TypeDeclarationProvider {
 
 /** Type Info (Ctrl+Shift+P) of the name under the caret: the first line of what gopls says on hover, which is its declaration. */
 class GoplsExpressionTypeProvider : ExpressionTypeProvider<PsiElement>() {
+    /** The type comes from the hover of gopls, so it goes with the source of documentation. */
     override fun getExpressionsAt(elementAt: PsiElement): List<PsiElement> =
-        if (elementAt.containingFile is GoFile && elementAt.elementType == GoTokenTypes.IDENTIFIER) listOf(elementAt) else emptyList()
+        if (elementAt.containingFile is GoFile && elementAt.elementType == GoTokenTypes.IDENTIFIER && !GoFeatures.native(GoFeature.HOVER, elementAt.project)) listOf(elementAt) else emptyList()
 
     override fun getInformationHint(element: PsiElement): String {
         val file = element.containingFile.virtualFile ?: return errorHint

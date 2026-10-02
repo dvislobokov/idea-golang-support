@@ -11,7 +11,9 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.settings.GoFeature
 import org.eclipse.lsp4j.Position
 import java.util.function.Supplier
 
@@ -21,7 +23,8 @@ import java.util.function.Supplier
  * directions), as an action for the keyboard. The navigator of the platform asks in the background and shows a list when there are several.
  */
 class GoplsGotoSuperHandler : LanguageCodeInsightActionHandler {
-    override fun isValidFor(editor: Editor, file: PsiFile): Boolean = file is GoFile && declarationAt(file, editor.caretModel.offset) != null
+    override fun isValidFor(editor: Editor, file: PsiFile): Boolean =
+        file is GoFile && !GoFeatures.native(GoFeature.NAVIGATION, file.project) && declarationAt(file, editor.caretModel.offset) != null
     override fun startInWriteAction(): Boolean = false
 
     override fun invoke(project: Project, editor: Editor, file: PsiFile) {

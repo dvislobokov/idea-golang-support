@@ -13,8 +13,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.settings.GoFeature
 import java.util.function.Supplier
 
 /**
@@ -33,7 +35,7 @@ class GoplsImplementationLineMarkerProvider : LineMarkerProvider {
         val file = (element.containingFile as? GoFile)?.virtualFile ?: return null
         val document = FileDocumentManager.getInstance().getCachedDocument(file) ?: return null
         val project = element.project
-        if (Gopls.client(project) == null) return null
+        if (GoFeatures.native(GoFeature.CODE_VISION, project) || Gopls.client(project) == null) return null
         val count = project.service<GoplsCountsService>().counts(file, document.modificationStamp)[GoplsCountsService.key(info)]?.implementations ?: return null
         if (count == 0) return null
 

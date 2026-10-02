@@ -41,6 +41,17 @@ class GoLanguageServerConfigurable(project: Project) : GoSettingsPage(project, "
         row { checkBox(GoBundle.message("ls.trace")).bindSelected(settings::goplsTrace).comment(GoBundle.message("ls.trace.comment")) }
         row { checkBox(GoBundle.message("ls.debugPages")).bindSelected(settings::goplsDebugPages).comment(GoBundle.message("ls.debugPages.comment")) }
         row { comment(GoBundle.message("ls.more")) }
+        // one exclusive switch per feature (MIGRATION.md, step 1): Apply restarts the server, whose descriptor reads the new values
+        group(GoBundle.message("ls.sources")) {
+            row { comment(GoBundle.message("ls.sources.comment")) }
+            for (feature in GoFeature.entries) {
+                row(GoBundle.message("ls.source.${feature.name}")) {
+                    // the renderer, not toString(): what the settings file keeps has to stay English whatever the language of the page
+                    comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label })
+                        .bindItem({ settings.source(feature) }, { settings.setSource(feature, it ?: GoFeatureSource.GOPLS) })
+                }
+            }
+        }
     }
 }
 

@@ -40,6 +40,47 @@ enum class GoFormatter(val title: String) {
     override fun toString(): String = title
 }
 
+/**
+ * Who gives a feature of the editor: gopls through the LSP client of the platform, or the plugin itself (the native PSI, as it arrives
+ * feature by feature: `MIGRATION.md`). One switch per feature, exclusive: the gopls side returns nothing when the plugin is the source,
+ * and the other way round, so that nothing is shown twice. The defaults move to [NATIVE] one feature at a time, after a live check.
+ */
+enum class GoFeatureSource(val title: String) {
+    GOPLS("gopls"),
+
+    /** The plugin's own code; until a feature has it, this only switches gopls off for the feature. */
+    NATIVE("Plugin");
+
+    /** What the combo shows; [toString] is what the settings file keeps, so it stays English. */
+    val label: String get() = GoBundle.messageOr("feature.source.$name", title)
+
+    override fun toString(): String = title
+}
+
+/**
+ * The features that have, or will have, two sources ([GoFeatureSource]). Formatting is not one of them: it has [GoFormatter], where
+ * the native formatter is one more entry when it is there. [needsIndex]: the native side works from the indices of the platform and has
+ * nothing to say while they are being built, so gopls answers then.
+ */
+enum class GoFeature(val needsIndex: Boolean = true) {
+    /** The parser marks them itself, without indices. */
+    SYNTAX_ERRORS(needsIndex = false),
+    /** Type errors, unused names: the errors of the compiler, not the analyzers. */
+    DIAGNOSTICS,
+    COMPLETION,
+    /** Quick documentation, parameter info, Type Info. */
+    HOVER,
+    /** Go to Declaration, Type Declaration, Super, the target behind a name in use. */
+    NAVIGATION,
+    /** Find Usages, Go to Implementation, the highlighting of the usages at the caret. */
+    USAGES,
+    RENAME,
+    /** The colours beyond the lexer: types, fields, parameters, constants. */
+    SEMANTIC_COLORS,
+    /** Counts of usages and implementations above declarations, the gutter icons of implementations, code lenses. */
+    CODE_VISION,
+}
+
 /** Machine-wide settings of the plugin: where the Go toolchain and its tools are, and what the plugin does on its own. */
 @Service(Service.Level.APP)
 @State(name = "GoSupportSettings", storages = [Storage("golang-support.xml")])
@@ -65,6 +106,17 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** Setting of gopls -> its value as a JSON text, from the page with the catalogue of the server; wins over the switches above. */
         var goplsOverrides by map<String, String>()
+
+        // the source of each feature with two of them (GoFeature); the defaults move to NATIVE one feature at a time (MIGRATION.md, step 8)
+        var syntaxErrors by enum(GoFeatureSource.GOPLS)
+        var diagnostics by enum(GoFeatureSource.GOPLS)
+        var completion by enum(GoFeatureSource.GOPLS)
+        var hover by enum(GoFeatureSource.GOPLS)
+        var navigation by enum(GoFeatureSource.GOPLS)
+        var usages by enum(GoFeatureSource.GOPLS)
+        var rename by enum(GoFeatureSource.GOPLS)
+        var semanticColors by enum(GoFeatureSource.GOPLS)
+        var codeVision by enum(GoFeatureSource.GOPLS)
 
         /** `-rpc.trace`: every message of the protocol in the log window of gopls. Big; for looking into what the server was asked. */
         var goplsTrace by property(false)
@@ -200,6 +252,33 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var goplsDebugPages: Boolean
         get() = state.goplsDebugPages
         set(value) { state.goplsDebugPages = value }
+
+    /** Who gives [feature]; whether it is the plugin right now (indices, the server switched off) is [io.github.golangsupport.lang.GoFeatures]. */
+    fun source(feature: GoFeature): GoFeatureSource = when (feature) {
+        GoFeature.SYNTAX_ERRORS -> state.syntaxErrors
+        GoFeature.DIAGNOSTICS -> state.diagnostics
+        GoFeature.COMPLETION -> state.completion
+        GoFeature.HOVER -> state.hover
+        GoFeature.NAVIGATION -> state.navigation
+        GoFeature.USAGES -> state.usages
+        GoFeature.RENAME -> state.rename
+        GoFeature.SEMANTIC_COLORS -> state.semanticColors
+        GoFeature.CODE_VISION -> state.codeVision
+    }
+
+    fun setSource(feature: GoFeature, source: GoFeatureSource) {
+        when (feature) {
+            GoFeature.SYNTAX_ERRORS -> state.syntaxErrors = source
+            GoFeature.DIAGNOSTICS -> state.diagnostics = source
+            GoFeature.COMPLETION -> state.completion = source
+            GoFeature.HOVER -> state.hover = source
+            GoFeature.NAVIGATION -> state.navigation = source
+            GoFeature.USAGES -> state.usages = source
+            GoFeature.RENAME -> state.rename = source
+            GoFeature.SEMANTIC_COLORS -> state.semanticColors = source
+            GoFeature.CODE_VISION -> state.codeVision = source
+        }
+    }
 
     var goplsOverrides: Map<String, String>
         get() = state.goplsOverrides.toMap()

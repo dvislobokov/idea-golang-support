@@ -24,11 +24,13 @@ import com.intellij.usages.UsageInfo2UsageAdapter
 import com.intellij.util.Processor
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoFindUsagesProvider
 import io.github.golangsupport.lang.GoTokenTypes
 import io.github.golangsupport.lint.GoSignatureProvider
 import io.github.golangsupport.lint.GoSignatures
+import io.github.golangsupport.settings.GoFeature
 import com.intellij.openapi.util.TextRange
 import org.eclipse.lsp4j.CodeAction
 import org.eclipse.lsp4j.CodeActionParams
@@ -165,6 +167,8 @@ class GoplsGotoDeclarationHandler : GotoDeclarationHandler {
     override fun getGotoDeclarationTargets(sourceElement: PsiElement?, offset: Int, editor: Editor): Array<PsiElement>? {
         val element = sourceElement?.takeIf { it.containingFile is GoFile && it.node?.elementType == GoTokenTypes.IDENTIFIER } ?: return null
         val project = element.project
+        // the references of the native PSI lead to the declaration themselves: the one source of a target (MIGRATION.md, step 1)
+        if (GoFeatures.native(GoFeature.NAVIGATION, project)) return null
         val file = element.containingFile.virtualFile ?: return null
         val client = Gopls.client(project) ?: return null
         val start = element.textRange.startOffset
@@ -189,6 +193,7 @@ class GoplsUsageSearcher : CustomUsageSearcher() {
         val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> {
             if (element is GoDeclaration || GoFindUsagesProvider.isLocalName(element)) GoplsTargets.of(element) else null
         } ?: return
+        if (GoFeatures.native(GoFeature.USAGES, project)) return
         val client = Gopls.client(project) ?: return
         for (place in Gopls.references(client, file, position, TIMEOUT_MS)) {
             val usage = ReadAction.compute<Usage?, RuntimeException> {
@@ -210,6 +215,7 @@ class GoplsImplementationSearch : QueryExecutorBase<PsiElement, DefinitionsScope
         // gopls answers a question about a plain function, a field or a value with an error, which the platform logs as a warning
         if (declaration.kind !in WITH_IMPLEMENTATIONS) return
         val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> { GoplsTargets.of(declaration) } ?: return
+        if (GoFeatures.native(GoFeature.USAGES, project)) return
         val client = Gopls.client(project) ?: return
         for (place in Gopls.implementations(client, file, position, TIMEOUT_MS)) {
             val target = ReadAction.compute<PsiElement?, RuntimeException> { Gopls.element(project, place) } ?: continue

@@ -20,8 +20,10 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarationKind
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoStructure
+import io.github.golangsupport.settings.GoFeature
 import io.github.golangsupport.testing.GoTests
 import java.util.concurrent.ConcurrentHashMap
 
@@ -112,7 +114,7 @@ abstract class GoplsCodeVisionProvider(private val actionId: String) : DaemonBou
 
     override fun computeForEditor(editor: Editor, file: PsiFile): List<Pair<TextRange, CodeVisionEntry>> {
         val virtualFile = (file as? GoFile)?.virtualFile ?: return emptyList()
-        if (Gopls.client(file.project) == null) return emptyList()
+        if (GoFeatures.native(GoFeature.CODE_VISION, file.project) || Gopls.client(file.project) == null) return emptyList()
         val counts = file.project.service<GoplsCountsService>().counts(virtualFile, editor.document.modificationStamp)
         return GoStructure.of(file).all().mapNotNull { declaration ->
             val text = counts[GoplsCountsService.key(declaration)]?.let { text(declaration, it) } ?: return@mapNotNull null
