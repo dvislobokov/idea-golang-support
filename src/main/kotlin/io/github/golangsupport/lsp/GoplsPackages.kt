@@ -15,6 +15,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspClient
 import io.github.golangsupport.GoIcons
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoImports
@@ -80,6 +82,7 @@ class GoplsKnownPackages {
 class GoplsPackageCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
         val file = parameters.originalFile as? GoFile ?: return
+        if (GoFeatures.native(GoFeature.COMPLETION, file.project)) return
         if (!GoSettings.getInstance().completionUnimportedPackages) return
         val virtualFile = file.virtualFile ?: return
         if (parameters.position.node?.elementType != GoTokenTypes.IDENTIFIER) return

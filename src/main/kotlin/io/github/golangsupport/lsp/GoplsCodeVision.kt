@@ -18,6 +18,8 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFile
@@ -111,6 +113,7 @@ abstract class GoplsCodeVisionProvider(private val actionId: String) : DaemonBou
     protected abstract fun text(declaration: GoDeclarationInfo, counts: GoplsCounts): String?
 
     override fun computeForEditor(editor: Editor, file: PsiFile): List<Pair<TextRange, CodeVisionEntry>> {
+        if (GoFeatures.native(GoFeature.CODE_VISION, file.project)) return emptyList()
         val virtualFile = (file as? GoFile)?.virtualFile ?: return emptyList()
         if (Gopls.client(file.project) == null) return emptyList()
         val counts = file.project.service<GoplsCountsService>().counts(virtualFile, editor.document.modificationStamp)

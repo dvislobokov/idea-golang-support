@@ -11,6 +11,8 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFile
@@ -28,6 +30,7 @@ import java.util.function.Supplier
 class GoplsImplementationLineMarkerProvider : LineMarkerProvider {
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
         if (element.elementType != GoTokenTypes.IDENTIFIER) return null
+        if (GoFeatures.native(GoFeature.CODE_VISION, element.project)) return null
         val declaration = (element.parent as? GoDeclaration)?.takeIf { it.nameIdentifier == element } ?: return null
         val info = declaration.info ?: return null
         val file = (element.containingFile as? GoFile)?.virtualFile ?: return null

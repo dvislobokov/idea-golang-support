@@ -9,6 +9,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFile
@@ -21,10 +23,12 @@ import java.util.function.Supplier
  * directions), as an action for the keyboard. The navigator of the platform asks in the background and shows a list when there are several.
  */
 class GoplsGotoSuperHandler : LanguageCodeInsightActionHandler {
-    override fun isValidFor(editor: Editor, file: PsiFile): Boolean = file is GoFile && declarationAt(file, editor.caretModel.offset) != null
+    override fun isValidFor(editor: Editor, file: PsiFile): Boolean =
+        file is GoFile && !GoFeatures.native(GoFeature.NAVIGATION, file.project) && declarationAt(file, editor.caretModel.offset) != null
     override fun startInWriteAction(): Boolean = false
 
     override fun invoke(project: Project, editor: Editor, file: PsiFile) {
+        if (GoFeatures.native(GoFeature.NAVIGATION, project)) return
         val declaration = declarationAt(file, editor.caretModel.offset) ?: return
         val name = declaration.name ?: return
         val title = if (declaration.kind == GoDeclarationKind.METHOD) "Interface Methods $name Implements" else "Interfaces $name Implements"

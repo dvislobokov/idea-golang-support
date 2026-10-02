@@ -17,6 +17,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspClient
 import com.intellij.platform.lsp.api.customization.LspCompletionSupport
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoExpectedTypes
 import io.github.golangsupport.lang.GoFile
@@ -187,6 +189,7 @@ class GoplsCompletionSupport : LspCompletionSupport() {
 class GoplsArgumentTypedHandler : TypedHandlerDelegate() {
     override fun checkAutoPopup(charTyped: Char, project: Project, editor: Editor, file: PsiFile): Result {
         if (charTyped != ' ' || file !is GoFile || !GoSettings.getInstance().completionArguments) return Result.CONTINUE
+        if (GoFeatures.native(GoFeature.COMPLETION, project)) return Result.CONTINUE
         val text = editor.document.immutableCharSequence
         val offset = editor.caretModel.offset
         if (text.getOrNull(offset - 1) != ',' || GoExpectedTypes.enclosingCall(text, offset) == null || Gopls.client(project) == null) return Result.CONTINUE

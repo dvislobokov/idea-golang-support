@@ -6,6 +6,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.DumbAware
 import com.intellij.psi.PsiFile
 import com.intellij.util.Consumer
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.settings.GoSettings
 
@@ -17,6 +19,7 @@ import io.github.golangsupport.settings.GoSettings
  */
 class GoplsHighlightUsagesHandlerFactory : HighlightUsagesHandlerFactory, DumbAware {
     override fun createHighlightUsagesHandler(editor: Editor, file: PsiFile): HighlightUsagesHandlerBase<PsiFile>? {
+        if (GoFeatures.native(GoFeature.USAGES, file.project)) return null
         if (file !is GoFile || !GoSettings.getInstance().goplsHighlightUsages) return null
         val client = Gopls.client(file.project) ?: return null
         val virtualFile = file.virtualFile ?: return null

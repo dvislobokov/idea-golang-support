@@ -29,12 +29,17 @@ import com.intellij.platform.lsp.api.ProjectWideLspClientDescriptor
 import com.intellij.platform.lsp.api.customization.LspCodeActionsCustomizer
 import com.intellij.platform.lsp.api.customization.LspCodeActionsSupport
 import com.intellij.platform.lsp.api.customization.LspCodeLensCustomizer
+import com.intellij.platform.lsp.api.customization.LspCodeLensDisabled
 import com.intellij.platform.lsp.api.customization.LspCodeLensSupport
 import com.intellij.platform.lsp.api.customization.LspCommandsCustomizer
 import com.intellij.platform.lsp.api.customization.LspCommandsSupport
 import com.intellij.platform.lsp.api.customization.LspCompletionCustomizer
+import com.intellij.platform.lsp.api.customization.LspCompletionDisabled
 import com.intellij.platform.lsp.api.customization.LspCustomization
+import com.intellij.platform.lsp.api.customization.LspDiagnosticsCustomizer
+import com.intellij.platform.lsp.api.customization.LspDiagnosticsDisabled
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsCustomizer
+import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsDisabled
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsSupport
 import com.intellij.platform.lsp.api.customization.LspFoldingRangeCustomizer
 import com.intellij.platform.lsp.api.customization.LspFoldingRangeDisabled
@@ -42,9 +47,16 @@ import com.intellij.platform.lsp.api.lsWidget.LspClientWidgetItem
 import com.intellij.platform.lsp.api.customization.LspGoToDefinitionCustomizer
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.platform.lsp.api.customization.LspGoToDefinitionDisabled
+import com.intellij.platform.lsp.api.customization.LspHoverCustomizer
+import com.intellij.platform.lsp.api.customization.LspHoverDisabled
+import com.intellij.platform.lsp.api.customization.LspRenameCustomizer
+import com.intellij.platform.lsp.api.customization.LspRenameDisabled
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensCustomizer
+import com.intellij.platform.lsp.api.customization.LspSemanticTokensDisabled
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoSemanticColors
 import io.github.golangsupport.cli.GoCli
@@ -179,8 +191,14 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         else -> "go"
     }
 
-    /** Go to Declaration is [GoplsGotoDeclarationHandler]: with both, every target would be offered twice. */
+    /**
+     * Go to Declaration is [GoplsGotoDeclarationHandler]: with both, every target would be offered twice. The switches of [GoFeatures]
+     * are read once, here, as settings only (a descriptor is often built while the IDE indexes; dumb mode is for the handlers): every
+     * settings page restarts the server on Apply ([GoLanguageServerControl.restartAll]), and the restart builds a new descriptor.
+     */
     override val lspCustomization: LspCustomization = object : LspCustomization() {
+        private fun native(feature: GoFeature) = GoFeatures.configuredNative(feature)
+
         override val goToDefinitionCustomizer: LspGoToDefinitionCustomizer get() = LspGoToDefinitionDisabled
 
         /**
@@ -192,20 +210,32 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         /**
          * The colours of the editor beyond what a lexer can tell: packages, references to types, fields, constants, parameters. The
          * platform asks for semantic tokens where a file has no highlighting of its own; a Go file has one, so it is said here.
+         * Follows [GoFeature.SEMANTIC_COLORS].
          */
-        override val semanticTokensCustomizer: LspSemanticTokensCustomizer = object : LspSemanticTokensSupport() {
+        override val semanticTokensCustomizer: LspSemanticTokensCustomizer = if (native(GoFeature.SEMANTIC_COLORS)) LspSemanticTokensDisabled else object : LspSemanticTokensSupport() {
             override fun shouldAskServerForSemanticTokens(psiFile: PsiFile): Boolean = psiFile is GoFile
             override val tokenModifiers: List<String> get() = super.tokenModifiers + GoSemanticColors.MODIFIERS
             override fun getTextAttributesKey(tokenType: String, modifiers: List<String>): TextAttributesKey? = GoSemanticColors.key(tokenType, modifiers)
         }
 
-        override val completionCustomizer: LspCompletionCustomizer = GoplsCompletionSupport()
+        /** Follows [GoFeature.COMPLETION]. */
+        override val completionCustomizer: LspCompletionCustomizer = if (native(GoFeature.COMPLETION)) LspCompletionDisabled else GoplsCompletionSupport()
+
+        /** Follows [GoFeature.HOVER]. */
+        override val hoverCustomizer: LspHoverCustomizer = if (native(GoFeature.HOVER)) LspHoverDisabled else super.hoverCustomizer
+
+        /** Follows [GoFeature.RENAME]. */
+        override val renameCustomizer: LspRenameCustomizer = if (native(GoFeature.RENAME)) LspRenameDisabled else super.renameCustomizer
+
+        /** Follows [GoFeature.DIAGNOSTICS]. */
+        override val diagnosticsCustomizer: LspDiagnosticsCustomizer = if (native(GoFeature.DIAGNOSTICS)) LspDiagnosticsDisabled else super.diagnosticsCustomizer
 
         /**
          * The usages of the name at the caret, reads and writes apart, and the exit points of a function on `func` or `return`: the
          * platform asks a server for them only where a file has no language of its own (TextMate), so a Go file is named here.
+         * Follows [GoFeature.USAGES].
          */
-        override val documentHighlightsCustomizer: LspDocumentHighlightsCustomizer = object : LspDocumentHighlightsSupport() {
+        override val documentHighlightsCustomizer: LspDocumentHighlightsCustomizer = if (native(GoFeature.USAGES)) LspDocumentHighlightsDisabled else object : LspDocumentHighlightsSupport() {
             override fun shouldAskServerForDocumentHighlights(psiFile: PsiFile): Boolean = psiFile is GoFile && GoSettings.getInstance().goplsHighlightUsages
         }
 
@@ -217,8 +247,8 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
             override val intentionActionsSupport: Boolean get() = false
         }
 
-        /** A clicked lens and the command of a code action: [GoplsCommands], not the fire-and-forget notification of the platform. */
-        override val codeLensCustomizer: LspCodeLensCustomizer = object : LspCodeLensSupport() {
+        /** A clicked lens and the command of a code action: [GoplsCommands], not the fire-and-forget notification of the platform. Follows [GoFeature.CODE_VISION]. */
+        override val codeLensCustomizer: LspCodeLensCustomizer = if (native(GoFeature.CODE_VISION)) LspCodeLensDisabled else object : LspCodeLensSupport() {
             override fun codeLensClicked(lspClient: LspClient, contextFile: VirtualFile, command: Command, mouseEvent: MouseEvent?) = GoplsCommands.execute(lspClient, contextFile, command)
         }
         override val commandsCustomizer: LspCommandsCustomizer = object : LspCommandsSupport() {

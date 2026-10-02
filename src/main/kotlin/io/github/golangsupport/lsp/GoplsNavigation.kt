@@ -22,6 +22,8 @@ import com.intellij.usageView.UsageInfo
 import com.intellij.usages.Usage
 import com.intellij.usages.UsageInfo2UsageAdapter
 import com.intellij.util.Processor
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFile
@@ -165,6 +167,7 @@ class GoplsGotoDeclarationHandler : GotoDeclarationHandler {
     override fun getGotoDeclarationTargets(sourceElement: PsiElement?, offset: Int, editor: Editor): Array<PsiElement>? {
         val element = sourceElement?.takeIf { it.containingFile is GoFile && it.node?.elementType == GoTokenTypes.IDENTIFIER } ?: return null
         val project = element.project
+        if (GoFeatures.native(GoFeature.NAVIGATION, project)) return null
         val file = element.containingFile.virtualFile ?: return null
         val client = Gopls.client(project) ?: return null
         val start = element.textRange.startOffset
@@ -189,6 +192,7 @@ class GoplsUsageSearcher : CustomUsageSearcher() {
         val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> {
             if (element is GoDeclaration || GoFindUsagesProvider.isLocalName(element)) GoplsTargets.of(element) else null
         } ?: return
+        if (GoFeatures.native(GoFeature.USAGES, project)) return
         val client = Gopls.client(project) ?: return
         for (place in Gopls.references(client, file, position, TIMEOUT_MS)) {
             val usage = ReadAction.compute<Usage?, RuntimeException> {
@@ -206,6 +210,7 @@ class GoplsUsageSearcher : CustomUsageSearcher() {
 /** Go to Implementation (Ctrl+Alt+B) of an interface, of its method, or of a type: `textDocument/implementation`, which the platform client lacks. */
 class GoplsImplementationSearch : QueryExecutorBase<PsiElement, DefinitionsScopedSearch.SearchParameters>() {
     override fun processQuery(parameters: DefinitionsScopedSearch.SearchParameters, consumer: Processor<in PsiElement>) {
+        if (GoFeatures.native(GoFeature.NAVIGATION, parameters.project)) return
         val declaration = parameters.element as? GoDeclaration ?: return
         // gopls answers a question about a plain function, a field or a value with an error, which the platform logs as a warning
         if (declaration.kind !in WITH_IMPLEMENTATIONS) return

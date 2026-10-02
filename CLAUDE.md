@@ -36,7 +36,7 @@ IGS (`lang.GoLanguage`/`GoFileType` — те же FQN; `GoLexer`, `GoFile`, `GoP
 Команды (JAVA_HOME — JBR IDEA, см. ниже; `--offline`):
 ```sh
 ./gradlew.bat :go-psi-core:test :go-psi-semantic:test :go-psi-ide:test --offline     # тесты модулей (~500 тестов)
-./gradlew.bat test --tests "io.github.golangsupport.lang.parser.*" --offline          # один пакет
+./gradlew.bat :go-psi-core:test --tests "io.github.golangsupport.lang.parser.*" --offline  # один пакет (задача того модуля, где тесты лежат)
 ./gradlew.bat :go-psi-core:corpusTest --offline --no-configuration-cache              # гейты лексера/парсера/стабов над GOROOT и GOMODCACHE (минуты)
 ./gradlew.bat :go-psi-semantic:corpusTest --offline --no-configuration-cache          # resolve/check над GOROOT (~8 мин)
 ./gradlew.bat benchmark --offline --no-configuration-cache                            # бенчмарки с порогами; -Dgopsi.benchmark.update=true записывает улучшения
@@ -56,7 +56,7 @@ tools/gates.sh corpus:semantic bench                                            
 export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 ./gradlew.bat test buildPlugin -q --offline   # основная проверка перед тем, как сказать «готово»
 ./gradlew.bat compileKotlin -q                # быстрая проверка компиляции
-./gradlew.bat test --tests "io.github.golangsupport.GoToolingTest" -q --offline
+./gradlew.bat :test --tests "io.github.golangsupport.GoToolingTest" -q --offline   # фильтр по корневым тестам — только `:test`: в подпроектах go-psi таких классов нет, и агрегат `test` падает
 ./gradlew.bat runIde --args="C:/Users/dvislobokov/idea-golang-support/playground"   # песочница для пользователя
 ```
 

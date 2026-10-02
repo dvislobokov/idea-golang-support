@@ -9,6 +9,7 @@ import com.intellij.openapi.components.service
 import com.intellij.util.execution.ParametersListUtil
 import io.github.golangsupport.GoBundle
 import io.github.golangsupport.PluginLanguage
+import io.github.golangsupport.lang.GoFeature
 
 /** Where delve builds the binary of a debug session. */
 enum class GoDebugBinaryLocation(val title: String) {
@@ -23,6 +24,17 @@ enum class GoDebugBinaryLocation(val title: String) {
 
     /** What the combo shows; [toString] is what the settings file keeps, so it stays English. */
     val label: String get() = GoBundle.messageOr("debugger.binaryLocation.$name", title)
+
+    override fun toString(): String = title
+}
+
+/** Who serves a feature: the language server or the plugin itself; see [io.github.golangsupport.lang.GoFeatures]. */
+enum class GoFeatureSource(val title: String) {
+    GOPLS("gopls"),
+    NATIVE("Built-in");
+
+    /** What a combo shows; [toString] is what the settings file keeps, so it stays English. */
+    val label: String get() = GoBundle.messageOr("featureSource.$name", title)
 
     override fun toString(): String = title
 }
@@ -65,6 +77,17 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** Setting of gopls -> its value as a JSON text, from the page with the catalogue of the server; wins over the switches above. */
         var goplsOverrides by map<String, String>()
+
+        // who serves each feature while the plugin moves from gopls to its own PSI: gopls until the native one is checked live
+        var syntaxErrorsSource by enum(GoFeatureSource.GOPLS)
+        var diagnosticsSource by enum(GoFeatureSource.GOPLS)
+        var completionSource by enum(GoFeatureSource.GOPLS)
+        var hoverSource by enum(GoFeatureSource.GOPLS)
+        var navigationSource by enum(GoFeatureSource.GOPLS)
+        var usagesSource by enum(GoFeatureSource.GOPLS)
+        var renameSource by enum(GoFeatureSource.GOPLS)
+        var semanticColorsSource by enum(GoFeatureSource.GOPLS)
+        var codeVisionSource by enum(GoFeatureSource.GOPLS)
 
         /** `-rpc.trace`: every message of the protocol in the log window of gopls. Big; for looking into what the server was asked. */
         var goplsTrace by property(false)
@@ -205,6 +228,56 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         get() = state.goplsOverrides.toMap()
         // a new map: BaseState does not notice changes inside the one it holds
         set(value) { state.goplsOverrides = value.toMutableMap() }
+
+    var syntaxErrorsSource: GoFeatureSource
+        get() = state.syntaxErrorsSource
+        set(value) { state.syntaxErrorsSource = value }
+
+    var diagnosticsSource: GoFeatureSource
+        get() = state.diagnosticsSource
+        set(value) { state.diagnosticsSource = value }
+
+    var completionSource: GoFeatureSource
+        get() = state.completionSource
+        set(value) { state.completionSource = value }
+
+    var hoverSource: GoFeatureSource
+        get() = state.hoverSource
+        set(value) { state.hoverSource = value }
+
+    var navigationSource: GoFeatureSource
+        get() = state.navigationSource
+        set(value) { state.navigationSource = value }
+
+    var usagesSource: GoFeatureSource
+        get() = state.usagesSource
+        set(value) { state.usagesSource = value }
+
+    var renameSource: GoFeatureSource
+        get() = state.renameSource
+        set(value) { state.renameSource = value }
+
+    var semanticColorsSource: GoFeatureSource
+        get() = state.semanticColorsSource
+        set(value) { state.semanticColorsSource = value }
+
+    var codeVisionSource: GoFeatureSource
+        get() = state.codeVisionSource
+        set(value) { state.codeVisionSource = value }
+
+    /** The source of [feature]; formatting has no switch of its own: the plugin formats unless the formatter is left to the language server. */
+    fun featureSource(feature: GoFeature): GoFeatureSource = when (feature) {
+        GoFeature.SYNTAX_ERRORS -> syntaxErrorsSource
+        GoFeature.DIAGNOSTICS -> diagnosticsSource
+        GoFeature.COMPLETION -> completionSource
+        GoFeature.HOVER -> hoverSource
+        GoFeature.NAVIGATION -> navigationSource
+        GoFeature.USAGES -> usagesSource
+        GoFeature.RENAME -> renameSource
+        GoFeature.SEMANTIC_COLORS -> semanticColorsSource
+        GoFeature.CODE_VISION -> codeVisionSource
+        GoFeature.FORMATTING -> if (formatter == GoFormatter.NONE) GoFeatureSource.GOPLS else GoFeatureSource.NATIVE
+    }
 
     var formatter: GoFormatter
         get() = state.formatter

@@ -4,6 +4,11 @@ All notable changes to the Go Project Support plugin are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Migration to the native Go PSI (branch `migration`, `MIGRATION.md`)
+- Step 1: per-feature source switches `GOPLS | NATIVE` in `GoSettings` (syntax errors, diagnostics, completion, hover, navigation, usages, rename, semantic colours, code vision) read through `GoFeatures`; the gopls customizers and handlers stand down when a feature is served natively. Defaults stay `GOPLS`; no settings UI until a native source exists.
+
 ## [0.2.1] - 2026-10-01
 
 ### Code quality
