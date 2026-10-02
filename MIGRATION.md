@@ -46,9 +46,12 @@
 | 9 | Текстовые инструменты IGS на PSI (бенефициары) | по инструменту | 5 | [ ] |
 | 10 | Удаление старого: сканер, text-lexer, gopls-дубли, docs/psi → docs | день | 8 | [ ] |
 | 11 | Волны `docs/psi/FEATURES.md` (новые фичи поверх PSI) | вехи | 8 | [ ] |
+| 12 | gopls опционален → удалён (две вехи) | вехи | 8, 11 | [ ] |
+| 13 | Собственный анализ вместо линтеров; линтеры по запросу (этапы A–C) | 2+3+4 недели | 5 | [ ] |
 
 Критический путь: 2 → 3 → 4 → 5 → 6/7 → 8. Шаг 1 делается параллельно и нужен к началу 8; шаг 9 можно вести
-параллельно с 6–8 по одному инструменту.
+параллельно с 6–8 по одному инструменту. Шаг 13 начинается после 5 и идёт параллельно с 6–8: ему нужны только
+PSI и типы. Шаг 12 — две вехи, которые закрывают 8 и 11/13 соответственно.
 
 ---
 
@@ -318,6 +321,107 @@ IGS; робот: открыть `playground` с зависимостью, Go to 
 генерация и рефакторинги. Решение D1 (`go` вне project model) в IGS уже принято де-факто: run/test/coverage/debug
 живут в IGS и зовут `go` и `dlv`; PSI-модули по-прежнему не зовут.
 
+## Шаг 12. Отказ от gopls: две вехи
+
+Ответ на вопрос «можно ли полностью отказаться от gopls» — да, в два этапа; граница между ними — объём волн
+`FEATURES.md`, не риск.
+
+**Веха 12.1 — gopls опционален.** Условие: все фичи 8a–8h и 8j на умолчании `NATIVE`, прошли релиз без отката.
+Тогда при `languageServerEnabled=false` плагин даёт всё для ежедневной работы: парсинг, навигация, usages, цвета,
+completion, doc, parameter info, rename, типовые диагностики, форматирование. gopls включают ради того, чего в PSI
+ещё нет: inlay hints, code vision, анализаторы, code actions (fill struct/switch/returns, create from usage), extract/
+inline/change signature, диагностики `go.mod`. Что сделать в самой вехе:
+- `languageServerEnabled` по умолчанию `false` для новых установок; существующим — уведомление один раз с выбором.
+- `GoToolchainCheckActivity` не предлагает установить gopls, пока сервер выключен; `GoplsStatusWidget`, окно gopls,
+  меню `Go.Gopls` скрываются при выключенном сервере (сейчас часть видна всегда — проверить роботом).
+- `build.GoBuildProblemsAnnotator` (ошибки `go build` без gopls) остаётся как подстраховка на cgo и build-варианты.
+- Замер `--perf` без gopls: память процесса IDE и P1/P3 — в CHANGELOG рядом с цифрами «с gopls».
+- Паритет проверяется списком `playground/README.md`: каждая строка «через gopls» получает колонку «без gopls».
+
+**Веха 12.2 — gopls удалён.** Условие: закрыты волны 1 (inlay hints, code vision), 2 (анализ, шаг 13 этап A),
+3 (создание кода: create from usage, implement interface, fill struct/switch/returns), 7 (introduce variable,
+extract function, inline, change signature) `FEATURES.md`, а также диагностики `go.mod` (unused require,
+`replace` в никуда — `FEATURES.md` §5). Что удаляется: content-модуль `lsp` целиком (`GoplsIntegration`,
+`Gopls*`, `io.github.golangsupport.lsp.xml`), `bundledModule("intellij.platform.lsp")` из сборки, EP
+`languageServerControl`/`signatureProvider` (остаётся нативный провайдер), страницы `GoLanguageServerConfigurable`/
+`GoplsSettingsConfigurable`, настройки `gopls*`, флаги `GoFeatureSource` (остаётся один путь), `tools/gopls/probe.py`.
+Vulncheck и upgrades переезжают на `go` CLI (`govulncheck`, `go list -m -u -json`) в `build.*`/`mod.*` — это сетевые
+команды, не анализ. Что не будет никогда без отдельного решения: cgo (`C.xxx` — sentinel, тела не анализируются;
+gopls делает это тоже плохо), одновременный анализ нескольких GOOS/GOARCH (у нас — переиндексация по тегам, как
+смена env у gopls), полный паритет со staticcheck (~150 правил; покрывается топ-30 своими правилами + линтер по
+запросу, шаг 13).
+
+Выигрыш после 12.2: плагин работает в любой IDE на платформе, включая форки без `intellij.platform.lsp`, без
+отдельного процесса на 300–800 МБ на проект, без расхождений «что видит IDE / что видит gopls» при правках.
+
+## Шаг 13. Собственный анализ вместо линтеров; линтеры по запросу
+
+**Зачем.** `lint.GoLintAnnotator` — внешний аннотатор golangci-lint по сохранённому файлу (`lintOnTheFly`): процесс на
+каждое сохранение, результат через секунды, конкуренция с IDE за CPU. Реально из него используют 10–20 проверок:
+`errcheck`, `govet` (printf, shadow, copylocks, structtag, unreachable), `staticcheck` SA-класс, `unused`,
+`ineffassign`, `gosimple`; остальное — стиль и метрики. Цель: всё, что должно быть «вживую», делает PSI
+(мгновенно, инкрементально по телам функций, с quick-fix), линтер остаётся инструментом по запросу и для CI.
+
+**Что уже есть (type checker):** unresolved, unused var/import/label/value, type mismatch, arity, duplicates,
+generics, missing return, init cycles — 0 ложных срабатываний на GOROOT (`:go-psi-semantic:corpusTest`), результат
+кэшируется по телам функций (`docs/psi/CHANGELOG.md`, «Per-body diagnostics»).
+
+**Этап A — vet-класс без data flow (~2 недели, после шага 5, параллельно с 6–8).** Каждая проверка — инспекция в
+`go-psi-ide/.../inspections` с quick-fix, корпусный гейт на GOROOT (0 ложных; исключения — список с причиной), тест с
+`<warning>`-маркерами. Порядок:
+- `Printf`-семейство: verb vs тип аргумента, число аргументов, `%w` только в `Errorf`, обёртки пользователя как у
+  vet (функция с `format string, args ...any`, зовущая printf-функцию) — fix: исправить verb;
+- `structtag`: синтаксис, дубли ключей/имён, `json:"-,"` — fix: исправить тег;
+- exhaustive `switch` по `iota`-перечислениям и «sealed» интерфейсам (определение — `FEATURES.md` §5; weak warning,
+  выключена по умолчанию) + fix «fill switch»;
+- `unreachable`, self-assignment, `x == nil` для значения, которое не может быть nil, сравнение функций;
+- `errors.As` с не-указателем, `errors.Is` vs `==`, `context.Context` не первым параметром, `context.Background()`
+  в обработчике, где есть входящий контекст;
+- `ineffassign`-лайт: присваивание, перекрытое следующим присваиванием без чтения в том же блоке (без CFG —
+  только прямая последовательность);
+- `//go:build`: синтаксис выражения, неизвестные GOOS/GOARCH; `//go:embed`: паттерн без совпадений.
+Критерий окончания A: на `playground` и на `golang.org/x/tools` набор срабатываний PSI ⊇ срабатывания `go vet`
+по этим анализаторам (сравнить скриптом по JSON `go vet -json`), ложных — 0 на GOROOT.
+
+**Этап B — data-flow (~3 недели).** Фреймворк per-function: CFG по PSI-блокам (`if`/`for`/`switch`/`select`/
+`goto`/`defer`/`panic`/`return`, `GoTerminating` уже есть), простой DFA (reaching definitions, liveness) с кэшем в
+`GoBodyCache` под трекером тела. Проверки на нём:
+- `errcheck`: результат-ошибка не присвоен/не проверен; `err` перезаписан до проверки; проверяется не тот `err`
+  (fix: `if err != nil { return ..., err }`);
+- nil-flow: разыменование после `x == nil` без выхода; `defer resp.Body.Close()` до проверки ошибки;
+- `copylocks`: копирование значения с `sync.Mutex`/`sync.WaitGroup` (по `GoSizes`/method set `Lock`);
+- `wg.Add` внутри горутины, захват переменной цикла в `go`/`defer` при `go < 1.22` в `go.mod`, отправка в закрытый
+  канал (локально);
+- `shadow` (опционально, выключена по умолчанию), неиспользуемые параметры (`unusedparams`, fix с call sites — M).
+Критерий B: `errcheck` и `nilness` по `golang.org/x/tools` — паритет с линтером ±5% при 0 ложных на GOROOT;
+`GoHighlightingPassBenchmark.afterBodyEdit` не хуже +10%.
+
+**Этап C — декларативный движок правил (~3–4 недели), `docs/psi/RULES.md`.** Правило = паттерн PSI (с
+метапеременными) + условия на типы/константы + сообщение + шаблон замены; загрузка из ресурсов плагина и из
+`.go-psi-rules.yaml` проекта; импортер синтаксиса ruleguard (`m.Match(...).Where(...).Report(...)`) для переноса
+готовых наборов. После движка перенос правила staticcheck/gocritic — минуты: первыми топ-30 SA по частоте
+срабатываний (`SA1006`, `SA1019` deprecated через doc-комментарии, `SA4006`, `SA4009`, `SA5011`, `SA6005`, `S1000`-серия
+упрощений с fix), затем `gocritic` (`ifElseChain`, `singleCaseSwitch`, `sloppyLen`, …). Каждое правило проходит тот же
+корпусный гейт. Критерий C: 30 правил SA + 20 gocritic, прогон корпуса < +15% к check-гейту.
+
+**Линтеры по запросу (параллельно с A, ~3 дня).**
+- `GoLintAnnotator` перестаёт быть `externalAnnotator` по умолчанию: настройка `lintOnTheFly` → `false`; код
+  аннотатора остаётся для тех, кто включит.
+- Действие **Go | Lint** (файл / пакет / проект; `golangci-lint run --out-format json` или `go vet -json`, если
+  golangci-lint не установлен) → Problems tool window с теми же quick-fix (`GoLintFixes`, `GoSignatureProvider`);
+  прогресс в `Task.Backgroundable`, отмена убивает процесс.
+- Перед коммитом: чекбокс «Lint changed files» в Commit-диалоге (`CheckinHandlerFactory`), как «Run inspections».
+- Профиль инспекций: нативные проверки, дублирующие линтер (printf, structtag, errcheck, …), помечены в описании
+  («replaces golangci-lint: govet/printf»), чтобы при включённом линтере пользователь выключил одно из двух.
+- CI остаётся на golangci-lint; документировать в `docs/guide.html`.
+
+**Что теряется.** Проверки, не перенесённые в A–C, видны только по запросу/в CI. Стиль и метрики (`gocyclo`,
+`lll`, `revive`-стиль, `gofumpt`-правила) своими не делаются — только линтер.
+
+**Умолчания по этапам.** После A: `lintOnTheFly=false` для новых установок. После B: линтер не предлагается к
+установке в `GoToolchainCheckActivity` (ставится по первому Go | Lint). После C: golangci-lint в настройках —
+раздел «External tools», не «Code quality».
+
 ## Риски и как их снимаем
 
 | Риск | Снятие |
@@ -331,6 +435,9 @@ IGS; робот: открыть `playground` с зависимостью, Go to 
 | Память: кэши типов (45 МБ на 16k строк GOROOT) | `GoCacheMemoryBenchmark`, P9; дальше — `docs/psi/LIBRARY-SUMMARIES.md` |
 | Кодировка/EOL: часть перенесённых файлов с CRLF | `.gitattributes` IGS нормализует; при первом касании файла Git переписывает в LF |
 | Лицензии не оформлены | шаг 10 до релиза |
+| Ложные срабатывания собственных проверок (хуже, чем отсутствие проверки) | корпусный гейт на GOROOT и `golang.org/x` для каждой инспекции, 0 ложных как условие merge; новые классы — выключены по умолчанию первый релиз |
+| Data-flow (этап B) замедляет подсветку | кэш в `GoBodyCache` по телу, `afterBodyEdit` в бенчмарках как порог, DFA только по запросу инспекции |
+| Пользователи теряют привычные проверки линтера после `lintOnTheFly=false` | Go \| Lint и чекбокс в Commit; уведомление один раз со ссылкой на настройку |
 
 ## Чек-лист текущего состояния
 
@@ -342,3 +449,5 @@ IGS; робот: открыть `playground` с зависимостью, Go to 
 - [ ] Шаг 6 — stub-индексы. [ ] Шаг 7 — project model, library roots.
 - [ ] 8a [ ] 8b [ ] 8c [ ] 8d [ ] 8e [ ] 8f [ ] 8g [ ] 8h [ ] 8i [ ] 8j.
 - [ ] Шаг 9, [ ] шаг 10, [ ] шаг 11.
+- [ ] 12.1 gopls опционален, [ ] 12.2 gopls удалён.
+- [ ] 13 линтеры по запросу, [ ] 13A vet-класс, [ ] 13B data-flow, [ ] 13C движок правил.
