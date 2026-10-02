@@ -49,7 +49,7 @@ Go file(0,66)
               GoReferenceExpressionImpl(REFERENCE_EXPRESSION)(49,50)
                 PsiElement(IDENTIFIER)('x')(49,50)
             PsiElement(++)('++')(50,52)
-          PsiErrorElement:';', SEMICOLON_SYNTHETIC or '}' expected(52,52)
+          PsiErrorElement:';' or '}' expected(52,52)
             <empty list>
   PsiElement(SEMICOLON_SYNTHETIC)('\n')(52,53)
   PsiWhiteSpace('\n')(53,54)

@@ -2,6 +2,8 @@ package io.github.golangsupport.ide.navigation
 
 import com.intellij.codeInsight.navigation.actions.TypeDeclarationProvider
 import com.intellij.psi.PsiElement
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoImportSpec
 import io.github.golangsupport.lang.psi.GoLabelDefinition
 import io.github.golangsupport.lang.psi.GoNamedElement
@@ -28,6 +30,7 @@ class GoTypeDeclarationProvider : TypeDeclarationProvider {
 
     override fun getSymbolTypeDeclarations(symbol: PsiElement): Array<PsiElement>? {
         val named = symbol as? GoNamedElement ?: return null
+        if (!GoIdeFeatureGate.enabled(GoIdeFeature.NAVIGATION, symbol.project)) return null
         if (named is GoTypeSpec || named is GoImportSpec || named is GoPackageClause || named is GoLabelDefinition) return null
         val type = GoSemanticService.getInstance(symbol.project).declarationType(named)
         val declaration = typeDeclarationOf(type) ?: return null

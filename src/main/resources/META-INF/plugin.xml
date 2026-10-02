@@ -34,6 +34,10 @@
     <xi:include href="/META-INF/go-psi-core-language.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- editor features over that PSI: structure, breadcrumbs, folding, Go to Class / Symbol, commenter, braces, quotes, find-usages words -->
     <xi:include href="/META-INF/go-psi-ide-editor.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- navigation and usages over that PSI: Go to Type Declaration / Implementation / Super, implementation gutters, reference search, usage types,
+         read/write access, Find Usages handler, exit points (MIGRATION.md step 8c; the gate GoIgsIdeFeatureGate follows the switches
+         Navigation / Usages / Code vision) -->
+    <xi:include href="/META-INF/go-psi-ide-navigation.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->
@@ -52,11 +56,16 @@
                             serviceImplementation="io.github.golangsupport.sdk.GoIgsToolchainProvider" overrides="true"/>
         <applicationService serviceInterface="io.github.golangsupport.project.impl.GoLibraryRootsPolicy"
                             serviceImplementation="io.github.golangsupport.sdk.GoIgsLibraryRootsPolicy" overrides="true"/>
+        <!-- the navigation and usages extensions of go-psi-ide answer only when their feature switch says Built-in (step 8c) -->
+        <applicationService serviceInterface="io.github.golangsupport.ide.GoIdeFeatureGate"
+                            serviceImplementation="io.github.golangsupport.lang.GoIgsIdeFeatureGate" overrides="true"/>
         <!-- *_test.go are tests: the "Tests" scope of the platform, and with it the green background in the tree and the tabs -->
         <testSourcesFilter implementation="io.github.golangsupport.testing.GoTestSourcesFilter"/>
 
         <lang.syntaxHighlighterFactory language="Go" implementationClass="io.github.golangsupport.lang.GoSyntaxHighlighterFactory"/>
         <annotator language="Go" implementationClass="io.github.golangsupport.lang.GoIdentifierAnnotator"/>
+        <!-- the syntax errors of the parser only when they are not gopls's (Settings | Tools | Go | Language Server, "Syntax errors") -->
+        <highlightErrorFilter implementation="io.github.golangsupport.lang.GoSyntaxErrorFilter"/>
         <!-- on the declarations GoDeclarations finds by tokens -->
         <testFinder implementation="io.github.golangsupport.lang.GoTestFinder"/>
         <testCreator language="Go" implementationClass="io.github.golangsupport.lang.GoTestCreator"/>

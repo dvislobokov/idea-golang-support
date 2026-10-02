@@ -24,6 +24,8 @@
         <typeDeclarationProvider implementation="io.github.golangsupport.lsp.GoplsTypeDeclarationProvider"/>
         <lang.expressionTypeProvider language="Go" implementationClass="io.github.golangsupport.lsp.GoplsExpressionTypeProvider"/>
         <customUsageSearcher implementation="io.github.golangsupport.lsp.GoplsUsageSearcher"/>
+        <!-- with gopls as the source of usages, Find Usages gets only its answer: the PSI references are not searched (step 8c) -->
+        <findUsagesHandlerFactory implementation="io.github.golangsupport.lsp.GoplsFindUsagesHandlerFactory"/>
         <definitionsScopedSearch implementation="io.github.golangsupport.lsp.GoplsImplementationSearch"/>
         <!-- the actions of gopls for the caret, an item of Alt+Enter each: an item is a class, so there are as many of them as there are classes -->
         <intentionAction>

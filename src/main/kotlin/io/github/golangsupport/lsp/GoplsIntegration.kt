@@ -382,15 +382,22 @@ class RestartGoplsAction : AnAction(), DumbAware {
  * The diagnostics of gopls as annotations, minus the ones that no longer fit the file: a diagnostic published for a longer version
  * of a big file (format on save shrank it) arrives with a range past the end, and the platform threw "Range must be inside element
  * being annotated" instead of dropping it (seen live on a 135 KB file). The next publish replaces them anyway.
+ * Minus, too, the syntax errors when the plugin's parser shows its own ([GoFeature.SYNTAX_ERRORS], MIGRATION.md step 8a): one underline per
+ * error, not two. Type errors (`source == "compiler"`) stay until the native diagnostics (step 8g).
  */
 class GoplsDiagnosticsSupport : LspDiagnosticsSupport() {
     override fun createAnnotation(holder: AnnotationHolder, diagnostic: Diagnostic, textRange: TextRange, quickFixes: List<IntentionAction>) {
-        if (!fits(textRange, holder.currentAnnotationSession.file.textLength)) return
+        val file = holder.currentAnnotationSession.file
+        if (!fits(textRange, file.textLength)) return
+        if (!accepts(diagnostic.source, GoFeatures.native(GoFeature.SYNTAX_ERRORS, file.project))) return
         super.createAnnotation(holder, diagnostic, textRange, quickFixes)
     }
 
     companion object {
         /** Whether a diagnostic at [range] can be annotated in a file of [textLength] characters. */
         fun fits(range: TextRange, textLength: Int): Boolean = range.startOffset >= 0 && range.endOffset <= textLength
+
+        /** Whether a diagnostic of [source] is shown: the syntax errors of gopls are not when the plugin's parser shows its own ([nativeSyntaxErrors]). */
+        fun accepts(source: String?, nativeSyntaxErrors: Boolean): Boolean = !(nativeSyntaxErrors && source == "syntax")
     }
 }

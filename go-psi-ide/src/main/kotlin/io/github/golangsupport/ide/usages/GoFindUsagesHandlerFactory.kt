@@ -6,6 +6,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.navigation.GoImplementations
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoMethodSpec
@@ -17,7 +19,7 @@ import io.github.golangsupport.lang.psi.GoMethodSpec
  */
 class GoFindUsagesHandlerFactory : FindUsagesHandlerFactory() {
 
-    override fun canFindUsages(element: PsiElement): Boolean = element is GoMethodDeclaration
+    override fun canFindUsages(element: PsiElement): Boolean = element is GoMethodDeclaration && GoIdeFeatureGate.enabled(GoIdeFeature.USAGES, element.project)
 
     override fun createFindUsagesHandler(element: PsiElement, forHighlightUsages: Boolean): FindUsagesHandler? {
         val method = element as? GoMethodDeclaration ?: return null

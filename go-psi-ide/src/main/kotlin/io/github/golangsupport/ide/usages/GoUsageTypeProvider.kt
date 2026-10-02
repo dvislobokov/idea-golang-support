@@ -4,6 +4,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.usages.impl.rules.UsageType
 import com.intellij.usages.impl.rules.UsageTypeProvider
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoAnonymousFieldDefinition
 import io.github.golangsupport.lang.psi.GoCallExpr
 import io.github.golangsupport.lang.psi.GoFieldDefinition
@@ -26,6 +28,7 @@ import io.github.golangsupport.lang.psi.GoTypeSpec
 class GoUsageTypeProvider : UsageTypeProvider {
 
     override fun getUsageType(element: PsiElement): UsageType? {
+        if (!GoIdeFeatureGate.enabled(GoIdeFeature.USAGES, element.project)) return null
         val site = PsiTreeUtil.getNonStrictParentOfType(
             element,
             GoReferenceExpression::class.java,

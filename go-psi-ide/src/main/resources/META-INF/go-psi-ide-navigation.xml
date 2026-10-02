@@ -1,11 +1,14 @@
 <!-- go-psi-ide, navigation and usages: type declaration, implementations, target element, goto super, implementation markers, references search, usage types, exit points.
-     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml.
+     Every extension here asks io.github.golangsupport.ide.GoIdeFeatureGate first (registered in go-psi-ide-editor.xml) and stands down when its
+     group is off. The platform takes one targetElementEvaluator and one codeInsight.gotoSuper per language: those two go first and, when off,
+     defer to the next one registered for Go. -->
 <idea-plugin>
   <extensions defaultExtensionNs="com.intellij">
     <typeDeclarationProvider implementation="io.github.golangsupport.ide.navigation.GoTypeDeclarationProvider"/>
     <definitionsScopedSearch implementation="io.github.golangsupport.ide.navigation.GoImplementationSearch"/>
-    <targetElementEvaluator language="Go" implementationClass="io.github.golangsupport.ide.navigation.GoTargetElementEvaluator"/>
-    <codeInsight.gotoSuper language="Go" implementationClass="io.github.golangsupport.ide.navigation.GoGotoSuperHandler"/>
+    <targetElementEvaluator language="Go" implementationClass="io.github.golangsupport.ide.navigation.GoTargetElementEvaluator" order="first"/>
+    <codeInsight.gotoSuper language="Go" implementationClass="io.github.golangsupport.ide.navigation.GoGotoSuperHandler" order="first"/>
     <codeInsight.lineMarkerProvider language="Go"
                                     implementationClass="io.github.golangsupport.ide.navigation.GoImplementationLineMarkerProvider"/>
     <referencesSearch implementation="io.github.golangsupport.ide.usages.GoReferencesSearch"/>

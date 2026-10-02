@@ -1,8 +1,10 @@
 package io.github.golangsupport.settings
 
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.SimpleListCellRenderer
@@ -41,6 +43,29 @@ class GoLanguageServerConfigurable(project: Project) : GoSettingsPage(project, "
         row { checkBox(GoBundle.message("ls.trace")).bindSelected(settings::goplsTrace).comment(GoBundle.message("ls.trace.comment")) }
         row { checkBox(GoBundle.message("ls.debugPages")).bindSelected(settings::goplsDebugPages).comment(GoBundle.message("ls.debugPages.comment")) }
         row { comment(GoBundle.message("ls.more")) }
+        group(GoBundle.message("features.group")) {
+            row { comment(GoBundle.message("features.group.comment")) }
+            row(GoBundle.message("features.syntaxErrors")) {
+                // the renderer, not toString(): what the settings file keeps has to stay English whatever the language of the page
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::syntaxErrorsSource.toNullableProperty())
+            }
+            row(GoBundle.message("features.navigation")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::navigationSource.toNullableProperty())
+                    .comment(GoBundle.message("features.navigation.comment"))
+            }
+            row(GoBundle.message("features.usages")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::usagesSource.toNullableProperty())
+                    .comment(GoBundle.message("features.usages.comment"))
+            }
+        }
+    }
+
+    /** A changed source shows at once: the error elements and the gopls annotations are both decided per highlighting pass, so a restart of the daemon is enough. */
+    override fun apply() {
+        val before = listOf(settings.syntaxErrorsSource, settings.navigationSource, settings.usagesSource)
+        super.apply()
+        val after = listOf(settings.syntaxErrorsSource, settings.navigationSource, settings.usagesSource)
+        if (after != before) ProjectManager.getInstance().openProjects.forEach { DaemonCodeAnalyzer.getInstance(it).restart() }
     }
 }
 

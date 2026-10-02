@@ -144,9 +144,10 @@ File ::= (PackageClauseWithSemi | <<missingPackageClause>>) ImportList TopLevelD
 private PackageClauseWithSemi ::= PackageClause semi {pin=1}
 PackageClause ::= package IDENTIFIER {pin=1 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoPackageClauseStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoPackageClauseStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
 
-// A terminator: explicit or inserted semicolon, end of file, or (optionally) a closing bracket.
-private semi ::= ';' | SEMICOLON_SYNTHETIC | <<eof>> | &(')' | '}')
-private semiToken ::= ';' | SEMICOLON_SYNTHETIC
+// A terminator: explicit or inserted semicolon, end of file, or (optionally) a closing bracket. The inserted semicolon is consumed by
+// an external rule so that it is not named among the expected tokens of an error ("';' or '}' expected", not "SEMICOLON_SYNTHETIC").
+private semi ::= ';' | <<syntheticSemi>> | <<eof>> | &(')' | '}')
+private semiToken ::= ';' | <<syntheticSemi>>
 
 ImportList ::= ImportDeclarationWithSemi* {hooks=[leftBinder="DOC_COMMENT_BINDER"]}
 private ImportDeclarationWithSemi ::= ImportDeclaration semi {pin=1 recoverWhile=TopLevelRecover}

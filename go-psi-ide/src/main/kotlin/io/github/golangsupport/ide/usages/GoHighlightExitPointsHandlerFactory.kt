@@ -8,6 +8,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.Consumer
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoBreakStatement
 import io.github.golangsupport.lang.psi.GoCallExpr
 import io.github.golangsupport.lang.psi.GoContinueStatement
@@ -40,7 +42,7 @@ import io.github.golangsupport.lang.psi.GoTypes
 class GoHighlightExitPointsHandlerFactory : HighlightUsagesHandlerFactoryBase(), DumbAware {
 
     override fun createHighlightUsagesHandler(editor: Editor, file: PsiFile, target: PsiElement): HighlightUsagesHandlerBase<*>? {
-        if (file !is GoFile) return null
+        if (file !is GoFile || !GoIdeFeatureGate.enabled(GoIdeFeature.USAGES, file.project)) return null
         val usages: List<PsiElement> = when (target.node?.elementType) {
             GoTypes.FUNC -> {
                 val owner = target.parent

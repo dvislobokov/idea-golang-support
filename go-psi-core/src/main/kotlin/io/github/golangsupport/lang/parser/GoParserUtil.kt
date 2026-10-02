@@ -45,6 +45,13 @@ object GoParserUtil : GeneratedParserUtilBase() {
     // Section B: composite literal gating (go/parser exprLev)
     // ---------------------------------------------------------------------------------------------
 
+    /**
+     * Consumes a semicolon the lexer inserted at a line end (`SEMICOLON_SYNTHETIC`) without naming it among the expected tokens of an
+     * error message: a user reads "';' or '}' expected", the line break that would have ended the statement is not a token to them.
+     */
+    @JvmStatic
+    fun syntheticSemi(b: PsiBuilder, level: Int): Boolean = consumeTokenFast(b, SEMICOLON_SYNTHETIC)
+
     /** Runs [p] with `exprLev` incremented: inside `(...)`, `[...]`, `{...}` of a literal, func bodies. */
     @JvmStatic
     fun nested(b: PsiBuilder, level: Int, p: Parser): Boolean {

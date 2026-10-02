@@ -5,6 +5,8 @@ import com.intellij.psi.PsiReference
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.Processor
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoImportSpec
 import io.github.golangsupport.lang.psi.GoReferenceExpression
 import io.github.golangsupport.semantic.scope.GoScopes
@@ -21,6 +23,7 @@ class GoReferencesSearch : QueryExecutorBase<PsiReference, ReferencesSearch.Sear
 
     override fun processQuery(parameters: ReferencesSearch.SearchParameters, consumer: Processor<in PsiReference>) {
         val spec = parameters.elementToSearch as? GoImportSpec ?: return
+        if (!GoIdeFeatureGate.enabled(GoIdeFeature.USAGES, spec.project)) return
         if (spec.isDot || spec.isBlank) return
         val localName = GoScopes.importName(spec)
         if (localName == spec.name) return

@@ -41,7 +41,7 @@ Go file(0,147)
           PsiComment(LINE_COMMENT)('// missing closing brace of the if')(45,79)
           PsiWhiteSpace('\n')(79,80)
           PsiElement(})('}')(80,81)
-      PsiErrorElement:';', SEMICOLON_SYNTHETIC or '}' expected(81,81)
+      PsiErrorElement:';' or '}' expected(81,81)
         <empty list>
   PsiElement(SEMICOLON_SYNTHETIC)('\n')(81,82)
   PsiWhiteSpace('\n')(82,83)

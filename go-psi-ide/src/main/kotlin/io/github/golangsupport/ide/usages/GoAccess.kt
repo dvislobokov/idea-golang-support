@@ -3,6 +3,8 @@ package io.github.golangsupport.ide.usages
 import com.intellij.codeInsight.highlighting.ReadWriteAccessDetector
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReference
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoAnonymousFieldDefinition
 import io.github.golangsupport.lang.psi.GoAssignmentStatement
 import io.github.golangsupport.lang.psi.GoConstDefinition
@@ -59,8 +61,9 @@ object GoAccess {
 class GoReadWriteAccessDetector : ReadWriteAccessDetector() {
 
     override fun isReadWriteAccessible(element: PsiElement): Boolean =
-        element is GoVarDefinition || element is GoConstDefinition || element is GoParamDefinition ||
-            element is GoReceiver || element is GoFieldDefinition || element is GoAnonymousFieldDefinition
+        (element is GoVarDefinition || element is GoConstDefinition || element is GoParamDefinition ||
+            element is GoReceiver || element is GoFieldDefinition || element is GoAnonymousFieldDefinition) &&
+            GoIdeFeatureGate.enabled(GoIdeFeature.USAGES, element.project)
 
     /** Declarations that assign a value: initialized vars, `:=`, range/recv/type-switch bindings, consts. */
     override fun isDeclarationWriteAccess(element: PsiElement): Boolean = when (element) {

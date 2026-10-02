@@ -18,6 +18,15 @@ behaviour is PSI/semantic based (`GoSemanticService`, stub indices); no LSP. Cod
 
 ## Phase 6c: navigation, usages, rename, documentation
 
+Every extension of `go-psi-ide-navigation.xml` asks the application service `ide.GoIdeFeatureGate` at its entry
+(`enabled(GoIdeFeature.NAVIGATION | USAGES | IMPLEMENTATION_MARKERS, project)`) and stands down when the answer is no:
+providers return null, searches process nothing, factories cannot find usages, the goto-super handler is not valid.
+`DefaultGoIdeFeatureGate` (registered in `go-psi-ide-editor.xml`) says yes to everything; a host plugin overrides the
+service with its own feature switches so that one source answers at a time, and says no while the IDE indexes. The
+platform consults a single `targetElementEvaluator` and a single `codeInsight.gotoSuper` per language, so those two are
+registered `order="first"` and, when off, delegate to the next extension registered for Go. `GoIdeFeatureGateTest` covers
+the closed gate; the other tests run against the default.
+
 ### Navigation (`ide.navigation`)
 
 | EP | Class | Behaviour |

@@ -15,6 +15,14 @@ class GoplsDiagnosticsTest {
     }
 
     @Test
+    fun onlyTheSyntaxErrorsOfGoplsYieldToTheParser() {
+        assertFalse(GoplsDiagnosticsSupport.accepts("syntax", nativeSyntaxErrors = true))
+        assertTrue(GoplsDiagnosticsSupport.accepts("syntax", nativeSyntaxErrors = false))
+        assertTrue("type errors stay until the native diagnostics", GoplsDiagnosticsSupport.accepts("compiler", nativeSyntaxErrors = true))
+        assertTrue(GoplsDiagnosticsSupport.accepts(null, nativeSyntaxErrors = true))
+    }
+
+    @Test
     fun aRangeInsideTheFileFits() {
         assertTrue(GoplsDiagnosticsSupport.fits(TextRange(0, 0), 0))
         assertTrue(GoplsDiagnosticsSupport.fits(TextRange(135160, 135163), 135163))

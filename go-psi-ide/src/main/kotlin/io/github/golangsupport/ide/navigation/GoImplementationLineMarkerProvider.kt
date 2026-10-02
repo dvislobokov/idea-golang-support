@@ -12,6 +12,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.semantic.cache.GoTrackers
 import java.util.concurrent.atomic.AtomicInteger
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
@@ -43,6 +45,8 @@ class GoImplementationLineMarkerProvider : LineMarkerProviderDescriptor() {
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? = null
 
     override fun collectSlowLineMarkers(elements: List<PsiElement>, result: MutableCollection<in LineMarkerInfo<*>>) {
+        val first = elements.firstOrNull() ?: return
+        if (!GoIdeFeatureGate.enabled(GoIdeFeature.IMPLEMENTATION_MARKERS, first.project)) return
         for (leaf in elements) {
             if (leaf.node.elementType !== GoTypes.IDENTIFIER) continue
             val owner = leaf.parent as? GoNamedElement ?: continue

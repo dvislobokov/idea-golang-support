@@ -26,8 +26,9 @@ Verified against go/scanner on all of GOROOT/src (`GorootLexerDiffCorpusTest`, 0
   offset 0; BAD_CHARACTER keeps the `MAYBE_SEMICOLON` state; a line comment ends only at `\n`
   and includes a trailing `\r`; unterminated string and rune literals end before `\n`, and a
   lone `\` before `\n` or EOF is part of the literal; unterminated block comments run to EOF.
-- Parser rule: `semi ::= ';' | SEMICOLON_SYNTHETIC | <<eof>> | &(')' | '}')`, i.e. the
-  semicolon is optional before `)` and `}` (spec).
+- Parser rule: `semi ::= ';' | <<syntheticSemi>> | <<eof>> | &(')' | '}')`, i.e. the
+  semicolon is optional before `)` and `}` (spec). `syntheticSemi` (GoParserUtil) consumes `SEMICOLON_SYNTHETIC` with
+  `consumeTokenFast`, so the inserted semicolon is not named among the expected tokens of an error ("';' or '}' expected").
 
 ## B. Composite literal vs block in control headers
 

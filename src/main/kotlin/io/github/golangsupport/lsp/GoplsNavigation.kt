@@ -2,6 +2,8 @@ package io.github.golangsupport.lsp
 
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler
 import com.intellij.find.findUsages.CustomUsageSearcher
+import com.intellij.find.findUsages.FindUsagesHandler
+import com.intellij.find.findUsages.FindUsagesHandlerFactory
 import com.intellij.find.findUsages.FindUsagesOptions
 import com.intellij.openapi.application.QueryExecutorBase
 import com.intellij.openapi.application.ReadAction
@@ -207,6 +209,21 @@ class GoplsUsageSearcher : CustomUsageSearcher() {
 
     private companion object {
         const val TIMEOUT_MS = 30_000
+    }
+}
+
+/**
+ * With gopls on duty for usages, Find Usages lists its usages alone: the handler runs no reference search, so the references of the
+ * PSI (which resolve whatever the switch says) do not double every site (seen live since step 4). The custom usage searcher above still
+ * runs: the platform calls every one of them besides the handler. Highlighting of the identifier at the caret keeps the references of
+ * the PSI ([FindUsagesHandler.findReferencesToHighlight] is not touched). Stands down when the PSI is the source.
+ */
+class GoplsFindUsagesHandlerFactory : FindUsagesHandlerFactory() {
+    override fun canFindUsages(element: PsiElement): Boolean =
+        element is GoNamedElement && element.containingFile is GoFile && !GoFeatures.native(GoFeature.USAGES, element.project)
+
+    override fun createFindUsagesHandler(element: PsiElement, forHighlightUsages: Boolean): FindUsagesHandler = object : FindUsagesHandler(element) {
+        override fun processElementUsages(element: PsiElement, processor: Processor<in UsageInfo>, options: FindUsagesOptions): Boolean = true
     }
 }
 

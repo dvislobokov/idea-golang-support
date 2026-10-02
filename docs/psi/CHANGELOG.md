@@ -5,6 +5,14 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, step 8c (MIGRATION.md)
+- go-psi-ide: `ide.GoIdeFeatureGate` (application service, default `DefaultGoIdeFeatureGate` in `go-psi-ide-editor.xml`) is asked at the
+  entry of every extension of `go-psi-ide-navigation.xml` for its group (`NAVIGATION`, `USAGES`, `IMPLEMENTATION_MARKERS`); the host
+  overrides it with its feature switches. `targetElementEvaluator` and `codeInsight.gotoSuper` (one per language in the platform) are
+  registered first and defer to the next extension for Go when off.
+- go-psi-core: the inserted semicolon is consumed by the external rule `syntheticSemi` (`consumeTokenFast`): an error reads
+  "';' or '}' expected", not "';', SEMICOLON_SYNTHETIC or '}' expected" (seen live at step 8a); recovery goldens updated, positions unchanged.
+
 ### 2026-10-02 - Transplant into idea-golang-support, step 7 (MIGRATION.md)
 - go-psi-semantic: `GoLibraryRootsPolicy` (application service, `project.impl`) decides what `GoRootsProvider` exposes: nothing,
   the standard library, or also the modules of the build list. The default reads the registry key `gopsi.libraryRoots` as before;

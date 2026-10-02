@@ -587,6 +587,9 @@ footer a { color: var(--text-2); }
         <tr><td>Inlay hints</td><td>Имена параметров, типы переменных и значения констант рядом с кодом.</td></tr>
         <tr><td>Log every message of the protocol</td><td>Полный обмен с сервером в окне журнала. Для разбора неполадок.</td></tr>
         <tr><td>Serve the debug pages of gopls</td><td>Служебные страницы сервера, открываются из меню gopls.</td></tr>
+        <tr><td>Source of features: Syntax errors <span class="new">новое</span></td><td>Кто подчёркивает синтаксические ошибки: gopls или встроенный парсер плагина (Built-in). Источник один: при Built-in диагностики gopls с источником <code>syntax</code> не показываются, при gopls скрыты ошибки парсера. Без сервера языка ошибки парсера показываются всегда. Смена действует сразу, без перезапуска сервера.</td></tr>
+        <tr><td>Source of features: Navigation <span class="new">новое</span></td><td>Кто отвечает на Go to Declaration / Type Declaration / Implementation / Super: gopls или ссылки и stub-индексы плагина (Built-in). Встроенная навигация видит стандартную библиотеку и зависимости настолько, насколько их индексирует «Index for navigation»; пока IDE индексирует, отвечает gopls.</td></tr>
+        <tr><td>Source of features: Usages and highlighting <span class="new">новое</span></td><td>Кто ищет использования (Find Usages, Show Usages) и подсвечивает идентификатор под кареткой и точки выхода: gopls или плагин (Built-in). При gopls ссылки PSI в Find Usages не ищутся — каждое место показывается один раз.</td></tr>
       </tbody>
     </table></div>
 
