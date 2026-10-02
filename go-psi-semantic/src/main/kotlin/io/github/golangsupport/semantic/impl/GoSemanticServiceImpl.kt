@@ -38,4 +38,6 @@ class GoSemanticServiceImpl(private val project: Project) : GoSemanticService {
     override fun check(file: GoFile): List<io.github.golangsupport.semantic.api.GoDiagnostic> =
         io.github.golangsupport.semantic.check.GoIncrementalChecker.check(file)
     override fun calleeSignature(call: io.github.golangsupport.lang.psi.GoCallExpr): GoSignatureType? = typer.calleeSignature(call)
+    override fun expectedTypeAt(expression: GoExpression): GoType? = io.github.golangsupport.semantic.infer.GoExpectedType.expectedFor(expression, typer)
+    override fun enclosingResultTypes(element: PsiElement): List<GoType>? = io.github.golangsupport.semantic.infer.GoExpectedType.enclosingResults(element, typer)
 }

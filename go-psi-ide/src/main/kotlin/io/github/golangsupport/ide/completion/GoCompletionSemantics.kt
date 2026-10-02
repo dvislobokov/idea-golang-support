@@ -4,6 +4,7 @@ import com.intellij.psi.PsiElement
 import io.github.golangsupport.lang.psi.*
 import io.github.golangsupport.project.api.GoPackage
 import io.github.golangsupport.semantic.api.GoSemanticService
+import io.github.golangsupport.semantic.infer.GoExpectedType
 import io.github.golangsupport.semantic.scope.GoPackageModel
 import io.github.golangsupport.semantic.scope.GoScopes
 import io.github.golangsupport.semantic.types.GoArrayType
@@ -76,33 +77,13 @@ class GoCompletionSemantics(private val context: GoCompletionContext) {
     }
 
     /** The type a composite literal's value has, including elided nested literals (`[]T{{...}}`). */
-    fun literalType(value: GoLiteralValue, depth: Int = 0): GoType? {
-        if (depth > 8) return null
-        val parent = value.parent
-        if (parent is GoCompositeLit) return typeOfEnclosing(parent)
-        val element = parent?.parent as? GoElement ?: return null
-        val outer = element.parent as? GoLiteralValue ?: return null
-        val outerType = literalType(outer, depth + 1)?.let(::derefUnderlying) ?: return null
-        val elementType = when (outerType) {
-            is GoSliceType -> outerType.elem
-            is GoArrayType -> outerType.elem
-            is GoMapType -> if (parent is GoKey) outerType.key else outerType.value
-            is GoStructType -> {
-                // A keyed struct field holding an elided literal is not valid Go, but keep the field type for robustness.
-                val key = (element.key?.expression as? GoReferenceExpression)?.identifier?.text
-                key?.let { k -> outerType.fields.firstOrNull { it.name == k }?.type }
-            }
-            else -> null
-        } ?: return null
-        // `[]*T{{...}}` elides `&T`.
-        return if (elementType is GoPointerType) elementType.elem else elementType
-    }
+    fun literalType(value: GoLiteralValue): GoType? = literalType(value, service)
 
     companion object {
-        fun derefUnderlying(type: GoType): GoType {
-            val u = type.underlying()
-            return if (u is GoPointerType) u.elem.underlying() else u
-        }
+        /** [literalType] without a completion session (the intentions of `ide.intentions` ask it too); the walk lives in `GoExpectedType`. */
+        fun literalType(value: GoLiteralValue, service: GoSemanticService): GoType? = GoExpectedType.literalType(value, service::typeOf)
+
+        fun derefUnderlying(type: GoType): GoType = GoExpectedType.derefUnderlying(type)
 
         fun isEmptyInterface(type: GoType): Boolean {
             val u = type.underlying()

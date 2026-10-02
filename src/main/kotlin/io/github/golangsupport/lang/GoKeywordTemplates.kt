@@ -27,9 +27,9 @@ import io.github.golangsupport.lang.psi.GoTypes
  * body offers `for i, x := range xs` for the slices in sight, as GoLand does. Each item is a live template ([Item.template], `$STOP$`
  * for what is typed next, `$END$` for the caret), expanded by the platform, so Tab walks the stops. Works without gopls.
  *
- * The place is read from the text: the declarations of the file say whether the caret is at the top level or in a body, the names
- * declared above the caret in the body say what there is to range over. Statements and expressions are not parsed: only what a
- * regular expression sees in a line.
+ * The place is read from the text: the declarations of the file say whether the caret is at the top level or in a body. What there is
+ * to range over or to select on comes from the PSI of go-psi ([GoScopeInputs], the overload of [contextAt] with a file); for a text
+ * without that PSI the names declared above the caret are what a regular expression sees in a line.
  */
 object GoKeywordTemplates {
     /** [keyword] is what is typed to get the item; [lookups] are other words that find it (`test` for `func TestX`). */
@@ -60,6 +60,11 @@ object GoKeywordTemplates {
         val hasContext: Boolean = false,
         /** The methods every type of the file has, by the name of the type. */
         val methods: Map<String, Set<String>> = emptyMap(),
+        /**
+         * In a body, when the PSI told what is in scope ([GoScopeInputs]): the variables with their kinds, innermost first. The `select`
+         * items and the channel items are built from it; null on the text path, which keeps the fixed `select` items.
+         */
+        val scope: List<GoScopeInputs.Variable>? = null,
     )
 
     class TypeInfo(val name: String, val isStruct: Boolean, val pointerReceiver: Boolean)
@@ -102,6 +107,28 @@ object GoKeywordTemplates {
         )
     }
 
+    /**
+     * The context of [offset] in a file of go-psi: the place is told by the text as above, what is in scope by the PSI ([GoScopeInputs]):
+     * variables by their types, not by a regular expression over the lines above (`ctx int` is no context), the methods of the types of
+     * the file by the semantic layer. Where the PSI cannot tell (no enclosing function, dumb mode), the text answer stays. Read action.
+     */
+    fun contextAt(file: GoFile, text: CharSequence, offset: Int): Context? {
+        val base = contextAt(text, offset, file.isTestFile, GoStructure.of(file)) ?: return null
+        if (base.place == Place.TOP) {
+            val methods = GoScopeInputs.methodsByType(file) ?: return base
+            return Context(Place.TOP, base.isTestFile, base.wantsMain, base.types, methods = methods)
+        }
+        val scope = GoScopeInputs.at(file, offset - typed(text, offset).length) ?: return base
+        fun names(kind: GoScopeInputs.Kind, filter: (GoScopeInputs.Variable) -> Boolean = { true }) = scope.filter { it.kind == kind && filter(it) }.map { it.name }.take(MAX_NAMES)
+        return Context(
+            Place.BODY, base.isTestFile, base.wantsMain, base.types,
+            // the templates write `t.Run`: a `*testing.X` that is called otherwise would get a call of a name that is not there
+            inTest = scope.any { it.kind == GoScopeInputs.Kind.TESTING && it.name == "t" },
+            slices = names(GoScopeInputs.Kind.SLICE), maps = names(GoScopeInputs.Kind.MAP), channels = names(GoScopeInputs.Kind.CHANNEL) { it.receives },
+            hasContext = scope.any { it.kind == GoScopeInputs.Kind.CONTEXT }, scope = scope,
+        )
+    }
+
     fun items(context: Context): List<Item> = if (context.place == Place.TOP) top(context) else body(context)
 
     private fun top(context: Context): List<Item> = buildList {
@@ -139,7 +166,9 @@ object GoKeywordTemplates {
         for (name in context.channels) add(Item("for", "for v := range $name {...}", "for \$V\$ := range $name {\n\t\$END\$\n}", "channel", stops = arrayOf("V" to "v")))
         add(Item("for", "for _, v := range xs {...}", "for \$I\$, \$V\$ := range \$XS\$ {\n\t\$END\$\n}", "range", stops = arrayOf("I" to "_", "V" to "v")))
         add(Item("for", "for i := 0; i < n; i++ {...}", "for \$I\$ := 0; \$I\$ < \$N\$; \$I\$++ {\n\t\$END\$\n}", "counter", stops = arrayOf("I" to "i", "N" to "n")))
-        if (context.hasContext) add(Item("for", "for { select { case <-ctx.Done(): ... } }", "for {\n\tselect {\n\tcase <-ctx.Done():\n\t\treturn\n\t\$END\$\n\t}\n}", "loop with context", listOf("select")))
+        val select = context.scope?.let(::selectCases)
+        if (context.scope == null && context.hasContext) add(Item("for", "for { select { case <-ctx.Done(): ... } }", "for {\n\tselect {\n\tcase <-ctx.Done():\n\t\treturn\n\t\$END\$\n\t}\n}", "loop with context", listOf("select")))
+        if (select != null) add(Item("for", "for { ${select.label} }", "for {\n\t${select.template.replace("\n", "\n\t")}\n}", "select loop", listOf("select"), stops = select.stops))
         add(Item("for", "for {...}", "for {\n\t\$END\$\n}", "endless"))
         add(Item("if", "if err != nil {...}", "if err != nil {\n\t\$END\$\n}", "error check", listOf("err")))
         add(Item("if", "if _, err := f(); err != nil {...}", "if \$RESULT\$, err := \$CALL\$; err != nil {\n\t\$END\$\n}", "call with error", stops = arrayOf("RESULT" to "_")))
@@ -147,18 +176,68 @@ object GoKeywordTemplates {
         add(Item("if", "if v, ok := x.(T); ok {...}", "if \$V\$, ok := \$X\$.(\$T\$); ok {\n\t\$END\$\n}", "type assertion", stops = arrayOf("V" to "v")))
         add(Item("switch", "switch x {...}", "switch \$X\$ {\ncase \$CASE\$:\n\t\$END\$\n}", "switch"))
         add(Item("switch", "switch v := x.(type) {...}", "switch \$V\$ := \$X\$.(type) {\ncase \$CASE\$:\n\t\$END\$\n}", "type switch", stops = arrayOf("V" to "v")))
-        add(Item("select", "select {...}", "select {\ncase \$CASE\$:\n\t\$END\$\n}", "select"))
-        if (context.hasContext) add(Item("select", "select { case <-ctx.Done(): ... }", "select {\ncase <-ctx.Done():\n\treturn \$RESULT\$\n\$END\$\n}", "wait with context", stops = arrayOf("RESULT" to "ctx.Err()")))
+        if (context.scope == null || select == null) add(Item("select", "select {...}", "select {\ncase \$CASE\$:\n\t\$END\$\n}", "select"))
+        if (context.scope == null && context.hasContext) add(Item("select", "select { case <-ctx.Done(): ... }", "select {\ncase <-ctx.Done():\n\treturn \$RESULT\$\n\$END\$\n}", "wait with context", stops = arrayOf("RESULT" to "ctx.Err()")))
+        if (select != null) add(Item("select", select.label, select.template, "cases in scope", stops = select.stops))
         add(Item("go", "go func() {...}()", "go func() {\n\t\$END\$\n}()", "goroutine"))
         add(Item("defer", "defer func() {...}()", "defer func() {\n\t\$END\$\n}()", "deferred call"))
         add(Item("chan", "ch := make(chan T)", "\$CH\$ := make(chan \$T\$\$END\$)", "channel", listOf("make"), stops = arrayOf("CH" to "ch")))
         add(Item("map", "m := make(map[K]V)", "\$M\$ := make(map[\$K\$]\$V\$\$END\$)", "map", listOf("make"), stops = arrayOf("M" to "m")))
+        add(Item("chan", "ch := make(chan T, n)", "\$CH\$ := make(chan \$T\$, \$N\$)\$END\$", "buffered channel", listOf("make"), stops = arrayOf("CH" to "ch")))
+        add(Item("make", "s := make([]T, 0, n)", "\$S\$ := make([]\$T\$, 0, \$N\$)\$END\$", "slice", listOf("slice"), stops = arrayOf("S" to "s")))
         if (context.inTest) {
             add(Item("t.Run", "t.Run(\"name\", func(t *testing.T) {...})", "t.Run(\"\$NAME\$\", func(t *testing.T) {\n\t\$END\$\n})", "subtest", listOf("Run")))
             add(Item("t.Parallel", "t.Parallel()", "t.Parallel()\$END\$", "parallel", listOf("Parallel")))
             add(Item("t.Cleanup", "t.Cleanup(func() {...})", "t.Cleanup(func() {\n\t\$END\$\n})", "cleanup", listOf("Cleanup")))
             add(Item("t.Helper", "t.Helper()", "t.Helper()\$END\$", "helper", listOf("Helper")))
         }
+        // what the PSI knows of the channels in scope: a receive with its ok, and a close for a channel this function made and has not closed
+        for (channel in context.scope.orEmpty().filter { it.kind == GoScopeInputs.Kind.CHANNEL }.take(MAX_NAMES)) {
+            val name = channel.name
+            if (channel.receives) add(Item("ok", "v, ok := <-$name", "\$V\$, ok := <-$name\$END\$", "receive", listOf("recv"), stops = arrayOf("V" to "v")))
+            if (channel.madeHere && channel.sends && !channel.closed) {
+                add(Item("close", "close($name)", "close($name)\$END\$", "close the channel"))
+                add(Item("defer", "defer close($name)", "defer close($name)\$END\$", "close on return", listOf("close")))
+            }
+        }
+    }
+
+    /** The cases a `select` can wait on in [scope], as one template: the context first, then receives, timers, sends. */
+    class Select(val label: String, val template: String, val stops: Array<Pair<String, String>>)
+
+    /** Null when nothing in scope can be waited on: the plain `select {...}` is offered then. */
+    fun selectCases(scope: List<GoScopeInputs.Variable>): Select? {
+        val heads = ArrayList<String>()
+        val bodies = ArrayList<String?>()
+        val stops = ArrayList<Pair<String, String>>()
+        scope.firstOrNull { it.kind == GoScopeInputs.Kind.CONTEXT }?.let { context ->
+            heads += "<-${context.name}.Done()"
+            bodies += "return \$RESULT\$"
+            stops += "RESULT" to "${context.name}.Err()"
+        }
+        val channels = scope.filter { it.kind == GoScopeInputs.Kind.CHANNEL }.take(MAX_NAMES)
+        for (channel in channels.filter { it.receives }) { heads += "v := <-${channel.name}"; bodies += null }
+        for (timer in scope.filter { it.kind == GoScopeInputs.Kind.TIMER }.take(MAX_NAMES)) { heads += "<-${timer.name}.C"; bodies += null }
+        channels.filter { !it.receives && it.sends }.forEachIndexed { index, channel ->
+            // the names of stops are letters ([STOP])
+            val value = if (index == 0) "VALUE" else "VALUE_${'A' + index}"
+            heads += "${channel.name} <- \$$value\$"
+            bodies += null
+            stops += value to ""
+        }
+        if (heads.isEmpty()) return null
+        // the caret goes into the first case that has no body of its own, or below the last one
+        val caret = bodies.indexOfFirst { it == null }
+        val text = StringBuilder("select {\n")
+        for (i in heads.indices) {
+            text.append("case ").append(heads[i]).append(":\n")
+            bodies[i]?.let { text.append('\t').append(it).append('\n') }
+            if (i == caret) text.append("\t\$END\$\n")
+        }
+        if (caret < 0) text.append("\$END\$\n")
+        text.append("}")
+        val label = "select { " + heads.joinToString("; ") { "case ${it.replace(STOP, "v")}: ..." } + " }"
+        return Select(label, text.toString(), stops.toTypedArray())
     }
 
     /**
@@ -227,11 +306,13 @@ class GoKeywordCompletionContributor : CompletionContributor() {
         val elementType = parameters.position.node.elementType
         if (elementType in GoTokenSets.COMMENTS || elementType in GoTokenSets.STRING_LITERALS || elementType == GoTypes.CHAR) return
         val text = parameters.editor.document.immutableCharSequence
-        val context = GoKeywordTemplates.contextAt(text, parameters.offset, file.isTestFile, GoStructure.of(file)) ?: return
         val typed = GoKeywordTemplates.typed(text, parameters.offset)
         if (typed.isEmpty() && !parameters.isExtendedCompletion) return
+        // the original file: completion has committed its document, and its PSI is what the scope is read from
+        val context = GoKeywordTemplates.contextAt(file, text, parameters.offset) ?: return
         val items = result.withPrefixMatcher(GoPrefixMatcher(typed))
-        val missingMethods = if (context.place == GoKeywordTemplates.Place.TOP && context.methods.isNotEmpty()) GoKeywordTemplates.interfaceItems(context, interfacesOf(file)) else emptyList()
+        val missingMethods = if (context.place == GoKeywordTemplates.Place.TOP && context.methods.isNotEmpty())
+            GoKeywordTemplates.interfaceItems(context, GoScopeInputs.interfaces(file, context.methods) ?: interfacesOf(file)) else emptyList()
         val own = HashSet<String>()
         for (item in missingMethods + GoKeywordTemplates.items(context)) {
             val element = LookupElementBuilder.create(item, item.keyword).withLookupStrings(item.lookups).withPresentableText(item.label).withTypeText(item.typeText, true)

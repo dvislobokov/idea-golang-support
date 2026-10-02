@@ -307,6 +307,43 @@ are joined with `; ` because problem descriptions are single-line.
   parameter incl. variadic elements), the value is typed and converts to `T`; integer-to-string
   conversions are not offered. Types of other packages are written with the file's import name.
 
+### Intentions (`ide.intentions`, `go-psi-ide-intentions.xml`, category "Go")
+
+Alt+Enter actions that rewrite code by its types (MIGRATION.md step 9 F). Each is an `IntentionAction` (`GoCodeActionIntention`:
+`startInWriteAction`, not dumb-aware) that asks `GoIdeFeatureGate` for `CODE_ACTIONS` first, computes a `GoEditPlan` (document edits +
+imports) from the PSI and `GoSemanticService`, applies it like the quick fixes and adds imports through `GoImportInserter`. Types are
+written as the file spells them (`GoSourceText`: import name of another package, `builtin` types unqualified); zero values come from
+`GoZeroValues` (shared with the `iferr` snippet), variables in scope from `GoScopeValues` (the local-scope walk of `GoScopeCandidates`).
+
+- Fill all fields / Fill required fields (`GoFillStructFieldsIntention`, `GoFillRequiredFieldsIntention`): inside `T{…}`, `&T{…}`, an
+  elided nested literal or on the literal's type; the fields not written yet, keyed, one per line (a one-line literal is spread over
+  lines; a multi-line one gets a comma after its last element). An embedded field is filled by its type name (`Base: Base{}`), never by
+  promoted fields (not valid keys). Unexported fields of another package are skipped. "Required" leaves out `nil`able fields (pointers,
+  slices, maps, channels, functions, interfaces). Positional literals: not offered. Values are not aligned (gofmt does it on save).
+- Fill return values (`GoFillReturnValuesIntention`): a `return` with fewer values than the results; each written value keeps the first
+  result slot it is assignable to, the others get a local of exactly that type declared before the statement (nearest, `err` first for
+  `error`) or the zero value. Not offered for a bare `return` with named results or `return f()` forwarding a tuple. Inside a function
+  whose body the checker reports as "missing return" (and whose last statement is not a `return`), the same intention reads
+  "Add missing return" and inserts the statement before the closing brace.
+- Fill switch (`GoFillSwitchIntention`): expression switch over a named non-interface type — `case C:` for every constant of exactly that
+  type in its package (files in order, unexported ones only in the own package), minus the ones resolved or named in a case; type switch
+  over a named interface — every implementing type of the project (`GoImplementations.implementingTypes`, project scope, generic types
+  skipped), `*T` when only the pointer implements it; a case naming the type with or without `*` counts. Inserted after the existing
+  cases, before `default`.
+- Fill select / Fill select with default (`GoFillSelectIntention`, `GoFillSelectWithDefaultIntention`): `case <-ctx.Done():` with
+  `return …, ctx.Err()` (zero values, or bare `return` without results) for every `context.Context` in scope, `case v := <-ch:` for
+  receive-capable channels (`v`, `v2`… when a local is called `v`), `case ch <- <zero>:` for send-only ones, `case <-t.C:` for
+  `*time.Timer`/`*time.Ticker`, `case <-time.After(d):` for `time.Duration` variables (import added); a case whose channel expression
+  already appears is not repeated; the second variant adds `default:` when missing.
+- Handle error (`GoHandleErrorIntention`, description directory `GoPsiHandleErrorIntention`): after `x, err := f()` / `x, err = f()` whose
+  callee's last result is `error`, unless the next statement is an `if` mentioning the variable: `if err != nil { return <zero values>, err }`.
+  A call standing alone becomes `if [_, …]err := f(); err != nil { … }`.
+- Wrap error with fmt.Errorf (`GoWrapErrorIntention`): the last value of a `return` that is an `error` variable becomes
+  `fmt.Errorf("<func>: %w", err)` (`Type.Method` for methods); `fmt` is imported when missing.
+
+Known gaps: enum constants with the same value both get a case (duplicate case); no exhaustiveness inspection yet; values in filled
+literals are not aligned until the file is formatted.
+
 ### Suppression (`GoInspectionSuppressor`, `lang.inspectionSuppressor`)
 
 `//noinspection GoUnusedVariable` (several ids comma-separated, or `ALL`) on its own line

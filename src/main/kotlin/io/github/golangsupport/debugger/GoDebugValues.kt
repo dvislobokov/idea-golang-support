@@ -18,6 +18,8 @@ import com.intellij.xdebugger.frame.XValueNode
 import com.intellij.xdebugger.frame.XValuePlace
 import com.intellij.xdebugger.frame.presentation.XRegularValuePresentation
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl
+import com.intellij.openapi.project.DumbService
+import io.github.golangsupport.run.GoDebugPsi
 import io.github.golangsupport.run.GoInlineValues
 import org.jetbrains.concurrency.Promise
 import org.jetbrains.concurrency.resolvedPromise
@@ -73,7 +75,10 @@ class GoValue(
         val position = process.session.currentPosition ?: return ThreeState.NO
         val document = ReadAction.compute<com.intellij.openapi.editor.Document?, RuntimeException> { FileDocumentManager.getInstance().getDocument(position.file) }
             ?: return ThreeState.NO
-        val lines = GoInlineValues.lines(document.immutableCharSequence, name, position.line)
+        // resolve needs indices: in dumb mode the tokens decide
+        val project = process.session.project
+        val lines = GoDebugPsi.compute(project, document, { file -> if (DumbService.isDumb(project)) GoInlineValues.lines(document.immutableCharSequence, name, position.line) else GoInlineValues.lines(file, name, position.line) },
+            { GoInlineValues.lines(it, name, position.line) })
         for (line in lines) XDebuggerUtil.getInstance().createPosition(position.file, line)?.let(callback::computed)
         return if (lines.isEmpty()) ThreeState.NO else ThreeState.YES
     }

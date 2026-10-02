@@ -20,6 +20,7 @@ import com.intellij.xdebugger.breakpoints.ui.XBreakpointCustomPropertiesPanel
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.run.GoBreakpointLines
+import io.github.golangsupport.run.GoDebugPsi
 import io.github.golangsupport.run.GoPanicFilter
 import io.github.golangsupport.run.HitCondition
 import java.util.concurrent.CompletableFuture
@@ -65,9 +66,9 @@ class GoLineBreakpointType : XLineBreakpointType<GoLineBreakpointProperties>("go
     override fun canPutAt(file: VirtualFile, line: Int, project: Project): Boolean {
         if (file.fileType != GoFileType) return false
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return false
-        // asked for every line the mouse passes in the gutter: one scan per change of the text
+        // asked for every line the mouse passes in the gutter: one scan per change of the text; the PSI when it is current, else the text
         val cached = document.getUserData(LINES)?.takeIf { it.first == document.modificationStamp }
-            ?: (document.modificationStamp to GoBreakpointLines.find(document.immutableCharSequence)).also { document.putUserData(LINES, it) }
+            ?: (document.modificationStamp to GoDebugPsi.compute(project, document, { GoBreakpointLines.find(it) }, { GoBreakpointLines.find(it) })).also { document.putUserData(LINES, it) }
         return line in cached.second
     }
 

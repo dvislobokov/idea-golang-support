@@ -45,83 +45,13 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
     // --- locals ---
 
     private fun locals(place: PsiElement, filter: Filter, out: MutableList<GoCandidate>) {
-        var child: PsiElement = place
-        var parent: PsiElement? = place.parent
-        val placeStart = place.textRange.startOffset
-        fun local(e: GoNamedElement?, level: Int) {
-            if (e == null) return
-            if (filter == Filter.TYPES && e !is GoTypeSpec && e !is GoTypeParamDefinition) return
+        walkLocals(place, receiverTypeParam = { name, def ->
+            if (accept(name)) out += GoCandidate(name, GoCandidateKind.TYPE_PARAMETER, GoScopeLevel.PARAMETER, def, tailText = " type parameter")
+        }) { e, level ->
+            if (filter == Filter.TYPES && e !is GoTypeSpec && e !is GoTypeParamDefinition) return@walkLocals
             val name = e.name
-            if (!accept(name)) return
-            out += declarationCandidate(e, name!!, level)
+            if (accept(name)) out += declarationCandidate(e, name!!, level)
         }
-        // Inner scopes first; within a block the latest declaration before the caret wins.
-        while (parent != null && parent !is PsiFile) {
-            val scopeOut = ArrayList<Pair<GoNamedElement, Int>>()
-            fun add(e: GoNamedElement?, level: Int) { if (e != null) scopeOut += e to level }
-            when (parent) {
-                is GoBlock -> statementsReversed(parent.statementList, child, placeStart).forEach { add(it, GoScopeLevel.LOCAL) }
-                is GoExprCaseClause -> statementsReversed(parent.statementList, child, placeStart).forEach { add(it, GoScopeLevel.LOCAL) }
-                is GoTypeCaseClause -> {
-                    statementsReversed(parent.statementList, child, placeStart).forEach { add(it, GoScopeLevel.LOCAL) }
-                    if (child !== parent.type) add((parent.parent as? GoTypeSwitchStatement)?.guard?.varDefinition, GoScopeLevel.LOCAL)
-                }
-                is GoCommClause -> {
-                    statementsReversed(parent.statementList, child, placeStart).forEach { add(it, GoScopeLevel.LOCAL) }
-                    if (child !== parent.commCase) parent.recvStatement?.varDefinitionList?.forEach { add(it, GoScopeLevel.LOCAL) }
-                }
-                is GoIfStatement -> parent.initStatement?.takeIf { it !== child }?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } }
-                is GoForStatement -> {
-                    parent.forClause?.let { fc -> if (child !== fc) fc.initStatement?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } } }
-                    parent.rangeClause?.let { rc -> if (child !== rc) rc.varDefinitionList.forEach { add(it, GoScopeLevel.LOCAL) } }
-                }
-                is GoRangeClause -> if (child !== parent.expression) parent.varDefinitionList.forEach { add(it, GoScopeLevel.LOCAL) }
-                is GoForClause -> parent.initStatement?.takeIf { it !== child }?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } }
-                is GoExprSwitchStatement -> parent.initStatement?.takeIf { it !== child }?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } }
-                is GoTypeSwitchStatement -> parent.initStatement?.takeIf { it !== child }?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } }
-                is GoFunctionLit -> signature(parent.signature, null, null).forEach { add(it, GoScopeLevel.PARAMETER) }
-                is GoFunctionDeclaration -> signature(parent.signature, parent.typeParameters, null).forEach { add(it, GoScopeLevel.PARAMETER) }
-                is GoMethodDeclaration -> {
-                    signature(parent.signature, parent.typeParameters, parent.receiver).forEach { add(it, GoScopeLevel.PARAMETER) }
-                    parent.receiver?.let { receiver ->
-                        GoScopes.receiverTypeArguments(receiver)?.forEach { (identifier, name) ->
-                            val def = GoScopes.receiverTypeParamOf(identifier) ?: return@forEach
-                            if (filter == Filter.ALL || filter == Filter.TYPES) {
-                                if (accept(name)) out += GoCandidate(name, GoCandidateKind.TYPE_PARAMETER, GoScopeLevel.PARAMETER, def, tailText = " type parameter")
-                            }
-                        }
-                    }
-                }
-                is GoTypeSpec -> parent.typeParameters?.let { GoScopes.typeParamDefinitions(it) }?.forEach { add(it, GoScopeLevel.PARAMETER) }
-                else -> {}
-            }
-            for ((e, level) in scopeOut) local(e, level)
-            child = parent
-            parent = parent.parent
-        }
-    }
-
-    /** Declarations of the statements before the caret, latest first (a later declaration hides an earlier one). */
-    private fun statementsReversed(statements: List<GoStatement>, child: PsiElement, placeStart: Int): List<GoNamedElement> {
-        val result = ArrayList<GoNamedElement>()
-        for (s in statements) {
-            if (s === child) {
-                if (s is GoTypeDeclaration) result += GoPsiUtil.declarationsOf(s)
-                break
-            }
-            if (s.textRange.startOffset >= placeStart) break
-            result += GoPsiUtil.declarationsOf(s)
-        }
-        return result.asReversed()
-    }
-
-    private fun signature(signature: GoSignature?, typeParams: GoTypeParameters?, receiver: GoReceiver?): List<GoNamedElement> {
-        val result = ArrayList<GoNamedElement>()
-        if (receiver != null && receiver.name != null) result += receiver
-        typeParams?.let { result += GoScopes.typeParamDefinitions(it) }
-        signature?.parameters?.parameterDeclarationList?.forEach { result += it.paramDefinitionList }
-        signature?.result?.parameters?.parameterDeclarationList?.forEach { result += it.paramDefinitionList }
-        return result
     }
 
     // --- package level ---
@@ -205,6 +135,83 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
         declarationCandidate(e, name, level, context)
 
     companion object {
+        /**
+         * The local scopes of [place], innermost first (an inner declaration hides an outer one with the same name): block-local
+         * declarations before [place] (latest first), `if`/`for`/`switch` init statements, range and type-switch variables, function
+         * and literal signatures, type-spec type parameters. [visit] gets each declaration with its level, [receiverTypeParam] the
+         * receiver type parameters of a method. Shared by completion and the intentions (`ide.intentions.GoScopeValues`).
+         */
+        fun walkLocals(place: PsiElement, receiverTypeParam: (String, GoTypeParamDefinition) -> Unit = { _, _ -> }, visit: (GoNamedElement, Int) -> Unit) {
+            var child: PsiElement = place
+            var parent: PsiElement? = place.parent
+            val placeStart = place.textRange.startOffset
+            // Inner scopes first; within a block the latest declaration before the caret wins.
+            while (parent != null && parent !is PsiFile) {
+                val scopeOut = ArrayList<Pair<GoNamedElement, Int>>()
+                fun add(e: GoNamedElement?, level: Int) { if (e != null) scopeOut += e to level }
+                when (parent) {
+                    is GoBlock -> statementsReversed(parent.statementList, child, placeStart).forEach { add(it, GoScopeLevel.LOCAL) }
+                    is GoExprCaseClause -> statementsReversed(parent.statementList, child, placeStart).forEach { add(it, GoScopeLevel.LOCAL) }
+                    is GoTypeCaseClause -> {
+                        statementsReversed(parent.statementList, child, placeStart).forEach { add(it, GoScopeLevel.LOCAL) }
+                        if (child !== parent.type) add((parent.parent as? GoTypeSwitchStatement)?.guard?.varDefinition, GoScopeLevel.LOCAL)
+                    }
+                    is GoCommClause -> {
+                        statementsReversed(parent.statementList, child, placeStart).forEach { add(it, GoScopeLevel.LOCAL) }
+                        if (child !== parent.commCase) parent.recvStatement?.varDefinitionList?.forEach { add(it, GoScopeLevel.LOCAL) }
+                    }
+                    is GoIfStatement -> parent.initStatement?.takeIf { it !== child }?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } }
+                    is GoForStatement -> {
+                        parent.forClause?.let { fc -> if (child !== fc) fc.initStatement?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } } }
+                        parent.rangeClause?.let { rc -> if (child !== rc) rc.varDefinitionList.forEach { add(it, GoScopeLevel.LOCAL) } }
+                    }
+                    is GoRangeClause -> if (child !== parent.expression) parent.varDefinitionList.forEach { add(it, GoScopeLevel.LOCAL) }
+                    is GoForClause -> parent.initStatement?.takeIf { it !== child }?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } }
+                    is GoExprSwitchStatement -> parent.initStatement?.takeIf { it !== child }?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } }
+                    is GoTypeSwitchStatement -> parent.initStatement?.takeIf { it !== child }?.let { GoPsiUtil.declarationsOf(it).forEach { d -> add(d, GoScopeLevel.LOCAL) } }
+                    is GoFunctionLit -> signature(parent.signature, null, null).forEach { add(it, GoScopeLevel.PARAMETER) }
+                    is GoFunctionDeclaration -> signature(parent.signature, parent.typeParameters, null).forEach { add(it, GoScopeLevel.PARAMETER) }
+                    is GoMethodDeclaration -> {
+                        signature(parent.signature, parent.typeParameters, parent.receiver).forEach { add(it, GoScopeLevel.PARAMETER) }
+                        parent.receiver?.let { receiver ->
+                            GoScopes.receiverTypeArguments(receiver)?.forEach { (identifier, name) ->
+                                val def = GoScopes.receiverTypeParamOf(identifier) ?: return@forEach
+                                receiverTypeParam(name, def)
+                            }
+                        }
+                    }
+                    is GoTypeSpec -> parent.typeParameters?.let { GoScopes.typeParamDefinitions(it) }?.forEach { add(it, GoScopeLevel.PARAMETER) }
+                    else -> {}
+                }
+                for ((e, level) in scopeOut) visit(e, level)
+                child = parent
+                parent = parent.parent
+            }
+        }
+
+        /** Declarations of the statements before the caret, latest first (a later declaration hides an earlier one). */
+        private fun statementsReversed(statements: List<GoStatement>, child: PsiElement, placeStart: Int): List<GoNamedElement> {
+            val result = ArrayList<GoNamedElement>()
+            for (s in statements) {
+                if (s === child) {
+                    if (s is GoTypeDeclaration) result += GoPsiUtil.declarationsOf(s)
+                    break
+                }
+                if (s.textRange.startOffset >= placeStart) break
+                result += GoPsiUtil.declarationsOf(s)
+            }
+            return result.asReversed()
+        }
+
+        private fun signature(signature: GoSignature?, typeParams: GoTypeParameters?, receiver: GoReceiver?): List<GoNamedElement> {
+            val result = ArrayList<GoNamedElement>()
+            if (receiver != null && receiver.name != null) result += receiver
+            typeParams?.let { result += GoScopes.typeParamDefinitions(it) }
+            signature?.parameters?.parameterDeclarationList?.forEach { result += it.paramDefinitionList }
+            signature?.result?.parameters?.parameterDeclarationList?.forEach { result += it.paramDefinitionList }
+            return result
+        }
+
         /** Signatures of the builtin functions as documented in `builtin.go` (the checker types them specially). */
         val BUILTIN_SIGNATURES: Map<String, String> = mapOf(
             "append" to "(slice []Type, elems ...Type) []Type",

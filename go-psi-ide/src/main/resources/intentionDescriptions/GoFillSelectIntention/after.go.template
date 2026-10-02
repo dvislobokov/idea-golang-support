@@ -1,0 +1,5 @@
+select {
+case <-ctx.Done():
+	return ctx.Err()
+case v := <-jobs:
+}

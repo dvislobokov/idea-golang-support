@@ -1,12 +1,41 @@
 package io.github.golangsupport.run
 
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiWhiteSpace
+import com.intellij.psi.SyntaxTraverser
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
+import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoTextLexer
 import io.github.golangsupport.lang.GoTextTokens
+import io.github.golangsupport.lang.psi.GoCallExpr
+import io.github.golangsupport.lang.psi.GoConstDefinition
+import io.github.golangsupport.lang.psi.GoExpression
+import io.github.golangsupport.lang.psi.GoFieldDefinition
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
+import io.github.golangsupport.lang.psi.GoIndexOrSliceExpr
+import io.github.golangsupport.lang.psi.GoLiteral
+import io.github.golangsupport.lang.psi.GoParamDefinition
+import io.github.golangsupport.lang.psi.GoParenthesesExpr
+import io.github.golangsupport.lang.psi.GoReceiver
+import io.github.golangsupport.lang.psi.GoReferenceExpression
+import io.github.golangsupport.lang.psi.GoStringLiteral
+import io.github.golangsupport.lang.psi.GoTokenSets
+import io.github.golangsupport.lang.psi.GoTypes
+import io.github.golangsupport.lang.psi.GoUnaryExpr
+import io.github.golangsupport.lang.psi.GoVarDeclaration
+import io.github.golangsupport.lang.psi.GoVarDefinition
+import io.github.golangsupport.semantic.api.GoSemanticService
+import io.github.golangsupport.semantic.psi.GoPsiUtil.inner
+import io.github.golangsupport.semantic.psi.GoPsiUtil.isSlice
 
 /** What of debugging is pure: how delve is started and what it says, which lines take a breakpoint, what an expression under the mouse is. */
 object DlvDap {
@@ -105,11 +134,63 @@ object GoBreakpointLines {
         structure.declarations.filter { it.body != null && it.kind != GoDeclarationKind.STRUCT && it.kind != GoDeclarationKind.INTERFACE }.forEach { result += lineOf(it.nameRange.startOffset) }
         return result
     }
+
+    /**
+     * The same rules decided by the PSI of go-psi: the line of the name of a function or a method, every line with code inside its body
+     * but the braces of the body itself (a lone `}` of a function, a comment, a blank line are not), and the lines of a package-level
+     * `var` past its first token. Read action.
+     */
+    fun find(file: GoFile): Set<Int> {
+        val lines = GoDebugPsi.Lines(file.viewProvider.contents)
+        val result = HashSet<Int>()
+        for (declaration in file.children) {
+            when (declaration) {
+                is GoFunctionOrMethodDeclaration -> {
+                    declaration.identifier?.let { result += lines.lineOf(it.textRange.startOffset) }
+                    val block = declaration.block ?: continue
+                    GoDebugPsi.codeLeaves(block).filter { it !== block.lbrace && it !== block.rbrace }.forEach { result += lines.lineOf(it.textRange.startOffset) }
+                }
+                // past the name, and not the closing brace of a function literal: the rules of the text version
+                is GoVarDeclaration -> for (spec in declaration.varSpecList) {
+                    val leaves = GoDebugPsi.codeLeaves(spec).toList()
+                    leaves.drop(1).dropLast(if (leaves.lastOrNull()?.node?.elementType == GoTypes.RBRACE) 1 else 0).forEach { result += lines.lineOf(it.textRange.startOffset) }
+                }
+            }
+        }
+        return result
+    }
+}
+
+/** What the debugger helpers share on the PSI path: the file of a document when its PSI is current, lines of a text, the leaves of code. */
+object GoDebugPsi {
+    /**
+     * [psi] on the Go file of [document] when the document is committed, [text] on its text otherwise; both in one read action, so this
+     * may be called from the EDT and from the threads of the debugger alike. The document is never committed here: that would wait for
+     * the EDT.
+     */
+    fun <T> compute(project: Project?, document: Document, psi: (GoFile) -> T, text: (CharSequence) -> T): T = ReadAction.compute<T, RuntimeException> {
+        val manager = project?.takeUnless { it.isDisposed }?.let(PsiDocumentManager::getInstance)
+        val file = manager?.takeIf { it.isCommitted(document) }?.getPsiFile(document) as? GoFile
+        if (file != null) psi(file) else text(document.immutableCharSequence)
+    }
+
+    /** Zero-based lines of a text by offset. */
+    class Lines(text: CharSequence) {
+        private val starts = ArrayList<Int>().apply { add(0); text.forEachIndexed { index, c -> if (c == '\n') add(index + 1) } }
+        val count: Int get() = starts.size
+        fun lineOf(offset: Int): Int = starts.binarySearch(offset).let { if (it >= 0) it else -it - 2 }
+        fun startOf(line: Int): Int = starts[line]
+    }
+
+    /** The leaves of [element] that are code: no white space, no comments. */
+    fun codeLeaves(element: PsiElement): Sequence<PsiElement> = SyntaxTraverser.psiTraverser(element).traverse().filter {
+        it.firstChild == null && it !is PsiWhiteSpace && it.textLength > 0 && it.node.elementType !in GoTokenSets.COMMENTS
+    }.asSequence()
 }
 
 /**
  * The expression a debugger evaluates when the mouse rests on code: the identifier under the pointer with the selectors to the left of
- * it (`order.Currency` on `Currency`). By tokens. Nothing that would run code of the program (a name followed by `(`), no package
+ * it (`order.Currency` on `Currency`). From the PSI where there is one ([rangeAt] with a file), else by tokens. Nothing that would run code of the program (a name followed by `(`), no package
  * qualifiers the debugger cannot tell from variables anyway: delve answers those with an error and the hint stays empty.
  */
 object GoHoverExpression {
@@ -133,6 +214,37 @@ object GoHoverExpression {
         // `f().x`, `items[0].Name`: what is to the left is not a plain name, the chain would be evaluated out of its context
         if (first >= 1 && tokens[first - 1].type == GoTextTokens.DOT) return null
         return TextRange(tokens[first].start, tokens[index].end)
+    }
+
+    /**
+     * The same from the PSI of go-psi: the smallest expression under [offset] that delve evaluates without running code - a name, a
+     * selector chain with what is left of it (`a.b[i].c` on `c`), an index on its bracket (`a[i]`), a dereference on its star (`*p`).
+     * Not a name that is called, not a chain with a call in it, not a type or a function name; a declared variable is its own name.
+     * Read action.
+     */
+    fun rangeAt(file: GoFile, offset: Int): TextRange? {
+        val leaf = file.findElementAt(offset) ?: return null
+        val expression: PsiElement = when (leaf.node.elementType) {
+            GoTypes.IDENTIFIER -> when (val parent = leaf.parent) {
+                is GoReferenceExpression -> parent.takeIf { it.identifier == leaf } ?: return null
+                is GoVarDefinition, is GoParamDefinition, is GoReceiver, is GoConstDefinition -> return leaf.textRange
+                else -> return null
+            }
+            GoTypes.LBRACK, GoTypes.RBRACK -> leaf.parent as? GoIndexOrSliceExpr ?: return null
+            GoTypes.MUL -> leaf.parent as? GoUnaryExpr ?: return null
+            else -> return null
+        }
+        if ((expression.parent as? GoCallExpr)?.expression === expression) return null
+        return expression.textRange.takeIf { evaluable(expression) }
+    }
+
+    private fun evaluable(element: PsiElement?): Boolean = when (element) {
+        is GoReferenceExpression -> element.expression?.let(::evaluable) ?: true
+        is GoIndexOrSliceExpr -> !element.isSlice && PsiTreeUtil.getChildrenOfTypeAsList(element, GoExpression::class.java).let { it.isNotEmpty() && it.all(::evaluable) }
+        is GoUnaryExpr -> element.mul != null && evaluable(element.expression)
+        is GoParenthesesExpr -> evaluable(element.inner)
+        is GoLiteral, is GoStringLiteral -> true
+        else -> false
     }
 }
 
@@ -250,4 +362,60 @@ object GoInlineValues {
         }
         return result.toList()
     }
+
+    /** A variable mentioned in code: [expression] is what delve is asked (`b.c` for a field of `b`), [name] the variable it starts with. */
+    class Mention(val name: String, val expression: String, val offset: Int)
+
+    /**
+     * The variables the code on [line] (zero-based) declares or uses, by resolve: locals, parameters, receivers, with the fields selected
+     * from them (`x := f(a, b.c)` -> `x`, `a`, `b.c`). Not a function, a type, a package, a constant. Read action, smart mode.
+     */
+    fun of(file: GoFile, line: Int): List<String> {
+        val lines = GoDebugPsi.Lines(file.viewProvider.contents)
+        if (line !in 0 until lines.count) return emptyList()
+        val end = if (line + 1 < lines.count) lines.startOf(line + 1) else file.textLength
+        return mentions(file, lines.startOf(line), end).map { it.expression }.distinct().toList()
+    }
+
+    /** [lines] on the PSI: the lines of the function around [currentLine], up to it, that mention the variable [name]. Read action, smart mode. */
+    fun lines(file: GoFile, name: String, currentLine: Int): List<Int> {
+        if (name.isEmpty()) return emptyList()
+        val lines = GoDebugPsi.Lines(file.viewProvider.contents)
+        if (currentLine !in 0 until lines.count) return emptyList()
+        val lineStart = lines.startOf(currentLine)
+        val lineEnd = if (currentLine + 1 < lines.count) lines.startOf(currentLine + 1) else file.textLength
+        // the top-level declaration around the line: a function, a method, a variable with a function literal
+        val code = (lineStart until lineEnd).firstOrNull { !file.viewProvider.contents[it].isWhitespace() } ?: lineStart
+        var declaration = file.findElementAt(code)
+        while (declaration != null && declaration.parent !is GoFile) declaration = declaration.parent
+        val from = declaration?.takeIf { it.parent is GoFile }?.textRange?.startOffset ?: 0
+        return mentions(file, from, lineEnd).filter { it.name == name }.map { lines.lineOf(it.offset) }.distinct().toList()
+    }
+
+    private fun mentions(file: GoFile, from: Int, to: Int): Sequence<Mention> {
+        val semantic = GoSemanticService.getInstance(file.project)
+        var leaf = file.findElementAt(from)
+        return generateSequence { leaf?.takeIf { it.textRange.startOffset < to }?.also { leaf = PsiTreeUtil.nextLeaf(it) } }.mapNotNull { identifier ->
+            if (identifier.node.elementType != GoTypes.IDENTIFIER || identifier.textRange.startOffset < from || identifier.text == "_") return@mapNotNull null
+            when (val parent = identifier.parent) {
+                is GoVarDefinition, is GoParamDefinition, is GoReceiver -> Mention(identifier.text, identifier.text, identifier.textRange.startOffset)
+                is GoReferenceExpression -> {
+                    if (parent.identifier != identifier || parent.expression != null || !isVariable(semantic, parent)) return@mapNotNull null
+                    // the fields selected from the variable go with it; a method call does not
+                    var expression: GoReferenceExpression = parent
+                    while (true) {
+                        val outer = expression.parent as? GoReferenceExpression ?: break
+                        if (outer.expression !== expression || (outer.parent as? GoCallExpr)?.expression === outer) break
+                        if (runCatching { semantic.resolve(outer) }.getOrDefault(emptyList()).none { it is GoFieldDefinition }) break
+                        expression = outer
+                    }
+                    Mention(identifier.text, expression.text, identifier.textRange.startOffset)
+                }
+                else -> null
+            }
+        }
+    }
+
+    private fun isVariable(semantic: GoSemanticService, reference: GoReferenceExpression): Boolean =
+        runCatching { semantic.resolve(reference) }.getOrDefault(emptyList()).any { it is GoVarDefinition || it is GoParamDefinition || it is GoReceiver }
 }

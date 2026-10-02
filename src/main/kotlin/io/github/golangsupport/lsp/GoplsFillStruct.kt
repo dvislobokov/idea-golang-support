@@ -12,6 +12,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.platform.lsp.api.LspClient
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoStructLiterals
 import org.eclipse.lsp4j.CodeAction
@@ -30,7 +32,8 @@ class GoplsFillStructIntention : IntentionAction, HighPriorityAction {
     override fun startInWriteAction(): Boolean = false
 
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-        if (editor == null || file !is GoFile || Gopls.client(project) == null) return false
+        // the native Fill all fields of go-psi-ide serves while the switch Code actions says Built-in (MIGRATION.md step 9)
+        if (editor == null || file !is GoFile || GoFeatures.native(GoFeature.CODE_ACTIONS, project) || Gopls.client(project) == null) return false
         val text = editor.document.immutableCharSequence
         val offset = editor.caretModel.offset
         return GoStructLiterals.isInLiteral(text, offset) || bareType(project, editor) != null

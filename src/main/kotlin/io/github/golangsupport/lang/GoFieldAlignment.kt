@@ -1,10 +1,15 @@
 package io.github.golangsupport.lang
 
+import io.github.golangsupport.lang.psi.GoStructType
+import io.github.golangsupport.semantic.infer.GoSizes
+import io.github.golangsupport.semantic.types.GoType
+
 /**
- * The layout of a struct as the compiler lays it out on a 64-bit machine, from the text of its body: what `fieldalignment` of
- * `go vet` reports, and the order of fields that wastes the least. No types beyond the text: the sizes of the predeclared types,
- * of pointers, slices, maps, channels, functions and interfaces are fixed; a well-known type of the standard library is in a table;
- * a type declared in the same file is followed. Anything else makes the size unknown, and nothing is proposed.
+ * The layout of a struct as the compiler lays it out on a 64-bit machine: what `fieldalignment` of `go vet` reports, and the order of
+ * fields that wastes the least. [analyze] of a [GoStructType] takes the sizes from the types of the PSI ([GoSizes] of go-psi). The text
+ * path ([analyze] of a body) knows no types beyond the text: the sizes of the predeclared types, of pointers, slices, maps, channels,
+ * functions and interfaces are fixed; a well-known type of the standard library is in a table; a type declared in the same file is
+ * followed. Anything else makes the size unknown, and nothing is proposed.
  */
 object GoFieldAlignment {
     class Layout(val size: Int, val align: Int)
@@ -83,6 +88,38 @@ object GoFieldAlignment {
             val layout = layoutOf(fieldType, local) ?: return null
             Field(entry.lines, Layout(layout.size * count, layout.align))
         }
+        return resultOf(fields)
+    }
+
+    /**
+     * The same for a struct of the PSI, the sizes from the types of its fields as the type checker of go-psi knows them ([GoSizes]: the
+     * layout of gc on 64 bits), a type of any package or a generic instance included. Null when a field is not on a line of its own or
+     * the size of a type is unknown (a type parameter, a type that does not resolve). Needs read access.
+     */
+    fun analyze(struct: GoStructType): Result? {
+        val close = struct.rbrace ?: return null
+        val text = struct.text
+        val open = struct.lbrace ?: return null
+        val body = text.substring(open.startOffsetInParent + 1, close.startOffsetInParent)
+        val entries = split(body) ?: return null
+        val declarations = struct.fieldDeclarationList
+        if (entries.size != declarations.size) return null
+        val fields = entries.zip(declarations).map { (entry, declaration) ->
+            val names = GoStructPsi.fieldsOf(declaration)
+            val layout = layoutOf(names.firstOrNull()?.type ?: return null) ?: return null
+            Field(entry.lines, Layout(layout.size * names.size, layout.align))
+        }
+        return resultOf(fields)
+    }
+
+    /** The layout of [type] by [GoSizes]; null when it is not known or does not fit an Int. */
+    fun layoutOf(type: GoType): Layout? {
+        val size = GoSizes.sizeof(type)?.takeIf { it <= Int.MAX_VALUE } ?: return null
+        val align = GoSizes.alignof(type) ?: return null
+        return Layout(size.toInt(), align.toInt())
+    }
+
+    private fun resultOf(fields: List<Field>): Result? {
         if (fields.isEmpty()) return null
         val current = structLayout(fields.map { it.layout }).size
         val ordered = optimalOrder(fields)

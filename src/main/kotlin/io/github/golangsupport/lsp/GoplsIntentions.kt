@@ -10,6 +10,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.settings.GoSettings
 import org.eclipse.lsp4j.CodeAction
@@ -47,8 +49,10 @@ class GoplsIntentionService(private val project: Project) {
         val range = Range(Gopls.position(document, start), Gopls.position(document, end))
         val context = CodeActionContext(emptyList()).apply { triggerKind = CodeActionTriggerKind.Invoked }
         val offered = offered(editor, file)
+        // the fill actions are the native intentions' while the switch Code actions says Built-in (MIGRATION.md step 9)
+        val native = GoFeatures.native(GoFeature.CODE_ACTIONS, project)
         val actions = Gopls.codeActions(client, CodeActionParams(client.getDocumentIdentifier(virtualFile), range, context), TIMEOUT_MS)
-            .filter { GoplsActionKinds.isIntention(it.kind) && it.disabled == null && !GoplsActionKinds.isOffered(it.kind, it.title, offered) }
+            .filter { GoplsActionKinds.isIntention(it.kind) && it.disabled == null && !GoplsActionKinds.isOffered(it.kind, it.title, offered, native) }
             .distinctBy { it.title }.take(SLOTS)
         asked = Asked(virtualFile.path, document.modificationStamp, start, end, actions)
         return actions

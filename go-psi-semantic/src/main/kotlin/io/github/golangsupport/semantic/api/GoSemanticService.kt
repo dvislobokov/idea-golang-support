@@ -67,6 +67,21 @@ interface GoSemanticService {
     /** The signature a call invokes, with inferred type arguments substituted; null for builtins and conversions. */
     fun calleeSignature(call: io.github.golangsupport.lang.psi.GoCallExpr): io.github.golangsupport.semantic.types.GoSignatureType?
 
+    /**
+     * The type [expression] is expected to have from its position: the assignment or declared variable type, the call parameter
+     * (variadic aware; none for conversions), the function result by index (a tuple for a single call returning all results),
+     * the composite literal element / key / field, the other binary operand (untyped constants yield to the typed side), the
+     * channel element of a send, the switch tag of a `case`, `bool` for conditions, the key type of a map index. Null when the
+     * position has no expectation (a receive `<-ch` is not one).
+     */
+    fun expectedTypeAt(expression: GoExpression): GoType?
+
+    /**
+     * The result types of the innermost function declaration, method or function literal around [element], in order (named
+     * results included); an empty list for a function without results, null outside any function.
+     */
+    fun enclosingResultTypes(element: PsiElement): List<GoType>?
+
     companion object {
         @JvmStatic
         fun getInstance(project: Project): GoSemanticService = project.service()

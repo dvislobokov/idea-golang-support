@@ -44,6 +44,15 @@ val graph = GoModuleGraphProvider.getInstance(project).graphFor(vf)  // project 
   `semantic.constantValue(expr)`, `semantic.render(type)`. Unknown is a value (`GoUnknownType`), never an exception.
 - Resolve: `semantic.resolve(GoReferenceExpression): List<PsiElement>` and `resolve(GoTypeReferenceExpression)`;
   the references themselves also resolve through `PsiReference.resolve()`.
+- Calls and positions: `semantic.calleeSignature(call)` (the signature a call invokes, inferred type arguments
+  substituted; null for builtins and conversions); `semantic.expectedTypeAt(expr): GoType?`, the type the
+  position expects (assignment / declared variable type, call parameter by index with variadic tails and spread,
+  none for conversions, `return` value by index — a `GoTupleType` of all results for a single call returning them
+  —, composite literal element / key / struct field including elided nested literals, the other binary operand —
+  an untyped constant yields to the typed side —, the element of a channel send, the tag of a `case`, `bool` for
+  `if`/`for` conditions, `&&`, `||` and `!`, the key of a map index; null elsewhere, `<-ch` included);
+  `semantic.enclosingResultTypes(element): List<GoType>?`, the result types of the innermost function declaration,
+  method or function literal around the element (named results in order; empty for none; null outside functions).
 - Members: `semantic.methodsOf(type)`, `lookupFieldOrMethod(type, name)`, `implements(type, iface)`.
 - Diagnostics: `semantic.check(file)` returns go/types-style `GoDiagnostic`s.
 - Packages: `GoPackageResolver.resolveImport(importPath, fromFile)` returns a `GoImportResolution`

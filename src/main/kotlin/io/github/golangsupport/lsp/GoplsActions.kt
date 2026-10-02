@@ -49,11 +49,26 @@ object GoplsActionKinds {
      * `Add struct tags` being `Add struct tags...` (reported by the user: both were in the list). The one of the plugin stays: it is
      * the one with the choices. Where it is not offered, the one of gopls is.
      */
-    fun isOffered(kind: String?, title: String?, offered: Collection<Offered>): Boolean {
+    fun isOffered(kind: String?, title: String?, offered: Collection<Offered>, nativeCodeActions: Boolean = false): Boolean {
+        if (nativeCodeActions && isNativeCodeAction(kind, title)) return true
         val same = SAME_AS.entries.firstOrNull { (k, _) -> kind == k || kind?.startsWith("$k.") == true }?.value
         if (same != null && offered.any { it.className.substringAfterLast('.') == same }) return true
         val name = name(title)
         return name.isNotEmpty() && offered.any { name(it.text) == name }
+    }
+
+    /** The kinds of gopls whose actions the native intentions of go-psi-ide do (`ide.intentions`, MIGRATION.md step 9). */
+    private val NATIVE_KINDS = listOf("refactor.rewrite.fillStruct", "refactor.rewrite.fillSwitch")
+
+    /**
+     * Whether a code action of gopls is one of those the native intentions replace when the switch Code actions says Built-in:
+     * fillstruct (`Fill Options`, `Fill anonymous struct`), fillswitch (`Add cases for Color`), the fillreturns quick fix
+     * (`Fill in return values`); titles read in gopls v0.23 (`internal/analysis/fill*`). gopls has no action that handles an error.
+     */
+    fun isNativeCodeAction(kind: String?, title: String?): Boolean {
+        if (kind != null && NATIVE_KINDS.any { kind == it || kind.startsWith("$it.") }) return true
+        val text = title.orEmpty().trim()
+        return text.startsWith("Fill ") || text.startsWith("Add cases for ")
     }
 
     /** A name without what differs by habit: the case of the letters, the dots of a dialog to come, the quotes around a name (`Create function 'f'`). */

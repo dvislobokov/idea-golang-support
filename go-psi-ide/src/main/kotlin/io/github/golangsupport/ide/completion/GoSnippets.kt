@@ -2,7 +2,7 @@ package io.github.golangsupport.ide.completion
 
 import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.lookup.LookupElement
-import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.ide.intentions.GoZeroValues
 import io.github.golangsupport.semantic.types.*
 
 /**
@@ -62,32 +62,8 @@ object GoSnippets {
     }
 
     /** The zero value of [type] as Go source; `err` for `error`. */
-    fun zeroValue(type: GoType, context: GoCompletionContext): String {
-        if (isError(type)) return "err"
-        if (type is GoTypeParamType) return "*new(${type.name})"
-        return when (val u = type.underlying()) {
-            is GoBasicType -> when {
-                u.kind.isBoolean -> "false"
-                u.kind.isString -> "\"\""
-                u.kind.isNumeric -> "0"
-                else -> "nil"
-            }
-            is GoPointerType, is GoSliceType, is GoMapType, is GoChanType, is GoSignatureType, is GoInterfaceType -> "nil"
-            is GoStructType, is GoArrayType -> typeSource(type, context) + "{}"
-            else -> "nil"
-        }
-    }
-
-    /** The predeclared `error` (the semantic layer models it as the unnamed interface `interface{ Error() string }`). */
-    private fun isError(type: GoType): Boolean {
-        if (type is GoNamedType) {
-            val file = type.declaration.containingFile as? GoFile ?: return false
-            return type.name == "error" && file.packageName == "builtin"
-        }
-        return type is GoInterfaceType && type.embedded.isEmpty() && type.methods.singleOrNull()?.let { m ->
-            m.name == "Error" && m.signature.params.isEmpty() && m.signature.results.singleOrNull()?.type == GoBasicType.STRING
-        } == true
-    }
+    fun zeroValue(type: GoType, context: GoCompletionContext): String =
+        if (GoZeroValues.isError(type)) "err" else GoZeroValues.of(type) { typeSource(it, context) }
 
     /** The type as written in the current package: other packages' named types are qualified by their package name. */
     private fun typeSource(type: GoType, context: GoCompletionContext): String {

@@ -422,7 +422,9 @@ class GoplsDiagnosticsSupport : LspDiagnosticsSupport() {
         if (!fits(textRange, file.textLength)) return
         val project = file.project
         if (!accepts(diagnostic.source, GoFeatures.native(GoFeature.SYNTAX_ERRORS, project), GoFeatures.native(GoFeature.DIAGNOSTICS, project))) return
-        super.createAnnotation(holder, diagnostic, textRange, quickFixes)
+        // `Fill in return values` and the like: the native intentions offer them while the switch Code actions says Built-in (step 9)
+        val fixes = if (GoFeatures.native(GoFeature.CODE_ACTIONS, project)) quickFixes.filterNot { GoplsActionKinds.isNativeCodeAction(null, it.text) } else quickFixes
+        super.createAnnotation(holder, diagnostic, textRange, fixes)
     }
 
     companion object {

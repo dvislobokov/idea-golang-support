@@ -1,0 +1,5 @@
+switch c {
+case Red:
+case Green:
+case Blue:
+}

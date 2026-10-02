@@ -29,6 +29,14 @@ private class CaretLine(document: Document, offset: Int) {
 private fun caretLine(editor: Editor?): CaretLine? = editor?.let { CaretLine(it.document, it.caretModel.offset) }
 
 /**
+ * The text intentions that the intentions of go-psi-ide (`ide.intentions`: Handle error, Fill return values) replace while the switch
+ * Code actions says Built-in (MIGRATION.md step 9): one source of each action in the list at a time. They go at step 10.
+ */
+object GoTextCodeActions {
+    fun available(project: Project): Boolean = !GoFeatures.native(GoFeature.CODE_ACTIONS, project)
+}
+
+/**
  * Alt+Enter on a call that stands alone on its line (`os.Remove(path)`): the call with its error handled. How many values the call
  * returns is asked of gopls; without it the intention still offers the plain `if err := …` and says so. The same text as the errcheck
  * fix, offered without the linter.
@@ -39,7 +47,7 @@ class GoHandleErrorIntention : IntentionAction {
     override fun startInWriteAction(): Boolean = false
 
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-        if (file !is GoFile) return false
+        if (file !is GoFile || !GoTextCodeActions.available(project)) return false
         val line = caretLine(editor) ?: return false
         return GoErrcheckFixes.callStatement(line.text) != null && !line.text.contains(":=") && !line.text.contains(" = ") && !line.text.trim().startsWith("return")
     }
@@ -68,7 +76,7 @@ class GoCheckErrorIntention : IntentionAction {
     override fun startInWriteAction(): Boolean = true
 
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-        if (file !is GoFile) return false
+        if (file !is GoFile || !GoTextCodeActions.available(project)) return false
         val line = caretLine(editor) ?: return false
         val error = GoStatementsOfError.assignedError(line.text) ?: return false
         val document = editor!!.document
@@ -101,7 +109,7 @@ class GoAddMissingReturnIntention : IntentionAction {
     override fun startInWriteAction(): Boolean = true
 
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-        if (file !is GoFile || editor == null) return false
+        if (file !is GoFile || editor == null || !GoTextCodeActions.available(project)) return false
         val function = functionAt(editor) ?: return false
         return GoGenerators.returnStatement(function.signature) != null && lastStatement(editor.document, function)?.startsWith("return") == false
     }
@@ -252,10 +260,21 @@ class GoReorderFieldsIntention(private val line: Int? = null) : IntentionAction 
     }
 
     private fun analyze(context: GenerateContext): Pair<GoDeclarationInfo, GoFieldAlignment.Result>? {
+        // the struct and its sizes from the PSI (step 9): the text scanner only when the document is not committed yet
+        val spec = if (line == null) context.typeSpecAtCaret else {
+            if (line !in 0 until context.document.lineCount) return null
+            context.file.takeIf { PsiDocumentManager.getInstance(context.project).isCommitted(context.document) }
+                ?.let { GoStructPsi.structSpecAt(it, context.document.getLineStartOffset(line)) }
+        }
+        if (spec != null) {
+            val struct = GoStructPsi.infoOf(spec) ?: return null
+            if (struct.body == null) return null
+            val result = GoFieldAlignment.analyze(GoStructPsi.structOf(spec) ?: return null) ?: return null
+            return (struct to result).takeIf { result.saves }
+        }
         val text = context.document.immutableCharSequence
         val structure = context.structure
         val struct = if (line == null) context.structAtCaret else {
-            if (line !in 0 until context.document.lineCount) return null
             val offset = context.document.getLineStartOffset(line)
             structure.declarations.lastOrNull { it.kind == GoDeclarationKind.STRUCT && it.range.contains(offset) }
         } ?: return null

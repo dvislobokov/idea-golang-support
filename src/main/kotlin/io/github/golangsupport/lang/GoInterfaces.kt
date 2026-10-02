@@ -18,8 +18,9 @@ object GoInterfaces {
 
     private val METHOD = Regex("""^([A-Za-z_]\w*)\s*(\(.*)$""", RegexOption.DOT_MATCHES_ALL)
     private val EMBEDDED = Regex("""^\*?([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)?)(?:\[.*])?$""", RegexOption.DOT_MATCHES_ALL)
-    private val QUALIFIED = Regex("""(?<![\w.])([A-Za-z_]\w*)\.([A-Z]\w*)""")
-    private val EXPORTED = Regex("""(?<![\w.])([A-Z]\w*)""")
+    // a name after `...` (a variadic parameter) is a type all the same
+    private val QUALIFIED = Regex("""(?:(?<![\w.])|(?<=\.\.\.))([A-Za-z_]\w*)\.([A-Z]\w*)""")
+    private val EXPORTED = Regex("""(?:(?<![\w.])|(?<=\.\.\.))([A-Z]\w*)""")
     private val WHITESPACE = Regex("""\s+""")
 
     /** The predeclared interfaces: `error` has a method, the others constrain type parameters and give nothing to implement. */

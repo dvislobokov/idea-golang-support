@@ -26,6 +26,10 @@ import io.github.golangsupport.settings.GoSettings
 import javax.swing.JList
 import javax.swing.ListCellRenderer
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoTypeSpec
+import io.github.golangsupport.semantic.api.GoSemanticService
+import io.github.golangsupport.semantic.types.GoNamedType
+import io.github.golangsupport.semantic.types.GoPointerType
 
 /**
  * An interface to implement: of the project, with what is known of it from the scanner, or of the catalogue (the standard library and
@@ -56,17 +60,17 @@ class GoInterfaceCandidate(
  */
 object GoInterfaceChooser {
     private const val NON_PROJECT = "io.github.golangsupport.implement.nonProject"
-    private val POINTER_RECEIVER = Regex("""^func\s*\(\s*\w*\s*\*""")
 
     fun show(context: GenerateContext) {
+        PsiDocumentManager.getInstance(context.project).commitDocument(context.document)
         val type = context.typeAtCaret ?: return context.hint("Put the caret inside a type declaration")
         val own = GoInterfaceSources.importPathOf(context.project, context.file)
-        val existing = existingMethods(context, type.name)
         // The candidates are collected before the popup, under a progress of their own: the popup computes its list as a read task with
         // write action priority and starts over on every write action, so a long scan under it never finished on a big project (seen
         // live: an empty popup, with "Searching..." at the bottom as the only sign). GoProjectInterfaces keeps what was read.
         var collected: Candidates? = null
         val finished = ProgressManager.getInstance().runProcessWithProgressSynchronously({
+            val existing = ReadAction.compute<Set<String>, RuntimeException> { context.typeSpecAtCaret?.let(::existingMethods).orEmpty() }
             collected = collect(context, own, existing, type.name, ProgressManager.getInstance().progressIndicator)
         }, "Collecting Interfaces", true, context.project)
         if (!finished) return
@@ -86,38 +90,52 @@ object GoInterfaceChooser {
         ActionManager.getInstance().getAction("ImplementMethods")?.shortcutSet?.let { popup.setCheckBoxShortcut(it) }
         popup.invoke(object : ChooseByNamePopupComponent.Callback() {
             override fun elementChosen(element: Any) {
-                (element as? GoInterfaceCandidate)?.let { apply(context, it, own) }
+                (element as? GoInterfaceCandidate)?.let { apply(context, it) }
             }
         }, ModalityState.current(), false)
     }
 
-    private fun existingMethods(context: GenerateContext, typeName: String): Set<String> =
-        context.structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver == typeName }.mapTo(HashSet()) { it.name }
-
-    /** A pointer receiver, unless the type has methods and none of them takes one: the style of the type is kept. */
-    private fun pointerReceiver(context: GenerateContext, typeName: String): Boolean {
-        val text = context.document.immutableCharSequence
-        val methods = context.structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver == typeName }
-        return methods.isEmpty() || methods.any { POINTER_RECEIVER.containsMatchIn(text.subSequence(it.range.startOffset, minOf(it.range.endOffset, it.range.startOffset + 80))) }
+    /**
+     * The methods the type of [spec] has, from the type checker: those of `*T`, declared in any file of the package or promoted from an
+     * embedded field, are all that a value of `*T` has to implement with.
+     */
+    fun existingMethods(spec: GoTypeSpec): Set<String> {
+        val semantic = GoSemanticService.getInstance(spec.project)
+        return semantic.methodsOf(GoPointerType(semantic.declarationType(spec))).mapTo(HashSet()) { it.name }
     }
 
-    private fun apply(context: GenerateContext, chosen: GoInterfaceCandidate, own: String?) {
-        val sources = GoInterfaceSources(context.project)
-        var methods: List<GoInterfaceMethod>? = null
+    /** A pointer receiver, unless the type has methods and none of them takes one: the style of the type is kept. */
+    fun pointerReceiver(spec: GoTypeSpec): Boolean {
+        val methods = (GoSemanticService.getInstance(spec.project).declarationType(spec) as? GoNamedType)?.methods.orEmpty()
+        return methods.isEmpty() || methods.any { it.pointerReceiver }
+    }
+
+    /** What Implement Interface writes for [spec]: the stubs of the methods of the interface it lacks and the imports they need. */
+    class Plan(val typeName: String, val stubs: String, val imports: List<String>)
+
+    /** The plan for the interface ([importPath], [directory], [name] as [GoInterfaceSources.methodsFor] takes them); null when it is not found. */
+    fun plan(spec: GoTypeSpec, target: GoFile, importPath: String?, directory: VirtualFile?, name: String): Plan? {
+        val typeName = spec.name ?: return null
+        val methods = GoInterfaceSources(spec.project).methodsFor(target, importPath, directory, name) ?: return null
+        val existing = existingMethods(spec)
+        val missing = methods.filter { it.name !in existing }
+        val stubs = if (missing.isEmpty()) "" else GoGenerators.methodStubs(typeName, missing.map { it.name to it.signature }, pointerReceiver(spec))
+        return Plan(typeName, stubs, missing.flatMap { it.imports }.distinct())
+    }
+
+    private fun apply(context: GenerateContext, chosen: GoInterfaceCandidate) {
+        var planned: Plan? = null
         val finished = ProgressManager.getInstance().runProcessWithProgressSynchronously({
-            methods = ReadAction.compute<List<GoInterfaceMethod>?, RuntimeException> {
-                if (chosen.directory != null) sources.methodsOf(chosen.directory, chosen.importPath, chosen.name)
-                else sources.methodsOf(chosen.importPath ?: return@compute null, chosen.name)
+            planned = ReadAction.compute<Plan?, RuntimeException> {
+                plan(context.typeSpecAtCaret ?: return@compute null, context.file, chosen.importPath, chosen.directory, chosen.name)
             }
         }, "Reading ${chosen.name}", true, context.project)
         if (!finished) return
-        val found = methods ?: return context.hint("Cannot read the methods of ${chosen.fullName}")
+        val found = planned ?: return context.hint("Cannot read the methods of ${chosen.fullName}")
+        if (found.stubs.isEmpty()) return context.hint("${found.typeName} has every method of ${chosen.name}")
         val type = context.typeAtCaret ?: return
-        val missing = found.filter { it.name !in existingMethods(context, type.name) }
-        if (missing.isEmpty()) return context.hint("${type.name} has every method of ${chosen.name}")
-        val rewritten = missing.map { GoInterfaces.rewrite(it, own, context.structure.imports) }
-        val stubs = GoGenerators.methodStubs(type.name, rewritten.map { it.name to it.signature }, pointerReceiver(context, type.name))
-        val imports = rewritten.flatMap { it.imports }.distinct()
+        val stubs = found.stubs
+        val imports = found.imports
         WriteCommandAction.runWriteCommandAction(context.project, "Implement Interface", null, {
             context.insertAfter(type, stubs, "Implement Interface")
             // the imports go above: the caret, put on the stubs already, moves with the text

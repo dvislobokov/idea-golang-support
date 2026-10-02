@@ -493,6 +493,8 @@ public abstract interface class io/github/golangsupport/semantic/api/GoSemanticS
 	public abstract fun check (Lio/github/golangsupport/lang/psi/GoFile;)Ljava/util/List;
 	public abstract fun constantValue (Lio/github/golangsupport/lang/psi/GoExpression;)Lio/github/golangsupport/semantic/types/GoConstant;
 	public abstract fun declarationType (Lio/github/golangsupport/lang/psi/GoNamedElement;)Lio/github/golangsupport/semantic/types/GoType;
+	public abstract fun enclosingResultTypes (Lcom/intellij/psi/PsiElement;)Ljava/util/List;
+	public abstract fun expectedTypeAt (Lio/github/golangsupport/lang/psi/GoExpression;)Lio/github/golangsupport/semantic/types/GoType;
 	public static fun getInstance (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/semantic/api/GoSemanticService;
 	public abstract fun implements (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoInterfaceType;)Z
 	public fun lookupFieldOrMethod (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;

@@ -58,9 +58,9 @@ Legend:
 | Live templates: `fori`, `forr`, `meth`, `func`, `test`, `bench`, `fuzz`, `main`, `err`, `json` tag | missing | `defaultLiveTemplates` + Go template context | S | |
 | Inlay hints: parameter names, `:=` and range variable types, `iota` constant values, composite literal field names and types, type parameter instantiation (`f[int]`) | missing | the same hint set as gopls; types of every `:=` in the visible range go through the per-body inference cache, measured with the UI robot | M | perf |
 | Struct size/alignment inlay, padding warning, "reorder fields" fix | missing | uses `GoSizes`; GoLand does not have it | S | |
-| Scope-aware `select`: Alt+Enter "Fill select", keyword templates `select` / `for { select {…} }`, and grey inline text after `select {` — cases from the scope (`<-ctx.Done()` for a `context.Context`, `<-t.C` for timers/tickers, `v := <-ch` per channel, `ch <- zero` for send-only, `<-time.After(d)` for a `time.Duration`) | planned (step 9, MIGRATION.md) | typed, never by name | S | |
-| Scope-aware `switch`: grey `case`s after `switch x {` over an `iota` enum (all constants) or a type switch over an interface (implementing types), Alt+Enter "Fill switch" | planned (step 9) | pairs with the exhaustive-switch check of section 5 | S | |
-| `make` by expected type: completion inside `make(` (`chan T`, `[]T, 0, len(x)`, `map[K]V`), templates `make(chan T[, n])` / slice / map, `v, ok := <-ch`, `for v := range ch`, `close(ch)` / `defer close(ch)` for a channel made in the function | planned (step 9) | `expectedTypeAt` | S | |
+| Scope-aware `select`: Alt+Enter "Fill select", keyword templates `select` / `for { select {…} }`, and grey inline text after `select {` — cases from the scope (`<-ctx.Done()` for a `context.Context`, `<-t.C` for timers/tickers, `v := <-ch` per channel, `ch <- zero` for send-only, `<-time.After(d)` for a `time.Duration`) | done (step 9) | typed, never by name | | |
+| Scope-aware `switch`: grey `case`s after `switch x {` over an `iota` enum (all constants) or a type switch over an interface (implementing types), Alt+Enter "Fill switch" | done (step 9) | pairs with the exhaustive-switch check of section 5 | | |
+| `make` by expected type: completion inside `make(` (`chan T`, `[]T, 0, len(x)`, `map[K]V`), templates `make(chan T[, n])` / slice / map, `v, ok := <-ch`, `for v := range ch`, `close(ch)` / `defer close(ch)` for a channel made in the function | done (step 9) | `expectedTypeAt` | | |
 | Smart completion (Ctrl+Shift+Space) by expected type, second-level `x.F.M()` chains | missing | `GoExpectedTypes` exists; plan: `expectedTypeAt(element)` in `semantic.api` (assignment, argument by position, `return` by index, literal element, binary operand, `case`, channel, condition), assignability filter in SMART, weigher boost in BASIC, chains one level deep with a candidate cap | M | perf |
 | Smart `return`: values by result type from the scope (`err` for `error`, nearest variable of the type) else zero values, `fmt.Errorf("…: %w", err)` when `err` is in scope; the same candidates behind a "Fill return values" fix | missing | the host has a text version (`GoIdioms.returnValues`, step 9 moves it to PSI); `GoSnippets.iferrText` has the zero values | S | |
 | Type-aware idioms as inline grey text: `if err != nil {…}` after `x, err :=`, `defer f.Close()` when the type has `Close() error`, `defer mu.Unlock()` after `Lock()` | missing | the host shows them by text rules (`GoInlineIdiomsProvider`); step 9 | S | |
@@ -85,10 +85,11 @@ Legend:
 | Add import, remove/optimize imports, unused variable, convert | done | | |
 | Create function / method / field / variable / type from usage | missing | gopls `undeclared name` fix | M |
 | Implement interface (stub methods), with the type picker | missing | gopls `stubmethods` | M |
-| Fill struct literal with fields (zero values) | missing | gopls `fillstruct` | S |
-| Fill switch: missing `case`s of `iota` enums and sealed interfaces (see section 5) | missing | gopls `fillswitch`; pairs with the exhaustiveness inspection | S |
-| Fill return values (`return` with too few values) | missing | gopls `fillreturns` | S |
-| Handle error: `if err != nil { return ..., err }`, wrap with `fmt.Errorf("...: %w", err)` | missing | | S |
+| Fill struct literal with fields (zero values) | done | `ide.intentions`: Fill all fields / Fill required fields (step 9 F); gopls `fillstruct` | S |
+| Fill switch: missing `case`s of `iota` enums and sealed interfaces (see section 5) | done | `GoFillSwitchIntention`: enum constants, implementing types of an interface; the exhaustiveness inspection is still missing | S |
+| Fill return values (`return` with too few values) | done | `GoFillReturnValuesIntention`, also "Add missing return" | S |
+| Handle error: `if err != nil { return ..., err }`, wrap with `fmt.Errorf("...: %w", err)` | done | `GoHandleErrorIntention`, `GoWrapErrorIntention` | S |
+| Fill select: `ctx.Done()`, channel receives/sends, timer/ticker `C`, `time.After(d)` from the scope, optional `default` | done | `GoFillSelectIntention`, `GoFillSelectWithDefaultIntention` | S |
 | Invert / flip `if`, merge nested `if`, `if` ↔ `switch` | missing | | S |
 | Split / join `var` declarations, `var x T = v` ↔ `x := v` | missing | | S |
 | Change quote (interpreted ↔ raw string) | missing | gopls `changequote` | S |

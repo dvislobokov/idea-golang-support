@@ -2,8 +2,9 @@ package io.github.golangsupport.lang
 
 /**
  * What Alt+Insert and the intentions write: constructors, accessors, `String()`, struct tags, the methods of an interface, a test, a
- * missing `return`, a function that is called but not written. Text in, text out: the scanner gives the declarations and their fields,
- * the caller puts the result where it belongs. Nothing here knows types beyond their names; what needs a type checker is not offered.
+ * missing `return`, a function that is called but not written. Text in, text out: the PSI gives the structs and their fields
+ * ([GoStructPsi], as [GoDeclarationInfo] through [GoStructPsi.infoOf]) and the method sets of interfaces, the caller puts the result where it
+ * belongs. Nothing here looks into types: the callers decide from the PSI and its types what to ask for.
  */
 object GoGenerators {
     private val ACRONYMS = setOf("ID", "URL", "URI", "HTTP", "HTTPS", "API", "JSON", "XML", "SQL", "DB", "UUID", "IP", "TCP", "UDP", "HTML", "CSS", "OS", "TLS", "SSH", "RPC", "GRPC", "CPU", "RAM", "TTL", "UID", "GID")
@@ -107,14 +108,22 @@ object GoGenerators {
 
     /** One field line with its tag: `Name string` -> `Name string \`json:"name"\``. */
     fun withTag(line: String, field: GoDeclarationInfo, kinds: List<String>, case: TagCase, omitEmpty: Boolean): String {
-        val wanted = kinds.filter { field.isExported || it !in setOf("json", "yaml", "xml") }
-        if (wanted.isEmpty()) return line
         val existing = Regex("""`([^`]*)`\s*$""").find(line)
-        val present = existing?.groupValues?.get(1)?.let { Regex("""(\w+):"[^"]*"""").findAll(it).map { m -> m.groupValues[1] }.toSet() }.orEmpty()
-        val added = wanted.filter { it !in present }.joinToString(" ") { kind -> "$kind:\"${case.apply(field.name)}${if (omitEmpty && kind == "json") ",omitempty" else ""}\"" }
-        if (added.isEmpty()) return line
-        return if (existing != null) line.substring(0, existing.range.first) + "`" + (existing.groupValues[1] + " " + added).trim() + "`"
-        else line.trimEnd() + " `$added`"
+        val tag = tagFor(field.name, field.isExported, existing?.groupValues?.get(1), kinds, case, omitEmpty) ?: return line
+        return if (existing != null) line.substring(0, existing.range.first) + tag else line.trimEnd() + " " + tag
+    }
+
+    /**
+     * The raw tag literal of a field named [name] with the keys of [kinds] it lacks added to [existing] (the value of its tag, without
+     * the quotes, or null); null when nothing is added. `json`, `yaml` and `xml` skip an unexported field, which they cannot see.
+     */
+    fun tagFor(name: String, exported: Boolean, existing: String?, kinds: List<String>, case: TagCase, omitEmpty: Boolean): String? {
+        val wanted = kinds.filter { exported || it !in setOf("json", "yaml", "xml") }
+        if (wanted.isEmpty()) return null
+        val present = existing?.let { Regex("""(\w+):"[^"]*"""").findAll(it).map { m -> m.groupValues[1] }.toSet() }.orEmpty()
+        val added = wanted.filter { it !in present }.joinToString(" ") { kind -> "$kind:\"${case.apply(name)}${if (omitEmpty && kind == "json") ",omitempty" else ""}\"" }
+        if (added.isEmpty()) return null
+        return "`" + ((existing?.let { "$it " } ?: "") + added).trim() + "`"
     }
 
     /** The methods of [iface] for [typeName], each with a body that panics: what Implement Interface writes. */

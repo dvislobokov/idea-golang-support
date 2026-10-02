@@ -130,13 +130,17 @@ object GoTestLocator : SMTestLocator {
         val psiManager = PsiManager.getInstance(project)
         if (test.isEmpty()) return listOfNotNull(psiManager.findDirectory(directory)?.let { PsiLocation(it) })
         val function = test.substringBefore('/')
-        val subtest = test.substringAfter('/', "").substringBefore('/')
+        val subtest = test.substringAfter('/', "")
         for (file in directory.children.filter { it.name.endsWith(GoTestNames.TEST_SUFFIX) }) {
-            val text = runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: continue
+            val psiFile = psiManager.findFile(file)
+            // the PSI and its text when there is one: the offsets of the scanner and of the PSI are then of the same text
+            val text = (psiFile as? GoFile)?.viewProvider?.contents ?: runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: continue
             val declaration = GoDeclarations.scan(text).declarations.firstOrNull { it.name == function && it.receiver == null } ?: continue
-            val psiFile = psiManager.findFile(file) ?: continue
-            // a subtest leads to its `t.Run("name", ...)` or to its case of the table, when that line can be told; otherwise to the function
-            val offset = subtest.takeIf { it.isNotEmpty() }?.let { name -> GoSubtests.find(text, declaration).firstOrNull { it.name == name }?.nameRange?.startOffset }
+            if (psiFile == null) continue
+            // a subtest leads to its `t.Run("name", ...)` or to its case of the table (a nested one by its whole path, else by the first
+            // level), when that line can be told; otherwise to the function
+            val subtests = if (subtest.isEmpty()) emptyList() else (psiFile as? GoFile)?.let { GoSubtests.find(it, declaration) } ?: GoSubtests.find(text, declaration)
+            val offset = (subtests.firstOrNull { it.name == subtest } ?: subtests.firstOrNull { it.name == subtest.substringBefore('/') })?.nameRange?.startOffset
                 ?: declaration.nameRange.startOffset
             val element = psiFile.findElementAt(offset) ?: continue
             return listOf(PsiLocation(element))

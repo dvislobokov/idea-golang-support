@@ -3,14 +3,40 @@ package io.github.golangsupport.lang
 /**
  * The next lines of code where Go leaves no choice about them: the check of an error that was just assigned, the `defer` that belongs to
  * what was just opened or locked. Shown as an inline suggestion (grey text, Tab to accept). By the text alone: the statement above the
- * caret and the signature of the function around it; no types, so only the shapes that mean one thing are recognized.
+ * caret and the signature of the function around it; no types, so only the shapes that mean one thing are recognized. On a go-psi file
+ * [Types] answers what the text can only guess (see [GoIdiomTypes]).
  */
 object GoIdioms {
+    /** The function around the caret as the PSI knows it ([GoReturnValues.function]); without it the text is scanned. */
+    class Function(val name: String?, val parameters: List<Parameter>, val results: List<Parameter>, val isMain: Boolean)
+
+    /**
+     * What only the types can tell, over the PSI ([GoIdiomTypes]). Offsets are those of [suggest]'s text; an answer is null when the
+     * types cannot tell (no PSI there yet, an unresolved call), and then the text decides as it does without types.
+     */
+    interface Types {
+        /** The function around the caret. */
+        val function: Function?
+
+        /** Whether the last result of the call assigned by the statement on the line at [lineStart] is `error`. */
+        fun assignsError(lineStart: Int): Boolean?
+
+        /** Whether [receiver] (an expression or a variable of the statement on the line at [lineStart]) has `method()` (`method() error`). */
+        fun hasMethod(lineStart: Int, receiver: String, method: String, returnsError: Boolean): Boolean?
+
+        /** The cases of `select {` on the line at [lineStart], a level a tab: ctx, then timers, then channels in scope; null for none. */
+        fun selectCases(lineStart: Int): List<String>?
+
+        /** The cases of `switch x {` (constants of the named type of `x`) or `switch v := x.(type) {` (implementations of the interface). */
+        fun switchCases(lineStart: Int): List<String>?
+    }
+
     /**
      * What to insert at [offset], or null. The caret has to be on a line of its own; what is typed there already must be the beginning
-     * of the suggestion (then the rest of it is returned). [unit] is one level of indentation.
+     * of the suggestion (then the rest of it is returned). [unit] is one level of indentation. [types], when given, makes the guesses by
+     * name exact and adds what only the types can tell (the cases of `select` and `switch`).
      */
-    fun suggest(text: CharSequence, offset: Int, unit: String = "\t"): String? {
+    fun suggest(text: CharSequence, offset: Int, unit: String = "\t", types: Types? = null): String? {
         if (offset < 0 || offset > text.length) return null
         var lineStart = offset
         while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--
@@ -29,8 +55,11 @@ object GoIdioms {
         val indent = before.takeWhile { it == ' ' || it == '\t' }.ifEmpty { above.indent + if (above.code.endsWith("{")) unit else "" }
 
         val below = text.subSequence(lineEnd, text.length).lineSequence().map { it.trim() }.firstOrNull { it.isNotEmpty() }
-        val suggestion = errorCheck(text, offset, above, indent, unit) ?: returnInErrorCheck(text, offset, previous, below, indent) ?: okCheck(text, offset, above, indent, unit)
-            ?: deferAfter(above) ?: deferInGoroutine(previous) ?: deferAfterErrorCheck(previous) ?: errorAfterLoop(text, offset, previous, indent, unit)
+        val function = types?.function
+        val suggestion = typedCases(text, offset, above, below, indent, unit, types)
+            ?: errorCheck(text, offset, above, indent, unit, types) ?: returnInErrorCheck(text, offset, previous, below, indent, function)
+            ?: okCheck(text, offset, above, indent, unit, function)
+            ?: deferAfter(above, types) ?: deferInGoroutine(previous) ?: deferAfterErrorCheck(previous, types) ?: errorAfterLoop(text, offset, previous, indent, unit, function)
             ?: scannerLoop(above, indent, unit) ?: rowsLoop(previous, indent, unit) ?: return null
         // not twice: the line below may be what would be suggested
         if (below != null && below == suggestion.lineSequence().first().trim()) return null
@@ -39,7 +68,8 @@ object GoIdioms {
         return (if (before.isEmpty()) indent else "") + suggestion.substring(typed.length)
     }
 
-    private class Line(val indent: String, val code: String)
+    /** A line of code; [start] is the offset of its first character (the indent). */
+    private class Line(val indent: String, val code: String, val start: Int)
 
     /** The non-blank lines above, nearest first, comments at the end of a line cut off; enough of them to see an `if` block and what is above it. */
     private fun linesBefore(text: CharSequence, lineStart: Int): List<Line> {
@@ -50,33 +80,68 @@ object GoIdioms {
             while (start > 0 && text[start - 1] != '\n') start--
             val raw = text.subSequence(start, end).toString().trimEnd('\r')
             val code = raw.trim().let { if (it.startsWith("//")) "" else it.substringBefore(" //").trim() }
-            if (code.isNotEmpty()) result += Line(raw.takeWhile { it == ' ' || it == '\t' }, code)
+            if (code.isNotEmpty()) result += Line(raw.takeWhile { it == ' ' || it == '\t' }, code, start)
             end = start - 1
         }
         return result
     }
 
+    // --- select, switch and for: what the types in scope suggest ---
+
+    private val SWITCH_OPENED = Regex("""^switch\b.*\{$""")
+
+    /**
+     * The empty body of `select {`, `switch x {`, `switch v := x.(type) {` or `for {` just opened: the cases the types give (see [Types]).
+     * Only with types, and only while there is nothing in the body yet.
+     */
+    private fun typedCases(text: CharSequence, offset: Int, above: Line, below: String?, indent: String, unit: String, types: Types?): String? {
+        if (types == null || below == null || !below.startsWith("}")) return null
+        val lines = when {
+            above.code == "select {" -> types.selectCases(above.start)
+            SWITCH_OPENED.matches(above.code) -> types.switchCases(above.start)
+            above.code == "for {" -> types.selectCases(above.start)?.let { cases -> listOf("select {") + cases + "}" }
+            else -> null
+        } ?: return null
+        if (lines.isEmpty()) return null
+        val values = lines.map { line ->
+            val code = line.trimStart('\t')
+            // `return ctx.Err()` is written as the function returns its errors
+            val written = if (code.startsWith(CONTEXT_EXIT)) contextExit(text, offset, code.removePrefix(CONTEXT_EXIT), types.function) else code
+            unit.repeat(line.length - code.length) + written
+        }
+        return values.joinToString("\n$indent")
+    }
+
+    /** The line of [Types.selectCases] that leaves on a cancelled context, followed by the name of the context. */
+    const val CONTEXT_EXIT = "\u0000exit:"
+
+    /** `return ctx.Err()`, with the zero values before it; a bare `return` from a function without results. */
+    private fun contextExit(text: CharSequence, offset: Int, context: String, function: Function?): String =
+        if (function != null && function.results.isEmpty()) "return" else returnStatement(text, offset, "$context.Err()", function)
+
     // --- if err != nil ---
 
     private val ERROR_ASSIGNMENT = Regex("""^(?:[\w.\[\]*]+\s*,\s*)*(\w*[eE]rr\w*)\s*:?=[^=].*[)\w\]}"`]$""")
 
-    private fun errorCheck(text: CharSequence, offset: Int, above: Line, indent: String, unit: String): String? {
+    private fun errorCheck(text: CharSequence, offset: Int, above: Line, indent: String, unit: String, types: Types?): String? {
         if (above.code.startsWith("if ") || above.code.startsWith("for ") || above.code.startsWith("switch ") || above.code.startsWith("}")) return null
         val error = ERROR_ASSIGNMENT.matchEntire(above.code)?.groupValues?.get(1) ?: return null
-        return "if $error != nil {\n$indent$unit${errorExit(text, offset, error, above.code).joinToString("\n$indent$unit")}\n$indent}"
+        // a call that does not return an error last is not checked for one
+        if (types?.assignsError(above.start) == false) return null
+        return "if $error != nil {\n$indent$unit${errorExit(text, offset, error, above.code, types?.function).joinToString("\n$indent$unit")}\n$indent}"
     }
 
     /**
      * The body of an `if err != nil {` that was typed by hand and is still empty: the statement that leaves the function. Not above
      * something that is in the block already: a line added to a body is not the whole of it.
      */
-    private fun returnInErrorCheck(text: CharSequence, offset: Int, previous: List<Line>, below: String?, indent: String): String? {
+    private fun returnInErrorCheck(text: CharSequence, offset: Int, previous: List<Line>, below: String?, indent: String, function: Function?): String? {
         val check = previous.firstOrNull() ?: return null
         val error = ERROR_CHECK.matchEntire(check.code)?.groupValues?.get(1) ?: return null
         if (below != null && !below.startsWith("}")) return null
         // what has failed is in the `if` itself (`if err := f(); err != nil {`), or in the statement above it
         val failed = if (';' in check.code) check.code.substringAfter("if ").substringBefore(';') else previous.getOrNull(1)?.code?.takeIf { ERROR_ASSIGNMENT.matches(it) }
-        return errorExit(text, offset, error, failed).joinToString("\n$indent")
+        return errorExit(text, offset, error, failed, function).joinToString("\n$indent")
     }
 
     // --- the way the file returns its errors ---
@@ -123,29 +188,30 @@ object GoIdioms {
      * - a file that wraps its errors returns the error wrapped, with what has failed in words ([failed] is the statement);
      * - the rest return the error as it is.
      */
-    private fun errorExit(text: CharSequence, offset: Int, error: String, failed: String?): List<String> {
+    private fun errorExit(text: CharSequence, offset: Int, error: String, failed: String?, function: Function? = null): List<String> {
         val badInput = BAD_INPUT.containsMatchIn(failed.orEmpty())
-        val parameters = enclosing(text, offset)?.takeIf { (_, results) -> results.isEmpty() }?.first.orEmpty()
+        val parameters = enclosing(text, offset, function)?.takeIf { (_, results) -> results.isEmpty() }?.first.orEmpty()
         parameters.firstOrNull { it.type == "http.ResponseWriter" }?.name?.let { writer ->
             return listOf("http.Error($writer, $error.Error(), http.${if (badInput) "StatusBadRequest" else "StatusInternalServerError"})", "return")
         }
         parameters.firstOrNull { it.type == "*gin.Context" }?.name?.let { context ->
             return listOf("$context.AbortWithStatusJSON(http.${if (badInput) "StatusBadRequest" else "StatusInternalServerError"}, gin.H{\"error\": $error.Error()})", "return")
         }
-        val plain = returnStatement(text, offset, error)
+        val plain = returnStatement(text, offset, error, function)
         // `t.Fatal(err)` and `log.Fatal(err)` say where they are by themselves
         val message = failure(failed)?.takeIf { plain.startsWith("return ") } ?: return listOf(plain)
         return listOf(when {
-            answersWithStatus(text) -> returnStatement(text, offset, "status.Errorf(codes.${if (badInput) "InvalidArgument" else "Internal"}, \"$message: %v\", $error)")
-            wrapsErrors(text) -> returnStatement(text, offset, "fmt.Errorf(\"$message: %w\", $error)")
+            answersWithStatus(text) -> returnStatement(text, offset, "status.Errorf(codes.${if (badInput) "InvalidArgument" else "Internal"}, \"$message: %v\", $error)", function)
+            wrapsErrors(text) -> returnStatement(text, offset, "fmt.Errorf(\"$message: %w\", $error)", function)
             else -> plain
         })
     }
 
-    /** The parameters and the results of the function the offset is in the body of. */
-    private fun enclosing(text: CharSequence, offset: Int): Pair<List<Parameter>, List<Parameter>>? =
-        GoDeclarations.scan(text).declarations.lastOrNull { it.body != null && offset > it.body.startOffset && offset <= it.body.endOffset && it.signature != null }
-            ?.let { splitSignature(it.signature.orEmpty()) }
+    /** The parameters and the results of the function the offset is in the body of: from the PSI when [function] is given. */
+    private fun enclosing(text: CharSequence, offset: Int, function: Function? = null): Pair<List<Parameter>, List<Parameter>>? =
+        function?.let { it.parameters to it.results }
+            ?: GoDeclarations.scan(text).declarations.lastOrNull { it.body != null && offset > it.body.startOffset && offset <= it.body.endOffset && it.signature != null }
+                ?.let { splitSignature(it.signature.orEmpty()) }
 
     // --- the receiver of a method ---
 
@@ -213,16 +279,24 @@ object GoIdioms {
         return (if (space.isEmpty()) " " else "") + "`" + pairs.joinToString(" ") + "`"
     }
 
-    /** What leaves the function around [offset] with the error: `return nil, err`, `return total, err`, `t.Fatal(err)`, `log.Fatal(err)`. */
-    fun returnStatement(text: CharSequence, offset: Int, error: String): String {
-        val structure = GoDeclarations.scan(text)
-        val function = structure.declarations.lastOrNull { it.body != null && offset > it.body.startOffset && offset <= it.body.endOffset && it.signature != null } ?: return "return $error"
-        val (parameters, results) = splitSignature(function.signature.orEmpty())
+    /**
+     * What leaves the function around [offset] with the error: `return nil, err`, `return total, err`, `t.Fatal(err)`, `log.Fatal(err)`.
+     * The function is [function] when the PSI knows it (exact zero values), otherwise the one the text scan finds.
+     */
+    fun returnStatement(text: CharSequence, offset: Int, error: String, function: Function? = null): String {
+        val around = function ?: run {
+            val structure = GoDeclarations.scan(text)
+            val declaration = structure.declarations.lastOrNull { it.body != null && offset > it.body.startOffset && offset <= it.body.endOffset && it.signature != null }
+                ?: return "return $error"
+            val (parameters, results) = splitSignature(declaration.signature.orEmpty())
+            Function(declaration.name, parameters, results, declaration.name == "main" && structure.isMainPackage)
+        }
+        val (parameters, results) = around.parameters to around.results
         if (results.isEmpty()) {
             val testing = parameters.firstOrNull { it.type.contains("testing.") }
             return when {
                 testing?.name != null -> "${testing.name}.Fatal($error)"
-                function.name == "main" && structure.isMainPackage -> "log.Fatal($error)"
+                around.isMain -> "log.Fatal($error)"
                 else -> "return"
             }
         }
@@ -232,7 +306,7 @@ object GoIdioms {
             when {
                 isError -> error
                 named -> result.name ?: result.type
-                else -> zeroValue(result.type)
+                else -> result.zero ?: zeroValue(result.type)
             }
         }
         return "return " + values.joinToString(", ")
@@ -247,7 +321,8 @@ object GoIdioms {
     /**
      * The values of the `return` that is being typed at [offset], for the completion list: the zero values of the results with the error
      * of the `if err != nil` around (`nil, err`), with `nil` for the error elsewhere. Null where the function returns less than two
-     * values: one name is what the language server completes.
+     * values: one name is what the language server completes. The text version, for code without PSI; with PSI [GoReturnValues]
+     * answers. To be removed at step 10 of the migration.
      */
     fun returnValues(text: CharSequence, offset: Int): String? {
         if (offset < 0 || offset > text.length) return null
@@ -266,6 +341,16 @@ object GoIdioms {
         return statement.removePrefix("return ").takeIf { statement.startsWith("return ") && ", " in it }
     }
 
+    /** Whether the line of [offset] is `return` and a name being typed, with nothing after the caret: where the values are offered. */
+    fun typingReturn(text: CharSequence, offset: Int): Boolean {
+        if (offset < 0 || offset > text.length) return false
+        var lineStart = offset
+        while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--
+        var lineEnd = offset
+        while (lineEnd < text.length && text[lineEnd] != '\n') lineEnd++
+        return text.subSequence(offset, lineEnd).isBlank() && RETURN_TYPED.matches(text.subSequence(lineStart, offset).toString().trimStart())
+    }
+
     // --- if !ok ---
 
     /** `v, ok := m[key]`, `s, ok := x.(string)`, `v, ok := <-ch`: the comma-ok forms, and what stands on the right. */
@@ -273,7 +358,7 @@ object GoIdioms {
     private val MAP_LOOKUP = Regex("""^([\w.]+)\[(.+)\]$""")
     private val TYPE_ASSERTION = Regex("""^([\w.()]+)\.\((.+)\)$""")
 
-    private fun okCheck(text: CharSequence, offset: Int, above: Line, indent: String, unit: String): String? {
+    private fun okCheck(text: CharSequence, offset: Int, above: Line, indent: String, unit: String, function: Function?): String? {
         if (above.code.startsWith("if ") || above.code.startsWith("for ")) return null
         val match = COMMA_OK.matchEntire(above.code) ?: return null
         val (ok, right) = match.destructured
@@ -286,11 +371,12 @@ object GoIdioms {
             assertion != null -> "fmt.Errorf(\"unexpected type %T\", ${assertion.groupValues[1]})"
             else -> "nil"
         }
-        val statement = returnStatement(text, offset, error).let { if (error == "nil" && it.endsWith("Fatal(nil)")) "return" else it }
+        val statement = returnStatement(text, offset, error, function).let { if (error == "nil" && it.endsWith("Fatal(nil)")) "return" else it }
         return "if !$ok {\n$indent$unit$statement\n$indent}"
     }
 
-    class Parameter(val name: String?, val type: String)
+    /** A parameter or a result; [zero] is the zero value of the type when the PSI knows it (the text guesses it by the name of the type). */
+    class Parameter(val name: String?, val type: String, val zero: String? = null)
 
     /** `(a, b int, f func() error) (total int, err error)` -> the parameters and the results; a name without a type takes the type that follows. */
     fun splitSignature(signature: String): Pair<List<Parameter>, List<Parameter>> {
@@ -356,9 +442,14 @@ object GoIdioms {
     private val SPAN = Regex("""^\w+,\s*(\w*[sS]pan\w*)\s*:?=\s*.+\.Start\(.*\)$""")
     private val SIGNALS = Regex("""^signal\.Notify\((\w+),.*\)$""")
 
-    private fun deferAfter(above: Line): String? {
+    private fun deferAfter(above: Line, types: Types?): String? {
         CONTEXT.matchEntire(above.code)?.let { match -> return match.groupValues[1].takeIf { it != "_" }?.let { "defer $it()" } }
-        LOCK.matchEntire(above.code)?.let { return "defer ${it.groupValues[1]}.${it.groupValues[2]}Unlock()" }
+        LOCK.matchEntire(above.code)?.let {
+            val (receiver, read) = it.destructured
+            // a `Lock` without an `Unlock` (a file lock, a custom type) is not paired by a deferred call
+            if (types?.hasMethod(above.start, receiver, "${read}Unlock", returnsError = false) == false) return null
+            return "defer $receiver.${read}Unlock()"
+        }
         STOPPABLE.matchEntire(above.code)?.let { return "defer ${it.groupValues[1]}.Stop()" }
         SPAN.matchEntire(above.code)?.let { return "defer ${it.groupValues[1]}.End()" }
         SIGNALS.matchEntire(above.code)?.let { return "defer signal.Stop(${it.groupValues[1]})" }
@@ -391,14 +482,14 @@ object GoIdioms {
      * After the loop over rows or over the lines of a scanner: the error the loop has stopped at, which `Next` and `Scan` do not
      * return and which is forgotten more often than anything else here.
      */
-    private fun errorAfterLoop(text: CharSequence, offset: Int, previous: List<Line>, indent: String, unit: String): String? {
+    private fun errorAfterLoop(text: CharSequence, offset: Int, previous: List<Line>, indent: String, unit: String, function: Function?): String? {
         val brace = previous.firstOrNull()?.takeIf { it.code == "}" } ?: return null
         val open = previous.indexOfFirst { it !== brace && it.indent == brace.indent }
         if (open < 1 || previous.subList(1, open).any { it.indent.length <= brace.indent.length }) return null
         val (name, method) = LOOP.matchEntire(previous[open].code)?.destructured ?: return null
         // what a wrapped error says has failed: `scan`, `read rows`
         val failed = if (method == "Scan") "scan()" else "readRows()"
-        return "if err := $name.Err(); err != nil {\n$indent$unit${errorExit(text, offset, "err", failed).joinToString("\n$indent$unit")}\n$indent}"
+        return "if err := $name.Err(); err != nil {\n$indent$unit${errorExit(text, offset, "err", failed, function).joinToString("\n$indent$unit")}\n$indent}"
     }
 
     private val CLOSED_ROWS = Regex("""^defer (\w+)\.Close\(\)$""")
@@ -423,18 +514,28 @@ object GoIdioms {
         Regex("""^[\w.]+\.(Begin|BeginTx)$""") to { name -> "$name.Rollback()" },
     )
 
-    /** The caret is right after `if err != nil { ... }`, and the statement above that `if` has opened something. */
-    private fun deferAfterErrorCheck(previous: List<Line>): String? {
+    /**
+     * The caret is right after `if err != nil { ... }`, and the statement above that `if` has opened something. With [types] the
+     * `Close` is exact: whatever has `Close() error` is closed, whatever has not is not, whatever the name of the function that opened it.
+     */
+    private fun deferAfterErrorCheck(previous: List<Line>, types: Types?): String? {
         if (previous.firstOrNull()?.code != "}") return null
         val indent = previous.first().indent
         val check = previous.indexOfFirst { it.indent == indent && it.code.startsWith("if ") && it.code.endsWith("!= nil {") }
         if (check < 0 || check + 1 >= previous.size) return null
         // everything between the `if` and its brace is its body
         if (previous.subList(1, check).any { it.indent.length <= indent.length }) return null
-        val match = OPENED.matchEntire(previous[check + 1].code) ?: return null
+        val opened = previous[check + 1]
+        val match = OPENED.matchEntire(opened.code) ?: return null
         val (name, opener) = match.destructured
         if (name == "_") return null
-        return CLOSERS.firstOrNull { it.first.matches(opener) }?.let { "defer ${it.second(name)}" }
+        val byName = CLOSERS.firstOrNull { it.first.matches(opener) }?.second?.invoke(name)
+        if (byName != null && byName != "$name.Close()") return "defer $byName"
+        return when (types?.hasMethod(opened.start, name, "Close", returnsError = true)) {
+            true -> "defer $name.Close()"
+            false -> null
+            null -> byName?.let { "defer $it" }
+        }
     }
 
     // --- text ---

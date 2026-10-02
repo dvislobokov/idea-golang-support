@@ -60,4 +60,12 @@ class GoInterfacesTest {
         assertEquals(listOf("example.com/app/store"), rewritten.imports)
         assertEquals("(item Item, target app.Target, r io.Reader) error", GoInterfaces.rewrite(method, "example.com/app/store", emptyList()).signature)
     }
+
+    /** Regression: the dots of a variadic parameter hid the type after them from both qualifications. */
+    @Test fun variadicParametersAreQualifiedToo() {
+        val method = GoInterfaceMethod("Serve", "(hs ...Handler, us ...url.URL)", http)
+        val rewritten = GoInterfaces.rewrite(method, "example.com/app", listOf(import("net/url", "u")))
+        assertEquals("(hs ...http.Handler, us ...u.URL)", rewritten.signature)
+        assertEquals(listOf("net/http"), rewritten.imports)
+    }
 }

@@ -12,8 +12,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 
 /**
- * What a function returns, asked of whoever knows the types: the module with the language server. The plugin itself has no type
- * information, and "handle the error" cannot be written without knowing how many values come before the error.
+ * What a function returns, asked of whoever knows the types: the PSI first (`lang.GoNativeSignatureProvider`), then the module with
+ * the language server. "Handle the error" cannot be written without knowing how many values come before the error.
  */
 interface GoSignatureProvider {
     /** The number of results of the function named at [offset] of [file]; null when unknown. Blocks: not for EDT without a progress. */

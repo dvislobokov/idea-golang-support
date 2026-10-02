@@ -58,13 +58,22 @@
     <!-- code vision over that PSI: the "N usages" / "N implementations" hints above the declarations; with it on duty the gopls hints stand down
          (MIGRATION.md step 8i; the gate follows the switch Code vision) -->
     <xi:include href="/META-INF/go-psi-ide-codevision.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- the intentions that rewrite code by its types over that PSI: fill all / required fields, fill return values, fill switch, fill select,
+         handle error, wrap error; with them on duty the same actions of gopls and the text intentions of GoIntentions stand down
+         (MIGRATION.md step 9; the gate follows the switch Code actions) -->
+    <xi:include href="/META-INF/go-psi-ide-intentions.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->
         <extensionPoint qualifiedName="io.github.golangsupport.languageServerControl" interface="io.github.golangsupport.settings.GoLanguageServerControl" dynamic="true"/>
-        <!-- what a function returns: asked by the fixes of the linter, answered by the module with gopls -->
+        <!-- what a function returns: asked by the fixes of the linter, answered by the PSI (GoNativeSignatureProvider), then by the module with gopls -->
         <extensionPoint qualifiedName="io.github.golangsupport.signatureProvider" interface="io.github.golangsupport.lint.GoSignatureProvider" dynamic="true"/>
     </extensionPoints>
+
+    <extensions defaultExtensionNs="io.github.golangsupport">
+        <!-- the signature of a call from the PSI, before the gopls one: the content module's provider answers when this one cannot -->
+        <signatureProvider order="first" implementation="io.github.golangsupport.lang.GoNativeSignatureProvider"/>
+    </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Go" implementationClass="io.github.golangsupport.lang.GoFileType" fieldName="INSTANCE" language="Go" extensions="go"/>
@@ -110,6 +119,9 @@
         <postStartupActivity implementation="io.github.golangsupport.help.GoWelcomePageActivity"/>
         <!-- `nil, err` after `return`: the values of the function as one item -->
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoReturnCompletionContributor"/>
+        <!-- the type `make(` is to make, from the expected type of the PSI; the comma-ok receive after `<-ch` -->
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoMakeCompletionContributor"/>
+        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoChannelReceiveCompletionContributor"/>
         <!-- `type Name struct {...}`, `for i, x := range xs`: what a keyword can begin here, expanded as live templates; before the native
              contributor, whose bare keywords and snippets of the same lookup string it hides when the PSI is the source (step 8e) -->
         <completion.contributor language="Go" order="first, before goPsiCompletion" implementationClass="io.github.golangsupport.lang.GoKeywordCompletionContributor"/>

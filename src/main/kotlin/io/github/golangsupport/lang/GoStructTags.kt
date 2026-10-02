@@ -9,6 +9,8 @@ import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
+import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.psi.GoFieldDeclaration
 import io.github.golangsupport.lang.psi.GoFile
 
 /**
@@ -129,6 +131,24 @@ object GoStructTags {
         Naming.NONE -> emptyList()
     }
 
+    /**
+     * Where a tag starts and the field it belongs to, from the PSI: [offset] inside the backquotes of the tag of a field declaration of
+     * any struct type (a named one, a field of a function, a variable). A tag still being typed has no closing backquote: the raw string
+     * runs to the end of the file and is the tag all the same. The field is the first name of the declaration, or the type of an
+     * embedded field. Null anywhere else, an interpreted string tag (`"json:\"id\""`) included. Needs read access.
+     */
+    fun tagAt(file: PsiFile, offset: Int): Pair<Int, String>? {
+        val leaf = file.findElementAt(offset) ?: file.findElementAt(offset - 1) ?: return null
+        val tag = GoStructPsi.tagAround(leaf) ?: return null
+        val start = tag.textRange.startOffset
+        if (offset <= start || file.viewProvider.contents.getOrNull(start) != '`') return null
+        // after the closing backquote the caret is out of the tag
+        if (tag.textLength > 1 && tag.text.endsWith('`') && offset >= tag.textRange.endOffset) return null
+        val declaration = tag.parent as? GoFieldDeclaration ?: return null
+        val field = GoStructPsi.fieldsOf(declaration).firstOrNull()?.name ?: return null
+        return start to field
+    }
+
     /** Where a tag starts and the field it belongs to, when [offset] is inside the backquotes of a field of a struct; null anywhere else. */
     fun tagAt(text: CharSequence, offset: Int): Pair<Int, String>? {
         val lineStart = text.lastIndexOf('\n', (offset - 1).coerceAtLeast(0)).let { if (it < 0) 0 else it + 1 }
@@ -172,7 +192,8 @@ class GoStructTagCompletionContributor : CompletionContributor() {
         if (parameters.originalFile !is GoFile) return
         val text = parameters.editor.document.immutableCharSequence
         val offset = parameters.offset
-        val (open, field) = GoStructTags.tagAt(text, offset) ?: return
+        // the copy of the file completion runs in has the dummy identifier after the caret: offsets up to the caret are those of the editor
+        val (open, field) = GoStructTags.tagAt(parameters.position.containingFile, offset) ?: return
         val context = GoStructTags.contextOf(text.subSequence(open + 1, offset).toString()) ?: return
         when (context) {
             is GoStructTags.Context.AtKey -> {

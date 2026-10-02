@@ -170,6 +170,24 @@ class GoIdeFeatureGateTest : GoSemanticIdeTestBase() {
         assertEmpty("no colour of the semantic annotator: $closed", closed)
     }
 
+    /** CODE_ACTIONS off: none of the intentions of `ide.intentions` is offered; the default gate offers them where they apply. */
+    fun testClosedGateCodeActions() {
+        val text = "package p\n\ntype T struct{ A int }\n\nvar v = T{<caret>}\n\nfunc f(ch chan int) {\n\tselect {}\n}\n"
+        fun offered(name: String): Pair<List<String>, List<String>> {
+            myFixture.configureByText(name, text)
+            val inLiteral = myFixture.availableIntentions.map { it.text }
+            myFixture.editor.caretModel.moveToOffset(myFixture.file.text.indexOf("{}\n}") + 1)
+            return inLiteral to myFixture.availableIntentions.map { it.text }
+        }
+        val (literal, select) = offered("open.go")
+        assertTrue(literal.toString(), "Fill all fields" in literal)
+        assertTrue(select.toString(), "Fill select" in select)
+        close(GoIdeFeature.CODE_ACTIONS)
+        val (closedLiteral, closedSelect) = offered("closed.go")
+        assertFalse(closedLiteral.toString(), "Fill all fields" in closedLiteral || "Fill required fields" in closedLiteral)
+        assertFalse(closedSelect.toString(), closedSelect.any { it.startsWith("Fill select") })
+    }
+
     fun testClosedGateFindUsagesOfMethod() {
         myFixture.configureByText("shapes.go", shapes)
         val method = myFixture.findElementByText("Area() float64 { return", GoMethodDeclaration::class.java)

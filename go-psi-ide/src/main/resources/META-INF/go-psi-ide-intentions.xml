@@ -1,0 +1,57 @@
+<!-- go-psi-ide, intentions: the Alt+Enter actions that rewrite code by its types (fill struct, fill return values, fill switch, fill select,
+     handle and wrap errors), over the PSI and GoSemanticService. Included by the host plugin (MIGRATION.md, step 9); every intention asks
+     io.github.golangsupport.ide.GoIdeFeatureGate (CODE_ACTIONS) first and is unavailable when it is off. The tests of go-psi-ide include
+     every go-psi-ide-*.xml. The description of the PSI "Handle error" lives in GoPsiHandleErrorIntention: the host has a text intention
+     of that simple name with its own description directory. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoFillStructFieldsIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoFillStructFieldsIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoFillRequiredFieldsIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoFillRequiredFieldsIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoFillReturnValuesIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoFillReturnValuesIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoFillSwitchIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoFillSwitchIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoFillSelectIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoFillSelectIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoFillSelectWithDefaultIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoFillSelectWithDefaultIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoHandleErrorIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoPsiHandleErrorIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoWrapErrorIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoWrapErrorIntention</descriptionDirectoryName>
+    </intentionAction>
+  </extensions>
+</idea-plugin>

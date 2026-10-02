@@ -15,8 +15,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.psi.GoStructType
+import io.github.golangsupport.lang.psi.GoTypeSpec
 import com.intellij.ui.CheckBoxList
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.dsl.builder.panel
@@ -38,6 +42,8 @@ abstract class GoGenerateAction : AnAction(), DumbAware {
 
     override fun actionPerformed(e: AnActionEvent) {
         val context = context(e) ?: return
+        // the struct and its fields come from the PSI: it has to see what is typed
+        PsiDocumentManager.getInstance(context.project).commitDocument(context.document)
         perform(context)
     }
 
@@ -56,19 +62,32 @@ class GenerateContext(val project: Project, val editor: Editor, val file: GoFile
     val structure: GoFileStructure get() = GoDeclarations.scan(document.immutableCharSequence)
     val offset: Int get() = editor.caretModel.offset
 
-    /** The type declaration the caret stands in, or on the name of. */
-    val typeAtCaret: GoDeclarationInfo? get() = structure.declarations.filter { it.kind.isType }.lastOrNull { offset >= it.range.startOffset && offset <= it.range.endOffset }
+    /** The top-level type spec the caret stands in, or on the keyword or the name of, from the PSI. Needs read access. */
+    val typeSpecAtCaret: GoTypeSpec? get() = GoStructPsi.typeSpecAt(file, offset)
+
+    /** [typeSpecAtCaret] as the tools that take declarations of the scanner want it ([GoStructPsi.infoOf]). */
+    val typeAtCaret: GoDeclarationInfo? get() = typeSpecAtCaret?.let(GoStructPsi::infoOf)
     val structAtCaret: GoDeclarationInfo? get() = typeAtCaret?.takeIf { it.kind == GoDeclarationKind.STRUCT }
+
+    /** The struct type at the caret with its fields from the PSI. */
+    val structTypeAtCaret: GoStructType? get() = typeSpecAtCaret?.let(GoStructPsi::structOf)
     val functionAtCaret: GoDeclarationInfo? get() = structure.declarations.filter { it.kind == GoDeclarationKind.FUNCTION || it.kind == GoDeclarationKind.METHOD }.lastOrNull { offset >= it.range.startOffset && offset <= it.range.endOffset }
 
     /** The declaration the generated code goes after: the one at the caret, and the last method of its type after that. */
     fun insertionOffset(declaration: GoDeclarationInfo?): Int {
         val text = document.immutableCharSequence
         if (declaration == null) return text.length
-        val methods = structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver == declaration.name }
-        // a type of a `type (...)` group: after the group, not inside it (seen live: a method written between the specs)
-        val group = structure.groups.firstOrNull { it.contains(declaration.range) }
-        val after = (methods.map { it.range.endOffset } + (group?.endOffset ?: declaration.range.endOffset)).max()
+        val committed = PsiDocumentManager.getInstance(project).isCommitted(document)
+        val spec = if (committed) GoDeclarationPsi.ofName(file.findElementAt(declaration.nameRange.startOffset)) as? GoTypeSpec else null
+        val after = if (spec != null) {
+            // a type of a `type (...)` group: after the group, not inside it (seen live: a method written between the specs)
+            val methods = file.methods.filter { it.receiverTypeName == spec.name }
+            (methods.map { it.textRange.endOffset } + (spec.parent?.textRange?.endOffset ?: spec.textRange.endOffset)).max()
+        } else {
+            val methods = structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver == declaration.name }
+            val group = structure.groups.firstOrNull { it.contains(declaration.range) }
+            (methods.map { it.range.endOffset } + (group?.endOffset ?: declaration.range.endOffset)).max()
+        }
         val lineEnd = text.indexOf('\n', after).let { if (it < 0) text.length else it }
         return lineEnd.coerceAtMost(text.length)
     }
@@ -155,20 +174,46 @@ class GoGenerateStructTagsAction : GoGenerateAction() {
 
     companion object {
         fun addTags(context: GenerateContext) {
-            val struct = context.structAtCaret ?: return context.hint("Put the caret inside a struct type")
-            val body = struct.body ?: return
-            val fields = GoGenerators.fields(struct)
-            if (fields.isEmpty()) return context.hint("${struct.name} has no named fields")
+            PsiDocumentManager.getInstance(context.project).commitDocument(context.document)
+            val spec = context.typeSpecAtCaret
+            val struct = spec?.let(GoStructPsi::structOf) ?: return context.hint("Put the caret inside a struct type")
+            val fields = GoStructPsi.fields(struct).filter { !it.embedded }
+            if (fields.isEmpty()) return context.hint("${spec.name} has no named fields")
             val dialog = TagsDialog(context.project)
             if (!dialog.showAndGet()) return
             val kinds = dialog.kinds()
             if (kinds.isEmpty()) return
-            val text = context.document.getText(body)
-            val replacement = GoGenerators.withTags(text, fields, body.startOffset, kinds, dialog.case(), dialog.omitEmpty())
-            if (replacement == text) return context.hint("Every field has these tags already")
+            val edits = tagEdits(fields, kinds, dialog.case(), dialog.omitEmpty())
+            if (edits.isEmpty()) return context.hint("Every field has these tags already")
             WriteCommandAction.runWriteCommandAction(context.project, "Add Struct Tags", null, {
-                context.document.replaceString(body.startOffset, body.endOffset, replacement)
+                // from the last field up: the offsets of the fields above stay right
+                for ((range, text) in edits.sortedByDescending { it.first.startOffset }) context.document.replaceString(range.startOffset, range.endOffset, text)
+                PsiDocumentManager.getInstance(context.project).commitDocument(context.document)
             }, context.file)
+        }
+
+        /**
+         * The edits that tag [fields] (of the PSI): the tag literal of a declaration replaced by the one with the missing keys, or a tag
+         * written after the type of a declaration without one. A declaration of several names is tagged after its first one.
+         */
+        fun tagEdits(fields: List<GoStructPsi.Field>, kinds: List<String>, case: GoGenerators.TagCase, omitEmpty: Boolean): List<Pair<TextRange, String>> =
+            fields.distinctBy { it.declaration }.mapNotNull { field ->
+                val value = existingTagValue(field)
+                // a backquote cannot go into the raw string the keys are written to
+                if (value != null && '`' in value) return@mapNotNull null
+                val tag = GoGenerators.tagFor(field.name, field.exported, value, kinds, case, omitEmpty) ?: return@mapNotNull null
+                val existing = field.declaration.tag
+                if (existing != null) existing.textRange to tag
+                else {
+                    val end = (field.declaration.type ?: field.declaration.anonymousFieldDefinition ?: return@mapNotNull null).textRange.endOffset
+                    TextRange(end, end) to " $tag"
+                }
+            }
+
+        /** The value of the tag of [field]; an interpreted string (`"json:\"id\""`) unquoted, as its keys are rewritten into a raw one. */
+        private fun existingTagValue(field: GoStructPsi.Field): String? {
+            val tag = field.tag ?: return null
+            return if (tag.startsWith("\"")) StringUtil.unescapeStringCharacters(tag.removeSurrounding("\"")) else field.tagValue
         }
     }
 }

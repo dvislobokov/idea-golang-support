@@ -5,6 +5,24 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, step 9 (MIGRATION.md)
+- go-psi-semantic: `GoSemanticService.expectedTypeAt(expression)` and `enclosingResultTypes(element)` are public API (ABI dump updated).
+  The expected-type logic of completion moved into `semantic.infer.GoExpectedType` and gained: conversions give no expectation, a
+  spread argument (`f(xs...)`) expects the variadic slice, a single call returning all results expects their tuple, the left operand
+  expects the right one's type unless it is an untyped constant, a map index expects the key type. `GoExpectedTypeTest` (6: assignments
+  and declarations, call arguments, returns, composite literals, operands / sends / cases / conditions / map index, enclosing results).
+- go-psi-ide: `GoExpectedTypes.compute` delegates to the service; `GoCompletionSemantics.literalType` and `derefUnderlying` to
+  `GoExpectedType` (the completion tests are the regression suite, unchanged).
+
+### 2026-10-02 - Transplant into idea-golang-support, step 9 (F) (MIGRATION.md)
+- go-psi-ide: intentions that rewrite code by its types (`ide.intentions`, `go-psi-ide-intentions.xml`, docs/IDE-FEATURES.md "Intentions"):
+  Fill all fields, Fill required fields, Fill return values / Add missing return, Fill switch, Fill select, Fill select with default,
+  Handle error, Wrap error with fmt.Errorf. All ask `GoIdeFeatureGate` for `CODE_ACTIONS` and are unavailable while it is off.
+- Shared helpers: `GoZeroValues` (zero values by type; `GoSnippets.iferrText` now uses it), `GoScopeValues` over
+  `GoScopeCandidates.walkLocals` (the local-scope walk of completion moved to the companion, completion unchanged),
+  `GoCompletionSemantics.literalType(value, service)` callable without a completion session.
+- Tests: `GoCodeActionIntentionsTest` (20), `GoIdeFeatureGateTest.testClosedGateCodeActions`.
+
 ### 2026-10-02 - Transplant into idea-golang-support, step 8i (MIGRATION.md)
 - go-psi-ide: code vision over the PSI (`ide.codevision`, `go-psi-ide-codevision.xml`): `GoUsagesCodeVisionProvider` ("N usages", references in
   the use scope, stopped at 100) and `GoImplementationsCodeVisionProvider` ("N implementations" on interfaces and their method specs only,
