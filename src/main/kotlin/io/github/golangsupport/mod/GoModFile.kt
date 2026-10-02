@@ -1,5 +1,7 @@
 package io.github.golangsupport.mod
 
+import io.github.golangsupport.project.impl.GoModFileParser
+
 /** A `require` line; [line] is zero-based. */
 data class GoRequire(val path: String, val version: String, val indirect: Boolean, val line: Int)
 
@@ -8,7 +10,10 @@ data class GoReplace(val oldPath: String, val oldVersion: String?, val newPath: 
     val isLocal: Boolean get() = newVersion == null
 }
 
-/** What a go.mod or a go.work says. Parsed by lines, as the format is defined: a directive, or a block of its arguments in parentheses. */
+/**
+ * What a go.mod or a go.work says, with the line of every require and replace (the tidy banner, the dependency nodes and the quick fixes
+ * navigate there). A view over the native project model's parser (`GoModFileParser.directives`): one grammar for the plugin.
+ */
 class GoModFile(
     val modulePath: String?,
     val goVersion: String?,
@@ -31,6 +36,7 @@ class GoModFile(
     companion object {
         val DIRECTIVES = setOf("module", "go", "toolchain", "godebug", "require", "replace", "exclude", "retract", "tool", "ignore", "use")
 
+        /** Malformed directives are skipped, as `GoModFileParser.parseGoMod` skips them; the arity rules are its. */
         fun parse(text: CharSequence): GoModFile {
             var modulePath: String? = null
             var goVersion: String? = null
@@ -40,66 +46,28 @@ class GoModFile(
             val excludes = ArrayList<Pair<String, String>>()
             val tools = ArrayList<String>()
             val uses = ArrayList<String>()
-            var block: String? = null
-
-            text.lineSequence().forEachIndexed { index, raw ->
-                val comment = raw.indexOf("//")
-                val indirect = comment >= 0 && raw.substring(comment + 2).trim().startsWith("indirect")
-                var words = words(if (comment >= 0) raw.substring(0, comment) else raw)
-                if (words.isEmpty()) return@forEachIndexed
-                if (block != null && words[0] == ")") {
-                    block = null
-                    return@forEachIndexed
-                }
-                val directive = block ?: words[0].also { words = words.drop(1) }
-                if (block == null && words.firstOrNull() == "(") {
-                    block = directive
-                    return@forEachIndexed
-                }
-                when (directive) {
-                    "module" -> modulePath = words.firstOrNull() ?: modulePath
-                    "go" -> goVersion = words.firstOrNull() ?: goVersion
-                    "toolchain" -> toolchain = words.firstOrNull() ?: toolchain
-                    "require" -> if (words.size >= 2) requires += GoRequire(words[0], words[1], indirect, index)
-                    "exclude" -> if (words.size >= 2) excludes += words[0] to words[1]
-                    "tool" -> words.firstOrNull()?.let(tools::add)
-                    "use" -> words.firstOrNull()?.let(uses::add)
-                    "replace" -> {
-                        val arrow = words.indexOf("=>")
-                        if (arrow in 1..2 && words.size > arrow + 1) {
-                            replaces += GoReplace(words[0], words.getOrNull(1).takeIf { arrow == 2 }, words[arrow + 1], words.getOrNull(arrow + 2), index)
-                        }
-                    }
+            for (directive in GoModFileParser.directives(text)) {
+                val a = directive.args
+                val line = directive.line - 1
+                when (directive.verb) {
+                    "module" -> a.singleOrNull()?.let { modulePath = it }
+                    "go" -> a.singleOrNull()?.let { goVersion = it }
+                    "toolchain" -> a.singleOrNull()?.let { toolchain = it }
+                    "require" -> if (a.size == 2) requires += GoRequire(a[0], a[1], directive.indirect, line)
+                    "exclude" -> if (a.size == 2) excludes += a[0] to a[1]
+                    "tool" -> a.singleOrNull()?.let(tools::add)
+                    "use" -> a.singleOrNull()?.let(uses::add)
+                    "replace" -> replace(a, line)?.let(replaces::add)
                 }
             }
             return GoModFile(modulePath, goVersion, toolchain, requires, replaces, excludes, tools, uses)
         }
 
-        /** Splits by whitespace; a quoted or back-quoted string, which a path with unusual characters needs, is one word. */
-        private fun words(line: String): List<String> {
-            val result = ArrayList<String>()
-            var i = 0
-            while (i < line.length) {
-                val c = line[i]
-                when {
-                    c.isWhitespace() -> i++
-                    c == '"' || c == '`' -> {
-                        val close = line.indexOf(c, i + 1).let { if (it < 0) line.length else it }
-                        result += line.substring(i + 1, close)
-                        i = close + 1
-                    }
-                    c == '(' || c == ')' -> {
-                        result += c.toString()
-                        i++
-                    }
-                    else -> {
-                        val start = i
-                        while (i < line.length && !line[i].isWhitespace() && line[i] != '(' && line[i] != ')') i++
-                        result += line.substring(start, i)
-                    }
-                }
-            }
-            return result
+        /** `old [version] => new [version]`, the shape `GoModFileParser.parseGoMod` accepts. */
+        private fun replace(a: List<String>, line: Int): GoReplace? {
+            val arrow = a.indexOf("=>")
+            if (arrow !in 1..2 || a.size - arrow - 1 !in 1..2) return null
+            return GoReplace(a[0], a.getOrNull(1).takeIf { arrow == 2 }, a[arrow + 1], a.getOrNull(arrow + 2), line)
         }
 
         /**

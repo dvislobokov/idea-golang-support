@@ -156,6 +156,13 @@ class GoModFileParserTest : TestCase() {
         assertNull(GoModFileParser.unquote("\"bad\\q\""))
     }
 
+    fun testDirectivesKeepLines() {
+        val d = GoModFileParser.directives("module \"m\"\n\nrequire (\n\ta v1.0.0 // indirect\n\n\tb v1.0.0 // indirect; note\n)\nuse ./x\nreplace a => ../a\n")
+        assertEquals(listOf("module" to 1, "require" to 4, "require" to 6, "use" to 8, "replace" to 9), d.map { it.verb to it.line })
+        assertEquals(listOf(listOf("m"), listOf("a", "v1.0.0"), listOf("b", "v1.0.0"), listOf("./x"), listOf("a", "=>", "../a")), d.map { it.args })
+        assertEquals(listOf(false, true, true, false, false), d.map { it.indirect })
+    }
+
     fun testGoWork() {
         val work = GoModFileParser.parseGoWork(
             """

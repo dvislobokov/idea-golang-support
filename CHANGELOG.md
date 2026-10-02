@@ -11,6 +11,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ### Migration to the native Go PSI (branch `migration`, `MIGRATION.md`)
 - Step 7: `$GOROOT/src` and the module directories of the build list are indexed library roots (navigable, searchable); the setting **Index for navigation** on Settings | Tools | Go chooses between the standard library alone and the standard library with the dependencies, and a change re-indexes without a restart.
+- Step 7 (part): one go.mod/go.work parser: `mod.GoModFile` is a thin view over the native project model's `GoModFileParser` (quoted paths, `// indirect; comment`, blocks and comments read by one grammar); the plugin's line-by-line parser is gone.
 - Step 4 follow-up: Structure view titles methods with their receiver again, `(Store) Add(item Item)`, under the type too; folding folds every nested `{...}` block of a body (`if`, `for`, `switch`, `select`, function literals) and runs of two or more `//` comments, as before the native parser.
 - Step 7 (part): the toolchain of the native project model is the plugin's (`go` of the settings, its `go env`, build tags, GOOS/GOARCH); Go | Reanalyze also drops the caches of the native PSI.
 - Step 6: Implement Interface and the project packages of the catalogue read the stub indices of the native PSI (no file is parsed, no AST loaded); the two text-based file indices are gone.

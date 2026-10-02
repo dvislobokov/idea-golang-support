@@ -11,6 +11,8 @@ stable on real-world projects.
   the host overrides it with its setting. `scheduleRootsUpdate` also reports a change of the policy.
 - go-psi-ide: a method in the Structure view is titled with its receiver type, `(Point) Move(dx, dy int)`, under its type as well;
   `GoFoldingBuilder` folds every `GoBlock` and the braces of `switch`/`select`, and `//` runs from two lines (was three).
+- go-psi-semantic: `GoModFileParser.directives(text)` gives every directive of a go.mod/go.work with its 1-based line and `// indirect`
+  flag (`GoModDirective`, internal), from the same tokenizer as `parseGoMod`/`parseGoWork`; the host's `mod.GoModFile` is built on it.
 
 ### 2026-10-02 - Transplant into idea-golang-support, steps 4-5 (MIGRATION.md)
 - The host plugin registers this parser and the editor descriptor (`go-psi-ide-editor.xml`); the file type is the host's

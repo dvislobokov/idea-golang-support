@@ -34,6 +34,14 @@ data class GoWorkFile(
     val errors: List<String> = emptyList(),
 )
 
+/**
+ * One logical directive line of a go.mod or go.work, as the tokenizer sees it: [verb] is the block verb inside a `verb ( ... )`
+ * block, [args] the unquoted tokens after it, [line] is 1-based (as in [GoModFile.errors]), [indirect] tells a `// indirect` suffix.
+ * For hosts that need positions (navigation, quick fixes) and read the verbs themselves; `parseGoMod`/`parseGoWork` validate.
+ */
+@ApiStatus.Internal
+data class GoModDirective(val verb: String, val args: List<String>, val line: Int, val indirect: Boolean)
+
 /** A go.sum line: `path version[/go.mod] hash`. */
 @ApiStatus.Internal
 data class GoSumEntry(val path: String, val version: String, val isGoMod: Boolean, val hash: String)
@@ -128,6 +136,10 @@ object GoModFileParser {
         }
         return GoWorkFile(go, toolchain, godebug, uses, replaces, errors)
     }
+
+    /** Every directive of [text] with its line, go.mod or go.work alike: the same tokenizer, quoting, blocks and comments as the parsers above. */
+    fun directives(text: CharSequence): List<GoModDirective> =
+        entries(text, mutableListOf()).map { GoModDirective(it.verb, it.args, it.line, isIndirect(it.suffix)) }
 
     fun parseGoSum(text: CharSequence): List<GoSumEntry> = text.lineSequence().mapNotNull { line ->
         val f = line.trim().split(Regex("\\s+"))
