@@ -441,8 +441,10 @@ footer a { color: var(--text-2); }
         <tr><td>Go on This Machine…</td><td>Найденный Go, инструменты и их версии, модули проекта, <code>go env</code>.</td></tr>
         <tr><td>Optimize IDE for Go…</td><td>Диалог со списком включённых плагинов, не нужных для Go (Java, Maven, Python, Spring, GitHub, GitLab…): отмеченные отключаются, IDE предлагает перезапуск. То же предлагает уведомление «Speed up the IDE for Go» при открытии Go-проекта после индексации.</td></tr>
         <tr><td>Debugger, Add Function Breakpoint… <span class="new">новое</span></td><td>Точка останова на функцию по имени, как её называет Delve.</td></tr>
-        <tr><td>Debugger, Show Debugger Logs</td><td>Каталог с журналами Delve.</td></tr>
+        <tr><td>Debugger, Show Debugger Logs</td><td>Каталог с журналами Delve (<code>~/idea-golang-logs/delve</code>).</td></tr>
         <tr><td>Debugger, Trace Debugger Protocol</td><td>Записывает обмен с отладчиком для следующих сеансов.</td></tr>
+        <tr><td>Plugin Logs <span class="new">новое</span></td><td>Журнал плагина в окне: что запущено, что вернулось, что не удалось и почему. Только события плагина, без записей IDE. Кнопки: очистить, только предупреждения и ошибки, открыть папку логов.</td></tr>
+        <tr><td>Open Logs Folder <span class="new">новое</span></td><td>Папка <code>~/idea-golang-logs</code>: журнал (<code>plugin/</code>), каждая команда <code>go</code> и инструментов с её выводом (<code>commands/</code>), журналы Delve (<code>delve/</code>). Файлы по дням, хранятся две недели.</td></tr>
         <tr><td>Help Page</td><td>Эта страница. Есть и в меню Help.</td></tr>
         <tr><td>Welcome to Go Project Support</td><td>Страница о плагине.</td></tr>
       </tbody>
@@ -666,7 +668,8 @@ footer a { color: var(--text-2); }
         <tr><td>Команда <code>go</code> не найдена</td><td>Go, Go on This Machine…</td><td>Указать путь в настройках, раздел Toolchain.</td></tr>
         <tr><td>В коде не набирается русская буква</td><td>Настройки, раздел Editor</td><td>Снять галочку о русской раскладке. В строках и комментариях русский текст набирается всегда.</td></tr>
         <tr><td>Серый текст или список мешают</td><td>Настройки, разделы Editor и Completion</td><td>Каждая возможность отключается своей галочкой.</td></tr>
-        <tr><td>Ошибка плагина</td><td>Help, Show Log: строки с <code>golangsupport</code></td><td>Приложить эти строки к сообщению об ошибке.</td></tr>
+        <tr><td>Команда или инструмент не сделали того, что ожидалось</td><td>Go, Plugin Logs: журнал плагина; кнопка Plugin Logs есть и на уведомлении об ошибке</td><td>Строки <code>[go]</code> говорят, что было запущено, где и с каким кодом выхода; полный вывод команды в <code>~/idea-golang-logs/commands</code> (Go, Open Logs Folder).</td></tr>
+        <tr><td>Ошибка плагина</td><td>Go, Plugin Logs; Help, Show Log: строки с <code>golangsupport</code></td><td>Приложить файл <code>plugin-ДАТА.log</code> из <code>~/idea-golang-logs/plugin</code> и эти строки к сообщению об ошибке.</td></tr>
       </tbody>
     </table></div>
     <p class="empty" id="empty">Ничего не найдено. Попробуйте другое слово.</p>

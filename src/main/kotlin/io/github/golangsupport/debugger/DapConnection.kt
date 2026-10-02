@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import io.github.golangsupport.cli.GoPluginLog
 
 private val LOG = logger<DapConnection>()
 
@@ -119,7 +120,7 @@ class DapConnection(
                 dispatch(message)
             }
         } catch (e: IOException) {
-            if (!closed.get()) LOG.info("The debug adapter has closed the connection: ${e.message}")
+            if (!closed.get()) GoPluginLog.warn(GoDebuggerLogs.CATEGORY, "The debug adapter has closed the connection: ${e.message}")
         } finally {
             close()
             listener.closed()

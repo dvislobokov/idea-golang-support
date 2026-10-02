@@ -63,8 +63,8 @@ import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoSemanticColors
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.cli.GoEnvironment
-import io.github.golangsupport.cli.GoLog
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.mod.GoModFileType
@@ -90,7 +90,7 @@ class GoplsIntegrationProvider : LspIntegrationProvider {
     override fun fileOpened(project: Project, file: VirtualFile, clientStarter: LspIntegrationProvider.LspClientStarter) {
         if (!isGoplsFile(file)) return
         if (!GoSettings.getInstance().languageServerEnabled) {
-            GoLog.LOG.info("gopls is not started for ${file.name}: the language server is off in Settings | Tools | Go")
+            GoPluginLog.info(GoplsLogService.CATEGORY, "gopls is not started for ${file.name}: the language server is off in Settings | Tools | Go")
             return
         }
         if (GoTool.GOPLS.find() == null) {
@@ -98,12 +98,12 @@ class GoplsIntegrationProvider : LspIntegrationProvider {
             // it here and starting again is what makes the first Go file of a session work (seen live: gopls started only when the
             // user opened go.mod a minute later, by which time something else had read the environment).
             if (!GoEnvironment.isKnown()) {
-                GoLog.LOG.info("gopls is not found yet for ${file.name}: reading `go env` first, the client starts when GOPATH is known")
+                GoPluginLog.info(GoplsLogService.CATEGORY, "gopls is not found yet for ${file.name}: reading `go env` first, the client starts when GOPATH is known")
                 GoEnvironment.whenKnown {
                     ApplicationManager.getApplication().invokeLater({
                         if (project.isDisposed) return@invokeLater
-                        if (GoTool.GOPLS.find() == null) return@invokeLater GoLog.LOG.info("gopls is still not found after `go env`; the plugin will offer to install it")
-                        GoLog.LOG.info("gopls found after `go env`: starting the client for the files that are open")
+                        if (GoTool.GOPLS.find() == null) return@invokeLater GoPluginLog.info(GoplsLogService.CATEGORY, "gopls is still not found after `go env`; the plugin will offer to install it")
+                        GoPluginLog.info(GoplsLogService.CATEGORY, "gopls found after `go env`: starting the client for the files that are open")
                         LspClientManager.getInstance(project).startClientsIfNeeded(GoplsIntegrationProvider::class.java)
                     }, project.disposed)
                 }
@@ -113,7 +113,7 @@ class GoplsIntegrationProvider : LspIntegrationProvider {
             if (OFFERED.compareAndSet(false, true)) GoTool.GOPLS.offerInstallation(project, "Go language server") { restart(project) }
             return
         }
-        GoLog.LOG.info("gopls is asked to serve ${file.name}")
+        GoPluginLog.info(GoplsLogService.CATEGORY, "gopls is asked to serve ${file.name}")
         clientStarter.ensureClientStarted(GoplsDescriptor(project))
     }
 

@@ -22,6 +22,7 @@ import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.intellij.util.Alarm
 import com.intellij.util.concurrency.AppExecutorUtil
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.mod.GoModFileType
@@ -129,7 +130,7 @@ class GoCatalogueService(private val project: Project) : Disposable {
                 }
                 dependencies = loaded
                 assemble()
-                LOG.info("Go catalogue: ${index.size} symbols of ${index.packages} packages (${ownPackages.size} of the project) in ${loaded.size} of ${sources.size} modules, " +
+                GoPluginLog.info("catalogue", "Go catalogue: ${index.size} symbols of ${index.packages} packages (${ownPackages.size} of the project) in ${loaded.size} of ${sources.size} modules, " +
                     "$scanned scanned, ${System.currentTimeMillis() - started} ms")
             }
 
@@ -188,7 +189,7 @@ class GoCatalogueService(private val project: Project) : Disposable {
         } catch (e: ProcessCanceledException) {
             throw e
         } catch (e: Exception) {
-            LOG.warn("Cannot read the packages of ${source.directory}: $e")
+            GoPluginLog.warn("catalogue", "Cannot read the packages of ${source.directory}: $e")
             return null
         }
         LOADED[source.key] = module

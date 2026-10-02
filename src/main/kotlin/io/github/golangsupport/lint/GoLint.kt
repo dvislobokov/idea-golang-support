@@ -17,6 +17,7 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoReorderFieldsIntention
@@ -116,13 +117,13 @@ class GoLintAnnotator : ExternalAnnotator<GoLintAnnotator.Request, GoLintAnnotat
             val output = GoCli.execute(GoCli.toolCommandLine(request.executable.path, request.workDirectory.path, *arguments.toTypedArray()), TIMEOUT_MS)
             if (output.isTimeout) return Result(emptyList(), fresh = false)
             val all = GoLintOutput.parse(output.stdout)
-            LOG.info("golangci-lint ${request.packagePath} in ${request.workDirectory.path}: exit code ${output.exitCode}, ${all.size} issues")
-            if (all.isEmpty() && output.exitCode != 0) LOG.info("golangci-lint has failed with exit code ${output.exitCode}: ${output.stderr.lines().lastOrNull { it.isNotBlank() }.orEmpty()}")
+            GoPluginLog.info("lint", "golangci-lint ${request.packagePath} in ${request.workDirectory.path}: exit code ${output.exitCode}, ${all.size} issues")
+            if (all.isEmpty() && output.exitCode != 0) GoPluginLog.warn("lint", "golangci-lint has failed with exit code ${output.exitCode}: ${output.stderr.lines().lastOrNull { it.isNotBlank() }.orEmpty()}")
             val issues = all.filter { FileUtil.pathsEqual(File(request.workDirectory.path, it.file).path, request.file.path) || FileUtil.pathsEqual(it.file, request.file.path) }
             request.file.putUserData(RESULT, request.stamp to issues)
             Result(issues, fresh = true)
         } catch (e: Exception) {
-            LOG.info("golangci-lint has failed: ${e.message}")
+            GoPluginLog.warn("lint", "golangci-lint has failed: ${e.message}")
             Result(emptyList(), fresh = false)
         }
     }

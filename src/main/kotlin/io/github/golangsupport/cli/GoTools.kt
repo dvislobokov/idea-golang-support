@@ -28,7 +28,11 @@ import java.io.File
  * started with), and the log has to answer them without a debugger.
  */
 object GoLog {
+    /** The logger of the IDE log; the journal ([GoPluginLog]) writes its short line through it, the rest of the plugin writes to the journal. */
     val LOG = logger<GoLog>()
+
+    /** The category of the journal for finding Go and its tools. */
+    const val CATEGORY_TOOLS = "tools"
 
     private val DESCRIBED = java.util.concurrent.atomic.AtomicBoolean()
 
@@ -41,8 +45,8 @@ object GoLog {
         if (!DESCRIBED.compareAndSet(false, true)) return
         val ide = EnvironmentUtil.getEnvironmentMap()["PATH"].orEmpty()
         val process = System.getenv("PATH").orEmpty()
-        LOG.info("PATH of the IDE (${ide.split(File.pathSeparatorChar).size} entries, ${if (ide == process) "the same as the process, the shell environment may not be loaded" else "from the shell"}): $ide")
-        LOG.info("GOPATH=${System.getenv("GOPATH")}, GOBIN=${System.getenv("GOBIN")}, HOME=${System.getProperty("user.home")}")
+        GoPluginLog.info(CATEGORY_TOOLS, "PATH of the IDE (${ide.split(File.pathSeparatorChar).size} entries, ${if (ide == process) "the same as the process, the shell environment may not be loaded" else "from the shell"}): $ide")
+        GoPluginLog.info(CATEGORY_TOOLS, "GOPATH=${System.getenv("GOPATH")}, GOBIN=${System.getenv("GOBIN")}, HOME=${System.getProperty("user.home")}")
     }
 }
 
@@ -71,22 +75,22 @@ class GoEnvironment(val values: Map<String, String>) {
         fun get(): GoEnvironment {
             val executable = GoCli.findExecutable()
             if (executable == null) {
-                GoLog.LOG.info("go env: no go executable, nothing to ask")
+                GoPluginLog.info(GoLog.CATEGORY_TOOLS, "go env: no go executable, nothing to ask")
                 return EMPTY
             }
             cached?.takeIf { it.first == executable }?.let { return it.second }
             val started = System.currentTimeMillis()
             val output = runCatching { GoCli.execute(GoCli.commandLine(null, "env", "-json"), 15_000) }
-                .onFailure { GoLog.LOG.info("go env has failed to start: ${it.message}") }.getOrNull()
+                .onFailure { GoPluginLog.info(GoLog.CATEGORY_TOOLS, "go env has failed to start: ${it.message}") }.getOrNull()
             val environment = if (output != null && output.exitCode == 0) parse(output.stdout) else EMPTY
             if (environment !== EMPTY) {
                 cached = executable to environment
-                GoLog.LOG.info(
+                GoPluginLog.info(GoLog.CATEGORY_TOOLS, 
                     "go env of $executable in ${System.currentTimeMillis() - started} ms: GOVERSION=${environment.goVersion}, GOROOT=${environment.goRoot}, " +
                         "GOPATH=${environment.goPath}, GOBIN=${environment.values["GOBIN"]}, tools are looked for in ${environment.binDirectory}",
                 )
             } else {
-                GoLog.LOG.warn("go env of $executable gave nothing: exit code ${output?.exitCode}, ${output?.stderr?.lines()?.firstOrNull { it.isNotBlank() }.orEmpty()}")
+                GoPluginLog.warn(GoLog.CATEGORY_TOOLS, "go env of $executable gave nothing: exit code ${output?.exitCode}, ${output?.stderr?.lines()?.firstOrNull { it.isNotBlank() }.orEmpty()}")
             }
             return environment
         }
@@ -157,9 +161,9 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
         // on change only: find() is asked on every file opened, on every annotator run and before every command
         val previous = LAST_FOUND.put(this, found?.path ?: NOT_FOUND)
         if (previous != (found?.path ?: NOT_FOUND)) {
-            if (found != null) GoLog.LOG.info("$command: $found (${if (configured() != null) "the path from the settings" else "found by the plugin"})")
+            if (found != null) GoPluginLog.info(GoLog.CATEGORY_TOOLS, "$command: $found (${if (configured() != null) "the path from the settings" else "found by the plugin"})")
             else {
-                GoLog.LOG.info("$command is not found: not on the PATH of the IDE and not in ${searchDirectories().joinToString(", ")}; `go env` read: ${GoEnvironment.isKnown()}")
+                GoPluginLog.info(GoLog.CATEGORY_TOOLS, "$command is not found: not on the PATH of the IDE and not in ${searchDirectories().joinToString(", ")}; `go env` read: ${GoEnvironment.isKnown()}")
                 GoLog.describeSearchOnce()
             }
         }

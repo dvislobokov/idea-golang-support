@@ -6,6 +6,7 @@ import com.intellij.execution.process.OSProcessUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.run.DlvDap
 import java.io.File
 import java.io.InputStream
@@ -104,7 +105,7 @@ class DelveProcess(commandLine: GeneralCommandLine, log: File?) : DelveAdapter {
     override fun stop(graceMs: Long) {
         runCatching { socket.close() }
         if (process.waitFor(graceMs, TimeUnit.MILLISECONDS)) return
-        LOG.info("dlv (pid ${process.pid()}) has not exited by itself, killing the process tree")
+        GoPluginLog.warn(GoDebuggerLogs.CATEGORY, "dlv (pid ${process.pid()}) has not exited by itself, killing the process tree")
         kill()
     }
 

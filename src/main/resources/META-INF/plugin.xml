@@ -175,6 +175,9 @@
         <!-- CPU, memory, heap, GC and scheduler of a running program: the operating system and the GODEBUG traces of the runtime -->
         <toolWindow id="Go Monitor" anchor="right" icon="/icons/goMonitorToolWindow.svg" factoryClass="io.github.golangsupport.monitor.GoMonitorToolWindowFactory"/>
         <toolWindow id="Go Tests" anchor="bottom" icon="/icons/goTestsToolWindow.svg" factoryClass="io.github.golangsupport.testing.GoTestExplorerToolWindowFactory"/>
+        <!-- the journal of the plugin; not on the stripe until Go | Plugin Logs asks for it -->
+        <toolWindow id="Go Plugin Logs" anchor="bottom" icon="AllIcons.Debugger.Console" doNotActivateOnStart="true"
+                    factoryClass="io.github.golangsupport.cli.GoPluginLogsToolWindowFactory"/>
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
         <!-- a user/leftover association can shadow the declarative .go / go.mod one: tell the user in a dialog and offer to claim it back -->
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoFileTypeCheckActivity"/>
@@ -259,6 +262,14 @@
             <action id="Go.Generate.TypeFromJson" class="io.github.golangsupport.lang.GoTypeFromJsonAction" text="Type from JSON..." description="Structs with json tags for a JSON document: the clipboard or a dialog"/>
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </group>
+        <group id="Go.Logs">
+            <separator/>
+            <action id="Go.PluginLogs" class="io.github.golangsupport.cli.ShowGoPluginLogsAction" text="Plugin Logs" icon="AllIcons.Debugger.Console"
+                    description="The journal of the plugin: what it ran, what came back, what failed and why; only the events of the plugin"/>
+            <action id="Go.OpenLogsFolder" class="io.github.golangsupport.cli.OpenGoLogsFolderAction" text="Open Logs Folder"
+                    description="~/idea-golang-logs: the journal, every go command with its output, the logs of delve"/>
+            <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </group>
         <action id="Go.HelpPage" class="io.github.golangsupport.help.ShowGoHelpPageAction" text="Help Page" icon="AllIcons.Actions.Help"
                 description="The keys, the actions, the settings and the features of the plugin, on one page">
             <add-to-group group-id="Go.MainMenu" anchor="last"/>
@@ -272,7 +283,7 @@
             <action id="Go.Debugger.AddFunctionBreakpoint" class="io.github.golangsupport.debugger.GoAddFunctionBreakpointAction" text="Add Function Breakpoint..."
                     description="A breakpoint on a function by its name, as delve names it; no file and line"/>
             <action id="Go.Debugger.ShowLogs" class="io.github.golangsupport.debugger.ShowDebuggerLogsAction" text="Show Debugger Logs"
-                    description="Open the directory with the logs of delve and the traces of the protocol"/>
+                    description="Open the directory with the logs of delve and the traces of the protocol (~/idea-golang-logs/delve)"/>
             <action id="Go.Debugger.TraceProtocol" class="io.github.golangsupport.debugger.TraceDebuggerProtocolAction" text="Trace Debugger Protocol"
                     description="Write every DAP message of the debug sessions that start from now on next to the debugger logs"/>
             <add-to-group group-id="Go.MainMenu" anchor="last"/>

@@ -8,6 +8,7 @@ import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.execution.process.ProcessOutputTypes
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
@@ -43,9 +44,9 @@ object GoCli {
         val found = configured ?: detectExecutable()
         // on change only: this is asked before every command and by every tool lookup
         if (LAST_GO.getAndSet(found ?: "-") != (found ?: "-")) {
-            if (found != null) GoLog.LOG.info("go: $found (${if (configured != null) "the path from the settings" else "found by the plugin"})")
+            if (found != null) GoPluginLog.info(GoLog.CATEGORY_TOOLS, "go: $found (${if (configured != null) "the path from the settings" else "found by the plugin"})")
             else {
-                GoLog.LOG.warn("go is not found: not on the PATH of the IDE, not in GOROOT and not in the usual installation directories")
+                GoPluginLog.warn(GoLog.CATEGORY_TOOLS, "go is not found: not on the PATH of the IDE, not in GOROOT and not in the usual installation directories")
                 GoLog.describeSearchOnce()
             }
         }
@@ -90,9 +91,22 @@ object GoCli {
     fun displayString(command: GeneralCommandLine): String =
         (listOf(File(command.exePath).nameWithoutExtension) + command.parametersList.list).joinToString(" ") { if (' ' in it) "\"$it\"" else it }
 
-    /** Runs a short command and captures its output. Must not be called on EDT. */
+    /** Runs a short command and captures its output; the command and how it ended go to the logs ([GoLogs]). Must not be called on EDT. */
     @Throws(ExecutionException::class)
-    fun execute(commandLine: GeneralCommandLine, timeoutMs: Int = TIMEOUT_MS): ProcessOutput = CapturingProcessHandler(commandLine).runProcess(timeoutMs)
+    fun execute(commandLine: GeneralCommandLine, timeoutMs: Int = TIMEOUT_MS): ProcessOutput {
+        val tag = commandLine.exePath.substringAfterLast(File.separatorChar).removeSuffix(".exe")
+        val startedAt = System.currentTimeMillis()
+        GoLogs.commandStarted(tag, commandLine)
+        val output = try {
+            CapturingProcessHandler(commandLine).runProcess(timeoutMs)
+        } catch (e: ExecutionException) {
+            GoLogs.commandFinished(tag, "could not start: ${e.message}", failed = true)
+            throw e
+        }
+        val failed = output.exitCode != 0 || output.isTimeout
+        GoLogs.commandFinished(tag, GoLogs.result(output.exitCode, startedAt, timedOut = output.isTimeout), failed, if (failed) GoLogs.tail(output.stdout, output.stderr) else "")
+        return output
+    }
 
     /**
      * Runs [commands] one after another in a background task, streaming what they print into [output] as it arrives;
@@ -130,26 +144,32 @@ object GoCli {
                     if (indicator.isCanceled) return false
                     indicator.text2 = displayString(command)
                     output.commandStarted(command)
+                    val startedAt = System.currentTimeMillis()
+                    GoLogs.commandStarted(title, command)
                     val result = try {
                         val handler = CapturingProcessHandler(command)
                         handler.addProcessListener(object : ProcessListener {
                             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                                if (outputType !== ProcessOutputTypes.SYSTEM) output.text(event.text, outputType === ProcessOutputTypes.STDERR)
+                                if (outputType === ProcessOutputTypes.SYSTEM) return
+                                output.text(event.text, outputType === ProcessOutputTypes.STDERR)
+                                GoLogs.command(title, event.text)
                             }
                         })
                         // cancelling the progress kills the process
                         handler.runProcessWithProgressIndicator(indicator, TIMEOUT_MS, true)
                     } catch (e: ExecutionException) {
                         output.text(e.message.orEmpty() + "\n", true)
+                        GoLogs.commandFinished(title, "could not start: ${e.message}", failed = true)
                         notifyError(project, title, e.message.orEmpty())
                         return false
                     }
                     output.commandFinished(result.exitCode)
+                    val failed = result.exitCode != 0 || result.isCancelled || result.isTimeout
+                    GoLogs.commandFinished(title, GoLogs.result(result.exitCode, startedAt, result.isCancelled, result.isTimeout), failed, if (failed) GoLogs.tail(result.stdout, result.stderr) else "")
                     if (result.isCancelled) return false
                     if (result.exitCode != 0) {
                         if (onFailure(result)) return false
-                        val details = (result.stderr.ifBlank { result.stdout }).trim().lines().takeLast(15).joinToString("\n")
-                        notifyError(project, "$title: exit code ${result.exitCode}", details)
+                        notifyError(project, "$title: exit code ${result.exitCode}", GoLogs.tail(result.stdout, result.stderr))
                         return false
                     }
                 }
@@ -169,9 +189,12 @@ object GoCli {
     fun notifyError(project: Project?, title: String, content: String) = notify(project, title, content, NotificationType.ERROR)
     fun notifyInfo(project: Project?, title: String, content: String = "") = notify(project, title, content, NotificationType.INFORMATION)
 
+    /** An error balloon carries a "Plugin Logs" button: the journal says what went on before it. */
     private fun notify(project: Project?, title: String, content: String, type: NotificationType) {
+        if (type == NotificationType.ERROR) GoPluginLog.warn("notify", "$title: $content")
         NotificationGroupManager.getInstance().getNotificationGroup(NOTIFICATION_GROUP)
             .createNotification(title, content.replace("\n", "<br>"), type)
+            .apply { if (type == NotificationType.ERROR && project != null) addAction(NotificationAction.createSimple("Plugin Logs") { GoPluginLogsToolWindowFactory.show(project) }) }
             .notify(project)
     }
 

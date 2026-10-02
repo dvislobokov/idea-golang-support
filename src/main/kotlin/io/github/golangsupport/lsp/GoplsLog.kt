@@ -22,6 +22,7 @@ import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentFactory
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.settings.GoLanguageServerConfigurable
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -41,8 +42,16 @@ class GoplsLogService(private val project: Project) : Disposable {
     /** `debug server listening at http://localhost:61674`, from stderr when the debug pages are on. */
     @Volatile var debugPagesUrl: String? = null
 
-    fun info(text: String) = append("[${TIME.format(LocalTime.now())}] $text\n", ConsoleViewContentType.SYSTEM_OUTPUT)
-    fun error(text: String) = append("[${TIME.format(LocalTime.now())}] $text\n", ConsoleViewContentType.ERROR_OUTPUT)
+    /** What the plugin does with the server: in this window, and in the journal of the plugin (the server's own lines stay here). */
+    fun info(text: String) {
+        GoPluginLog.info(CATEGORY, text)
+        append("[${TIME.format(LocalTime.now())}] $text\n", ConsoleViewContentType.SYSTEM_OUTPUT)
+    }
+
+    fun error(text: String) {
+        GoPluginLog.error(CATEGORY, text)
+        append("[${TIME.format(LocalTime.now())}] $text\n", ConsoleViewContentType.ERROR_OUTPUT)
+    }
 
     /** A line of the server itself; a line about the debug pages is remembered for the action that opens them. */
     fun server(text: String) {
@@ -69,6 +78,10 @@ class GoplsLogService(private val project: Project) : Disposable {
 
     companion object {
         private val TIME = DateTimeFormatter.ofPattern("HH:mm:ss")
+
+        /** The category of the journal for the language server. */
+        const val CATEGORY = "gopls"
+
         fun getInstance(project: Project): GoplsLogService = project.service()
     }
 }

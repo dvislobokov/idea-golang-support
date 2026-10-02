@@ -29,6 +29,7 @@ import com.intellij.xdebugger.attach.XAttachPresentationGroup
 import com.intellij.xdebugger.attach.XAttachProcessPresentationGroup
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.run.DlvDap
 import io.github.golangsupport.run.GoCommand
@@ -84,7 +85,7 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
         val configuration = environment.runProfile as? GoRunConfiguration
         if (configuration?.options?.command == GoCommand.REMOTE) {
             val options = configuration.options
-            LOG.info("Connecting to dlv dap at ${options.remoteHost}:${options.remotePort}")
+            GoPluginLog.info(GoDebuggerLogs.CATEGORY, "Connecting to dlv dap at ${options.remoteHost}:${options.remotePort}")
             return RemoteDelve(options.remoteHost.orEmpty().ifBlank { "localhost" }, options.remotePort)
         }
         val delve = GoTool.DELVE.find() ?: run {
@@ -93,7 +94,7 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
         }
         val directory = configuration?.packageDirectory()?.takeIf { it.isNotBlank() }
         val log = GoDebuggerLogs.newAdapterLog()
-        LOG.info("Starting $delve in $directory, log: ${log ?: "off"}")
+        GoPluginLog.info(GoDebuggerLogs.CATEGORY, "Starting $delve in $directory, log: ${log ?: "off"}")
         val commandLine = GoCli.toolCommandLine(delve.path, directory, *DlvDap.arguments(log != null, GoSettings.getInstance().debugAnyGoVersion).toTypedArray())
         return DelveProcess(commandLine, log)
     }

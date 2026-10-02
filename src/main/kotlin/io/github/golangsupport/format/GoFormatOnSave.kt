@@ -8,6 +8,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.settings.GoFormatter
 import io.github.golangsupport.settings.GoSettings
@@ -65,7 +66,7 @@ class GoFormatOnSave : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
         // a syntax error is the business of the editor, not of saving
         if (output.exitCode == 0 && !output.isTimeout && output.stdout.isNotEmpty()) output.stdout else null
     } catch (e: Exception) {
-        LOG.info("Format on save has failed: ${e.message}")
+        GoPluginLog.warn("format", "Format on save has failed: ${e.message}")
         null
     }
 

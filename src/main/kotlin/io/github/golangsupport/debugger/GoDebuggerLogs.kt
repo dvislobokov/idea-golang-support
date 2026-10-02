@@ -5,9 +5,9 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.ToggleAction
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.util.registry.Registry
+import io.github.golangsupport.cli.GoLogs
 import io.github.golangsupport.settings.GoSettings
 import java.io.File
 import java.io.Writer
@@ -17,16 +17,19 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * What to look at when a debug session misbehaves, all in `<log directory of the IDE>/delve`: the log of delve itself
+ * What to look at when a debug session misbehaves, all in `~/idea-golang-logs/delve` ([GoLogs]): the log of delve itself
  * (`dlv dap --log --log-output=dap,debugger`, one file per session) and, when switched on, every DAP message both ways (`protocol/`).
  */
 object GoDebuggerLogs {
     /** The messages of the protocol, per session; takes effect from the next session. */
     const val PROTOCOL_TRACE_KEY = "go.debugger.protocol.trace"
     private const val KEEP = 20
+
+    /** The category of the journal for the debugger. */
+    const val CATEGORY = "debugger"
     private val STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")
 
-    val directory: Path get() = Path.of(PathManager.getLogPath(), "delve")
+    val directory: Path get() = GoLogs.directory("delve")
     val protocolDirectory: Path get() = directory.resolve("protocol")
 
     fun adapterLogName(time: LocalDateTime): String = "dlv-${STAMP.format(time)}.log"

@@ -6,6 +6,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Logs
+- **Go | Plugin Logs**: the journal of the plugin in a tool window (only the events of the plugin; Clear, Warnings and Errors Only, Open Logs Folder), and a "Plugin Logs" button on every error notification. One folder for every log, `~/idea-golang-logs`: `plugin/plugin-DATE.log` (the journal), `commands/commands-DATE.log` (every `go` command and tool the plugin runs, with its output, timestamps and exit code), `delve/` (the debugger logs moved here from the log directory of the IDE). Files are kept for two weeks. **Go | Open Logs Folder** opens it.
+
 ### Migration to the native Go PSI (branch `migration`, `MIGRATION.md`)
 - Steps 4–5: the Go parser is the native one (go-psi-core); Structure view, breadcrumbs, folding, Go to Class/Symbol, commenter, brace matcher and quote handler come from go-psi-ide; the text-level pseudo-PSI (`GoDeclaration`) is gone, the text scanner stays behind the `GoDeclarationPsi` bridge for run icons, Go to Test, the annotator and the gopls handlers. Gates: tests, both corpus gates, benchmarks, verifier, UI robot.
 - gopls: semantic tokens are not requested for files above 100 000 bytes (the server refuses them and the platform logged an exception per request).
