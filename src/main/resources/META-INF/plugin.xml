@@ -53,9 +53,6 @@
         <!-- on the declarations GoDeclarations finds by tokens -->
         <testFinder implementation="io.github.golangsupport.lang.GoTestFinder"/>
         <testCreator language="Go" implementationClass="io.github.golangsupport.lang.GoTestCreator"/>
-        <fileBasedIndex implementation="io.github.golangsupport.lang.GoDeclarationIndex"/>
-        <!-- what every file of the project exports: the packages of the project in the catalogue of completion -->
-        <fileBasedIndex implementation="io.github.golangsupport.catalogue.GoExportsIndex"/>
         <!-- indentation while typing, the way gofmt would have it; whole files are formatted by gofmt itself -->
         <lineIndentProvider implementation="io.github.golangsupport.lang.GoLineIndentProvider"/>
         <enterHandlerDelegate order="first" implementation="io.github.golangsupport.lang.GoEnterBetweenBracketsHandler"/>

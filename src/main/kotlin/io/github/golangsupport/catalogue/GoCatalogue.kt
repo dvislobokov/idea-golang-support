@@ -13,7 +13,7 @@ import java.util.zip.GZIPOutputStream
 /** What a package gives to those who import it: a function, a type, a constant or a variable with an upper-case name. */
 data class GoSymbol(val name: String, val kind: GoDeclarationKind, val signature: String?)
 
-/** The exported names of one file: what the index of the platform keeps for a file of the project. */
+/** The exported names of one file; a file that exports nothing still votes for the name of the package of its directory. */
 data class GoFileExports(val packageName: String, val symbols: List<GoSymbol>)
 
 class GoPackageSymbols(val importPath: String, val name: String, val symbols: List<GoSymbol>)

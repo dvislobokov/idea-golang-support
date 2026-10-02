@@ -1,80 +1,104 @@
 package io.github.golangsupport.lang
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.fileEditor.impl.LoadTextUtil
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.stubs.StubIndex
+import com.intellij.psi.util.CachedValue
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
 import com.intellij.util.concurrency.AppExecutorUtil
+import io.github.golangsupport.lang.psi.GoConstraintTerm
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoInterfaceType
+import io.github.golangsupport.lang.psi.GoTypeSpec
+import io.github.golangsupport.lang.stubs.GoConstraintTermStub
+import io.github.golangsupport.lang.stubs.GoTypeReferenceExpressionStub
+import io.github.golangsupport.lang.stubs.index.GoTypesIndex
 import io.github.golangsupport.mod.GoModulesService
-import java.util.concurrent.ConcurrentHashMap
+import io.github.golangsupport.semantic.cache.GoTrackers
 
 /**
- * The interfaces of the Go files of the project, for Implement Interface: read once and kept by file, so that the popup opens at
- * once the second time (the first run on a big project took long even on fast machines, seen live). A file is read again only
- * when its text has changed; the files to look at come from the index (the ones that declare an interface) when it is ready, and
- * from a walk over the content of the project while it is being built. Warmed up in the background after the project opens.
+ * The interfaces of the Go files of the project, for Implement Interface: every type spec of [GoTypesIndex] in the project scope whose
+ * type is an interface, read from the stubs (no AST of any file is loaded). The list is kept until a declaration of the project changes
+ * ([GoTrackers.projectWideDependencies]), so the popup opens at once the second time; in dumb mode the last list is given. Warmed up in
+ * the background after the project opens.
  */
 @Service(Service.Level.PROJECT)
 class GoProjectInterfaces(private val project: Project) {
     /** An interface as declared: what does not depend on where it is asked from. */
     class Entry(val name: String, val directory: VirtualFile, val file: VirtualFile, val importPath: String?, val packageName: String, val methods: Set<String>, val embeds: Boolean)
 
-    private class Scanned(val stamp: Long, val entries: List<Entry>)
+    @Volatile private var last: List<Entry> = emptyList()
 
-    private val byFile = ConcurrentHashMap<VirtualFile, Scanned>()
+    private val cache: CachedValue<List<Entry>> = CachedValuesManager.getManager(project).createCachedValue {
+        CachedValueProvider.Result.create(collect(), *GoTrackers.getInstance(project).projectWideDependencies())
+    }
 
-    /** The interfaces there are now; [indicator] is told the file at hand. Read actions per file: nothing long is held. */
+    /** The interfaces there are now. A non-blocking read action that gives way to write actions; [indicator] cancels it. */
     fun entries(indicator: ProgressIndicator? = null): List<Entry> {
-        val files = ReadAction.compute<Collection<VirtualFile>, RuntimeException> { files() }
-        byFile.keys.retainAll(files.toSet())
-        val documents = FileDocumentManager.getInstance()
+        if (DumbService.isDumb(project)) return last
+        indicator?.isIndeterminate = true
+        if (ApplicationManager.getApplication().isReadAccessAllowed) return current()
+        val action = ReadAction.nonBlocking<List<Entry>> { current() }.expireWhen { project.isDisposed }
+        return (if (indicator != null) action.wrapProgress(indicator) else action).executeSynchronously()
+    }
+
+    private fun current(): List<Entry> = if (DumbService.isDumb(project)) last else cache.value.also { last = it }
+
+    private fun collect(): List<Entry> {
+        val scope = GlobalSearchScope.projectScope(project)
+        val index = StubIndex.getInstance()
+        val names = ArrayList<String>()
+        // the type names first, then the specs: an interface is a type spec, which index of interfaces there is not
+        index.processAllKeys(GoTypesIndex.KEY, { names += it; true }, scope, null)
         val modules = GoModulesService.getInstance(project)
         val result = ArrayList<Entry>()
-        indicator?.isIndeterminate = false
-        for ((i, file) in files.withIndex()) {
-            (indicator ?: ProgressManager.getInstance().progressIndicator)?.checkCanceled()
-            indicator?.fraction = i.toDouble() / files.size
-            indicator?.text2 = file.path
-            val scanned = ReadAction.compute<Scanned?, RuntimeException> {
-                if (!file.isValid) return@compute null
-                val document = documents.getCachedDocument(file)
-                val stamp = document?.modificationStamp ?: file.modificationStamp
-                byFile[file]?.takeIf { it.stamp == stamp } ?: Scanned(stamp, scan(file, document?.immutableCharSequence ?: LoadTextUtil.loadText(file), modules)).also { byFile[file] = it }
-            } ?: continue
-            result += scanned.entries
+        for (name in names) {
+            ProgressManager.checkCanceled()
+            index.processElements(GoTypesIndex.KEY, name, project, scope, GoTypeSpec::class.java) { spec -> entryOf(spec, modules)?.let(result::add); true }
         }
         return result
     }
 
-    private fun files(): Collection<VirtualFile> {
-        if (!DumbService.isDumb(project)) return GoDeclarationIndex.filesWithInterfaces(project, GlobalSearchScope.projectScope(project))
-        val all = ArrayList<VirtualFile>()
-        ProjectFileIndex.getInstance(project).iterateContent { file -> if (!file.isDirectory && file.extension == GoFileType.defaultExtension) all.add(file); true }
-        return all
-    }
-
-    private fun scan(file: VirtualFile, text: CharSequence, modules: GoModulesService): List<Entry> {
-        val directory = file.parent ?: return emptyList()
-        val structure = GoDeclarations.scan(text)
-        val importPath = modules.moduleOf(directory)?.importPath(directory)
-        return structure.declarations.mapNotNull { declaration ->
-            if (declaration.kind != GoDeclarationKind.INTERFACE || declaration.body == null) return@mapNotNull null
-            val body = GoInterfaces.parseBody(text.subSequence(declaration.body.startOffset, declaration.body.endOffset))
-            if (body.methods.isEmpty() && body.embedded.isEmpty()) return@mapNotNull null
-            Entry(declaration.name, directory, file, importPath, structure.packageName ?: directory.name, body.methods.mapTo(LinkedHashSet()) { it.first }, body.embedded.isNotEmpty())
+    private fun entryOf(spec: GoTypeSpec, modules: GoModulesService): Entry? {
+        val type = spec.type as? GoInterfaceType ?: return null
+        val file = spec.containingFile as? GoFile ?: return null
+        val virtualFile = file.virtualFile ?: return null
+        val directory = virtualFile.parent ?: return null
+        val methods = type.methodSpecList.mapNotNullTo(LinkedHashSet()) { it.name }
+        var embeds = false
+        for (element in type.constraintElemList) {
+            // a union or an approximation (`~int | ~string`) is a type set: there is nothing to implement in it
+            val term = element.constraintTermList.singleOrNull()?.takeUnless(::hasTilde) ?: continue
+            when (embeddedName(term)) {
+                null, "any", "comparable" -> Unit
+                "error" -> methods += "Error"
+                else -> embeds = true
+            }
         }
+        if (methods.isEmpty() && !embeds) return null
+        return Entry(spec.name ?: return null, directory, virtualFile, modules.moduleOf(directory)?.importPath(directory), file.packageName ?: directory.name, methods, embeds)
     }
 
-    /** Reads what is not read yet, in the background and with write actions going first: the first popup finds the files done. */
+    private fun hasTilde(term: GoConstraintTerm): Boolean = ((term as? StubBasedPsiElementBase<*>)?.greenStub as? GoConstraintTermStub)?.hasTilde ?: (term.tilde != null)
+
+    /** `Reader`, `io.Reader`: from the stub of the type reference, or from its text when the AST is there. */
+    private fun embeddedName(term: GoConstraintTerm): String? {
+        val reference = term.type.typeReferenceExpression ?: return null
+        return ((reference as? StubBasedPsiElementBase<*>)?.greenStub as? GoTypeReferenceExpressionStub)?.qualifiedText ?: reference.text
+    }
+
+    /** Reads the interfaces in the background, with write actions going first: the first popup finds them read. */
     fun warmUp() {
         ReadAction.nonBlocking<Unit> { entries() }.inSmartMode(project).expireWhen { project.isDisposed }.coalesceBy(this)
             .submit(AppExecutorUtil.getAppExecutorService())

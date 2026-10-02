@@ -86,9 +86,9 @@ object GoInterfaces {
     }
 
     /** `(\n\tctx context.Context,\n\tid int,\n) error` -> `(ctx context.Context, id int) error`. */
-    private fun tidy(signature: String): String = signature.replace(WHITESPACE, " ").replace(Regex("""\(\s+"""), "(").replace(Regex("""(,)?\s+\)"""), ")").trim()
+    internal fun tidy(signature: String): String = signature.replace(WHITESPACE, " ").replace(Regex("""\(\s+"""), "(").replace(Regex("""(,)?\s+\)"""), ")").trim()
 
-    private fun stripComments(text: CharSequence): String {
+    internal fun stripComments(text: CharSequence): String {
         val out = StringBuilder(text.length)
         var i = 0
         while (i < text.length) {

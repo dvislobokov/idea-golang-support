@@ -42,8 +42,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Not the indexes of the platform: library roots would have every index built for every file of every dependency, where one list of
  * exported names per package is all that is asked for.
  *
- * The packages of the project itself do change, and for them the index of the platform is the cache ([GoExportsIndex]): it is the
- * platform that knows which file has changed. They are put together again when the index says it is not what it was.
+ * The packages of the project itself do change, and for them the stub indices of the platform are the cache ([GoProjectPackages]): it is the
+ * platform that knows which file has changed. They are put together again when a declaration of the project has changed ([GoProjectPackages.stamp]).
  */
 @Service(Service.Level.PROJECT)
 class GoCatalogueService(private val project: Project) : Disposable {
@@ -64,12 +64,12 @@ class GoCatalogueService(private val project: Project) : Disposable {
      * index has changed, for the next list. Needs read access.
      */
     fun current(): GoSymbolIndex {
-        if (!DumbService.isDumb(project) && GoExportsIndex.stamp(project) != ownStamp) refreshProject()
+        if (!DumbService.isDumb(project) && GoProjectPackages.stamp(project) != ownStamp) refreshProject()
         return index
     }
 
     private fun refreshProject() {
-        ReadAction.nonBlocking<Pair<Long, List<GoPackageSymbols>>> { GoExportsIndex.stamp(project) to GoExportsIndex.projectPackages(project) }
+        ReadAction.nonBlocking<Pair<Long, List<GoPackageSymbols>>> { GoProjectPackages.stamp(project) to GoProjectPackages.of(project) }
             .inSmartMode(project).expireWhen { project.isDisposed }.coalesceBy(this, "project")
             .submit(AppExecutorUtil.getAppExecutorService())
             .onSuccess { (stamp, packages) ->

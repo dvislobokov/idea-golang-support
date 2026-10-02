@@ -40,7 +40,7 @@
 | 3 | Подключение модулей в плагин: Gradle + `xi:include`, без регистрации парсера | полдня | 2 | [x] 2026-10-02, ветка `migration` |
 | 4 | Подмена парсера + мост `GoDeclaration` + токены (атомарно) | 2–3 дня | 1, 3 | [x] 2026-10-02, ветка `migration` |
 | 5 | Полный гейт шага 4: тесты, корпус, робот, живая проверка | день | 4 | [x] 2026-10-02 (робот); живая проверка — за пользователем |
-| 6 | Stub-индексы вместо `GoDeclarationIndex` и `GoExportsIndex` | 1–2 дня | 5 | [ ] |
+| 6 | Stub-индексы вместо `GoDeclarationIndex` и `GoExportsIndex` | 1–2 дня | 5 | [x] 2026-10-02, ветка `migration` |
 | 7 | Project model `project.api` поверх `cli`/`mod`/`settings`; library roots | 2 дня | 5 | [ ] |
 | 8 | Фичи с gopls на PSI, по одной за флагом (8a–8k) | по фиче | 6, 7 | [ ] |
 | 9 | Текстовые инструменты IGS на PSI (бенефициары) | по инструменту | 5 | [ ] |
@@ -458,7 +458,8 @@ generics, missing return, init cycles — 0 ложных срабатывани�
   0 «Plugin to blame: Go». `tools/psi-ui-robot/autotest.py --attach --perf` (порт 8084, минимально адаптирован к раскладке IGS): P8 `check()` warm 0.3 мс / после правки тела
   соседа 0.6 мс (база 0.4), P9 53 МБ (база 45 МБ, с gopls в процессе), P6 первое открытие 1057 мс, P7 без GOROOT (roots не включены — шаг 7); P2–P5 падают по построению: completion,
   документация, форматтер go-psi на шаге 4 не подключены (их даёт gopls), сценарий переписывается на шаге 10. Живая проверка пользователем — отдельно.
-- [ ] Шаг 6 — stub-индексы. [ ] Шаг 7 — project model, library roots.
+- [x] Шаг 6 — stub-индексы (2026-10-02): `GoProjectInterfaces` по `GoTypesIndex` (спеки с `GoInterfaceType`, методы и встроенные из стабов, кэш на `GoTrackers.projectWideDependencies`, в dumb-режиме — последний список), `catalogue.GoProjectPackages` по `GoAllPublicNamesIndex` (сигнатуры рендерит `GoStubTexts` из дерева стабов: текста сигнатур стабы не хранят; `stamp` — `GoTrackers.projectOutOfBlock`), `GoInterfaceSources` для пакетов проекта — PSI (AST только выбранного интерфейса), GOROOT и module cache — сканер до шага 7. `GoDeclarationIndex`, `GoExportsIndex` удалены. Тесты с guard на загрузку AST (`GoProjectInterfacesTest`, `GoProjectPackagesTest`). Долг: смена `module` в go.mod не сбрасывает кэши до правки Go-файла — закрывается трекером project model на шаге 7.
+- [ ] Шаг 7 — project model, library roots.
 - [ ] 8a [ ] 8b [ ] 8c [ ] 8d [ ] 8e [ ] 8f [ ] 8g [ ] 8h [ ] 8i [ ] 8j.
 - [ ] Шаг 9, [ ] шаг 10, [ ] шаг 11.
 - [ ] 12.1 gopls опционален, [ ] 12.2 gopls удалён.
