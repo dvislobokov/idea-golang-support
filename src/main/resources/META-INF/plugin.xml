@@ -23,7 +23,7 @@
         <module name="io.github.golangsupport.lsp"/>
     </content>
 
-    <!-- the native Go PSI (go-psi-core, go-psi-semantic; docs/psi/, MIGRATION.md): stub and file indices, project model and semantic services.
+    <!-- the native Go PSI (go-psi-core, go-psi-semantic; docs/PSI-README.md, MIGRATION.md): stub and file indices, project model and semantic services.
          Not the parser (go-psi-core-language.xml, step 4), not the IDE features (go-psi-ide-*.xml, one per feature at step 8) -->
     <xi:include href="/META-INF/go-psi-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/go-psi-semantic.xml" xpointer="xpointer(/idea-plugin/*)"/>

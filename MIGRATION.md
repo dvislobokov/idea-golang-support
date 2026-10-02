@@ -1,9 +1,9 @@
 # Миграция: от gopls к своему PSI (go-psi) внутри idea-golang-support
 
 Составлен 2026-10-02 после переноса кода go-psi в этот репозиторий (`82c34a1`). Анализ, на котором он основан, —
-`docs/psi/MIGRATION-idea-golang-support.md` (инвентарь IGS, таблица точек расширения, риски); здесь — только порядок действий.
+`docs/PSI-MIGRATION-history.md` (инвентарь IGS, таблица точек расширения, риски); здесь — только порядок действий.
 Статус шага отмечать прямо здесь (`[ ]` → `[x]` с датой и коммитом), сделанное переносить в `ROADMAP.md`, историю — в `CHANGELOG.md`
-(про PSI-модули — в `docs/psi/CHANGELOG.md`).
+(про PSI-модули — в `CHANGELOG.md (раздел «go-psi»)`).
 
 Обозначения: **IGS** — корневой модуль плагина (`src/main/kotlin/io/github/golangsupport`), **PSI** — подпроекты
 `go-psi-core` / `go-psi-semantic` / `go-psi-ide` (пакеты `lang.*`, `semantic.*`, `project.*`, `ide.*` того же корня),
@@ -23,7 +23,7 @@
    затронутого слоя (`:go-psi-core:corpusTest`, `:go-psi-semantic:corpusTest`, `--no-configuration-cache`);
    `checkKotlinAbi`; робот (`tools/ui-robot`, сценарии в `playground/`), 0 «Plugin to blame: Go» в `idea.log`.
    Регрессии производительности ловят `./gradlew.bat benchmark` (пороги `testData/benchmark/thresholds.json`) и
-   `tools/ui-robot/autotest.py --perf` (P1–P9, цифры в `docs/psi/CHANGELOG.md`, запись «Performance wave»).
+   `tools/ui-robot/autotest.py --perf` (P1–P9, цифры в `CHANGELOG.md (раздел «go-psi»)`, запись «Performance wave»).
 5. **Иконки, цвета, настройки, тексты — из IGS.** `GoIcons`, `colorSchemes/GoDefault.xml`/`GoDarcula.xml` с ключами
    `GO_*`, `GoSettings` и страницы Settings | Tools | Go, `GoBundle` (en/ru). PSI-модули своих не заводят; что есть в
    `go-psi-core/src/main/resources/icons` и в `ide.highlighting.GoColorSettingsPage` — удаляется на шаге 2.
@@ -45,7 +45,7 @@
 | 8 | Фичи с gopls на PSI, по одной за флагом (8a–8k) | по фиче | 6, 7 | [ ] |
 | 9 | Текстовые инструменты IGS на PSI (бенефициары) | по инструменту | 5 | [ ] |
 | 10 | Удаление старого: сканер, text-lexer, gopls-дубли, docs/psi → docs | день | 8 | [ ] |
-| 11 | Волны `docs/psi/FEATURES.md` (новые фичи поверх PSI) | вехи | 8 | [ ] |
+| 11 | Волны `docs/FEATURES.md` (новые фичи поверх PSI) | вехи | 8 | [ ] |
 | 12 | gopls опционален → удалён (две вехи) | вехи | 8, 11 | [ ] |
 | 13 | Собственный анализ вместо линтеров; линтеры по запросу (этапы A–C) | 2+3+4 недели | 5 | [ ] |
 
@@ -86,7 +86,7 @@ PSI и типы. Шаг 12 — две вехи, которые закрываю�
 
 **Зачем.** Две регистрации языка «Go» и типа файла «Go» в одном плагине невозможны; у IGS и PSI совпадают FQN
 `io.github.golangsupport.lang.GoLanguage` и `GoFileType`, а ещё ~25 простых имён (список — отчёт переноса,
-`docs/psi/MIGRATION-idea-golang-support.md` 4.3 и ниже).
+`docs/PSI-MIGRATION-history.md` 4.3 и ниже).
 
 **Как.**
 - Удалить из `go-psi-core`: `lang/GoLanguage.kt` (объекты `GoLanguage`, `GoFileType`), `lang/GoIcons.kt`,
@@ -189,7 +189,7 @@ PSI и типы. Шаг 12 — две вехи, которые закрываю�
 
 `test buildPlugin --offline`; `:go-psi-core:corpusTest --no-configuration-cache` (лексер/AST diff/fuzz/стабы — 0
 расхождений); `benchmark` (пороги не хуже); `runIdeForUiTests` на копии `playground` — весь список `playground/README.md`;
-`tools/ui-robot/autotest.py --perf` — P1/P6/P7 не хуже цифр в `docs/psi/CHANGELOG.md`; живая проверка пользователем:
+`tools/ui-robot/autotest.py --perf` — P1/P6/P7 не хуже цифр в `CHANGELOG.md (раздел «go-psi»)`; живая проверка пользователем:
 печать в `net/http/server.go`, Structure, folding, Go to Symbol, run-иконки, gopls-навигация.
 
 ## Шаг 6. Stub-индексы вместо файловых
@@ -225,7 +225,7 @@ Go to Symbol по проекту и по GOROOT после шага 7.
   индексация, каталог вместо индекса). Resolve и стабы требуют проиндексированных зависимостей. Решение: PSI
   `GoRootsProvider` (`AdditionalLibraryRootsProvider`) включается для GOROOT/src (без `cmd/`) и для модулей из
   build list текущего проекта (не всего module cache). Цена измерена: GOROOT ~6–7 с CPU в один поток, 3–5 с
-  при параллельной индексации (`docs/psi/PERF-BACKLOG.md` п. 8), повторное открытие — из индексов на диске.
+  при параллельной индексации (`docs/PERF-BACKLOG.md` п. 8), повторное открытие — из индексов на диске.
   `view.GoDependenciesTreeProvider` (узел Dependencies) остаётся, но файлы зависимостей теперь ещё и в индексах.
 - Go | Reanalyze (`build.GoReanalyzeAction`) дополнительно зовёт `GoTrackers.invalidateAll()`.
 - `go.mod`/`go.work` как язык: у IGS свой `GoModLanguage` + подсветка + completion; у PSI — только модель. Язык
@@ -331,7 +331,7 @@ IGS; робот: открыть `playground` с зависимостью, Go to 
 - Удалить `lang.GoDeclarations` (сканер) и мост `GoDeclarationPsi`, `GoTextLexer`/`GoTextTokens`, если не осталось
   потребителей (indent и typed handlers могут остаться на текстовом лексере — решить по факту), gopls-дубли фич,
   переведённых на `NATIVE` релиз назад; флаги этих фич убрать из настроек.
-- `docs/psi/*` → `docs/` (один комплект документации), `docs/psi/CHANGELOG.md` → раздел в `CHANGELOG.md`;
+- `docs/psi/*` → `docs/` (один комплект документации), `docs/psi/CHANGELOG.md` → раздел в `CHANGELOG.md` — **сделано 2026-10-02 (10-C)**: 14 файлов в `docs/`, `PSI-PLAN.md`, `PSI-README.md`, `PSI-MIGRATION-history.md`, changelog go-psi — раздел «go-psi» в `CHANGELOG.md`; ROADMAP/PLAN закрыли «свой парсер», в `COMPARE.md` колонка «Без gopls»;
   `tools/psi-ui-robot` слить с `tools/ui-robot` (сценарии P1–P9 и 16 шагов go-psi добавить к сценариям IGS) — **сделано 2026-10-02 (10-B)**: один робот, порт 8083, `autotest.py`/`perf.py` в `tools/ui-robot`, проект сценариев `tools/ui-robot/project-psi`; сценарий ещё ждёт переписывания под один переключатель (шаги 6, 12, 13, P2–P5 рассчитаны на go-psi completion/документацию/форматтер).
 - `ROADMAP.md`/`PLAN.md`: пункт «свой парсер» уровня 4 закрыт; `COMPARE.md` — колонка «без gopls».
 - Лицензии: `LICENSE` для IGS и `NOTICE.md` (go/parser, `internal/types/testdata` — BSD-3 Go authors;
@@ -339,7 +339,7 @@ IGS; робот: открыть `playground` с зависимостью, Go to 
 
 ## Шаг 11. Новые фичи
 
-По волнам `docs/psi/FEATURES.md` §11: постфиксы/live templates (у IGS уже есть `GoPostfixTemplates`,
+По волнам `docs/FEATURES.md` §11: постфиксы/live templates (у IGS уже есть `GoPostfixTemplates`,
 `liveTemplates/Go.xml` — объединять, не дублировать), inlay hints, struct size, Smart Enter (`GoSmartEnter` IGS
 переводится на PSI), surround/unwrap, Code Vision, затем анализ (exhaustive switch, Printf, struct tags, error flow),
 генерация и рефакторинги. Решение D1 (`go` вне project model) в IGS уже принято де-факто: run/test/coverage/debug
@@ -388,7 +388,7 @@ gopls делает это тоже плохо), одновременный ан�
 
 **Что уже есть (type checker):** unresolved, unused var/import/label/value, type mismatch, arity, duplicates,
 generics, missing return, init cycles — 0 ложных срабатываний на GOROOT (`:go-psi-semantic:corpusTest`), результат
-кэшируется по телам функций (`docs/psi/CHANGELOG.md`, «Per-body diagnostics»).
+кэшируется по телам функций (`CHANGELOG.md (раздел «go-psi»)`, «Per-body diagnostics»).
 
 **Этап A — vet-класс без data flow (~2 недели, после шага 5, параллельно с 6–8).** Каждая проверка — инспекция в
 `go-psi-ide/.../inspections` с quick-fix, корпусный гейт на GOROOT (0 ложных; исключения — список с причиной), тест с
@@ -420,7 +420,7 @@ generics, missing return, init cycles — 0 ложных срабатывани�
 Критерий B: `errcheck` и `nilness` по `golang.org/x/tools` — паритет с линтером ±5% при 0 ложных на GOROOT;
 `GoHighlightingPassBenchmark.afterBodyEdit` не хуже +10%.
 
-**Этап C — декларативный движок правил (~3–4 недели), `docs/psi/RULES.md`.** Правило = паттерн PSI (с
+**Этап C — декларативный движок правил (~3–4 недели), `docs/RULES.md`.** Правило = паттерн PSI (с
 метапеременными) + условия на типы/константы + сообщение + шаблон замены; загрузка из ресурсов плагина и из
 `.go-psi-rules.yaml` проекта; импортер синтаксиса ruleguard (`m.Match(...).Where(...).Report(...)`) для переноса
 готовых наборов. После движка перенос правила staticcheck/gocritic — минуты: первыми топ-30 SA по частоте
@@ -456,7 +456,7 @@ generics, missing return, init cycles — 0 ложных срабатывани�
 | Configuration cache: `corpusTest`/`benchmark` не сериализуются | запускать с `--no-configuration-cache`; обычный `test` — с кэшем |
 | `--offline`: артефакты grammarkit/JFlex/abi-tools | уже в кэше Gradle; при смене версий — один онлайн-запуск, записать в CLAUDE.md |
 | Split mode / remote dev, форки IDE без LSP-модуля | PSI-код в главном модуле не зависит от `lsp`; при `languageServerEnabled=false` все фичи `NATIVE` |
-| Память: кэши типов (45 МБ на 16k строк GOROOT) | `GoCacheMemoryBenchmark`, P9; дальше — `docs/psi/LIBRARY-SUMMARIES.md` |
+| Память: кэши типов (45 МБ на 16k строк GOROOT) | `GoCacheMemoryBenchmark`, P9; дальше — `docs/LIBRARY-SUMMARIES.md` |
 | Кодировка/EOL: часть перенесённых файлов с CRLF | `.gitattributes` IGS нормализует; при первом касании файла Git переписывает в LF |
 | Лицензии не оформлены | шаг 10 до релиза |
 | Ложные срабатывания собственных проверок (хуже, чем отсутствие проверки) | корпусный гейт на GOROOT и `golang.org/x` для каждой инспекции, 0 ложных как условие merge; новые классы — выключены по умолчанию первый релиз |
@@ -495,7 +495,8 @@ generics, missing return, init cycles — 0 ложных срабатывани�
 - [x] 8a — синтаксические ошибки (2026-10-02): переключатель `syntaxErrorsSource`: NATIVE — `PsiErrorElement` показаны, у gopls отброшены диагностики с `source == "syntax"` (`GoplsDiagnosticsSupport.accepts`); GOPLS — ошибки парсера скрыты `lang.GoSyntaxErrorFilter` (`highlightErrorFilter`), gopls показывает свои; без сервера — всегда парсер. Первая группа «Source of features» на странице Language Server (строка «Syntax errors»); apply перезапускает демон и gopls (диагностики gopls кэшированы платформой до следующей публикации — рестарт демона их не перефильтровывает, рестарт сервера — да). Сообщение парсера больше не называет вставленную точку с запятой (`<<syntheticSemi>>`, goldens recovery обновлены, позиции те же). Умолчание пока GOPLS. Робот (8084, `broken.go` с незакрытой скобкой, `errors.js`): GOPLS — 1 ошибка gopls «expected ';', found 'EOF'»; NATIVE — 1 ошибка парсера; `GoSyntaxErrorFilterTest`, `GoplsDiagnosticsTest`, `GoLazyBodyTest` 8/8.
 - [x] 8b — уже PSI с шагов 4/6, флага нет.
 - [x] 8c — навигация и usages (2026-10-02): `go-psi-ide-navigation.xml` включён; в go-psi-ide сервис `ide.GoIdeFeatureGate` (NAVIGATION / USAGES / IMPLEMENTATION_MARKERS, по умолчанию всё включено), в IGS переопределён `lang.GoIgsIdeFeatureGate` → `GoFeatures.native(NAVIGATION | USAGES | CODE_VISION)`; каждое расширение дескриптора спрашивает гейт на входе. Платформа берёт один `targetElementEvaluator` и один `codeInsight.gotoSuper` на язык (`forLanguage`): PSI-реализации зарегистрированы `order="first"` и при закрытом гейте делегируют следующему для Go (единственное допустимое `order="first"` — не ради дедупликации, а потому что слот один). Найдено и исправлено: с шага 4 Find Usages в режиме gopls показывал каждое место дважды (ссылки PSI резолвятся независимо от переключателя + usages gopls) — `lsp.GoplsFindUsagesHandlerFactory` отдаёт handler без поиска ссылок, когда источник usages — gopls (`GoplsFindUsagesHandlerTest`). Строки «Navigation» и «Usages and highlighting» на странице Language Server. Умолчание пока GOPLS. Робот (`nav8c.js`, `goto_targets.js`): GOPLS — handler gopls, usages `Priced` 1 / `Order.Total` 6 только от gopls, реализации 2, маркеры gopls; NATIVE — handler PSI, usages 1 / 5 (gopls ещё считает вызов через интерфейс `priced.Total()`; у PSI это вопрос «Include Interface Methods» своего handler'а), реализации `Priced` 2, Go to Super — PSI, 6 маркеров PSI, Ctrl+B через ссылки PSI: `fmt.Println` → GOROOT, `uuid.NewString` → module cache, `Total` → проект. Dumb-режим под NATIVE не смотрел (по построению отвечает gopls). «Plugin to blame: Go» — только от моих же JS-зондов (класс content-модуля через чужой загрузчик, чтение PSI вне read action), от плагина 0. Известный плавающий тест: `semantic.GoDeepExpressionTest.testLongStringConcatenationTypesAndFoldsWithoutStackOverflow` падает в полном прогоне `:go-psi-semantic:test` примерно раз из трёх с `RecursionManager` «Inconsistent depth» (тестовый assert, enters/exits расходятся на 1 из-за соседнего теста), в одиночку и при повторе проходит; код не менялся с переноса — разобрать отдельно.
-- [x] Шаг 9 (2026-10-02, четыре агента Opus: S/F/I/R; робот — ниже), [ ] шаг 10, [ ] шаг 11.
+- [x] Шаг 9 (2026-10-02, четыре агента Opus: S/F/I/R; робот — ниже), [~] шаг 10 (A, B, C сделаны; лицензии ждут решения пользователя), [ ] шаг 11.
+- [x] 10-A — текстовый сканер удалён (2026-10-02): `lang.GoDeclarations`, `GoDeclarationPsi`, `GoTextLexer`, `GoTextTokens` и текстовые intentions (Handle error, Add if err != nil check, Add missing return — их заменяют intentions go-psi-ide; при источнике gopls их место занимают действия gopls, своего «Handle error» без сервера больше нет). Вместо них: `lang.GoDeclarationKind` (`of`/`ofName`/`at`) и `GoDeclarationInfo.of/topLevel/all` только из PSI, `GoTokens` (лексер go-psi) для текста до коммита (отступы, вставка импорта, контекст live-шаблонов, completion выражений отладчика), `GoNames`, `GoImports.importsOf`; `catalogue.GoSourceScanner` оставлен для файлов вне индексов (каталог stdlib/module cache с диска раз на версию; `GoCatalogueFiles.VERSION` → 2). Потребители: run-иконки и producer (были не полностью PSI), Go to Test, Generate Test, шаблоны, макросы, intentions, выравнивание, теги, gopls-обработчики (`GoplsTargets`), отладчик (`GoDebugPsi`: null на незакоммиченном документе), подтесты (ничего в dumb-режиме). Робот (8083, объединённый): `order_test.go` — 7 run-иконок (тесты, подтесты таблицы `TestTotal/empty`, бенчмарк), `main.go` — «Run the program», Go to Test из `order.go` → `order_test.go`; 0 новых «Plugin to blame: Go». Долг: Generate Test предлагается и на строке док-комментария (`GoDeclarationInfo.range` с `func`, а поиск «функция под кареткой» включает док); фикстура `GoFixesTest` называет уже несуществующий `GoHandleErrorIntention`.
 - [x] 9-S — `semantic.api`: `expectedTypeAt(expression)` и `enclosingResultTypes(element)` (ABI +2, логика `ide.completion.GoExpectedTypes` переехала в `semantic.infer.GoExpectedType` и расширена: конверсии без ожидания, spread-аргумент, `return f()` кортежем, левый операнд, ключ map); `lang.GoNativeSignatureProvider` первым в `signatureProvider` (gopls — только когда вызов не резолвится); умный `return` на PSI (`lang.GoReturnValues`: переменная точного типа из scope, `err` для `error`, иначе нулевое значение; второй вариант `fmt.Errorf("…: %w", err)` при импортированном `fmt`; текстовый `GoIdioms.returnValues` — fallback до шага 10); `GoInlineIdiomsProvider` по типам (`Close() error` в method set, `Unlock` после `Lock`, `if err != nil` только при `error` последним результатом) и новые серые идиомы: `select {` → кейсы из scope (ctx, таймеры, каналы), `for {` → `select` внутри, `switch x {` → все константы перечисления / `case T:` по реализациям интерфейса (до 50, не в dumb-режиме); `make(` по ожидаемому типу (`GoMakeCompletionContributor`: `chan T`, `[]T, 0, len(x)`, `map[K]V`), `v, ok := <-ch` после `<-ch` (`GoChannelReceiveCompletionContributor`). `GoExpectedTypeTest` (~40 позиций), `GoNativeTypesTest` (16).
 - [x] 9-F — go-psi-ide `ide.intentions` за гейтом CODE_ACTIONS: Fill all fields / Fill required fields (embedded — по имени типа, промоутнутые поля ключами не бывают), Fill return values (+ режим «Add missing return»), Fill switch (константы типа / реализации интерфейса), Fill select / Fill select with default, Handle error (+ `if err := f(); err != nil`), Wrap error with fmt.Errorf; `GoZeroValues`, `GoScopeValues`; дескриптор `go-psi-ide-intentions.xml` с описаниями. В native-режиме скрыты действия gopls `Fill <Struct>`/`Fill anonymous struct`, `Add cases for <T>`, `Fill in return values`, `GoplsFillStructIntention`, а текстовые `GoHandleErrorIntention`/`GoCheckErrorIntention`/`GoAddMissingReturnIntention` отступают. Известно: две константы одного значения дадут дубль `case`; выравнивание `Key: value` — gofmt при сохранении. `GoCodeActionIntentionsTest` (20), `GoCodeActionsSwitchTest`.
 - [x] 9-I — `lang.GoStructPsi` (поля, теги, embedded, типы из PSI); генераторы и Add Struct Tags на PSI (тег перед хвостовым комментарием, `A, B T` тегируется раз); `GoFieldAlignment.analyze(GoStructType)` через `GoSizes`; Reorder Fields переведён на PSI (моя правка `GoIntentions.kt`, текст — fallback при незакоммиченном документе); Implement Interface: существующие методы и стиль получателя из type checker, method set интерфейса через `GoInterfaceSources.methodsFor` → stub-индексы + `methodsOf(declarationType(spec))` + `GoTypeRenderer.render(type, qualifier)` (alias/dot-import/реальное имя пакета), дисковый сканер — только вне индексов (roots «Standard library» для зависимости, dumb-режим). Сгруппированные параметры пишутся развёрнуто (`Less(i int, j int)`). Исправлен regex `GoInterfaces` для `...pkg.T`. `GoStructPsiTest` (7: io.Reader, fmt.Stringer, sort.Interface, heap.Interface, io.ReadWriteCloser, alias, Formatter с импортом).

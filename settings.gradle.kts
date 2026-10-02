@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-// go-psi (native Go PSI, docs/psi/): library modules, not yet consumed by the plugin (root project).
+// go-psi (native Go PSI, docs/PSI-README.md): library modules, not yet consumed by the plugin (root project).
 include(
     "go-psi-core",
     "go-psi-semantic",

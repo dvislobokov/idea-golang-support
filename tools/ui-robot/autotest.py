@@ -13,7 +13,7 @@ Options combine (`--attach --perf --steps 1`); an unknown option prints this tex
 
 Writes build/ui-robot/report.md and build/ui-robot/NN-step.png (pictures of the IDE frame or of a popup, painted by the component,
 never of the desktop). Each step is PASS or FAIL with the text read from the IDE as evidence. The performance mode also
-writes build/ui-robot/perf.md and perf.json (see perf.py and docs/psi/TESTING.md "Performance mode").
+writes build/ui-robot/perf.md and perf.json (see perf.py and docs/TESTING.md "Performance mode").
 
 The scenario project (tools/ui-robot/project-psi, not the playground: the steps check its exact files) is copied to %TEMP%/gopsi-ui-project and opened from there: outside the repository,
 so that the user's main IDE does not analyse it, and with its own go.mod. Every step that edits a file first restores its text.

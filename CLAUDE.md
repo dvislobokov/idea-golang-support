@@ -15,9 +15,8 @@ folding, Go to Class / Symbol, commenter, скобки — из `go-psi-ide-edit
 
 2026-10-02 сюда перенесён код go-psi: лексер, парсер (Grammar-Kit, `go-psi-core/src/main/grammar/Go.bnf|Go.flex`), PSI, стабы, индексы,
 project model, типы, resolve, IDE-фичи. Пакеты `io.github.golangsupport.lang.*` (core), `.semantic.*`, `.project.*` (semantic), `.ide.*` (ide).
-Пока это библиотечные модули: в `plugin.xml` не подключены, в ZIP не попадают. План подмены gopls → PSI шаг за шагом — `docs/psi/MIGRATION-idea-golang-support.md`
-(раздел 4.4, шаги 5–12; шаги 1–4 сделаны), что уже есть и как устроено — `docs/psi/IDE-FEATURES.md`, `docs/psi/SEMANTIC.md`, `docs/psi/PLAN.md`,
-история — `docs/psi/CHANGELOG.md`, что ещё не сделано — `docs/psi/FEATURES.md`, производительность — `docs/psi/PERF-BACKLOG.md`.
+Пока это библиотечные модули: в `plugin.xml` не подключены, в ZIP не попадают. План подмены gopls → PSI шаг за шагом — `MIGRATION.md` (шаги 1–10 сделаны 2026-10-02; английский анализ до переноса — `docs/PSI-MIGRATION-history.md`), индекс документов PSI — `docs/PSI-README.md`, что уже есть и как устроено — `docs/IDE-FEATURES.md`, `docs/SEMANTIC.md`, `docs/PSI-PLAN.md`,
+история — `CHANGELOG.md (раздел «go-psi»)`, что ещё не сделано — `docs/FEATURES.md`, производительность — `docs/PERF-BACKLOG.md`.
 При подключении иконки, цвета и настройки берём из IGS (`GoIcons`, `colorSchemes/*`, `GoSettings`), а не из go-psi. Коллизии имён с текущими классами
 IGS (`lang.GoLanguage`/`GoFileType` — те же FQN; `GoLexer`, `GoFile`, `GoParserDefinition`, … — те же простые имена) решаются шагом 5 миграции.
 
@@ -29,7 +28,7 @@ IGS (`lang.GoLanguage`/`GoFileType` — те же FQN; `GoLexer`, `GoFile`, `GoP
 - `GoFileElementType.STUB_VERSION` и версии индексов поднимать при любом изменении сериализованной формы. Внутри тел функций ничего не стабится; resolve
   работает по стабам без загрузки AST чужих файлов (тесты проверяют через `AstLoadingFilter`).
 - Для кэшей типов/resolve не использовать `PsiModificationTracker.MODIFICATION_COUNT`; только трекеры из `semantic.cache.GoTrackers` / `GoBodyCache`.
-- Каждая неоднозначность, разобранная в `GoParserUtil`, описана в `docs/psi/GRAMMAR.md` со ссылкой на функцию go/parser.
+- Каждая неоднозначность, разобранная в `GoParserUtil`, описана в `docs/GRAMMAR.md` со ссылкой на функцию go/parser.
 - Метрики корпусов `testData/metrics/*.json` могут только улучшаться (поля `millis` — не метрики); пороги бенчмарков — `testData/benchmark/thresholds.json`.
 
 Команды (JAVA_HOME — JBR IDEA, см. ниже; `--offline`):

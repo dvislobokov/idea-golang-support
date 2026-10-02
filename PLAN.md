@@ -12,7 +12,7 @@
 2. **Уровень 1 (часы)** — раздражители первой недели: инструменты разом, go.mod, статусы в gutter, линтер до сохранения, стек паники.
 3. **Уровень 2 (день)** — подтесты и табличные кейсы, покрытие, fuzz, рендереры отладчика, монитор для отладки.
 4. **Уровень 3 (дни)** — бенчмарки, горутины, зависимости, remote debug, ошибки сборки без gopls, endpoints.
-5. **Уровень 4 (неделя+)** — профили в IDE, Go templates, свой парсер.
+5. **Уровень 4 (неделя+)** — профили в IDE, Go templates, свой парсер (сделан 2026-10-02, `MIGRATION.md`).
 
 ---
 
@@ -124,7 +124,9 @@
   через `runtime/pprof` требует кода в программе — предлагать `net/http/pprof` по импорту («Open pprof» по адресу из кода), как в PLAN 5.
 - [ ] **Go templates** (`html/template`, `text/template`): свой язык для `{{ … }}` внутри HTML/текста (`TemplateLanguage` платформы), подсветка actions, completion
   функций (`if range with template block define end`, builtin funcs), переход к `define`. 1–2 недели.
-- [ ] **Свой парсер и PSI Go** (недели): локальные инспекции, surround/unwrap, Find Usages и Go to Implementation с места использования без gopls, Change Signature,
+- [x] (2026-10-02) Закрыто: свой парсер и PSI — go-psi (Grammar-Kit, стабы, типы, resolve), подключён шагами 1–10 `MIGRATION.md`; дальше — его волны
+  (`docs/FEATURES.md`, шаг 11 `MIGRATION.md`). Исходная формулировка:
+  **Свой парсер и PSI Go** (недели): локальные инспекции, surround/unwrap, Find Usages и Go to Implementation с места использования без gopls, Change Signature,
   Move, Type/Call Hierarchy. Кандидат — грамматика заброшенного go-lang-idea-plugin (Apache 2.0; проверить лицензию, generics и модулей там нет). Отдельное решение:
   не начинать, пока gopls-путь не упрётся в потолок.
 - [ ] **cgo и Plan9 assembly** — подсветка `.s` файлов и `import "C"`: только если появится запрос.

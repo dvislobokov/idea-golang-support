@@ -37,7 +37,7 @@ Alternatives considered and rejected:
 
 go-psi is developed and shipped standalone for now. A possible later move into the user's
 other plugin (`idea-golang-support`) is out of scope of this plan; the analysis and a draft
-transplant plan are kept in `docs/MIGRATION-idea-golang-support.md` for reference only. The
+transplant plan are kept in `docs/PSI-MIGRATION-history.md` for reference only. The
 API feedback below still applies to go-psi as a library.
 
 ## 2. Module layout
@@ -66,7 +66,7 @@ Each module applies `org.jetbrains.intellij.platform.module`; `plugin` applies
 ## 3. Phases
 
 Each phase ends with: all its tests green, corpus gate passing, a live check in `runIde`, and a
-short entry in `docs/CHANGELOG.md`.
+short entry in `CHANGELOG.md` (section "go-psi").
 
 ### Phase 0: bootstrap (1 session)
 - Gradle multi-module build with IPGP 2.19.0, Grammar-Kit subplugin, Kotlin 2.4.x, JDK 21.

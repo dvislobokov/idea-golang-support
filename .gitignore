@@ -11,7 +11,7 @@ build/distributions/*
 !build/distributions/*.zip
 out/
 *.iml
-# go-psi library modules and tools (docs/psi/)
+# go-psi library modules and tools (docs/PSI-README.md)
 /go-psi-*/build/
 tools/astdump/*.exe
 tools/portshorttest/*.exe

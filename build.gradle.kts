@@ -151,7 +151,7 @@ intellijPlatform {
     }
 }
 
-// --- go-psi library modules (go-psi-core, go-psi-semantic, go-psi-ide; docs/psi/) ------------------------------------------
+// --- go-psi library modules (go-psi-core, go-psi-semantic, go-psi-ide; docs/PSI-README.md) ---------------------------------
 // Copied from go-psi with the package renamed to io.github.golangsupport; composed into the plugin jar (see dependencies above).
 // Their slow gates run with `--no-configuration-cache`: `:go-psi-core:corpusTest`, `benchmark` (testIde tasks).
 
@@ -212,7 +212,7 @@ tasks.register("benchmark") {
 benchmarkModules.zipWithNext().forEach { (a, b) -> project(b).tasks.matching { it.name == "benchmark" }.configureEach { mustRunAfter("$a:benchmark") } }
 
 // Binary compatibility validation of the go-psi modules: Kotlin Gradle plugin built-in ABI validation, <module>/api/<module>.api
-// is the committed dump of the public API packages (docs/psi/API.md, "Binary compatibility"). `checkKotlinAbi` runs as part of
+// is the committed dump of the public API packages (docs/API.md, "Binary compatibility"). `checkKotlinAbi` runs as part of
 // `check`; `./gradlew updateKotlinAbi` rewrites the dumps. @ApiStatus.Internal declarations are excluded.
 val abiPackages = listOf(
     "io.github.golangsupport.lang.psi",

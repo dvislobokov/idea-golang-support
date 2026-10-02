@@ -177,75 +177,82 @@ Go to Symbol, gutter-иконки запуска, генераторы кода 
 GoLand 2026.2 (июль 2026) — эталон. У GoLand свой полный парсер, type checker и сотни инспекций; плагин намеренно опирается на gopls, поэтому
 часть «нет» ниже — это не пробелы реализации, а то, что gopls/LSP-клиент платформы не дают. Такие случаи помечены «(LSP)».
 
+Колонка «Без gopls» (добавлена 2026-10-02, после шагов 1–10 `MIGRATION.md`) — что работает, когда переключатель **Language features**
+на странице Language Server стоит на Built-in, а сервер выключен: всё из шагов 4–9 (парсер, стаб-индексы, resolve и типы go-psi,
+completion, документация, навигация, usages, rename, code vision, 10 инспекций, семантические цвета, Fill-действия, Built-in форматтер).
+Не работает без gopls: inlay hints, рефакторинги и code actions gopls сверх Fill-действий (Extract, Inline call, modernize…), его
+анализаторы и staticcheck, линзы и vulncheck в go.mod. «как с gopls» — строка от gopls не зависит. Колонка составлена по коду и
+`CHANGELOG.md`, вживую без сервера целиком не проверялась; таблицы 3.4, 3.5, 3.7, 3.8 от gopls не зависят (кроме single-file editing в 3.8).
+
 ### 3.1 Редактор и язык
 
-| Возможность | GoLand | Плагин | Статус |
-|---|---|---|---|
-| Подсветка синтаксиса, директив, строк, рун | да | свой лексер | ✅ |
-| Semantic highlighting (пакеты, типы, поля, параметры, константы) | свой анализ + уникальные цвета локальных переменных | semantic tokens gopls; без gopls — только аннотатор | ✅ (цвет получателя метода — ❌) |
-| Ошибки компиляции в редакторе | своя проверка типов, мгновенно | диагностика gopls; без gopls — ошибки последнего Go \| Build / Vet в редакторе (сохранённые файлы) | ✅ |
-| Инспекции (сотни: unused, shadowing, resource leak 2025.3, redundant else, unreachable, error handling…) | да | анализаторы gopls + staticcheck (~244, включаются на странице gopls) + golangci-lint | 🟡 меньше и без локальных инспекций плагина |
-| Quick-fixes при инспекциях | сотни | code actions gopls при диагностике; свои 4 intention; 3 фикса линтера | 🟡 |
-| Go 1.26 modernizers / `go fix` в редакторе (2026.1–2026.2) | да, с Problems window и diff | modernize-анализаторы gopls (по умолчанию в gopls v0.18+) как диагностика | 🟡 без сводного окна и массового применения |
-| Completion: символы, smart, ML-ранжирование | да | gopls через платформу, автоимпорт при выборе | ✅ базовое; smart/ML ❌ |
-| Completion в struct-тегах | ключи и опции популярных библиотек | 27 ключей, ~80 правил validator, gorm, env | ✅ (➕ шире по библиотекам) |
-| Postfix templates | ~25 (`.if .else .nil .notnil .err .var .for .forr .range .return .rr .len .print .panic .go .defer .append .switch .sort .not …`) | 25 (с `.sort`, `.errn`) | ✅ |
-| Live templates | ~40 | 41 | ✅ |
-| Идиомы серым текстом без ИИ | нет (есть Full Line completion с моделью) | правила `if err != nil`, `if !ok`, `defer …`, `for rows.Next()` | ➕ |
-| Complete Statement | да | да | ✅ |
-| Отступы при наборе как gofmt | да | да | ✅ |
-| Форматирование gofmt / goimports / gofumpt, format on save | встроенный форматтер + gofmt/goimports/gofumpt, `golangci-lint fmt` (2025.3) | gofmt / goimports / `golangci-lint fmt`; gofumpt через gopls | ✅ |
-| Настройки code style (пробелы, переносы, пустые строки) | да, поверх gofmt | только отступы | ❌ (по замыслу: gofmt) |
-| Optimize Imports, группировка импортов | да | через gopls | 🟡 |
-| Folding: тела, группы, комментарии, блоки внутри функций, custom regions | всё | тела, группы, комментарии | 🟡 |
-| Structure view с методами под типом, фильтрами | да | методы под типом того же файла; фильтров нет | ✅ |
-| Breadcrumbs, sticky lines | да | да | ✅ |
-| Parameter Info, Quick Documentation, Type Info (Ctrl+Shift+P), Expression type | да | всё через gopls; Type Info — первая строка hover | 🟡 |
-| Exit points highlighting, recursive call gutter, usages highlighting в файле | да | document highlight через LSP (если платформа) ; остальное ❌ | ❌ |
-| Rename с превью и по всему модулю | да | gopls rename через платформу | 🟡 (не проверено роботом) |
-| Refactorings: Extract variable/function/method, Inline, Change Signature, Move, Safe Delete, Introduce Constant, Extract Interface | все | Extract variable/function/method, Inline call, Fill struct… — code actions gopls через пункт «Refactorings and actions of gopls…» | 🟡 Change Signature, Move, Safe Delete, Extract Interface ❌ (LSP) |
-| Generate: constructor, getters/setters, String(), tags, implement interface, test | да (+ Implement methods по Ctrl+O с типами) | да, по тексту без типов; интерфейсы только проекта | ✅ / stdlib-интерфейсы ❌ |
-| Generate test (табличный) | да, с gotests-подобным скелетом | да | ✅ |
-| Create function/method from usage | да, с типами | да, типы угадываются (`any`) | 🟡 |
-| Go templates (`html/template`, `text/template`) | подсветка, completion, навигация | только иконка файла | ❌ |
-| cgo, Plan9 assembly | подсветка, навигация | нет | ❌ |
-| Generics | полная поддержка | лексер/сканер их пропускают; смысл — gopls | ✅ через gopls |
-| Doc comment по `//` | да | да | ✅ |
-| Spell checking, TODO в комментариях | да | платформа (комментарии — токены COMMENTS) | ✅ |
+| Возможность | GoLand | Плагин | Без gopls | Статус |
+|---|---|---|---|---|
+| Подсветка синтаксиса, директив, строк, рун | да | свой лексер | ✅ лексер go-psi | ✅ |
+| Semantic highlighting (пакеты, типы, поля, параметры, константы) | свой анализ + уникальные цвета локальных переменных | semantic tokens gopls; без gopls — только аннотатор | ✅ аннотатор go-psi-ide по resolve | ✅ (цвет получателя метода — ❌) |
+| Ошибки компиляции в редакторе | своя проверка типов, мгновенно | диагностика gopls; без gopls — ошибки последнего Go \| Build / Vet в редакторе (сохранённые файлы) | ✅ парсер и проверка типов go-psi, мгновенно; Build / Vet тоже | ✅ |
+| Инспекции (сотни: unused, shadowing, resource leak 2025.3, redundant else, unreachable, error handling…) | да | анализаторы gopls + staticcheck (~244, включаются на странице gopls) + golangci-lint | 🟡 10 инспекций go-psi-ide + golangci-lint; анализаторов gopls и staticcheck нет | 🟡 меньше и без локальных инспекций плагина |
+| Quick-fixes при инспекциях | сотни | code actions gopls при диагностике; свои 4 intention; 3 фикса линтера | 🟡 фиксы инспекций go-psi-ide, Fill-действия, Handle / Wrap error, фиксы линтера; code actions gopls нет | 🟡 |
+| Go 1.26 modernizers / `go fix` в редакторе (2026.1–2026.2) | да, с Problems window и diff | modernize-анализаторы gopls (по умолчанию в gopls v0.18+) как диагностика | ❌ (анализаторы gopls) | 🟡 без сводного окна и массового применения |
+| Completion: символы, smart, ML-ранжирование | да | gopls через платформу, автоимпорт при выборе | ✅ go-psi-ide: области видимости, члены, неимпортированные пакеты; `return` и `make(` по типам | ✅ базовое; smart/ML ❌ |
+| Completion в struct-тегах | ключи и опции популярных библиотек | 27 ключей, ~80 правил validator, gorm, env | ✅ | ✅ (➕ шире по библиотекам) |
+| Postfix templates | ~25 (`.if .else .nil .notnil .err .var .for .forr .range .return .rr .len .print .panic .go .defer .append .switch .sort .not …`) | 25 (с `.sort`, `.errn`) | ✅ | ✅ |
+| Live templates | ~40 | 41 | ✅ | ✅ |
+| Идиомы серым текстом без ИИ | нет (есть Full Line completion с моделью) | правила `if err != nil`, `if !ok`, `defer …`, `for rows.Next()` | ✅ по типам go-psi | ➕ |
+| Complete Statement | да | да | ✅ | ✅ |
+| Отступы при наборе как gofmt | да | да | ✅ | ✅ |
+| Форматирование gofmt / goimports / gofumpt, format on save | встроенный форматтер + gofmt/goimports/gofumpt, `golangci-lint fmt` (2025.3) | gofmt / goimports / `golangci-lint fmt`; gofumpt через gopls | ✅ Built-in без процесса, gofmt / goimports; gofumpt ❌ | ✅ |
+| Настройки code style (пробелы, переносы, пустые строки) | да, поверх gofmt | только отступы | как с gopls | ❌ (по замыслу: gofmt) |
+| Optimize Imports, группировка импортов | да | через gopls | ✅ go-psi-ide | 🟡 |
+| Folding: тела, группы, комментарии, блоки внутри функций, custom regions | всё | тела, группы, комментарии | ✅ | 🟡 |
+| Structure view с методами под типом, фильтрами | да | методы под типом того же файла; фильтров нет | ✅ | ✅ |
+| Breadcrumbs, sticky lines | да | да | ✅ | ✅ |
+| Parameter Info, Quick Documentation, Type Info (Ctrl+Shift+P), Expression type | да | всё через gopls; Type Info — первая строка hover | ✅ go-psi-ide | 🟡 |
+| Exit points highlighting, recursive call gutter, usages highlighting в файле | да | document highlight через LSP (если платформа) ; остальное ❌ | 🟡 использования и точки выхода — go-psi-ide; recursive call gutter ❌ | ❌ |
+| Rename с превью и по всему модулю | да | gopls rename через платформу | ✅ PSI: in-place для локальных, диалог, метод интерфейса с реализациями | 🟡 (не проверено роботом) |
+| Refactorings: Extract variable/function/method, Inline, Change Signature, Move, Safe Delete, Introduce Constant, Extract Interface | все | Extract variable/function/method, Inline call, Fill struct… — code actions gopls через пункт «Refactorings and actions of gopls…» | ❌ (code actions gopls); есть Fill struct / return / switch / select | 🟡 Change Signature, Move, Safe Delete, Extract Interface ❌ (LSP) |
+| Generate: constructor, getters/setters, String(), tags, implement interface, test | да (+ Implement methods по Ctrl+O с типами) | да, по тексту без типов; интерфейсы только проекта | ✅ по типам go-psi, интерфейсы stdlib и module cache | ✅ / stdlib-интерфейсы ❌ |
+| Generate test (табличный) | да, с gotests-подобным скелетом | да | ✅ | ✅ |
+| Create function/method from usage | да, с типами | да, типы угадываются (`any`) | как с gopls | 🟡 |
+| Go templates (`html/template`, `text/template`) | подсветка, completion, навигация | только иконка файла | как с gopls | ❌ |
+| cgo, Plan9 assembly | подсветка, навигация | нет | как с gopls | ❌ |
+| Generics | полная поддержка | лексер/сканер их пропускают; смысл — gopls | ✅ проверка типов go-psi | ✅ через gopls |
+| Doc comment по `//` | да | да | ✅ | ✅ |
+| Spell checking, TODO в комментариях | да | платформа (комментарии — токены COMMENTS) | ✅ | ✅ |
 
 ### 3.2 Навигация и поиск
 
-| Возможность | GoLand | Плагин | Статус |
-|---|---|---|---|
-| Go to Declaration (Ctrl+B, Ctrl+клик) | да | gopls, PSI-цели, подсветка ссылки | ✅ (Ctrl+наведение вживую 🟡) |
-| Go to Implementation с объявления | да | gopls `implementation` | ✅ |
-| Go to Implementation с места использования | да | `targetElementEvaluator` резолвит имя через gopls: объявления и локальные переменные; имена пакетов — нет | ✅ |
-| Find Usages с объявления, группировка read/write | да | gopls references, без группировки | ✅ / группировка ❌ |
-| Find Usages с места использования | да | `targetElementEvaluator` резолвит имя через gopls: объявления и локальные переменные; имена пакетов — нет | ✅ |
-| Code vision usages/implementations | да | да | ✅ |
-| Gutter implements / implemented by | да | да | ✅ |
-| Go to Type Declaration, Super Method, Related Symbol | да | Go to Type Declaration через `typeDefinition` gopls; остальное нет | ✅ / ❌ |
-| Type Hierarchy, Call Hierarchy | да | провайдеры платформы для LSP + gopls; проверено 2026-09-30 | ✅ |
-| Go to Class / Symbol / File | да | да (по индексу + `workspace/symbol`) | ✅ |
-| Recent locations, bookmarks | платформа | платформа | ✅ |
-| Навигация внутри go.mod (модуль → исходники, версии) | да | узел Dependencies; в самом go.mod ❌ | 🟡 |
-| Переход в исходники зависимостей из module cache | да (External Libraries) | Dependencies в Project view | 🟡 |
+| Возможность | GoLand | Плагин | Без gopls | Статус |
+|---|---|---|---|---|
+| Go to Declaration (Ctrl+B, Ctrl+клик) | да | gopls, PSI-цели, подсветка ссылки | ✅ resolve go-psi | ✅ (Ctrl+наведение вживую 🟡) |
+| Go to Implementation с объявления | да | gopls `implementation` | ✅ стаб-индексы | ✅ |
+| Go to Implementation с места использования | да | `targetElementEvaluator` резолвит имя через gopls: объявления и локальные переменные; имена пакетов — нет | ✅ | ✅ |
+| Find Usages с объявления, группировка read/write | да | gopls references, без группировки | ✅ ссылки PSI, с группировкой read/write | ✅ / группировка ❌ |
+| Find Usages с места использования | да | `targetElementEvaluator` резолвит имя через gopls: объявления и локальные переменные; имена пакетов — нет | ✅ | ✅ |
+| Code vision usages/implementations | да | да | ✅ | ✅ |
+| Gutter implements / implemented by | да | да | ✅ | ✅ |
+| Go to Type Declaration, Super Method, Related Symbol | да | Go to Type Declaration через `typeDefinition` gopls; остальное нет | ✅ Type Declaration, Super; Related Symbol ❌ | ✅ / ❌ |
+| Type Hierarchy, Call Hierarchy | да | провайдеры платформы для LSP + gopls; проверено 2026-09-30 | ❌ (провайдеры LSP) | ✅ |
+| Go to Class / Symbol / File | да | да (по индексу + `workspace/symbol`) | ✅ стаб-индексы | ✅ |
+| Recent locations, bookmarks | платформа | платформа | ✅ | ✅ |
+| Навигация внутри go.mod (модуль → исходники, версии) | да | узел Dependencies; в самом go.mod ❌ | как с gopls | 🟡 |
+| Переход в исходники зависимостей из module cache | да (External Libraries) | Dependencies в Project view | ✅ библиотечные корни: GOROOT и build list | 🟡 |
 
 ### 3.3 Модули и зависимости
 
-| Возможность | GoLand | Плагин | Статус |
-|---|---|---|---|
-| Подсветка go.mod / go.work, folding блоков (2025.3) | да | подсветка, commenter, folding блоков | ✅ |
-| Completion в go.mod (пути модулей, версии из proxy) | да | директивы, пути из module cache, версии из кэша и GOPROXY, версии go | ✅ |
-| Quick doc, навигация из go.mod | да | нет | ❌ |
-| Инспекции go.mod (неиспользуемые require, обновления) | да | линзы и диагностика gopls: tidy, upgrades, vulncheck | 🟡 |
-| Автоматическое `go mod tidy` / подсказка после правки | да (Sync) | баннер над go.mod после сохранения с другими require: Tidy / Download | ✅ |
-| Vulnerability checker (Package Checker) | да | govulncheck через gopls в go.mod и кнопкой в окне Go Dependencies (уязвимые модули помечены) | 🟡 |
-| Окно зависимостей с обновлениями и upgrade | да (Dependencies tool window) | окно Go Dependencies: `go list -m -u`, Upgrade Selected / All, Tidy, govulncheck | ✅ |
-| Dependency diagram | да | нет | ❌ |
-| Vendoring, GOPATH-режим | да | vendor (команда); GOPATH-режим ❌ | 🟡 |
-| Workspaces (go.work): узел, Add module to workspace | да | разбор `use`, gopls открывает; UI ❌ | 🟡 |
-| Установка Go SDK из IDE, несколько SDK | да | нет; путь к `go` в настройках | ❌ |
+| Возможность | GoLand | Плагин | Без gopls | Статус |
+|---|---|---|---|---|
+| Подсветка go.mod / go.work, folding блоков (2025.3) | да | подсветка, commenter, folding блоков | как с gopls | ✅ |
+| Completion в go.mod (пути модулей, версии из proxy) | да | директивы, пути из module cache, версии из кэша и GOPROXY, версии go | как с gopls | ✅ |
+| Quick doc, навигация из go.mod | да | нет | как с gopls | ❌ |
+| Инспекции go.mod (неиспользуемые require, обновления) | да | линзы и диагностика gopls: tidy, upgrades, vulncheck | ❌ (линзы и диагностика gopls) | 🟡 |
+| Автоматическое `go mod tidy` / подсказка после правки | да (Sync) | баннер над go.mod после сохранения с другими require: Tidy / Download | как с gopls | ✅ |
+| Vulnerability checker (Package Checker) | да | govulncheck через gopls в go.mod и кнопкой в окне Go Dependencies (уязвимые модули помечены) | 🟡 только кнопкой в окне Go Dependencies | 🟡 |
+| Окно зависимостей с обновлениями и upgrade | да (Dependencies tool window) | окно Go Dependencies: `go list -m -u`, Upgrade Selected / All, Tidy, govulncheck | как с gopls | ✅ |
+| Dependency diagram | да | нет | как с gopls | ❌ |
+| Vendoring, GOPATH-режим | да | vendor (команда); GOPATH-режим ❌ | как с gopls | 🟡 |
+| Workspaces (go.work): узел, Add module to workspace | да | разбор `use`, gopls открывает; UI ❌ | как с gopls | 🟡 |
+| Установка Go SDK из IDE, несколько SDK | да | нет; путь к `go` в настройках | как с gopls | ❌ |
 
 ### 3.4 Сборка, запуск, тесты
 
@@ -298,22 +305,22 @@ GoLand 2026.2 (июль 2026) — эталон. У GoLand свой полный 
 
 ### 3.6 Качество кода и инструменты
 
-| Возможность | GoLand | Плагин | Статус |
-|---|---|---|---|
-| golangci-lint в редакторе (v1/v2), `.golangci.yml` | да, по умолчанию с 2025.3; `golangci-lint fmt` | да, для сохранённых файлов, находки держатся при наборе; fmt как форматтер | ✅ |
-| Фиксы к находкам линтера | quick-fixes | Handle error / Ignore / `//nolint` | 🟡 (SuggestedFixes ❌) |
-| go vet | инспекция | меню Go | Vet | 🟡 |
-| staticcheck | инспекции | через gopls, по умолчанию включён | ✅ |
-| govulncheck | Package Checker | gopls | 🟡 |
-| Escape analysis / optimization details (2026.2) | визуализация | Toggle Compiler Optimization Details (диагностика gopls) | 🟡 |
-| Struct field reordering для экономии памяти (2026.2) | да | нет | ❌ |
-| Browse assembly / free symbols / документация в вебе | нет | через gopls | ➕ |
-| Настройки gopls из `api-json` | н/п | да | ➕ |
-| Лог и статистика языкового сервера | н/п | окно gopls, Show Statistics, Debug Pages | ➕ |
-| HTTP Client, Database tools, Docker, Kubernetes, Terraform, Web (JS/TS), SQL в строках | да | зависит от IDE-хоста (в Ultimate есть, в Community/форках — нет) | — |
-| Endpoints (net/http, chi, gin, echo) | да | нет | ❌ |
-| Protobuf / gRPC | плагин | нет (общие плагины платформы) | — |
-| AI: Junie, AI Assistant, Claude Agent, ACP-агенты | да | зависит от IDE-хоста | — |
+| Возможность | GoLand | Плагин | Без gopls | Статус |
+|---|---|---|---|---|
+| golangci-lint в редакторе (v1/v2), `.golangci.yml` | да, по умолчанию с 2025.3; `golangci-lint fmt` | да, для сохранённых файлов, находки держатся при наборе; fmt как форматтер | как с gopls | ✅ |
+| Фиксы к находкам линтера | quick-fixes | Handle error / Ignore / `//nolint` | 🟡 результаты функции — из сигнатуры go-psi | 🟡 (SuggestedFixes ❌) |
+| go vet | инспекция | меню Go | Vet | как с gopls | 🟡 |
+| staticcheck | инспекции | через gopls, по умолчанию включён | ❌ (через gopls) | ✅ |
+| govulncheck | Package Checker | gopls | 🟡 окно Go Dependencies | 🟡 |
+| Escape analysis / optimization details (2026.2) | визуализация | Toggle Compiler Optimization Details (диагностика gopls) | ❌ (диагностика gopls) | 🟡 |
+| Struct field reordering для экономии памяти (2026.2) | да | нет | как с gopls | ❌ |
+| Browse assembly / free symbols / документация в вебе | нет | через gopls | ❌ (gopls) | ➕ |
+| Настройки gopls из `api-json` | н/п | да | н/п | ➕ |
+| Лог и статистика языкового сервера | н/п | окно gopls, Show Statistics, Debug Pages | н/п | ➕ |
+| HTTP Client, Database tools, Docker, Kubernetes, Terraform, Web (JS/TS), SQL в строках | да | зависит от IDE-хоста (в Ultimate есть, в Community/форках — нет) | — | — |
+| Endpoints (net/http, chi, gin, echo) | да | нет | как с gopls | ❌ |
+| Protobuf / gRPC | плагин | нет (общие плагины платформы) | — | — |
+| AI: Junie, AI Assistant, Claude Agent, ACP-агенты | да | зависит от IDE-хоста | — | — |
 
 ### 3.7 Наблюдаемость
 

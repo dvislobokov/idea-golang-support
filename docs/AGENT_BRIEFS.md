@@ -8,7 +8,7 @@ brief must be self-contained. `CLAUDE.md` is loaded automatically and its hard r
 
 ```
 Task: <one sentence>
-Context: read CLAUDE.md, docs/PLAN.md section <N>, and <files>. Do not read generated sources.
+Context: read CLAUDE.md, docs/PSI-PLAN.md section <N>, and <files>. Do not read generated sources.
 Deliverables: <files to create or change, with package names>
 Constraints:
   - Do not touch: <files/areas>
@@ -24,7 +24,7 @@ Report: files changed, commands run with results, open questions, anything you c
 
 1. Work only inside the deliverables listed in the brief. If something else must change to make
    it compile, change the minimum and list it in the report.
-2. Never edit `CLAUDE.md`, `docs/PLAN.md`, `Go.bnf` ambiguity rules in `GoParserUtil`, public API
+2. Never edit `CLAUDE.md`, `docs/PSI-PLAN.md`, `Go.bnf` ambiguity rules in `GoParserUtil`, public API
    packages, or stub/index versions unless the brief says so explicitly.
 3. Never commit, push, or create branches. Never delete files outside the deliverables.
 4. Run the exact commands from "Done when". A task is not done if they fail. Do not weaken or
