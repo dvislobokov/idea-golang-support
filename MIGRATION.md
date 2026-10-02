@@ -35,7 +35,7 @@
 | # | Шаг | Объём | Зависит от | Статус |
 |---|---|---|---|---|
 | 0 | Перенос кода как библиотечных модулей | — | — | [x] 2026-10-02, `82c34a1` |
-| 1 | Переключатели фич: `GoFeatures` + настройки + чтение в lsp-кастомайзерах | день | — | [ ] |
+| 1 | Переключатели фич: `GoFeatures` + настройки + чтение в lsp-кастомайзерах | день | — | [x] 2026-10-02, `8fabc19` |
 | 2 | Единые `GoLanguage`/`GoFileType`; переименование старых текстовых помощников | день | — | [ ] |
 | 3 | Подключение модулей в плагин: Gradle + `xi:include`, без регистрации парсера | полдня | 2 | [ ] |
 | 4 | Подмена парсера + мост `GoDeclaration` + токены (атомарно) | 2–3 дня | 1, 3 | [ ] |
@@ -81,6 +81,22 @@ PSI и типы. Шаг 12 — две вехи, которые закрываю�
 
 **Проверка.** `GoSettingsTest`/`GoBundleTest`; робот: `setting <Name> NATIVE` → `state` показывает перезапуск gopls;
 при выключенном сервере все `native(...)` истинны (JUnit, без платформы).
+
+**Сделано 2026-10-02 (`8fabc19`).** `GoFeatureSource { GOPLS, NATIVE }` и `GoFeature` (девять фич, у каждой `needsIndex`) лежат в
+`settings/GoSettings.kt` рядом с полями; `GoSettings.source(feature)` / `setSource`. `lang/GoFeatures` — объект, не сервис:
+`native(feature, project)` (настройка + `DumbService` + «сервер есть»: включён и lsp-модуль загружен), `source(feature)` для
+кастомайзеров дескриптора (решается при старте сервера, индексацию там не дождаться), `isNative(...)` — чистая функция для тестов.
+В `GoplsDescriptor` при `NATIVE` отключены completion, hover, rename, semantic tokens, code lens (`Lsp*Disabled`), диагностики
+фильтруются по `source` (`GoplsDiagnosticsFilter`: `syntax` при нативных синтаксических ошибках, `syntax` и `compiler` при нативных
+диагностиках, анализаторы остаются — заготовка 8a/8g), `documentHighlight` не спрашивается при нативных usages. Обработчики:
+навигация — `GoplsGotoDeclarationHandler`, `GoplsTargetElementEvaluator`, `GoplsTypeDeclarationProvider`, `GoplsGotoSuperHandler`;
+usages — `GoplsUsageSearcher`, `GoplsImplementationSearch`, `GoplsHighlightUsagesHandlerFactory`; hover — `GoplsExpressionTypeProvider`
+(Type Info читает hover); code vision — `GoplsImplementationLineMarkerProvider`, `GoplsCodeVisionProvider`. Страница Language Server:
+группа «Source of each feature» (комбо на фичу, тексты en/ru), строка в `docs/guide.html`. Тест — `GoFeaturesTest` (JUnit).
+Отложено: `GoFormatter.NATIVE` появится на шаге 8j вместе с форматтером (на странице только то, за чем есть реализация);
+`GoplsPackageCompletionContributor` и `GoBuildProblemsAnnotator.shouldShow()` переводятся на флаги на 8e и 8g. Не проверено:
+сборка с платформой и робот — в среде, где делался шаг, хосты JetBrains закрыты; перед следующим шагом прогнать
+`test buildPlugin --offline` и робота (`setting`, перезапуск gopls).
 
 ## Шаг 2. Единые `GoLanguage`/`GoFileType`, переименование клэшей
 
@@ -442,7 +458,7 @@ generics, missing return, init cycles — 0 ложных срабатывани�
 ## Чек-лист текущего состояния
 
 - [x] Перенос: 3 подпроекта, `testData`, `tools`, `docs/psi`; `test checkKotlinAbi buildPlugin --offline` зелёные; ZIP без изменений.
-- [ ] Шаг 1 — переключатели.
+- [x] Шаг 1 — переключатели (2026-10-02, `8fabc19`; сборка с платформой и робот — не прогнаны, см. шаг 1).
 - [ ] Шаг 2 — единые `GoLanguage`/`GoFileType`.
 - [ ] Шаг 3 — модули в плагине.
 - [ ] Шаг 4–5 — парсер.

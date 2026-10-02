@@ -4,6 +4,11 @@ All notable changes to the Go Project Support plugin are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### gopls (LSP content module)
+- Settings | Tools | Go | Language Server, "Source of each feature": gopls or the plugin itself for syntax errors, compiler errors, completion, documentation, navigation, usages, rename, semantic colours and the counts above declarations — one exclusive switch per feature, gopls by default. The plugin takes a feature over as its native code for it arrives (`MIGRATION.md`); without a language server it is the source of everything, and while the indices are being built gopls answers.
+
 ## [0.2.1] - 2026-10-01
 
 ### Code quality
