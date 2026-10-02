@@ -45,6 +45,9 @@
         <fileType name="Go Module" implementationClass="io.github.golangsupport.mod.GoModFileType" fieldName="INSTANCE" language="GoModule"
                   fileNames="go.mod;go.work"/>
         <fileIconProvider implementation="io.github.golangsupport.view.GoFileIconProvider"/>
+        <!-- the toolchain of the native project model is the plugin's: its go, its go env, the build tags and GOOS/GOARCH of the settings (MIGRATION.md step 7) -->
+        <applicationService serviceInterface="io.github.golangsupport.project.api.GoToolchainProvider"
+                            serviceImplementation="io.github.golangsupport.sdk.GoIgsToolchainProvider" overrides="true"/>
         <!-- *_test.go are tests: the "Tests" scope of the platform, and with it the green background in the tree and the tabs -->
         <testSourcesFilter implementation="io.github.golangsupport.testing.GoTestSourcesFilter"/>
 

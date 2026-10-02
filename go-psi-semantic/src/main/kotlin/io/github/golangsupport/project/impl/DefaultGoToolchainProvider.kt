@@ -38,7 +38,7 @@ class DefaultGoToolchainProvider : GoToolchainProvider {
     private val refining = AtomicBoolean(false)
 
     /** Changes when a background `go env` refinement replaced the pure answer. */
-    val modificationTracker: ModificationTracker get() = tracker
+    override val modificationTracker: ModificationTracker get() = tracker
     private val tracker = SimpleModificationTracker()
 
     /** Marks toolchain-derived caches stale (tests). */

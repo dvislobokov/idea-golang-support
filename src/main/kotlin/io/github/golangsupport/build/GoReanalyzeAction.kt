@@ -19,6 +19,8 @@ import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.mod.GoModFileType
 import io.github.golangsupport.settings.GoLanguageServerControl
 import io.github.golangsupport.settings.GoSettings
+import io.github.golangsupport.project.impl.GoProjectModelTracker
+import io.github.golangsupport.semantic.cache.GoTrackers
 
 /**
  * Go | Reanalyze Project: everything the plugin knows about the project is thrown away and read again, without a restart of the IDE.
@@ -56,6 +58,9 @@ class GoReanalyzeAction : AnAction(), DumbAware {
                         FileBasedIndex.getInstance().requestReindex(file)
                     }
                     GoBuildProblems.getInstance(project).clear(null)
+                    // the caches of the native PSI: types, resolve, the project model
+                    GoTrackers.getInstance(project).invalidateAll()
+                    GoProjectModelTracker.getInstance(project).incModificationCount()
                     if (GoSettings.getInstance().completionCatalogue) GoCatalogueService.getInstance(project).refresh(rescan = true)
                 }
 

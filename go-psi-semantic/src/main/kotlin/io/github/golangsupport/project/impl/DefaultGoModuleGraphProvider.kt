@@ -61,8 +61,7 @@ class DefaultGoModuleGraphProvider(private val project: Project) : GoModuleGraph
             .mapNotNull { graphFor(it) }
             .distinctBy { g -> g.mainModules.map { it.dir } }
 
-    private fun toolchainTracker(): ModificationTracker =
-        (GoToolchainProvider.getInstance() as? DefaultGoToolchainProvider)?.modificationTracker ?: ModificationTracker.NEVER_CHANGED
+    private fun toolchainTracker(): ModificationTracker = GoToolchainProvider.getInstance().modificationTracker
 
     private fun builder(toolchain: GoToolchainInfo?): GoModuleGraphBuilder =
         GoModuleGraphBuilder(toolchain?.gomodcache?.let(::GoModuleCacheLayout), toolchain?.env.orEmpty())

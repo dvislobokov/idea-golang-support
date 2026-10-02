@@ -67,6 +67,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** `-tags` of every command that compiles: build, run, test, vet, the language server, the linter, the debugger. */
         var buildTags by string("")
 
+        /** GOOS / GOARCH the code is analysed for (which files a package has, which `//go:build` lines hold); empty: the ones of the machine. */
+        var analysisGoos by string("")
+        var analysisGoarch by string("")
+
         var languageServerEnabled by property(true)
         /** On: the analyzers of staticcheck come with fixes, and fixes are what Alt+Enter is made of here. */
         var goplsStaticcheck by property(true)
@@ -195,6 +199,14 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var buildTags: String
         get() = state.buildTags.orEmpty()
         set(value) { state.buildTags = value.trim() }
+
+    var analysisGoos: String
+        get() = state.analysisGoos.orEmpty()
+        set(value) { state.analysisGoos = value.trim() }
+
+    var analysisGoarch: String
+        get() = state.analysisGoarch.orEmpty()
+        set(value) { state.analysisGoarch = value.trim() }
 
     var languageServerEnabled: Boolean
         get() = state.languageServerEnabled

@@ -2,6 +2,7 @@ package io.github.golangsupport.project.api
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.ModificationTracker
 import java.nio.file.Path
 
 /**
@@ -73,6 +74,9 @@ data class GoToolchainInfo @JvmOverloads constructor(
 interface GoToolchainProvider {
     /** The toolchain for [project] (application default when null); null when none is known. */
     fun toolchainFor(project: Project?): GoToolchainInfo?
+
+    /** Changes when the answer of [toolchainFor] changes (a background `go env` arrived, the settings changed): what caches of the model depend on. */
+    val modificationTracker: ModificationTracker get() = ModificationTracker.NEVER_CHANGED
 
     companion object {
         @JvmStatic

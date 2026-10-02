@@ -376,8 +376,7 @@ class DefaultGoPackageResolver(private val project: Project) : GoPackageResolver
         return GoModuleCacheLayout(root).also { cacheLayoutMemo = it }
     }
 
-    private fun toolchainTracker(): ModificationTracker =
-        (GoToolchainProvider.getInstance() as? DefaultGoToolchainProvider)?.modificationTracker ?: ModificationTracker.NEVER_CHANGED
+    private fun toolchainTracker(): ModificationTracker = GoToolchainProvider.getInstance().modificationTracker
 
     companion object {
         private val NO_PACKAGE = Any()

@@ -420,11 +420,16 @@ public final class io/github/golangsupport/project/api/GoToolchainInfo {
 public abstract interface class io/github/golangsupport/project/api/GoToolchainProvider {
 	public static final field Companion Lio/github/golangsupport/project/api/GoToolchainProvider$Companion;
 	public static fun getInstance ()Lio/github/golangsupport/project/api/GoToolchainProvider;
+	public fun getModificationTracker ()Lcom/intellij/openapi/util/ModificationTracker;
 	public abstract fun toolchainFor (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/project/api/GoToolchainInfo;
 }
 
 public final class io/github/golangsupport/project/api/GoToolchainProvider$Companion {
 	public final fun getInstance ()Lio/github/golangsupport/project/api/GoToolchainProvider;
+}
+
+public final class io/github/golangsupport/project/api/GoToolchainProvider$DefaultImpls {
+	public static fun getModificationTracker (Lio/github/golangsupport/project/api/GoToolchainProvider;)Lcom/intellij/openapi/util/ModificationTracker;
 }
 
 public final class io/github/golangsupport/project/api/GoVersion : java/lang/Comparable {
