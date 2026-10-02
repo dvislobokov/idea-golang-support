@@ -302,6 +302,28 @@ IGS; робот: открыть `playground` с зависимостью, Go to 
   вместо токенов; `GoRunLineMarkerContributor`/producer — уже PSI после шага 4.
 - `GoIdentifierAnnotator` — удаляется после 8d.
 
+**Дополнения шага 9 (2026-10-02, по просьбе пользователя), в работе у агентов 9-S/9-F/9-R (Opus):**
+- Переключатель «Code actions» (`GoFeature.CODE_ACTIONS`, гейт `GoIdeFeature.CODE_ACTIONS`) — для intentions, переписывающих код по типам; одноимённые
+  действия gopls и текстовые intentions IGS в native-режиме прячутся (commit `a152dd9`).
+- `semantic.api`: `expectedTypeAt(expression)` (цель присваивания, аргумент по позиции, `return` по индексу, элемент/ключ/поле литерала, второй операнд,
+  элемент канала при `ch <- v`, `case`, условия → `bool`) и `enclosingResultTypes(element)`; `ide.completion.GoExpectedTypes` делегирует.
+- Intentions на PSI в go-psi-ide `ide.intentions`: Fill all fields / Fill required fields, Fill return values, Fill switch (`iota`-перечисления,
+  type switch по реализациям интерфейса), **Fill select** (`<-ctx.Done()` для `context.Context` в scope, `<-t.C` для `*time.Timer`/`*time.Ticker`,
+  `v := <-ch` для каналов на приём, `ch <- zero` для send-only, `<-time.After(d)` при `time.Duration` в scope, вариант с `default`), Handle error
+  (`if err != nil { return zeros, err }`), Wrap error (`fmt.Errorf("f: %w", err)`). Общие помощники `GoZeroValues`, `GoScopeValues`.
+- Умный `return` на PSI (`lang.GoReturnValues`): переменная нужного типа из scope (`err` для `error`), иначе нулевое значение; второй вариант с `%w`.
+  Нативный `GoSignatureProvider` для линтера через `calleeSignature`.
+- Серый текст (`GoInlineIdiomsProvider`, Tab принимает) по типам: после `select {` — кейсы из scope (ctx, таймеры, каналы); после `switch x {` над
+  перечислением — все `case` по константам, над интерфейсом — `case *T:` по реализациям; после `for {` с каналом в scope — `select` внутри;
+  `defer x.Close()` только при `Close() error` в method set, `defer mu.Unlock()` только после `Lock()`, `if err != nil` только когда последний результат —
+  `error`. Каналы в серый текст не добавляем (закрытие — дело отправителя).
+- `make` и каналы: completion внутри `make(` по ожидаемому типу (`chan T`, `[]T, 0, len(x)`, `map[K]V`), `v, ok := <-ch` после `<-ch`; шаблоны
+  ключевых слов по scope: `make(chan T)` / буферизованный / `make([]T, 0, n)` / `make(map[K]V)`, `for v := range ch`, `close(ch)` / `defer close(ch)`
+  для канала, созданного в этой функции и не закрытого; шаблоны `select` и «select loop» (`for { select { … } }`) по scope вместо фиксированного `select (+ctx)`.
+- Структуры и интерфейсы на PSI: `GoStructPsi`, Implement Interface с method set из `GoSemanticService.methodsOf` для проекта, GOROOT и зависимостей
+  (индексы шага 7), дисковый сканер — только как fallback вне индексов; генераторы, теги, выравнивание — поля и размеры из PSI/`GoSizes`.
+- Отладчик и тесты на PSI: выражение под мышью, inline values, breakpoint-строки, подтесты `t.Run` — PSI в read action, текст как fallback.
+
 ## Шаг 10. Удаление старого
 
 - Удалить `lang.GoDeclarations` (сканер) и мост `GoDeclarationPsi`, `GoTextLexer`/`GoTextTokens`, если не осталось
