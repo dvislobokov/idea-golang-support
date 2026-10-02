@@ -18,13 +18,13 @@ class GoplsFindUsagesHandlerTest : BasePlatformTestCase() {
     override fun setUp() {
         super.setUp()
         server = settings.languageServerEnabled
-        usages = settings.usagesSource
+        usages = settings.languageFeaturesSource
     }
 
     override fun tearDown() {
         try {
             settings.languageServerEnabled = server
-            settings.usagesSource = usages
+            settings.languageFeaturesSource = usages
         } finally {
             super.tearDown()
         }
@@ -37,13 +37,13 @@ class GoplsFindUsagesHandlerTest : BasePlatformTestCase() {
         val gopls = factories.filterIsInstance<GoplsFindUsagesHandlerFactory>().single()
         val psi = factories.filterIsInstance<GoFindUsagesHandlerFactory>().single()
         settings.languageServerEnabled = true
-        settings.usagesSource = GoFeatureSource.GOPLS
+        settings.languageFeaturesSource = GoFeatureSource.GOPLS
         assertTrue(gopls.canFindUsages(function))
         assertFalse(psi.canFindUsages(function))
         // the gopls handler searches no references: what gopls answers is the whole answer
         val handler = gopls.createFindUsagesHandler(function, false)
         assertTrue(handler.processElementUsages(function, { fail("a reference was searched"); false }, handler.findUsagesOptions))
-        settings.usagesSource = GoFeatureSource.NATIVE
+        settings.languageFeaturesSource = GoFeatureSource.NATIVE
         assertFalse(gopls.canFindUsages(function))
         settings.languageServerEnabled = false
         assertFalse(gopls.canFindUsages(function))

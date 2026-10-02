@@ -49,7 +49,7 @@ class GoplsIntentionService(private val project: Project) {
         val range = Range(Gopls.position(document, start), Gopls.position(document, end))
         val context = CodeActionContext(emptyList()).apply { triggerKind = CodeActionTriggerKind.Invoked }
         val offered = offered(editor, file)
-        // the fill actions are the native intentions' while the switch Code actions says Built-in (MIGRATION.md step 9)
+        // the fill actions are the native intentions' while the switch Language features says Built-in (MIGRATION.md step 9)
         val native = GoFeatures.native(GoFeature.CODE_ACTIONS, project)
         val actions = Gopls.codeActions(client, CodeActionParams(client.getDocumentIdentifier(virtualFile), range, context), TIMEOUT_MS)
             .filter { GoplsActionKinds.isIntention(it.kind) && it.disabled == null && !GoplsActionKinds.isOffered(it.kind, it.title, offered, native) }

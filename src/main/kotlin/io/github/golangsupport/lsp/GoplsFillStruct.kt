@@ -32,7 +32,7 @@ class GoplsFillStructIntention : IntentionAction, HighPriorityAction {
     override fun startInWriteAction(): Boolean = false
 
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-        // the native Fill all fields of go-psi-ide serves while the switch Code actions says Built-in (MIGRATION.md step 9)
+        // the native Fill all fields of go-psi-ide serves while the switch Language features says Built-in (MIGRATION.md step 9)
         if (editor == null || file !is GoFile || GoFeatures.native(GoFeature.CODE_ACTIONS, project) || Gopls.client(project) == null) return false
         val text = editor.document.immutableCharSequence
         val offset = editor.caretModel.offset

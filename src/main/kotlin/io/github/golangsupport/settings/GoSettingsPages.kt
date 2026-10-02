@@ -45,46 +45,10 @@ class GoLanguageServerConfigurable(project: Project) : GoSettingsPage(project, "
         row { checkBox(GoBundle.message("ls.debugPages")).bindSelected(settings::goplsDebugPages).comment(GoBundle.message("ls.debugPages.comment")) }
         row { comment(GoBundle.message("ls.more")) }
         group(GoBundle.message("features.group")) {
-            row { comment(GoBundle.message("features.group.comment")) }
-            row(GoBundle.message("features.syntaxErrors")) {
+            row(GoBundle.message("features.source")) {
                 // the renderer, not toString(): what the settings file keeps has to stay English whatever the language of the page
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::syntaxErrorsSource.toNullableProperty())
-            }
-            row(GoBundle.message("features.navigation")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::navigationSource.toNullableProperty())
-                    .comment(GoBundle.message("features.navigation.comment"))
-            }
-            row(GoBundle.message("features.usages")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::usagesSource.toNullableProperty())
-                    .comment(GoBundle.message("features.usages.comment"))
-            }
-            row(GoBundle.message("features.completion")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::completionSource.toNullableProperty())
-                    .comment(GoBundle.message("features.completion.comment"))
-            }
-            row(GoBundle.message("features.hover")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::hoverSource.toNullableProperty())
-                    .comment(GoBundle.message("features.hover.comment"))
-            }
-            row(GoBundle.message("features.diagnostics")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::diagnosticsSource.toNullableProperty())
-                    .comment(GoBundle.message("features.diagnostics.comment"))
-            }
-            row(GoBundle.message("features.semanticColors")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::semanticColorsSource.toNullableProperty())
-                    .comment(GoBundle.message("features.semanticColors.comment"))
-            }
-            row(GoBundle.message("features.rename")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::renameSource.toNullableProperty())
-                    .comment(GoBundle.message("features.rename.comment"))
-            }
-            row(GoBundle.message("features.codeVision")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::codeVisionSource.toNullableProperty())
-                    .comment(GoBundle.message("features.codeVision.comment"))
-            }
-            row(GoBundle.message("features.codeActions")) {
-                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::codeActionsSource.toNullableProperty())
-                    .comment(GoBundle.message("features.codeActions.comment"))
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::languageFeaturesSource.toNullableProperty())
+                    .comment(GoBundle.message("features.source.comment"))
             }
         }
     }

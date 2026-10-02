@@ -12,7 +12,7 @@ import io.github.golangsupport.settings.GoFeatureSource
 import io.github.golangsupport.settings.GoSettings
 
 /**
- * The switch Code actions (MIGRATION.md step 9): with Built-in the intentions of go-psi-ide answer, the fill actions of gopls are
+ * The feature Code actions under the switch Language features (MIGRATION.md step 9): with Built-in the intentions of go-psi-ide answer, the fill actions of gopls are
  * hidden and the text intentions of the plugin stand down; with gopls it is the other way round.
  */
 class GoCodeActionsSwitchTest : BasePlatformTestCase() {
@@ -23,13 +23,13 @@ class GoCodeActionsSwitchTest : BasePlatformTestCase() {
     override fun setUp() {
         super.setUp()
         server = settings.languageServerEnabled
-        source = settings.codeActionsSource
+        source = settings.languageFeaturesSource
     }
 
     override fun tearDown() {
         try {
             settings.languageServerEnabled = server
-            settings.codeActionsSource = source
+            settings.languageFeaturesSource = source
         } finally {
             super.tearDown()
         }
@@ -37,7 +37,7 @@ class GoCodeActionsSwitchTest : BasePlatformTestCase() {
 
     private fun use(source: GoFeatureSource) {
         settings.languageServerEnabled = true
-        settings.codeActionsSource = source
+        settings.languageFeaturesSource = source
     }
 
     fun testTheFillActionsOfGoplsAreHiddenWhenNative() {

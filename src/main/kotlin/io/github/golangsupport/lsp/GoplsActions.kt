@@ -61,7 +61,7 @@ object GoplsActionKinds {
     private val NATIVE_KINDS = listOf("refactor.rewrite.fillStruct", "refactor.rewrite.fillSwitch")
 
     /**
-     * Whether a code action of gopls is one of those the native intentions replace when the switch Code actions says Built-in:
+     * Whether a code action of gopls is one of those the native intentions replace when the switch Language features says Built-in:
      * fillstruct (`Fill Options`, `Fill anonymous struct`), fillswitch (`Add cases for Color`), the fillreturns quick fix
      * (`Fill in return values`); titles read in gopls v0.23 (`internal/analysis/fill*`). gopls has no action that handles an error.
      */

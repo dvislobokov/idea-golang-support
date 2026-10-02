@@ -38,29 +38,29 @@
          read/write access, Find Usages handler, exit points (MIGRATION.md step 8c; the gate GoIgsIdeFeatureGate follows the switches
          Navigation / Usages / Code vision) -->
     <xi:include href="/META-INF/go-psi-ide-navigation.xml" xpointer="xpointer(/idea-plugin/*)"/>
-    <!-- code completion over that PSI: contributor, confidence, weighers (MIGRATION.md step 8e; the gate follows the switch Completion) -->
+    <!-- code completion over that PSI: contributor, confidence, weighers (MIGRATION.md step 8e; the gate follows GoFeature.COMPLETION) -->
     <xi:include href="/META-INF/go-psi-ide-completion.xml" xpointer="xpointer(/idea-plugin/*)"/>
-    <!-- quick documentation, parameter info, expression type over the PSI (MIGRATION.md step 8f; the gate follows the switch Documentation) -->
+    <!-- quick documentation, parameter info, expression type over the PSI (MIGRATION.md step 8f; the gate follows GoFeature.HOVER) -->
     <xi:include href="/META-INF/go-psi-ide-documentation.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- diagnostics over that PSI: the inspections over the semantic check with their quick fixes, the suppressor and the import optimizer
-         (MIGRATION.md step 8g; the gate follows the switch Diagnostics) -->
+         (MIGRATION.md step 8g; the gate follows GoFeature.DIAGNOSTICS) -->
     <xi:include href="/META-INF/go-psi-ide-inspections.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- semantic colours over that PSI: the annotator that colours identifiers by what they resolve to; with it on duty the semantic tokens of gopls
-         and the text rules of GoIdentifierAnnotator stand down (MIGRATION.md step 8d; the gate follows the switch Semantic colours) -->
+         and the text rules of GoIdentifierAnnotator stand down (MIGRATION.md step 8d; the gate follows GoFeature.SEMANTIC_COLORS) -->
     <xi:include href="/META-INF/go-psi-ide-highlighting.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- rename over that PSI: element manipulators, names and rename-input validators (passive, every mode), in-place availability and the
-         interface-method processor (MIGRATION.md step 8h; the gate follows the switch Rename) -->
+         interface-method processor (MIGRATION.md step 8h; the gate follows GoFeature.RENAME) -->
     <xi:include href="/META-INF/go-psi-ide-refactoring.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- the gofmt-compatible formatter over that PSI: formatting model, code style pages, import sorter, post-format processor
          (MIGRATION.md step 8j; chosen by the formatter setting, Built-in: with a tool chosen GoFormattingService claims the file and the
          platform never reaches this model; with None the language server formats) -->
     <xi:include href="/META-INF/go-psi-ide-formatter.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- code vision over that PSI: the "N usages" / "N implementations" hints above the declarations; with it on duty the gopls hints stand down
-         (MIGRATION.md step 8i; the gate follows the switch Code vision) -->
+         (MIGRATION.md step 8i; the gate follows GoFeature.CODE_VISION) -->
     <xi:include href="/META-INF/go-psi-ide-codevision.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- the intentions that rewrite code by its types over that PSI: fill all / required fields, fill return values, fill switch, fill select,
          handle error, wrap error; with them on duty the same actions of gopls and the text intentions of GoIntentions stand down
-         (MIGRATION.md step 9; the gate follows the switch Code actions) -->
+         (MIGRATION.md step 9; the gate follows GoFeature.CODE_ACTIONS) -->
     <xi:include href="/META-INF/go-psi-ide-intentions.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>

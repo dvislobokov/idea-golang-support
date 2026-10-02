@@ -21,14 +21,14 @@ class GoSyntaxErrorFilterTest : BasePlatformTestCase() {
     override fun setUp() {
         super.setUp()
         languageServer = GoSettings.getInstance().languageServerEnabled
-        source = GoSettings.getInstance().syntaxErrorsSource
+        source = GoSettings.getInstance().languageFeaturesSource
         GoSettings.getInstance().languageServerEnabled = false
     }
 
     override fun tearDown() {
         try {
             GoSettings.getInstance().languageServerEnabled = languageServer
-            GoSettings.getInstance().syntaxErrorsSource = source
+            GoSettings.getInstance().languageFeaturesSource = source
         } finally {
             super.tearDown()
         }
@@ -42,7 +42,7 @@ class GoSyntaxErrorFilterTest : BasePlatformTestCase() {
     private fun shown(languageServer: Boolean, source: GoFeatureSource): Boolean {
         val errors = errorElements()
         GoSettings.getInstance().languageServerEnabled = languageServer
-        GoSettings.getInstance().syntaxErrorsSource = source
+        GoSettings.getInstance().languageFeaturesSource = source
         val filter = GoSyntaxErrorFilter()
         return errors.map { filter.shouldHighlightErrorElement(it) }.distinct().single() // one answer for all of them
     }
@@ -53,7 +53,7 @@ class GoSyntaxErrorFilterTest : BasePlatformTestCase() {
 
     fun testWithoutTheServerTheErrorElementsShowWhateverTheSwitch() {
         errorElements()
-        GoSettings.getInstance().syntaxErrorsSource = GoFeatureSource.GOPLS
+        GoSettings.getInstance().languageFeaturesSource = GoFeatureSource.GOPLS
         assertTrue(myFixture.doHighlighting().any { it.severity == HighlightSeverity.ERROR })
     }
 

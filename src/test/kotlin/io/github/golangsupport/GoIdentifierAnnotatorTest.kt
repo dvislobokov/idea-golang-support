@@ -46,14 +46,14 @@ class GoIdentifierAnnotatorTest : BasePlatformTestCase() {
     override fun setUp() {
         super.setUp()
         server = settings.languageServerEnabled
-        colours = settings.semanticColorsSource
+        colours = settings.languageFeaturesSource
         settings.languageServerEnabled = false
     }
 
     override fun tearDown() {
         try {
             settings.languageServerEnabled = server
-            settings.semanticColorsSource = colours
+            settings.languageFeaturesSource = colours
         } finally {
             super.tearDown()
         }
@@ -72,7 +72,7 @@ class GoIdentifierAnnotatorTest : BasePlatformTestCase() {
     fun testWithGoplsTheTextRulesColourTheIdentifiers() {
         myFixture.configureByText("shop.go", code)
         settings.languageServerEnabled = true
-        settings.semanticColorsSource = GoFeatureSource.GOPLS
+        settings.languageFeaturesSource = GoFeatureSource.GOPLS
         assertTrue(GoIdentifierAnnotator.coloursIdentifiers(project))
         val keys = annotatorKeys()
         for (expected in listOf("GO_DIRECTIVE", "GO_PACKAGE", "GO_TYPE_DECLARATION", "GO_FIELD", "GO_BUILTIN_TYPE", "GO_FUNCTION_DECLARATION", "GO_BUILTIN_FUNCTION", "GO_FUNCTION_CALL", "GO_BUILTIN_CONSTANT")) {
@@ -83,7 +83,7 @@ class GoIdentifierAnnotatorTest : BasePlatformTestCase() {
     fun testWithTheBuiltInSourceTheTextRulesLeaveTheIdentifiersAlone() {
         myFixture.configureByText("shop.go", code)
         settings.languageServerEnabled = true
-        settings.semanticColorsSource = GoFeatureSource.NATIVE
+        settings.languageFeaturesSource = GoFeatureSource.NATIVE
         assertFalse(GoIdentifierAnnotator.coloursIdentifiers(project))
         assertEquals(listOf("GO_DIRECTIVE"), annotatorKeys())
         settings.languageServerEnabled = false // without the server whatever is built in is the source

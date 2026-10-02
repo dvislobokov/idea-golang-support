@@ -13,28 +13,22 @@ import io.github.golangsupport.lang.GoLanguage
 import io.github.golangsupport.settings.GoFeatureSource
 import io.github.golangsupport.settings.GoSettings
 
-/** The feature groups of go-psi-ide follow the switches of the plugin: the gate is the plugin's, one source answers at a time. */
+/** The feature groups of go-psi-ide follow the switch of the plugin: the gate is the plugin's, one source answers at a time. */
 class GoIdeFeatureGateTest : BasePlatformTestCase() {
     private val settings get() = GoSettings.getInstance()
     private var server = true
-    private var navigation = GoFeatureSource.GOPLS
-    private var usages = GoFeatureSource.GOPLS
-    private var codeVision = GoFeatureSource.GOPLS
+    private var source = GoFeatureSource.GOPLS
 
     override fun setUp() {
         super.setUp()
         server = settings.languageServerEnabled
-        navigation = settings.navigationSource
-        usages = settings.usagesSource
-        codeVision = settings.codeVisionSource
+        source = settings.languageFeaturesSource
     }
 
     override fun tearDown() {
         try {
             settings.languageServerEnabled = server
-            settings.navigationSource = navigation
-            settings.usagesSource = usages
-            settings.codeVisionSource = codeVision
+            settings.languageFeaturesSource = source
         } finally {
             super.tearDown()
         }
@@ -46,13 +40,13 @@ class GoIdeFeatureGateTest : BasePlatformTestCase() {
 
     fun testWithGoplsTheNativeNavigationStandsDown() {
         settings.languageServerEnabled = true
-        settings.navigationSource = GoFeatureSource.GOPLS
+        settings.languageFeaturesSource = GoFeatureSource.GOPLS
         assertFalse(GoIdeFeatureGate.enabled(GoIdeFeature.NAVIGATION, project))
     }
 
     fun testWithTheBuiltInSourceTheNativeNavigationAnswers() {
         settings.languageServerEnabled = true
-        settings.navigationSource = GoFeatureSource.NATIVE
+        settings.languageFeaturesSource = GoFeatureSource.NATIVE
         // the light project is in smart mode: a feature that needs the indexes is on
         assertTrue(GoIdeFeatureGate.enabled(GoIdeFeature.NAVIGATION, project))
     }
@@ -62,7 +56,8 @@ class GoIdeFeatureGateTest : BasePlatformTestCase() {
         for (feature in GoIdeFeature.entries) assertTrue(feature.name, GoIdeFeatureGate.enabled(feature, project))
     }
 
-    fun testEachSwitchDrivesItsOwnGroup() {
+    /** Each group of go-psi-ide maps to its own feature; the one switch of the page drives all of them together. */
+    fun testTheOneSwitchDrivesEveryGroup() {
         assertEquals(GoFeature.NAVIGATION, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.NAVIGATION))
         assertEquals(GoFeature.USAGES, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.USAGES))
         assertEquals(GoFeature.CODE_VISION, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.IMPLEMENTATION_MARKERS))
@@ -73,12 +68,12 @@ class GoIdeFeatureGateTest : BasePlatformTestCase() {
         assertEquals(GoFeature.CODE_ACTIONS, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.CODE_ACTIONS))
         assertEquals(GoFeature.RENAME, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.RENAME))
         settings.languageServerEnabled = true
-        settings.navigationSource = GoFeatureSource.NATIVE
-        settings.usagesSource = GoFeatureSource.GOPLS
-        settings.codeVisionSource = GoFeatureSource.GOPLS
-        assertTrue(GoIdeFeatureGate.enabled(GoIdeFeature.NAVIGATION, project))
-        assertFalse(GoIdeFeatureGate.enabled(GoIdeFeature.USAGES, project))
-        assertFalse(GoIdeFeatureGate.enabled(GoIdeFeature.IMPLEMENTATION_MARKERS, project))
+        settings.languageFeaturesSource = GoFeatureSource.NATIVE
+        // the light project is in smart mode: the groups that need the indexes are on too
+        for (feature in GoIdeFeature.entries) assertTrue(feature.name, GoIdeFeatureGate.enabled(feature, project))
+        settings.languageFeaturesSource = GoFeatureSource.GOPLS
+        for (feature in GoIdeFeature.entries) assertFalse(feature.name, GoIdeFeatureGate.enabled(feature, project))
+        for (feature in GoFeature.entries.filter { it != GoFeature.FORMATTING }) assertEquals(feature.name, GoFeatureSource.GOPLS, settings.featureSource(feature))
     }
 
     /** The platform takes one target element evaluator and one Go to Super handler per language: the PSI ones go first and defer when off. */
