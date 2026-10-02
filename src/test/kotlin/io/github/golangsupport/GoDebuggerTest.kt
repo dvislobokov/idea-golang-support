@@ -14,10 +14,8 @@ import io.github.golangsupport.debugger.int
 import io.github.golangsupport.debugger.json
 import io.github.golangsupport.debugger.string
 import io.github.golangsupport.run.GoDebugCompletion
-import io.github.golangsupport.run.GoInlineValues
 import io.github.golangsupport.run.GoPanicFilter
 import io.github.golangsupport.debugger.GoFunctionBreakpointHandler
-import io.github.golangsupport.debugger.GoFunctionNames
 import io.github.golangsupport.run.HitCondition
 import junit.framework.TestCase
 import java.io.ByteArrayInputStream
@@ -30,29 +28,6 @@ import java.util.concurrent.TimeUnit
 
 /** The plugin's own DAP client against a fake adapter on pipes, and the pure parts of the debugger. No process is started. */
 class GoDebuggerTest : TestCase() {
-    fun testTheNameDelveGivesTheFunctionAtACaret() {
-        val text = """
-            package store
-
-            type Order struct{}
-
-            func NewOrder() *Order { return nil }
-
-            func (o *Order) Total() int {
-            	return 0
-            }
-
-            func (o Order) Empty() bool { return true }
-
-            var x = 1
-        """.trimIndent()
-        assertEquals("store.NewOrder", GoFunctionNames.at(text, text.indexOf("return nil")))
-        assertEquals("store.(*Order).Total", GoFunctionNames.at(text, text.indexOf("return 0")))
-        assertEquals("store.Order.Empty", GoFunctionNames.at(text, text.indexOf("Empty")))
-        assertNull("not in a function", GoFunctionNames.at(text, text.indexOf("var x")))
-        assertEquals("main.main", GoFunctionNames.at("package main\n\nfunc main() {\n}\n", 22))
-    }
-
     /** A fake adapter: reads what the client sends, writes what the test tells it to. */
     private inner class FakeAdapter {
         val toClient = PipedOutputStream()
@@ -205,30 +180,6 @@ class GoDebuggerTest : TestCase() {
         assertTrue(GoDebugCompletion.isName("_x1"))
         assertFalse(GoDebugCompletion.isName("[0]"))
         assertFalse(GoDebugCompletion.isName("[\"key\"]"))
-    }
-
-    fun testInlineValueLines() {
-        val text = """package main
-
-func (o *Order) Total() int {
-	total := 0
-	for _, item := range o.items {
-		total += item.Price * item.Quantity
-	}
-	return total
-}
-
-func other() {
-	total := 1
-}
-"""
-        // stopped at `return total` (line 7): the lines of Total() that mention `total`, not `other()`, not `item.Price` for `Price`
-        assertEquals(listOf(3, 5, 7), GoInlineValues.lines(text, "total", 7))
-        assertEquals(listOf(4, 5), GoInlineValues.lines(text, "item", 7))
-        assertEquals(emptyList<Int>(), GoInlineValues.lines(text, "Price", 7))
-        // stopped in the loop (line 5): nothing below the line
-        assertEquals(listOf(3, 5), GoInlineValues.lines(text, "total", 5))
-        assertEquals(emptyList<Int>(), GoInlineValues.lines(text, "total", 100))
     }
 
     private fun assertThrowsExecution(block: () -> Unit): ExecutionException {

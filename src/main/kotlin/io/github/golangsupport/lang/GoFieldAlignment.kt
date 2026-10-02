@@ -6,10 +6,8 @@ import io.github.golangsupport.semantic.types.GoType
 
 /**
  * The layout of a struct as the compiler lays it out on a 64-bit machine: what `fieldalignment` of `go vet` reports, and the order of
- * fields that wastes the least. [analyze] of a [GoStructType] takes the sizes from the types of the PSI ([GoSizes] of go-psi). The text
- * path ([analyze] of a body) knows no types beyond the text: the sizes of the predeclared types, of pointers, slices, maps, channels,
- * functions and interfaces are fixed; a well-known type of the standard library is in a table; a type declared in the same file is
- * followed. Anything else makes the size unknown, and nothing is proposed.
+ * fields that wastes the least. [analyze] of a [GoStructType] takes the sizes from the types of the PSI ([GoSizes] of go-psi); a type
+ * whose size is unknown makes nothing to propose.
  */
 object GoFieldAlignment {
     class Layout(val size: Int, val align: Int)
@@ -19,46 +17,6 @@ object GoFieldAlignment {
 
     class Result(val currentSize: Int, val optimalSize: Int, val fields: List<Field>) {
         val saves: Boolean get() = optimalSize < currentSize
-    }
-
-    private val KNOWN: Map<String, Layout> = buildMap {
-        for (name in listOf("bool", "int8", "uint8", "byte")) put(name, Layout(1, 1))
-        for (name in listOf("int16", "uint16")) put(name, Layout(2, 2))
-        for (name in listOf("int32", "uint32", "rune", "float32")) put(name, Layout(4, 4))
-        for (name in listOf("int64", "uint64", "float64", "complex64", "int", "uint", "uintptr", "unsafe.Pointer", "time.Duration", "atomic.Int64", "atomic.Uint64", "atomic.Uintptr")) put(name, Layout(8, 8))
-        put("complex128", Layout(16, 8))
-        for (name in listOf("string", "error", "any", "context.Context", "atomic.Value")) put(name, Layout(16, 8))
-        for (name in listOf("atomic.Int32", "atomic.Uint32", "atomic.Bool")) put(name, Layout(4, 4))
-        put("time.Time", Layout(24, 8))
-        put("sync.Mutex", Layout(8, 4))
-        put("sync.RWMutex", Layout(24, 8))
-        put("sync.WaitGroup", Layout(16, 8))
-        put("sync.Once", Layout(12, 4))
-        put("sync.Map", Layout(40, 8))
-        for (name in listOf("json.RawMessage", "sql.NullString", "big.Int")) put(name, if (name == "big.Int") Layout(32, 8) else Layout(24, 8))
-    }
-
-    /** The layout of a type written as [type]; [local] resolves a name declared in the file to the text of its type, or to null. */
-    fun layoutOf(type: String, local: (String) -> String?, depth: Int = 0): Layout? {
-        val text = type.trim()
-        if (depth > 8 || text.isEmpty()) return null
-        KNOWN[text]?.let { return it }
-        return when {
-            text.startsWith("*") || text.startsWith("chan ") || text.startsWith("chan<-") || text.startsWith("<-chan") || text.startsWith("func(") || text.startsWith("func ") -> Layout(8, 8)
-            text.startsWith("map[") -> Layout(8, 8)
-            text.startsWith("[]") -> Layout(24, 8)
-            text == "struct{}" || text == "struct {}" -> Layout(0, 1)
-            text == "interface{}" || text == "interface {}" -> Layout(16, 8)
-            text.startsWith("[") -> {
-                val close = text.indexOf(']')
-                val count = text.substring(1, close).trim().toIntOrNull() ?: return null
-                val element = layoutOf(text.substring(close + 1), local, depth + 1) ?: return null
-                Layout(count * element.size, element.align)
-            }
-            text.startsWith("atomic.Pointer[") -> Layout(8, 8)
-            text.all { it.isLetterOrDigit() || it == '_' } -> local(text)?.let { layoutOf(it, local, depth + 1) }
-            else -> null
-        }
     }
 
     /** The layout of a struct whose fields have [layouts], in that order: each field at its alignment, the whole rounded to the largest. */
@@ -78,23 +36,9 @@ object GoFieldAlignment {
     private fun roundUp(offset: Int, align: Int): Int = (offset + align - 1) / align * align
 
     /**
-     * The body of a struct between its braces: the fields with their lines, laid out as they are and as they would be at best. Null when a
-     * field is not on a line of its own (a struct literal type over several lines), or the size of a type is unknown.
-     */
-    fun analyze(body: CharSequence, local: (String) -> String?): Result? {
-        val entries = split(body) ?: return null
-        val fields = entries.map { entry ->
-            val (fieldType, count) = typeOf(entry.field) ?: return null
-            val layout = layoutOf(fieldType, local) ?: return null
-            Field(entry.lines, Layout(layout.size * count, layout.align))
-        }
-        return resultOf(fields)
-    }
-
-    /**
-     * The same for a struct of the PSI, the sizes from the types of its fields as the type checker of go-psi knows them ([GoSizes]: the
-     * layout of gc on 64 bits), a type of any package or a generic instance included. Null when a field is not on a line of its own or
-     * the size of a type is unknown (a type parameter, a type that does not resolve). Needs read access.
+     * The fields of a struct of the PSI with their lines, laid out as they are and as they would be at best; the sizes from the types of
+     * its fields as the type checker of go-psi knows them ([GoSizes]: the layout of gc on 64 bits), a type of any package or a generic
+     * instance included. Null when a field is not on a line of its own or the size of a type is unknown (a type parameter, a type that does not resolve). Needs read access.
      */
     fun analyze(struct: GoStructType): Result? {
         val close = struct.rbrace ?: return null
@@ -178,45 +122,5 @@ object GoFieldAlignment {
             i++
         }
         return depth
-    }
-
-    /** `a, b int `json:"x"` // c` -> `int` and 2; an embedded `*pkg.T` -> `*pkg.T` and 1. */
-    private fun typeOf(field: String): Pair<String, Int>? {
-        var line = field
-        line.indexOf("//").takeIf { it >= 0 }?.let { line = line.substring(0, it) }
-        line.indexOf('`').takeIf { it >= 0 }?.let { line = line.substring(0, it) }
-        val tokens = line.trim().split(WHITESPACE).filter { it.isNotEmpty() }
-        if (tokens.isEmpty()) return null
-        // an embedded field is its type alone
-        if (tokens.size == 1) return tokens[0] to 1
-        // `a, b int`, `a,b int`: the names end with the first token without a comma after it
-        var typeStart = 0
-        while (typeStart < tokens.size - 1 && tokens[typeStart].endsWith(",")) typeStart++
-        val names = tokens.subList(0, typeStart + 1).flatMap { it.split(',') }.filter { it.isNotEmpty() }
-        if (typeStart + 1 >= tokens.size || !names.all { name -> name.all { c -> c.isLetterOrDigit() || c == '_' } }) return null
-        return tokens.subList(typeStart + 1, tokens.size).joinToString(" ") to names.size
-    }
-
-    private val WHITESPACE = Regex("""\s+""")
-
-    /** What the file itself says a type name is: the type of a plain `type X int64`, or the struct written as `struct { ... }` of a struct type. */
-    fun localTypes(structure: GoFileStructure, text: CharSequence): (String) -> String? = { name ->
-        structure.declarations.firstOrNull { it.kind.isType && it.name == name }?.let { declaration ->
-            when (declaration.kind) {
-                GoDeclarationKind.STRUCT -> declaration.body?.let { body -> structSize(text.subSequence(body.startOffset + 1, body.endOffset - 1), structure, text) }
-                GoDeclarationKind.TYPE -> declaration.signature?.removePrefix("=")?.trim()
-                else -> null
-            }
-        }
-    }
-
-    /** A local struct type as a fixed-size array of bytes is not right (the alignment): it is written as `[N]` of a unit of its alignment instead. */
-    private fun structSize(body: CharSequence, structure: GoFileStructure, text: CharSequence): String? {
-        val entries = split(body) ?: return null
-        val layouts = entries.map { entry -> typeOf(entry.field)?.let { (type, count) -> layoutOf(type, localTypes(structure, text))?.let { Layout(it.size * count, it.align) } } ?: return null }
-        if (layouts.isEmpty()) return "struct{}"
-        val layout = structLayout(layouts)
-        val unit = when (layout.align) { 1 -> "byte"; 2 -> "int16"; 4 -> "int32"; else -> "int64" }
-        return "[${layout.size / layout.align}]$unit"
     }
 }

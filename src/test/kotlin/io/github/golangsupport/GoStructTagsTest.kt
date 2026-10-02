@@ -44,18 +44,6 @@ class GoStructTagsTest {
         assertTrue(GoStructTags.names(GoStructTags.key("validate")!!, "Name").isEmpty())
     }
 
-    @Test fun tagOfAField() {
-        val text = "package p\n\ntype User struct {\n\tName     string `json:\"na\n\tAge int\n}\n\nvar s = `json`\n"
-        val caret = text.indexOf("na\n") + 2
-        val (open, field) = GoStructTags.tagAt(text, caret)!!
-        assertEquals('`', text[open])
-        assertEquals("Name", field)
-        // a raw string outside a struct is not a tag
-        assertNull(GoStructTags.tagAt(text, text.lastIndexOf("json") + 2))
-        val anonymous = "package p\n\nfunc f() {\n\tvar body struct {\n\t\tID int `js\n\t}\n}\n"
-        assertEquals("ID", GoStructTags.tagAt(anonymous, anonymous.indexOf("`js") + 3)!!.second)
-    }
-
     @Test fun templatesStayOutOfStringsAndComments() {
         val text = "package p\n\ntype T struct {\n\tName string `json`\n}\n\n// err\nfunc f() {\n\terr\n\tx := \"err\"\n}\n"
         assertTrue(GoTemplateContexts.isInLiteralOrComment(text, text.indexOf("`json") + 1))

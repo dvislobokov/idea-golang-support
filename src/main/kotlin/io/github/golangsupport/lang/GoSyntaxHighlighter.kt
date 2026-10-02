@@ -23,6 +23,8 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.lang.lexer.GoLexer
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoImportSpec
 import io.github.golangsupport.lang.psi.GoTokenSets
 import io.github.golangsupport.lang.psi.GoTypes
 import javax.swing.Icon
@@ -150,8 +152,8 @@ class GoIdentifierAnnotator : Annotator {
     }
 
     private fun classify(element: PsiElement): TextAttributesKey? {
-        val declaration = GoDeclarationPsi.ofName(element)
-        if (declaration != null) return when (GoDeclarationPsi.kindOf(declaration)) {
+        val declaration = GoDeclarationKind.ofName(element)
+        if (declaration != null) return when (GoDeclarationKind.of(declaration)) {
             GoDeclarationKind.FUNCTION, GoDeclarationKind.METHOD, GoDeclarationKind.INTERFACE_METHOD -> GoSyntaxHighlighter.FUNCTION_DECLARATION
             GoDeclarationKind.STRUCT, GoDeclarationKind.INTERFACE, GoDeclarationKind.TYPE -> GoSyntaxHighlighter.TYPE_DECLARATION
             GoDeclarationKind.FIELD -> GoSyntaxHighlighter.FIELD
@@ -169,9 +171,9 @@ class GoIdentifierAnnotator : Annotator {
             previous?.text == "package" -> GoSyntaxHighlighter.PACKAGE
             (next == GoTypes.STRING || next == GoTypes.RAW_STRING) && isImportAlias(element) -> GoSyntaxHighlighter.PACKAGE
             !afterDot && next == GoTypes.PERIOD && text in importedNames(element) -> GoSyntaxHighlighter.PACKAGE
-            !afterDot && text in GoTextTokens.BUILTIN_TYPES -> GoSyntaxHighlighter.BUILTIN_TYPE
-            !afterDot && text in GoTextTokens.BUILTIN_CONSTANTS -> GoSyntaxHighlighter.BUILTIN_CONSTANT
-            !afterDot && isCall && text in GoTextTokens.BUILTIN_FUNCTIONS -> GoSyntaxHighlighter.BUILTIN_FUNCTION
+            !afterDot && text in GoNames.BUILTIN_TYPES -> GoSyntaxHighlighter.BUILTIN_TYPE
+            !afterDot && text in GoNames.BUILTIN_CONSTANTS -> GoSyntaxHighlighter.BUILTIN_CONSTANT
+            !afterDot && isCall && text in GoNames.BUILTIN_FUNCTIONS -> GoSyntaxHighlighter.BUILTIN_FUNCTION
             isCall -> GoSyntaxHighlighter.FUNCTION_CALL
             else -> null
         }
@@ -201,12 +203,11 @@ object GoCodeLeaves {
     private fun isCode(leaf: PsiElement): Boolean = leaf !is PsiWhiteSpace && leaf !is PsiComment && leaf.elementType != GoTypes.SEMICOLON_SYNTHETIC && leaf.textLength > 0
 }
 
-/** `f` of `import f "fmt"`: the import begins with it. */
-private fun isImportAlias(element: PsiElement): Boolean =
-    GoStructure.of(element.containingFile).imports.any { it.alias != null && it.range.startOffset == element.textRange.startOffset }
+/** `f` of `import f "fmt"`: the name of an import spec. */
+private fun isImportAlias(element: PsiElement): Boolean = (element.parent as? GoImportSpec)?.identifier == element
 
 private fun importedNames(element: PsiElement): Set<String> =
-    GoStructure.of(element.containingFile).imports.mapTo(HashSet()) { it.alias?.takeIf { alias -> alias != "_" && alias != "." } ?: GoSemanticColors.packageName(it.path) }
+    (element.containingFile as? GoFile)?.imports.orEmpty().mapTo(HashSet()) { it.alias?.takeIf { alias -> alias != "_" && alias != "." } ?: GoSemanticColors.packageName(it.path) }
 
 class GoColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName(): String = "Go"

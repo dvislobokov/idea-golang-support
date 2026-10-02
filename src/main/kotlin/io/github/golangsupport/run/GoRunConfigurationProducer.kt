@@ -10,10 +10,8 @@ import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
-import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.psi.GoFile
-import io.github.golangsupport.lang.GoStructure
 import io.github.golangsupport.lang.psi.GoFunctionDeclaration
 import io.github.golangsupport.lang.psi.GoTypes
 import com.intellij.openapi.actionSystem.ActionUpdateThread
@@ -41,19 +39,25 @@ object GoRunTargets {
         }
         val file = element.containingFile as? GoFile ?: return null
         val directory = file.virtualFile?.parent ?: return null
-        val structure = GoStructure.of(file)
         if (file.isTestFile) {
             val offset = element.textRange.startOffset
-            val function = GoTests.find(structure, file.name).firstOrNull { offset in it.first.range }
+            val (declaration, kind) = topLevel(element)?.let { top -> GoTests.find(file).firstOrNull { it.first === top } }
                 ?: return GoRunTarget(GoCommand.TEST, directory.path, "go test ${directory.name}")
-            val (declaration, kind) = function
+            val name = declaration.name ?: return null
             // the caret on the line of `t.Run("empty", ...)` or of a case of the table: that one subtest
             val document = file.viewProvider.document
-            val subtest = document?.let { doc -> GoSubtests.ofFile(file).values.firstOrNull { it.function === declaration && doc.getLineNumber(it.nameRange.startOffset) == doc.getLineNumber(offset) } }
+            val subtest = document?.let { doc -> GoSubtests.ofFile(file).values.firstOrNull { it.function == name && doc.getLineNumber(it.nameRange.startOffset) == doc.getLineNumber(offset) } }
             if (subtest != null) return GoRunTarget(GoCommand.TEST, directory.path, subtest.fullName, GoTests.pattern(listOf(subtest.fullName)))
-            return GoRunTarget(GoCommand.TEST, directory.path, declaration.name, GoTests.pattern(listOf(declaration.name)), benchmark = kind == GoTestKind.BENCHMARK)
+            return GoRunTarget(GoCommand.TEST, directory.path, name, GoTests.pattern(listOf(name)), benchmark = kind == GoTestKind.BENCHMARK)
         }
-        return if (structure.mainFunction != null) GoRunTarget(GoCommand.RUN, directory.path, "go run ${directory.name}") else null
+        return if (GoRunConfigurationGenerator.isProgram(file)) GoRunTarget(GoCommand.RUN, directory.path, "go run ${directory.name}") else null
+    }
+
+    /** The package-level declaration [element] is in (a doc comment is a part of its declaration). */
+    private fun topLevel(element: PsiElement): PsiElement? {
+        var current: PsiElement? = element
+        while (current != null && current.parent !is GoFile) current = current.parent
+        return current
     }
 
     private fun containsGo(directory: com.intellij.openapi.vfs.VirtualFile): Boolean =
@@ -93,14 +97,15 @@ class GoRunLineMarkerContributor : RunLineMarkerContributor() {
         val file = element.containingFile as? GoFile ?: return null
         val type = element.elementType
         if (type == GoTypes.STRING || type == GoTypes.RAW_STRING) return subtestInfo(file, element)
-        val declaration = GoDeclarationPsi.ofName(element) as? GoFunctionDeclaration ?: return null
-        val info = GoDeclarationPsi.infoOf(declaration)?.takeIf { it.kind == GoDeclarationKind.FUNCTION } ?: return null
+        val declaration = GoDeclarationKind.ofName(element) as? GoFunctionDeclaration ?: return null
+        val name = declaration.name ?: return null
         val actions = ExecutorAction.getActions(0)
-        return when (GoTests.kindOf(info, file.name)) {
-            null -> if (!file.isTestFile && info.name == "main" && GoStructure.of(file).isMainPackage) Info(AllIcons.RunConfigurations.TestState.Run, actions) { "Run the program" } else null
+        val kind = if (file.isTestFile) GoTests.kindOf(name) else null
+        return when (kind) {
+            null -> if (!file.isTestFile && name == "main" && file.packageName == "main") Info(AllIcons.RunConfigurations.TestState.Run, actions) { "Run the program" } else null
             // a fuzz function is a test by `-run`; the fuzzing itself is its own way to start
-            GoTestKind.FUZZ -> Info(statusIcon(file, info.name), actions + GoFuzzAction(info.name)) { "Run ${info.name}" }
-            else -> Info(statusIcon(file, info.name), actions) { "Run ${info.name}" }
+            GoTestKind.FUZZ -> Info(statusIcon(file, name), actions + GoFuzzAction(name)) { "Run $name" }
+            else -> Info(statusIcon(file, name), actions) { "Run $name" }
         }
     }
 

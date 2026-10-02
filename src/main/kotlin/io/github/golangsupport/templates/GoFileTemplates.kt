@@ -18,7 +18,7 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.cli.GoCli
-import io.github.golangsupport.lang.GoDeclarations
+import io.github.golangsupport.lang.lexer.GoFileHeaderScanner
 import io.github.golangsupport.mod.GoModFileType
 import io.github.golangsupport.mod.GoModulesService
 import java.io.File
@@ -37,7 +37,7 @@ object GoPackageNames {
     /** Asked on EDT, by the New File dialog: one file is enough, and it is read the way the editor reads files (a stream is a slow operation there). */
     fun of(directory: VirtualFile): String {
         val sibling = directory.children.filter { !it.isDirectory && it.extension == "go" }.minByOrNull { it.name.endsWith("_test.go") }
-        val existing = sibling?.let { file -> runCatching { GoDeclarations.scan(LoadTextUtil.loadText(file)).packageName }.getOrNull() }
+        val existing = sibling?.let { file -> runCatching { GoFileHeaderScanner.scan(LoadTextUtil.loadText(file), withImports = false).packageName }.getOrNull() }
         return forDirectory(listOfNotNull(existing?.removeSuffix("_test")), directory.name, directory.parent?.name)
     }
 }

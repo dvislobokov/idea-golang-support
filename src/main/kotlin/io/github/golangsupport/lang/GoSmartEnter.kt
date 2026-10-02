@@ -104,6 +104,6 @@ object GoDocComments {
         val nextEnd = text.indexOf('\n', lineEnd + 1).let { if (it < 0) text.length else it }
         val next = text.subSequence(lineEnd + 1, nextEnd).toString()
         val name = DECLARATION.find(next)?.groupValues?.get(1) ?: return null
-        return name.takeIf { it != "_" && it !in GoTextTokens.KEYWORDS }
+        return name.takeIf { it != "_" && it !in GoNames.KEYWORDS }
     }
 }

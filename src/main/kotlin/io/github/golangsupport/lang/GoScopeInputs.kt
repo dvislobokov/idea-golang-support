@@ -61,7 +61,7 @@ import io.github.golangsupport.semantic.types.GoPointerType as GoPointerTypeSem
  * scope before the caret with what a template can do with them (range over, select on, close), and for the top of a file the methods
  * the types of the file have and the interfaces of the project. Types come from [GoSemanticService]; where a type of the standard
  * library does not resolve (no GOROOT), the declared type is read from the PSI: `ctx context.Context` with `import "context"`.
- * Null answers mean "the PSI cannot tell" (no enclosing function, dumb mode): the caller keeps its text path then.
+ * Null answers mean "the PSI cannot tell" (no enclosing function, dumb mode): the caller keeps what the lines above tell then.
  */
 object GoScopeInputs {
     enum class Kind { SLICE, MAP, CHANNEL, CONTEXT, TESTING, TIMER }

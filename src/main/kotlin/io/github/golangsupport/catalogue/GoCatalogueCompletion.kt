@@ -11,7 +11,6 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoIdioms
 import io.github.golangsupport.lang.GoImport
@@ -70,7 +69,7 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         if (index.size == 0) return
         // the names of the package of the file are the business of the language server, and `internal` is not for everyone
         val own = file.virtualFile?.parent?.let { GoModulesService.getInstance(file.project).moduleOf(it)?.importPath(it) }
-        val imports = GoDeclarations.scan(text).imports
+        val imports = GoImports.importsOf(text)
         val matcher = GoPrefixMatcher(typed)
         val names = result.withPrefixMatcher(matcher)
         // the list is a part of what there is: more letters may bring other names into it
@@ -120,7 +119,7 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
             // not where a type is expected (`var c http.Client`), and not when the braces are there
             val literal = GoSettings.getInstance().completionStructBraces && GoStructLiterals.isValuePlace(text, context.startOffset) &&
                 text.getOrNull(context.tailOffset) != '{' && text.getOrNull(context.tailOffset) != '('
-            val insertion = GoCatalogueInsertion.of(entry, GoDeclarations.scan(text).imports, literal) ?: return@InsertHandler
+            val insertion = GoCatalogueInsertion.of(entry, GoImports.importsOf(text), literal) ?: return@InsertHandler
             document.replaceString(context.startOffset, context.tailOffset, insertion.text)
             // the caret first: the import is written above it and moves it along
             context.editor.caretModel.moveToOffset(context.tailOffset - insertion.caretFromEnd)

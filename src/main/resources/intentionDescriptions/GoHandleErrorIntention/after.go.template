@@ -1,3 +1,0 @@
-if err := os.Remove(path); err != nil {
-	return err
-}

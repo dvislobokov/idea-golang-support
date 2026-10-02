@@ -29,10 +29,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComponentContainer
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
-import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoTestNames
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.mod.GoModulesService
@@ -132,17 +130,13 @@ object GoTestLocator : SMTestLocator {
         val function = test.substringBefore('/')
         val subtest = test.substringAfter('/', "")
         for (file in directory.children.filter { it.name.endsWith(GoTestNames.TEST_SUFFIX) }) {
-            val psiFile = psiManager.findFile(file)
-            // the PSI and its text when there is one: the offsets of the scanner and of the PSI are then of the same text
-            val text = (psiFile as? GoFile)?.viewProvider?.contents ?: runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: continue
-            val declaration = GoDeclarations.scan(text).declarations.firstOrNull { it.name == function && it.receiver == null } ?: continue
-            if (psiFile == null) continue
+            val psiFile = psiManager.findFile(file) as? GoFile ?: continue
+            val declaration = psiFile.functions.firstOrNull { it.name == function } ?: continue
             // a subtest leads to its `t.Run("name", ...)` or to its case of the table (a nested one by its whole path, else by the first
             // level), when that line can be told; otherwise to the function
-            val subtests = if (subtest.isEmpty()) emptyList() else (psiFile as? GoFile)?.let { GoSubtests.find(it, declaration) } ?: GoSubtests.find(text, declaration)
-            val offset = (subtests.firstOrNull { it.name == subtest } ?: subtests.firstOrNull { it.name == subtest.substringBefore('/') })?.nameRange?.startOffset
-                ?: declaration.nameRange.startOffset
-            val element = psiFile.findElementAt(offset) ?: continue
+            val subtests = if (subtest.isEmpty()) emptyList() else GoSubtests.find(declaration)
+            val element = (subtests.firstOrNull { it.name == subtest } ?: subtests.firstOrNull { it.name == subtest.substringBefore('/') })
+                ?.let { psiFile.findElementAt(it.nameRange.startOffset) } ?: declaration.identifier ?: declaration
             return listOf(PsiLocation(element))
         }
         return emptyList()

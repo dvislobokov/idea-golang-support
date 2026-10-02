@@ -3,7 +3,6 @@ package io.github.golangsupport
 import io.github.golangsupport.debugger.GoGoroutineName
 import io.github.golangsupport.debugger.GoValuePresentation
 import io.github.golangsupport.testing.GoBenchmarks
-import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lsp.GoplsHover
 import io.github.golangsupport.testing.GoCoverage
 import io.github.golangsupport.testing.GoLineCoverage
@@ -16,34 +15,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GoTestingTest {
-    @Test fun subtestsOfATableAndOfRun() {
-        val text = """
-            package store
-
-            func TestTotal(t *testing.T) {
-                tests := []struct {
-                    name  string
-                    items []Item
-                    want  int
-                }{
-                    {name: "empty", want: 0},
-                    {name: "two items", items: []Item{{Price: 1}, {Price: 2}}, want: 3},
-                    {"positional", nil, 0},
-                }
-                for _, tt := range tests {
-                    t.Run(tt.name, func(t *testing.T) {})
-                }
-                t.Run("explicit", func(t *testing.T) {
-                    t.Run("nested", func(t *testing.T) {})
-                })
-                t.Run(fmt.Sprintf("%d", 1), nil)
-            }
-            """.trimIndent()
-        val function = GoDeclarations.scan(text).declarations.single { it.name == "TestTotal" }
-        val subtests = GoSubtests.find(text, function)
-        assertEquals(listOf("empty", "two_items", "explicit", "nested"), subtests.map { it.name })
-        assertEquals("TestTotal/two_items", subtests[1].fullName)
-        assertEquals("\"two items\"", text.substring(subtests[1].nameRange.startOffset, subtests[1].nameRange.endOffset))
+    @Test fun namesOfSubtests() {
+        assertEquals("two_items", GoSubtests.subtestName("\"two items\""))
         assertNull(GoSubtests.subtestName("\"with %s\""))
         assertNull(GoSubtests.subtestName("\"esc\\n\""))
         assertEquals("raw_name", GoSubtests.subtestName("`raw name`"))

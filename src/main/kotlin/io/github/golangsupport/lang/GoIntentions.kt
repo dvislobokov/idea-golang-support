@@ -1,147 +1,17 @@
 package io.github.golangsupport.lang
 
 import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerImpl
-import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
-import io.github.golangsupport.lint.GoErrcheckFixes
-import io.github.golangsupport.lint.GoSignatureProvider
+import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.lang.psi.GoFile
-
-/** The line of the caret: its text, its bounds, its indent and the unit of indentation of the file. */
-private class CaretLine(document: Document, offset: Int) {
-    val number = document.getLineNumber(offset)
-    val start = document.getLineStartOffset(number)
-    val end = document.getLineEndOffset(number)
-    val text: String = document.getText(TextRange(start, end))
-    val indent = text.takeWhile { it == ' ' || it == '\t' }
-    val unit = if (indent.startsWith(" ")) "    " else "\t"
-}
-
-private fun caretLine(editor: Editor?): CaretLine? = editor?.let { CaretLine(it.document, it.caretModel.offset) }
-
-/**
- * The text intentions that the intentions of go-psi-ide (`ide.intentions`: Handle error, Fill return values) replace while the switch
- * Code actions says Built-in (MIGRATION.md step 9): one source of each action in the list at a time. They go at step 10.
- */
-object GoTextCodeActions {
-    fun available(project: Project): Boolean = !GoFeatures.native(GoFeature.CODE_ACTIONS, project)
-}
-
-/**
- * Alt+Enter on a call that stands alone on its line (`os.Remove(path)`): the call with its error handled. How many values the call
- * returns is asked of gopls; without it the intention still offers the plain `if err := …` and says so. The same text as the errcheck
- * fix, offered without the linter.
- */
-class GoHandleErrorIntention : IntentionAction {
-    override fun getText(): String = "Handle error"
-    override fun getFamilyName(): String = "Go: handle error"
-    override fun startInWriteAction(): Boolean = false
-
-    override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-        if (file !is GoFile || !GoTextCodeActions.available(project)) return false
-        val line = caretLine(editor) ?: return false
-        return GoErrcheckFixes.callStatement(line.text) != null && !line.text.contains(":=") && !line.text.contains(" = ") && !line.text.trim().startsWith("return")
-    }
-
-    override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
-        val line = caretLine(editor) ?: return
-        val virtualFile = file?.virtualFile ?: return
-        val statement = GoErrcheckFixes.callStatement(line.text) ?: return
-        val nameOffset = line.start + (GoErrcheckFixes.functionNameOffset(line.text) ?: return)
-        val results = ProgressManager.getInstance().runProcessWithProgressSynchronously<Int?, RuntimeException>(
-            { GoSignatureProvider.resultCount(project, virtualFile, nameOffset) }, "Asking gopls What the Function Returns", true, project,
-        ) ?: 1
-        if (results == 0) return HintManager.getInstance().showErrorHint(editor!!, "The function returns nothing")
-        val replacement = line.indent + GoErrcheckFixes.handle(statement, results, line.indent, line.unit)
-        WriteCommandAction.runWriteCommandAction(project, text, null, {
-            editor!!.document.replaceString(line.start, line.end, replacement)
-            replacement.indexOf("return err").takeIf { it >= 0 }?.let { editor.caretModel.moveToOffset(line.start + it + "return ".length) }
-        }, file)
-    }
-}
-
-/** Alt+Enter on `x, err := f()` (or `err = f()`) without a check below: `if err != nil { return … }` with the results of the function. */
-class GoCheckErrorIntention : IntentionAction {
-    override fun getText(): String = "Add if err != nil check"
-    override fun getFamilyName(): String = "Go: check error"
-    override fun startInWriteAction(): Boolean = true
-
-    override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-        if (file !is GoFile || !GoTextCodeActions.available(project)) return false
-        val line = caretLine(editor) ?: return false
-        val error = GoStatementsOfError.assignedError(line.text) ?: return false
-        val document = editor!!.document
-        val next = if (line.number + 1 < document.lineCount) document.getText(TextRange(document.getLineStartOffset(line.number + 1), document.getLineEndOffset(line.number + 1))).trim() else ""
-        return !next.startsWith("if $error ")
-    }
-
-    override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
-        val line = caretLine(editor) ?: return
-        val error = GoStatementsOfError.assignedError(line.text) ?: return
-        val document = editor!!.document
-        val returned = GoIdioms.returnStatement(document.immutableCharSequence, line.start, error)
-        val check = "\n${line.indent}if $error != nil {\n${line.indent}${line.unit}$returned\n${line.indent}}"
-        document.insertString(line.end, check)
-        editor.caretModel.moveToOffset(line.end + check.length)
-    }
-}
-
-object GoStatementsOfError {
-    private val ASSIGNED = Regex("""^\s*(?:[\w.\[\]]+\s*,\s*)*(err\w*)\s*:?=\s*.+$""")
-
-    /** `err` of `x, err := f()`; null for a line that assigns no error. */
-    fun assignedError(line: String): String? = ASSIGNED.matchEntire(line)?.groupValues?.get(1)?.takeIf { !line.trim().startsWith("if ") && !line.trim().startsWith("for ") }
-}
-
-/** Alt+Enter inside a function that returns values and ends without `return`: `return 0, nil` before its closing brace. */
-class GoAddMissingReturnIntention : IntentionAction {
-    override fun getText(): String = "Add missing return"
-    override fun getFamilyName(): String = "Go: missing return"
-    override fun startInWriteAction(): Boolean = true
-
-    override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
-        if (file !is GoFile || editor == null || !GoTextCodeActions.available(project)) return false
-        val function = functionAt(editor) ?: return false
-        return GoGenerators.returnStatement(function.signature) != null && lastStatement(editor.document, function)?.startsWith("return") == false
-    }
-
-    override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
-        val function = functionAt(editor ?: return) ?: return
-        val body = function.body ?: return
-        val statement = GoGenerators.returnStatement(function.signature) ?: return
-        val document = editor.document
-        val closingLine = document.getLineNumber(body.endOffset - 1)
-        val closingStart = document.getLineStartOffset(closingLine)
-        val indent = document.getText(TextRange(closingStart, body.endOffset - 1)).takeWhile { it == ' ' || it == '\t' }
-        val unit = if (indent.startsWith(" ")) "    " else "\t"
-        val inserted = "$indent$unit$statement\n"
-        document.insertString(closingStart, inserted)
-        editor.caretModel.moveToOffset(closingStart + inserted.length - 1)
-    }
-
-    private fun functionAt(editor: Editor): GoDeclarationInfo? {
-        val offset = editor.caretModel.offset
-        return GoDeclarations.scan(editor.document.immutableCharSequence).declarations
-            .filter { (it.kind == GoDeclarationKind.FUNCTION || it.kind == GoDeclarationKind.METHOD) && it.body != null }
-            .lastOrNull { offset >= it.range.startOffset && offset <= it.range.endOffset }
-    }
-
-    /** The last line of code of the body, without its indent; null for an empty body. */
-    private fun lastStatement(document: Document, function: GoDeclarationInfo): String? {
-        val body = function.body ?: return null
-        val text = document.getText(TextRange(body.startOffset + 1, body.endOffset - 1))
-        return text.lines().map { it.trim() }.lastOrNull { it.isNotEmpty() && !it.startsWith("//") }?.let { if (it == "}" ) "}" else it } ?: ""
-    }
-}
+import io.github.golangsupport.lang.psi.GoMethodDeclaration
 
 /**
  * Alt+Enter on a call of a function that is not there (`undefined: total`, as gopls says): the function with parameters from the
@@ -165,10 +35,9 @@ class GoCreateFunctionIntention : IntentionAction {
         val text = editor.document.immutableCharSequence
         val (called, qualifier) = GoGenerators.calledName(text, editor.caretModel.offset) ?: return false
         name = called
-        val structure = GoDeclarations.scan(text)
         // a function of this file, a builtin, a package (`fmt.Println`): not ours to create
-        if (called in BUILTINS || structure.declarations.any { it.name == called && (qualifier == null && it.kind == GoDeclarationKind.FUNCTION || qualifier != null && it.kind == GoDeclarationKind.METHOD) }) return false
-        if (qualifier != null && structure.imports.any { (it.alias ?: it.path.substringAfterLast('/')) == qualifier }) return false
+        if (called in BUILTINS || (if (qualifier == null) file.functions.any { it.name == called } else file.methods.any { it.name == called })) return false
+        if (qualifier != null && file.imports.any { (it.alias ?: it.path.substringAfterLast('/')) == qualifier }) return false
         return !hasServerFix(project, editor, called)
     }
 
@@ -186,19 +55,18 @@ class GoCreateFunctionIntention : IntentionAction {
         val text = document.immutableCharSequence
         val offset = editor.caretModel.offset
         val (called, qualifier) = GoGenerators.calledName(text, offset) ?: return
-        WriteCommandAction.runWriteCommandAction(project, "Create Function", null, { writeOwn(document, text, offset, called, qualifier, editor) }, file)
+        PsiDocumentManager.getInstance(project).commitDocument(document)
+        // `s.total(...)` inside a method with the receiver `s`: a method of that type
+        val receiverType = qualifier?.let { q ->
+            PsiTreeUtil.getParentOfType(file?.findElementAt(offset), GoMethodDeclaration::class.java)?.takeIf { it.receiver?.name == q }?.receiverTypeName
+        }
+        WriteCommandAction.runWriteCommandAction(project, "Create Function", null, { writeOwn(document, text, offset, called, qualifier, receiverType, editor) }, file)
     }
 
-    private fun writeOwn(document: Document, text: CharSequence, offset: Int, called: String, qualifier: String?, editor: Editor) {
+    private fun writeOwn(document: Document, text: CharSequence, offset: Int, called: String, qualifier: String?, receiverType: String?, editor: Editor) {
         var nameStart = offset
         while (nameStart > 0 && (text[nameStart - 1].isLetterOrDigit() || text[nameStart - 1] == '_')) nameStart--
         val call = GoGenerators.callText(text, nameStart) ?: return
-        val structure = GoDeclarations.scan(text)
-        // `s.total(...)` inside a method with the receiver `s`: a method of that type
-        val receiverType = qualifier?.let { q ->
-            structure.declarations.filter { it.kind == GoDeclarationKind.METHOD }.lastOrNull { offset >= it.range.startOffset && offset <= it.range.endOffset }
-                ?.takeIf { document.getText(it.range).substringBefore(')').substringAfter('(').trim().substringBefore(' ') == q }?.receiver
-        }
         val lineStart = text.lastIndexOf('\n', nameStart - 1) + 1
         val qualifierLength = qualifier?.let { it.length + 1 } ?: 0
         val assigned = GoGenerators.assignedNames(text.substring(lineStart, (nameStart - qualifierLength).coerceAtLeast(lineStart)))
@@ -260,26 +128,15 @@ class GoReorderFieldsIntention(private val line: Int? = null) : IntentionAction 
     }
 
     private fun analyze(context: GenerateContext): Pair<GoDeclarationInfo, GoFieldAlignment.Result>? {
-        // the struct and its sizes from the PSI (step 9): the text scanner only when the document is not committed yet
+        // the struct and its sizes from the PSI; nothing while the document is not committed
+        if (!PsiDocumentManager.getInstance(context.project).isCommitted(context.document)) return null
         val spec = if (line == null) context.typeSpecAtCaret else {
             if (line !in 0 until context.document.lineCount) return null
-            context.file.takeIf { PsiDocumentManager.getInstance(context.project).isCommitted(context.document) }
-                ?.let { GoStructPsi.structSpecAt(it, context.document.getLineStartOffset(line)) }
-        }
-        if (spec != null) {
-            val struct = GoStructPsi.infoOf(spec) ?: return null
-            if (struct.body == null) return null
-            val result = GoFieldAlignment.analyze(GoStructPsi.structOf(spec) ?: return null) ?: return null
-            return (struct to result).takeIf { result.saves }
-        }
-        val text = context.document.immutableCharSequence
-        val structure = context.structure
-        val struct = if (line == null) context.structAtCaret else {
-            val offset = context.document.getLineStartOffset(line)
-            structure.declarations.lastOrNull { it.kind == GoDeclarationKind.STRUCT && it.range.contains(offset) }
+            GoStructPsi.structSpecAt(context.file, context.document.getLineStartOffset(line))
         } ?: return null
-        val body = struct.body ?: return null
-        val result = GoFieldAlignment.analyze(text.subSequence(body.startOffset + 1, body.endOffset - 1), GoFieldAlignment.localTypes(structure, text)) ?: return null
+        val struct = GoStructPsi.infoOf(spec) ?: return null
+        if (struct.body == null) return null
+        val result = GoFieldAlignment.analyze(GoStructPsi.structOf(spec) ?: return null) ?: return null
         return (struct to result).takeIf { result.saves }
     }
 

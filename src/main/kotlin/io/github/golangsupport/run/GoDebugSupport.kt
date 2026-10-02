@@ -8,13 +8,8 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.SyntaxTraverser
-import com.intellij.psi.TokenType
-import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
-import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoTextLexer
-import io.github.golangsupport.lang.GoTextTokens
+import io.github.golangsupport.lang.GoTokens
 import io.github.golangsupport.lang.psi.GoCallExpr
 import io.github.golangsupport.lang.psi.GoConstDefinition
 import io.github.golangsupport.lang.psi.GoExpression
@@ -105,40 +100,10 @@ enum class GoPanicFilter(val id: String, val title: String) {
 
 /** The 0-based lines a breakpoint makes sense at: code inside the body of a function, or inside a multi-line initializer of a variable (a function literal). */
 object GoBreakpointLines {
-    fun find(text: CharSequence): Set<Int> {
-        val structure = GoDeclarations.scan(text)
-        val bodies = structure.declarations.mapNotNull { declaration ->
-            when (declaration.kind) {
-                GoDeclarationKind.FUNCTION, GoDeclarationKind.METHOD -> declaration.body
-                GoDeclarationKind.VAR -> declaration.range
-                else -> null
-            }
-        }
-        if (bodies.isEmpty()) return emptySet()
-        val lineStarts = ArrayList<Int>().apply {
-            add(0)
-            for (i in text.indices) if (text[i] == '\n') add(i + 1)
-        }
-        fun lineOf(offset: Int): Int = lineStarts.binarySearch(offset).let { if (it >= 0) it else -it - 2 }
-
-        val result = HashSet<Int>()
-        val lexer = GoTextLexer()
-        lexer.start(text, 0, text.length, 0)
-        while (true) {
-            val type = lexer.tokenType ?: break
-            val start = lexer.tokenStart
-            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS && bodies.any { start > it.startOffset && start < it.endOffset - 1 }) result += lineOf(start)
-            lexer.advance()
-        }
-        // the header of a function is a place to stop at as well: delve puts the breakpoint at its first instruction
-        structure.declarations.filter { it.body != null && it.kind != GoDeclarationKind.STRUCT && it.kind != GoDeclarationKind.INTERFACE }.forEach { result += lineOf(it.nameRange.startOffset) }
-        return result
-    }
-
     /**
-     * The same rules decided by the PSI of go-psi: the line of the name of a function or a method, every line with code inside its body
-     * but the braces of the body itself (a lone `}` of a function, a comment, a blank line are not), and the lines of a package-level
-     * `var` past its first token. Read action.
+     * By the PSI of go-psi: the line of the name of a function or a method, every line with code inside its body but the braces of the
+     * body itself (a lone `}` of a function, a comment, a blank line are not), and the lines of a package-level `var` past its first
+     * token. Read action.
      */
     fun find(file: GoFile): Set<Int> {
         val lines = GoDebugPsi.Lines(file.viewProvider.contents)
@@ -150,7 +115,7 @@ object GoBreakpointLines {
                     val block = declaration.block ?: continue
                     GoDebugPsi.codeLeaves(block).filter { it !== block.lbrace && it !== block.rbrace }.forEach { result += lines.lineOf(it.textRange.startOffset) }
                 }
-                // past the name, and not the closing brace of a function literal: the rules of the text version
+                // past the name, and not the closing brace of a function literal
                 is GoVarDeclaration -> for (spec in declaration.varSpecList) {
                     val leaves = GoDebugPsi.codeLeaves(spec).toList()
                     leaves.drop(1).dropLast(if (leaves.lastOrNull()?.node?.elementType == GoTypes.RBRACE) 1 else 0).forEach { result += lines.lineOf(it.textRange.startOffset) }
@@ -164,14 +129,14 @@ object GoBreakpointLines {
 /** What the debugger helpers share on the PSI path: the file of a document when its PSI is current, lines of a text, the leaves of code. */
 object GoDebugPsi {
     /**
-     * [psi] on the Go file of [document] when the document is committed, [text] on its text otherwise; both in one read action, so this
-     * may be called from the EDT and from the threads of the debugger alike. The document is never committed here: that would wait for
-     * the EDT.
+     * [psi] on the Go file of [document] when the document is committed, null otherwise (what is being typed has no answer until the
+     * PSI has seen it); in a read action, so this may be called from the EDT and from the threads of the debugger alike. The document is
+     * never committed here: that would wait for the EDT.
      */
-    fun <T> compute(project: Project?, document: Document, psi: (GoFile) -> T, text: (CharSequence) -> T): T = ReadAction.compute<T, RuntimeException> {
+    fun <T> compute(project: Project?, document: Document, psi: (GoFile) -> T): T? = ReadAction.compute<T?, RuntimeException> {
         val manager = project?.takeUnless { it.isDisposed }?.let(PsiDocumentManager::getInstance)
         val file = manager?.takeIf { it.isCommitted(document) }?.getPsiFile(document) as? GoFile
-        if (file != null) psi(file) else text(document.immutableCharSequence)
+        file?.let(psi)
     }
 
     /** Zero-based lines of a text by offset. */
@@ -190,34 +155,12 @@ object GoDebugPsi {
 
 /**
  * The expression a debugger evaluates when the mouse rests on code: the identifier under the pointer with the selectors to the left of
- * it (`order.Currency` on `Currency`). From the PSI where there is one ([rangeAt] with a file), else by tokens. Nothing that would run code of the program (a name followed by `(`), no package
+ * it (`order.Currency` on `Currency`), from the PSI. Nothing that would run code of the program (a name followed by `(`), no package
  * qualifiers the debugger cannot tell from variables anyway: delve answers those with an error and the hint stays empty.
  */
 object GoHoverExpression {
-    private class Token(val type: IElementType, val start: Int, val end: Int)
-
-    fun rangeAt(text: CharSequence, offset: Int): TextRange? {
-        val tokens = ArrayList<Token>()
-        val lexer = GoTextLexer()
-        lexer.start(text, 0, text.length, 0)
-        while (true) {
-            val type = lexer.tokenType ?: break
-            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS) tokens += Token(type, lexer.tokenStart, lexer.tokenEnd)
-            if (lexer.tokenStart > offset) break // one token past the pointer is enough to see a call
-            lexer.advance()
-        }
-        val index = tokens.indexOfFirst { offset >= it.start && offset < it.end }
-        if (index < 0 || tokens[index].type != GoTextTokens.IDENTIFIER) return null
-        if (tokens.getOrNull(index + 1)?.type == GoTextTokens.LPAREN) return null
-        var first = index
-        while (first >= 2 && tokens[first - 1].type == GoTextTokens.DOT && tokens[first - 2].type == GoTextTokens.IDENTIFIER) first -= 2
-        // `f().x`, `items[0].Name`: what is to the left is not a plain name, the chain would be evaluated out of its context
-        if (first >= 1 && tokens[first - 1].type == GoTextTokens.DOT) return null
-        return TextRange(tokens[first].start, tokens[index].end)
-    }
-
     /**
-     * The same from the PSI of go-psi: the smallest expression under [offset] that delve evaluates without running code - a name, a
+     * The smallest expression under [offset] that delve evaluates without running code - a name, a
      * selector chain with what is left of it (`a.b[i].c` on `c`), an index on its bracket (`a[i]`), a dereference on its star (`*p`).
      * Not a name that is called, not a chain with a call in it, not a type or a function name; a declared variable is its own name.
      * Read action.
@@ -253,7 +196,7 @@ object GoEvaluate {
     private val CALL = Regex("""^([A-Za-z_][\w.]*)\s*\(.*\)$""", RegexOption.DOT_MATCHES_ALL)
 
     /** The builtins and conversions delve evaluates by itself; with `call` in front it would look for a function of that name. */
-    private val OWN = setOf("len", "cap", "complex", "imag", "real", "min", "max") + io.github.golangsupport.lang.GoTextTokens.BUILTIN_TYPES
+    private val OWN = setOf("len", "cap", "complex", "imag", "real", "min", "max") + io.github.golangsupport.lang.GoNames.BUILTIN_TYPES
 
     fun expression(text: String): String {
         val trimmed = text.trim()
@@ -285,38 +228,33 @@ object GoDebugCompletion {
     /** [qualifier] is the expression before the dot, null at a name that stands alone; [prefix] is what is typed of the name so far. */
     class Context(val qualifier: String?, val prefix: String)
 
-    private class Token(val type: IElementType, val start: Int, val end: Int)
-
     /**
      * Null where names are not completed: in strings, comments and numbers, and after a dot whose left side is not a plain chain of
      * names (`Make().`, `items[0].`): finding the fields would mean evaluating it, i.e. running code of the program while typing.
      */
     fun contextAt(text: CharSequence, offset: Int): Context? {
-        val tokens = ArrayList<Token>()
-        val lexer = GoTextLexer()
-        lexer.start(text, 0, text.length, 0)
-        while (true) {
-            val type = lexer.tokenType ?: break
-            if (lexer.tokenStart >= offset) break
+        val tokens = ArrayList<GoTokens.Token>()
+        for (token in GoTokens.all(text)) {
+            if (token.start >= offset) break
             // the caret inside or at the end of a literal or a comment
-            if ((type in GoTextTokens.COMMENTS || type in GoTextTokens.STRINGS) && offset <= lexer.tokenEnd) return null
-            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS) tokens += Token(type, lexer.tokenStart, lexer.tokenEnd)
-            lexer.advance()
+            if ((token.type in GoTokenSets.COMMENTS || token.type in GoTokenSets.STRING_LITERALS || token.type == GoTypes.CHAR) && offset <= token.end) return null
+            if (GoTokens.isCode(token.type) && token.type != GoTypes.SEMICOLON_SYNTHETIC) tokens += token
         }
         val last = tokens.lastOrNull() ?: return Context(null, "")
-        if (last.type == GoTextTokens.NUMBER && last.end >= offset) return null
+        if (last.type in GoTokenSets.NUMBERS && last.end >= offset) return null
 
-        val typing = last.end >= offset && (last.type == GoTextTokens.IDENTIFIER || last.type == GoTextTokens.KEYWORD)
+        val typing = last.end >= offset && (last.type == GoTypes.IDENTIFIER || last.type in GoTokenSets.KEYWORDS)
         val prefix = if (typing) text.subSequence(last.start, offset).toString() else ""
         val before = if (typing) tokens.size - 2 else tokens.size - 1
-        if (before < 0 || tokens[before].type != GoTextTokens.DOT) return Context(null, prefix)
+        if (before < 0 || tokens[before].type != GoTypes.PERIOD) return Context(null, prefix)
 
-        // `name.`: the chain that ends with that name, found the way a hover finds it
+        // `name.`: the chain of names that ends with that name; `f().x`, `items[0].x` would be evaluated out of their context
         val name = before - 1
-        if (name < 0) return null
-        val range = GoHoverExpression.rangeAt(text.subSequence(0, tokens[name].end), tokens[name].start) ?: return null
-        if (range.endOffset != tokens[name].end) return null
-        return Context(text.subSequence(range.startOffset, range.endOffset).toString(), prefix)
+        if (name < 0 || tokens[name].type != GoTypes.IDENTIFIER) return null
+        var first = name
+        while (first >= 2 && tokens[first - 1].type == GoTypes.PERIOD && tokens[first - 2].type == GoTypes.IDENTIFIER) first -= 2
+        if (first >= 1 && tokens[first - 1].type == GoTypes.PERIOD) return null
+        return Context(text.subSequence(tokens[first].start, tokens[name].end).toString(), prefix)
     }
 
     /** Delve lists more than fields under a value: `[0]`, `[key]`. Only what can be typed is offered. */
@@ -325,44 +263,9 @@ object GoDebugCompletion {
 
 /**
  * Where the value of a variable is shown in the editor while the program stands at a line, as in GoLand: on the lines of the current
- * function, up to the line of execution, that mention the variable. By tokens: there is no parser to tell a declaration from a use,
- * and both are worth the value.
+ * function, up to the line of execution, that mention the variable, by resolve: a declaration and a use are both worth the value.
  */
 object GoInlineValues {
-    /**
-     * Zero-based lines that mention [name] as a name of its own (`total`, not `order.total` and not `"total"`), inside the function that
-     * contains [currentLine] and not below that line: what is below has not happened yet, the value there would be a guess.
-     */
-    fun lines(text: CharSequence, name: String, currentLine: Int): List<Int> {
-        if (name.isEmpty()) return emptyList()
-        val lineStarts = ArrayList<Int>().apply { add(0); text.forEachIndexed { index, c -> if (c == '\n') add(index + 1) } }
-        if (currentLine !in lineStarts.indices) return emptyList()
-        val lineEnd = if (currentLine + 1 < lineStarts.size) lineStarts[currentLine + 1] else text.length
-
-        // the function around the line: a method, a function, or the variable whose initializer is a function literal
-        val offset = lineStarts[currentLine]
-        val from = GoDeclarations.scan(text).declarations.filter { it.body != null || it.kind == GoDeclarationKind.VAR }
-            .filter { offset >= it.range.startOffset && offset < it.range.endOffset }.maxByOrNull { it.range.startOffset }?.range?.startOffset ?: 0
-
-        val result = LinkedHashSet<Int>()
-        val lexer = GoTextLexer()
-        lexer.start(text, 0, text.length, 0)
-        var previousCode: String? = null
-        var line = 0
-        var position = 0
-        while (true) {
-            val type = lexer.tokenType ?: break
-            val start = lexer.tokenStart
-            if (start >= lineEnd) break
-            while (position < start) if (text[position++] == '\n') line++
-            val token = text.subSequence(start, lexer.tokenEnd).toString()
-            if (start >= from && type == GoTextTokens.IDENTIFIER && token == name && previousCode != ".") result += line
-            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS) previousCode = token
-            lexer.advance()
-        }
-        return result.toList()
-    }
-
     /** A variable mentioned in code: [expression] is what delve is asked (`b.c` for a field of `b`), [name] the variable it starts with. */
     class Mention(val name: String, val expression: String, val offset: Int)
 
@@ -377,7 +280,11 @@ object GoInlineValues {
         return mentions(file, lines.startOf(line), end).map { it.expression }.distinct().toList()
     }
 
-    /** [lines] on the PSI: the lines of the function around [currentLine], up to it, that mention the variable [name]. Read action, smart mode. */
+    /**
+     * Zero-based lines that mention the variable [name] (`total`, not `order.total` and not `"total"`), inside the top-level declaration
+     * that contains [currentLine] and not below that line: what is below has not happened yet, the value there would be a guess. Read
+     * action, smart mode.
+     */
     fun lines(file: GoFile, name: String, currentLine: Int): List<Int> {
         if (name.isEmpty()) return emptyList()
         val lines = GoDebugPsi.Lines(file.viewProvider.contents)

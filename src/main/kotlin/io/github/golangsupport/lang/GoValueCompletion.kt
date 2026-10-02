@@ -121,7 +121,7 @@ class GoValueCompletionContributor : CompletionContributor() {
         while (lineEnd < text.length && text[lineEnd] != '\n') lineEnd++
         val codes = GoHttpStatuses.matching(text.subSequence(lineStart, lineEnd).toString(), typed)
         if (codes.isEmpty()) return
-        val imports = GoStructure.of(file).imports
+        val imports = GoImports.importsOf(text)
         val http = imports.firstOrNull { it.path == "net/http" }
         val qualifier = http?.let(GoImports::nameOf) ?: "http"
         val items = result.withPrefixMatcher(typed)

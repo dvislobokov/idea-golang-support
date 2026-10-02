@@ -13,7 +13,7 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.newvfs.RefreshQueue
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileVisitor
-import io.github.golangsupport.lang.GoDeclarations
+import com.intellij.psi.PsiManager
 import io.github.golangsupport.lang.GoTestNames
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.mod.GoModulesService
@@ -55,8 +55,8 @@ class GoRunConfigurationGenerator(private val project: Project) {
                     if (file.isDirectory) return file.name !in SKIPPED_DIRECTORIES && !file.name.startsWith(".") && !file.name.startsWith("_")
                     val directory = file.parent ?: return true
                     if (file.extension != "go" || file.name.endsWith(GoTestNames.TEST_SUFFIX) || directory in programs || programs.size >= MAX_TARGETS) return true
-                    val text = runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: return true
-                    if (isProgram(text)) programs += directory
+                    val psi = PsiManager.getInstance(project).findFile(file) as? GoFile ?: return true
+                    if (isProgram(psi)) programs += directory
                     return true
                 }
             })
@@ -97,8 +97,8 @@ class GoRunConfigurationGenerator(private val project: Project) {
         private const val MAX_TARGETS = 30
         private val SKIPPED_DIRECTORIES = setOf("vendor", "testdata", "node_modules", "examples", "third_party")
 
-        /** A file of a program: `package main` with a `func main`. */
-        fun isProgram(text: CharSequence): Boolean = GoDeclarations.scan(text).mainFunction != null
+        /** A file of a program: `package main` with a `func main`, from its stubs. Read action. */
+        fun isProgram(file: GoFile): Boolean = file.packageName == "main" && file.functions.any { it.name == "main" }
 
         fun getInstance(project: Project): GoRunConfigurationGenerator = project.service()
     }

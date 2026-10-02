@@ -32,7 +32,7 @@ import io.github.golangsupport.semantic.types.GoNamedType
 import io.github.golangsupport.semantic.types.GoPointerType
 
 /**
- * An interface to implement: of the project, with what is known of it from the scanner, or of the catalogue (the standard library and
+ * An interface to implement: of the project, with what is known of it from the PSI, or of the catalogue (the standard library and
  * the modules go.mod requires), of which the name and the package are known until it is chosen and read.
  */
 class GoInterfaceCandidate(

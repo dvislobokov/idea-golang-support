@@ -1,16 +1,14 @@
 package io.github.golangsupport
 
+import io.github.golangsupport.catalogue.GoSourceScanner
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoTypeNameMacro
-import io.github.golangsupport.run.GoBreakpointLines
-import io.github.golangsupport.run.GoHoverExpression
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class GoDeclarationsTest {
+/** The scanner of the catalogue: the package-level declarations of files outside the indices, by the tokens of the lexer of go-psi. */
+class GoSourceScannerTest {
     private val source = """
         // Package store keeps orders.
         package store
@@ -68,9 +66,9 @@ class GoDeclarationsTest {
         }
     """.trimIndent()
 
-    private val structure = GoDeclarations.scan(source)
+    private val structure = GoSourceScanner.scan(source)
 
-    private fun names(kind: GoDeclarationKind) = structure.all().filter { it.kind == kind }.map { it.name }
+    private fun names(kind: GoDeclarationKind) = structure.declarations.flatMap { listOf(it) + it.children }.filter { it.kind == kind }.map { it.name }
 
     @Test fun packageAndImports() {
         assertEquals("store", structure.packageName)
@@ -104,40 +102,19 @@ class GoDeclarationsTest {
         assertTrue(source.substring(structure.declarations.first { it.name == "returnsLiteral" }.body!!.startOffset).startsWith("{\n    return nil"))
     }
 
-    @Test fun groupsFold() = assertEquals(3, structure.groups.size)
-
     @Test fun brokenCodeDoesNotThrow() {
-        for (end in source.indices step 7) GoDeclarations.scan(source.substring(0, end))
-        GoDeclarations.scan("func (")
-        GoDeclarations.scan("type ( A struct {")
+        for (end in source.indices step 7) GoSourceScanner.scan(source.substring(0, end))
+        GoSourceScanner.scan("func (")
+        GoSourceScanner.scan("type ( A struct {")
     }
 
-    @Test fun receiverOfTheMethodTemplate() = assertEquals("*Order", GoTypeNameMacro.receiverFor(structure, source.length))
-
-    @Test fun breakpointLines() {
-        val lines = GoBreakpointLines.find(source).map { source.lines()[it].trim() }
-        assertTrue("total++" in lines)
-        assertTrue("return nil" in lines)
-        assertTrue(lines.none { it.startsWith("Name ") || it.startsWith("import") || it == "B" })
-    }
-
-    @Test fun hoverExpression() {
-        val text = "x := order.Currency + f(a).b + g()"
-        fun at(marker: String, shift: Int = 0) = GoHoverExpression.rangeAt(text, text.indexOf(marker) + shift)?.substring(text)
-        assertEquals("order.Currency", at("Currency"))
-        assertEquals("order", at("order"))
-        assertNull(at("f("))
-        assertNull(at(".b", 1))
-        assertNull(at("g("))
-    }
-
-    /** The indexer runs the scanner on every file of the project: it must finish on anything, a file cut anywhere or not Go at all. */
+    /** The catalogue runs the scanner on every file of GOROOT and the module cache: it must finish on anything, a file cut anywhere or not Go at all. */
     @Test(timeout = 10_000) fun scannerTerminatesOnBrokenInput() {
-        for (end in source.indices) GoDeclarations.scan(source.substring(0, end))
-        for (start in source.indices) GoDeclarations.scan(source.substring(start))
+        for (end in source.indices) GoSourceScanner.scan(source.substring(0, end))
+        for (start in source.indices) GoSourceScanner.scan(source.substring(start))
         val random = java.util.Random(7)
         val pieces = listOf("package", "import", "func", "type", "struct", "interface", "var", "const", "map", "chan", "(", ")", "[", "]", "{", "}",
             ".", ",", ";", "=", "\n", "\t", " ", "\"", "'", "`", "/", "*", "a1", "x", "_")
-        repeat(200) { GoDeclarations.scan((0 until 200).joinToString("") { pieces[random.nextInt(pieces.size)] }) }
+        repeat(200) { GoSourceScanner.scan((0 until 200).joinToString("") { pieces[random.nextInt(pieces.size)] }) }
     }
 }

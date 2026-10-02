@@ -23,7 +23,6 @@ import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.psi.GoFile
-import io.github.golangsupport.lang.GoStructure
 import io.github.golangsupport.testing.GoTests
 import java.util.concurrent.ConcurrentHashMap
 
@@ -59,7 +58,7 @@ class GoplsCountsService(private val project: Project) {
                 val document = FileDocumentManager.getInstance().getDocument(file)
                 val psi = if (project.isDisposed || !file.isValid) null else PsiManager.getInstance(project).findFile(file) as? GoFile
                 if (document == null || psi == null || document.modificationStamp != stamp) emptyList()
-                else GoStructure.of(psi).all().filter { isCounted(it, file.name) }.take(MAX_DECLARATIONS).map { it to Gopls.position(document, it.nameRange.startOffset) }
+                else GoDeclarationInfo.all(psi).filter { isCounted(it, file.name) }.take(MAX_DECLARATIONS).map { it to Gopls.position(document, it.nameRange.startOffset) }
             }
             if (declarations.isEmpty()) return
             val counts = HashMap<String, GoplsCounts>()
@@ -117,7 +116,7 @@ abstract class GoplsCodeVisionProvider(private val actionId: String) : DaemonBou
         val virtualFile = (file as? GoFile)?.virtualFile ?: return emptyList()
         if (Gopls.client(file.project) == null) return emptyList()
         val counts = file.project.service<GoplsCountsService>().counts(virtualFile, editor.document.modificationStamp)
-        return GoStructure.of(file).all().mapNotNull { declaration ->
+        return GoDeclarationInfo.all(file as GoFile).mapNotNull { declaration ->
             val text = counts[GoplsCountsService.key(declaration)]?.let { text(declaration, it) } ?: return@mapNotNull null
             val offset = declaration.nameRange.startOffset
             declaration.range to ClickableTextCodeVisionEntry(text, id, { _, clickedEditor -> invoke(clickedEditor, offset) }, null, text, "", emptyList())

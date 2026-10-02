@@ -1,7 +1,6 @@
 package io.github.golangsupport.catalogue
 
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoTestNames
 import io.github.golangsupport.lang.psi.GoFile
 import java.io.DataInputStream
@@ -25,7 +24,7 @@ class GoPackageSymbols(val importPath: String, val name: String, val symbols: Li
 class GoModuleSymbols(val key: String, val standard: Boolean, val packages: List<GoPackageSymbols>, val project: Boolean = false)
 
 /**
- * Reads the exported declarations of the packages under a directory, with the scanner of the plugin: no compiler, no `go list`.
+ * Reads the exported declarations of the packages under a directory, with [GoSourceScanner]: no compiler, no `go list`, no PSI.
  * Build constraints are not looked at: `file_windows.go` and `file_linux.go` declare the same names, one of each is kept.
  */
 object GoCatalogueScanner {
@@ -65,7 +64,7 @@ object GoCatalogueScanner {
 
     /** What one file exports; null for a text without a package clause. A file that exports nothing still tells the name of its package. */
     fun exportsOf(text: CharSequence): GoFileExports? {
-        val file = GoDeclarations.scan(text)
+        val file = GoSourceScanner.scan(text)
         val symbols = file.declarations.filter { it.isExported && it.kind != GoDeclarationKind.METHOD }
             .map { GoSymbol(it.name, it.kind, it.signature?.take(MAX_SIGNATURE)) }
         return GoFileExports(file.packageName ?: return null, symbols)
@@ -99,7 +98,7 @@ object GoCatalogueFiles {
     private const val MAGIC = 0x476F4361 // "GoCa"
 
     // bump when the scanner starts to see declarations differently, or the format changes
-    const val VERSION = 1
+    const val VERSION = 2
 
     fun write(file: File, module: GoModuleSymbols) {
         file.parentFile?.mkdirs()

@@ -23,7 +23,7 @@
    затронутого слоя (`:go-psi-core:corpusTest`, `:go-psi-semantic:corpusTest`, `--no-configuration-cache`);
    `checkKotlinAbi`; робот (`tools/ui-robot`, сценарии в `playground/`), 0 «Plugin to blame: Go» в `idea.log`.
    Регрессии производительности ловят `./gradlew.bat benchmark` (пороги `testData/benchmark/thresholds.json`) и
-   `tools/psi-ui-robot/autotest.py --perf` (P1–P9, цифры в `docs/psi/CHANGELOG.md`, запись «Performance wave»).
+   `tools/ui-robot/autotest.py --perf` (P1–P9, цифры в `docs/psi/CHANGELOG.md`, запись «Performance wave»).
 5. **Иконки, цвета, настройки, тексты — из IGS.** `GoIcons`, `colorSchemes/GoDefault.xml`/`GoDarcula.xml` с ключами
    `GO_*`, `GoSettings` и страницы Settings | Tools | Go, `GoBundle` (en/ru). PSI-модули своих не заводят; что есть в
    `go-psi-core/src/main/resources/icons` и в `ide.highlighting.GoColorSettingsPage` — удаляется на шаге 2.
@@ -189,7 +189,7 @@ PSI и типы. Шаг 12 — две вехи, которые закрываю�
 
 `test buildPlugin --offline`; `:go-psi-core:corpusTest --no-configuration-cache` (лексер/AST diff/fuzz/стабы — 0
 расхождений); `benchmark` (пороги не хуже); `runIdeForUiTests` на копии `playground` — весь список `playground/README.md`;
-`tools/psi-ui-robot/autotest.py --perf` — P1/P6/P7 не хуже цифр в `docs/psi/CHANGELOG.md`; живая проверка пользователем:
+`tools/ui-robot/autotest.py --perf` — P1/P6/P7 не хуже цифр в `docs/psi/CHANGELOG.md`; живая проверка пользователем:
 печать в `net/http/server.go`, Structure, folding, Go to Symbol, run-иконки, gopls-навигация.
 
 ## Шаг 6. Stub-индексы вместо файловых
@@ -332,7 +332,7 @@ IGS; робот: открыть `playground` с зависимостью, Go to 
   потребителей (indent и typed handlers могут остаться на текстовом лексере — решить по факту), gopls-дубли фич,
   переведённых на `NATIVE` релиз назад; флаги этих фич убрать из настроек.
 - `docs/psi/*` → `docs/` (один комплект документации), `docs/psi/CHANGELOG.md` → раздел в `CHANGELOG.md`;
-  `tools/psi-ui-robot` слить с `tools/ui-robot` (сценарии P1–P9 и 16 шагов go-psi добавить к сценариям IGS).
+  `tools/psi-ui-robot` слить с `tools/ui-robot` (сценарии P1–P9 и 16 шагов go-psi добавить к сценариям IGS) — **сделано 2026-10-02 (10-B)**: один робот, порт 8083, `autotest.py`/`perf.py` в `tools/ui-robot`, проект сценариев `tools/ui-robot/project-psi`; сценарий ещё ждёт переписывания под один переключатель (шаги 6, 12, 13, P2–P5 рассчитаны на go-psi completion/документацию/форматтер).
 - `ROADMAP.md`/`PLAN.md`: пункт «свой парсер» уровня 4 закрыт; `COMPARE.md` — колонка «без gopls».
 - Лицензии: `LICENSE` для IGS и `NOTICE.md` (go/parser, `internal/types/testdata` — BSD-3 Go authors;
   фрагменты go-lang-idea-plugin — Apache-2.0) — до первого релиза с PSI.

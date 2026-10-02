@@ -123,7 +123,7 @@ private class ScopeGroup(private val process: GoDebugProcess, private val scope:
 
 /**
  * Evaluate, watches, the hover in the editor, conditions of the platform's own: `evaluate` in the frame. The expression under the mouse
- * is found by [GoHoverExpression] (the PSI when the document is committed, tokens otherwise): the evaluator must say what to evaluate there.
+ * is found by [GoHoverExpression] on the PSI (nothing while the document is not committed): the evaluator must say what to evaluate there.
  */
 class GoEvaluator(private val process: GoDebugProcess, private val frameId: Int) : XDebuggerEvaluator() {
     override fun evaluate(expression: String, callback: XEvaluationCallback, expressionPosition: XSourcePosition?) {
@@ -135,5 +135,5 @@ class GoEvaluator(private val process: GoDebugProcess, private val frameId: Int)
     }
 
     override fun getExpressionRangeAtOffset(project: Project, document: Document, offset: Int, sideEffectsAllowed: Boolean): TextRange? =
-        GoDebugPsi.compute(project, document, { GoHoverExpression.rangeAt(it, offset) }, { GoHoverExpression.rangeAt(it, offset) })
+        GoDebugPsi.compute(project, document) { GoHoverExpression.rangeAt(it, offset) }
 }

@@ -26,6 +26,8 @@ import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider
 import com.intellij.psi.codeStyle.lineIndent.LineIndentProvider
 import com.intellij.psi.tree.IElementType
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoTokenSets
+import io.github.golangsupport.lang.psi.GoTypes
 
 /**
  * The indent of a line while typing, the way gofmt would have it: gofmt is the only style there is, so unlike the C# sibling of this
@@ -34,51 +36,45 @@ import io.github.golangsupport.lang.psi.GoFile
  * more for a line that continues an expression. Whole files are formatted by gofmt itself.
  */
 object GoIndentEngine {
-    private class Token(val type: IElementType, val start: Int, val text: CharSequence)
     private class Open(val line: Int, val isSwitchBrace: Boolean)
 
-    /** The number of indent levels of the line that starts at [lineStart]; null inside a raw string or a block comment, which are as they are. */
+    /**
+     * The number of indent levels of the line that starts at [lineStart]; null inside a raw string or a block comment, which are as they
+     * are. By the tokens of the lexer of go-psi over the text: the line is being typed, the PSI has not seen it.
+     */
     fun levelOf(text: CharSequence, lineStart: Int): Int? {
         val stack = ArrayList<Open>()
         var line = 0
         var lineHasSwitch = false
-        var lastCode: Token? = null
-        var beforeLast: Token? = null
-        val lexer = GoTextLexer()
-        lexer.start(text, 0, text.length, 0)
-        while (true) {
-            val type = lexer.tokenType ?: break
-            val start = lexer.tokenStart
-            if (start >= lineStart) break
+        var lastCode: IElementType? = null
+        for (token in GoTokens.all(text)) {
+            val type = token.type
+            if (token.start >= lineStart) break
             // a token that spans the line start: the line is a part of it
-            if (lexer.tokenEnd > lineStart && (type == GoTextTokens.RAW_STRING || type == GoTextTokens.BLOCK_COMMENT)) return null
-            val tokenText = text.subSequence(start, lexer.tokenEnd)
+            if (token.end > lineStart && (type == GoTypes.RAW_STRING || type == GoTypes.BLOCK_COMMENT)) return null
             when {
-                type == TokenType.WHITE_SPACE || type == GoTextTokens.RAW_STRING || type == GoTextTokens.BLOCK_COMMENT -> {
-                    val breaks = tokenText.count { it == '\n' }
+                // the semicolon the lexer inserts at a line end is that line break
+                type == TokenType.WHITE_SPACE || type == GoTypes.SEMICOLON_SYNTHETIC || type == GoTypes.RAW_STRING || type == GoTypes.BLOCK_COMMENT -> {
+                    var breaks = 0
+                    for (k in token.start until token.end) if (text[k] == '\n') breaks++
                     if (breaks > 0) {
                         line += breaks
                         lineHasSwitch = false
                     }
                     // a raw string is a value: the statement it ends is over, however many lines it took
-                    if (type == GoTextTokens.RAW_STRING) {
-                        beforeLast = lastCode
-                        lastCode = Token(type, start, tokenText)
-                    }
+                    if (type == GoTypes.RAW_STRING) lastCode = type
                 }
-                type in GoTextTokens.COMMENTS -> {}
+                type in GoTokenSets.COMMENTS -> {}
                 else -> {
                     when (type) {
-                        GoTextTokens.KEYWORD -> if (tokenText.toString() == "switch" || tokenText.toString() == "select") lineHasSwitch = true
-                        GoTextTokens.LBRACE -> stack += Open(line, lineHasSwitch)
-                        GoTextTokens.LPAREN, GoTextTokens.LBRACKET -> stack += Open(line, false)
-                        GoTextTokens.RBRACE, GoTextTokens.RPAREN, GoTextTokens.RBRACKET -> if (stack.isNotEmpty()) stack.removeAt(stack.lastIndex)
+                        GoTypes.SWITCH, GoTypes.SELECT -> lineHasSwitch = true
+                        GoTypes.LBRACE -> stack += Open(line, lineHasSwitch)
+                        GoTypes.LPAREN, GoTypes.LBRACK -> stack += Open(line, false)
+                        GoTypes.RBRACE, GoTypes.RPAREN, GoTypes.RBRACK -> if (stack.isNotEmpty()) stack.removeAt(stack.lastIndex)
                     }
-                    beforeLast = lastCode
-                    lastCode = Token(type, start, tokenText)
+                    lastCode = type
                 }
             }
-            lexer.advance()
         }
 
         // what the line itself starts with
@@ -97,20 +93,19 @@ object GoIndentEngine {
         // the brackets a closer closes and the ones that stay may share a line: `})` of `foo(func() {` closes that line as a whole
         if (closers > 0 && remaining.isNotEmpty() && stack.size > remaining.size && stack[remaining.size].line == remaining.last().line) level--
         if ((word == "case" || word == "default") && stack.lastOrNull()?.isSwitchBrace == true) level--
-        if (closers == 0 && continues(lastCode, beforeLast)) level++
+        if (closers == 0 && continues(lastCode)) level++
         return level.coerceAtLeast(0)
     }
 
     /** A line whose last token cannot end a statement is continued by the next one: `total :=`, `a +`, `x.` - and not `i++`, not a label's or a case's `:`. */
-    private fun continues(last: Token?, beforeLast: Token?): Boolean {
-        if (last == null) return false
-        if (last.type == GoTextTokens.DOT) return true
-        if (last.type != GoTextTokens.OPERATOR) return false
-        val c = last.text[0]
-        if (c == ':') return false
-        val doubled = beforeLast != null && beforeLast.type == GoTextTokens.OPERATOR && beforeLast.text[0] == c && beforeLast.start + 1 == last.start
-        return !(doubled && (c == '+' || c == '-'))
+    private fun continues(last: IElementType?): Boolean = when (last) {
+        null, GoTypes.COLON, GoTypes.INC, GoTypes.DEC -> false
+        GoTypes.PERIOD -> true
+        in PUNCTUATION -> false
+        else -> last in GoTokenSets.OPERATORS
     }
+
+    private val PUNCTUATION = setOf(GoTypes.LPAREN, GoTypes.LBRACK, GoTypes.LBRACE, GoTypes.COMMA, GoTypes.RPAREN, GoTypes.RBRACK, GoTypes.RBRACE, GoTypes.SEMICOLON)
 
     fun indentText(level: Int, options: CommonCodeStyleSettings.IndentOptions): String =
         if (options.USE_TAB_CHARACTER) "\t".repeat(level) else " ".repeat(level * options.INDENT_SIZE)

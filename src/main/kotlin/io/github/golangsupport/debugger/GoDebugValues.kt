@@ -75,10 +75,10 @@ class GoValue(
         val position = process.session.currentPosition ?: return ThreeState.NO
         val document = ReadAction.compute<com.intellij.openapi.editor.Document?, RuntimeException> { FileDocumentManager.getInstance().getDocument(position.file) }
             ?: return ThreeState.NO
-        // resolve needs indices: in dumb mode the tokens decide
+        // resolve needs indices: in dumb mode, and while the document is not committed, there are no values in the editor
         val project = process.session.project
-        val lines = GoDebugPsi.compute(project, document, { file -> if (DumbService.isDumb(project)) GoInlineValues.lines(document.immutableCharSequence, name, position.line) else GoInlineValues.lines(file, name, position.line) },
-            { GoInlineValues.lines(it, name, position.line) })
+        if (DumbService.isDumb(project)) return ThreeState.NO
+        val lines = GoDebugPsi.compute(project, document) { file -> GoInlineValues.lines(file, name, position.line) }.orEmpty()
         for (line in lines) XDebuggerUtil.getInstance().createPosition(position.file, line)?.let(callback::computed)
         return if (lines.isEmpty()) ThreeState.NO else ThreeState.YES
     }

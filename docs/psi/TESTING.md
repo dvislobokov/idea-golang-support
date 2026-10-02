@@ -148,25 +148,34 @@ tests compare:
 ## UI robot
 
 An end-to-end check of the IDE features in a real sandbox IDE, driven through the
-[Remote Robot](https://github.com/JetBrains/intellij-ui-test-robot) server. The harness was
-adapted from the user's plugin idea-golang-support (`runIdeForUiTests`, `tools/ui-robot/robot.py`
-and the `scripts/*.js` helpers); it is a developer tool, not part of `build` or CI.
+[Remote Robot](https://github.com/JetBrains/intellij-ui-test-robot) server. One robot serves the
+whole plugin: `tools/ui-robot/robot.py`, the `scripts/*.js` helpers with `prelude.js` and
+`scripts/session.sh` (the plugin's own checks: markers, structure, targets, debugger, ...) and
+`tools/ui-robot/autotest.py` (this scenario, steps 1-16, and the performance mode P1-P9). It is a
+developer tool, not part of `build` or CI. Since step 10 of the migration the former
+`tools/psi-ui-robot` (port 8084) is merged into it: one sandbox, one port.
 
 ```
-python tools/ui-robot/autotest.py                # starts :plugin:runIdeForUiTests, runs all steps, exits the IDE
-python tools/ui-robot/autotest.py --attach       # uses a sandbox already running on port 8084 and keeps it
+python tools/ui-robot/autotest.py                # starts runIdeForUiTests, runs all steps, exits the IDE
+python tools/ui-robot/autotest.py --attach       # uses a sandbox already running on port 8083 and keeps it
 python tools/ui-robot/autotest.py --attach --steps 6,9
-./gradlew :plugin:runIdeForUiTests [-ProbotPort=8090]   # the sandbox alone (ROBOT_PORT=8090 for robot.py)
-python tools/ui-robot/robot.py wait|windows|shot|find|js|script ...   # manual driving
+python tools/ui-robot/autotest.py --help         # the options
+./gradlew.bat runIdeForUiTests --no-configuration-cache [-ProbotPort=8090]   # the sandbox alone (ROBOT_PORT=8090 for robot.py)
+python tools/ui-robot/robot.py wait|windows|shot|find|js|script|openfile|breakpoint|run ...   # manual driving
+. tools/ui-robot/scripts/session.sh              # Git Bash helpers: robot_js, invoke, setting, openfile, state, ...
 ```
 
-- Port 8084 by default. 8082 and 8083 belong to other sandboxes on this machine; `robot.py`
-  refuses them and refuses an IDE whose config path is not this repository's
-  `.intellijPlatform/sandbox/.../config_runIdeForUiTests`.
-- The scenario project `tools/ui-robot/project` (its own `go.mod`, `main.go`, `util/util.go`,
-  `broken.go` with deliberate problems, `fmtcheck/misformatted.go.txt`) is copied to
-  `%TEMP%/gopsi-ui-project` and opened from there. Steps restore file texts through the editor,
-  so `--attach` runs can be repeated.
+- Port 8083 by default (`ROBOT_PORT` and `-ProbotPort=` override it). 8082 belongs to the
+  sandbox of idea-dotnet-support; `robot.py` refuses it and refuses an IDE whose config path is
+  not a sandbox of this repository (`.intellijPlatform/sandbox/idea-golang-support/...`).
+  `--attach` with nothing listening on the port fails at once.
+- The log checks read `.intellijPlatform/sandbox/idea-golang-support/IU-*/log_runIdeForUiTests/idea.log`
+  of the checkout the script lives in (`SANDBOX_LOG` overrides the path); `--cold` deletes
+  `index` and `caches` of the `system_runIdeForUiTests` next to it.
+- The scenario project `tools/ui-robot/project-psi` (its own `go.mod`, `main.go`, `util/util.go`,
+  `broken.go` with deliberate problems, `fmtcheck/misformatted.go.txt`; not the playground: the
+  steps check these exact files) is copied to `%TEMP%/gopsi-ui-project` and opened from there.
+  Steps restore file texts through the editor, so `--attach` runs can be repeated.
 - Output: `build/ui-robot/report.md` (a PASS/FAIL table and the text read from the IDE as
   evidence) and `build/ui-robot/NN-step.png`, painted by an IDE component (never a desktop
   screenshot). Steps: open the project and smart mode; plugin line and no go-psi exceptions in

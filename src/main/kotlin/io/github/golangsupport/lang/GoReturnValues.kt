@@ -48,8 +48,7 @@ import io.github.golangsupport.semantic.types.GoTypeRenderer
 import io.github.golangsupport.semantic.types.GoUnknownType
 
 /**
- * The values of a `return` from the PSI (the text version is [GoIdioms.returnValues], left for code without PSI and removed at step 10
- * of the migration): the result types of the function around come from `GoSemanticService.enclosingResultTypes`, each value is a
+ * The values of a `return` from the PSI: the result types of the function around come from `GoSemanticService.enclosingResultTypes`, each value is a
  * variable in scope of exactly that type (the nearest; `err` first for `error`) or the zero value of the type. Inside
  * `if err != nil {` the values are the zero values and the checked error: what is returned there is the failure, not what was computed.
  */
@@ -60,7 +59,7 @@ object GoReturnValues {
 
     /**
      * The values for the `return` being typed at [position] (a leaf of the completion copy is fine): null when the PSI cannot tell (no
-     * go-psi file, no function around) and the text version is to be asked; [NONE] when the function returns less than two values.
+     * go-psi file, no function around, dumb mode); [NONE] when the function returns less than two values.
      */
     fun forReturn(position: PsiElement): Values? {
         val file = position.containingFile as? GoFile ?: return null

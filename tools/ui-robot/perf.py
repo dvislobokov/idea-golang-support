@@ -73,7 +73,7 @@ var LISTEN = Disposer.newDisposable("robot-perf")
             var it = args[1].iterator()
             while (it.hasNext()) {
                 var st = it.next()
-                if (String(st.annotator.getClass().getName()).indexOf("gopsi") >= 0)
+                if (String(st.annotator.getClass().getName()).indexOf("io.github.golangsupport.ide.") >= 0)
                     ANNOT.add(t + " " + ((st.annotatorFinishStamp - st.annotatorStartStamp) / 1000000) + "|" + args[2].getName() + "|")
             }
         }
@@ -267,8 +267,8 @@ def write_outputs():
             "checks": [{"step": s, "check": d, "ok": ok} for s, d, ok in CHECKS]}
     with open(os.path.join(AT.OUT, "perf.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(data, f, indent=1, sort_keys=False)
-    lines = ["# go-psi UI robot: editing performance", "",
-             "%s, IDE %s, go-psi %s, %s CPUs, -Xmx %s MB, autoreparse delay %s ms, %s." % (
+    lines = ["# UI robot: editing performance (PSI)", "",
+             "%s, IDE %s, plugin %s, %s CPUs, -Xmx %s MB, autoreparse delay %s ms, %s." % (
                  META.get("date"), META.get("ide"), META.get("plugin"), META.get("cpus"), META.get("xmxMb"),
                  META.get("autoReparseDelayMs"), META.get("flags")), "",
              "Times in ms measured inside the IDE (System.nanoTime), %d repetitions unless n says otherwise; "

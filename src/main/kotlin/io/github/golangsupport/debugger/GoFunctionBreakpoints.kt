@@ -21,9 +21,11 @@ import com.intellij.xdebugger.breakpoints.XBreakpointType
 import com.intellij.xdebugger.breakpoints.ui.XBreakpointCustomPropertiesPanel
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
-import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarations
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
+import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.run.HitCondition
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -155,15 +157,16 @@ class GoFunctionBreakpointHandler(private val process: GoDebugProcess) : XBreakp
 
 /** The name delve gives the function at a place of a file: `store.(*Order).Total`, `store.NewOrder`, `main.main`. */
 object GoFunctionNames {
-    fun at(text: CharSequence, offset: Int): String? {
-        val structure = GoDeclarations.scan(text)
-        val function = structure.declarations.filter { it.kind == GoDeclarationKind.FUNCTION || it.kind == GoDeclarationKind.METHOD }
-            .lastOrNull { offset >= it.range.startOffset && offset <= it.range.endOffset } ?: return null
-        val pkg = structure.packageName ?: return null
-        val receiver = function.receiver ?: return "$pkg.${function.name}"
-        // the pointer is in the text of the receiver, which the scanner reduces to the name of the type
-        val pointer = text.subSequence(function.range.startOffset, function.nameRange.startOffset).contains('*')
-        return "$pkg.${if (pointer) "(*$receiver)" else receiver}.${function.name}"
+    /** The top-level function or method of [file] around [offset], by its PSI; null outside them. Read action. */
+    fun at(file: GoFile, offset: Int): String? {
+        var element: PsiElement? = file.findElementAt(offset)
+        while (element != null && element.parent !is GoFile) element = element.parent
+        val function = element as? GoFunctionOrMethodDeclaration ?: return null
+        val name = function.name ?: return null
+        val pkg = file.packageName ?: return null
+        val method = function as? GoMethodDeclaration ?: return "$pkg.$name"
+        val receiver = method.receiverTypeName ?: return null
+        return "$pkg.${if (method.isPointerReceiver) "(*$receiver)" else receiver}.$name"
     }
 }
 
@@ -178,7 +181,11 @@ class GoAddFunctionBreakpointAction : AnAction(), DumbAware {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val editor = e.getData(CommonDataKeys.EDITOR)
-        val initial = if (editor != null && e.getData(CommonDataKeys.PSI_FILE) is GoFile) GoFunctionNames.at(editor.document.immutableCharSequence, editor.caretModel.offset) else null
+        val file = e.getData(CommonDataKeys.PSI_FILE) as? GoFile
+        val initial = if (editor != null && file != null) {
+            PsiDocumentManager.getInstance(project).commitDocument(editor.document)
+            GoFunctionNames.at(file, editor.caretModel.offset)
+        } else null
         val name = Messages.showInputDialog(project, "Function, as delve names it: main.main, store.(*Order).Total, net/http.(*Server).Serve", "Go Function Breakpoint", null, initial, null) ?: return
         GoFunctionBreakpointType.add(project, name)
     }

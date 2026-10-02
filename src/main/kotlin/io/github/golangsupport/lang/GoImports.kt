@@ -1,5 +1,9 @@
 package io.github.golangsupport.lang
 
+import com.intellij.openapi.util.TextRange
+import io.github.golangsupport.lang.psi.GoTokenSets
+import io.github.golangsupport.lang.psi.GoTypes
+
 /**
  * The import of a package, written by the plugin itself: a package chosen from the completion list is imported at once, in the same
  * edit, so that what is typed after its dot is known to the language server. Where the line goes is a matter of gofmt and goimports,
@@ -11,12 +15,48 @@ object GoImports {
     private val PACKAGE_CLAUSE = Regex("""^package[ \t]+\w+[^\n]*""", RegexOption.MULTILINE)
     private val DECLARING = setOf("package", "func", "type", "var", "const", "import", "goto", "break", "continue")
 
+    /**
+     * The imports of a text, by its tokens: the PSI may not have seen the text yet (an import is added in the edit of a completion item).
+     * Stops at the first declaration that is not an import, as the language does.
+     */
+    fun importsOf(text: CharSequence): List<GoImport> {
+        val tokens = GoTokens.code(text).iterator()
+        var token = if (tokens.hasNext()) tokens.next() else return emptyList()
+        fun advance(): Boolean = tokens.hasNext().also { if (it) token = tokens.next() }
+        fun skipSemicolons(): Boolean {
+            while (token.type in GoTokenSets.SEMICOLONS) if (!advance()) return false
+            return true
+        }
+        if (token.type != GoTypes.PACKAGE || !advance() || token.type != GoTypes.IDENTIFIER || !advance()) return emptyList()
+        val result = ArrayList<GoImport>()
+        /** `[alias | .] "path"`; false when the tokens end or are something else. */
+        fun spec(): Boolean {
+            val first = token
+            val alias = if (token.type == GoTypes.IDENTIFIER || token.type == GoTypes.PERIOD) text.subSequence(token.start, token.end).toString().also { if (!advance()) return false } else null
+            if (token.type != GoTypes.STRING && token.type != GoTypes.RAW_STRING) return false
+            result += GoImport(text.subSequence(token.start, token.end).toString().trim('"', '`'), alias, TextRange(first.start, token.end))
+            advance()
+            return true
+        }
+        while (skipSemicolons() && token.type == GoTypes.IMPORT) {
+            if (!advance()) break
+            if (token.type != GoTypes.LPAREN) {
+                if (!spec()) break
+                continue
+            }
+            if (!advance()) break
+            while (skipSemicolons() && token.type != GoTypes.RPAREN) if (!spec()) return result
+            if (token.type != GoTypes.RPAREN || !advance()) break
+        }
+        return result
+    }
+
     /** A path of the standard library has no domain in its first part. */
     fun isStandard(path: String): Boolean = '.' !in path.substringBefore('/')
 
     /** What to insert to import [path], null when it is imported already or the file has no package clause to put it after. */
     fun add(text: CharSequence, path: String): Insertion? {
-        val imports = GoDeclarations.scan(text).imports
+        val imports = importsOf(text)
         if (imports.any { it.path == path }) return null
         val quoted = "\"$path\""
         if (imports.isEmpty()) {
@@ -53,7 +93,7 @@ object GoImports {
      * the bracket that closes its block. Where Alt+Enter is pressed for the imports to be put in order.
      */
     fun isInImports(text: CharSequence, offset: Int): Boolean {
-        val imports = GoDeclarations.scan(text).imports
+        val imports = importsOf(text)
         if (imports.isEmpty()) return false
         val keyword = text.toString().lastIndexOf("import", imports.first().range.startOffset)
         val start = lineStart(text, if (keyword >= 0) keyword else imports.first().range.startOffset)
@@ -92,7 +132,7 @@ object GoImports {
      * and `Values`. What gopls writes into a struct it fills: `URL: &url.URL{}`, and no import (checked with its answer).
      */
     fun missing(text: CharSequence, range: IntRange): Map<String, Set<String>> {
-        val imported = GoDeclarations.scan(text).imports.mapNotNullTo(HashSet()) { nameOf(it) }
+        val imported = importsOf(text).mapNotNullTo(HashSet()) { nameOf(it) }
         val result = LinkedHashMap<String, MutableSet<String>>()
         val from = range.first.coerceIn(0, text.length)
         val part = text.subSequence(from, (range.last + 1).coerceIn(from, text.length))

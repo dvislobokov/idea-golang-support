@@ -1,7 +1,8 @@
 """Drives the sandbox IDE started with `./gradlew runIdeForUiTests` through the Remote Robot server (http://127.0.0.1:8083).
 
-The port is 8083 (ROBOT_PORT overrides it; start the IDE with the same `-ProbotPort=`): 8082 belongs to the sandbox of idea-dotnet-support,
-and a robot pointed at the IDE of another agent clicks, types and exits there.
+One robot for the plugin's own checks (scripts/*.js, `scripts/session.sh`) and for the scenario of the PSI features (`autotest.py`,
+`--perf` in `perf.py`): one sandbox, one port. The port is 8083 (ROBOT_PORT overrides it; start the IDE with the same `-ProbotPort=`):
+8082 belongs to the sandbox of idea-dotnet-support, and a robot pointed at the IDE of another agent clicks, types and exits there.
 
     python robot.py wait                         wait until the server answers
     python robot.py windows                      frames and dialogs of the IDE
@@ -10,42 +11,62 @@ and a robot pointed at the IDE of another agent clicks, types and exits there.
     python robot.py click XPATH                  click the centre of the first match
     python robot.py clicktext XPATH TEXT         click a text inside the first match (a row of a tree or a list, a tab); add `double` for a double click
     python robot.py open PROJECT_DIR             open a project in the sandbox
-    python robot.py action ACTION_ID             invoke an action of the IDE (StepOver, Resume, Stop, ...)
+    python robot.py action ACTION_ID             invoke an action of the IDE (StepOver, Resume, ReformatCode, Exit, ...)
     python robot.py openfile FILE [LINE]         open a file of the project in the editor, the caret on LINE (1-based)
     python robot.py breakpoint FILE LINE         toggle a line breakpoint (LINE is 1-based)
     python robot.py run CONFIGURATION [Debug]    start a run configuration by name, with the Run or the Debug executor
     python robot.py js FILE.js [--edt]           run JavaScript inside the IDE, print what it returns
+    python robot.py script NAME [KEY=VALUE ...]  run scripts/NAME.js with prelude.js first and each __KEY__ replaced by VALUE
     python robot.py tree OUT.html                the component tree with XPaths (what http://127.0.0.1:8083 shows)
+    python robot.py --help                       this text
 
 Pictures are always of a component of the IDE, painted by the component itself: the `/screenshot` of the server captures the
 whole desktop with whatever else is on it, and is deliberately not used.
+
+Pitfalls of Rhino (seen live): `const` inside a loop keeps its first value, use `var`; classes of the plugin live in its own class
+loader, so load them with `cls("io.github...")` / `kotlinObject(...)` from prelude.js.
 """
 import base64
-import os
 import json
+import os
+import struct
 import sys
 import time
 import urllib.error
 import urllib.request
 
-BASE = "http://127.0.0.1:" + os.environ.get("ROBOT_PORT", "8083")
+PORT = os.environ.get("ROBOT_PORT", "8083")
+if PORT == "8082":
+    raise SystemExit("robot: port 8082 belongs to the sandbox of idea-dotnet-support; use 8083 (the default) or another free port")
+BASE = "http://127.0.0.1:" + PORT
+HERE = os.path.dirname(os.path.abspath(__file__))
+SCRIPTS = os.path.join(HERE, "scripts")
 # HTTP_PROXY of the shell would route 127.0.0.1 through the proxy, which answers 403 (seen live): never a proxy for the robot
 urllib.request.install_opener(urllib.request.build_opener(urllib.request.ProxyHandler({})))
 MAIN_WINDOWS = ["//div[@class='IdeFrameImpl']", "//div[@class='FlatWelcomeFrame']"]
 DIALOGS = "//div[@class='MyDialog']"
 
 
+class RobotError(Exception):
+    pass
+
+
 def request(path, body=None, timeout=60):
     data = None if body is None else json.dumps(body).encode("utf-8")
     req = urllib.request.Request(BASE + path, data=data, headers={"Content-Type": "application/json"} if data else {})
-    with urllib.request.urlopen(req, timeout=timeout) as response:
-        return response.read()
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            return response.read()
+    except urllib.error.HTTPError as e:
+        # the server answers 500 with the JSON of the failure (a script error, a timeout): keep its message
+        body = e.read().decode("utf-8", errors="replace")
+        raise RobotError("robot: HTTP %d for %s: %s" % (e.code, path, body[:3000]))
 
 
 def call(path, body=None, timeout=60):
     result = json.loads(request(path, body, timeout))
     if result.get("status") != "SUCCESS":
-        raise SystemExit("robot: %s\n%s" % (result.get("message") or result.get("status"), result.get("log", "")))
+        raise RobotError("robot: %s\n%s" % (result.get("message") or result.get("status"), result.get("log", "")))
     return result
 
 
@@ -56,7 +77,7 @@ def components(xpath):
 def first(xpath):
     found = components(xpath)
     if not found:
-        raise SystemExit("robot: nothing matches %s" % xpath)
+        raise RobotError("robot: nothing matches %s" % xpath)
     return found[0]
 
 
@@ -65,7 +86,7 @@ def main_window():
         found = components(xpath)
         if found:
             return found[0]
-    raise SystemExit("robot: the IDE has no window yet")
+    raise RobotError("robot: the IDE has no window yet")
 
 
 def image_bytes(result):
@@ -77,30 +98,67 @@ def script_body(script, edt=False):
     return {"script": script, "runInEdt": edt}
 
 
-def js(script, edt=False, timeout=120):
-    result = call("/js/retrieveAny", script_body(script, edt), timeout)
-    raw = result.get("bytes")
-    if raw is None:
-        return None
-    # a Java-serialized object; strings and numbers are readable enough once the header is cut off
-    data = image_bytes(result)
+def decode_serialized(data):
+    """The value of /js/retrieveAny is a Java-serialized object: a String (TC_STRING / TC_LONGSTRING) is decoded exactly."""
+    if data[:4] == b"\xac\xed\x00\x05":
+        if data[4:5] == b"t":
+            length = struct.unpack(">H", data[5:7])[0]
+            return data[7:7 + length].decode("utf-8", errors="replace")
+        if data[4:5] == b"|":
+            length = struct.unpack(">Q", data[5:13])[0]
+            return data[13:13 + length].decode("utf-8", errors="replace")
     return data.decode("utf-8", errors="replace")
+
+
+def js(script, edt=False, timeout=180):
+    result = call("/js/retrieveAny", script_body(script, edt), timeout)
+    if result.get("bytes") is None:
+        return None
+    return decode_serialized(image_bytes(result))
 
 
 def js_string(value):
     return json.dumps(value)
 
 
-def command_wait(_):
-    for _ in range(120):
+def fill(name, values):
+    """scripts/NAME.js with prelude.js in front and every __KEY__ replaced."""
+    with open(os.path.join(SCRIPTS, "prelude.js"), encoding="utf-8") as f:
+        prelude = f.read()
+    with open(os.path.join(SCRIPTS, name if name.endswith(".js") else name + ".js"), encoding="utf-8") as f:
+        body = f.read()
+    for key, value in values.items():
+        body = body.replace("__%s__" % key, str(value))
+    return prelude + "\n" + body
+
+
+def script(name, timeout=180, **values):
+    return js(fill(name, values), timeout=timeout)
+
+
+def shot(path, xpath=None):
+    component = first(xpath) if xpath else main_window()
+    result = call("/%s/screenshot?isPaintingMode=true" % component["id"], timeout=60)
+    with open(path, "wb") as out:
+        out.write(image_bytes(result))
+    return path
+
+
+def wait_up(tries=300):
+    for _ in range(tries):
         try:
             request("/", timeout=3)
             check_sandbox()
-            print("robot is up")
-            return
-        except (urllib.error.URLError, OSError):
+            return True
+        except (urllib.error.URLError, OSError, RobotError):
             time.sleep(2)
-    raise SystemExit("robot: no answer from %s" % BASE)
+    return False
+
+
+def command_wait(_):
+    if not wait_up():
+        raise SystemExit("robot: no answer from %s" % BASE)
+    print("robot is up")
 
 
 def command_windows(_):
@@ -110,11 +168,7 @@ def command_windows(_):
 
 
 def command_shot(args):
-    component = first(args[1]) if len(args) > 1 else main_window()
-    result = call("/%s/screenshot?isPaintingMode=true" % component["id"])
-    with open(args[0], "wb") as out:
-        out.write(image_bytes(result))
-    print(args[0], "%sx%s" % (component["width"], component["height"]))
+    print(shot(args[0], args[1] if len(args) > 1 else None))
 
 
 def command_find(args):
@@ -141,25 +195,27 @@ def command_clicktext(args):
     print("clicked", repr(match["text"]))
 
 
-def command_open(args):
-    script = """
+def open_project(path):
+    code = """
         importClass(com.intellij.ide.impl.ProjectUtil)
         importClass(com.intellij.openapi.application.ApplicationManager)
         const path = %s
         ApplicationManager.getApplication().invokeLater(new java.lang.Runnable({ run: function () { ProjectUtil.openOrImport(path, null, true) } }))
-    """ % js_string(args[0].replace("\\", "/"))
-    call("/js/execute", script_body(script))
+    """ % js_string(path.replace("\\", "/"))
+    call("/js/execute", script_body(code))
+
+
+def command_open(args):
+    open_project(args[0])
     print("opening", args[0])
 
 
-def command_action(args):
-    script = """
+def action(action_id):
+    code = """
         importClass(com.intellij.openapi.actionSystem.ActionManager)
-        importClass(com.intellij.openapi.actionSystem.ex.ActionUtil)
         importClass(com.intellij.openapi.actionSystem.ActionPlaces)
         importClass(com.intellij.openapi.application.ApplicationManager)
         importClass(com.intellij.openapi.wm.IdeFocusManager)
-        importClass(com.intellij.ide.DataManager)
         const id = %s
         ApplicationManager.getApplication().invokeLater(new java.lang.Runnable({ run: function () {
             const action = ActionManager.getInstance().getAction(id)
@@ -167,8 +223,12 @@ def command_action(args):
             const focus = IdeFocusManager.getGlobalInstance().getFocusOwner()
             ActionManager.getInstance().tryToExecute(action, null, focus, ActionPlaces.UNKNOWN, true)
         } }))
-    """ % js_string(args[0])
-    call("/js/execute", script_body(script))
+    """ % js_string(action_id)
+    call("/js/execute", script_body(code))
+
+
+def command_action(args):
+    action(args[0])
     print("invoked", args[0])
 
 
@@ -188,30 +248,33 @@ IN_PROJECT = """
 """
 
 
-def command_openfile(args):
-    line = int(args[1]) - 1 if len(args) > 1 else 0
-    script = IN_PROJECT + """
+def open_file(path, line=1):
+    code = IN_PROJECT + """
         importClass(com.intellij.openapi.fileEditor.OpenFileDescriptor)
         const target = file(%s)
         later(function () { new OpenFileDescriptor(project, target, %d, 0).navigate(true) })
-    """ % (js_string(args[0].replace("\\", "/")), line)
-    call("/js/execute", script_body(script))
+    """ % (js_string(path.replace("\\", "/")), int(line) - 1)
+    call("/js/execute", script_body(code))
+
+
+def command_openfile(args):
+    open_file(args[0], args[1] if len(args) > 1 else 1)
     print("opened", args[0])
 
 
 def command_breakpoint(args):
-    script = IN_PROJECT + """
+    code = IN_PROJECT + """
         importClass(com.intellij.xdebugger.XDebuggerUtil)
         const target = file(%s)
         later(function () { XDebuggerUtil.getInstance().toggleLineBreakpoint(project, target, %d) })
     """ % (js_string(args[0].replace("\\", "/")), int(args[1]) - 1)
-    call("/js/execute", script_body(script))
+    call("/js/execute", script_body(code))
     print("toggled a breakpoint at", args[0], args[1])
 
 
 def command_run(args):
     debug = len(args) > 1 and args[1].lower() == "debug"
-    script = IN_PROJECT + """
+    code = IN_PROJECT + """
         importClass(com.intellij.execution.RunManager)
         importClass(com.intellij.execution.ProgramRunnerUtil)
         importClass(com.intellij.execution.executors.DefaultDebugExecutor)
@@ -222,12 +285,19 @@ def command_run(args):
         const executor = %s
         later(function () { ProgramRunnerUtil.executeConfiguration(settings, executor) })
     """ % (js_string(args[0]), "DefaultDebugExecutor.getDebugExecutorInstance()" if debug else "DefaultRunExecutor.getRunExecutorInstance()")
-    call("/js/execute", script_body(script))
+    call("/js/execute", script_body(code))
     print("started", args[0], "with", "Debug" if debug else "Run")
 
 
 def command_js(args):
-    print(js(open(args[0], encoding="utf-8").read(), edt="--edt" in args))
+    with open(args[0], encoding="utf-8") as f:
+        source = f.read()
+    print(js(source, edt="--edt" in args))
+
+
+def command_script(args):
+    values = dict(arg.split("=", 1) for arg in args[1:])
+    print(script(args[0], **values))
 
 
 def command_tree(args):
@@ -238,24 +308,32 @@ def command_tree(args):
 
 COMMANDS = {
     "wait": command_wait, "windows": command_windows, "shot": command_shot, "find": command_find, "click": command_click,
-    "open": command_open, "action": command_action, "js": command_js, "tree": command_tree,
+    "open": command_open, "action": command_action, "js": command_js, "script": command_script, "tree": command_tree,
     "clicktext": command_clicktext, "openfile": command_openfile, "breakpoint": command_breakpoint, "run": command_run,
 }
+
 
 SANDBOX = "idea-golang-support"
 
 
 def check_sandbox():
-    """Refuses to touch an IDE that is not the sandbox of this project: another agent may have one on the same port."""
-    path = js("com.intellij.openapi.application.PathManager.getConfigPath()") or ""
-    if SANDBOX not in path.replace("\\", "/"):
-        raise SystemExit("robot: the IDE on %s is not the sandbox of %s (its configuration is in %r): wrong port?" % (BASE, SANDBOX, path))
+    """Refuses to touch an IDE that is not a sandbox of this repository: another agent may have one on the same port."""
+    path = (js("com.intellij.openapi.application.PathManager.getConfigPath()") or "").replace("\\", "/")
+    # `.intellijPlatform/sandbox/idea-golang-support/IU-*/config_runIdeForUiTests` of this checkout or of a worktree of it
+    if SANDBOX not in path or "/sandbox/" not in path:
+        raise RobotError("robot: the IDE on %s is not the sandbox of %s (its configuration is in %r): wrong port?" % (BASE, SANDBOX, path))
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("--help", "-h", "help"):
+        print(__doc__)
+        raise SystemExit(0)
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
         raise SystemExit(__doc__)
-    # `wait` is what finds out whether anything listens at all; everything else acts, and acts on the right IDE only
-    if sys.argv[1] != "wait":
-        check_sandbox()
-    COMMANDS[sys.argv[1]](sys.argv[2:])
+    try:
+        # `wait` is what finds out whether anything listens at all; everything else acts, and acts on the right IDE only
+        if sys.argv[1] != "wait":
+            check_sandbox()
+        COMMANDS[sys.argv[1]](sys.argv[2:])
+    except RobotError as e:
+        raise SystemExit(str(e))

@@ -17,7 +17,6 @@ import io.github.golangsupport.semantic.types.GoMethod
 import io.github.golangsupport.semantic.types.GoNamedType
 import io.github.golangsupport.semantic.types.GoTypeRenderer
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoImport
 import io.github.golangsupport.lang.GoImports
 import io.github.golangsupport.lang.GoInterfaceMethod
@@ -34,7 +33,7 @@ import java.io.File
  * of the interface (embedded interfaces of any package unfolded, `error` included) whenever its package is in the indices: the project,
  * and since library roots (MIGRATION.md step 7) the standard library and the module cache. Only a package outside the indices (the
  * setting indexes the standard library alone while the interface is of a dependency, or indexing is not done yet) is read the old way:
- * from disk with the scanner of the plugin ([read] of a [File]), or from the PSI text of a project package in dumb mode. Made for one
+ * from disk with [GoSourceScanner] ([read] of a [File]), or from the PSI text of a project package in dumb mode. Made for one
  * Implement Interface and thrown away: what it has read is kept only for that long. Needs read access; not for EDT.
  */
 class GoInterfaceSources(private val project: Project) {
@@ -143,12 +142,12 @@ class GoInterfaceSources(private val project: Project) {
 
     /**
      * A package of the standard library or of the module cache that is not in the indices (library roots of the standard library only,
-     * or indexing not done), by the scanner of the plugin from disk.
+     * or indexing not done), by [GoSourceScanner] from disk.
      */
     private fun read(importPath: String, directory: File): LoadedPackage? {
         val texts = (directory.listFiles() ?: return null).filter { it.isFile && GoCatalogueScanner.isSource(it.name) }
             .mapNotNull { file -> runCatching { file.readText() }.getOrNull() }
-        val files = texts.map { it to GoDeclarations.scan(it) }.filter { it.second.packageName != null }
+        val files = texts.map { it to GoSourceScanner.scan(it) }.filter { it.second.packageName != null }
         val name = files.groupingBy { it.second.packageName!! }.eachCount().maxByOrNull { it.value }?.key ?: return null
         val own = files.filter { it.second.packageName == name }
         val exportedTypes = own.flatMap { it.second.declarations }.filter { it.kind.isType && it.isExported }.mapTo(HashSet()) { it.name }

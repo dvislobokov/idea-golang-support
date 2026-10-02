@@ -11,8 +11,11 @@ object GoExpectedTypes {
     private val TYPED_VARIABLE = Regex("""^var\s+\w+\s+(\S.*?)\s*=\s*\w*$""")
     private val NOT_CALLS = setOf("func", "if", "for", "switch", "select", "return", "case", "range", "map", "chan", "struct", "interface")
 
-    /** What the text alone tells: a value of a `return` by its place among the results, the value of a `var` with a type. */
-    fun byText(text: CharSequence, offset: Int): String? {
+    /**
+     * What the text tells: a value of a `return` by its place among [results] (the result types of the function around, from its PSI), the
+     * value of a `var` with a type.
+     */
+    fun byText(text: CharSequence, offset: Int, results: List<String>?): String? {
         if (offset < 0 || offset > text.length) return null
         var lineStart = offset
         while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--
@@ -21,9 +24,7 @@ object GoExpectedTypes {
         val returned = RETURN.matchEntire(before)?.groupValues?.get(1) ?: return null
         // inside a call of the statement the type is the one of its parameter
         val index = topLevelCommas(returned) ?: return null
-        val function = GoDeclarations.scan(text).declarations.lastOrNull { it.body != null && offset > it.body.startOffset && offset <= it.body.endOffset && it.signature != null }
-        val results = GoIdioms.splitSignature(function?.signature ?: return null).second
-        return results.getOrNull(index)?.type
+        return results?.getOrNull(index)
     }
 
     /** The number of commas outside brackets, null when a bracket is left open: the caret is inside of something else then. */

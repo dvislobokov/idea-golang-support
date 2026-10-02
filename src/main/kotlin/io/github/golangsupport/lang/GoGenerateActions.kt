@@ -19,6 +19,8 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiElement
+import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
 import io.github.golangsupport.lang.psi.GoStructType
 import io.github.golangsupport.lang.psi.GoTypeSpec
 import com.intellij.ui.CheckBoxList
@@ -59,34 +61,40 @@ abstract class GoGenerateAction : AnAction(), DumbAware {
 
 class GenerateContext(val project: Project, val editor: Editor, val file: GoFile) {
     val document: Document get() = editor.document
-    val structure: GoFileStructure get() = GoDeclarations.scan(document.immutableCharSequence)
     val offset: Int get() = editor.caretModel.offset
+    val packageName: String? get() = file.packageName
 
     /** The top-level type spec the caret stands in, or on the keyword or the name of, from the PSI. Needs read access. */
     val typeSpecAtCaret: GoTypeSpec? get() = GoStructPsi.typeSpecAt(file, offset)
 
-    /** [typeSpecAtCaret] as the tools that take declarations of the scanner want it ([GoStructPsi.infoOf]). */
+    /** [typeSpecAtCaret] as a value for the generators ([GoStructPsi.infoOf]). */
     val typeAtCaret: GoDeclarationInfo? get() = typeSpecAtCaret?.let(GoStructPsi::infoOf)
     val structAtCaret: GoDeclarationInfo? get() = typeAtCaret?.takeIf { it.kind == GoDeclarationKind.STRUCT }
 
     /** The struct type at the caret with its fields from the PSI. */
     val structTypeAtCaret: GoStructType? get() = typeSpecAtCaret?.let(GoStructPsi::structOf)
-    val functionAtCaret: GoDeclarationInfo? get() = structure.declarations.filter { it.kind == GoDeclarationKind.FUNCTION || it.kind == GoDeclarationKind.METHOD }.lastOrNull { offset >= it.range.startOffset && offset <= it.range.endOffset }
+    /** The top-level function or method the caret is in (its doc comment included), from the PSI. Needs read access. */
+    val functionAtCaret: GoDeclarationInfo?
+        get() {
+            for (at in intArrayOf(offset, offset - 1)) {
+                var element: PsiElement? = file.findElementAt(at.coerceAtLeast(0))
+                while (element != null && element.parent !is GoFile) element = element.parent
+                (element as? GoFunctionOrMethodDeclaration)?.let { return GoDeclarationInfo.of(it) }
+            }
+            return null
+        }
 
-    /** The declaration the generated code goes after: the one at the caret, and the last method of its type after that. */
+    /** The declaration the generated code goes after: the one at the caret, and the last method of its type after that. Committed document. */
     fun insertionOffset(declaration: GoDeclarationInfo?): Int {
         val text = document.immutableCharSequence
         if (declaration == null) return text.length
-        val committed = PsiDocumentManager.getInstance(project).isCommitted(document)
-        val spec = if (committed) GoDeclarationPsi.ofName(file.findElementAt(declaration.nameRange.startOffset)) as? GoTypeSpec else null
-        val after = if (spec != null) {
+        val element = GoDeclarationKind.ofName(file.findElementAt(declaration.nameRange.startOffset))
+        val after = if (element is GoTypeSpec) {
             // a type of a `type (...)` group: after the group, not inside it (seen live: a method written between the specs)
-            val methods = file.methods.filter { it.receiverTypeName == spec.name }
-            (methods.map { it.textRange.endOffset } + (spec.parent?.textRange?.endOffset ?: spec.textRange.endOffset)).max()
+            val methods = file.methods.filter { it.receiverTypeName == element.name }
+            (methods.map { it.textRange.endOffset } + (element.parent?.textRange?.endOffset ?: element.textRange.endOffset)).max()
         } else {
-            val methods = structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver == declaration.name }
-            val group = structure.groups.firstOrNull { it.contains(declaration.range) }
-            (methods.map { it.range.endOffset } + (group?.endOffset ?: declaration.range.endOffset)).max()
+            element?.textRange?.endOffset ?: declaration.range.endOffset
         }
         val lineEnd = text.indexOf('\n', after).let { if (it < 0) text.length else it }
         return lineEnd.coerceAtMost(text.length)
@@ -225,20 +233,6 @@ class GoImplementInterfaceAction : GoGenerateAction() {
 
     companion object {
         fun implement(context: GenerateContext) = GoInterfaceChooser.show(context)
-
-        class Candidate(val declaration: GoDeclarationInfo, val fileName: String, val packageName: String?)
-
-        /** Every interface with methods in the Go files of the project (the index knows names, not kinds): for the keyword templates. */
-        fun interfaces(project: Project, current: GoFile): List<Candidate> {
-            val result = ArrayList<Candidate>()
-            for (file in com.intellij.psi.search.FileTypeIndex.getFiles(GoFileType, com.intellij.psi.search.GlobalSearchScope.projectScope(project))) {
-                val psi = com.intellij.psi.PsiManager.getInstance(project).findFile(file) as? GoFile ?: continue
-                val structure = GoStructure.of(psi)
-                structure.declarations.filter { it.kind == GoDeclarationKind.INTERFACE && it.children.any { m -> m.kind == GoDeclarationKind.INTERFACE_METHOD } }
-                    .forEach { result += Candidate(it, file.name, structure.packageName) }
-            }
-            return result.sortedWith(compareBy({ it.fileName != current.name }, { it.declaration.name }))
-        }
     }
 }
 
@@ -249,9 +243,10 @@ class GoGenerateTestAction : GoGenerateAction() {
 
     companion object {
         fun generate(context: GenerateContext) {
+            PsiDocumentManager.getInstance(context.project).commitDocument(context.document)
             val function = context.functionAtCaret ?: return context.hint("Put the caret inside a function")
             val source = context.file.virtualFile ?: return
-            val packageName = context.structure.packageName
+            val packageName = context.packageName
             val testName = source.nameWithoutExtension + "_test.go"
             val test = GoGenerators.testFunction(function, packageName)
             WriteCommandAction.runWriteCommandAction(context.project, "Generate Test", null, {

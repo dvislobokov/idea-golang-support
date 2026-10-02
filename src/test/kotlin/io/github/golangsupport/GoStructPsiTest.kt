@@ -15,8 +15,8 @@ import io.github.golangsupport.semantic.types.GoTypeRenderer
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import io.github.golangsupport.catalogue.GoSourceScanner
 import io.github.golangsupport.lang.GenerateContext
-import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoFieldAlignment
 import io.github.golangsupport.lang.GoGenerateStructTagsAction
 import io.github.golangsupport.lang.GoGenerators
@@ -80,10 +80,10 @@ class GoStructPsiTest : BasePlatformTestCase() {
         assertEquals("[]string", GoTypeRenderer.render(fields[4].type))
     }
 
-    /** The declarations [GoStructPsi.infoOf] makes give the generators the same text as those of the scanner. */
+    /** The declarations [GoStructPsi.infoOf] makes give the generators the same text as those the scanner of the catalogue reads from files. */
     fun testGeneratorsGetTheSameTextFromThePsi() {
         val file = myFixture.configureByText("server.go", server) as GoFile
-        val scanned = GoDeclarations.scan(server).declarations.first { it.name == "Server" }
+        val scanned = GoSourceScanner.scan(server).declarations.first { it.name == "Server" }
         val info = GoStructPsi.infoOf(spec(file, "Server"))!!
         assertEquals(scanned.range, info.range)
         assertEquals(scanned.body, info.body)

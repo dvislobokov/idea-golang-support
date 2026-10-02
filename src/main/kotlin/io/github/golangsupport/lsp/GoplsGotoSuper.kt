@@ -10,7 +10,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoNamedElement
@@ -31,7 +30,7 @@ class GoplsGotoSuperHandler : LanguageCodeInsightActionHandler {
         if (GoFeatures.native(GoFeature.NAVIGATION, project)) return
         val declaration = declarationAt(file, editor.caretModel.offset) ?: return
         val name = declaration.name ?: return
-        val title = if (GoDeclarationPsi.kindOf(declaration) == GoDeclarationKind.METHOD) "Interface Methods $name Implements" else "Interfaces $name Implements"
+        val title = if (GoDeclarationKind.of(declaration) == GoDeclarationKind.METHOD) "Interface Methods $name Implements" else "Interfaces $name Implements"
         PsiTargetNavigator(Supplier<Collection<PsiElement>> { targets(project, declaration) }).navigate(editor, title)
     }
 
@@ -43,7 +42,7 @@ class GoplsGotoSuperHandler : LanguageCodeInsightActionHandler {
 
     /** The method, or the type, the caret is in: anywhere in its declaration, its body included. */
     private fun declarationAt(file: PsiFile, offset: Int): GoNamedElement? =
-        GoDeclarationPsi.at(file, offset)?.takeIf { GoDeclarationPsi.kindOf(it).let { kind -> kind == GoDeclarationKind.METHOD || kind?.isType == true } }
+        GoDeclarationKind.at(file, offset)?.takeIf { GoDeclarationKind.of(it).let { kind -> kind == GoDeclarationKind.METHOD || kind?.isType == true } }
 
     private companion object {
         const val TIMEOUT_MS = 15_000

@@ -1,8 +1,5 @@
 package io.github.golangsupport
 
-import com.intellij.openapi.util.TextRange
-import io.github.golangsupport.lang.GoBlockFolds
-import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoTestNames
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -31,32 +28,5 @@ class GoTestNavigationTest {
         assertEquals(listOf("calc" to null), GoTestNames.subjectsOf("Test_calc"))
         assertEquals(listOf("Order_Total" to null, "Total" to "Order", "Order" to null), GoTestNames.subjectsOf("TestOrder_Total"))
         assertEquals(emptyList<Pair<String, String?>>(), GoTestNames.subjectsOf("helper"))
-    }
-
-    @Test fun blocksInsideAFunctionFold() {
-        val source = """
-            package p
-
-            func f(items []int) int {
-            	total := 0
-            	for _, x := range items {
-            		if x > 0 {
-            			total += x
-            		}
-            	}
-            	m := map[string]int{
-            		"a": 1,
-            	}
-            	return total + m["a"]
-            }
-        """.trimIndent()
-        val body = GoDeclarations.scan(source).declarations.first { it.name == "f" }.body!!
-        val folds = GoBlockFolds.find(source, body).map { source.substring(it.startOffset, it.endOffset) }
-        assertEquals(3, folds.size)
-        assertTrue(folds[0].startsWith("{\n\t\tif x > 0"))
-        assertTrue(folds[1].startsWith("{\n\t\t\ttotal += x"))
-        assertTrue(folds[2].startsWith("{\n\t\t\"a\": 1"))
-        // the body itself is folded by the declaration, not here
-        assertFalse(folds.any { TextRange(body.startOffset, body.endOffset).length == it.length })
     }
 }

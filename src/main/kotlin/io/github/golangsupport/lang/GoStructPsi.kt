@@ -99,27 +99,8 @@ object GoStructPsi {
         return TextRange((open ?: return null).textRange.startOffset, (close ?: return null).textRange.endOffset)
     }
 
-    /**
-     * What the tools that still take the declarations of the scanner want of [spec]: its name, ranges, body and, for a struct, the
-     * fields (an embedded one without a signature, as the scanner has it). The range starts at `type` for a spec of its own and at the
-     * name in a `type (...)` group, as the scanner's does.
-     */
-    fun infoOf(spec: GoTypeSpec): GoDeclarationInfo? {
-        val name = spec.name ?: return null
-        val identifier = spec.identifier
-        val kind = GoDeclarationPsi.kindOf(spec) ?: return null
-        val declaration = spec.parent as? GoTypeDeclaration
-        // the `type` keyword, not the doc comment above it
-        val start = if (declaration != null && declaration.lparen == null) declaration.type_.textRange.startOffset else identifier.textRange.startOffset
-        val type = spec.type
-        val children = (type as? GoStructType)?.let { struct ->
-            fields(struct).filter { it.name != "_" }.map { field ->
-                val nameRange = (field.element.nameIdentifier ?: field.element).textRange
-                GoDeclarationInfo(GoDeclarationKind.FIELD, field.name, nameRange, TextRange(nameRange.startOffset, field.declaration.textRange.endOffset), signature = field.typeText.takeUnless { field.embedded })
-            }
-        }.orEmpty()
-        return GoDeclarationInfo(kind, name, identifier.textRange, TextRange(start, spec.textRange.endOffset), body = type?.let(::bodyRange), children = children)
-    }
+    /** [spec] as a value for the generators: name, ranges, body and, for a struct, the fields (an embedded one without a signature). */
+    fun infoOf(spec: GoTypeSpec): GoDeclarationInfo? = GoDeclarationInfo.of(spec)
 
     /** A type written over several lines, as one line: what a parameter list or a dialog shows. */
     private fun oneLine(text: String): String = if ('\n' in text) GoInterfaces.tidy(GoInterfaces.stripComments(text)) else text

@@ -7,7 +7,7 @@ package io.github.golangsupport.lang
  * [Types] answers what the text can only guess (see [GoIdiomTypes]).
  */
 object GoIdioms {
-    /** The function around the caret as the PSI knows it ([GoReturnValues.function]); without it the text is scanned. */
+    /** The function around the caret as the PSI knows it ([GoReturnValues.function]). */
     class Function(val name: String?, val parameters: List<Parameter>, val results: List<Parameter>, val isMain: Boolean)
 
     /**
@@ -117,7 +117,7 @@ object GoIdioms {
 
     /** `return ctx.Err()`, with the zero values before it; a bare `return` from a function without results. */
     private fun contextExit(text: CharSequence, offset: Int, context: String, function: Function?): String =
-        if (function != null && function.results.isEmpty()) "return" else returnStatement(text, offset, "$context.Err()", function)
+        if (function != null && function.results.isEmpty()) "return" else returnStatement("$context.Err()", function)
 
     // --- if err != nil ---
 
@@ -190,28 +190,25 @@ object GoIdioms {
      */
     private fun errorExit(text: CharSequence, offset: Int, error: String, failed: String?, function: Function? = null): List<String> {
         val badInput = BAD_INPUT.containsMatchIn(failed.orEmpty())
-        val parameters = enclosing(text, offset, function)?.takeIf { (_, results) -> results.isEmpty() }?.first.orEmpty()
+        val parameters = enclosing(function)?.takeIf { (_, results) -> results.isEmpty() }?.first.orEmpty()
         parameters.firstOrNull { it.type == "http.ResponseWriter" }?.name?.let { writer ->
             return listOf("http.Error($writer, $error.Error(), http.${if (badInput) "StatusBadRequest" else "StatusInternalServerError"})", "return")
         }
         parameters.firstOrNull { it.type == "*gin.Context" }?.name?.let { context ->
             return listOf("$context.AbortWithStatusJSON(http.${if (badInput) "StatusBadRequest" else "StatusInternalServerError"}, gin.H{\"error\": $error.Error()})", "return")
         }
-        val plain = returnStatement(text, offset, error, function)
+        val plain = returnStatement(error, function)
         // `t.Fatal(err)` and `log.Fatal(err)` say where they are by themselves
         val message = failure(failed)?.takeIf { plain.startsWith("return ") } ?: return listOf(plain)
         return listOf(when {
-            answersWithStatus(text) -> returnStatement(text, offset, "status.Errorf(codes.${if (badInput) "InvalidArgument" else "Internal"}, \"$message: %v\", $error)", function)
-            wrapsErrors(text) -> returnStatement(text, offset, "fmt.Errorf(\"$message: %w\", $error)", function)
+            answersWithStatus(text) -> returnStatement("status.Errorf(codes.${if (badInput) "InvalidArgument" else "Internal"}, \"$message: %v\", $error)", function)
+            wrapsErrors(text) -> returnStatement("fmt.Errorf(\"$message: %w\", $error)", function)
             else -> plain
         })
     }
 
-    /** The parameters and the results of the function the offset is in the body of: from the PSI when [function] is given. */
-    private fun enclosing(text: CharSequence, offset: Int, function: Function? = null): Pair<List<Parameter>, List<Parameter>>? =
-        function?.let { it.parameters to it.results }
-            ?: GoDeclarations.scan(text).declarations.lastOrNull { it.body != null && offset > it.body.startOffset && offset <= it.body.endOffset && it.signature != null }
-                ?.let { splitSignature(it.signature.orEmpty()) }
+    /** The parameters and the results of the function around the caret, as the PSI knows it. */
+    private fun enclosing(function: Function?): Pair<List<Parameter>, List<Parameter>>? = function?.let { it.parameters to it.results }
 
     // --- the receiver of a method ---
 
@@ -280,17 +277,11 @@ object GoIdioms {
     }
 
     /**
-     * What leaves the function around [offset] with the error: `return nil, err`, `return total, err`, `t.Fatal(err)`, `log.Fatal(err)`.
-     * The function is [function] when the PSI knows it (exact zero values), otherwise the one the text scan finds.
+     * What leaves [function] with the error: `return nil, err`, `return total, err`, `t.Fatal(err)`, `log.Fatal(err)`; `return err` when
+     * the function is not known (no PSI there yet, dumb mode).
      */
-    fun returnStatement(text: CharSequence, offset: Int, error: String, function: Function? = null): String {
-        val around = function ?: run {
-            val structure = GoDeclarations.scan(text)
-            val declaration = structure.declarations.lastOrNull { it.body != null && offset > it.body.startOffset && offset <= it.body.endOffset && it.signature != null }
-                ?: return "return $error"
-            val (parameters, results) = splitSignature(declaration.signature.orEmpty())
-            Function(declaration.name, parameters, results, declaration.name == "main" && structure.isMainPackage)
-        }
+    fun returnStatement(error: String, function: Function?): String {
+        val around = function ?: return "return $error"
         val (parameters, results) = around.parameters to around.results
         if (results.isEmpty()) {
             val testing = parameters.firstOrNull { it.type.contains("testing.") }
@@ -317,29 +308,6 @@ object GoIdioms {
     // any letter: what is typed may be of the other layout
     private val RETURN_TYPED = Regex("""^return[ \t]+[\w\p{L}]*$""")
     private val ERROR_CHECK = Regex("""^(?:\}\s*else\s+)?if\s+(?:.*;\s*)?(\w*[eE]rr\w*)\s*!=\s*nil\s*\{$""")
-
-    /**
-     * The values of the `return` that is being typed at [offset], for the completion list: the zero values of the results with the error
-     * of the `if err != nil` around (`nil, err`), with `nil` for the error elsewhere. Null where the function returns less than two
-     * values: one name is what the language server completes. The text version, for code without PSI; with PSI [GoReturnValues]
-     * answers. To be removed at step 10 of the migration.
-     */
-    fun returnValues(text: CharSequence, offset: Int): String? {
-        if (offset < 0 || offset > text.length) return null
-        var lineStart = offset
-        while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--
-        var lineEnd = offset
-        while (lineEnd < text.length && text[lineEnd] != '\n') lineEnd++
-        if (text.subSequence(offset, lineEnd).isNotBlank()) return null
-        val before = text.subSequence(lineStart, offset).toString()
-        if (!RETURN_TYPED.matches(before.trimStart())) return null
-        val indent = before.takeWhile { it == ' ' || it == '\t' }
-        // the line that opens the block of the caret: the nearest one above with a smaller indent
-        val opener = linesBefore(text, lineStart).firstOrNull { it.indent.length < indent.length }
-        val error = opener?.let { ERROR_CHECK.matchEntire(it.code) }?.groupValues?.get(1) ?: "nil"
-        val statement = returnStatement(text, offset, error)
-        return statement.removePrefix("return ").takeIf { statement.startsWith("return ") && ", " in it }
-    }
 
     /** Whether the line of [offset] is `return` and a name being typed, with nothing after the caret: where the values are offered. */
     fun typingReturn(text: CharSequence, offset: Int): Boolean {
@@ -371,7 +339,7 @@ object GoIdioms {
             assertion != null -> "fmt.Errorf(\"unexpected type %T\", ${assertion.groupValues[1]})"
             else -> "nil"
         }
-        val statement = returnStatement(text, offset, error, function).let { if (error == "nil" && it.endsWith("Fatal(nil)")) "return" else it }
+        val statement = returnStatement(error, function).let { if (error == "nil" && it.endsWith("Fatal(nil)")) "return" else it }
         return "if !$ok {\n$indent$unit$statement\n$indent}"
     }
 

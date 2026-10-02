@@ -10,8 +10,8 @@ class GoInterfaceMethod(val name: String, val signature: String, val origin: GoI
 class GoInterfaceBody(val methods: List<Pair<String, String>>, val embedded: List<String>)
 
 /**
- * Interfaces by their text, for Implement Interface: the scanner keeps a signature of one line and cuts it for the Structure view,
- * here a method is read whole from the body of the interface, and made to compile in the file that implements it.
+ * Interfaces by their text, for Implement Interface (a package outside the indices, a type the checker does not know): a method is read
+ * whole from the body of the interface, and made to compile in the file that implements it.
  */
 object GoInterfaces {
     class Rewritten(val name: String, val signature: String, val imports: List<String>)

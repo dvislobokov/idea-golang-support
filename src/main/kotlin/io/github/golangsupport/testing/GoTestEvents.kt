@@ -7,7 +7,7 @@ import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoTestNames
 import io.github.golangsupport.lang.psi.GoFile
-import io.github.golangsupport.lang.GoFileStructure
+import io.github.golangsupport.lang.psi.GoFunctionDeclaration
 
 enum class GoTestKind(val prefix: String) { TEST("Test"), BENCHMARK("Benchmark"), FUZZ("Fuzz"), EXAMPLE("Example") }
 
@@ -20,8 +20,9 @@ object GoTests {
     fun kindOf(declaration: GoDeclarationInfo, fileName: String): GoTestKind? =
         if (declaration.kind == GoDeclarationKind.FUNCTION && fileName.endsWith(GoTestNames.TEST_SUFFIX)) kindOf(declaration.name) else null
 
-    fun find(structure: GoFileStructure, fileName: String): List<Pair<GoDeclarationInfo, GoTestKind>> =
-        structure.declarations.mapNotNull { declaration -> kindOf(declaration, fileName)?.let { declaration to it } }
+    /** The test functions of a `_test.go` file, from its stubs. Read action. */
+    fun find(file: GoFile): List<Pair<GoFunctionDeclaration, GoTestKind>> =
+        if (!file.name.endsWith(GoTestNames.TEST_SUFFIX)) emptyList() else file.functions.mapNotNull { function -> function.name?.let(::kindOf)?.let { function to it } }
 
     /** `-run` for exactly these functions; a subtest `TestA/case_1` is `^TestA$/^case_1$`, a level of the pattern per level of the name. */
     fun pattern(names: List<String>): String {

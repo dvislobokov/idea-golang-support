@@ -26,6 +26,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileDocumentManagerListener
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.vfs.VfsUtilCore
+import com.intellij.psi.PsiManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.VirtualFileVisitor
@@ -45,8 +46,6 @@ import com.intellij.ui.TreeSpeedSearch
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.ui.tree.TreeUtil
 import io.github.golangsupport.GoIcons
-import io.github.golangsupport.lang.GoDeclarationInfo
-import io.github.golangsupport.lang.GoDeclarations
 import io.github.golangsupport.lang.GoTestNames
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.mod.GoModulesService
@@ -60,9 +59,7 @@ import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 
 /** A test function found in the sources, with the file it is in. */
-class DiscoveredGoTest(val declaration: GoDeclarationInfo, val kind: GoTestKind, val file: VirtualFile, val packageDirectory: VirtualFile) {
-    val name: String get() = declaration.name
-}
+class DiscoveredGoTest(val name: String, val kind: GoTestKind, val file: VirtualFile, val packageDirectory: VirtualFile)
 
 /** The directory of a package that has tests; [title] is its import path, or the path from the project when it is in no module. */
 class GoTestPackage(val directory: VirtualFile, val title: String, val tests: List<DiscoveredGoTest>)
@@ -72,7 +69,7 @@ enum class GoTestStatus { PASSED, FAILED, SKIPPED }
 object GoTestExplorerModel {
     private val SKIPPED_DIRECTORIES = setOf("vendor", "testdata", "node_modules", ".git", ".idea")
 
-    /** Tests of every module of the project, found by tokens without compiling anything. Blocking, needs read access. */
+    /** Tests of every module of the project, found in the stubs of the test files without compiling anything. Blocking, needs read access. */
     fun discover(project: Project): List<GoTestPackage> {
         val modules = GoModulesService.getInstance(project)
         val byDirectory = LinkedHashMap<VirtualFile, MutableList<DiscoveredGoTest>>()
@@ -81,9 +78,9 @@ object GoTestExplorerModel {
                 override fun visitFile(file: VirtualFile): Boolean {
                     if (file.isDirectory) return file.name !in SKIPPED_DIRECTORIES && !file.name.startsWith("_")
                     if (!file.name.endsWith(GoTestNames.TEST_SUFFIX)) return true
-                    val text = runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: return true
+                    val psi = PsiManager.getInstance(project).findFile(file) as? GoFile ?: return true
                     val directory = file.parent ?: return true
-                    GoTests.find(GoDeclarations.scan(text), file.name).mapTo(byDirectory.getOrPut(directory) { ArrayList() }) { (declaration, kind) -> DiscoveredGoTest(declaration, kind, file, directory) }
+                    GoTests.find(psi).mapTo(byDirectory.getOrPut(directory) { ArrayList() }) { (declaration, kind) -> DiscoveredGoTest(declaration.name.orEmpty(), kind, file, directory) }
                     return true
                 }
             })
@@ -172,7 +169,8 @@ private class GoTestExplorerPanel(private val project: Project, toolWindow: Tool
         object : DoubleClickListener() {
             override fun onDoubleClick(event: MouseEvent): Boolean {
                 val test = (tree.lastSelectedPathComponent as? DefaultMutableTreeNode)?.userObject as? DiscoveredGoTest ?: return false
-                OpenFileDescriptor(project, test.file, test.declaration.nameRange.startOffset).navigate(true)
+                val function = (PsiManager.getInstance(project).findFile(test.file) as? GoFile)?.functions?.firstOrNull { it.name == test.name }
+                function?.navigate(true) ?: OpenFileDescriptor(project, test.file).navigate(true)
                 return true
             }
         }.installOn(tree)

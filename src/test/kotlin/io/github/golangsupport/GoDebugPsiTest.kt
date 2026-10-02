@@ -1,8 +1,9 @@
 package io.github.golangsupport
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import io.github.golangsupport.lang.GoDeclarations
+import io.github.golangsupport.debugger.GoFunctionNames
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.run.GoRunConfigurationGenerator
 import io.github.golangsupport.run.GoBreakpointLines
 import io.github.golangsupport.run.GoDebugPsi
 import io.github.golangsupport.run.GoHoverExpression
@@ -51,8 +52,6 @@ class GoDebugPsiTest : BasePlatformTestCase() {
         assertNull(hover(file, "Get() +"))
         assertEquals("s", hover(file, "s.Get"))
         assertEquals("s.n", hover(file, "n\n}", 0))
-        // the text version on the same place agrees where it can tell
-        assertEquals("s.n", GoHoverExpression.rangeAt(file.text, file.text.lastIndexOf("n\n}"))?.substring(file.text))
     }
 
     fun testTheVariablesOfALine() {
@@ -98,7 +97,6 @@ class GoDebugPsiTest : BasePlatformTestCase() {
         val file = file("b.go", source)
         val lines = source.lines()
         val psi = GoBreakpointLines.find(file)
-        assertEquals("the same rules as the text", GoBreakpointLines.find(source), psi)
         fun at(text: String) = lines.indexOfFirst { it == text }
         assertTrue(at("func Total(xs []int) int {") in psi && at("\tsum := 0") in psi && at("\t\tsum += x") in psi && at("\t}") in psi)
         assertFalse("a comment", at("\t// a comment") in psi)
@@ -108,13 +106,12 @@ class GoDebugPsiTest : BasePlatformTestCase() {
         assertTrue("a variable with a function literal", at("\tprintln(\"x\")") in psi)
     }
 
-    fun testTheHelperFallsBackToTheTextOfAnUncommittedDocument() {
+    fun testTheHelperAnswersNothingForAnUncommittedDocument() {
         val file = myFixture.configureByText("u.go", "package a\n\nfunc f(n int) int {\n\treturn n\n}\n") as GoFile
         val document = myFixture.editor.document
-        val psi = GoDebugPsi.compute(project, document, { "psi" }, { "text" })
-        assertEquals("psi", psi)
+        assertEquals("psi", GoDebugPsi.compute(project, document) { "psi" })
         com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(project) { document.insertString(0, "// x\n") }
-        assertEquals("text", GoDebugPsi.compute(project, document, { "psi" }, { "text" }))
+        assertNull(GoDebugPsi.compute(project, document) { "psi" })
         assertNotNull(file)
     }
 
@@ -143,12 +140,75 @@ class GoDebugPsiTest : BasePlatformTestCase() {
             }
         """.trimIndent()
         val file = file("x_test.go", source)
-        val function = GoDeclarations.scan(source).declarations.first { it.name == "TestX" }
-        val subtests = GoSubtests.find(file, function)
+        val function = file.functions.first { it.name == "TestX" }
+        val subtests = GoSubtests.find(function)
         assertEquals(listOf("outer", "outer/inner_one", "case_a"), subtests.map { it.name })
         assertEquals("TestX/outer/inner_one", subtests[1].fullName)
         assertEquals("\"inner one\"", subtests[1].nameRange.substring(source))
-        assertTrue("the text version takes any Run", GoSubtests.find(source, function).any { it.name == "server" })
+        assertFalse("a Run of a server is no subtest", subtests.any { it.name == "server" })
         assertEquals(setOf("outer", "outer/inner_one", "case_a"), GoSubtests.ofFile(file).values.map { it.name }.toSet())
+    }
+
+    fun testTheNameDelveGivesTheFunctionAtACaret() {
+        val text = """
+            package store
+
+            type Order struct{}
+
+            func NewOrder() *Order { return nil }
+
+            func (o *Order) Total() int {
+            	return 0
+            }
+
+            func (o Order) Empty() bool { return true }
+
+            var x = 1
+        """.trimIndent()
+        val file = file("store.go", text)
+        assertEquals("store.NewOrder", GoFunctionNames.at(file, text.indexOf("return nil")))
+        assertEquals("store.(*Order).Total", GoFunctionNames.at(file, text.indexOf("return 0")))
+        assertEquals("store.Order.Empty", GoFunctionNames.at(file, text.indexOf("Empty")))
+        assertNull("not in a function", GoFunctionNames.at(file, text.indexOf("var x")))
+        assertEquals("main.main", GoFunctionNames.at(file("main.go", "package main\n\nfunc main() {\n}\n"), 22))
+    }
+
+    fun testInlineValueLinesStayInTheFunctionAndAboveTheLine() {
+        val text = """
+            package main
+
+            type Item struct{ Price, Quantity int }
+            type Order struct{ items []Item }
+
+            func (o *Order) Total() int {
+            	total := 0
+            	for _, item := range o.items {
+            		total += item.Price * item.Quantity
+            	}
+            	return total
+            }
+
+            func other() {
+            	total := 1
+            	_ = total
+            }
+        """.trimIndent()
+        val file = file("order.go", text)
+        val lines = text.lines()
+        fun at(code: String) = lines.indexOfFirst { it.trim() == code }
+        val returned = at("return total")
+        // the lines of Total() that mention `total`, not other(), not `item.Price` for `Price`
+        assertEquals(listOf(at("total := 0"), at("total += item.Price * item.Quantity"), returned), GoInlineValues.lines(file, "total", returned))
+        assertEquals(listOf(at("for _, item := range o.items {"), at("total += item.Price * item.Quantity")), GoInlineValues.lines(file, "item", returned))
+        assertEquals(emptyList<Int>(), GoInlineValues.lines(file, "Price", returned))
+        // stopped in the loop: nothing below the line
+        assertEquals(listOf(at("total := 0"), at("total += item.Price * item.Quantity")), GoInlineValues.lines(file, "total", at("total += item.Price * item.Quantity")))
+        assertEquals(emptyList<Int>(), GoInlineValues.lines(file, "total", 100))
+    }
+
+    fun testProgramsAreMainPackagesWithAMain() {
+        assertTrue(GoRunConfigurationGenerator.isProgram(file("p1/main.go", "package main\n\nfunc main() {}\n")))
+        assertFalse(GoRunConfigurationGenerator.isProgram(file("p2/store.go", "package store\n\nfunc main() {}\n")))
+        assertFalse(GoRunConfigurationGenerator.isProgram(file("p3/helper.go", "package main\n\nfunc helper() {}\n")))
     }
 }

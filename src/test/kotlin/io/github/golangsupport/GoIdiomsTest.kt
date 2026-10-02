@@ -1,5 +1,6 @@
 package io.github.golangsupport
 
+import io.github.golangsupport.catalogue.GoSourceScanner
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoIdioms
 import io.github.golangsupport.lang.GoSnippets
@@ -10,11 +11,32 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GoIdiomsTest {
+    /**
+     * The function around [offset] as the PSI gives it to [GoIdioms] ([io.github.golangsupport.lang.GoReturnValues.function]): here from
+     * its signature as written, read by the scanner of the catalogue, so that the rules are tested without a project.
+     */
+    private fun function(text: String, offset: Int): GoIdioms.Function? {
+        val scanned = GoSourceScanner.scan(text)
+        val declaration = scanned.declarations.lastOrNull { it.body != null && offset > it.body!!.startOffset && offset <= it.body!!.endOffset && it.signature != null } ?: return null
+        val (parameters, results) = GoIdioms.splitSignature(declaration.signature!!)
+        return GoIdioms.Function(declaration.name, parameters, results, declaration.name == "main" && scanned.packageName == "main")
+    }
+
+    /** What only the PSI knows is not known here, but the function around the caret. */
+    private class Known(override val function: GoIdioms.Function?) : GoIdioms.Types {
+        override fun assignsError(lineStart: Int): Boolean? = null
+        override fun hasMethod(lineStart: Int, receiver: String, method: String, returnsError: Boolean): Boolean? = null
+        override fun selectCases(lineStart: Int): List<String>? = null
+        override fun switchCases(lineStart: Int): List<String>? = null
+    }
+
+    private fun suggest(text: String, offset: Int): String? = GoIdioms.suggest(text, offset, types = Known(function(text, offset)))
+
     /** The suggestion at `<caret>`, which is cut out of [code]. */
     private fun suggest(code: String): String? {
         val text = code.trimIndent().replace("    ", "\t")
         val offset = text.indexOf("<caret>")
-        return GoIdioms.suggest(text.replace("<caret>", ""), offset)
+        return suggest(text.replace("<caret>", ""), offset)
     }
 
     @Test fun errorCheckReturnsTheZeroValuesOfTheFunction() {
@@ -87,7 +109,7 @@ class GoIdiomsTest {
     /** The editor keeps the caret of a blank line in virtual space: the line has no indent of its own, the suggestion brings it. */
     @Test fun aBlankLineWithoutItsIndent() = assertEquals(
         "\tif err != nil {\n\t\treturn err\n\t}",
-        GoIdioms.suggest("package main\n\nfunc f() error {\n\terr := run()\n\n}", "package main\n\nfunc f() error {\n\terr := run()\n".length),
+        suggest("package main\n\nfunc f() error {\n\terr := run()\n\n}", "package main\n\nfunc f() error {\n\terr := run()\n".length),
     )
 
     @Test fun nothingWhereItIsNotTheNextLine() {
@@ -403,40 +425,6 @@ class GoIdiomsTest {
         assertEquals(listOf("error"), GoIdioms.splitSignature("() error").second.map { it.type })
     }
 
-    /** The values offered at `<caret>`, which is cut out of [code]. */
-    private fun returnValues(code: String): String? {
-        val text = code.trimIndent().replace("    ", "\t")
-        return GoIdioms.returnValues(text.replace("<caret>", ""), text.indexOf("<caret>"))
-    }
-
-    @Test fun returnValuesInsideAnErrorCheck() {
-        val code = """
-            package main
-
-            func (s *Server) DeleteUser(ctx context.Context, req interface{}) (interface{}, error) {
-                _, err := os.Open("123")
-                if err != nil {
-                    return ni<caret>
-                }
-                return nil, nil
-            }
-            """
-        assertEquals("nil, err", returnValues(code))
-        assertEquals("nil, err", returnValues(code.replace("return ni<caret>", "return <caret>")))
-        assertEquals("nil, openErr", returnValues(code.replace("err :=", "openErr :=").replace("err !=", "openErr !=")))
-        // not after `return`, and not in the middle of what is written
-        assertNull(returnValues(code.replace("return ni<caret>", "ni<caret>")))
-        assertNull(returnValues(code.replace("return ni<caret>", "return <caret>nil, err")))
-    }
-
-    @Test fun returnValuesOutsideAnErrorCheck() {
-        assertEquals("0, \"\", nil", returnValues("package main\n\nfunc f() (int, string, error) {\n    return <caret>\n}"))
-        assertEquals("nil, nil", returnValues("package main\n\nfunc f(p *T) (*T, error) {\n    if p != nil {\n        return <caret>\n    }\n}"))
-        // one value is what the server completes
-        assertNull(returnValues("package main\n\nfunc f() error {\n    if err != nil {\n        return <caret>\n    }\n}"))
-        assertNull(returnValues("package main\n\nfunc f() {\n    return <caret>\n}"))
-    }
-
     @Test fun theSnippetsOfGopls() {
         // what gopls offers for the function `sort.Slice` takes, seen with tools/gopls/completion.py
         assertEquals("func(i, j int) bool {\$0}", GoSnippets.unescape("func(i, j int) bool {\$0\\}"))
@@ -464,9 +452,9 @@ class GoIdiomsTest {
     /** The `err` live template fills its statement with this: the function around the caret decides what leaves it with the error. */
     @Test fun errorReturnForTheTemplate() {
         val source = "package p\n\nfunc load(name string) ([]byte, error) {\n\tf, err := open(name)\n\t\n}\n\nfunc TestLoad(t *testing.T) {\n\t\n}\n\nfunc plain() {\n\t\n}\n"
-        assertEquals("return nil, err", GoIdioms.returnStatement(source, source.indexOf("open(name)\n\t") + "open(name)\n\t".length, "err"))
-        assertEquals("t.Fatal(err)", GoIdioms.returnStatement(source, source.indexOf("testing.T) {\n\t") + "testing.T) {\n\t".length, "err"))
-        assertEquals("return", GoIdioms.returnStatement(source, source.indexOf("plain() {\n\t") + "plain() {\n\t".length, "err"))
-        assertEquals("return err", GoIdioms.returnStatement(source, 0, "err"))
+        assertEquals("return nil, err", GoIdioms.returnStatement("err", function(source, source.indexOf("open(name)\n\t") + "open(name)\n\t".length)))
+        assertEquals("t.Fatal(err)", GoIdioms.returnStatement("err", function(source, source.indexOf("testing.T) {\n\t") + "testing.T) {\n\t".length)))
+        assertEquals("return", GoIdioms.returnStatement("err", function(source, source.indexOf("plain() {\n\t") + "plain() {\n\t".length)))
+        assertEquals("the function is not known", "return err", GoIdioms.returnStatement("err", null))
     }
 }

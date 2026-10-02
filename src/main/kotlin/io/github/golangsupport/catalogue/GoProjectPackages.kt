@@ -10,7 +10,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.stubs.StubIndex
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.psi.GoConstDefinition
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoFunctionDeclaration
@@ -79,7 +78,7 @@ object GoProjectPackages {
         val kind = when (element) {
             is GoVarDefinition -> GoDeclarationKind.VAR
             is GoConstDefinition -> GoDeclarationKind.CONST
-            is GoFunctionDeclaration, is GoTypeSpec -> GoDeclarationPsi.kindOf(element)
+            is GoFunctionDeclaration, is GoTypeSpec -> GoDeclarationKind.of(element)
             else -> null
         } ?: return null
         return GoSymbol(name, kind, GoStubTexts.signatureOf(element)?.take(MAX_SIGNATURE))

@@ -13,7 +13,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoDeclarationPsi
+import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoNamedElement
@@ -32,8 +32,8 @@ class GoplsImplementationLineMarkerProvider : LineMarkerProvider {
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
         if (element.elementType != GoTypes.IDENTIFIER) return null
         if (GoFeatures.native(GoFeature.CODE_VISION, element.project)) return null
-        val declaration = GoDeclarationPsi.ofName(element) ?: return null
-        val info = GoDeclarationPsi.infoOf(declaration) ?: return null
+        val declaration = GoDeclarationKind.ofName(element) ?: return null
+        val info = GoDeclarationInfo.of(declaration) ?: return null
         val file = (element.containingFile as? GoFile)?.virtualFile ?: return null
         val document = FileDocumentManager.getInstance().getCachedDocument(file) ?: return null
         val project = element.project
@@ -46,7 +46,7 @@ class GoplsImplementationLineMarkerProvider : LineMarkerProvider {
         val tooltip = if (isInterface) "Is implemented by $count ${what}${if (count == 1) "" else "s"}" else "Implements $count interface${if (what == "method") " method" else ""}${if (count == 1) "" else "s"}"
         val title = if (isInterface) "Implementations of ${info.name}" else "Implemented by ${info.name}"
         val navigation = GutterIconNavigationHandler<PsiElement> { event, clicked ->
-            val target = GoDeclarationPsi.ofName(clicked) ?: return@GutterIconNavigationHandler
+            val target = GoDeclarationKind.ofName(clicked) ?: return@GutterIconNavigationHandler
             // the supplier is run by the navigator in the background, with a progress: a request to the server has no place on EDT
             PsiTargetNavigator(Supplier<Collection<PsiElement>> { targets(target) }).navigate(event, title, project)
         }

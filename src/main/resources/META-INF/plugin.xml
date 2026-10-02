@@ -59,7 +59,7 @@
          (MIGRATION.md step 8i; the gate follows GoFeature.CODE_VISION) -->
     <xi:include href="/META-INF/go-psi-ide-codevision.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- the intentions that rewrite code by its types over that PSI: fill all / required fields, fill return values, fill switch, fill select,
-         handle error, wrap error; with them on duty the same actions of gopls and the text intentions of GoIntentions stand down
+         handle error, wrap error; with them on duty the same actions of gopls stand down
          (MIGRATION.md step 9; the gate follows GoFeature.CODE_ACTIONS) -->
     <xi:include href="/META-INF/go-psi-ide-intentions.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
@@ -95,7 +95,7 @@
         <annotator language="Go" implementationClass="io.github.golangsupport.lang.GoIdentifierAnnotator"/>
         <!-- the syntax errors of the parser only when they are not gopls's (Settings | Tools | Go | Language Server, "Syntax errors") -->
         <highlightErrorFilter implementation="io.github.golangsupport.lang.GoSyntaxErrorFilter"/>
-        <!-- on the declarations GoDeclarations finds by tokens -->
+        <!-- by the names of the functions and methods of the PSI -->
         <testFinder implementation="io.github.golangsupport.lang.GoTestFinder"/>
         <testCreator language="Go" implementationClass="io.github.golangsupport.lang.GoTestCreator"/>
         <!-- indentation while typing, the way gofmt would have it; whole files are formatted by gofmt itself -->
@@ -136,21 +136,6 @@
         <!-- a Cyrillic letter typed in code is a key of the Russian layout left on: the handlers of the platform are given its Latin
              character. The last of the handlers of the editor is the one around the others, the completion list among them -->
         <editorTypedHandler implementationClass="io.github.golangsupport.lang.GoLayoutTypedHandler" id="Go.Layout" order="last"/>
-        <intentionAction>
-            <language>Go</language>
-            <className>io.github.golangsupport.lang.GoHandleErrorIntention</className>
-            <category>Go</category>
-        </intentionAction>
-        <intentionAction>
-            <language>Go</language>
-            <className>io.github.golangsupport.lang.GoCheckErrorIntention</className>
-            <category>Go</category>
-        </intentionAction>
-        <intentionAction>
-            <language>Go</language>
-            <className>io.github.golangsupport.lang.GoAddMissingReturnIntention</className>
-            <category>Go</category>
-        </intentionAction>
         <intentionAction>
             <language>Go</language>
             <className>io.github.golangsupport.lang.GoCreateFunctionIntention</className>

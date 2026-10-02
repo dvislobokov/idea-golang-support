@@ -7,7 +7,7 @@ is marked SLOWER (FASTER for the reverse) when its median grew by more than the 
 and the min..max ranges of the two runs do not overlap; for MB the same with 5 MB, marked LARGER / SMALLER. A metric with one
 sample per run gets the mark with a `?` and never fails the comparison. Live numbers are
 noisy: compare runs on the same machine, run each side twice, and read a change as real only when it is larger than the spread
-of two runs of the same build (see docs/TESTING.md "Performance mode").
+of two runs of the same build (see docs/psi/TESTING.md "Performance mode").
 Exit code 1 when anything is SLOWER or LARGER, so the script can gate a local check.
 """
 import argparse
@@ -63,7 +63,7 @@ def main(argv):
     old, new = load(args.old), load(args.new)
     for label, path, data in (("old", args.old, old), ("new", args.new, new)):
         meta = data.get("meta", {})
-        print("%s: %s, %s, go-psi %s (%s)" % (label, path, meta.get("date"), meta.get("plugin"), meta.get("flags")))
+        print("%s: %s, %s, plugin %s (%s)" % (label, path, meta.get("date"), meta.get("plugin"), meta.get("flags")))
     print()
     print("| Metric | unit | old median | new median | change | old min..max | new min..max | |")
     print("|---|---|---|---|---|---|---|---|")

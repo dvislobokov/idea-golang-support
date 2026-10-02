@@ -8,7 +8,7 @@ import io.github.golangsupport.catalogue.GoPackageSymbols
 import io.github.golangsupport.catalogue.GoSymbol
 import io.github.golangsupport.catalogue.GoSymbolIndex
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarations
+import io.github.golangsupport.lang.GoImports
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -136,7 +136,7 @@ class GoCatalogueTest {
 
     private fun insertion(name: String, code: String): String? {
         val entry = index.find(name, 1).single()
-        return GoCatalogueInsertion.of(entry, GoDeclarations.scan(code).imports)?.let { "${it.text} caret-${it.caretFromEnd} import=${it.importPath}" }
+        return GoCatalogueInsertion.of(entry, GoImports.importsOf(code))?.let { "${it.text} caret-${it.caretFromEnd} import=${it.importPath}" }
     }
 
     @Test fun howASymbolIsWritten() {

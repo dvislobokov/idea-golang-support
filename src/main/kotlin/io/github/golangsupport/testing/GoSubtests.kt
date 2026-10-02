@@ -4,17 +4,11 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.SyntaxTraverser
-import com.intellij.psi.TokenType
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTreeUtil
-import io.github.golangsupport.lang.GoDeclarationInfo
-import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.GoScopeInputs
 import io.github.golangsupport.lang.psi.GoFile
-import io.github.golangsupport.lang.GoTextLexer
-import io.github.golangsupport.lang.GoStructure
-import io.github.golangsupport.lang.GoTextTokens
 import io.github.golangsupport.lang.psi.GoArgumentList
 import io.github.golangsupport.lang.psi.GoCallExpr
 import io.github.golangsupport.lang.psi.GoElement
@@ -32,44 +26,15 @@ import io.github.golangsupport.semantic.psi.GoPsiUtil.arguments
  * A subtest a test function names in its body: `t.Run("empty", ...)`, or a case of a table, `{name: "empty", ...}`. [nameRange] is the string
  * literal with its quotes; [name] is what `go test -run` knows the subtest by (spaces become underscores, as `go test` rewrites them).
  */
-class GoSubtest(val name: String, val nameRange: TextRange, val function: GoDeclarationInfo) {
+class GoSubtest(val name: String, val nameRange: TextRange, val function: String) {
     /** `TestTotal/empty`: the name of the subtest as the test tree and `-run` see it. */
-    val fullName: String get() = "${function.name}/$name"
+    val fullName: String get() = "$function/$name"
 }
 
-/**
- * The subtests of a test function: from the PSI of go-psi where there is one ([find] with a file), else by tokens without knowing types -
- * the string that follows `.Run(` or `name:` in the body of a `TestXxx` or `FuzzXxx` function.
- */
+/** The subtests of a test function, from the PSI of go-psi. */
 object GoSubtests {
     /** The fields a table test names its cases by, as people call them. */
     private val CASE_FIELDS = setOf("name", "Name", "desc", "description", "testName", "title", "scenario", "tc", "caseName", "label")
-
-    fun find(text: CharSequence, function: GoDeclarationInfo): List<GoSubtest> {
-        val body = function.body ?: return emptyList()
-        val lexer = GoTextLexer()
-        lexer.start(text, body.startOffset, body.endOffset, 0)
-        val tokens = ArrayList<Pair<com.intellij.psi.tree.IElementType, TextRange>>()
-        while (true) {
-            val type = lexer.tokenType ?: break
-            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS) tokens += type to TextRange(lexer.tokenStart, lexer.tokenEnd)
-            lexer.advance()
-        }
-        val result = ArrayList<GoSubtest>()
-        val seen = HashSet<String>()
-        for (i in tokens.indices) {
-            val (type, range) = tokens[i]
-            if (type != GoTextTokens.STRING && type != GoTextTokens.RAW_STRING) continue
-            val word = { j: Int -> tokens.getOrNull(j)?.takeIf { it.first == GoTextTokens.IDENTIFIER }?.let { text.subSequence(it.second.startOffset, it.second.endOffset).toString() } }
-            val isRun = tokens.getOrNull(i - 1)?.first == GoTextTokens.LPAREN && word(i - 2) == "Run" && tokens.getOrNull(i - 3)?.first == GoTextTokens.DOT && word(i - 4) != null
-            val isCase = tokens.getOrNull(i - 1)?.let { it.first == GoTextTokens.OPERATOR && text[it.second.startOffset] == ':' } == true && word(i - 2) in CASE_FIELDS &&
-                tokens.getOrNull(i - 3)?.first.let { it == GoTextTokens.LBRACE || it == GoTextTokens.COMMA }
-            if (!isRun && !isCase) continue
-            val name = subtestName(text.subSequence(range.startOffset, range.endOffset).toString()) ?: continue
-            if (seen.add(name)) result += GoSubtest(name, range, function)
-        }
-        return result
-    }
 
     /** `"two items"` -> `two_items`; a name with an escape or a format verb is not a name `-run` can be given. */
     fun subtestName(literal: String): String? {
@@ -83,14 +48,15 @@ object GoSubtests {
     }
 
     /**
-     * The same from the PSI of go-psi: `t.Run("name", ...)` where `t` is a `*testing.T` (a `Run` of anything else is no subtest), a run
-     * inside the function literal of another named by the path of both (`outer/inner`, as `go test` names it), and the cases of a table
-     * (`{name: "x", ...}`) under the runs around them. A run whose name is not a literal hides the runs inside it: their path is not
-     * known. Falls back to [find] by tokens when the function is not found in the PSI or in dumb mode. Read action.
+     * `t.Run("name", ...)` where `t` is a `*testing.T` (a `Run` of anything else is no subtest), a run inside the function literal of
+     * another named by the path of both (`outer/inner`, as `go test` names it), and the cases of a table (`{name: "x", ...}`) under the
+     * runs around them. A run whose name is not a literal hides the runs inside it: their path is not known. Nothing in dumb mode: whether
+     * `t` is a `*testing.T` takes resolve. Read action.
      */
-    fun find(file: GoFile, function: GoDeclarationInfo): List<GoSubtest> {
-        val declaration = GoDeclarationPsi.psiOf(file, function) as? GoFunctionOrMethodDeclaration
-        if (declaration == null || DumbService.isDumb(file.project)) return find(file.viewProvider.contents, function)
+    fun find(declaration: GoFunctionOrMethodDeclaration): List<GoSubtest> {
+        val file = declaration.containingFile as? GoFile ?: return emptyList()
+        val function = declaration.name ?: return emptyList()
+        if (DumbService.isDumb(file.project)) return emptyList()
         val block = declaration.block ?: return emptyList()
         val semantic = GoSemanticService.getInstance(file.project)
         val result = ArrayList<GoSubtest>()
@@ -146,9 +112,7 @@ object GoSubtests {
 
     /** The subtests of every test function of the file, by the offset of their name: for the gutter and the run producer. */
     fun ofFile(file: GoFile): Map<Int, GoSubtest> = CachedValuesManager.getCachedValue(file) {
-        val structure = GoStructure.of(file)
-        val all = GoTests.find(structure, file.name).filter { it.second == GoTestKind.TEST || it.second == GoTestKind.FUZZ }
-            .flatMap { (function, _) -> find(file, function) }
+        val all = GoTests.find(file).filter { it.second == GoTestKind.TEST || it.second == GoTestKind.FUZZ }.flatMap { (function, _) -> find(function) }
         CachedValueProvider.Result.create(all.associateBy { it.nameRange.startOffset }, file, DumbService.getInstance(file.project).modificationTracker)
     }
 }

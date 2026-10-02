@@ -4,16 +4,17 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoDeclarationPsi
-import io.github.golangsupport.lang.GoStructure
+import io.github.golangsupport.lang.GoTypeNameMacro
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoFunctionDeclaration
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoTypes
 import io.github.golangsupport.settings.GoSettings
 
-/** The bridge between the PSI of the parser and the text scanner: kinds, infos, names, the declaration around an offset. */
-class GoDeclarationPsiTest : BasePlatformTestCase() {
+/** Declarations of the PSI as the tools of the plugin see them: kinds, values ([GoDeclarationInfo]), names, the declaration around an offset. */
+class GoDeclarationInfoTest : BasePlatformTestCase() {
     private var languageServer = true
 
     // a file opened in an editor starts gopls, where it is installed: not in a test
@@ -73,16 +74,17 @@ class GoDeclarationPsiTest : BasePlatformTestCase() {
     }
 
     private fun assertDeclaration(context: String, name: String, kind: GoDeclarationKind) {
-        val declaration = GoDeclarationPsi.ofName(leaf(context, name))
+        val declaration = GoDeclarationKind.ofName(leaf(context, name))
         assertNotNull("ofName($name)", declaration)
         assertEquals(name, declaration!!.name)
-        assertEquals(name, kind, GoDeclarationPsi.kindOf(declaration))
-        val info = GoDeclarationPsi.infoOf(declaration)
-        assertNotNull("infoOf($name)", info)
+        assertEquals(name, kind, GoDeclarationKind.of(declaration))
+        val info = GoDeclarationInfo.of(declaration)
+        assertNotNull("of($name)", info)
         assertEquals(name, info!!.name)
         assertEquals(name, kind, info.kind)
-        assertSame(name, declaration, GoDeclarationPsi.psiOf(myFixture.file, info))
-        assertFalse(name, GoDeclarationPsi.isLocalName(declaration.nameIdentifier!!))
+        assertEquals(name, declaration.nameIdentifier!!.textRange, info.nameRange)
+        // the range starts at the code, not at the doc comment
+        assertFalse(name, code.substring(info.range.startOffset).startsWith("//"))
     }
 
     fun testKindsInfosAndNames() {
@@ -96,50 +98,54 @@ class GoDeclarationPsiTest : BasePlatformTestCase() {
         assertDeclaration("func Sum", "Sum", GoDeclarationKind.FUNCTION)
         assertDeclaration("Add(n", "Add", GoDeclarationKind.METHOD)
 
-        val sum = GoDeclarationPsi.ofName(leaf("func Sum", "Sum")) as GoFunctionDeclaration
-        assertEquals("(items []Order) int", GoDeclarationPsi.infoOf(sum)!!.signature)
-        val add = GoDeclarationPsi.ofName(leaf("Add(n", "Add")) as GoMethodDeclaration
-        assertEquals("Order", add.receiverTypeName)
-        assertEquals("Order", GoDeclarationPsi.infoOf(add)!!.receiver)
-        assertEquals("(n int) error", GoDeclarationPsi.infoOf(add)!!.signature)
+        val sum = GoDeclarationKind.ofName(leaf("func Sum", "Sum")) as GoFunctionDeclaration
+        assertEquals("(items []Order) int", GoDeclarationInfo.of(sum)!!.signature)
+        assertTrue(code.substring(GoDeclarationInfo.of(sum)!!.body!!.startOffset).startsWith("{\n\tcount := 0"))
+        val add = GoDeclarationKind.ofName(leaf("Add(n", "Add")) as GoMethodDeclaration
+        assertEquals("Order", GoDeclarationInfo.of(add)!!.receiver)
+        assertEquals("(n int) error", GoDeclarationInfo.of(add)!!.signature)
+        assertEquals("(Order) Add(n int) error", GoDeclarationInfo.of(add)!!.presentation)
+        assertEquals("[]Order", GoDeclarationInfo.of(GoDeclarationKind.ofName(leaf("var orders", "orders"))!!)!!.signature)
+        assertEquals("(o Order) int", GoDeclarationInfo.of(GoDeclarationKind.ofName(leaf("Price(o", "Price"))!!)!!.signature)
     }
 
-    fun testUsesAndLocals() {
+    fun testUsesAndLocalsHaveNoKind() {
         myFixture.configureByText("shop.go", code)
         // a use of a type is no declaration
-        assertNull(GoDeclarationPsi.ofName(leaf("[]Order", "Order")))
-        // a local, its use and a parameter are local names, and have a named PSI element of their own
+        assertNull(GoDeclarationKind.ofName(leaf("[]Order", "Order")))
+        // a local and a parameter have a named element of their own, but no kind
         val count = leaf("count := 0", "count")
-        assertNull(GoDeclarationPsi.ofName(count))
-        assertNull(GoDeclarationPsi.kindOf(count.parent))
-        assertTrue(GoDeclarationPsi.isLocalName(count))
-        assertNotNull(GoDeclarationPsi.namedOf(count))
-        assertTrue(GoDeclarationPsi.isLocalName(leaf("count += o", "count")))
-        assertTrue(GoDeclarationPsi.isLocalName(leaf("items []Order", "items")))
-        // a use of a package-level name is not its declaration either, but no local
-        assertNull(GoDeclarationPsi.namedOf(leaf("o.Total", "Total")))
+        assertNull(GoDeclarationKind.ofName(count))
+        assertNull(GoDeclarationKind.of(count.parent))
+        assertNull(GoDeclarationKind.ofName(leaf("items []Order", "items")))
     }
 
     fun testDeclarationAroundAnOffset() {
         myFixture.configureByText("shop.go", code)
-        val inBody = code.indexOf("count += o.Total")
-        val sum = GoDeclarationPsi.at(myFixture.file, inBody)
+        val sum = GoDeclarationKind.at(myFixture.file, code.indexOf("count += o.Total"))
         assertTrue(sum is GoFunctionDeclaration)
         assertEquals("Sum", sum!!.name)
-        assertEquals("Add", GoDeclarationPsi.at(myFixture.file, code.indexOf("return nil"))!!.name)
-        assertNull(GoDeclarationPsi.at(myFixture.file, code.indexOf("package")))
+        assertEquals("Add", GoDeclarationKind.at(myFixture.file, code.indexOf("return nil"))!!.name)
+        assertNull(GoDeclarationKind.at(myFixture.file, code.indexOf("package")))
+    }
+
+    fun testTopLevelInTheOrderOfTheText() {
+        myFixture.configureByText("shop.go", code)
+        val file = myFixture.file as GoFile
+        assertEquals(listOf("Limit", "orders", "Order", "Pricer", "Sum", "Add"), GoDeclarationInfo.topLevel(file).map { it.name })
+        assertEquals(listOf("Limit", "orders", "Order", "Total", "Pricer", "Price", "Sum", "Add"), GoDeclarationInfo.all(file).map { it.name })
+        assertEquals("*Order", GoTypeNameMacro.receiverFor(file, code.length))
+        assertEquals("*Order", GoTypeNameMacro.receiverFor(file, code.indexOf("type Pricer")))
+        assertNull(GoTypeNameMacro.receiverFor(file, code.indexOf("type Order")))
     }
 
     fun testStructureAfterTyping() {
         myFixture.configureByText("shop.go", "$code\n\n<caret>")
         myFixture.type("func Extra(n int) {\n")
         PsiDocumentManager.getInstance(project).commitAllDocuments()
-        val structure = GoStructure.of(myFixture.file)
-        val extra = structure.declarations.firstOrNull { it.name == "Extra" }
+        val extra = GoDeclarationInfo.topLevel(myFixture.file as GoFile).firstOrNull { it.name == "Extra" }
         assertNotNull(myFixture.file.text, extra)
         assertEquals(GoDeclarationKind.FUNCTION, extra!!.kind)
-        val psi = GoDeclarationPsi.psiOf(myFixture.file, extra)
-        assertTrue("$psi", psi is GoFunctionDeclaration)
-        assertEquals(extra.nameRange.startOffset, GoDeclarationPsi.infoOf(psi!!)!!.nameRange.startOffset)
+        assertEquals("(n int)", extra.signature)
     }
 }

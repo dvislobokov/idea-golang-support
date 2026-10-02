@@ -1,7 +1,8 @@
-"""End-to-end scenario of go-psi's IDE features in a real sandbox IDE, driven through the Remote Robot (robot.py).
+"""End-to-end scenario of the PSI-based IDE features (the go-psi steps 1-16 and the performance steps P1-P9) in a real sandbox IDE,
+driven through the Remote Robot (robot.py: the same robot, port and prelude.js as the plugin's checks in scripts/ and session.sh).
 
-    python tools/ui-robot/autotest.py                 start `./gradlew :plugin:runIdeForUiTests`, run every step, exit the IDE
-    python tools/ui-robot/autotest.py --attach        use the sandbox that already runs on ROBOT_PORT (default 8084), keep it running
+    python tools/ui-robot/autotest.py                 start `./gradlew runIdeForUiTests -ProbotPort=PORT`, run every step, exit the IDE
+    python tools/ui-robot/autotest.py --attach        use the sandbox that already runs on ROBOT_PORT (default 8083), keep it running
     python tools/ui-robot/autotest.py --steps 3,4,5   only these steps (1 = open the project, run it once per IDE session)
     python tools/ui-robot/autotest.py --perf          performance mode (perf.py): steps 1, 2, P1-P9, 15; no functional steps
     python tools/ui-robot/autotest.py --perf --scenario   performance mode first, then every functional step
@@ -12,11 +13,12 @@ Options combine (`--attach --perf --steps 1`); an unknown option prints this tex
 
 Writes build/ui-robot/report.md and build/ui-robot/NN-step.png (pictures of the IDE frame or of a popup, painted by the component,
 never of the desktop). Each step is PASS or FAIL with the text read from the IDE as evidence. The performance mode also
-writes build/ui-robot/perf.md and perf.json (see perf.py and docs/TESTING.md "Performance mode").
+writes build/ui-robot/perf.md and perf.json (see perf.py and docs/psi/TESTING.md "Performance mode").
 
-The scenario project (tools/ui-robot/project) is copied to %TEMP%/gopsi-ui-project and opened from there: outside the repository,
+The scenario project (tools/ui-robot/project-psi, not the playground: the steps check its exact files) is copied to %TEMP%/gopsi-ui-project and opened from there: outside the repository,
 so that the user's main IDE does not analyse it, and with its own go.mod. Every step that edits a file first restores its text.
 """
+import glob
 import json
 import os
 import re
@@ -35,13 +37,24 @@ import robot
 
 REPO = os.path.dirname(os.path.dirname(HERE))
 OUT = os.path.join(REPO, "build", "ui-robot")
-SOURCE_PROJECT = os.path.join(HERE, "project")
+SOURCE_PROJECT = os.path.join(HERE, "project-psi")
 SCRATCH = os.path.join(tempfile.gettempdir(), "gopsi-ui-project")
-# The sandbox of this repository (idea-golang-support, IDEA 2026.1.4); GOPSI_SANDBOX_LOG overrides it (the go-psi layout was sandbox/plugin/IU-2026.1.5).
-SANDBOX_LOG = os.environ.get("GOPSI_SANDBOX_LOG") or os.path.join(REPO, ".intellijPlatform", "sandbox", "idea-golang-support", "IU-2026.1.4", "log_runIdeForUiTests", "idea.log")
+
+
+def sandbox_log():
+    """idea.log of this checkout's runIdeForUiTests sandbox (`IU-<version>` follows localIdePath); SANDBOX_LOG overrides it."""
+    if os.environ.get("SANDBOX_LOG"):
+        return os.environ["SANDBOX_LOG"]
+    sandbox = os.path.join(REPO, ".intellijPlatform", "sandbox", "idea-golang-support")
+    ides = sorted(glob.glob(os.path.join(sandbox, "IU-*")), key=os.path.getmtime)
+    return os.path.join(ides[-1] if ides else os.path.join(sandbox, "IU-2026.1.4"), "log_runIdeForUiTests", "idea.log")
+
+
+SANDBOX_LOG = sandbox_log()
 GOROOT = os.environ.get("GOROOT") or r"C:\Program Files\Go"
 GOFMT = os.path.join(GOROOT, "bin", "gofmt.exe")
-PLUGIN_LINE = "Go PSI (0.0.9)"
+# the plugin in the `Loaded custom plugins` line of idea.log, without its version
+PLUGIN_LINE = "Go Project Support ("
 
 # ------------------------------------------------------------------------------------------------------------------------------
 # JavaScript helpers, put in front of every step script (after robot's prelude.js). Rhino: `var` only (a `const` in a loop keeps
@@ -294,8 +307,8 @@ def record(number, title, checks, evidence, pictures):
 
 def write_report():
     os.makedirs(OUT, exist_ok=True)
-    lines = ["# go-psi UI robot report", "",
-             "Sandbox: `:plugin:runIdeForUiTests` (IntelliJ IDEA 2026.1.5, robot-server on %s), project `%s`, %s." % (
+    lines = ["# UI robot report: the PSI scenario", "",
+             "Sandbox: `runIdeForUiTests` (robot-server on %s), project `%s`, %s." % (
                  robot.BASE, SCRATCH, time.strftime("%Y-%m-%d %H:%M")), "",
              "| # | Step | Result | Checks | Screenshot |", "|---|---|---|---|---|"]
     for r in RESULTS:
@@ -340,12 +353,12 @@ def log_text():
 
 
 def gopsi_exceptions():
-    """ERROR records of the current IDE session whose text or stack trace mentions go-psi."""
+    """ERROR records of the current IDE session whose text or stack trace mentions the plugin (go-psi lives in its packages now)."""
     found = []
     record_lines = []
     for line in log_text().splitlines() + ["2000-01-01 00:00:00,000 [0] INFO - end"]:
         if re.match(r"\d{4}-\d\d-\d\d \d\d:\d\d:\d\d,\d+ ", line):
-            if record_lines and (" ERROR - " in record_lines[0] or " SEVERE - " in record_lines[0]) and any("gopsi" in l for l in record_lines):
+            if record_lines and (" ERROR - " in record_lines[0] or " SEVERE - " in record_lines[0]) and any("golangsupport" in l or "Plugin to blame: Go" in l for l in record_lines):
                 found.append("\n".join(record_lines[:25]))
             record_lines = [line]
         else:
@@ -392,7 +405,8 @@ def step1_start(attach, cold=False):
             evidence.append("--cold: removed %s" % wipe_sandbox_indexes())
         log = open(os.path.join(OUT, "gradle-runIdeForUiTests.log"), "w", encoding="utf-8")  # noqa: SIM115 - gradle writes to it until the IDE exits
         gradlew = os.path.join(REPO, "gradlew.bat" if os.name == "nt" else "gradlew")
-        GRADLE = subprocess.Popen([gradlew, ":plugin:runIdeForUiTests", "-ProbotPort=" + robot.PORT, "--console=plain"],
+        # no configuration cache: the RunIde task does not serialize
+        GRADLE = subprocess.Popen([gradlew, "runIdeForUiTests", "-ProbotPort=" + robot.PORT, "--no-configuration-cache", "--console=plain"],
                                   cwd=REPO, stdout=log, stderr=subprocess.STDOUT)
         evidence.append("started gradle pid %d" % GRADLE.pid)
     started = time.time()
@@ -1244,6 +1258,10 @@ def main():
     if wanted is None and opts["perf"] and not opts["scenario"]:
         wanted = {1, 2, 15}
     os.makedirs(OUT, exist_ok=True)
+    if attach and not port_open():
+        # --attach never starts anything: fail at once instead of retrying for 15 minutes in step 1
+        raise SystemExit("autotest: nothing listens on %s, the robot never answered; start `./gradlew runIdeForUiTests "
+                         "--no-configuration-cache` (ROBOT_PORT=%s) or run without --attach" % (robot.BASE, robot.PORT))
     MEASURE_OPEN = opts["perf"]
     if wanted is None or 1 in wanted:
         step1_start(attach, opts["cold"])

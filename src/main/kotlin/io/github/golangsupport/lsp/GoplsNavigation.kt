@@ -20,13 +20,13 @@ import com.intellij.platform.lsp.api.LspServerState
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.searches.DefinitionsScopedSearch
+import com.intellij.psi.util.elementType
 import com.intellij.usageView.UsageInfo
 import com.intellij.usages.Usage
 import com.intellij.usages.UsageInfo2UsageAdapter
 import com.intellij.util.Processor
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoNamedElement
@@ -147,7 +147,7 @@ object Gopls {
     /** The PSI element of a place: the declaration, when the place is the name of one (it presents itself better), otherwise the token. */
     fun element(project: Project, place: Place): PsiElement? {
         val leaf = PsiManager.getInstance(project).findFile(place.file)?.findElementAt(place.startOffset) ?: return null
-        return GoDeclarationPsi.ofName(leaf) ?: leaf
+        return GoDeclarationKind.ofName(leaf) ?: leaf
     }
 }
 
@@ -193,8 +193,8 @@ class GoplsUsageSearcher : CustomUsageSearcher() {
         // called on a background thread without a read action (seen live): everything about the element is read in one
         val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> {
             // a local comes as its PSI definition (the Find Usages provider of the PSI takes named elements) or as a bare token
-            val accepted = GoDeclarationPsi.declaration(element) != null || GoDeclarationPsi.isLocalName(element) ||
-                element is GoNamedElement && element.nameIdentifier?.let(GoDeclarationPsi::isLocalName) == true
+            val accepted = GoDeclarationKind.declaration(element) != null || GoplsTargets.isLocalName(element) ||
+                element is GoNamedElement && element.nameIdentifier?.let(GoplsTargets::isLocalName) == true
             if (accepted) GoplsTargets.of(element) else null
         } ?: return
         if (GoFeatures.native(GoFeature.USAGES, project)) return
@@ -233,7 +233,7 @@ class GoplsImplementationSearch : QueryExecutorBase<PsiElement, DefinitionsScope
         if (GoFeatures.native(GoFeature.NAVIGATION, parameters.project)) return
         val declaration = ReadAction.compute<GoNamedElement?, RuntimeException> {
             // gopls answers a question about a plain function, a field or a value with an error, which the platform logs as a warning
-            GoDeclarationPsi.declaration(parameters.element)?.takeIf { GoDeclarationPsi.kindOf(it) in WITH_IMPLEMENTATIONS }
+            GoDeclarationKind.declaration(parameters.element)?.takeIf { GoDeclarationKind.of(it) in WITH_IMPLEMENTATIONS }
         } ?: return
         val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> { GoplsTargets.of(declaration) } ?: return
         val client = Gopls.client(project) ?: return
@@ -255,6 +255,21 @@ object GoplsTargets {
         if (!element.isValid) return null
         val file = element.containingFile?.virtualFile ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
-        return Triple(element.project, file, Gopls.position(document, GoDeclarationPsi.nameOffset(element)))
+        return Triple(element.project, file, Gopls.position(document, nameOffset(element)))
     }
+
+    /** The offset of the name of a named element, the start of anything else: where a request to gopls about it points. */
+    private fun nameOffset(element: PsiElement): Int = (element as? GoNamedElement)?.nameIdentifier?.textRange?.startOffset ?: element.textRange.startOffset
+
+    /** Any named element whose name is this identifier leaf, a local or a parameter too: what Find Usages of the PSI starts from. */
+    fun namedOf(leaf: PsiElement?): GoNamedElement? {
+        if (leaf == null || leaf.elementType != GoTypes.IDENTIFIER) return null
+        return (leaf.parent as? GoNamedElement)?.takeIf { it.nameIdentifier == leaf }
+    }
+
+    /**
+     * An identifier token of a Go file that is not the name of a declaration with a kind: a local, a parameter, a receiver, a field of a
+     * struct literal. Find Usages and the gopls searchers accept these (the server tells where such a name is declared).
+     */
+    fun isLocalName(element: PsiElement): Boolean = element.containingFile is GoFile && element.elementType == GoTypes.IDENTIFIER && GoDeclarationKind.ofName(element) == null
 }

@@ -10,7 +10,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoDeclarationPsi
+import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoNamedElement
 import io.github.golangsupport.lang.psi.GoTypes
@@ -24,7 +24,7 @@ class GoplsTargetElementEvaluator : TargetElementEvaluatorEx2() {
     override fun getNamedElement(element: PsiElement): PsiElement? {
         if (GoFeatures.native(GoFeature.NAVIGATION, element.project)) return null
         if (element.containingFile !is GoFile || element.elementType != GoTypes.IDENTIFIER) return null
-        GoDeclarationPsi.namedOf(element)?.let { return it }
+        GoplsTargets.namedOf(element)?.let { return it }
         val file = element.containingFile.virtualFile ?: return null
         val client = Gopls.client(element.project) ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
@@ -32,8 +32,8 @@ class GoplsTargetElementEvaluator : TargetElementEvaluatorEx2() {
         // a declaration of the file structure, or the PSI definition of a local: the Find Usages provider of the PSI takes named elements;
         // a package name leads to a directory or a package clause, which is no target to search from
         val target = Gopls.element(element.project, place) ?: return null
-        GoDeclarationPsi.declaration(target)?.let { return it }
-        return target.takeIf { GoDeclarationPsi.isLocalName(it) && it.containingFile == element.containingFile }?.let { GoDeclarationPsi.namedOf(it) ?: it }
+        GoDeclarationKind.declaration(target)?.let { return it }
+        return target.takeIf { GoplsTargets.isLocalName(it) && it.containingFile == element.containingFile }?.let { GoplsTargets.namedOf(it) ?: it }
     }
 
     private companion object {

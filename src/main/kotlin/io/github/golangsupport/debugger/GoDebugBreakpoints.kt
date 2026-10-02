@@ -66,10 +66,13 @@ class GoLineBreakpointType : XLineBreakpointType<GoLineBreakpointProperties>("go
     override fun canPutAt(file: VirtualFile, line: Int, project: Project): Boolean {
         if (file.fileType != GoFileType) return false
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return false
-        // asked for every line the mouse passes in the gutter: one scan per change of the text; the PSI when it is current, else the text
-        val cached = document.getUserData(LINES)?.takeIf { it.first == document.modificationStamp }
-            ?: (document.modificationStamp to GoDebugPsi.compute(project, document, { GoBreakpointLines.find(it) }, { GoBreakpointLines.find(it) })).also { document.putUserData(LINES, it) }
-        return line in cached.second
+        // asked for every line the mouse passes in the gutter: one walk of the PSI per change of the text; while the PSI has not seen the
+        // last change the lines of the text before it stand (or any line, delve verifies the breakpoint anyway)
+        val known = document.getUserData(LINES)
+        val lines = known?.takeIf { it.first == document.modificationStamp }?.second
+            ?: GoDebugPsi.compute(project, document) { GoBreakpointLines.find(it) }?.also { document.putUserData(LINES, document.modificationStamp to it) }
+            ?: known?.second ?: return true
+        return line in lines
     }
 
     override fun createCustomPropertiesPanel(project: Project): XBreakpointCustomPropertiesPanel<GoLineBreakpoint> = PropertiesPanel()

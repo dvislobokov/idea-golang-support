@@ -18,7 +18,14 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import io.github.golangsupport.settings.GoSettings
+import com.intellij.psi.PsiElement
+import io.github.golangsupport.lang.psi.GoConstDeclaration
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
+import io.github.golangsupport.lang.psi.GoInterfaceType
+import io.github.golangsupport.lang.psi.GoStructType
+import io.github.golangsupport.lang.psi.GoTypeDeclaration
+import io.github.golangsupport.lang.psi.GoVarDeclaration
 import io.github.golangsupport.lang.psi.GoTokenSets
 import io.github.golangsupport.lang.psi.GoTypes
 
@@ -27,9 +34,9 @@ import io.github.golangsupport.lang.psi.GoTypes
  * body offers `for i, x := range xs` for the slices in sight, as GoLand does. Each item is a live template ([Item.template], `$STOP$`
  * for what is typed next, `$END$` for the caret), expanded by the platform, so Tab walks the stops. Works without gopls.
  *
- * The place is read from the text: the declarations of the file say whether the caret is at the top level or in a body. What there is
- * to range over or to select on comes from the PSI of go-psi ([GoScopeInputs], the overload of [contextAt] with a file); for a text
- * without that PSI the names declared above the caret are what a regular expression sees in a line.
+ * The place is read from the PSI: the declarations of the file say whether the caret is at the top level or in a body. What there is
+ * to range over or to select on comes from the PSI of go-psi too ([GoScopeInputs]); in dumb mode the names declared above the caret are
+ * what a regular expression sees in a line.
  */
 object GoKeywordTemplates {
     /** [keyword] is what is typed to get the item; [lookups] are other words that find it (`test` for `func TestX`). */
@@ -62,7 +69,7 @@ object GoKeywordTemplates {
         val methods: Map<String, Set<String>> = emptyMap(),
         /**
          * In a body, when the PSI told what is in scope ([GoScopeInputs]): the variables with their kinds, innermost first. The `select`
-         * items and the channel items are built from it; null on the text path, which keeps the fixed `select` items.
+         * items and the channel items are built from it; null in dumb mode, which keeps the fixed `select` items.
          */
         val scope: List<GoScopeInputs.Variable>? = null,
     )
@@ -79,41 +86,14 @@ object GoKeywordTemplates {
     private val CHANNEL = Regex("""\b([a-zA-Z_]\w*)\s*(?::?=\s*(?:make\()?|\s)(?:<-)?chan\b""")
     private val CONTEXT = Regex("""\bctx\b""")
 
-    /** The context of [offset], or null where a keyword cannot begin: in the middle of a line, in a signature, in a type body. */
-    fun contextAt(text: CharSequence, offset: Int, isTestFile: Boolean, structure: GoFileStructure = GoDeclarations.scan(text)): Context? {
-        val typedStart = offset - typed(text, offset).length
-        val lineStart = lineStart(text, typedStart)
-        if (text.subSequence(lineStart, typedStart).isNotBlank()) return null
-        val types = structure.declarations.filter { it.kind.isType }.sortedByDescending { it.kind == GoDeclarationKind.STRUCT }.take(MAX_TYPES).map { type ->
-            val methods = structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver == type.name }
-            val pointer = methods.none() && type.kind == GoDeclarationKind.STRUCT || methods.any { text.subSequence(it.range.startOffset, it.nameRange.startOffset).contains('*') }
-            TypeInfo(type.name, type.kind == GoDeclarationKind.STRUCT, pointer)
-        }
-        val wantsMain = structure.isMainPackage && structure.mainFunction == null
-        val enclosing = structure.all().firstOrNull { it.range.contains(typedStart) && it.range.startOffset < typedStart }
-        if (enclosing == null) {
-            val methods = structure.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.receiver != null }.groupBy({ it.receiver!! }, { it.name }).mapValues { it.value.toSet() }
-            return Context(Place.TOP, isTestFile, wantsMain, types, methods = methods)
-        }
-        val body = enclosing.body ?: return null
-        if ((enclosing.kind != GoDeclarationKind.FUNCTION && enclosing.kind != GoDeclarationKind.METHOD) || typedStart <= body.startOffset || typedStart >= body.endOffset) return null
-        val above = text.subSequence(maxOf(body.startOffset, lineStart(text, lineStart, MAX_LINES_BACK)), lineStart)
-        val signature = enclosing.signature ?: ""
-        fun names(regex: Regex): List<String> = (regex.findAll(signature).map { it.groupValues[1] } + regex.findAll(above).map { it.groupValues[1] })
-            .filter { it != "_" && it !in KEYWORDS }.distinct().toList().takeLast(MAX_NAMES).reversed()
-        return Context(
-            Place.BODY, isTestFile, wantsMain, types, inTest = signature.contains("*testing.T"),
-            slices = names(SLICE), maps = names(MAP), channels = names(CHANNEL), hasContext = CONTEXT.containsMatchIn(signature) || CONTEXT.containsMatchIn(above),
-        )
-    }
-
     /**
-     * The context of [offset] in a file of go-psi: the place is told by the text as above, what is in scope by the PSI ([GoScopeInputs]):
-     * variables by their types, not by a regular expression over the lines above (`ctx int` is no context), the methods of the types of
-     * the file by the semantic layer. Where the PSI cannot tell (no enclosing function, dumb mode), the text answer stays. Read action.
+     * The context of [offset] in [file] (whose document is [text], committed: completion commits it), or null where a keyword cannot
+     * begin: in the middle of a line, in a signature, in a type body. The place and the types of the file come from the PSI; what is in
+     * scope from [GoScopeInputs] (variables by their types: `ctx int` is no context, the methods of the types by the semantic layer).
+     * Where those cannot tell (dumb mode), the names declared above the caret are what a regular expression sees in a line. Read action.
      */
     fun contextAt(file: GoFile, text: CharSequence, offset: Int): Context? {
-        val base = contextAt(text, offset, file.isTestFile, GoStructure.of(file)) ?: return null
+        val base = placeAt(file, text, offset) ?: return null
         if (base.place == Place.TOP) {
             val methods = GoScopeInputs.methodsByType(file) ?: return base
             return Context(Place.TOP, base.isTestFile, base.wantsMain, base.types, methods = methods)
@@ -126,6 +106,39 @@ object GoKeywordTemplates {
             inTest = scope.any { it.kind == GoScopeInputs.Kind.TESTING && it.name == "t" },
             slices = names(GoScopeInputs.Kind.SLICE), maps = names(GoScopeInputs.Kind.MAP), channels = names(GoScopeInputs.Kind.CHANNEL) { it.receives },
             hasContext = scope.any { it.kind == GoScopeInputs.Kind.CONTEXT }, scope = scope,
+        )
+    }
+
+    /** The place of [offset] by the PSI, with what the declarations of the file tell; in a body, the names by the lines above. */
+    private fun placeAt(file: GoFile, text: CharSequence, offset: Int): Context? {
+        val typedStart = offset - typed(text, offset).length
+        val lineStart = lineStart(text, typedStart)
+        if (text.subSequence(lineStart, typedStart).isNotBlank()) return null
+        val methodsOf = file.methods.groupBy { it.receiverTypeName }
+        val types = file.types.filter { it.name != null }.sortedByDescending { it.type is GoStructType }.take(MAX_TYPES).map { type ->
+            val methods = methodsOf[type.name].orEmpty()
+            val struct = type.type is GoStructType
+            TypeInfo(type.name!!, struct, methods.none() && struct || methods.any { it.isPointerReceiver })
+        }
+        val wantsMain = file.packageName == "main" && file.functions.none { it.name == "main" }
+        // the package-level declaration that began before the word: none is the top of the file
+        var enclosing: PsiElement? = file.findElementAt(typedStart)
+        while (enclosing != null && enclosing.parent !is GoFile) enclosing = enclosing.parent
+        val isDeclaration = enclosing is GoFunctionOrMethodDeclaration || enclosing is GoTypeDeclaration || enclosing is GoVarDeclaration || enclosing is GoConstDeclaration
+        if (enclosing == null || !isDeclaration || enclosing.textRange.startOffset >= typedStart) {
+            val methods = file.methods.mapNotNull { m -> m.receiverTypeName?.let { it to m.name } }.groupBy({ it.first }, { it.second }).mapValues { it.value.filterNotNull().toSet() }
+            return Context(Place.TOP, file.isTestFile, wantsMain, types, methods = methods)
+        }
+        val function = enclosing as? GoFunctionOrMethodDeclaration ?: return null
+        val body = function.block?.textRange ?: return null
+        if (typedStart <= body.startOffset || typedStart >= body.endOffset) return null
+        val above = text.subSequence(maxOf(body.startOffset, lineStart(text, lineStart, MAX_LINES_BACK)), lineStart)
+        val signature = GoDeclarationInfo.of(function)?.signature.orEmpty()
+        fun names(regex: Regex): List<String> = (regex.findAll(signature).map { it.groupValues[1] } + regex.findAll(above).map { it.groupValues[1] })
+            .filter { it != "_" && it !in KEYWORDS }.distinct().toList().takeLast(MAX_NAMES).reversed()
+        return Context(
+            Place.BODY, file.isTestFile, wantsMain, types, inTest = signature.contains("*testing.T"),
+            slices = names(SLICE), maps = names(MAP), channels = names(CHANNEL), hasContext = CONTEXT.containsMatchIn(signature) || CONTEXT.containsMatchIn(above),
         )
     }
 
@@ -333,13 +346,13 @@ class GoKeywordCompletionContributor : CompletionContributor() {
     private fun interfacesOf(file: GoFile): List<GoKeywordTemplates.InterfaceInfo> = CachedValuesManager.getManager(file.project).getCachedValue(file.project) {
         val project = file.project
         val interfaces = ArrayList<GoKeywordTemplates.InterfaceInfo>()
-        // the index knows names, not kinds: every Go file of the project, its declarations from the cache of the file
+        // the index knows names, not kinds: every Go file of the project, its types from the stubs; the text of a signature only for an interface
         for (virtualFile in FileTypeIndex.getFiles(GoFileType, GlobalSearchScope.projectScope(project))) {
             val psi = PsiManager.getInstance(project).findFile(virtualFile) as? GoFile ?: continue
-            for (declaration in GoStructure.of(psi).declarations) {
-                if (declaration.kind != GoDeclarationKind.INTERFACE) continue
-                val methods = declaration.children.filter { it.kind == GoDeclarationKind.INTERFACE_METHOD }.map { it.name to it.signature.orEmpty() }
-                if (methods.isNotEmpty()) interfaces += GoKeywordTemplates.InterfaceInfo(declaration.name, methods)
+            for (spec in psi.types) {
+                val type = spec.type as? GoInterfaceType ?: continue
+                val methods = type.methodSpecList.mapNotNull { method -> method.name?.let { it to GoDeclarationInfo.oneLine(method.signature?.text.orEmpty()) } }
+                if (methods.isNotEmpty()) interfaces += GoKeywordTemplates.InterfaceInfo(spec.name ?: continue, methods)
             }
         }
         CachedValueProvider.Result.create(interfaces.sortedBy { it.name }, PsiModificationTracker.MODIFICATION_COUNT)

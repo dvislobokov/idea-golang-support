@@ -98,8 +98,8 @@ object GoSnippets {
 
 /**
  * `return` inside a function with several results: all of its values as one item, `nil, err`. From the PSI ([GoReturnValues]: variables
- * of the result types in scope, zero values, and the error wrapped with `fmt.Errorf` as a second item where `fmt` is imported); the text
- * version ([GoIdioms.returnValues]) where the PSI cannot tell. Works without gopls.
+ * of the result types in scope, zero values, and the error wrapped with `fmt.Errorf` as a second item where `fmt` is imported); nothing
+ * while the IDE indexes. Works without gopls.
  */
 class GoReturnCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
@@ -110,8 +110,8 @@ class GoReturnCompletionContributor : CompletionContributor() {
             GoReturnValues.forReturn(parameters.position)
         } catch (_: IndexNotReadyException) {
             null
-        }
-        val values = if (psi == null) listOfNotNull(GoIdioms.returnValues(text, parameters.offset)) else listOfNotNull(psi.plain.takeIf { it.isNotEmpty() }, psi.wrapped)
+        } ?: return
+        val values = listOfNotNull(psi.plain.takeIf { it.isNotEmpty() }, psi.wrapped)
         val matching = result.withPrefixMatcher(GoPrefixMatcher(GoCompletionOrder.typed(text, parameters.offset)))
         values.forEachIndexed { i, value ->
             val item = LookupElementBuilder.create(value).bold().withIcon(AllIcons.Actions.StepOut).withTypeText("return values", true)

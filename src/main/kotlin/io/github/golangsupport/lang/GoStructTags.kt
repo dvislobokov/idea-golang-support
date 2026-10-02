@@ -148,38 +148,6 @@ object GoStructTags {
         val field = GoStructPsi.fieldsOf(declaration).firstOrNull()?.name ?: return null
         return start to field
     }
-
-    /** Where a tag starts and the field it belongs to, when [offset] is inside the backquotes of a field of a struct; null anywhere else. */
-    fun tagAt(text: CharSequence, offset: Int): Pair<Int, String>? {
-        val lineStart = text.lastIndexOf('\n', (offset - 1).coerceAtLeast(0)).let { if (it < 0) 0 else it + 1 }
-        val beforeCaret = text.subSequence(lineStart, offset).toString()
-        val open = beforeCaret.indexOf('`')
-        if (open < 0 || beforeCaret.indexOf('`', open + 1) >= 0) return null
-        // `Name string` or `Name, Other string` or an embedded `*pkg.Type`: the field is the first word
-        val head = beforeCaret.substring(0, open).trim()
-        if (head.isEmpty() || head.startsWith("//")) return null
-        val field = Regex("""^\*?(?:\w+\.)?(\w+)""").find(head)?.groupValues?.get(1) ?: return null
-        if (field in GoTextTokens.KEYWORDS) return null
-        // inside the braces of a struct type
-        val structure = GoDeclarations.scan(text)
-        val inStruct = structure.declarations.any { it.kind == GoDeclarationKind.STRUCT && it.body?.let { body -> offset > body.startOffset && offset < body.endOffset } == true } ||
-            isInsideStructLiteralType(text, lineStart)
-        return if (inStruct) (lineStart + open) to field else null
-    }
-
-    /** An anonymous `struct {` above the line (a field of a function, a variable): the scanner lists only named types. */
-    private fun isInsideStructLiteralType(text: CharSequence, lineStart: Int): Boolean {
-        var depth = 0
-        var i = lineStart - 1
-        while (i >= 0) {
-            when (text[i]) {
-                '}' -> depth++
-                '{' -> if (depth == 0) return Regex("""struct\s*$""").containsMatchIn(text.subSequence((i - 20).coerceAtLeast(0), i)) else depth--
-            }
-            i--
-        }
-        return false
-    }
 }
 
 /**

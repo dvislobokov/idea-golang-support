@@ -1,40 +1,25 @@
 package io.github.golangsupport
 
-import io.github.golangsupport.lang.GoDeclarations
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import io.github.golangsupport.lang.GoFieldAlignment
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import io.github.golangsupport.lang.GoStructPsi
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoStructType
 
-class GoFieldAlignmentTest {
-    private val none: (String) -> String? = { null }
+/** The layout of a struct with the sizes of the types of its fields from the PSI, and the order that wastes the least. */
+class GoFieldAlignmentTest : BasePlatformTestCase() {
+    private var files = 0
 
-    private fun bodyOf(source: String): CharSequence {
-        val structure = GoDeclarations.scan(source)
-        val body = structure.declarations.first { it.name == "T" }.body!!
-        return source.subSequence(body.startOffset + 1, body.endOffset - 1)
+    /** The struct `T` of [source], in a package of its own. */
+    private fun struct(source: String): GoStructType {
+        val file = myFixture.addFileToProject("p${files++}/t.go", "package p\n\n$source\n") as GoFile
+        return GoStructPsi.structOf(file.types.first { it.name == "T" })!!
     }
 
-    @Test fun sizesOfTypes() {
-        assertEquals(1, GoFieldAlignment.layoutOf("bool", none)!!.size)
-        assertEquals(16, GoFieldAlignment.layoutOf("string", none)!!.size)
-        assertEquals(24, GoFieldAlignment.layoutOf("[]byte", none)!!.size)
-        assertEquals(8, GoFieldAlignment.layoutOf("*Server", none)!!.size)
-        assertEquals(8, GoFieldAlignment.layoutOf("map[string]int", none)!!.size)
-        assertEquals(8, GoFieldAlignment.layoutOf("chan struct{}", none)!!.size)
-        assertEquals(8, GoFieldAlignment.layoutOf("func(int) error", none)!!.size)
-        assertEquals(12, GoFieldAlignment.layoutOf("[3]int32", none)!!.size)
-        assertEquals(4, GoFieldAlignment.layoutOf("[3]int32", none)!!.align)
-        assertEquals(0, GoFieldAlignment.layoutOf("struct{}", none)!!.size)
-        assertEquals(24, GoFieldAlignment.layoutOf("time.Time", none)!!.size)
-        assertNull(GoFieldAlignment.layoutOf("pkg.Unknown", none))
-        assertNull(GoFieldAlignment.layoutOf("Local", none))
-        assertEquals(8, GoFieldAlignment.layoutOf("Local", { if (it == "Local") "int64" else null })!!.size)
-    }
+    /** The text between the braces of [struct]. */
+    private fun body(struct: GoStructType): String = struct.text.substring(struct.lbrace!!.startOffsetInParent + 1, struct.rbrace!!.startOffsetInParent)
 
-    @Test fun structLayout() {
+    fun testStructLayout() {
         val bool = GoFieldAlignment.Layout(1, 1)
         val int64 = GoFieldAlignment.Layout(8, 8)
         assertEquals(24, GoFieldAlignment.structLayout(listOf(bool, int64, bool)).size)
@@ -44,53 +29,41 @@ class GoFieldAlignmentTest {
         assertEquals(8, GoFieldAlignment.structLayout(listOf(GoFieldAlignment.Layout(0, 1), int64)).size)
     }
 
-    @Test fun reordersAndKeepsComments() {
-        val source = """
-            type T struct {
-            	// Debug turns the log on.
-            	Debug bool // trailing
-            	Timeout int64
-            	Name    string `json:"name"`
-            	Verbose bool
-
-            	done chan struct{}
-            }
-        """.trimIndent()
-        val body = bodyOf(source)
-        val result = GoFieldAlignment.analyze(body, none)!!
+    fun testReordersAndKeepsComments() {
+        val struct = struct(
+            "type T struct {\n\t// Debug turns the log on.\n\tDebug bool // trailing\n\tTimeout int64\n\tName    string `json:\"name\"`\n\tVerbose bool\n\n\tdone chan struct{}\n}",
+        )
+        val result = GoFieldAlignment.analyze(struct)!!
         assertEquals(48, result.currentSize)
         assertEquals(40, result.optimalSize)
         assertTrue(result.saves)
         assertEquals(
             "\n\tName    string `json:\"name\"`\n\tTimeout int64\n\tdone chan struct{}\n\t// Debug turns the log on.\n\tDebug bool // trailing\n\tVerbose bool\n",
-            GoFieldAlignment.rewrite(body, result),
+            GoFieldAlignment.rewrite(body(struct), result),
         )
     }
 
-    @Test fun nothingToGain() {
-        val result = GoFieldAlignment.analyze(bodyOf("type T struct {\n\tA int64\n\tB, C bool\n}"), none)!!
+    fun testNothingToGain() {
+        val result = GoFieldAlignment.analyze(struct("type T struct {\n\tA int64\n\tB, C bool\n}"))!!
         assertEquals(16, result.currentSize)
         assertFalse(result.saves)
     }
 
-    @Test fun multiNameFieldsAndEmbedded() {
-        val others = "type Inner struct {\n\tA bool\n\tB int64\n}\ntype ID int32"
-        val local = GoFieldAlignment.localTypes(GoDeclarations.scan(others), others)
-        val result = GoFieldAlignment.analyze(bodyOf("type T struct {\n\tX, Y bool\n\tInner\n\tID ID\n}"), local)!!
+    fun testMultiNameFieldsAndTypesOfThePackage() {
+        val result = GoFieldAlignment.analyze(struct("type Inner struct {\n\tA bool\n\tB int64\n}\n\ntype ID int32\n\ntype T struct {\n\tX, Y bool\n\tInner\n\tID ID\n}"))!!
         // Inner is 16 bytes aligned to 8: bool bool [pad 6] Inner(16) ID(4) [pad 4] = 32; Inner first: 16 + 4 + 1 + 1 -> 24
         assertEquals(32, result.currentSize)
         assertEquals(24, result.optimalSize)
     }
 
-    @Test fun unknownAndMultilineFieldsAreLeftAlone() {
-        assertNull(GoFieldAlignment.analyze(bodyOf("type T struct {\n\tA pkg.Thing\n\tB bool\n}"), none))
-        assertNull(GoFieldAlignment.analyze(bodyOf("type T struct {\n\tA struct {\n\t\tX bool\n\t}\n\tB int64\n}"), none))
+    fun testUnknownAndMultilineFieldsAreLeftAlone() {
+        assertNull(GoFieldAlignment.analyze(struct("type T struct {\n\tA pkg.Thing\n\tB bool\n}")))
+        assertNull(GoFieldAlignment.analyze(struct("type T struct {\n\tA struct {\n\t\tX bool\n\t}\n\tB int64\n}")))
     }
 
-    @Test fun closingBraceIndentIsKept() {
-        val source = "type (\n\tT struct {\n\t\tA bool\n\t\tB int64\n\t}\n)"
-        val body = bodyOf(source)
-        val result = GoFieldAlignment.analyze(body, none)!!
-        assertEquals("\n\t\tB int64\n\t\tA bool\n\t", GoFieldAlignment.rewrite(body, result))
+    fun testClosingBraceIndentIsKept() {
+        val struct = struct("type (\n\tT struct {\n\t\tA bool\n\t\tB int64\n\t}\n)")
+        val result = GoFieldAlignment.analyze(struct)!!
+        assertEquals("\n\t\tB int64\n\t\tA bool\n\t", GoFieldAlignment.rewrite(body(struct), result))
     }
 }

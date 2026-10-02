@@ -1,4 +1,4 @@
-// The warnings and errors of the file in the selected editor: what the annotators and the language server have found.
+// The warnings and errors of the file in the selected editor: what the annotators, the inspections and the language server have found.
 importClass(com.intellij.openapi.project.ProjectManager)
 importClass(com.intellij.openapi.fileEditor.FileEditorManager)
 importClass(com.intellij.openapi.editor.impl.DocumentMarkupModel)

@@ -5,6 +5,9 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, step 10 (MIGRATION.md)
+- Step 10 (B): one UI robot in tools/ui-robot (the go-psi scenarios, --perf, --cold moved in; port 8083).
+
 ### 2026-10-02 - Transplant into idea-golang-support, step 9 (MIGRATION.md)
 - go-psi-semantic: `GoSemanticService.expectedTypeAt(expression)` and `enclosingResultTypes(element)` are public API (ABI dump updated).
   The expected-type logic of completion moved into `semantic.infer.GoExpectedType` and gained: conversions give no expectation, a

@@ -28,7 +28,7 @@ class GoExpectedTypesTest {
         return markers.replace(code, "") to markers.replace(before, "").length
     }
 
-    private fun byText(name: String): String? = at(name).let { (text, offset) -> GoExpectedTypes.byText(text, offset) }
+    private fun byText(name: String): String? = at(name).let { (text, offset) -> GoExpectedTypes.byText(text, offset, listOf("*os.File", "int", "error")) }
     private fun call(name: String): Int? = at(name).let { (text, offset) -> GoExpectedTypes.enclosingCall(text, offset) }
 
     @Test fun theTypeOfAReturnedValueIsTheOneOfItsPlace() {

@@ -2,7 +2,6 @@ package io.github.golangsupport
 
 import io.github.golangsupport.format.GoTextDiff
 import io.github.golangsupport.lang.GoIndentEngine
-import io.github.golangsupport.run.GoRunConfigurationGenerator
 import io.github.golangsupport.templates.GoPackageNames
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -124,11 +123,5 @@ func Total(items []Item, discount int) (total int, err error) {
         // a plain Go file has the icon of its file type, other files are not ours
         assertNull(GoIcons.forFile("order.go"))
         assertNull(GoIcons.forFile("config.yaml"))
-    }
-
-    @Test fun programs() {
-        assertTrue(GoRunConfigurationGenerator.isProgram("package main\n\nfunc main() {}\n"))
-        assertFalse(GoRunConfigurationGenerator.isProgram("package store\n\nfunc main() {}\n"))
-        assertFalse(GoRunConfigurationGenerator.isProgram("package main\n\nfunc helper() {}\n"))
     }
 }

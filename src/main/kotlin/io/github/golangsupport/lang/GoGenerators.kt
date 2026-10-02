@@ -256,5 +256,5 @@ object GoGenerators {
         return null
     }
 
-    private val KEYWORDS = GoTextTokens.KEYWORDS
+    private val KEYWORDS = GoNames.KEYWORDS
 }

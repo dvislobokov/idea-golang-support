@@ -17,10 +17,14 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspClient
 import com.intellij.platform.lsp.api.customization.LspCompletionSupport
 import com.intellij.psi.PsiFile
+import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoCompletionOrder
+import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoExpectedTypes
+import io.github.golangsupport.lang.GoIdioms
+import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoSnippets
 import io.github.golangsupport.lang.GoStructLiterals
@@ -82,9 +86,16 @@ class GoplsCompletionSupport : LspCompletionSupport() {
         val text = document.immutableCharSequence
         val offset = parameters.offset - GoCompletionOrder.typed(text, parameters.offset).length
         expected?.takeIf { it.stamp == document.modificationStamp && it.offset == offset && it.path == path }?.let { return it.type }
-        val type = GoExpectedTypes.byText(text, offset) ?: GoExpectedTypes.enclosingCall(text, offset)?.let { parameterType(parameters, offset) }
+        val type = GoExpectedTypes.byText(text, offset, resultTypes(parameters)) ?: GoExpectedTypes.enclosingCall(text, offset)?.let { parameterType(parameters, offset) }
         expected = Expected(document.modificationStamp, offset, path, type)
         return type
+    }
+
+    /** The result types of the function around the caret as written in its signature (completion has committed the document). */
+    private fun resultTypes(parameters: CompletionParameters): List<String>? {
+        val function = PsiTreeUtil.getParentOfType(parameters.position, GoFunctionOrMethodDeclaration::class.java) ?: return null
+        val signature = GoDeclarationInfo.of(function)?.signature ?: return null
+        return GoIdioms.splitSignature(signature.substring(signature.indexOf('('))).second.map { it.type }
     }
 
     /** The type of the parameter the caret is at, from the signature help of the server. */
