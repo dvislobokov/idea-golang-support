@@ -1,0 +1,1 @@
+package p; var _ = [10]T[int]{}

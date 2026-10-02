@@ -1,0 +1,1 @@
+package p; func _() { map[int]int{}[0]++; map[int]int{}[0] += 1 }

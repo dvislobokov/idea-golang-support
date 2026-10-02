@@ -1,0 +1,1 @@
+package p; func f() { select { case <- c: case c <- d: case c <- <- d: case <-c <- d: } };

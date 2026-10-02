@@ -1,0 +1,1 @@
+package p; type T []int; var a []bool; func f() { if a[T{42}[0]] {} };

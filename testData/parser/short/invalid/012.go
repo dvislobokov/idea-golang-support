@@ -1,0 +1,1 @@
+package p; func f() { _ = (<-<- /* ERROR "expected 'chan'" */ chan int)(nil) };

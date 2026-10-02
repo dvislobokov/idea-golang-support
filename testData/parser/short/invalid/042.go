@@ -1,0 +1,1 @@
+package p; var x, y, z; /* ERROR "expected type" */

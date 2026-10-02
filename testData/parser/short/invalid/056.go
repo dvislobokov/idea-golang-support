@@ -1,0 +1,1 @@
+package p; var _ func[ /* ERROR "must have no type parameters" */ T any](T)

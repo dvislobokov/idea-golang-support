@@ -1,0 +1,1 @@
+package p; func f() { for ; _ /* ERROR "expected boolean or range expression" */ = range x ; {} };

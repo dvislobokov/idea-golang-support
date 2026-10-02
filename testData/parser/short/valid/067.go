@@ -1,0 +1,1 @@
+package p; type _[A any,] struct{}

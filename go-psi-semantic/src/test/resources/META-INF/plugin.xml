@@ -1,0 +1,10 @@
+<!-- Test-only descriptor so that go-psi-semantic tests see the core and semantic extensions without the plugin module. -->
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
+  <id>io.github.golangsupport.semantic.test</id>
+  <name>Go PSI Semantic (tests)</name>
+  <vendor>Go Project Support</vendor>
+  <depends>com.intellij.modules.platform</depends>
+
+  <xi:include href="/META-INF/go-psi-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
+  <xi:include href="/META-INF/go-psi-semantic.xml" xpointer="xpointer(/idea-plugin/*)"/>
+</idea-plugin>

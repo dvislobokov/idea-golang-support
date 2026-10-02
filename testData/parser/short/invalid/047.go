@@ -1,0 +1,1 @@
+package p; func f() { if true {} else ; /* ERROR "expected if statement or block" */ }

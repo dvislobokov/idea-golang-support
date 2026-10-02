@@ -1,0 +1,1 @@
+package p; func f() { if f(); /* ERROR "missing condition" */ {} };

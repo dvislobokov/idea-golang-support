@@ -1,0 +1,1 @@
+package p; func f() { go f /* ERROR HERE "must be function call" */ }

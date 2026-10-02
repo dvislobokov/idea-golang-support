@@ -1,0 +1,29 @@
+<!-- Extensions contributed by go-psi-semantic. Included into plugin/src/main/resources/META-INF/plugin.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Project model (Phase 4). Host plugins may replace these with overrides="true". -->
+    <applicationService serviceInterface="io.github.golangsupport.project.api.GoToolchainProvider"
+                        serviceImplementation="io.github.golangsupport.project.impl.DefaultGoToolchainProvider"/>
+    <projectService serviceInterface="io.github.golangsupport.project.api.GoModuleGraphProvider"
+                    serviceImplementation="io.github.golangsupport.project.impl.DefaultGoModuleGraphProvider"/>
+    <projectService serviceInterface="io.github.golangsupport.project.api.GoPackageResolver"
+                    serviceImplementation="io.github.golangsupport.project.impl.DefaultGoPackageResolver"/>
+
+    <!-- Semantic layer (Phase 5): references, types, resolve. -->
+    <applicationService serviceInterface="io.github.golangsupport.lang.psi.GoReferenceProvider"
+                        serviceImplementation="io.github.golangsupport.semantic.resolve.GoReferenceProviderImpl"/>
+    <projectService serviceInterface="io.github.golangsupport.semantic.api.GoSemanticService"
+                    serviceImplementation="io.github.golangsupport.semantic.impl.GoSemanticServiceImpl"/>
+
+    <additionalLibraryRootsProvider implementation="io.github.golangsupport.project.impl.GoRootsProvider"/>
+    <registryKey key="gopsi.libraryRoots" defaultValue="true"
+                 description="Index $GOROOT/src and resolved Go module directories as library roots (go-psi)."/>
+    <registryKey key="gopsi.libraryRoots.includeCmd" defaultValue="false"
+                 description="Also index $GOROOT/src/cmd when gopsi.libraryRoots is on (go-psi)."/>
+  </extensions>
+
+  <projectListeners>
+    <listener class="io.github.golangsupport.project.impl.GoProjectModelTracker$Listener"
+              topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+  </projectListeners>
+</idea-plugin>

@@ -1,0 +1,1 @@
+package p; func f() { defer func() {} /* ERROR HERE "must be function call" */ }

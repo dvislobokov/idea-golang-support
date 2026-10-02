@@ -1,0 +1,1 @@
+package p; func (T) _[A, B C](a A) B

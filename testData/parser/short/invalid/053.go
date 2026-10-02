@@ -1,0 +1,1 @@
+package p; func f() (a, b ... /* ERROR "invalid use of ..." */ int)

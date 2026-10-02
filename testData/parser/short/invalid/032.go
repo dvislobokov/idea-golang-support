@@ -1,0 +1,1 @@
+package p; func f() { go func() { func() { f(x func /* ERROR "missing ','" */ (){}) } } }

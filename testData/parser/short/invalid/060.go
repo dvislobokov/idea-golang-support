@@ -1,0 +1,1 @@
+package p; func (T) _[A, B any](a A) B

@@ -1,0 +1,194 @@
+# Known-unsupported or divergent sites of the go/types testdata harness (GoTypesTestdataTest).
+# Format: <file>:<line>  # reason. A line listed here may miss its ERROR annotations and may carry
+# diagnostics that do not match them. Regenerate from the test's report (the "expected ERROR" and
+# "no error expected" lines) after the checker improves; the test prints stale entries.
+
+
+# check/builtins0.go
+check/builtins0.go:80  # not implemented: ERROR "must be a slice"
+check/builtins0.go:231  # not implemented: ERRORx `cannot use .* in variable declaration`
+check/builtins0.go:531  # not implemented: ERROR "mismatched types"
+check/builtins0.go:585  # not implemented: ERROR "mismatched types"
+check/builtins0.go:616  # not implemented: ERROR "use of package unsafe not in selector"
+check/builtins0.go:625  # not implemented: ERROR "cannot use generic type G without instantiation"
+check/builtins0.go:655  # not implemented: ERROR "use of untyped nil in argument to new"
+check/builtins0.go:656  # not implemented: ERROR "cannot use type comparable outside a type constraint"
+check/builtins0.go:1065  # not implemented: ERROR "not enough arguments"
+check/builtins0.go:1066  # not implemented: ERROR "too many arguments"
+check/builtins0.go:1067  # not implemented: ERROR "boolean constant"
+check/builtins0.go:1068  # not implemented: ERROR "boolean constant"
+check/builtins0.go:1070  # not implemented: ERROR "failed"
+check/builtins0.go:1074  # not implemented: ERROR "invalid use of ..."
+check/builtins0.go:1080  # not implemented: ERROR "used as value"
+check/builtins0.go:1081  # not implemented: ERROR "boolean constant"
+check/builtins0.go:1082  # not implemented: ERROR "boolean constant"
+check/builtins0.go:1093  # not implemented: ERROR "invalid use of ..."
+
+# check/builtins1.go
+check/builtins1.go:14  # not implemented: ERROR "cannot clear x"
+check/builtins1.go:22  # not implemented: ERROR "cannot clear x"
+check/builtins1.go:35  # not implemented: ERROR "cannot close non-channel"
+check/builtins1.go:65  # not implemented: ERROR "invalid copy: argument must be a slice; have x (variable of type T constrained by any)"
+check/builtins1.go:71  # not implemented: ERROR "argument must be a slice; have \"foo\" (untyped string constant)"
+check/builtins1.go:79  # not implemented: ERROR "different element types"
+check/builtins1.go:80  # not implemented: ERROR "different element types"
+check/builtins1.go:85  # not implemented: ERROR "arguments x (variable of type T constrained by ~[]E) and \"foo\" (untyped string constant) have different element types E and byte"
+check/builtins1.go:90  # not implemented: ERROR "arguments []int{} (value of type []int) and y (variable of type T constrained by ~string) have different element types int and byte"
+check/builtins1.go:91  # not implemented: ERROR "argument must be a slice; have y (variable of type T constrained by ~string)"
+check/builtins1.go:95  # not implemented: ERROR "argument must be a slice; have x (variable of type T constrained by ~[]byte | ~string)"
+check/builtins1.go:115  # not implemented: ERROR "not a map"
+check/builtins1.go:128  # not implemented: ERRORx `cannot use .* as string`
+check/builtins1.go:132  # not implemented: ERROR "must have identical key types"
+check/builtins1.go:140  # not implemented: ERROR "must have identical key types"
+
+# check/const0.go
+check/const0.go:16  # not implemented: ERROR "invalid constant type"
+check/const0.go:19  # not implemented: ERROR "invalid constant type"
+check/const0.go:55  # not implemented: ERROR "invalid operation"
+check/const0.go:137  # divergent diagnostic [mismatched-types]: invalid operation: ti2 ^ ti5 (mismatched types int64 and int8)
+check/const0.go:281  # not implemented: ERROR "is not constant"
+check/const0.go:382  # not implemented: ERROR "constant bitwise complement overflow"
+
+# check/constdecl.go
+check/constdecl.go:120  # not implemented: ERROR "overflows"
+check/constdecl.go:128  # not implemented: ERROR "overflows"
+check/constdecl.go:134  # not implemented: ERROR "invalid array length"
+check/constdecl.go:135  # not implemented: ERROR "invalid array length"
+
+# check/conversions1.go
+
+# check/decls1.go
+check/decls1.go:68  # not implemented: ERROR "not a type"
+
+# check/decls3.go
+check/decls3.go:47  # not implemented: ERROR "ambiguous selector t.X"
+check/decls3.go:102  # not implemented: ERROR "Pointer redeclared"
+check/decls3.go:104  # not implemented: ERROR "UP redeclared"
+check/decls3.go:231  # not implemented: ERROR "ambiguous selector S5{}.X"
+
+# check/decls4.go
+check/decls4.go:64  # not implemented: ERROR "already declared"
+check/decls4.go:67  # not implemented: ERROR "invalid receiver"
+check/decls4.go:98  # not implemented: ERROR "already declared"
+check/decls4.go:198  # not implemented: ERROR "ambiguous selector eD.xm"
+
+# check/errors.go
+
+# check/expr0.go
+check/expr0.go:131  # divergent diagnostic [operator]: invalid operation: cannot indirect s4 (variable of type string)
+check/expr0.go:134  # divergent diagnostic [operator]: invalid operation: cannot receive from non-channel s7 (variable of type string)
+
+# check/expr1.go
+check/expr1.go:126  # not implemented: ERROR "multiple-value f"
+
+# check/expr2.go
+check/expr2.go:204  # not implemented: ERROR "invalid operation: i == 0 (mismatched types interface{m() int} and untyped int)"
+
+# check/expr3.go
+check/expr3.go:106  # not implemented: ERROR "mismatched types int and untyped string"
+check/expr3.go:460  # not implemented: ERRORx `use of .* outside type switch`
+check/expr3.go:508  # not implemented: ERROR "not enough arguments in call to f2\n\thave (func())\n\twant (float32, string)"
+
+# check/issues1.go
+check/issues1.go:22  # not implemented: ERROR "cannot use nil as Y value in argument to eql"
+check/issues1.go:34  # not implemented: ERROR "x.m undefined"
+check/issues1.go:39  # not implemented: ERROR "x.m undefined"
+check/issues1.go:59  # not implemented: ERROR "P does not satisfy interface{~uint}"
+check/issues1.go:76  # not implemented: ERROR "U does not satisfy Unsigned"
+check/issues1.go:249  # not implemented: ERROR "nil (untyped nil) is not a type"
+
+# check/labels.go
+check/labels.go:44  # not implemented: ERROR "declared and not used"
+check/labels.go:160  # not implemented: ERROR "label L1 declared and not used"
+
+# check/shifts.go
+check/shifts.go:57  # not implemented: ERROR "overflows"
+check/shifts.go:385  # not implemented: ERRORx `shifted operand 1 .* must be integer`
+
+# check/stmt0.go
+check/stmt0.go:127  # not implemented: ERROR "not an expression"
+check/stmt0.go:215  # divergent diagnostic [undefined]: undefined: x; not implemented: ERROR "send or receive"
+check/stmt0.go:216  # divergent diagnostic [unused-variable]: declared and not used: a; not implemented: ERROR "send or receive"
+check/stmt0.go:397  # not implemented: ERROR "result parameter a not in scope at return"
+check/stmt0.go:607  # not implemented: ERROR "use of untyped nil"
+check/stmt0.go:684  # not implemented: ERROR "outside type switch"
+check/stmt0.go:733  # not implemented: ERROR "1 is not a type"
+
+# check/typeinst0.go
+check/typeinst0.go:12  # not implemented: ERROR "cannot use a type parameter as RHS in type declaration"
+check/typeinst0.go:35  # not implemented: ERROR "not a generic type"; not implemented: ERROR "expected type argument list"
+check/typeinst0.go:36  # not implemented: ERROR "not a generic type"; not implemented: ERROR "expected type argument list"
+check/typeinst0.go:39  # divergent diagnostic [type-args]: not enough type arguments for type T1: have 0, want 1; not implemented: ERROR "expected type argument list"
+
+# check/typeinst1.go
+
+# check/typeparams.go
+check/typeparams.go:34  # not implemented: ERROR "cannot use generic function reverse"
+check/typeparams.go:75  # not implemented: ERROR "cannot use generic function new"
+check/typeparams.go:78  # not implemented: ERROR "invalid map key type T (missing comparable constraint)"
+check/typeparams.go:108  # not implemented: ERROR "cannot take address"
+check/typeparams.go:118  # not implemented: ERROR "cannot assign"
+check/typeparams.go:119  # not implemented: ERROR "cannot assign"
+check/typeparams.go:296  # not implemented: ERROR "cannot infer"
+
+# check/unions.go
+
+# check/vardecl.go
+check/vardecl.go:17  # not implemented: ERROR "expected type"
+check/vardecl.go:18  # not implemented: ERROR "expected type"
+check/vardecl.go:19  # not implemented: ERROR "expected type"
+
+# fixedbugs/issue39634.go
+fixedbugs/issue39634.go:18  # not implemented: ERROR "redeclared"
+fixedbugs/issue39634.go:26  # not implemented: ERROR "invalid recursive type"
+fixedbugs/issue39634.go:30  # not implemented: ERROR "cannot indirect"
+fixedbugs/issue39634.go:38  # not implemented: ERROR "cannot be a type parameter"
+fixedbugs/issue39634.go:42  # not implemented: ERROR "invalid recursive type"
+fixedbugs/issue39634.go:46  # not implemented: ERROR "used as value"; not implemented: ERROR "u (package-level variable) is not a type"; not implemented: ERROR "must be called"; not implemented: ERROR "undefined"
+fixedbugs/issue39634.go:51  # not implemented: ERRORx `generic type .* without instantiation`
+fixedbugs/issue39634.go:61  # not implemented: ERROR "duplicate method"
+fixedbugs/issue39634.go:69  # not implemented: ERROR "invalid recursive type: Z19 refers to itself"
+fixedbugs/issue39634.go:72  # not implemented: ERROR "invalid recursive type"
+fixedbugs/issue39634.go:73  # not implemented: ERROR "too many arguments in call to F20\n\thave (unknown type)\n\twant ()"
+fixedbugs/issue39634.go:76  # not implemented: ERROR "invalid recursive type"
+fixedbugs/issue39634.go:80  # not implemented: ERROR "cannot use a type parameter as RHS in type declaration"
+fixedbugs/issue39634.go:81  # divergent diagnostic [receiver]: invalid receiver type T24 (cannot be an interface); divergent diagnostic [call-arity]: not enough arguments in call to T24.m; not implemented: ERROR "without instantiation"
+fixedbugs/issue39634.go:86  # not implemented: ERROR "without instantiation"
+fixedbugs/issue39634.go:89  # not implemented: ERROR "interface method must have no type parameters"
+fixedbugs/issue39634.go:90  # divergent diagnostic [assignability]: cannot use F26 (value of generic type func[Z any]() interface{F26()}) as interface{F26()} value in return statement: ...; not implemented: ERROR "operand"
+
+# fixedbugs/issue45920.go
+fixedbugs/issue45920.go:11  # not implemented: ERROR "chan<- int does not satisfy chan int | <-chan int"
+fixedbugs/issue45920.go:16  # not implemented: ERROR "<-chan int does not satisfy chan int | chan<- int"
+
+# fixedbugs/issue45985.go
+fixedbugs/issue45985.go:12  # not implemented: ERROR "S (type int) does not satisfy interface{~[]T}"
+
+# fixedbugs/issue47411.go
+fixedbugs/issue47411.go:22  # not implemented: ERROR "P does not satisfy interface{interface{comparable; ~int | ~string}"
+
+# fixedbugs/issue50929.go
+fixedbugs/issue50929.go:20  # divergent diagnostic [cannot-infer]: in call to G, cannot infer A; not implemented: ERROR "does not match"
+fixedbugs/issue50929.go:61  # not implemented: ERROR "not enough type arguments for type M: have 2, want 3"
+fixedbugs/issue50929.go:63  # divergent diagnostic [cannot-infer]: in call to NC, cannot infer Rc; not implemented: ERROR "does not match"
+fixedbugs/issue50929.go:67  # not implemented: ERROR "not enough type arguments for type M: have 2, want 3"
+
+# fixedbugs/issue51232.go
+fixedbugs/issue51232.go:27  # not implemented: ERRORx `cannot use .* as F\[RCT\]`; not implemented: ERROR "not enough type arguments for type concreteF: have 1, want 2"
+
+# fixedbugs/issue54280.go
+fixedbugs/issue54280.go:7  # not implemented: ERROR "constant overflow"
+
+# spec/assignability.go
+spec/assignability.go:112  # not implemented: ERRORx `cannot use C .* as _CC value`
+spec/assignability.go:113  # not implemented: ERRORx `cannot use C .* as _SC value`
+spec/assignability.go:114  # not implemented: ERRORx `cannot use C .* as _RC value`
+spec/assignability.go:120  # not implemented: ERRORx `cannot use C .* as CC value`
+spec/assignability.go:121  # not implemented: ERRORx `cannot use C .* as SC value`
+spec/assignability.go:122  # not implemented: ERRORx `cannot use C .* as RC value`
+spec/assignability.go:136  # not implemented: ERRORx `cannot use C .* as TP1 value`
+spec/assignability.go:150  # not implemented: ERRORx `cannot use X1 .* as Chan value`
+spec/assignability.go:177  # not implemented: ERROR "cannot use nil"
+
+# spec/conversions.go
+spec/conversions.go:119  # not implemented: ERROR "cannot convert x (variable of type X constrained by Float | Complex) to type T: cannot convert float32 (in X) to type complex64 (in T)"

@@ -1,0 +1,149 @@
+# Origin: Go 1.27.1 GOROOT (C:\Program Files\Go), refreshed from 1.24.7. Files are byte-identical copies; layout is relative to GOROOT.
+# GOROOT/src/go/parser/testdata/*.go2, *.src, resolution/, goversion/, issue42951/ (a directory named not_a_file.go containing invalid.go)
+# GOROOT/test/syntax/*.go (syntax-error tests with // ERROR annotations)
+# GOROOT/src/cmd/compile/internal/syntax/testdata/*.go
+# GOROOT/test/typeparam: 25 small files (<2.5KB) picked by scanning for type parameter lists, ~, |, comparable, interface constraints and instantiation; ranked by count of constraint-syntax lines (count shown):
+#   builtins.go: 28 lines, 1890 bytes
+#   issue50417.go: 18 lines, 1584 bytes
+#   ifaceconv.go: 13 lines, 1712 bytes
+#   issue50109.go: 12 lines, 2287 bytes
+#   list.go: 11 lines, 2477 bytes
+#   dottype.go: 10 lines, 1390 bytes
+#   issue50690a.go: 10 lines, 1682 bytes
+#   issue44688.go: 10 lines, 1981 bytes
+#   tparam1.go: 9 lines, 1087 bytes
+#   ordered.go: 9 lines, 2247 bytes
+#   eface.go: 8 lines, 1142 bytes
+#   issue50177.go: 8 lines, 2063 bytes
+#   issue48538.go: 8 lines, 790 bytes
+#   smoketest.go: 7 lines, 1019 bytes
+#   equal.go: 7 lines, 1318 bytes
+#   index2.go: 6 lines, 1561 bytes
+#   double.go: 6 lines, 1580 bytes
+#   stringer.go: 6 lines, 1591 bytes
+#   typeswitch6.go: 6 lines, 495 bytes
+#   smallest.go: 6 lines, 825 bytes
+#   cons.go: 5 lines, 2032 bytes
+#   genembed.go: 5 lines, 901 bytes
+#   issue48645b.go: 4 lines, 1481 bytes
+#   issue47272.go: 3 lines, 1071 bytes
+#   issue58513.go: 3 lines, 1220 bytes
+#
+# Files marked [new in 1.27] were added in the 1.27.1 refresh (generic methods, new(expr), new syntax testdata). No previously listed file was removed upstream.
+#
+# Files:
+src/cmd/compile/internal/syntax/testdata/chans.go
+src/cmd/compile/internal/syntax/testdata/fallthrough.go
+src/cmd/compile/internal/syntax/testdata/interface.go
+src/cmd/compile/internal/syntax/testdata/issue20789.go
+src/cmd/compile/internal/syntax/testdata/issue23385.go
+src/cmd/compile/internal/syntax/testdata/issue23434.go
+src/cmd/compile/internal/syntax/testdata/issue31092.go
+src/cmd/compile/internal/syntax/testdata/issue43527.go
+src/cmd/compile/internal/syntax/testdata/issue43674.go
+src/cmd/compile/internal/syntax/testdata/issue46558.go
+src/cmd/compile/internal/syntax/testdata/issue47704.go
+src/cmd/compile/internal/syntax/testdata/issue48382.go
+src/cmd/compile/internal/syntax/testdata/issue49205.go
+src/cmd/compile/internal/syntax/testdata/issue49482.go
+src/cmd/compile/internal/syntax/testdata/issue52391.go
+src/cmd/compile/internal/syntax/testdata/issue56022.go
+src/cmd/compile/internal/syntax/testdata/issue60599.go
+src/cmd/compile/internal/syntax/testdata/issue63835.go
+src/cmd/compile/internal/syntax/testdata/issue65790.go
+src/cmd/compile/internal/syntax/testdata/issue68589.go
+src/cmd/compile/internal/syntax/testdata/issue69506.go
+src/cmd/compile/internal/syntax/testdata/issue70974.go
+src/cmd/compile/internal/syntax/testdata/linalg.go
+src/cmd/compile/internal/syntax/testdata/map.go
+src/cmd/compile/internal/syntax/testdata/map2.go
+src/cmd/compile/internal/syntax/testdata/sample.go
+src/cmd/compile/internal/syntax/testdata/slices.go
+src/cmd/compile/internal/syntax/testdata/smoketest.go
+src/cmd/compile/internal/syntax/testdata/tparams.go
+src/cmd/compile/internal/syntax/testdata/typeset.go
+src/go/parser/testdata/chans.go2
+src/go/parser/testdata/commas.src
+src/go/parser/testdata/goversion/t01.go
+src/go/parser/testdata/goversion/t02.go
+src/go/parser/testdata/goversion/t03.go
+src/go/parser/testdata/goversion/t04.go
+src/go/parser/testdata/goversion/t05.go
+src/go/parser/testdata/goversion/t06.go
+src/go/parser/testdata/interface.go2
+src/go/parser/testdata/issue11377.src
+src/go/parser/testdata/issue23434.src
+src/go/parser/testdata/issue3106.src
+src/go/parser/testdata/issue34946.src
+src/go/parser/testdata/issue44504.src
+src/go/parser/testdata/issue49174.go2
+src/go/parser/testdata/issue49175.go2
+src/go/parser/testdata/issue49482.go2
+src/go/parser/testdata/issue50427.go2
+src/go/parser/testdata/issue64534.src
+src/go/parser/testdata/issue69506.go2
+src/go/parser/testdata/linalg.go2
+src/go/parser/testdata/map.go2
+src/go/parser/testdata/metrics.go2
+src/go/parser/testdata/resolution/issue45136.src
+src/go/parser/testdata/resolution/issue45160.src
+src/go/parser/testdata/resolution/resolution.src
+src/go/parser/testdata/resolution/typeparams.go2
+src/go/parser/testdata/set.go2
+src/go/parser/testdata/slices.go2
+src/go/parser/testdata/sort.go2
+src/go/parser/testdata/tparams.go2
+src/go/parser/testdata/typeset.go2
+test/syntax/chan.go
+test/syntax/chan1.go
+test/syntax/composite.go
+test/syntax/ddd.go
+test/syntax/else.go
+test/syntax/if.go
+test/syntax/import.go
+test/syntax/initvar.go
+test/syntax/semi1.go
+test/syntax/semi2.go
+test/syntax/semi3.go
+test/syntax/semi4.go
+test/syntax/semi5.go
+test/syntax/semi6.go
+test/syntax/semi7.go
+test/syntax/topexpr.go
+test/syntax/typesw.go
+test/syntax/vareq.go
+test/syntax/vareq1.go
+test/typeparam/builtins.go
+test/typeparam/cons.go
+test/typeparam/dottype.go
+test/typeparam/double.go
+test/typeparam/eface.go
+test/typeparam/equal.go
+test/typeparam/genembed.go
+test/typeparam/ifaceconv.go
+test/typeparam/index2.go
+test/typeparam/issue44688.go
+test/typeparam/issue47272.go
+test/typeparam/issue48538.go
+test/typeparam/issue48645b.go
+test/typeparam/issue50109.go
+test/typeparam/issue50177.go
+test/typeparam/issue50417.go
+test/typeparam/issue50690a.go
+test/typeparam/issue58513.go
+test/typeparam/list.go
+test/typeparam/ordered.go
+test/typeparam/smallest.go
+test/typeparam/smoketest.go
+test/typeparam/stringer.go
+test/typeparam/tparam1.go
+test/typeparam/typeswitch6.go
+src/cmd/compile/internal/syntax/testdata/issue70957.go [new in 1.27]
+src/go/parser/testdata/issue42951/not_a_file.go/invalid.go [new in 1.27]
+test/genmeth.go [new in 1.27] generic methods
+test/genmeth1.go [new in 1.27] generic methods
+test/genmeth2.go [new in 1.27] generic methods
+test/newexpr.go [new in 1.27] new(expr)
+test/fixedbugs/issue80976.go [new in 1.27] generic method, alias receiver
+test/fixedbugs/issue81165.go [new in 1.27] generic method, alias receiver
+test/typeparam/issue50317.go [new in 1.27] generic method, blank name

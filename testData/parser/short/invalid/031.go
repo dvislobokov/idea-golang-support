@@ -1,0 +1,1 @@
+package p; func f() { defer ( /* ERROR "must not be parenthesized" */ f()) }

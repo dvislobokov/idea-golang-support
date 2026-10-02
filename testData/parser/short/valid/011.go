@@ -1,0 +1,1 @@
+package p; func f(x int, a ...int) { f(0, a...); f(1, a...,) };

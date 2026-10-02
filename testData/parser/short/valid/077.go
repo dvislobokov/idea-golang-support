@@ -1,0 +1,1 @@
+package p; type _[A, B C[A, B]] interface { _(a A) B }

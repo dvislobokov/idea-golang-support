@@ -1,0 +1,1 @@
+package p; type (T = p.T; _ = struct{}; x = *T)

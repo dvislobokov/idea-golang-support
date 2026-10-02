@@ -1,0 +1,48 @@
+GoFileStub(package=consts)
+  PACKAGE_CLAUSE:GoPackageClauseStub(name=consts)
+  TYPE_SPEC:GoTypeSpecStub(name=Weekday, alias=false, generic=false)
+    TYPE:GoTypeStub
+      TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+  CONST_DECLARATION:GoConstDeclarationStub
+    CONST_SPEC:GoConstSpecStub(iota=0, values=[iota])
+      CONST_DEFINITION:GoConstDefinitionStub(name=Sunday)
+      TYPE:GoTypeStub
+        TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(Weekday)
+    CONST_SPEC:GoConstSpecStub(iota=1, values=[])
+      CONST_DEFINITION:GoConstDefinitionStub(name=Monday)
+    CONST_SPEC:GoConstSpecStub(iota=2, values=[])
+      CONST_DEFINITION:GoConstDefinitionStub(name=Tuesday)
+    CONST_SPEC:GoConstSpecStub(iota=3, values=[])
+      CONST_DEFINITION:GoConstDefinitionStub(name=_)
+    CONST_SPEC:GoConstSpecStub(iota=4, values=[])
+      CONST_DEFINITION:GoConstDefinitionStub(name=Thursday)
+  CONST_DECLARATION:GoConstDeclarationStub
+    CONST_SPEC:GoConstSpecStub(iota=0, values=[1 << (10 * (iota + 1))])
+      CONST_DEFINITION:GoConstDefinitionStub(name=KB)
+    CONST_SPEC:GoConstSpecStub(iota=1, values=[])
+      CONST_DEFINITION:GoConstDefinitionStub(name=MB)
+    CONST_SPEC:GoConstSpecStub(iota=2, values=[iota, iota * 2])
+      CONST_DEFINITION:GoConstDefinitionStub(name=a)
+      CONST_DEFINITION:GoConstDefinitionStub(name=b)
+  CONST_DECLARATION:GoConstDeclarationStub
+    CONST_SPEC:GoConstSpecStub(iota=0, values=["single"])
+      CONST_DEFINITION:GoConstDefinitionStub(name=Single)
+  VAR_DECLARATION:GoVarDeclarationStub
+    VAR_SPEC:GoVarSpecStub(values=[1, 2])
+      VAR_DEFINITION:GoVarDefinitionStub(name=x)
+      VAR_DEFINITION:GoVarDefinitionStub(name=y)
+    VAR_SPEC:GoVarSpecStub(values=[])
+      VAR_DEFINITION:GoVarDefinitionStub(name=z)
+      TYPE:GoTypeStub
+        TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+    VAR_SPEC:GoVarSpecStub(values=[struct{ n int }{n: 1}])
+      VAR_DEFINITION:GoVarDefinitionStub(name=private)
+  VAR_DECLARATION:GoVarDeclarationStub
+    VAR_SPEC:GoVarSpecStub(values=[])
+      VAR_DEFINITION:GoVarDefinitionStub(name=Exported)
+      VAR_DEFINITION:GoVarDefinitionStub(name=unexported)
+      TYPE:GoTypeStub
+        TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(float64)
+  FUNCTION_DECLARATION:GoFunctionDeclarationStub(name=f, arity=0)
+    SIGNATURE:GoSignatureStub
+      PARAMETERS:GoParametersStub

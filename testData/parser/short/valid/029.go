@@ -1,0 +1,1 @@
+package p; func _(x []int) { for range x {} }

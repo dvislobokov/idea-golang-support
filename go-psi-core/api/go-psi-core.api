@@ -1,0 +1,1195 @@
+public abstract interface class io/github/golangsupport/lang/psi/GoAddExpr : io/github/golangsupport/lang/psi/GoBinaryExpr {
+	public abstract fun getAdd ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getOr ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSub ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getXor ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoAndExpr : io/github/golangsupport/lang/psi/GoBinaryExpr {
+	public abstract fun getLand ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoAnonymousFieldDefinition : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getMul ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getTypeArguments ()Lio/github/golangsupport/lang/psi/GoTypeArguments;
+	public abstract fun getTypeReferenceExpression ()Lio/github/golangsupport/lang/psi/GoTypeReferenceExpression;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoArgumentList : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoArrayOrSliceType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getEllipsis ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoAssignOp : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getAddAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getAndAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getAndNotAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getMulAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getOrAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getQuoAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRemAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getShlAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getShrAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSubAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getXorAssign ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoAssignmentStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getAssignOp ()Lio/github/golangsupport/lang/psi/GoAssignOp;
+	public abstract fun getExpressionList ()Ljava/util/List;
+	public abstract fun getLeftHandExprList ()Lio/github/golangsupport/lang/psi/GoLeftHandExprList;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoBinaryExpr : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getExpressionList ()Ljava/util/List;
+	public abstract fun getLeft ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getRight ()Lio/github/golangsupport/lang/psi/GoExpression;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoBlock : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getLbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getStatementList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoBreakStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getBreak ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLabelRef ()Lio/github/golangsupport/lang/psi/GoLabelRef;
+}
+
+public final class io/github/golangsupport/lang/psi/GoBuildConstraint {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lio/github/golangsupport/lang/psi/GoBuildConstraint;
+	public static synthetic fun copy$default (Lio/github/golangsupport/lang/psi/GoBuildConstraint;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/github/golangsupport/lang/psi/GoBuildConstraint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGoBuild ()Ljava/lang/String;
+	public final fun getPlusBuild ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isEmpty ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoCallExpr : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getArgumentList ()Lio/github/golangsupport/lang/psi/GoArgumentList;
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoChannelType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getArrow ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getChan ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoCommCase : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getCase ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getDefault ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLeftHandExprList ()Lio/github/golangsupport/lang/psi/GoLeftHandExprList;
+	public abstract fun getStatement ()Lio/github/golangsupport/lang/psi/GoStatement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoCommClause : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getColon ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getCommCase ()Lio/github/golangsupport/lang/psi/GoCommCase;
+	public abstract fun getStatementList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoCompositeElement : com/intellij/psi/PsiElement {
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoCompositeLit : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getLbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLiteralValue ()Lio/github/golangsupport/lang/psi/GoLiteralValue;
+	public abstract fun getRbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getTypeList ()Ljava/util/List;
+	public abstract fun getTypeReferenceExpression ()Lio/github/golangsupport/lang/psi/GoTypeReferenceExpression;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoConditionalExpr : io/github/golangsupport/lang/psi/GoBinaryExpr {
+	public abstract fun getEql ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getGeq ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getGtr ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLeq ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLss ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getNeq ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoConstDeclaration : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getConst ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getConstSpecList ()Ljava/util/List;
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoConstDefinition : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoConstSpec : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getConstDefinitionList ()Ljava/util/List;
+	public abstract fun getExpressionList ()Ljava/util/List;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoConstraintElem : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getConstraintTermList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoConstraintTerm : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getTilde ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoContinueStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getContinue ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLabelRef ()Lio/github/golangsupport/lang/psi/GoLabelRef;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoConversionExpr : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getComma ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoDeferStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getDefer ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoElement : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getColon ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getKey ()Lio/github/golangsupport/lang/psi/GoKey;
+	public abstract fun getValue ()Lio/github/golangsupport/lang/psi/GoValue;
+}
+
+public final class io/github/golangsupport/lang/psi/GoElementFactory {
+	public static final field INSTANCE Lio/github/golangsupport/lang/psi/GoElementFactory;
+	public static final fun createFileFromText (Lcom/intellij/openapi/project/Project;Ljava/lang/String;)Lio/github/golangsupport/lang/psi/GoFile;
+	public static final fun createFileFromText (Lcom/intellij/openapi/project/Project;Ljava/lang/String;Ljava/lang/String;)Lio/github/golangsupport/lang/psi/GoFile;
+	public static synthetic fun createFileFromText$default (Lcom/intellij/openapi/project/Project;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/lang/psi/GoFile;
+	public static final fun createIdentifier (Lcom/intellij/openapi/project/Project;Ljava/lang/String;)Lcom/intellij/psi/PsiElement;
+	public static final fun createImportSpec (Lcom/intellij/openapi/project/Project;Ljava/lang/String;Ljava/lang/String;)Lio/github/golangsupport/lang/psi/GoImportSpec;
+}
+
+public final class io/github/golangsupport/lang/psi/GoElementType : com/intellij/psi/tree/IElementType {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class io/github/golangsupport/lang/psi/GoElementTypes {
+	public static final field BAD_CHARACTER Lcom/intellij/psi/tree/IElementType;
+	public static final field BLOCK_COMMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field COMMENTS Lcom/intellij/psi/tree/TokenSet;
+	public static final field FILE Lio/github/golangsupport/lang/stubs/GoFileElementType;
+	public static final field IDENTIFIER Lcom/intellij/psi/tree/IElementType;
+	public static final field INSTANCE Lio/github/golangsupport/lang/psi/GoElementTypes;
+	public static final field LINE_COMMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field WHITE_SPACE Lcom/intellij/psi/tree/IElementType;
+	public static final field WHITE_SPACES Lcom/intellij/psi/tree/TokenSet;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoElseStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getElse ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getStatement ()Lio/github/golangsupport/lang/psi/GoStatement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoExprCaseClause : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getCase ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getColon ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getDefault ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpressionList ()Ljava/util/List;
+	public abstract fun getStatementList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoExprSwitchStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getExprCaseClauseList ()Ljava/util/List;
+	public abstract fun getLbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSwitch ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoExpression : io/github/golangsupport/lang/psi/GoCompositeElement {
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoFallthroughStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getFallthrough ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoFieldDeclaration : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getAnonymousFieldDefinition ()Lio/github/golangsupport/lang/psi/GoAnonymousFieldDefinition;
+	public abstract fun getFieldDefinitionList ()Ljava/util/List;
+	public abstract fun getTag ()Lio/github/golangsupport/lang/psi/GoTag;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoFieldDefinition : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+}
+
+public final class io/github/golangsupport/lang/psi/GoFile : com/intellij/extapi/psi/PsiFileBase {
+	public fun <init> (Lcom/intellij/psi/FileViewProvider;)V
+	public final fun getBuildConstraint ()Lio/github/golangsupport/lang/psi/GoBuildConstraint;
+	public final fun getConsts ()Ljava/util/List;
+	public fun getFileType ()Lcom/intellij/openapi/fileTypes/FileType;
+	public final fun getFunctions ()Ljava/util/List;
+	public final fun getImports ()Ljava/util/List;
+	public final fun getMethods ()Ljava/util/List;
+	public final fun getPackageClause ()Lio/github/golangsupport/lang/psi/GoPackageClause;
+	public final fun getPackageDoc ()Lcom/intellij/psi/PsiComment;
+	public final fun getPackageDocText ()Ljava/lang/String;
+	public final fun getPackageName ()Ljava/lang/String;
+	public final fun getTypes ()Ljava/util/List;
+	public final fun getVars ()Ljava/util/List;
+	public final fun isCgo ()Z
+	public final fun isTestFile ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoForClause : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getStatementList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoForStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getBlock ()Lio/github/golangsupport/lang/psi/GoBlock;
+	public abstract fun getFor ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoFunctionDeclaration : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoFunctionOrMethodDeclaration, io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getBlock ()Lio/github/golangsupport/lang/psi/GoBlock;
+	public abstract fun getFunc ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSignature ()Lio/github/golangsupport/lang/psi/GoSignature;
+	public abstract fun getTypeParameters ()Lio/github/golangsupport/lang/psi/GoTypeParameters;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoFunctionLit : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getFunc ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSignature ()Lio/github/golangsupport/lang/psi/GoSignature;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoFunctionOrMethodDeclaration : io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getBlock ()Lio/github/golangsupport/lang/psi/GoBlock;
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSignature ()Lio/github/golangsupport/lang/psi/GoSignature;
+	public abstract fun getTypeParameters ()Lio/github/golangsupport/lang/psi/GoTypeParameters;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoFunctionType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getFunc ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSignature ()Lio/github/golangsupport/lang/psi/GoSignature;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoGoStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getGo ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoGotoStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getGoto ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLabelRef ()Lio/github/golangsupport/lang/psi/GoLabelRef;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoIfStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getIf ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getStatementList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoImportDeclaration : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getImport ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getImportSpecList ()Ljava/util/List;
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoImportList : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getImportDeclarationList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoImportSpec : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoImportSpecBase, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getPeriod ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getStringLiteral ()Lio/github/golangsupport/lang/psi/GoStringLiteral;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoImportSpecBase {
+	public abstract fun getAlias ()Ljava/lang/String;
+	public abstract fun getPath ()Ljava/lang/String;
+	public abstract fun isBlank ()Z
+	public abstract fun isDot ()Z
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoIncDecStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getDec ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getInc ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLeftHandExprList ()Lio/github/golangsupport/lang/psi/GoLeftHandExprList;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoIndexOrSliceExpr : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getLbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrack ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoInterfaceType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getConstraintElemList ()Ljava/util/List;
+	public abstract fun getInterface ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getMethodSpecList ()Ljava/util/List;
+	public abstract fun getRbrace ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoKey : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getLiteralValue ()Lio/github/golangsupport/lang/psi/GoLiteralValue;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoLabelDefinition : io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoLabelRef : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoLabeledStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getColon ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLabelDefinition ()Lio/github/golangsupport/lang/psi/GoLabelDefinition;
+	public abstract fun getStatement ()Lio/github/golangsupport/lang/psi/GoStatement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoLeftHandExprList : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getExpressionList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoLiteral : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getChar ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getFloat ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getImag ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getInt ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoLiteralValue : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getLbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrace ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoMapType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getLbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getMap ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getTypeList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoMethodDeclaration : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoFunctionOrMethodDeclaration, io/github/golangsupport/lang/psi/GoMethodDeclarationBase, io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getBlock ()Lio/github/golangsupport/lang/psi/GoBlock;
+	public abstract fun getFunc ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getReceiver ()Lio/github/golangsupport/lang/psi/GoReceiver;
+	public abstract fun getSignature ()Lio/github/golangsupport/lang/psi/GoSignature;
+	public abstract fun getTypeParameters ()Lio/github/golangsupport/lang/psi/GoTypeParameters;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoMethodDeclarationBase {
+	public abstract fun getReceiverTypeName ()Ljava/lang/String;
+	public abstract fun isPointerReceiver ()Z
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoMethodSpec : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSignature ()Lio/github/golangsupport/lang/psi/GoSignature;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoMulExpr : io/github/golangsupport/lang/psi/GoBinaryExpr {
+	public abstract fun getAnd ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getAndNot ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getMul ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getQuo ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRem ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getShl ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getShr ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoNamedElement : com/intellij/psi/NavigatablePsiElement, com/intellij/psi/PsiNameIdentifierOwner, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getDocComment ()Lcom/intellij/psi/PsiComment;
+	public abstract fun getDocText ()Ljava/lang/String;
+	public abstract fun isPublic ()Z
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoOrExpr : io/github/golangsupport/lang/psi/GoBinaryExpr {
+	public abstract fun getLor ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoPackageClause : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getPackage ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoParType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoParamDefinition : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoParameterDeclaration : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getParamDefinitionList ()Ljava/util/List;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoParameters : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getParameterDeclarationList ()Ljava/util/List;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoParenthesesExpr : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoPointerType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getMul ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoRangeClause : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getDefine ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getLeftHandExprList ()Lio/github/golangsupport/lang/psi/GoLeftHandExprList;
+	public abstract fun getRange ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getVarDefinitionList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoReceiver : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getComma ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoRecvStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getDefine ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getLeftHandExprList ()Lio/github/golangsupport/lang/psi/GoLeftHandExprList;
+	public abstract fun getVarDefinitionList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoReferenceExpression : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getPeriod ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoReferenceProvider {
+	public static final field Companion Lio/github/golangsupport/lang/psi/GoReferenceProvider$Companion;
+	public static fun getInstance ()Lio/github/golangsupport/lang/psi/GoReferenceProvider;
+	public abstract fun getReference (Lcom/intellij/psi/PsiElement;)Lcom/intellij/psi/PsiReference;
+	public static fun referenceOf (Lcom/intellij/psi/PsiElement;)Lcom/intellij/psi/PsiReference;
+}
+
+public final class io/github/golangsupport/lang/psi/GoReferenceProvider$Companion {
+	public final fun getInstance ()Lio/github/golangsupport/lang/psi/GoReferenceProvider;
+	public final fun referenceOf (Lcom/intellij/psi/PsiElement;)Lcom/intellij/psi/PsiReference;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoResult : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getParameters ()Lio/github/golangsupport/lang/psi/GoParameters;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoReturnStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getExpressionList ()Ljava/util/List;
+	public abstract fun getReturn ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoSelectStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getCommClauseList ()Ljava/util/List;
+	public abstract fun getLbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSelect ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoSendStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getArrow ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getLeftHandExprList ()Lio/github/golangsupport/lang/psi/GoLeftHandExprList;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoShortVarDeclaration : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getDefine ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpressionList ()Ljava/util/List;
+	public abstract fun getVarDefinitionList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoSignature : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getParameters ()Lio/github/golangsupport/lang/psi/GoParameters;
+	public abstract fun getResult ()Lio/github/golangsupport/lang/psi/GoResult;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoSimpleStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getLeftHandExprList ()Lio/github/golangsupport/lang/psi/GoLeftHandExprList;
+	public abstract fun getStatement ()Lio/github/golangsupport/lang/psi/GoStatement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoSpecType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoStatement : io/github/golangsupport/lang/psi/GoCompositeElement {
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoStringLiteral : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getRawString ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getString ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoStructType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getFieldDeclarationList ()Ljava/util/List;
+	public abstract fun getLbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getStruct ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoSwitchStatement : io/github/golangsupport/lang/psi/GoStatement {
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTag : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getStringLiteral ()Lio/github/golangsupport/lang/psi/GoStringLiteral;
+}
+
+public final class io/github/golangsupport/lang/psi/GoTokenSets {
+	public static final field COMMENTS Lcom/intellij/psi/tree/TokenSet;
+	public static final field INSTANCE Lio/github/golangsupport/lang/psi/GoTokenSets;
+	public static final field KEYWORDS Lcom/intellij/psi/tree/TokenSet;
+	public static final field LITERALS Lcom/intellij/psi/tree/TokenSet;
+	public static final field NUMBERS Lcom/intellij/psi/tree/TokenSet;
+	public static final field OPERATORS Lcom/intellij/psi/tree/TokenSet;
+	public static final field SEMICOLONS Lcom/intellij/psi/tree/TokenSet;
+	public static final field STRING_LITERALS Lcom/intellij/psi/tree/TokenSet;
+	public static final field WHITESPACES Lcom/intellij/psi/tree/TokenSet;
+}
+
+public final class io/github/golangsupport/lang/psi/GoTokenType : com/intellij/psi/tree/IElementType {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoType : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getTypeArguments ()Lio/github/golangsupport/lang/psi/GoTypeArguments;
+	public abstract fun getTypeReferenceExpression ()Lio/github/golangsupport/lang/psi/GoTypeReferenceExpression;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeArguments : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getLbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getTypeList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeAssertionExpr : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getPeriod ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeCaseClause : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getCase ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getColon ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getDefault ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getStatementList ()Ljava/util/List;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeDeclaration : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getTypeSpecList ()Ljava/util/List;
+	public abstract fun getType_ ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeList : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoType {
+	public abstract fun getTypeList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeParamDefinition : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeParameterDeclaration : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getConstraintElem ()Lio/github/golangsupport/lang/psi/GoConstraintElem;
+	public abstract fun getTypeParamDefinitionList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeParameters : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getLbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrack ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getTypeParameterDeclarationList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeReferenceExpression : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getPeriod ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getReferenceExpression ()Lio/github/golangsupport/lang/psi/GoReferenceExpression;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeSpec : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement, io/github/golangsupport/lang/psi/GoTypeSpecBase {
+	public abstract fun getAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+	public abstract fun getTypeParameters ()Lio/github/golangsupport/lang/psi/GoTypeParameters;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeSpecBase {
+	public abstract fun isAlias ()Z
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeSwitchGuard : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getDefine ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getPeriod ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getType_ ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getVarDefinition ()Lio/github/golangsupport/lang/psi/GoVarDefinition;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypeSwitchStatement : io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getLbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRbrace ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSwitch ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getTypeCaseClauseList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoTypes {
+	public static final field ADD Lcom/intellij/psi/tree/IElementType;
+	public static final field ADD_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field ADD_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field AND Lcom/intellij/psi/tree/IElementType;
+	public static final field AND_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field AND_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field AND_NOT Lcom/intellij/psi/tree/IElementType;
+	public static final field AND_NOT_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field ANONYMOUS_FIELD_DEFINITION Lcom/intellij/psi/tree/IElementType;
+	public static final field ARGUMENT_LIST Lcom/intellij/psi/tree/IElementType;
+	public static final field ARRAY_OR_SLICE_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field ARROW Lcom/intellij/psi/tree/IElementType;
+	public static final field ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field ASSIGNMENT_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field ASSIGN_OP Lcom/intellij/psi/tree/IElementType;
+	public static final field BLOCK Lcom/intellij/psi/tree/IElementType;
+	public static final field BLOCK_COMMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field BREAK Lcom/intellij/psi/tree/IElementType;
+	public static final field BREAK_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field CALL_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field CASE Lcom/intellij/psi/tree/IElementType;
+	public static final field CHAN Lcom/intellij/psi/tree/IElementType;
+	public static final field CHANNEL_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field CHAR Lcom/intellij/psi/tree/IElementType;
+	public static final field COLON Lcom/intellij/psi/tree/IElementType;
+	public static final field COMMA Lcom/intellij/psi/tree/IElementType;
+	public static final field COMM_CASE Lcom/intellij/psi/tree/IElementType;
+	public static final field COMM_CLAUSE Lcom/intellij/psi/tree/IElementType;
+	public static final field COMPOSITE_LIT Lcom/intellij/psi/tree/IElementType;
+	public static final field CONDITIONAL_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field CONST Lcom/intellij/psi/tree/IElementType;
+	public static final field CONSTRAINT_ELEM Lcom/intellij/psi/tree/IElementType;
+	public static final field CONSTRAINT_TERM Lcom/intellij/psi/tree/IElementType;
+	public static final field CONST_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field CONST_DEFINITION Lcom/intellij/psi/tree/IElementType;
+	public static final field CONST_SPEC Lcom/intellij/psi/tree/IElementType;
+	public static final field CONTINUE Lcom/intellij/psi/tree/IElementType;
+	public static final field CONTINUE_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field CONVERSION_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field DEC Lcom/intellij/psi/tree/IElementType;
+	public static final field DEFAULT Lcom/intellij/psi/tree/IElementType;
+	public static final field DEFER Lcom/intellij/psi/tree/IElementType;
+	public static final field DEFER_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field DEFINE Lcom/intellij/psi/tree/IElementType;
+	public static final field ELEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field ELLIPSIS Lcom/intellij/psi/tree/IElementType;
+	public static final field ELSE Lcom/intellij/psi/tree/IElementType;
+	public static final field ELSE_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field EQL Lcom/intellij/psi/tree/IElementType;
+	public static final field EXPRESSION Lcom/intellij/psi/tree/IElementType;
+	public static final field EXPR_CASE_CLAUSE Lcom/intellij/psi/tree/IElementType;
+	public static final field EXPR_SWITCH_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field FALLTHROUGH Lcom/intellij/psi/tree/IElementType;
+	public static final field FALLTHROUGH_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field FIELD_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field FIELD_DEFINITION Lcom/intellij/psi/tree/IElementType;
+	public static final field FLOAT Lcom/intellij/psi/tree/IElementType;
+	public static final field FOR Lcom/intellij/psi/tree/IElementType;
+	public static final field FOR_CLAUSE Lcom/intellij/psi/tree/IElementType;
+	public static final field FOR_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field FUNC Lcom/intellij/psi/tree/IElementType;
+	public static final field FUNCTION_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field FUNCTION_LIT Lcom/intellij/psi/tree/IElementType;
+	public static final field FUNCTION_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field GEQ Lcom/intellij/psi/tree/IElementType;
+	public static final field GO Lcom/intellij/psi/tree/IElementType;
+	public static final field GOTO Lcom/intellij/psi/tree/IElementType;
+	public static final field GOTO_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field GO_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field GTR Lcom/intellij/psi/tree/IElementType;
+	public static final field IDENTIFIER Lcom/intellij/psi/tree/IElementType;
+	public static final field IF Lcom/intellij/psi/tree/IElementType;
+	public static final field IF_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field IMAG Lcom/intellij/psi/tree/IElementType;
+	public static final field IMPORT Lcom/intellij/psi/tree/IElementType;
+	public static final field IMPORT_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field IMPORT_LIST Lcom/intellij/psi/tree/IElementType;
+	public static final field IMPORT_SPEC Lcom/intellij/psi/tree/IElementType;
+	public static final field INC Lcom/intellij/psi/tree/IElementType;
+	public static final field INC_DEC_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field INDEX_OR_SLICE_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field INT Lcom/intellij/psi/tree/IElementType;
+	public static final field INTERFACE Lcom/intellij/psi/tree/IElementType;
+	public static final field INTERFACE_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field KEY Lcom/intellij/psi/tree/IElementType;
+	public static final field LABELED_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field LABEL_DEFINITION Lcom/intellij/psi/tree/IElementType;
+	public static final field LABEL_REF Lcom/intellij/psi/tree/IElementType;
+	public static final field LAND Lcom/intellij/psi/tree/IElementType;
+	public static final field LBRACE Lcom/intellij/psi/tree/IElementType;
+	public static final field LBRACK Lcom/intellij/psi/tree/IElementType;
+	public static final field LEFT_HAND_EXPR_LIST Lcom/intellij/psi/tree/IElementType;
+	public static final field LEQ Lcom/intellij/psi/tree/IElementType;
+	public static final field LINE_COMMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field LITERAL Lcom/intellij/psi/tree/IElementType;
+	public static final field LITERAL_VALUE Lcom/intellij/psi/tree/IElementType;
+	public static final field LOR Lcom/intellij/psi/tree/IElementType;
+	public static final field LPAREN Lcom/intellij/psi/tree/IElementType;
+	public static final field LSS Lcom/intellij/psi/tree/IElementType;
+	public static final field MAP Lcom/intellij/psi/tree/IElementType;
+	public static final field MAP_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field METHOD_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field METHOD_SPEC Lcom/intellij/psi/tree/IElementType;
+	public static final field MUL Lcom/intellij/psi/tree/IElementType;
+	public static final field MUL_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field MUL_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field NEQ Lcom/intellij/psi/tree/IElementType;
+	public static final field NOT Lcom/intellij/psi/tree/IElementType;
+	public static final field OR Lcom/intellij/psi/tree/IElementType;
+	public static final field OR_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field OR_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field PACKAGE Lcom/intellij/psi/tree/IElementType;
+	public static final field PACKAGE_CLAUSE Lcom/intellij/psi/tree/IElementType;
+	public static final field PARAMETERS Lcom/intellij/psi/tree/IElementType;
+	public static final field PARAMETER_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field PARAM_DEFINITION Lcom/intellij/psi/tree/IElementType;
+	public static final field PARENTHESES_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field PAR_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field PERIOD Lcom/intellij/psi/tree/IElementType;
+	public static final field POINTER_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field QUO Lcom/intellij/psi/tree/IElementType;
+	public static final field QUO_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field RANGE Lcom/intellij/psi/tree/IElementType;
+	public static final field RANGE_CLAUSE Lcom/intellij/psi/tree/IElementType;
+	public static final field RAW_STRING Lcom/intellij/psi/tree/IElementType;
+	public static final field RBRACE Lcom/intellij/psi/tree/IElementType;
+	public static final field RBRACK Lcom/intellij/psi/tree/IElementType;
+	public static final field RECEIVER Lcom/intellij/psi/tree/IElementType;
+	public static final field RECV_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field REFERENCE_EXPRESSION Lcom/intellij/psi/tree/IElementType;
+	public static final field REM Lcom/intellij/psi/tree/IElementType;
+	public static final field REM_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field RESULT Lcom/intellij/psi/tree/IElementType;
+	public static final field RETURN Lcom/intellij/psi/tree/IElementType;
+	public static final field RETURN_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field RPAREN Lcom/intellij/psi/tree/IElementType;
+	public static final field SELECT Lcom/intellij/psi/tree/IElementType;
+	public static final field SELECT_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field SEMICOLON Lcom/intellij/psi/tree/IElementType;
+	public static final field SEMICOLON_SYNTHETIC Lcom/intellij/psi/tree/IElementType;
+	public static final field SEND_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field SHL Lcom/intellij/psi/tree/IElementType;
+	public static final field SHL_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field SHORT_VAR_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field SHR Lcom/intellij/psi/tree/IElementType;
+	public static final field SHR_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field SIGNATURE Lcom/intellij/psi/tree/IElementType;
+	public static final field SIMPLE_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field SPEC_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field STRING Lcom/intellij/psi/tree/IElementType;
+	public static final field STRING_LITERAL Lcom/intellij/psi/tree/IElementType;
+	public static final field STRUCT Lcom/intellij/psi/tree/IElementType;
+	public static final field STRUCT_TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field SUB Lcom/intellij/psi/tree/IElementType;
+	public static final field SUB_ASSIGN Lcom/intellij/psi/tree/IElementType;
+	public static final field SWITCH Lcom/intellij/psi/tree/IElementType;
+	public static final field SWITCH_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field TAG Lcom/intellij/psi/tree/IElementType;
+	public static final field TILDE Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_ Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_ARGUMENTS Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_ASSERTION_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_CASE_CLAUSE Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_LIST Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_PARAMETERS Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_PARAMETER_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_PARAM_DEFINITION Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_REFERENCE_EXPRESSION Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_SPEC Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_SWITCH_GUARD Lcom/intellij/psi/tree/IElementType;
+	public static final field TYPE_SWITCH_STATEMENT Lcom/intellij/psi/tree/IElementType;
+	public static final field UNARY_EXPR Lcom/intellij/psi/tree/IElementType;
+	public static final field VALUE Lcom/intellij/psi/tree/IElementType;
+	public static final field VAR Lcom/intellij/psi/tree/IElementType;
+	public static final field VAR_DECLARATION Lcom/intellij/psi/tree/IElementType;
+	public static final field VAR_DEFINITION Lcom/intellij/psi/tree/IElementType;
+	public static final field VAR_SPEC Lcom/intellij/psi/tree/IElementType;
+	public static final field XOR Lcom/intellij/psi/tree/IElementType;
+	public static final field XOR_ASSIGN Lcom/intellij/psi/tree/IElementType;
+}
+
+public class io/github/golangsupport/lang/psi/GoTypes$Factory {
+	public fun <init> ()V
+	public static fun createElement (Lcom/intellij/lang/ASTNode;)Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoUnaryExpr : io/github/golangsupport/lang/psi/GoExpression {
+	public abstract fun getAdd ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getAnd ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getArrow ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getMul ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getNot ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getSub ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getTilde ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getXor ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoValue : io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getExpression ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public abstract fun getLiteralValue ()Lio/github/golangsupport/lang/psi/GoLiteralValue;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoVarDeclaration : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoStatement {
+	public abstract fun getLparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getRparen ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getVar ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getVarSpecList ()Ljava/util/List;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoVarDefinition : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoNamedElement {
+	public abstract fun getIdentifier ()Lcom/intellij/psi/PsiElement;
+}
+
+public abstract interface class io/github/golangsupport/lang/psi/GoVarSpec : com/intellij/psi/StubBasedPsiElement, io/github/golangsupport/lang/psi/GoCompositeElement {
+	public abstract fun getAssign ()Lcom/intellij/psi/PsiElement;
+	public abstract fun getExpressionList ()Ljava/util/List;
+	public abstract fun getType ()Lio/github/golangsupport/lang/psi/GoType;
+	public abstract fun getVarDefinitionList ()Ljava/util/List;
+}
+
+public class io/github/golangsupport/lang/psi/GoVisitor : com/intellij/psi/PsiElementVisitor {
+	public fun <init> ()V
+	public fun visitAddExpr (Lio/github/golangsupport/lang/psi/GoAddExpr;)V
+	public fun visitAndExpr (Lio/github/golangsupport/lang/psi/GoAndExpr;)V
+	public fun visitAnonymousFieldDefinition (Lio/github/golangsupport/lang/psi/GoAnonymousFieldDefinition;)V
+	public fun visitArgumentList (Lio/github/golangsupport/lang/psi/GoArgumentList;)V
+	public fun visitArrayOrSliceType (Lio/github/golangsupport/lang/psi/GoArrayOrSliceType;)V
+	public fun visitAssignOp (Lio/github/golangsupport/lang/psi/GoAssignOp;)V
+	public fun visitAssignmentStatement (Lio/github/golangsupport/lang/psi/GoAssignmentStatement;)V
+	public fun visitBinaryExpr (Lio/github/golangsupport/lang/psi/GoBinaryExpr;)V
+	public fun visitBlock (Lio/github/golangsupport/lang/psi/GoBlock;)V
+	public fun visitBreakStatement (Lio/github/golangsupport/lang/psi/GoBreakStatement;)V
+	public fun visitCallExpr (Lio/github/golangsupport/lang/psi/GoCallExpr;)V
+	public fun visitChannelType (Lio/github/golangsupport/lang/psi/GoChannelType;)V
+	public fun visitCommCase (Lio/github/golangsupport/lang/psi/GoCommCase;)V
+	public fun visitCommClause (Lio/github/golangsupport/lang/psi/GoCommClause;)V
+	public fun visitCompositeElement (Lio/github/golangsupport/lang/psi/GoCompositeElement;)V
+	public fun visitCompositeLit (Lio/github/golangsupport/lang/psi/GoCompositeLit;)V
+	public fun visitConditionalExpr (Lio/github/golangsupport/lang/psi/GoConditionalExpr;)V
+	public fun visitConstDeclaration (Lio/github/golangsupport/lang/psi/GoConstDeclaration;)V
+	public fun visitConstDefinition (Lio/github/golangsupport/lang/psi/GoConstDefinition;)V
+	public fun visitConstSpec (Lio/github/golangsupport/lang/psi/GoConstSpec;)V
+	public fun visitConstraintElem (Lio/github/golangsupport/lang/psi/GoConstraintElem;)V
+	public fun visitConstraintTerm (Lio/github/golangsupport/lang/psi/GoConstraintTerm;)V
+	public fun visitContinueStatement (Lio/github/golangsupport/lang/psi/GoContinueStatement;)V
+	public fun visitConversionExpr (Lio/github/golangsupport/lang/psi/GoConversionExpr;)V
+	public fun visitDeferStatement (Lio/github/golangsupport/lang/psi/GoDeferStatement;)V
+	public fun visitElement (Lio/github/golangsupport/lang/psi/GoElement;)V
+	public fun visitElseStatement (Lio/github/golangsupport/lang/psi/GoElseStatement;)V
+	public fun visitExprCaseClause (Lio/github/golangsupport/lang/psi/GoExprCaseClause;)V
+	public fun visitExprSwitchStatement (Lio/github/golangsupport/lang/psi/GoExprSwitchStatement;)V
+	public fun visitExpression (Lio/github/golangsupport/lang/psi/GoExpression;)V
+	public fun visitFallthroughStatement (Lio/github/golangsupport/lang/psi/GoFallthroughStatement;)V
+	public fun visitFieldDeclaration (Lio/github/golangsupport/lang/psi/GoFieldDeclaration;)V
+	public fun visitFieldDefinition (Lio/github/golangsupport/lang/psi/GoFieldDefinition;)V
+	public fun visitForClause (Lio/github/golangsupport/lang/psi/GoForClause;)V
+	public fun visitForStatement (Lio/github/golangsupport/lang/psi/GoForStatement;)V
+	public fun visitFunctionDeclaration (Lio/github/golangsupport/lang/psi/GoFunctionDeclaration;)V
+	public fun visitFunctionLit (Lio/github/golangsupport/lang/psi/GoFunctionLit;)V
+	public fun visitFunctionType (Lio/github/golangsupport/lang/psi/GoFunctionType;)V
+	public fun visitGoStatement (Lio/github/golangsupport/lang/psi/GoGoStatement;)V
+	public fun visitGotoStatement (Lio/github/golangsupport/lang/psi/GoGotoStatement;)V
+	public fun visitIfStatement (Lio/github/golangsupport/lang/psi/GoIfStatement;)V
+	public fun visitImportDeclaration (Lio/github/golangsupport/lang/psi/GoImportDeclaration;)V
+	public fun visitImportList (Lio/github/golangsupport/lang/psi/GoImportList;)V
+	public fun visitImportSpec (Lio/github/golangsupport/lang/psi/GoImportSpec;)V
+	public fun visitIncDecStatement (Lio/github/golangsupport/lang/psi/GoIncDecStatement;)V
+	public fun visitIndexOrSliceExpr (Lio/github/golangsupport/lang/psi/GoIndexOrSliceExpr;)V
+	public fun visitInterfaceType (Lio/github/golangsupport/lang/psi/GoInterfaceType;)V
+	public fun visitKey (Lio/github/golangsupport/lang/psi/GoKey;)V
+	public fun visitLabelDefinition (Lio/github/golangsupport/lang/psi/GoLabelDefinition;)V
+	public fun visitLabelRef (Lio/github/golangsupport/lang/psi/GoLabelRef;)V
+	public fun visitLabeledStatement (Lio/github/golangsupport/lang/psi/GoLabeledStatement;)V
+	public fun visitLeftHandExprList (Lio/github/golangsupport/lang/psi/GoLeftHandExprList;)V
+	public fun visitLiteral (Lio/github/golangsupport/lang/psi/GoLiteral;)V
+	public fun visitLiteralValue (Lio/github/golangsupport/lang/psi/GoLiteralValue;)V
+	public fun visitMapType (Lio/github/golangsupport/lang/psi/GoMapType;)V
+	public fun visitMethodDeclaration (Lio/github/golangsupport/lang/psi/GoMethodDeclaration;)V
+	public fun visitMethodSpec (Lio/github/golangsupport/lang/psi/GoMethodSpec;)V
+	public fun visitMulExpr (Lio/github/golangsupport/lang/psi/GoMulExpr;)V
+	public fun visitNamedElement (Lio/github/golangsupport/lang/psi/GoNamedElement;)V
+	public fun visitOrExpr (Lio/github/golangsupport/lang/psi/GoOrExpr;)V
+	public fun visitPackageClause (Lio/github/golangsupport/lang/psi/GoPackageClause;)V
+	public fun visitParType (Lio/github/golangsupport/lang/psi/GoParType;)V
+	public fun visitParamDefinition (Lio/github/golangsupport/lang/psi/GoParamDefinition;)V
+	public fun visitParameterDeclaration (Lio/github/golangsupport/lang/psi/GoParameterDeclaration;)V
+	public fun visitParameters (Lio/github/golangsupport/lang/psi/GoParameters;)V
+	public fun visitParenthesesExpr (Lio/github/golangsupport/lang/psi/GoParenthesesExpr;)V
+	public fun visitPointerType (Lio/github/golangsupport/lang/psi/GoPointerType;)V
+	public fun visitRangeClause (Lio/github/golangsupport/lang/psi/GoRangeClause;)V
+	public fun visitReceiver (Lio/github/golangsupport/lang/psi/GoReceiver;)V
+	public fun visitRecvStatement (Lio/github/golangsupport/lang/psi/GoRecvStatement;)V
+	public fun visitReferenceExpression (Lio/github/golangsupport/lang/psi/GoReferenceExpression;)V
+	public fun visitResult (Lio/github/golangsupport/lang/psi/GoResult;)V
+	public fun visitReturnStatement (Lio/github/golangsupport/lang/psi/GoReturnStatement;)V
+	public fun visitSelectStatement (Lio/github/golangsupport/lang/psi/GoSelectStatement;)V
+	public fun visitSendStatement (Lio/github/golangsupport/lang/psi/GoSendStatement;)V
+	public fun visitShortVarDeclaration (Lio/github/golangsupport/lang/psi/GoShortVarDeclaration;)V
+	public fun visitSignature (Lio/github/golangsupport/lang/psi/GoSignature;)V
+	public fun visitSimpleStatement (Lio/github/golangsupport/lang/psi/GoSimpleStatement;)V
+	public fun visitSpecType (Lio/github/golangsupport/lang/psi/GoSpecType;)V
+	public fun visitStatement (Lio/github/golangsupport/lang/psi/GoStatement;)V
+	public fun visitStringLiteral (Lio/github/golangsupport/lang/psi/GoStringLiteral;)V
+	public fun visitStructType (Lio/github/golangsupport/lang/psi/GoStructType;)V
+	public fun visitSwitchStatement (Lio/github/golangsupport/lang/psi/GoSwitchStatement;)V
+	public fun visitTag (Lio/github/golangsupport/lang/psi/GoTag;)V
+	public fun visitType (Lio/github/golangsupport/lang/psi/GoType;)V
+	public fun visitTypeArguments (Lio/github/golangsupport/lang/psi/GoTypeArguments;)V
+	public fun visitTypeAssertionExpr (Lio/github/golangsupport/lang/psi/GoTypeAssertionExpr;)V
+	public fun visitTypeCaseClause (Lio/github/golangsupport/lang/psi/GoTypeCaseClause;)V
+	public fun visitTypeDeclaration (Lio/github/golangsupport/lang/psi/GoTypeDeclaration;)V
+	public fun visitTypeList (Lio/github/golangsupport/lang/psi/GoTypeList;)V
+	public fun visitTypeParamDefinition (Lio/github/golangsupport/lang/psi/GoTypeParamDefinition;)V
+	public fun visitTypeParameterDeclaration (Lio/github/golangsupport/lang/psi/GoTypeParameterDeclaration;)V
+	public fun visitTypeParameters (Lio/github/golangsupport/lang/psi/GoTypeParameters;)V
+	public fun visitTypeReferenceExpression (Lio/github/golangsupport/lang/psi/GoTypeReferenceExpression;)V
+	public fun visitTypeSpec (Lio/github/golangsupport/lang/psi/GoTypeSpec;)V
+	public fun visitTypeSwitchGuard (Lio/github/golangsupport/lang/psi/GoTypeSwitchGuard;)V
+	public fun visitTypeSwitchStatement (Lio/github/golangsupport/lang/psi/GoTypeSwitchStatement;)V
+	public fun visitUnaryExpr (Lio/github/golangsupport/lang/psi/GoUnaryExpr;)V
+	public fun visitValue (Lio/github/golangsupport/lang/psi/GoValue;)V
+	public fun visitVarDeclaration (Lio/github/golangsupport/lang/psi/GoVarDeclaration;)V
+	public fun visitVarDefinition (Lio/github/golangsupport/lang/psi/GoVarDefinition;)V
+	public fun visitVarSpec (Lio/github/golangsupport/lang/psi/GoVarSpec;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoAnonymousFieldDefinitionStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;Z)V
+	public final fun isPointer ()Z
+}
+
+public final class io/github/golangsupport/lang/stubs/GoConstDeclarationStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoConstDefinitionStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoConstSpecStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;ILjava/util/List;)V
+	public final fun getIota ()I
+	public final fun getValues ()Ljava/util/List;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoConstraintElemStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoConstraintTermStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Z)V
+	public final fun getHasTilde ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoFieldDeclarationStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoFieldDefinitionStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoFileElementType$Companion {
+}
+
+public final class io/github/golangsupport/lang/stubs/GoFileStub : com/intellij/psi/stubs/PsiFileStubImpl {
+	public static final field Companion Lio/github/golangsupport/lang/stubs/GoFileStub$Companion;
+	public static final field TEST_SUFFIX Ljava/lang/String;
+	public fun <init> (Lio/github/golangsupport/lang/psi/GoFile;Ljava/lang/String;Lio/github/golangsupport/lang/psi/GoBuildConstraint;ZZ)V
+	public final fun getBuildConstraint ()Lio/github/golangsupport/lang/psi/GoBuildConstraint;
+	public final fun getPackageName ()Ljava/lang/String;
+	public fun getType ()Lcom/intellij/psi/tree/IStubFileElementType;
+	public synthetic fun getType ()Lcom/intellij/psi/tree/StubFileElementType;
+	public final fun isCgo ()Z
+	public final fun isTestFile ()Z
+	public static final fun isTestFileName (Ljava/lang/String;)Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoFileStub$Companion {
+	public final fun isTestFileName (Ljava/lang/String;)Z
+}
+
+public final class io/github/golangsupport/lang/stubs/GoFunctionDeclarationStub : io/github/golangsupport/lang/stubs/GoFunctionOrMethodDeclarationStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;I)V
+}
+
+public abstract class io/github/golangsupport/lang/stubs/GoFunctionOrMethodDeclarationStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;I)V
+	protected fun details ()Ljava/lang/String;
+	public final fun getArity ()I
+}
+
+public final class io/github/golangsupport/lang/stubs/GoImportSpecStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getAlias ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun isBlank ()Z
+	public final fun isDot ()Z
+}
+
+public final class io/github/golangsupport/lang/stubs/GoMethodDeclarationStub : io/github/golangsupport/lang/stubs/GoFunctionOrMethodDeclarationStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;ILjava/lang/String;Z)V
+	public final fun getReceiverTypeName ()Ljava/lang/String;
+	public final fun isPointerReceiver ()Z
+}
+
+public final class io/github/golangsupport/lang/stubs/GoMethodSpecStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;I)V
+	public final fun getArity ()I
+}
+
+public abstract class io/github/golangsupport/lang/stubs/GoNamedStub : com/intellij/psi/stubs/NamedStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+	protected fun details ()Ljava/lang/String;
+	public final fun isPublic ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoPackageClauseStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoParamDefinitionStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoParameterDeclarationStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Z)V
+	public final fun isVariadic ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoParametersStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoReceiverStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoResultStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoSignatureStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public abstract class io/github/golangsupport/lang/stubs/GoStubBase : com/intellij/psi/stubs/StubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoTagStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+	public final fun getText ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoTypeArgumentsStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoTypeParamDefinitionStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoTypeParameterDeclarationStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoTypeParametersStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoTypeReferenceExpressionStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getName ()Ljava/lang/String;
+	public final fun getQualifiedText ()Ljava/lang/String;
+	public final fun getQualifier ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoTypeSpecStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;ZZ)V
+	public final fun getHasTypeParameters ()Z
+	public final fun isAlias ()Z
+}
+
+public final class io/github/golangsupport/lang/stubs/GoTypeStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+	public final fun getDetail ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/lang/stubs/GoVarDeclarationStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoVarDefinitionStub : io/github/golangsupport/lang/stubs/GoNamedStub {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/lang/String;)V
+}
+
+public final class io/github/golangsupport/lang/stubs/GoVarSpecStub : io/github/golangsupport/lang/stubs/GoStubBase {
+	public fun <init> (Lcom/intellij/psi/stubs/StubElement;Lcom/intellij/psi/stubs/IStubElementType;Ljava/util/List;)V
+	public final fun getValues ()Ljava/util/List;
+	public fun toString ()Ljava/lang/String;
+}
+

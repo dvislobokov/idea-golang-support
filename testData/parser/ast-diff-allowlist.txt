@@ -1,0 +1,12 @@
+# Deliberate differences between the go-psi PSI tree and go/ast, used by GorootAstDiffCorpusTest.
+#
+# Entries (one per line, `#` starts a comment):
+#   class <class>       every mismatch of that class is accepted; <class> is printed in the test summary,
+#                       for example `LabeledStmt range` or `Ident -> BadExpr kind`
+#   <file>:<offset>     a single mismatch (file relative to the corpus root, byte offset of the node)
+# A stale entry (one that matched nothing) is listed in the summary.
+#
+# Currently empty: every known difference is a normalisation in GoAstMapping / GoAstDump / AstDiff
+# (wrapper nodes, synthesised go/ast nodes, comment-trimmed ranges, dropped EmptyStmt; the one
+# structural case, a label before `}`, is handled in AstDiff.pair: go/ast ends LabeledStmt at the
+# implicit EmptyStmt, which sits on the next token). They are documented in the KDoc of GoAstMapping.

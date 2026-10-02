@@ -1,0 +1,1 @@
+package p; func f(func() func() func());

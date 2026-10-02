@@ -1,0 +1,12 @@
+GoFileStub(package=imports, goBuild=linux && (amd64 || arm64), plusBuild=[+build linux, +build amd64 arm64], cgo)
+  PACKAGE_CLAUSE:GoPackageClauseStub(name=imports)
+  IMPORT_SPEC:GoImportSpecStub(name=C, path=C, alias=null)
+  IMPORT_SPEC:GoImportSpecStub(name=fmt, path=fmt, alias=null)
+  IMPORT_SPEC:GoImportSpecStub(name=str, path=strings, alias=str)
+  IMPORT_SPEC:GoImportSpecStub(name=., path=math, alias=.)
+  IMPORT_SPEC:GoImportSpecStub(name=_, path=embed, alias=_)
+  IMPORT_SPEC:GoImportSpecStub(name=packages, path=golang.org/x/tools/go/packages, alias=null)
+  IMPORT_SPEC:GoImportSpecStub(name=os, path=os, alias=null)
+  FUNCTION_DECLARATION:GoFunctionDeclarationStub(name=Use, arity=0)
+    SIGNATURE:GoSignatureStub
+      PARAMETERS:GoParametersStub

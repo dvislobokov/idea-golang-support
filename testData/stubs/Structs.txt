@@ -1,0 +1,79 @@
+GoFileStub(package=structs)
+  PACKAGE_CLAUSE:GoPackageClauseStub(name=structs)
+  IMPORT_SPEC:GoImportSpecStub(name=sync, path=sync, alias=null)
+  TYPE_SPEC:GoTypeSpecStub(name=Point, alias=false, generic=false)
+    STRUCT_TYPE:GoTypeStub
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        FIELD_DEFINITION:GoFieldDefinitionStub(name=X)
+        FIELD_DEFINITION:GoFieldDefinitionStub(name=Y)
+        TYPE:GoTypeStub
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+        TAG:GoTagStub(`json:"x"`)
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        FIELD_DEFINITION:GoFieldDefinitionStub(name=Label)
+        TYPE:GoTypeStub
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(string)
+  TYPE_SPEC:GoTypeSpecStub(name=Node, alias=false, generic=false)
+    STRUCT_TYPE:GoTypeStub
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        ANONYMOUS_FIELD_DEFINITION:GoAnonymousFieldDefinitionStub(name=Point, pointer=true)
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(Point)
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        ANONYMOUS_FIELD_DEFINITION:GoAnonymousFieldDefinitionStub(name=Mutex, pointer=false)
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(sync.Mutex)
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        ANONYMOUS_FIELD_DEFINITION:GoAnonymousFieldDefinitionStub(name=Pair, pointer=false)
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(Pair)
+          TYPE_ARGUMENTS:GoTypeArgumentsStub
+            TYPE:GoTypeStub
+              TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+            TYPE:GoTypeStub
+              TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(string)
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        FIELD_DEFINITION:GoFieldDefinitionStub(name=children)
+        ARRAY_OR_SLICE_TYPE:GoTypeStub(2)
+          POINTER_TYPE:GoTypeStub
+            TYPE:GoTypeStub
+              TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(Node)
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        FIELD_DEFINITION:GoFieldDefinitionStub(name=meta)
+        STRUCT_TYPE:GoTypeStub
+          FIELD_DECLARATION:GoFieldDeclarationStub
+            FIELD_DEFINITION:GoFieldDefinitionStub(name=Tags)
+            ARRAY_OR_SLICE_TYPE:GoTypeStub
+              TYPE:GoTypeStub
+                TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(string)
+            TAG:GoTagStub(`yaml:"tags"`)
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        FIELD_DEFINITION:GoFieldDefinitionStub(name=ignored)
+        ARRAY_OR_SLICE_TYPE:GoTypeStub(...)
+          TYPE:GoTypeStub
+            TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+  TYPE_SPEC:GoTypeSpecStub(name=Pair, alias=false, generic=true)
+    TYPE_PARAMETERS:GoTypeParametersStub
+      TYPE_PARAMETER_DECLARATION:GoTypeParameterDeclarationStub
+        TYPE_PARAM_DEFINITION:GoTypeParamDefinitionStub(name=A)
+        TYPE_PARAM_DEFINITION:GoTypeParamDefinitionStub(name=B)
+        CONSTRAINT_ELEM:GoConstraintElemStub
+          CONSTRAINT_TERM:GoConstraintTermStub(tilde=false)
+            TYPE:GoTypeStub
+              TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(any)
+    STRUCT_TYPE:GoTypeStub
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        FIELD_DEFINITION:GoFieldDefinitionStub(name=First)
+        TYPE:GoTypeStub
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(A)
+      FIELD_DECLARATION:GoFieldDeclarationStub
+        FIELD_DEFINITION:GoFieldDefinitionStub(name=Second)
+        TYPE:GoTypeStub
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(B)
+  METHOD_DECLARATION:GoMethodDeclarationStub(name=Area, arity=0, receiver=*Node)
+    RECEIVER:GoReceiverStub(name=n)
+      POINTER_TYPE:GoTypeStub
+        TYPE:GoTypeStub
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(Node)
+    SIGNATURE:GoSignatureStub
+      PARAMETERS:GoParametersStub
+      RESULT:GoResultStub
+        TYPE:GoTypeStub
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)

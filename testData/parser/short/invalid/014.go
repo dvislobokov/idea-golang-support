@@ -1,0 +1,1 @@
+package p; func f() { if x := g(); x /* ERROR "expected boolean expression" */ = 0 {}};

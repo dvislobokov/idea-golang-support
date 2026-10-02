@@ -1,0 +1,1 @@
+package p; type _[A,] /* ERROR "missing type constraint" */ struct{ A }

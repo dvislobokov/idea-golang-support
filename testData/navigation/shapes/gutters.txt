@@ -1,0 +1,16 @@
+Implements method in: func (Partial) Name() string  { return "partial" }
+Implements method in: func (c Circle) Area() float64      { return 3 * c.R * c.R }
+Implements method in: func (c Circle) Name() string       { return "circle" }
+Implements method in: func (c Circle) Perimeter() float64 { return 6 * c.R }
+Implements method in: func (c Circle) String() string     { return fmt.Sprint(c.R) }
+Implements method in: func (s *Square) Area() float64      { return s.Side * s.Side }
+Implements method in: func (s *Square) Name() string       { return "square" }
+Implements method in: func (s *Square) Perimeter() float64 { return 4 * s.Side }
+Implements: type Circle struct {
+Implements: type Partial struct{}
+Implements: type Square struct {
+Is implemented by: Area() float64
+Is implemented by: Name() string
+Is implemented by: Perimeter() float64
+Is implemented by: type Named interface {
+Is implemented by: type Shape interface {

@@ -11,3 +11,10 @@ build/distributions/*
 !build/distributions/*.zip
 out/
 *.iml
+# go-psi library modules and tools (docs/psi/)
+/go-psi-*/build/
+tools/astdump/*.exe
+tools/portshorttest/*.exe
+tools/ml/data/
+.venv/
+__pycache__/

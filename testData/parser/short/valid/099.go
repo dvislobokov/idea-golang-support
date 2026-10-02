@@ -1,0 +1,1 @@
+package p; type T[P any] = T0

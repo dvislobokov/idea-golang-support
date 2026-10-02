@@ -1,0 +1,3 @@
+# The robot scripts build JavaScript sources full of `{}`: printf-style formatting is deliberate there.
+[lint]
+extend-ignore = ["UP031"]

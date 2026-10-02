@@ -1,0 +1,1 @@
+package p; func f() { if true {} else defer /* ERROR "expected if statement or block" */ f() }

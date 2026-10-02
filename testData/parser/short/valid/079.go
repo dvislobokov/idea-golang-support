@@ -1,0 +1,1 @@
+package p; func _[T1 interface{ m() }, T2, T3 interface{}](x T1, y T3) T2

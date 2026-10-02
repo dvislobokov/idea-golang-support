@@ -1,0 +1,9 @@
+<!-- Test-only descriptor so that go-psi-core tests see the core extensions without the plugin module. -->
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
+  <id>io.github.golangsupport.core.test</id>
+  <name>Go PSI Core (tests)</name>
+  <vendor>Go Project Support</vendor>
+  <depends>com.intellij.modules.platform</depends>
+
+  <xi:include href="/META-INF/go-psi-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
+</idea-plugin>

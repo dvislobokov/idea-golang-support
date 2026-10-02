@@ -1,0 +1,1 @@
+package p; func f() { _ = x = /* ERROR "expected '=='" */ 0 {}};

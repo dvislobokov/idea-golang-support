@@ -1,0 +1,1 @@
+package p; func(*T[e, e /* ERROR "e redeclared" */ ]) _()

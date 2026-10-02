@@ -12,6 +12,42 @@
 `tools/dlv-dap/probe.py` — зонд `dlv dap` (как объявляет порт, capabilities). `tools/gopls/probe.py` — зонд gopls без IDE: диагностики файла и code actions в заданных местах (так отличают «сервер не предлагает» от «платформа не показывает»). `tools/icons/generate.py` — все SVG плагина (править фигуры там, потом запускать). Анализ платформенных API LSP / DAP — в соседнем репозитории:
 `../idea-dotnet-support/docs/platform-lsp-dap.html`, `tools/platform-api/api.json`, журнал находок по DAP-клиенту — `PLATFORM_DAP_PLAN.md` там же.
 
+## go-psi: свой PSI Go (подпроекты `go-psi-core`, `go-psi-semantic`, `go-psi-ide`)
+
+2026-10-02 сюда перенесён код go-psi: лексер, парсер (Grammar-Kit, `go-psi-core/src/main/grammar/Go.bnf|Go.flex`), PSI, стабы, индексы,
+project model, типы, resolve, IDE-фичи. Пакеты `io.github.golangsupport.lang.*` (core), `.semantic.*`, `.project.*` (semantic), `.ide.*` (ide).
+Пока это библиотечные модули: в `plugin.xml` не подключены, в ZIP не попадают. План подмены gopls → PSI шаг за шагом — `docs/psi/MIGRATION-idea-golang-support.md`
+(раздел 4.4, шаги 5–12; шаги 1–4 сделаны), что уже есть и как устроено — `docs/psi/IDE-FEATURES.md`, `docs/psi/SEMANTIC.md`, `docs/psi/PLAN.md`,
+история — `docs/psi/CHANGELOG.md`, что ещё не сделано — `docs/psi/FEATURES.md`, производительность — `docs/psi/PERF-BACKLOG.md`.
+При подключении иконки, цвета и настройки берём из IGS (`GoIcons`, `colorSchemes/*`, `GoSettings`), а не из go-psi. Коллизии имён с текущими классами
+IGS (`lang.GoLanguage`/`GoFileType` — те же FQN; `GoLexer`, `GoFile`, `GoParserDefinition`, … — те же простые имена) решаются шагом 5 миграции.
+
+Жёсткие правила go-psi (действуют для этих модулей):
+- Никакого LSP/gopls внутри PSI-модулей. Бинарник `go` — только в project model (`go env`, `go list -m`, `gofmt`) и всегда с чистым fallback.
+- Не декомпилировать и не копировать код GoLand. go-lang-idea-plugin (Apache-2.0) и intellij-rust (MIT) читать можно; скопированные фрагменты — с атрибуцией в `NOTICE.md`.
+- Правка грамматики, стабов или системы типов — только с тестами; багфикс без регрессионного теста неполный. Грамматика: правка `Go.bnf`/`Go.flex`,
+  `:go-psi-core:generateParser :go-psi-core:generateLexer`, обновление golden-файлов `-Dgopsi.updateGoldens=true` с ручным просмотром диффа, затем корпусный гейт.
+- `GoFileElementType.STUB_VERSION` и версии индексов поднимать при любом изменении сериализованной формы. Внутри тел функций ничего не стабится; resolve
+  работает по стабам без загрузки AST чужих файлов (тесты проверяют через `AstLoadingFilter`).
+- Для кэшей типов/resolve не использовать `PsiModificationTracker.MODIFICATION_COUNT`; только трекеры из `semantic.cache.GoTrackers` / `GoBodyCache`.
+- Каждая неоднозначность, разобранная в `GoParserUtil`, описана в `docs/psi/GRAMMAR.md` со ссылкой на функцию go/parser.
+- Метрики корпусов `testData/metrics/*.json` могут только улучшаться (поля `millis` — не метрики); пороги бенчмарков — `testData/benchmark/thresholds.json`.
+
+Команды (JAVA_HOME — JBR IDEA, см. ниже; `--offline`):
+```sh
+./gradlew.bat :go-psi-core:test :go-psi-semantic:test :go-psi-ide:test --offline     # тесты модулей (~500 тестов)
+./gradlew.bat test --tests "io.github.golangsupport.lang.parser.*" --offline          # один пакет
+./gradlew.bat :go-psi-core:corpusTest --offline --no-configuration-cache              # гейты лексера/парсера/стабов над GOROOT и GOMODCACHE (минуты)
+./gradlew.bat :go-psi-semantic:corpusTest --offline --no-configuration-cache          # resolve/check над GOROOT (~8 мин)
+./gradlew.bat benchmark --offline --no-configuration-cache                            # бенчмарки с порогами; -Dgopsi.benchmark.update=true записывает улучшения
+./gradlew.bat checkKotlinAbi --offline                                                # ABI публичных пакетов (api/*.api); updateKotlinAbi после осознанной смены API
+tools/gates.sh corpus:semantic bench                                                  # те же гейты, вывод сокращён до метрик/падений (лог в build/gates/)
+```
+Задачи `corpusTest`/`benchmark` (тип `testIde`) несовместимы с configuration cache — только с `--no-configuration-cache`. После правок гонять
+только затронутые тесты; перед «готово» — тесты модулей и корпусный гейт затронутого слоя. Тестовые маркеры: `<caret>`, `/*ref*/` `/*def*/`
+`/*no ref*/` (resolve), `/*T: type*/` (типы), `<error descr="">`/`<warning>` (подсветка). Build-теги по умолчанию — host GOOS/GOARCH с `cgo`; тесты
+закрепляют `linux/amd64`.
+
 ## Сборка и проверка
 
 Системных JDK и Gradle нет. Wrapper запускать с JBR целевой IDE (Git Bash):

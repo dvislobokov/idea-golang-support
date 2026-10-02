@@ -1,0 +1,1 @@
+package p; type T []int; func f() { for _ = range []int{T{42}[0]} {} };

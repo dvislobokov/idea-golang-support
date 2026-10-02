@@ -1,0 +1,1 @@
+package p; var a = T{{1, 2}, {3, 4}}

@@ -1,0 +1,1 @@
+package p; func f() (a b string /* ERROR "missing ','" */ , ok bool)

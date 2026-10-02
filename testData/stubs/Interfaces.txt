@@ -1,0 +1,100 @@
+GoFileStub(package=ifaces)
+  PACKAGE_CLAUSE:GoPackageClauseStub(name=ifaces)
+  IMPORT_SPEC:GoImportSpecStub(name=io, path=io, alias=null)
+  TYPE_SPEC:GoTypeSpecStub(name=Reader, alias=false, generic=false)
+    INTERFACE_TYPE:GoTypeStub
+      METHOD_SPEC:GoMethodSpecStub(name=Read, arity=1)
+        SIGNATURE:GoSignatureStub
+          PARAMETERS:GoParametersStub
+            PARAMETER_DECLARATION:GoParameterDeclarationStub(variadic=false)
+              PARAM_DEFINITION:GoParamDefinitionStub(name=p)
+              ARRAY_OR_SLICE_TYPE:GoTypeStub
+                TYPE:GoTypeStub
+                  TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(byte)
+          RESULT:GoResultStub
+            PARAMETERS:GoParametersStub
+              PARAMETER_DECLARATION:GoParameterDeclarationStub(variadic=false)
+                PARAM_DEFINITION:GoParamDefinitionStub(name=n)
+                TYPE:GoTypeStub
+                  TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+              PARAMETER_DECLARATION:GoParameterDeclarationStub(variadic=false)
+                PARAM_DEFINITION:GoParamDefinitionStub(name=err)
+                TYPE:GoTypeStub
+                  TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(error)
+  TYPE_SPEC:GoTypeSpecStub(name=ReadCloser, alias=false, generic=false)
+    INTERFACE_TYPE:GoTypeStub
+      CONSTRAINT_ELEM:GoConstraintElemStub
+        CONSTRAINT_TERM:GoConstraintTermStub(tilde=false)
+          TYPE:GoTypeStub
+            TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(io.Reader)
+      CONSTRAINT_ELEM:GoConstraintElemStub
+        CONSTRAINT_TERM:GoConstraintTermStub(tilde=false)
+          TYPE:GoTypeStub
+            TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(Reader)
+      METHOD_SPEC:GoMethodSpecStub(name=Close, arity=0)
+        SIGNATURE:GoSignatureStub
+          PARAMETERS:GoParametersStub
+          RESULT:GoResultStub
+            TYPE:GoTypeStub
+              TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(error)
+      METHOD_SPEC:GoMethodSpecStub(name=Each, arity=2)
+        SIGNATURE:GoSignatureStub
+          PARAMETERS:GoParametersStub
+            PARAMETER_DECLARATION:GoParameterDeclarationStub(variadic=false)
+              PARAM_DEFINITION:GoParamDefinitionStub(name=f)
+              FUNCTION_TYPE:GoTypeStub
+                SIGNATURE:GoSignatureStub
+                  PARAMETERS:GoParametersStub
+                    PARAMETER_DECLARATION:GoParameterDeclarationStub(variadic=false)
+                      TYPE:GoTypeStub
+                        TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+                  RESULT:GoResultStub
+                    TYPE:GoTypeStub
+                      TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(bool)
+            PARAMETER_DECLARATION:GoParameterDeclarationStub(variadic=true)
+              PARAM_DEFINITION:GoParamDefinitionStub(name=args)
+              TYPE:GoTypeStub
+                TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(any)
+  TYPE_SPEC:GoTypeSpecStub(name=Ordered, alias=false, generic=false)
+    INTERFACE_TYPE:GoTypeStub
+      CONSTRAINT_ELEM:GoConstraintElemStub
+        CONSTRAINT_TERM:GoConstraintTermStub(tilde=true)
+          TYPE:GoTypeStub
+            TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+        CONSTRAINT_TERM:GoConstraintTermStub(tilde=true)
+          TYPE:GoTypeStub
+            TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(string)
+        CONSTRAINT_TERM:GoConstraintTermStub(tilde=false)
+          TYPE:GoTypeStub
+            TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(float64)
+  TYPE_SPEC:GoTypeSpecStub(name=Handler, alias=false, generic=false)
+    FUNCTION_TYPE:GoTypeStub
+      SIGNATURE:GoSignatureStub
+        PARAMETERS:GoParametersStub
+          PARAMETER_DECLARATION:GoParameterDeclarationStub(variadic=false)
+            PARAM_DEFINITION:GoParamDefinitionStub(name=w)
+            TYPE:GoTypeStub
+              TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(io.Writer)
+          PARAMETER_DECLARATION:GoParameterDeclarationStub(variadic=false)
+            PARAM_DEFINITION:GoParamDefinitionStub(name=r)
+            CHANNEL_TYPE:GoTypeStub(<-chan)
+              TYPE:GoTypeStub
+                TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(string)
+        RESULT:GoResultStub
+          TYPE:GoTypeStub
+            TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(error)
+  TYPE_SPEC:GoTypeSpecStub(name=Ch, alias=false, generic=false)
+    CHANNEL_TYPE:GoTypeStub(chan<-)
+      MAP_TYPE:GoTypeStub
+        TYPE:GoTypeStub
+          TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(string)
+        ARRAY_OR_SLICE_TYPE:GoTypeStub
+          POINTER_TYPE:GoTypeStub
+            TYPE:GoTypeStub
+              TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(int)
+  METHOD_DECLARATION:GoMethodDeclarationStub(name=Serve, arity=0, receiver=Handler)
+    RECEIVER:GoReceiverStub(name=h)
+      TYPE:GoTypeStub
+        TYPE_REFERENCE_EXPRESSION:GoTypeReferenceExpressionStub(Handler)
+    SIGNATURE:GoSignatureStub
+      PARAMETERS:GoParametersStub

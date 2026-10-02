@@ -1,0 +1,1 @@
+package p; type I1 interface{}; type I2 interface{ I1 }

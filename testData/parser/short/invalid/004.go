@@ -1,0 +1,1 @@
+package p; func f() { if _ = range /* ERROR "expected operand" */ x; true {} };

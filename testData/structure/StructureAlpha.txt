@@ -1,0 +1,24 @@
+-Structure.go
+ Celsius
+ count int
+ E
+ helper()
+ limit int
+ List[T any]
+ Map[K comparable, V any](m map[K]V, f func(V) V) (result map[K]V, err error)
+ Name string
+ NewPoint(x, y int) *Point
+ Pi
+ -Point
+  *Base
+  label string
+  Move(dx, dy int)
+  String() string
+  X int
+  Y int
+ registry
+ (*Base) Reset()
+ -Shape
+  Area() float64
+  fmt.Stringer
+  Scale(factor float64) Shape

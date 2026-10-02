@@ -1,0 +1,1 @@
+package p; func _(x p.T[Q])

@@ -1,0 +1,39 @@
+[project]
+name = "gopsi-ml"
+version = "0.0.1"
+description = "Offline corpus, dataset and training tooling for go-psi ML features"
+requires-python = ">=3.12"
+dependencies = [
+    "pyarrow>=21",
+]
+
+[project.scripts]
+gopsi-corpus = "gopsi_ml.corpus.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "pyright>=1.1.380",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gopsi_ml"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

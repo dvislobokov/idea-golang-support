@@ -1,0 +1,69 @@
+== type Point
+a.go:19 [Type reference] func (p *Point) Move(dx int) { p.X += dx }
+a.go:21 [Type reference] func NewPoint(x int) *Point {
+a.go:22 [Type reference] return &Point{X: x, Y: 0}
+a.go:36 [Type conversion] _ = Point(*p)
+a.go:37 [Type reference] q := Point{X: 1}
+b.go:4 [Type reference] var p Point
+
+== type Base (embedded)
+a.go:10 [Embedded field] Base
+
+== field X
+a.go:19 [Field write] func (p *Point) Move(dx int) { p.X += dx }
+a.go:22 [Composite literal key] return &Point{X: x, Y: 0}
+a.go:34 [Field write] p.X = p.Y
+a.go:37 [Composite literal key] q := Point{X: 1}
+a.go:38 [Field read] _ = q.X
+b.go:6 [Field read] _ = NewPoint(2).X
+
+== field Y
+a.go:22 [Composite literal key] return &Point{X: x, Y: 0}
+a.go:34 [Field read] p.X = p.Y
+a.go:35 [Field write] p.Y++
+
+== promoted field ID
+a.go:39 [Field read] _ = q.ID
+
+== method Point.Move
+a.go:29 [Method call] p.Move(2)
+a.go:32 [Method value] f := p.Move
+b.go:5 [Method call] p.Move(1)
+
+== interface method Mover.Move
+a.go:31 [Method call] m.Move(3)
+
+== func NewPoint
+a.go:28 [Call] p := NewPoint(1)
+b.go:6 [Call] _ = NewPoint(2).X
+
+== unexported func helper
+a.go:40 [Call] fmt.Println(p, helper(), rand.IntN(3))
+b.go:7 [Call] _ = helper()
+
+== local p
+a.go:29 [Value read] p.Move(2)
+a.go:30 [Value read] var m Mover = p
+a.go:32 [Value read] f := p.Move
+a.go:34 [Value read] p.X = p.Y
+a.go:34 [Value read] p.X = p.Y
+a.go:35 [Value read] p.Y++
+a.go:36 [Value read] _ = Point(*p)
+a.go:40 [Value read] fmt.Println(p, helper(), rand.IntN(3))
+
+== local i
+a.go:42 [Value read] for i := 0; i < 3; i++ {
+a.go:42 [Value write] for i := 0; i < 3; i++ {
+a.go:44 [Value read] if i > 1 {
+
+== label outer
+a.go:45 [Label reference] break outer
+a.go:47 [Label reference] continue outer
+a.go:50 [Label reference] goto outer
+
+== import fmt
+a.go:40 [Package qualifier] fmt.Println(p, helper(), rand.IntN(3))
+
+== import math/rand/v2
+a.go:25 [Package qualifier] func helper() int { return rand.IntN(10) }
+a.go:40 [Package qualifier] fmt.Println(p, helper(), rand.IntN(3))

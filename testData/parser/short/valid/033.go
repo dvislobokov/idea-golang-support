@@ -1,0 +1,1 @@
+package p; func _(x chan int) { chan int(x) <- 0 }

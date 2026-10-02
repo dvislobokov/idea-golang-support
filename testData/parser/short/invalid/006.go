@@ -1,0 +1,1 @@
+package p; func f() { for _ = range x ; /* ERROR "expected '{'" */ ; {} };

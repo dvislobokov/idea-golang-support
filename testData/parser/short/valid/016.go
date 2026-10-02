@@ -1,0 +1,1 @@
+package p; type T []int; func g(int) bool { return true }; func f() { if g(T{42}[0]) {} };

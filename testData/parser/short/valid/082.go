@@ -1,0 +1,1 @@
+package p; var _ = func()T[int]{}

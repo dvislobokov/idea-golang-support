@@ -1,0 +1,1 @@
+package p; var _ = map[P]int{P{}:0, {}:1}

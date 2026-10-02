@@ -1,0 +1,1 @@
+package p; type _[_ any] int; var _ = T[] /* ERROR "expected operand" */ {}

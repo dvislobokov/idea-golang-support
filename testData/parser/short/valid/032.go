@@ -1,0 +1,1 @@
+package p; func _(x interface{f()}) { interface{f()}(x).f() }

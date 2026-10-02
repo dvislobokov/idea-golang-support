@@ -1,0 +1,72 @@
+package io.github.golangsupport.ide.rename
+
+import com.intellij.lang.refactoring.NamesValidator
+import com.intellij.lang.refactoring.RefactoringSupportProvider
+import com.intellij.openapi.project.Project
+import com.intellij.patterns.ElementPattern
+import com.intellij.patterns.PlatformPatterns
+import com.intellij.psi.PsiElement
+import com.intellij.psi.search.LocalSearchScope
+import com.intellij.refactoring.rename.RenameInputValidatorEx
+import com.intellij.util.ProcessingContext
+import io.github.golangsupport.lang.psi.GoNamedElement
+import io.github.golangsupport.lang.psi.GoPackageClause
+
+/** Go identifiers and keywords for rename and other refactorings. */
+class GoNamesValidator : NamesValidator {
+    override fun isKeyword(name: String, project: Project?): Boolean = name in KEYWORDS
+
+    override fun isIdentifier(name: String, project: Project?): Boolean = isValidIdentifier(name)
+
+    companion object {
+        @JvmField
+        val KEYWORDS: Set<String> = setOf(
+            "break", "case", "chan", "const", "continue", "default", "defer", "else", "fallthrough", "for", "func",
+            "go", "goto", "if", "import", "interface", "map", "package", "range", "return", "select", "struct",
+            "switch", "type", "var",
+        )
+
+        /** `[\p{L}_][\p{L}\p{Nd}_]*` and not a keyword (the Go spec's identifier). */
+        @JvmStatic
+        fun isValidIdentifier(name: String): Boolean {
+            if (name.isEmpty() || name in KEYWORDS) return false
+            var i = 0
+            var first = true
+            while (i < name.length) {
+                val cp = name.codePointAt(i)
+                val ok = cp == '_'.code || Character.isLetter(cp) || (!first && Character.getType(cp) == Character.DECIMAL_DIGIT_NUMBER.toInt())
+                if (!ok) return false
+                first = false
+                i += Character.charCount(cp)
+            }
+            return true
+        }
+    }
+}
+
+/** Rejects keywords and non-identifiers in the rename dialog of Go declarations, with a reason. */
+class GoRenameInputValidator : RenameInputValidatorEx {
+    override fun getPattern(): ElementPattern<out PsiElement> = PlatformPatterns.psiElement(GoNamedElement::class.java)
+
+    override fun isInputValid(newName: String, element: PsiElement, context: ProcessingContext): Boolean =
+        GoNamesValidator.isValidIdentifier(newName)
+
+    override fun getErrorMessage(newName: String, project: Project): String? = when {
+        newName in GoNamesValidator.KEYWORDS -> "'$newName' is a Go keyword"
+        !GoNamesValidator.isValidIdentifier(newName) -> "'$newName' is not a valid Go identifier"
+        else -> null
+    }
+}
+
+/**
+ * Rename modes: in-place for declarations visible only in one function or file (locals,
+ * parameters, receivers, labels, imports); the dialog for package-level declarations.
+ */
+class GoRefactoringSupportProvider : RefactoringSupportProvider() {
+    override fun isAvailable(context: PsiElement): Boolean = context is GoNamedElement
+
+    override fun isInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean =
+        element is GoNamedElement && element !is GoPackageClause && element.useScope is LocalSearchScope
+
+    override fun isMemberInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean = false
+}

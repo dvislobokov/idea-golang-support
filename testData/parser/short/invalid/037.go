@@ -1,0 +1,1 @@
+package p; type _ struct{ ( /* ERROR "cannot parenthesize embedded type" */ int) }

@@ -1,0 +1,1 @@
+package p; func f() {goto; /* ERROR "expected 'IDENT', found ';'" */ }

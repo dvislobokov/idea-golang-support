@@ -1,0 +1,1 @@
+package p; func f() { for i /* ERROR "boolean or range expression" */ , x = []string {} }

@@ -1,0 +1,30 @@
+<!-- Extensions contributed by go-psi-core. Included into plugin/src/main/resources/META-INF/plugin.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType name="Go"
+              language="Go"
+              extensions="go"
+              implementationClass="io.github.golangsupport.lang.GoFileType"
+              fieldName="INSTANCE"/>
+    <lang.parserDefinition language="Go"
+                           implementationClass="io.github.golangsupport.lang.parser.GoParserDefinition"/>
+    <!-- Comments as GoCommentImpl: a PsiComment without the injection-host overhead (docs/FORMATTER.md). -->
+    <lang.ast.factory language="Go" implementationClass="io.github.golangsupport.lang.psi.impl.GoASTFactory"/>
+
+    <!-- Stub element types live in the generated GoTypes; the platform derives each external id as
+         "go." + field name, which GoStubElementType.getExternalId matches. -->
+    <stubElementTypeHolder class="io.github.golangsupport.lang.psi.GoTypes" externalIdPrefix="go."/>
+
+    <stubIndex implementation="io.github.golangsupport.lang.stubs.index.GoPackagesIndex"/>
+    <stubIndex implementation="io.github.golangsupport.lang.stubs.index.GoFunctionIndex"/>
+    <stubIndex implementation="io.github.golangsupport.lang.stubs.index.GoMethodIndex"/>
+    <stubIndex implementation="io.github.golangsupport.lang.stubs.index.GoTypesIndex"/>
+    <stubIndex implementation="io.github.golangsupport.lang.stubs.index.GoAllPublicNamesIndex"/>
+    <stubIndex implementation="io.github.golangsupport.lang.stubs.index.GoAllPrivateNamesIndex"/>
+    <stubIndex implementation="io.github.golangsupport.lang.stubs.index.GoMethodFingerprintIndex"/>
+    <stubIndex implementation="io.github.golangsupport.lang.stubs.index.GoMethodSpecFingerprintIndex"/>
+
+    <fileBasedIndex implementation="io.github.golangsupport.lang.index.GoFileImportsIndex"/>
+    <fileBasedIndex implementation="io.github.golangsupport.lang.index.GoBuildTagsIndex"/>
+  </extensions>
+</idea-plugin>

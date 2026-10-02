@@ -1,0 +1,1 @@
+package p; func _[]/* ERROR "empty type parameter list" */()

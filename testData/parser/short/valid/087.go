@@ -1,0 +1,1 @@
+package p; func (_ R[P]) _(x T)

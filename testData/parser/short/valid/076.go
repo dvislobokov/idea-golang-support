@@ -1,0 +1,1 @@
+package p; type _[A, B any] interface { _(a A) B }

@@ -1,0 +1,1 @@
+package p; const (x = 0; y; z)

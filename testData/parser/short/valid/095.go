@@ -1,0 +1,1 @@
+package p; type _ interface{int|float32; bool; m(); string;}

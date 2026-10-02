@@ -1,0 +1,1 @@
+package p; type T[P1, P2 any] struct { P1; f []P2 }

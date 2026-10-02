@@ -1,0 +1,1 @@
+package p; func _[T1, T2 interface{}](x T1) T2

@@ -1,0 +1,1 @@
+package p; func f[T ... /* ERROR "invalid use of ..." */ C]()() {}

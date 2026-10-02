@@ -1,0 +1,1 @@
+package p; func (R[P]) _()

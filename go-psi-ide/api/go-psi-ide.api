@@ -1,0 +1,47 @@
+public final class io/github/golangsupport/ide/completion/api/GoCompletionCandidate {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;IILcom/intellij/psi/PsiElement;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()Lcom/intellij/psi/PsiElement;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;IILcom/intellij/psi/PsiElement;)Lio/github/golangsupport/ide/completion/api/GoCompletionCandidate;
+	public static synthetic fun copy$default (Lio/github/golangsupport/ide/completion/api/GoCompletionCandidate;Ljava/lang/String;Ljava/lang/String;IILcom/intellij/psi/PsiElement;ILjava/lang/Object;)Lio/github/golangsupport/ide/completion/api/GoCompletionCandidate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElement ()Lcom/intellij/psi/PsiElement;
+	public final fun getExpectedTypeMatch ()I
+	public final fun getKind ()Ljava/lang/String;
+	public final fun getLookupString ()Ljava/lang/String;
+	public final fun getScopeLevel ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/golangsupport/ide/completion/api/GoCompletionRanker {
+	public static final field Companion Lio/github/golangsupport/ide/completion/api/GoCompletionRanker$Companion;
+	public static final field EP_NAME Lcom/intellij/openapi/extensions/ExtensionPointName;
+	public abstract fun rank (Lio/github/golangsupport/ide/completion/api/GoCompletionRankingContext;Ljava/util/List;)Ljava/util/List;
+}
+
+public final class io/github/golangsupport/ide/completion/api/GoCompletionRanker$Companion {
+}
+
+public final class io/github/golangsupport/ide/completion/api/GoCompletionRankingContext {
+	public fun <init> (Lcom/intellij/psi/PsiFile;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Lcom/intellij/psi/PsiFile;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Lcom/intellij/psi/PsiFile;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/golangsupport/ide/completion/api/GoCompletionRankingContext;
+	public static synthetic fun copy$default (Lio/github/golangsupport/ide/completion/api/GoCompletionRankingContext;Lcom/intellij/psi/PsiFile;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/ide/completion/api/GoCompletionRankingContext;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExpectedType ()Ljava/lang/String;
+	public final fun getFile ()Lcom/intellij/psi/PsiFile;
+	public final fun getOffset ()I
+	public final fun getPositionKind ()Ljava/lang/String;
+	public final fun getPrefix ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

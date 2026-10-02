@@ -1,0 +1,1 @@
+package p; var _ = map[T[int]]T[int]{}

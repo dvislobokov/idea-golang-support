@@ -1,0 +1,1 @@
+package p; func f() { var s []int; _ = s[: /* ERROR "middle index required" */ ::] };

@@ -1,0 +1,1 @@
+package p; func f() { switch _ /* ERROR "expected switch expression" */ = range x; true {} };

@@ -1,0 +1,442 @@
+// Go grammar for the IntelliJ Platform (Grammar-Kit). Phase 2: full Go 1.25 syntax plus the
+// 1.26/1.27 forms listed in docs/GRAMMAR.md section I.
+//
+// Token names follow the go/token constant names (BREAK, LBRACE, ADD_ASSIGN, ...) so that lexer
+// dumps diff 1:1 against tools/astdump. Fixed tokens carry their literal text so that rules can
+// reference them as '{' or 'func'; the regexps of variable tokens are approximations used only by
+// the Grammar-Kit live preview (the real definitions are in Go.flex).
+//
+// Ambiguities are resolved by external rules in GoParserUtil; see docs/GRAMMAR.md for the mapping
+// to go/parser functions. PSI node names follow GoLand's public PSI where possible.
+{
+  parserClass="io.github.golangsupport.lang.parser.GoParser"
+  parserUtilClass="io.github.golangsupport.lang.parser.GoParserUtil"
+  parserImports=[
+    "static io.github.golangsupport.lang.parser.GoParserUtil.DOC_COMMENT_BINDER"
+  ]
+
+  psiPackage="io.github.golangsupport.lang.psi"
+  psiImplPackage="io.github.golangsupport.lang.psi.impl"
+  psiClassPrefix="Go"
+  psiImplClassSuffix="Impl"
+
+  elementTypeHolderClass="io.github.golangsupport.lang.psi.GoTypes"
+  elementTypeClass="io.github.golangsupport.lang.psi.GoElementType"
+  tokenTypeClass="io.github.golangsupport.lang.psi.GoTokenType"
+
+  // Phase 3: every composite element type comes from GoElementTypeFactory (stub types for the rules
+  // with stubClass, plain GoElementType otherwise); see docs/GRAMMAR.md section M.
+  elementTypeFactory="io.github.golangsupport.lang.stubs.GoElementTypeFactory.stubFactory"
+  extends="io.github.golangsupport.lang.psi.impl.GoCompositeElementImpl"
+  implements="io.github.golangsupport.lang.psi.GoCompositeElement"
+  // All type nodes share one stub class; the root Type carries the stub-based mixin, the others extend it.
+  stubClass(".*Type|TypeList")="io.github.golangsupport.lang.stubs.GoTypeStub"
+  mixin("Type")="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoTypeStub>"
+  generateTokenAccessors=true
+
+  tokens=[
+    // Keywords
+    BREAK='break'
+    CASE='case'
+    CHAN='chan'
+    CONST='const'
+    CONTINUE='continue'
+    DEFAULT='default'
+    DEFER='defer'
+    ELSE='else'
+    FALLTHROUGH='fallthrough'
+    FOR='for'
+    FUNC='func'
+    GO='go'
+    GOTO='goto'
+    IF='if'
+    IMPORT='import'
+    INTERFACE='interface'
+    MAP='map'
+    PACKAGE='package'
+    RANGE='range'
+    RETURN='return'
+    SELECT='select'
+    STRUCT='struct'
+    SWITCH='switch'
+    TYPE_='type'
+    VAR='var'
+
+    // Operators and punctuation (longest first where one is a prefix of another)
+    AND_NOT_ASSIGN='&^='
+    SHL_ASSIGN='<<='
+    SHR_ASSIGN='>>='
+    ELLIPSIS='...'
+    ADD_ASSIGN='+='
+    SUB_ASSIGN='-='
+    MUL_ASSIGN='*='
+    QUO_ASSIGN='/='
+    REM_ASSIGN='%='
+    AND_ASSIGN='&='
+    OR_ASSIGN='|='
+    XOR_ASSIGN='^='
+    AND_NOT='&^'
+    SHL='<<'
+    SHR='>>'
+    LAND='&&'
+    LOR='||'
+    ARROW='<-'
+    INC='++'
+    DEC='--'
+    EQL='=='
+    NEQ='!='
+    LEQ='<='
+    GEQ='>='
+    DEFINE=':='
+    ADD='+'
+    SUB='-'
+    MUL='*'
+    QUO='/'
+    REM='%'
+    AND='&'
+    OR='|'
+    XOR='^'
+    LSS='<'
+    GTR='>'
+    ASSIGN='='
+    NOT='!'
+    LPAREN='('
+    LBRACK='['
+    LBRACE='{'
+    COMMA=','
+    PERIOD='.'
+    RPAREN=')'
+    RBRACK=']'
+    RBRACE='}'
+    SEMICOLON=';'
+    COLON=':'
+    TILDE='~'
+
+    // Automatically inserted semicolon; its text is the line break it replaces.
+    SEMICOLON_SYNTHETIC='regexp:\n'
+
+    // Literals
+    IMAG='regexp:(0[xX][0-9a-fA-F_]*(\.[0-9a-fA-F_]*)?([pP][+-]?[0-9_]*)?|([0-9][0-9_]*(\.[0-9_]*)?|\.[0-9][0-9_]*)([eE][+-]?[0-9_]*)?)i'
+    FLOAT='regexp:0[xX][0-9a-fA-F_]*(\.[0-9a-fA-F_]*)?[pP][+-]?[0-9_]*|([0-9][0-9_]*\.[0-9_]*|\.[0-9][0-9_]*)([eE][+-]?[0-9_]*)?|[0-9][0-9_]*[eE][+-]?[0-9_]*'
+    INT='regexp:0[xX][0-9a-fA-F_]*|0[oObB][0-9_]*|[0-9][0-9_]*'
+    CHAR="regexp:'([^'\\n]|\[^\n])*'?"
+    STRING='regexp:"([^"\\n]|\[^\n])*"?'
+    RAW_STRING='regexp:`[^`]*`?'
+
+    IDENTIFIER='regexp:[\p{L}_][\p{L}\p{Nd}_]*'
+
+    // Comments
+    LINE_COMMENT='regexp://[^\n]*'
+    BLOCK_COMMENT='regexp:/\*(.|\n)*?\*/'
+  ]
+
+  extends("(Binary|Unary|Call|IndexOrSlice|TypeAssertion|Parentheses|Conversion)Expr|CompositeLit|FunctionLit|Literal|StringLiteral|ReferenceExpression")=Expression
+  extends(".*Type|TypeList")=Type
+  extends(".*(Statement|Declaration)|Block|ShortVarDeclaration")=Statement
+}
+
+// ---------------------------------------------------------------------------------------------
+// File
+// ---------------------------------------------------------------------------------------------
+
+File ::= (PackageClauseWithSemi | <<missingPackageClause>>) ImportList TopLevelDeclarations
+
+private PackageClauseWithSemi ::= PackageClause semi {pin=1}
+PackageClause ::= package IDENTIFIER {pin=1 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoPackageClauseStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoPackageClauseStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+
+// A terminator: explicit or inserted semicolon, end of file, or (optionally) a closing bracket.
+private semi ::= ';' | SEMICOLON_SYNTHETIC | <<eof>> | &(')' | '}')
+private semiToken ::= ';' | SEMICOLON_SYNTHETIC
+
+ImportList ::= ImportDeclarationWithSemi* {hooks=[leftBinder="DOC_COMMENT_BINDER"]}
+private ImportDeclarationWithSemi ::= ImportDeclaration semi {pin=1 recoverWhile=TopLevelRecover}
+
+ImportDeclaration ::= import (ImportSpec | '(' ImportSpecs? ')') {pin=1 hooks=[leftBinder="DOC_COMMENT_BINDER"]}
+private ImportSpecs ::= (ImportSpecWithSemi | semiToken)+
+private ImportSpecWithSemi ::= !(')' | <<eof>>) ImportSpec semi {pin=1 recoverWhile=SpecRecover}
+ImportSpec ::= ('.' | IDENTIFIER)? StringLiteral {pin=2 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoImportSpecStub" mixin="io.github.golangsupport.lang.psi.impl.GoImportSpecMixin" implements=["io.github.golangsupport.lang.psi.GoNamedElement" "io.github.golangsupport.lang.psi.GoImportSpecBase"]}
+
+private TopLevelDeclarations ::= TopLevelDeclarationWithSemi*
+private TopLevelDeclarationWithSemi ::= !<<eof>> TopLevelDeclaration semi {pin=1 recoverWhile=TopLevelRecover}
+private TopLevelDeclaration ::=
+    ConstDeclaration
+  | TypeDeclaration
+  | VarDeclaration
+  | FunctionDeclaration
+  | MethodDeclaration
+  | ImportDeclaration
+private TopLevelRecover ::= !(const | 'type' | var | func | import)
+
+// Recovery inside parenthesised spec groups and braces: stop at terminators and closers.
+// Stops at everything that may legitimately follow a spec: terminators, closers, and the start of
+// the next spec/field/interface element.
+private SpecRecover ::= !(';' | SEMICOLON_SYNTHETIC | ')' | '}' | IDENTIFIER | '.' | STRING | RAW_STRING | '*' | '~' | '[' | '('
+  | const | 'type' | var | func | import | package | interface | struct | map | chan | '<-')
+
+// ---------------------------------------------------------------------------------------------
+// Declarations
+// ---------------------------------------------------------------------------------------------
+
+ConstDeclaration ::= const (ConstSpec | '(' ConstSpecs? ')') {pin(".*")=1 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoConstDeclarationStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoConstDeclarationStub>"}
+private ConstSpecs ::= (ConstSpecWithSemi | semiToken)+
+private ConstSpecWithSemi ::= !(')' | <<eof>>) ConstSpec semi {pin=1 recoverWhile=SpecRecover}
+ConstSpec ::= ConstDefinitionList ConstSpecTail? {pin=1 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoConstSpecStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoConstSpecStub>"}
+// go/parser parseValueSpec: `const x T` without values is accepted (the checker reports "missing init expr").
+private ConstSpecTail ::= Type ('=' ExpressionList)? | '=' ExpressionList {pin(".*")=1}
+private ConstDefinitionList ::= ConstDefinition (',' ConstDefinition)*
+ConstDefinition ::= IDENTIFIER {stubClass="io.github.golangsupport.lang.stubs.GoConstDefinitionStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoConstDefinitionStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+
+VarDeclaration ::= var (VarSpec | '(' VarSpecs? ')') {pin(".*")=1 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoVarDeclarationStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoVarDeclarationStub>"}
+private VarSpecs ::= (VarSpecWithSemi | semiToken)+
+private VarSpecWithSemi ::= !(')' | <<eof>>) VarSpec semi {pin=1 recoverWhile=SpecRecover}
+VarSpec ::= VarDefinitionList (Type ('=' ExpressionList)? | '=' ExpressionList) {pin(".*")=1 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoVarSpecStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoVarSpecStub>"}
+private VarDefinitionList ::= VarDefinition (',' VarDefinition)*
+VarDefinition ::= IDENTIFIER {stubClass="io.github.golangsupport.lang.stubs.GoVarDefinitionStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoVarDefinitionStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+
+TypeDeclaration ::= 'type' (TypeSpec | '(' TypeSpecs? ')') {pin(".*")=1 hooks=[leftBinder="DOC_COMMENT_BINDER"]}
+private TypeSpecs ::= (TypeSpecWithSemi | semiToken)+
+private TypeSpecWithSemi ::= !(')' | <<eof>>) TypeSpec semi {pin=1 recoverWhile=SpecRecover}
+// `'type' Name [` is either a 'type' parameter list or an array 'type'; see GoParserUtil.isTypeParams
+// (port of go/parser parseTypeSpec/extractName, docs/GRAMMAR.md section C).
+TypeSpec ::= IDENTIFIER (<<isTypeParams>> TypeParameters)? '='? SpecType {pin=1 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoTypeSpecStub" mixin="io.github.golangsupport.lang.psi.impl.GoTypeSpecMixin" implements=["io.github.golangsupport.lang.psi.GoNamedElement" "io.github.golangsupport.lang.psi.GoTypeSpecBase"]}
+SpecType ::= Type
+
+TypeParameters ::= '[' TypeParameterDeclaration (',' TypeParameterDeclaration)* ','? ']' {pin=1 stubClass="io.github.golangsupport.lang.stubs.GoTypeParametersStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoTypeParametersStub>"}
+TypeParameterDeclaration ::= TypeParamDefinition (',' TypeParamDefinition)* ConstraintElem {pin=1 stubClass="io.github.golangsupport.lang.stubs.GoTypeParameterDeclarationStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoTypeParameterDeclarationStub>"}
+TypeParamDefinition ::= IDENTIFIER {stubClass="io.github.golangsupport.lang.stubs.GoTypeParamDefinitionStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoTypeParamDefinitionStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+ConstraintElem ::= ConstraintTerm ('|' ConstraintTerm)* {stubClass="io.github.golangsupport.lang.stubs.GoConstraintElemStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoConstraintElemStub>"}
+ConstraintTerm ::= '~'? Type {stubClass="io.github.golangsupport.lang.stubs.GoConstraintTermStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoConstraintTermStub>"}
+
+// Function bodies are lazy and reparseable: the outer parser collapses `{ ... }` by brace matching
+// (GoParserUtil.lazyBlock, docs/GRAMMAR.md section N) and the body is parsed on first access.
+// The `| Block` alternative never matches (lazyBlock accepts every `{`); it only makes Grammar-Kit
+// generate the `getBlock()` accessor.
+FunctionDeclaration ::= func IDENTIFIER TypeParameters? Signature FunctionBody? {pin=2 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoFunctionDeclarationStub" mixin="io.github.golangsupport.lang.psi.impl.GoFunctionOrMethodDeclarationImpl<io.github.golangsupport.lang.stubs.GoFunctionDeclarationStub>" implements="io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration"}
+MethodDeclaration ::= func Receiver IDENTIFIER TypeParameters? Signature FunctionBody? {pin=2 hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoMethodDeclarationStub" mixin="io.github.golangsupport.lang.psi.impl.GoMethodDeclarationMixin" implements=["io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration" "io.github.golangsupport.lang.psi.GoMethodDeclarationBase"]}
+private FunctionBody ::= <<lazyBlock Block>> | Block
+Receiver ::= '(' (IDENTIFIER <<typeAfterName>> Type | Type) ','? ')' {pin=1 stubClass="io.github.golangsupport.lang.stubs.GoReceiverStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoReceiverStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+
+Signature ::= Parameters Result? {pin=1 stubClass="io.github.golangsupport.lang.stubs.GoSignatureStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoSignatureStub>"}
+Result ::= Parameters | Type {stubClass="io.github.golangsupport.lang.stubs.GoResultStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoResultStub>"}
+Parameters ::= '(' (ParameterList ','?)? ')' {pin=1 stubClass="io.github.golangsupport.lang.stubs.GoParametersStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoParametersStub>"}
+private ParameterList ::= ParameterDeclaration (',' ParameterDeclaration)*
+// go/parser parseParameterList: a group of names followed by a 'type', or a bare 'type'.
+// Tried in this order, the backtracking reproduces the "all names are types" rule for `(a, b)`.
+ParameterDeclaration ::= ParamDefinitionList <<variadic>> <<typeAfterName>> Type | <<variadic>> Type {stubClass="io.github.golangsupport.lang.stubs.GoParameterDeclarationStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoParameterDeclarationStub>"}
+private ParamDefinitionList ::= ParamDefinition (',' ParamDefinition)*
+ParamDefinition ::= IDENTIFIER {stubClass="io.github.golangsupport.lang.stubs.GoParamDefinitionStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoParamDefinitionStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+
+// ---------------------------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------------------------
+
+Type ::=
+    TypeReferenceExpression TypeArguments?
+  | ParType
+  | ArrayOrSliceType
+  | StructType
+  | PointerType
+  | FunctionType
+  | InterfaceType
+  | MapType
+  | ChannelType
+
+// A (qualified) 'type' name: T or pkg.T. Type arguments (List[int]) follow it in the enclosing Type.
+TypeReferenceExpression ::= (SimpleReferenceExpression '.')? IDENTIFIER {stubClass="io.github.golangsupport.lang.stubs.GoTypeReferenceExpressionStub" mixin="io.github.golangsupport.lang.psi.impl.GoTypeReferenceExpressionMixin"}
+TypeArguments ::= '[' Type (',' Type)* ','? ']' {pin=1 stubClass="io.github.golangsupport.lang.stubs.GoTypeArgumentsStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoTypeArgumentsStub>"}
+// Unpinned variant for speculative parses (a composite literal guess must be able to back out).
+private TypeArgumentsNoPin ::= '[' Type (',' Type)* ','? ']' {elementType=TypeArguments}
+
+ParType ::= '(' Type ')' {pin=1}
+ArrayOrSliceType ::= '[' ('...' | <<nested Expression>>)? ']' Type {pin=1}
+PointerType ::= '*' Type {pin=1}
+FunctionType ::= func &'(' Signature {pin=2}
+MapType ::= map '[' Type ']' Type {pin=1}
+ChannelType ::= ('<-' chan | chan '<-' | chan) Type {pin=1}
+
+StructType ::= struct '{' FieldDeclarations? '}' {pin=1}
+private FieldDeclarations ::= (FieldDeclarationWithSemi | semiToken)+
+private FieldDeclarationWithSemi ::= !('}' | <<eof>>) FieldDeclaration semi {pin=1 recoverWhile=SpecRecover}
+// go/parser parseFieldDecl/parseArrayFieldOrTypeInstance (docs/GRAMMAR.md section D): the named
+// alternative is tried first; `T[P]` fails it (no 'type' after `]`) and parses as an embedded field.
+FieldDeclaration ::= (FieldDefinitionList <<typeAfterName>> Type | AnonymousFieldDefinition) Tag? {hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoFieldDeclarationStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoFieldDeclarationStub>"}
+private FieldDefinitionList ::= FieldDefinition (',' FieldDefinition)*
+FieldDefinition ::= IDENTIFIER {stubClass="io.github.golangsupport.lang.stubs.GoFieldDefinitionStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoFieldDefinitionStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+AnonymousFieldDefinition ::= '*'? TypeReferenceExpression TypeArguments? {stubClass="io.github.golangsupport.lang.stubs.GoAnonymousFieldDefinitionStub" mixin="io.github.golangsupport.lang.psi.impl.GoAnonymousFieldDefinitionMixin" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+Tag ::= StringLiteral {stubClass="io.github.golangsupport.lang.stubs.GoTagStub" mixin="io.github.golangsupport.lang.psi.impl.GoStubbedElementImpl<io.github.golangsupport.lang.stubs.GoTagStub>"}
+
+InterfaceType ::= interface '{' InterfaceElements? '}' {pin=1}
+private InterfaceElements ::= (InterfaceElementWithSemi | semiToken)+
+private InterfaceElementWithSemi ::= !('}' | <<eof>>) InterfaceElement semi {pin=1 recoverWhile=SpecRecover}
+private InterfaceElement ::= MethodSpec | ConstraintElem
+// Go 1.27 generic methods are accepted syntactically; the semantic layer reports them for older versions.
+MethodSpec ::= IDENTIFIER <<noTypeParameters TypeParameters>>? Signature {hooks=[leftBinder="DOC_COMMENT_BINDER"] stubClass="io.github.golangsupport.lang.stubs.GoMethodSpecStub" mixin="io.github.golangsupport.lang.psi.impl.GoNamedElementImpl<io.github.golangsupport.lang.stubs.GoMethodSpecStub>" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+
+TypeList ::= Type (',' Type)* ','?
+
+// ---------------------------------------------------------------------------------------------
+// Statements
+// ---------------------------------------------------------------------------------------------
+
+// extraRoot: the lazy body element type (GoLazyBlockElementType) parses its text with this rule.
+Block ::= '{' Statements? '}' {pin=1 extraRoot=true}
+private Statements ::= (StatementWithSemi | semiToken)+
+// `func Name` can only start a top-level declaration, so an unclosed block ends there; so does a
+// `var`/`const`/`type`/`import`/`func` at column 0 (gofmt never indents a statement that way).
+private StatementWithSemi ::= !('}' | case | default | <<eof>> | func IDENTIFIER | <<columnZeroDeclaration>>) Statement StatementTerminator {pin=1 recoverWhile=StatementRecover}
+private StatementTerminator ::= semi | &(case | default)
+private StatementRecover ::= !('!' | '&' | '(' | '*' | '+' | '-' | ';' | SEMICOLON_SYNTHETIC | '<-' | '^' | '[' | '{' | '}' | '|' | '||'
+  | break | case | chan | const | continue | default | defer | else | fallthrough | for | func | go | goto | if
+  | interface | map | return | select | struct | switch | 'type' | var
+  | IDENTIFIER | INT | FLOAT | IMAG | CHAR | STRING | RAW_STRING)
+
+Statement ::=
+    ConstDeclaration
+  | TypeDeclaration
+  | VarDeclaration
+  | LabeledStatement
+  | GoStatement
+  | DeferStatement
+  | ReturnStatement
+  | BreakStatement
+  | ContinueStatement
+  | GotoStatement
+  | FallthroughStatement
+  | IfStatement
+  | SwitchStatement
+  | SelectStatement
+  | ForStatement
+  | Block
+  | SimpleStatement
+
+// go/parser parseSimpleStmt. The left-hand expression list is parsed once; the suffix decides the
+// statement kind via left rules (docs/GRAMMAR.md section G).
+SimpleStatement ::= ShortVarDeclaration | LeftHandExprList (AssignmentStatement | SendStatement | IncDecStatement)?
+ShortVarDeclaration ::= VarDefinitionList ':=' ExpressionList {pin=2}
+LeftHandExprList ::= Expression (',' Expression)*
+private ExpressionList ::= Expression (',' Expression)*
+left AssignmentStatement ::= AssignOp ExpressionList {pin=1}
+AssignOp ::= '=' | '+=' | '-=' | '|=' | '^=' | '*=' | '/=' | '%=' | '<<=' | '>>=' | '&=' | '&^='
+left SendStatement ::= '<-' Expression {pin=1}
+left IncDecStatement ::= ('++' | '--')
+
+LabeledStatement ::= &(IDENTIFIER ':') LabelDefinition ':' Statement? {pin=2}
+LabelDefinition ::= IDENTIFIER {mixin="io.github.golangsupport.lang.psi.impl.GoLabelDefinitionMixin" implements="io.github.golangsupport.lang.psi.GoNamedElement"}
+LabelRef ::= IDENTIFIER {mixin="io.github.golangsupport.lang.psi.impl.GoLabelRefMixin"}
+
+GoStatement ::= go Expression {pin=1}
+DeferStatement ::= defer Expression {pin=1}
+ReturnStatement ::= return ExpressionList? {pin=1}
+BreakStatement ::= break LabelRef? {pin=1}
+ContinueStatement ::= continue LabelRef? {pin=1}
+GotoStatement ::= goto LabelRef {pin=1}
+FallthroughStatement ::= fallthrough
+
+// Control clause headers are parsed with exprLev = -1 (docs/GRAMMAR.md section B).
+IfStatement ::= if <<controlHeader IfHeader>> Block ElseStatement? {pin=1}
+private IfHeader ::= (<<hasInitStatement>> SimpleStatement? ';')? Expression
+ElseStatement ::= else (IfStatement | Block) {pin=1}
+
+SwitchStatement ::= TypeSwitchStatement | ExprSwitchStatement
+TypeSwitchStatement ::= <<isTypeSwitch>> switch <<controlHeader TypeSwitchHeader>> '{' TypeCaseClause* '}' {pin=2}
+private TypeSwitchHeader ::= (<<hasInitStatement>> SimpleStatement? ';')? TypeSwitchGuard
+TypeSwitchGuard ::= (VarDefinition ':=')? Expression '.' '(' 'type' ')' {pin=4}
+TypeCaseClause ::= !'}' (case TypeList | default) ':' Statements? {pin=2}
+
+ExprSwitchStatement ::= switch <<controlHeader ExprSwitchHeader>> '{' ExprCaseClause* '}' {pin=1}
+private ExprSwitchHeader ::= ((<<hasInitStatement>> SimpleStatement? ';')? Expression?)
+ExprCaseClause ::= !'}' (case ExpressionList | default) ':' Statements? {pin=2}
+
+SelectStatement ::= select '{' CommClause* '}' {pin=1}
+CommClause ::= !'}' CommCase ':' Statements? {pin=2}
+CommCase ::= case (<<isSendStatement>> LeftHandExprList SendStatement | RecvStatement) | default {pin(".*")=1}
+RecvStatement ::= (VarDefinitionList ':=' | LeftHandExprList '=')? Expression {pin=1}
+
+ForStatement ::= for <<controlHeader ForHeader>>? Block {pin=1}
+private ForHeader ::= <<isRangeClause>> RangeClause | <<hasInitStatement>> ForClause | Expression
+ForClause ::= SimpleStatement? ';' Expression? ';' SimpleStatement?
+RangeClause ::= (VarDefinitionList ':=' | LeftHandExprList '=')? range Expression {pin=2}
+
+// ---------------------------------------------------------------------------------------------
+// Expressions
+// ---------------------------------------------------------------------------------------------
+
+Expression ::=
+    OrExpr
+  | AndExpr
+  | ConditionalExpr
+  | AddExpr
+  | MulExpr
+  | UnaryExpr
+  | PrimaryGroup
+  | AtomGroup
+
+fake BinaryExpr ::= Expression+ {
+  methods=[left="Expression[0]" right="Expression[1]"]
+}
+OrExpr ::= Expression '||' Expression {extends=BinaryExpr}
+AndExpr ::= Expression '&&' Expression {extends=BinaryExpr}
+ConditionalExpr ::= Expression RelOp Expression {extends=BinaryExpr}
+AddExpr ::= Expression AddOp Expression {extends=BinaryExpr}
+MulExpr ::= Expression MulOp Expression {extends=BinaryExpr}
+UnaryExpr ::= UnaryOp Expression
+
+private RelOp ::= '==' | '!=' | '<' | '<=' | '>' | '>='
+private AddOp ::= '+' | '-' | '|' | '^'
+private MulOp ::= '*' | '/' | '%' | '<<' | '>>' | '&' | '&^'
+// go/parser parseUnaryExpr case ARROW: `<-chan T` is a channel type, not a receive, unless the
+// channel type is converted (`<-chan<- int(nil)` receives from `(chan<- int)(nil)`).
+// `*[N]T`, `*struct{...}` etc. are pointer types (go/parser parseOperand falls back to tryIdentOrType).
+private UnaryOp ::= '+' | '-' | '!' | '^' | '~' | '*' !TypeLiteralStart | '&' | '<-' (!chan | &(ChannelType '('))
+private TypeLiteralStart ::= '*'* ('[' | struct | map | chan | interface | func | '<-' chan)
+
+private PrimaryGroup ::= CallExpr | IndexOrSliceExpr | TypeAssertionExpr | QualifiedReferenceExpression
+
+CallExpr ::= Expression ArgumentList
+ArgumentList ::= '(' <<nested Arguments>>? ')' {pin=1}
+private Arguments ::= ExpressionOrType (',' ExpressionOrType)* '...'? ','?
+
+// go/parser parseIndexOrSliceOrInstance (docs/GRAMMAR.md section F): indices, slices and 'type'
+// arguments share one node; the semantic layer decides what `x[...]` means.
+IndexOrSliceExpr ::= Expression '[' <<nested IndexBody>> ']' {pin=2}
+private IndexBody ::= <<isSliceBody>> SliceBody | IndexListBody
+private SliceBody ::= ExpressionOrType? ':' ExpressionOrType? (':' ExpressionOrType?)?
+private IndexListBody ::= ExpressionOrType (',' ExpressionOrType)* ','?
+
+TypeAssertionExpr ::= Expression '.' '(' !'type' Type ')'
+
+fake ReferenceExpression ::= Expression? '.'? IDENTIFIER {mixin="io.github.golangsupport.lang.psi.impl.GoReferenceExpressionMixin"}
+SimpleReferenceExpression ::= IDENTIFIER {extends=ReferenceExpression elementType=ReferenceExpression}
+QualifiedReferenceExpression ::= Expression '.' IDENTIFIER {extends=ReferenceExpression elementType=ReferenceExpression}
+
+private AtomGroup ::=
+    ParenthesesExpr
+  | FunctionLit
+  | CompositeLit
+  | ConversionExpr
+  | Literal
+  | StringLiteral
+  | SimpleReferenceExpression
+
+ParenthesesExpr ::= '(' <<nested ExpressionOrType>> ')' {pin=1}
+private ExpressionOrType ::= Expression | Type
+
+// The body is lazy (section N); its parse starts at exprLev 0 like go/parser's parseFuncTypeOrLit.
+FunctionLit ::= func Signature <<lazyBlock Block>> {pin=3}
+
+Literal ::= INT | FLOAT | IMAG | CHAR
+StringLiteral ::= STRING | RAW_STRING
+
+// go/parser parsePrimaryExpr case LBRACE (docs/GRAMMAR.md section B): a named 'type' followed by
+// '{' is a composite literal only outside control clause headers; explicit literal types always are.
+CompositeLit ::= LiteralTypeExpr LiteralValue
+private LiteralTypeExpr ::= StructType | ArrayOrSliceType | MapType | <<compositeLitAllowed>> TypeReferenceExpression TypeArgumentsNoPin?
+LiteralValue ::= '{' <<nested ElementList>>? '}' {pin=1}
+private ElementList ::= Element (',' Element)* ','?
+Element ::= (<<isKeyedElement>> Key ':')? Value
+Key ::= LiteralValue | Expression
+Value ::= LiteralValue | Expression
+
+// A conversion whose target is syntactically a 'type' literal: []byte(s), map[K]V(m), (chan int)(c).
+ConversionExpr ::= ConversionType '(' <<nested Expression>> ','? ')' {pin=2}
+private ConversionType ::= ArrayOrSliceType | MapType | ChannelType | FunctionType | StructType | InterfaceType

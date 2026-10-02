@@ -1,0 +1,1 @@
+package p; func _() (type /* ERROR "found 'type'" */ T)(T)

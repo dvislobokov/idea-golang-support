@@ -1,0 +1,1 @@
+package p; type _[A+B, /* ERROR "unexpected comma" */ ] int

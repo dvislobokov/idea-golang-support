@@ -1,0 +1,1057 @@
+public final class io/github/golangsupport/project/api/GoBuildConstraintEvaluator {
+	public static final field INSTANCE Lio/github/golangsupport/project/api/GoBuildConstraintEvaluator;
+	public static final fun goVersion (Lio/github/golangsupport/project/api/GoConstraintExpr;)Ljava/lang/String;
+	public static final fun goodOSArchFile (Ljava/lang/String;Lio/github/golangsupport/project/api/GoBuildContext;)Z
+	public static final fun goodOSArchFile (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Z
+	public static final fun isGoBuild (Ljava/lang/String;)Z
+	public static final fun isPlusBuild (Ljava/lang/String;)Z
+	public static final fun matchFile (Ljava/lang/String;Ljava/lang/CharSequence;Lio/github/golangsupport/project/api/GoBuildContext;)Z
+	public static final fun matches (Lio/github/golangsupport/lang/psi/GoBuildConstraint;Lio/github/golangsupport/project/api/GoBuildContext;)Z
+	public static final fun matches (Lio/github/golangsupport/lang/psi/GoFile;Lio/github/golangsupport/project/api/GoBuildContext;)Z
+	public static final fun parse (Ljava/lang/String;)Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public static final fun parseExpr (Ljava/lang/String;)Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public static final fun parseFileHeader (Ljava/lang/CharSequence;)Lio/github/golangsupport/project/api/GoBuildConstraintEvaluator$FileHeader;
+	public static final fun parsePlusBuildExpr (Ljava/lang/String;)Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public static final fun shouldBuild (Ljava/lang/CharSequence;Lio/github/golangsupport/project/api/GoBuildContext;)Z
+	public static final fun shouldBuild (Ljava/lang/CharSequence;Lkotlin/jvm/functions/Function1;)Z
+}
+
+public final class io/github/golangsupport/project/api/GoBuildConstraintEvaluator$FileHeader {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;ZZ)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/util/List;ZZ)Lio/github/golangsupport/project/api/GoBuildConstraintEvaluator$FileHeader;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoBuildConstraintEvaluator$FileHeader;Ljava/lang/String;Ljava/util/List;ZZILjava/lang/Object;)Lio/github/golangsupport/project/api/GoBuildConstraintEvaluator$FileHeader;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBinaryOnly ()Z
+	public final fun getGoBuild ()Ljava/lang/String;
+	public final fun getMultipleGoBuild ()Z
+	public final fun getPlusBuild ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun toBuildConstraint ()Lio/github/golangsupport/lang/psi/GoBuildConstraint;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoBuildContext {
+	public static final field Companion Lio/github/golangsupport/project/api/GoBuildContext$Companion;
+	public static final field LINUX_AMD64 Lio/github/golangsupport/project/api/GoBuildContext;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5-1d2VIE4 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/util/Set;
+	public final fun component7 ()Ljava/util/Set;
+	public final fun copy-pedNzq8 (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)Lio/github/golangsupport/project/api/GoBuildContext;
+	public static synthetic fun copy-pedNzq8$default (Lio/github/golangsupport/project/api/GoBuildContext;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoBuildContext;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuildTags ()Ljava/util/Set;
+	public final fun getCgoEnabled ()Z
+	public final fun getCompiler ()Ljava/lang/String;
+	public final fun getGoVersion-1d2VIE4 ()Ljava/lang/String;
+	public final fun getGoarch ()Ljava/lang/String;
+	public final fun getGoos ()Ljava/lang/String;
+	public final fun getToolTags ()Ljava/util/Set;
+	public fun hashCode ()I
+	public final fun matchTag (Ljava/lang/String;)Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoBuildContext$Companion {
+}
+
+public abstract class io/github/golangsupport/project/api/GoConstraintExpr {
+	public abstract fun eval (Lkotlin/jvm/functions/Function1;)Z
+}
+
+public final class io/github/golangsupport/project/api/GoConstraintExpr$And : io/github/golangsupport/project/api/GoConstraintExpr {
+	public fun <init> (Lio/github/golangsupport/project/api/GoConstraintExpr;Lio/github/golangsupport/project/api/GoConstraintExpr;)V
+	public final fun component1 ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public final fun component2 ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public final fun copy (Lio/github/golangsupport/project/api/GoConstraintExpr;Lio/github/golangsupport/project/api/GoConstraintExpr;)Lio/github/golangsupport/project/api/GoConstraintExpr$And;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoConstraintExpr$And;Lio/github/golangsupport/project/api/GoConstraintExpr;Lio/github/golangsupport/project/api/GoConstraintExpr;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoConstraintExpr$And;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun eval (Lkotlin/jvm/functions/Function1;)Z
+	public final fun getX ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public final fun getY ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoConstraintExpr$Not : io/github/golangsupport/project/api/GoConstraintExpr {
+	public fun <init> (Lio/github/golangsupport/project/api/GoConstraintExpr;)V
+	public final fun component1 ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public final fun copy (Lio/github/golangsupport/project/api/GoConstraintExpr;)Lio/github/golangsupport/project/api/GoConstraintExpr$Not;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoConstraintExpr$Not;Lio/github/golangsupport/project/api/GoConstraintExpr;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoConstraintExpr$Not;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun eval (Lkotlin/jvm/functions/Function1;)Z
+	public final fun getX ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoConstraintExpr$Or : io/github/golangsupport/project/api/GoConstraintExpr {
+	public fun <init> (Lio/github/golangsupport/project/api/GoConstraintExpr;Lio/github/golangsupport/project/api/GoConstraintExpr;)V
+	public final fun component1 ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public final fun component2 ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public final fun copy (Lio/github/golangsupport/project/api/GoConstraintExpr;Lio/github/golangsupport/project/api/GoConstraintExpr;)Lio/github/golangsupport/project/api/GoConstraintExpr$Or;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoConstraintExpr$Or;Lio/github/golangsupport/project/api/GoConstraintExpr;Lio/github/golangsupport/project/api/GoConstraintExpr;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoConstraintExpr$Or;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun eval (Lkotlin/jvm/functions/Function1;)Z
+	public final fun getX ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public final fun getY ()Lio/github/golangsupport/project/api/GoConstraintExpr;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoConstraintExpr$Tag : io/github/golangsupport/project/api/GoConstraintExpr {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/golangsupport/project/api/GoConstraintExpr$Tag;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoConstraintExpr$Tag;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoConstraintExpr$Tag;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun eval (Lkotlin/jvm/functions/Function1;)Z
+	public final fun getTag ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoConstraintSyntaxException : java/lang/IllegalArgumentException {
+	public fun <init> (ILjava/lang/String;)V
+	public final fun getOffset ()I
+}
+
+public abstract interface class io/github/golangsupport/project/api/GoImportResolution {
+	public fun getPackageOrNull ()Lio/github/golangsupport/project/api/GoPackage;
+}
+
+public final class io/github/golangsupport/project/api/GoImportResolution$CPseudoPackage : io/github/golangsupport/project/api/GoImportResolution {
+	public static final field INSTANCE Lio/github/golangsupport/project/api/GoImportResolution$CPseudoPackage;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPackageOrNull ()Lio/github/golangsupport/project/api/GoPackage;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoImportResolution$DefaultImpls {
+	public static fun getPackageOrNull (Lio/github/golangsupport/project/api/GoImportResolution;)Lio/github/golangsupport/project/api/GoPackage;
+}
+
+public final class io/github/golangsupport/project/api/GoImportResolution$InternalDenied : io/github/golangsupport/project/api/GoImportResolution {
+	public fun <init> (Lio/github/golangsupport/project/api/GoPackage;)V
+	public final fun component1 ()Lio/github/golangsupport/project/api/GoPackage;
+	public final fun copy (Lio/github/golangsupport/project/api/GoPackage;)Lio/github/golangsupport/project/api/GoImportResolution$InternalDenied;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoImportResolution$InternalDenied;Lio/github/golangsupport/project/api/GoPackage;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoImportResolution$InternalDenied;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPackageOrNull ()Lio/github/golangsupport/project/api/GoPackage;
+	public final fun getPkg ()Lio/github/golangsupport/project/api/GoPackage;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoImportResolution$Resolved : io/github/golangsupport/project/api/GoImportResolution {
+	public fun <init> (Lio/github/golangsupport/project/api/GoPackage;)V
+	public final fun component1 ()Lio/github/golangsupport/project/api/GoPackage;
+	public final fun copy (Lio/github/golangsupport/project/api/GoPackage;)Lio/github/golangsupport/project/api/GoImportResolution$Resolved;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoImportResolution$Resolved;Lio/github/golangsupport/project/api/GoPackage;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoImportResolution$Resolved;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPackageOrNull ()Lio/github/golangsupport/project/api/GoPackage;
+	public final fun getPkg ()Lio/github/golangsupport/project/api/GoPackage;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoImportResolution$Unresolved : io/github/golangsupport/project/api/GoImportResolution {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/github/golangsupport/project/api/GoImportResolution$Unresolved;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoImportResolution$Unresolved;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoImportResolution$Unresolved;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getImportPath ()Ljava/lang/String;
+	public fun getPackageOrNull ()Lio/github/golangsupport/project/api/GoPackage;
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoModule {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZ)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZ)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/util/List;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/util/List;
+	public final fun component13 ()Ljava/util/List;
+	public final fun component14 ()Ljava/util/List;
+	public final fun component15 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/nio/file/Path;
+	public final fun component4 ()Ljava/nio/file/Path;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Z
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun component9 ()Lio/github/golangsupport/project/api/GoModuleVersion;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)Lio/github/golangsupport/project/api/GoModule;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoModule;Ljava/lang/String;Ljava/lang/String;Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/lang/String;ZZZLio/github/golangsupport/project/api/GoModuleVersion;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoModule;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeprecated ()Ljava/lang/String;
+	public final fun getDir ()Ljava/nio/file/Path;
+	public final fun getExcludes ()Ljava/util/List;
+	public final fun getGoModFile ()Ljava/nio/file/Path;
+	public final fun getGoVersion ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getReplacement ()Lio/github/golangsupport/project/api/GoModuleVersion;
+	public final fun getReplaces ()Ljava/util/List;
+	public final fun getRequires ()Ljava/util/List;
+	public final fun getRetracts ()Ljava/util/List;
+	public final fun getTools ()Ljava/util/List;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isIndirect ()Z
+	public final fun isMain ()Z
+	public final fun isWorkspaceMember ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoModuleGraph {
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/nio/file/Path;ZLjava/nio/file/Path;Ljava/util/List;Lio/github/golangsupport/project/api/GoModuleGraph$Source;)V
+	public final fun getMainModules ()Ljava/util/List;
+	public final fun getMissing ()Ljava/util/List;
+	public final fun getModules ()Ljava/util/List;
+	public final fun getSource ()Lio/github/golangsupport/project/api/GoModuleGraph$Source;
+	public final fun getVendorDir ()Ljava/nio/file/Path;
+	public final fun getVendorMode ()Z
+	public final fun getWorkFile ()Ljava/nio/file/Path;
+	public final fun module (Ljava/lang/String;)Lio/github/golangsupport/project/api/GoModule;
+	public final fun modulesForImportPath (Ljava/lang/String;)Ljava/util/List;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoModuleGraph$Source : java/lang/Enum {
+	public static final field GO_LIST Lio/github/golangsupport/project/api/GoModuleGraph$Source;
+	public static final field PURE Lio/github/golangsupport/project/api/GoModuleGraph$Source;
+	public static final field VENDOR Lio/github/golangsupport/project/api/GoModuleGraph$Source;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/project/api/GoModuleGraph$Source;
+	public static fun values ()[Lio/github/golangsupport/project/api/GoModuleGraph$Source;
+}
+
+public abstract interface class io/github/golangsupport/project/api/GoModuleGraphProvider {
+	public static final field Companion Lio/github/golangsupport/project/api/GoModuleGraphProvider$Companion;
+	public static fun getInstance (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/project/api/GoModuleGraphProvider;
+	public abstract fun graphFor (Lcom/intellij/openapi/vfs/VirtualFile;)Lio/github/golangsupport/project/api/GoModuleGraph;
+}
+
+public final class io/github/golangsupport/project/api/GoModuleGraphProvider$Companion {
+	public final fun getInstance (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/project/api/GoModuleGraphProvider;
+}
+
+public final class io/github/golangsupport/project/api/GoModuleVersion {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/github/golangsupport/project/api/GoModuleVersion;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoModuleVersion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoModuleVersion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoPackage {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/intellij/openapi/vfs/VirtualFile;Lio/github/golangsupport/project/api/GoModule;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcom/intellij/openapi/vfs/VirtualFile;
+	public final fun component4 ()Lio/github/golangsupport/project/api/GoModule;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Ljava/util/List;
+	public final fun component9 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/intellij/openapi/vfs/VirtualFile;Lio/github/golangsupport/project/api/GoModule;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Z)Lio/github/golangsupport/project/api/GoPackage;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoPackage;Ljava/lang/String;Ljava/lang/String;Lcom/intellij/openapi/vfs/VirtualFile;Lio/github/golangsupport/project/api/GoModule;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ZILjava/lang/Object;)Lio/github/golangsupport/project/api/GoPackage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDirectory ()Lcom/intellij/openapi/vfs/VirtualFile;
+	public final fun getGoFiles ()Ljava/util/List;
+	public final fun getIgnoredFiles ()Ljava/util/List;
+	public final fun getImportPath ()Ljava/lang/String;
+	public final fun getModule ()Lio/github/golangsupport/project/api/GoModule;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTestFiles ()Ljava/util/List;
+	public final fun getXTestFiles ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isCommand ()Z
+	public final fun isEmpty ()Z
+	public final fun isStd ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/golangsupport/project/api/GoPackageResolver {
+	public static final field Companion Lio/github/golangsupport/project/api/GoPackageResolver$Companion;
+	public static fun getInstance (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/project/api/GoPackageResolver;
+	public abstract fun importPathOf (Lcom/intellij/openapi/vfs/VirtualFile;)Ljava/lang/String;
+	public fun packageOf (Lcom/intellij/openapi/vfs/VirtualFile;)Lio/github/golangsupport/project/api/GoPackage;
+	public abstract fun packageOf (Lcom/intellij/openapi/vfs/VirtualFile;Lio/github/golangsupport/project/api/GoBuildContext;)Lio/github/golangsupport/project/api/GoPackage;
+	public static synthetic fun packageOf$default (Lio/github/golangsupport/project/api/GoPackageResolver;Lcom/intellij/openapi/vfs/VirtualFile;Lio/github/golangsupport/project/api/GoBuildContext;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoPackage;
+	public abstract fun resolveImport (Ljava/lang/String;Lcom/intellij/openapi/vfs/VirtualFile;)Lio/github/golangsupport/project/api/GoImportResolution;
+}
+
+public final class io/github/golangsupport/project/api/GoPackageResolver$Companion {
+	public final fun getInstance (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/project/api/GoPackageResolver;
+}
+
+public final class io/github/golangsupport/project/api/GoPackageResolver$DefaultImpls {
+	public static fun packageOf (Lio/github/golangsupport/project/api/GoPackageResolver;Lcom/intellij/openapi/vfs/VirtualFile;)Lio/github/golangsupport/project/api/GoPackage;
+	public static synthetic fun packageOf$default (Lio/github/golangsupport/project/api/GoPackageResolver;Lcom/intellij/openapi/vfs/VirtualFile;Lio/github/golangsupport/project/api/GoBuildContext;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoPackage;
+}
+
+public final class io/github/golangsupport/project/api/GoPlatforms {
+	public static final field INSTANCE Lio/github/golangsupport/project/api/GoPlatforms;
+	public static final field KNOWN_ARCH Ljava/util/Set;
+	public static final field KNOWN_OS Ljava/util/Set;
+	public static final field UNIX_OS Ljava/util/Set;
+}
+
+public final class io/github/golangsupport/project/api/GoReplace {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/golangsupport/project/api/GoReplace;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoReplace;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoReplace;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNewPath ()Ljava/lang/String;
+	public final fun getNewVersion ()Ljava/lang/String;
+	public final fun getOldPath ()Ljava/lang/String;
+	public final fun getOldVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isLocal ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoRequire {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lio/github/golangsupport/project/api/GoRequire;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoRequire;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/golangsupport/project/api/GoRequire;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndirect ()Z
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoRetract {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/golangsupport/project/api/GoRetract;
+	public static synthetic fun copy$default (Lio/github/golangsupport/project/api/GoRetract;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoRetract;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHigh ()Ljava/lang/String;
+	public final fun getLow ()Ljava/lang/String;
+	public final fun getRationale ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoToolchainInfo {
+	public synthetic fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/util/Map;Ljava/nio/file/Path;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/util/Map;Ljava/nio/file/Path;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/util/Map;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/nio/file/Path;
+	public final fun component10 ()Ljava/nio/file/Path;
+	public final fun component2-1d2VIE4 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/nio/file/Path;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Z
+	public final fun component8 ()Ljava/util/Set;
+	public final fun component9 ()Ljava/util/Map;
+	public final fun copy-cDOtbqQ (Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/util/Map;Ljava/nio/file/Path;)Lio/github/golangsupport/project/api/GoToolchainInfo;
+	public static synthetic fun copy-cDOtbqQ$default (Lio/github/golangsupport/project/api/GoToolchainInfo;Ljava/nio/file/Path;Ljava/lang/String;Ljava/util/List;Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/util/Map;Ljava/nio/file/Path;ILjava/lang/Object;)Lio/github/golangsupport/project/api/GoToolchainInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuildContext ()Lio/github/golangsupport/project/api/GoBuildContext;
+	public final fun getBuildTags ()Ljava/util/Set;
+	public final fun getCgoEnabled ()Z
+	public final fun getEnv ()Ljava/util/Map;
+	public final fun getGoBinary ()Ljava/nio/file/Path;
+	public final fun getGoarch ()Ljava/lang/String;
+	public final fun getGomodcache ()Ljava/nio/file/Path;
+	public final fun getGoos ()Ljava/lang/String;
+	public final fun getGopath ()Ljava/util/List;
+	public final fun getGoroot ()Ljava/nio/file/Path;
+	public final fun getGorootSrc ()Ljava/nio/file/Path;
+	public final fun getVersion-1d2VIE4 ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/github/golangsupport/project/api/GoToolchainProvider {
+	public static final field Companion Lio/github/golangsupport/project/api/GoToolchainProvider$Companion;
+	public static fun getInstance ()Lio/github/golangsupport/project/api/GoToolchainProvider;
+	public abstract fun toolchainFor (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/project/api/GoToolchainInfo;
+}
+
+public final class io/github/golangsupport/project/api/GoToolchainProvider$Companion {
+	public final fun getInstance ()Lio/github/golangsupport/project/api/GoToolchainProvider;
+}
+
+public final class io/github/golangsupport/project/api/GoVersion : java/lang/Comparable {
+	public static final field Companion Lio/github/golangsupport/project/api/GoVersion$Companion;
+	public static final synthetic fun box-impl (Ljava/lang/String;)Lio/github/golangsupport/project/api/GoVersion;
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo-I1RxtcU (Ljava/lang/String;)I
+	public static fun compareTo-I1RxtcU (Ljava/lang/String;Ljava/lang/String;)I
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public static final fun getLanguageVersion-hy1U7is (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun getMajor-impl (Ljava/lang/String;)I
+	public static final fun getMinor-impl (Ljava/lang/String;)I
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public static final fun isAtLeast-I1RxtcU (Ljava/lang/String;Ljava/lang/String;)Z
+	public static final fun isValid-impl (Ljava/lang/String;)Z
+	public static final fun parse-gM4o7iA (Ljava/lang/String;)Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/project/api/GoVersion$Companion {
+	public final fun parse-gM4o7iA (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/api/GoDiagnostic {
+	public fun <init> (Lcom/intellij/openapi/util/TextRange;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lcom/intellij/openapi/util/TextRange;Ljava/lang/String;Ljava/lang/String;Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;)V
+	public synthetic fun <init> (Lcom/intellij/openapi/util/TextRange;Ljava/lang/String;Ljava/lang/String;Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/intellij/openapi/util/TextRange;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;
+	public final fun copy (Lcom/intellij/openapi/util/TextRange;Ljava/lang/String;Ljava/lang/String;Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;)Lio/github/golangsupport/semantic/api/GoDiagnostic;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/api/GoDiagnostic;Lcom/intellij/openapi/util/TextRange;Ljava/lang/String;Ljava/lang/String;Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;ILjava/lang/Object;)Lio/github/golangsupport/semantic/api/GoDiagnostic;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getRange ()Lcom/intellij/openapi/util/TextRange;
+	public final fun getSeverity ()Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/api/GoDiagnostic$Severity : java/lang/Enum {
+	public static final field ERROR Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;
+	public static final field WARNING Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;
+	public static fun values ()[Lio/github/golangsupport/semantic/api/GoDiagnostic$Severity;
+}
+
+public abstract interface class io/github/golangsupport/semantic/api/GoSemanticService {
+	public static final field Companion Lio/github/golangsupport/semantic/api/GoSemanticService$Companion;
+	public abstract fun calleeSignature (Lio/github/golangsupport/lang/psi/GoCallExpr;)Lio/github/golangsupport/semantic/types/GoSignatureType;
+	public abstract fun check (Lio/github/golangsupport/lang/psi/GoFile;)Ljava/util/List;
+	public abstract fun constantValue (Lio/github/golangsupport/lang/psi/GoExpression;)Lio/github/golangsupport/semantic/types/GoConstant;
+	public abstract fun declarationType (Lio/github/golangsupport/lang/psi/GoNamedElement;)Lio/github/golangsupport/semantic/types/GoType;
+	public static fun getInstance (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/semantic/api/GoSemanticService;
+	public abstract fun implements (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoInterfaceType;)Z
+	public fun lookupFieldOrMethod (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;
+	public abstract fun lookupFieldOrMethod (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;Lio/github/golangsupport/lang/psi/GoFile;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;
+	public static synthetic fun lookupFieldOrMethod$default (Lio/github/golangsupport/semantic/api/GoSemanticService;Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;Lio/github/golangsupport/lang/psi/GoFile;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;
+	public abstract fun methodsOf (Lio/github/golangsupport/semantic/types/GoType;)Ljava/util/List;
+	public abstract fun packageOf (Lio/github/golangsupport/lang/psi/GoFile;)Lio/github/golangsupport/project/api/GoPackage;
+	public fun render (Lio/github/golangsupport/semantic/types/GoType;)Ljava/lang/String;
+	public abstract fun render (Lio/github/golangsupport/semantic/types/GoType;Z)Ljava/lang/String;
+	public static synthetic fun render$default (Lio/github/golangsupport/semantic/api/GoSemanticService;Lio/github/golangsupport/semantic/types/GoType;ZILjava/lang/Object;)Ljava/lang/String;
+	public abstract fun resolve (Lio/github/golangsupport/lang/psi/GoReferenceExpression;)Ljava/util/List;
+	public abstract fun resolve (Lio/github/golangsupport/lang/psi/GoTypeReferenceExpression;)Lcom/intellij/psi/PsiElement;
+	public abstract fun typeOf (Lio/github/golangsupport/lang/psi/GoExpression;)Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/api/GoSemanticService$Companion {
+	public final fun getInstance (Lcom/intellij/openapi/project/Project;)Lio/github/golangsupport/semantic/api/GoSemanticService;
+}
+
+public final class io/github/golangsupport/semantic/api/GoSemanticService$DefaultImpls {
+	public static fun lookupFieldOrMethod (Lio/github/golangsupport/semantic/api/GoSemanticService;Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;
+	public static synthetic fun lookupFieldOrMethod$default (Lio/github/golangsupport/semantic/api/GoSemanticService;Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;Lio/github/golangsupport/lang/psi/GoFile;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;
+	public static fun render (Lio/github/golangsupport/semantic/api/GoSemanticService;Lio/github/golangsupport/semantic/types/GoType;)Ljava/lang/String;
+	public static synthetic fun render$default (Lio/github/golangsupport/semantic/api/GoSemanticService;Lio/github/golangsupport/semantic/types/GoType;ZILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoArrayType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/Long;)V
+	public final fun component1 ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun copy (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/Long;)Lio/github/golangsupport/semantic/types/GoArrayType;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoArrayType;Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/Long;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoArrayType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElem ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun getLength ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoBasicKind : java/lang/Enum {
+	public static final field BOOL Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field COMPLEX128 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field COMPLEX64 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field FLOAT32 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field FLOAT64 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field INT Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field INT16 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field INT32 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field INT64 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field INT8 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field INVALID Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field STRING Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UINT Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UINT16 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UINT32 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UINT64 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UINT8 Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UINTPTR Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UNSAFE_POINTER Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UNTYPED_BOOL Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UNTYPED_COMPLEX Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UNTYPED_FLOAT Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UNTYPED_INT Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UNTYPED_NIL Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UNTYPED_RUNE Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static final field UNTYPED_STRING Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getTypeName ()Ljava/lang/String;
+	public final fun isBoolean ()Z
+	public final fun isComplex ()Z
+	public final fun isConstType ()Z
+	public final fun isFloat ()Z
+	public final fun isInteger ()Z
+	public final fun isNumeric ()Z
+	public final fun isOrdered ()Z
+	public final fun isString ()Z
+	public final fun isUnsigned ()Z
+	public final fun isUntyped ()Z
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public static fun values ()[Lio/github/golangsupport/semantic/types/GoBasicKind;
+}
+
+public final class io/github/golangsupport/semantic/types/GoBasicType : io/github/golangsupport/semantic/types/GoType {
+	public static final field Companion Lio/github/golangsupport/semantic/types/GoBasicType$Companion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKind ()Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isUntyped ()Z
+}
+
+public final class io/github/golangsupport/semantic/types/GoBasicType$Companion {
+	public final fun byName (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getBOOL ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getBYTE ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getCOMPLEX128 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getCOMPLEX64 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getFLOAT32 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getFLOAT64 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getINT ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getINT16 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getINT32 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getINT64 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getINT8 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getINVALID ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getRUNE ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getSTRING ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUINT ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUINT16 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUINT32 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUINT64 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUINT8 ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUINTPTR ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUNSAFE_POINTER ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUNTYPED_BOOL ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUNTYPED_COMPLEX ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUNTYPED_FLOAT ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUNTYPED_INT ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUNTYPED_NIL ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUNTYPED_RUNE ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun getUNTYPED_STRING ()Lio/github/golangsupport/semantic/types/GoBasicType;
+	public final fun of (Lio/github/golangsupport/semantic/types/GoBasicKind;)Lio/github/golangsupport/semantic/types/GoBasicType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoChanDir : java/lang/Enum {
+	public static final field BOTH Lio/github/golangsupport/semantic/types/GoChanDir;
+	public static final field RECV Lio/github/golangsupport/semantic/types/GoChanDir;
+	public static final field SEND Lio/github/golangsupport/semantic/types/GoChanDir;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoChanDir;
+	public static fun values ()[Lio/github/golangsupport/semantic/types/GoChanDir;
+}
+
+public final class io/github/golangsupport/semantic/types/GoChanType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoChanDir;)V
+	public final fun component1 ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun component2 ()Lio/github/golangsupport/semantic/types/GoChanDir;
+	public final fun copy (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoChanDir;)Lio/github/golangsupport/semantic/types/GoChanType;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoChanType;Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoChanDir;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoChanType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDir ()Lio/github/golangsupport/semantic/types/GoChanDir;
+	public final fun getElem ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/github/golangsupport/semantic/types/GoConstant {
+	public static final field Companion Lio/github/golangsupport/semantic/types/GoConstant$Companion;
+	public final fun getKind ()Lio/github/golangsupport/semantic/types/GoBasicKind;
+	public final fun render ()Ljava/lang/String;
+	public final fun toBigDecimal ()Ljava/math/BigDecimal;
+	public final fun toBigInteger ()Ljava/math/BigInteger;
+}
+
+public final class io/github/golangsupport/semantic/types/GoConstant$Bool : io/github/golangsupport/semantic/types/GoConstant {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lio/github/golangsupport/semantic/types/GoConstant$Bool;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoConstant$Bool;ZILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoConstant$Bool;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoConstant$Companion {
+	public final fun binary (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoConstant;Lio/github/golangsupport/semantic/types/GoConstant;)Lio/github/golangsupport/semantic/types/GoConstant;
+	public final fun parseFloat (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoConstant$Float;
+	public final fun parseImag (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoConstant$Complex;
+	public final fun parseInt (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoConstant$Int;
+	public final fun parseRune (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoConstant$Int;
+	public final fun renderFloat (Ljava/math/BigDecimal;)Ljava/lang/String;
+	public final fun unary (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoConstant;)Lio/github/golangsupport/semantic/types/GoConstant;
+	public final fun unescape (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoConstant$Complex : io/github/golangsupport/semantic/types/GoConstant {
+	public fun <init> (Ljava/math/BigDecimal;Ljava/math/BigDecimal;)V
+	public final fun component1 ()Ljava/math/BigDecimal;
+	public final fun component2 ()Ljava/math/BigDecimal;
+	public final fun copy (Ljava/math/BigDecimal;Ljava/math/BigDecimal;)Lio/github/golangsupport/semantic/types/GoConstant$Complex;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoConstant$Complex;Ljava/math/BigDecimal;Ljava/math/BigDecimal;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoConstant$Complex;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIm ()Ljava/math/BigDecimal;
+	public final fun getRe ()Ljava/math/BigDecimal;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoConstant$Float : io/github/golangsupport/semantic/types/GoConstant {
+	public fun <init> (Ljava/math/BigDecimal;)V
+	public final fun component1 ()Ljava/math/BigDecimal;
+	public final fun copy (Ljava/math/BigDecimal;)Lio/github/golangsupport/semantic/types/GoConstant$Float;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoConstant$Float;Ljava/math/BigDecimal;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoConstant$Float;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/math/BigDecimal;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoConstant$Int : io/github/golangsupport/semantic/types/GoConstant {
+	public fun <init> (J)V
+	public fun <init> (Ljava/math/BigInteger;)V
+	public final fun component1 ()Ljava/math/BigInteger;
+	public final fun copy (Ljava/math/BigInteger;)Lio/github/golangsupport/semantic/types/GoConstant$Int;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoConstant$Int;Ljava/math/BigInteger;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoConstant$Int;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/math/BigInteger;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoConstant$Str : io/github/golangsupport/semantic/types/GoConstant {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoConstant$Str;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoConstant$Str;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoConstant$Str;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoField {
+	public fun <init> (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoType;ZLjava/lang/String;Lio/github/golangsupport/lang/psi/GoNamedElement;Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeclaration ()Lio/github/golangsupport/lang/psi/GoNamedElement;
+	public final fun getEmbedded ()Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPkgPath ()Ljava/lang/String;
+	public final fun getTag ()Ljava/lang/String;
+	public final fun getType ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public final fun isExported ()Z
+	public fun toString ()Ljava/lang/String;
+	public final fun withType (Lio/github/golangsupport/semantic/types/GoType;)Lio/github/golangsupport/semantic/types/GoField;
+}
+
+public final class io/github/golangsupport/semantic/types/GoInterfaceType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Z)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;ZZ)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAllMethods ()Ljava/util/List;
+	public final fun getComparableMarker ()Z
+	public final fun getEmbedded ()Ljava/util/List;
+	public final fun getHasTypeTerms ()Z
+	public final fun getImplicit ()Z
+	public final fun getMethods ()Ljava/util/List;
+	public final fun getTypeTerms ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isComparableConstraint ()Z
+	public final fun isConstraintOnly ()Z
+	public final fun isEmpty ()Z
+	public final fun method (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoMethod;
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoLookup {
+	public static final field INSTANCE Lio/github/golangsupport/semantic/types/GoLookup;
+	public final fun alternativeMember (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoLookup$Alternative;
+	public final fun alternativeMember (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;Z)Lio/github/golangsupport/semantic/types/GoLookup$Alternative;
+	public static synthetic fun alternativeMember$default (Lio/github/golangsupport/semantic/types/GoLookup;Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;ZILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoLookup$Alternative;
+	public final fun lookupFieldOrMethod (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;
+	public final fun lookupFieldOrMethod (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;
+	public static synthetic fun lookupFieldOrMethod$default (Lio/github/golangsupport/semantic/types/GoLookup;Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoLookup$Selection;
+	public final fun methodSet (Lio/github/golangsupport/semantic/types/GoType;)Ljava/util/List;
+}
+
+public final class io/github/golangsupport/semantic/types/GoLookup$Alternative {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getKind ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPkgPath ()Ljava/lang/String;
+}
+
+public abstract class io/github/golangsupport/semantic/types/GoLookup$Selection {
+	public abstract fun getIndirect ()Z
+	public abstract fun getPath ()Ljava/util/List;
+	public abstract fun getType ()Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoLookup$Selection$Ambiguous : io/github/golangsupport/semantic/types/GoLookup$Selection {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/github/golangsupport/semantic/types/GoLookup$Selection$Ambiguous;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoLookup$Selection$Ambiguous;Ljava/util/List;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoLookup$Selection$Ambiguous;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCandidates ()Ljava/util/List;
+	public fun getIndirect ()Z
+	public fun getPath ()Ljava/util/List;
+	public fun getType ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoLookup$Selection$Field : io/github/golangsupport/semantic/types/GoLookup$Selection {
+	public fun <init> (Lio/github/golangsupport/semantic/types/GoField;ZLjava/util/List;)V
+	public final fun component1 ()Lio/github/golangsupport/semantic/types/GoField;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Lio/github/golangsupport/semantic/types/GoField;ZLjava/util/List;)Lio/github/golangsupport/semantic/types/GoLookup$Selection$Field;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoLookup$Selection$Field;Lio/github/golangsupport/semantic/types/GoField;ZLjava/util/List;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoLookup$Selection$Field;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIndirect ()Z
+	public final fun getMember ()Lio/github/golangsupport/semantic/types/GoField;
+	public fun getPath ()Ljava/util/List;
+	public fun getType ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoLookup$Selection$Method : io/github/golangsupport/semantic/types/GoLookup$Selection {
+	public fun <init> (Lio/github/golangsupport/semantic/types/GoMethod;Lio/github/golangsupport/semantic/types/GoType;ZLjava/util/List;)V
+	public final fun component1 ()Lio/github/golangsupport/semantic/types/GoMethod;
+	public final fun component2 ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Lio/github/golangsupport/semantic/types/GoMethod;Lio/github/golangsupport/semantic/types/GoType;ZLjava/util/List;)Lio/github/golangsupport/semantic/types/GoLookup$Selection$Method;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoLookup$Selection$Method;Lio/github/golangsupport/semantic/types/GoMethod;Lio/github/golangsupport/semantic/types/GoType;ZLjava/util/List;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoLookup$Selection$Method;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIndirect ()Z
+	public final fun getMethod ()Lio/github/golangsupport/semantic/types/GoMethod;
+	public fun getPath ()Ljava/util/List;
+	public final fun getReceiver ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun getType ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoMapType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;)V
+	public final fun component1 ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun component2 ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun copy (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;)Lio/github/golangsupport/semantic/types/GoMapType;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoMapType;Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoMapType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun getValue ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoMethod {
+	public fun <init> (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoSignatureType;Lio/github/golangsupport/lang/psi/GoNamedElement;)V
+	public fun <init> (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoSignatureType;Lio/github/golangsupport/lang/psi/GoNamedElement;Z)V
+	public fun <init> (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoSignatureType;Lio/github/golangsupport/lang/psi/GoNamedElement;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoSignatureType;Lio/github/golangsupport/lang/psi/GoNamedElement;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getDeclaration ()Lio/github/golangsupport/lang/psi/GoNamedElement;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPkgPath ()Ljava/lang/String;
+	public final fun getPointerReceiver ()Z
+	public final fun getSignature ()Lio/github/golangsupport/semantic/types/GoSignatureType;
+	public final fun isExported ()Z
+	public fun toString ()Ljava/lang/String;
+	public final fun withSignature (Lio/github/golangsupport/semantic/types/GoSignatureType;)Lio/github/golangsupport/semantic/types/GoMethod;
+}
+
+public final class io/github/golangsupport/semantic/types/GoNamedType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Lio/github/golangsupport/lang/psi/GoTypeSpec;Ljava/util/List;Lio/github/golangsupport/semantic/types/GoTypeSource;)V
+	public fun <init> (Lio/github/golangsupport/lang/psi/GoTypeSpec;Ljava/util/List;Lio/github/golangsupport/semantic/types/GoTypeSource;Lio/github/golangsupport/semantic/types/GoNamedType;)V
+	public synthetic fun <init> (Lio/github/golangsupport/lang/psi/GoTypeSpec;Ljava/util/List;Lio/github/golangsupport/semantic/types/GoTypeSource;Lio/github/golangsupport/semantic/types/GoNamedType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeclaration ()Lio/github/golangsupport/lang/psi/GoTypeSpec;
+	public final fun getMethods ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getOrigin ()Lio/github/golangsupport/semantic/types/GoNamedType;
+	public final fun getPkgPath ()Ljava/lang/String;
+	public final fun getSource ()Lio/github/golangsupport/semantic/types/GoTypeSource;
+	public final fun getTypeArgs ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun instantiate (Ljava/util/List;)Lio/github/golangsupport/semantic/types/GoNamedType;
+	public final fun isGeneric ()Z
+	public final fun isInstantiated ()Z
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun underlying ()Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoParam {
+	public fun <init> (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoType;)V
+	public fun <init> (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/lang/psi/GoNamedElement;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/lang/psi/GoNamedElement;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeclaration ()Lio/github/golangsupport/lang/psi/GoNamedElement;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getType ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun withType (Lio/github/golangsupport/semantic/types/GoType;)Lio/github/golangsupport/semantic/types/GoParam;
+}
+
+public final class io/github/golangsupport/semantic/types/GoPointerType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Lio/github/golangsupport/semantic/types/GoType;)V
+	public final fun component1 ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun copy (Lio/github/golangsupport/semantic/types/GoType;)Lio/github/golangsupport/semantic/types/GoPointerType;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoPointerType;Lio/github/golangsupport/semantic/types/GoType;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoPointerType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElem ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoSignatureType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Ljava/util/List;Ljava/util/List;Z)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;ZLjava/util/List;)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;ZLjava/util/List;Lio/github/golangsupport/semantic/types/GoParam;)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;ZLjava/util/List;Lio/github/golangsupport/semantic/types/GoParam;Lio/github/golangsupport/semantic/types/GoSubstitution;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;ZLjava/util/List;Lio/github/golangsupport/semantic/types/GoParam;Lio/github/golangsupport/semantic/types/GoSubstitution;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getParams ()Ljava/util/List;
+	public final fun getPartialSubst ()Lio/github/golangsupport/semantic/types/GoSubstitution;
+	public final fun getReceiver ()Lio/github/golangsupport/semantic/types/GoParam;
+	public final fun getResultType ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun getResults ()Ljava/util/List;
+	public final fun getTypeParams ()Ljava/util/List;
+	public final fun getVariadic ()Z
+	public fun hashCode ()I
+	public final fun isGeneric ()Z
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoSliceType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Lio/github/golangsupport/semantic/types/GoType;)V
+	public final fun component1 ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun copy (Lio/github/golangsupport/semantic/types/GoType;)Lio/github/golangsupport/semantic/types/GoSliceType;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoSliceType;Lio/github/golangsupport/semantic/types/GoType;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoSliceType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getElem ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoStructType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Ljava/util/List;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun field (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoField;
+	public final fun getFields ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoSubstitution {
+	public static final field Companion Lio/github/golangsupport/semantic/types/GoSubstitution$Companion;
+	public fun <init> (Ljava/util/Map;)V
+	public final fun get (Lio/github/golangsupport/semantic/types/GoTypeParamType;)Lio/github/golangsupport/semantic/types/GoType;
+	public final fun getMap ()Ljava/util/Map;
+	public final fun has (Lio/github/golangsupport/semantic/types/GoTypeParamType;)Z
+	public final fun isEmpty ()Z
+	public final fun plus (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoSubstitution;
+}
+
+public final class io/github/golangsupport/semantic/types/GoSubstitution$Companion {
+	public final fun getEMPTY ()Lio/github/golangsupport/semantic/types/GoSubstitution;
+	public final fun of (Ljava/util/List;Ljava/util/List;)Lio/github/golangsupport/semantic/types/GoSubstitution;
+}
+
+public final class io/github/golangsupport/semantic/types/GoTerm {
+	public fun <init> (ZLio/github/golangsupport/semantic/types/GoType;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun copy (ZLio/github/golangsupport/semantic/types/GoType;)Lio/github/golangsupport/semantic/types/GoTerm;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoTerm;ZLio/github/golangsupport/semantic/types/GoType;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoTerm;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTilde ()Z
+	public final fun getType ()Lio/github/golangsupport/semantic/types/GoType;
+	public fun hashCode ()I
+	public final fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoTerm;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoTupleType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/github/golangsupport/semantic/types/GoTupleType;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoTupleType;Ljava/util/List;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoTupleType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTypes ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/github/golangsupport/semantic/types/GoType {
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun toString ()Ljava/lang/String;
+	public fun underlying ()Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoTypeParamType : io/github/golangsupport/semantic/types/GoType {
+	public static final field Companion Lio/github/golangsupport/semantic/types/GoTypeParamType$Companion;
+	public fun <init> (Lio/github/golangsupport/lang/psi/GoTypeParamDefinition;ILio/github/golangsupport/semantic/types/GoTypeSource;)V
+	public synthetic fun <init> (Lio/github/golangsupport/lang/psi/GoTypeParamDefinition;ILio/github/golangsupport/semantic/types/GoTypeSource;ILkotlin/Lazy;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBound ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun getCoreType ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun getDeclaration ()Lio/github/golangsupport/lang/psi/GoTypeParamDefinition;
+	public final fun getGeneration ()I
+	public final fun getIndex ()I
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSingleExactTerm ()Lio/github/golangsupport/semantic/types/GoType;
+	public final fun getSource ()Lio/github/golangsupport/semantic/types/GoTypeSource;
+	public final fun getTerms ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun underlying ()Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoTypeParamType$Companion {
+}
+
+public final class io/github/golangsupport/semantic/types/GoTypePredicates {
+	public static final field INSTANCE Lio/github/golangsupport/semantic/types/GoTypePredicates;
+	public final fun assignable (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun comparable (Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun comparable (Lio/github/golangsupport/semantic/types/GoType;Z)Z
+	public static synthetic fun comparable$default (Lio/github/golangsupport/semantic/types/GoTypePredicates;Lio/github/golangsupport/semantic/types/GoType;ZILjava/lang/Object;)Z
+	public final fun convertible (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun defaultType (Lio/github/golangsupport/semantic/types/GoType;)Lio/github/golangsupport/semantic/types/GoType;
+	public final fun identical (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun identicalIgnoreTags (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun implements (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoInterfaceType;)Z
+	public final fun isKnown (Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun isNamed (Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun isUntyped (Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun missingMethods (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoInterfaceType;)Ljava/util/List;
+	public final fun representableKind (Lio/github/golangsupport/semantic/types/GoBasicKind;Lio/github/golangsupport/semantic/types/GoBasicKind;)Z
+	public final fun satisfactionFailure (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	public final fun satisfies (Lio/github/golangsupport/semantic/types/GoType;Lio/github/golangsupport/semantic/types/GoType;)Z
+}
+
+public final class io/github/golangsupport/semantic/types/GoTypeRenderer {
+	public static final field INSTANCE Lio/github/golangsupport/semantic/types/GoTypeRenderer;
+	public final fun render (Lio/github/golangsupport/semantic/types/GoType;)Ljava/lang/String;
+	public final fun render (Lio/github/golangsupport/semantic/types/GoType;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	public final fun render (Lio/github/golangsupport/semantic/types/GoType;Z)Ljava/lang/String;
+	public static synthetic fun render$default (Lio/github/golangsupport/semantic/types/GoTypeRenderer;Lio/github/golangsupport/semantic/types/GoType;ZILjava/lang/Object;)Ljava/lang/String;
+}
+
+public abstract interface class io/github/golangsupport/semantic/types/GoTypeSource {
+	public abstract fun boundOf (Lio/github/golangsupport/semantic/types/GoTypeParamType;)Lio/github/golangsupport/semantic/types/GoType;
+	public abstract fun methodsOf (Lio/github/golangsupport/semantic/types/GoNamedType;)Ljava/util/List;
+	public abstract fun packagePathOf (Lio/github/golangsupport/semantic/types/GoNamedType;)Ljava/lang/String;
+	public abstract fun underlyingOf (Lio/github/golangsupport/semantic/types/GoNamedType;)Lio/github/golangsupport/semantic/types/GoType;
+}
+
+public final class io/github/golangsupport/semantic/types/GoUnionType : io/github/golangsupport/semantic/types/GoType {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/github/golangsupport/semantic/types/GoUnionType;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoUnionType;Ljava/util/List;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoUnionType;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTerms ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun substitute (Lio/github/golangsupport/semantic/types/GoSubstitution;)Lio/github/golangsupport/semantic/types/GoType;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoUnknownType : io/github/golangsupport/semantic/types/GoType {
+	public static final field INSTANCE Lio/github/golangsupport/semantic/types/GoUnknownType;
+}
+

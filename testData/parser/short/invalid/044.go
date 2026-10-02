@@ -1,0 +1,1 @@
+package p; var _ = struct { x int, /* ERROR "expected ';', found ','" */ y float }{};

@@ -1,0 +1,1 @@
+package p; var ( _ = (struct {*T}).m; _ = (interface {T}).m )

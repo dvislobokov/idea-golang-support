@@ -1,0 +1,1 @@
+package p; func f[A, B any](); func _() { _ = f[int, int] }

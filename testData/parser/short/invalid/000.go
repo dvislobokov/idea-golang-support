@@ -1,0 +1,1 @@
+foo /* ERROR "expected 'package'" */ !

@@ -1,0 +1,1 @@
+package p; func f() { go ( /* ERROR "must not be parenthesized" */ f()) }

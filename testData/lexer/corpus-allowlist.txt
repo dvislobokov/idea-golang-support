@@ -1,0 +1,23 @@
+# Known GoLexer vs go/scanner differences on $GOROOT/src, as `<path relative to src>:<byte offset>`.
+# Used by GorootLexerDiffCorpusTest; entries are subtracted before counting mismatches. Every
+# entry belongs to a documented class below. Stale entries are reported by the test.
+
+# Class 1: multi-line block comment after a semicolon-eligible token, e.g.
+#     DT_MOVETAB = 0x6ffffefe /* ...
+#        ... */
+# go/scanner returns COMMENT and then the inserted SEMICOLON at the offset of the first newline
+# *inside* the comment (scanner.go: s.nlPos). A token cannot be split, so GoLexer keeps the
+# MAYBE_SEMICOLON state across the comment and inserts SEMICOLON_SYNTHETIC at the next newline
+# after it. Each occurrence is a pair: SEMICOLON missing at the inner newline, SEMICOLON extra at
+# the following newline. The number of semicolons is the same in all GOROOT occurrences; the
+# variant where a token follows the comment on its closing line (`x /* \n */ y`) does not occur.
+cmd/internal/obj/ppc64/asm9.go:111259
+cmd/internal/obj/ppc64/asm9.go:111306
+debug/elf/elf.go:37327
+debug/elf/elf.go:37479
+debug/elf/elf.go:44297
+debug/elf/elf.go:44358
+debug/elf/elf.go:44595
+debug/elf/elf.go:44715
+debug/elf/elf.go:44786
+debug/elf/elf.go:44866

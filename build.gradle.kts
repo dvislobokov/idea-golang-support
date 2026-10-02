@@ -1,10 +1,14 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
     id("org.jetbrains.kotlin.jvm") version "2.3.21"
     id("org.jetbrains.intellij.platform") version "2.19.0"
+    // Applied by the go-psi library modules (go-psi-core, go-psi-semantic, go-psi-ide); versions in gradle/libs.versions.toml.
+    alias(libs.plugins.intellij.platform.module) apply false
+    alias(libs.plugins.intellij.platform.grammarkit) apply false
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -127,6 +131,103 @@ intellijPlatform {
             // 2026.1: the platform with the LSP client API under its new names (LspIntegrationProvider) and with the DAP module
             sinceBuild = "261"
             untilBuild = provider { null }
+        }
+    }
+}
+
+// --- go-psi library modules (go-psi-core, go-psi-semantic, go-psi-ide; docs/psi/) ------------------------------------------
+// Copied from go-psi with the package renamed to io.github.golangsupport. Not consumed by the plugin yet: the root project
+// neither depends on them nor includes their META-INF/go-psi-*.xml, so the shipped plugin is unchanged.
+// Their slow gates run with `--no-configuration-cache`: `:go-psi-core:corpusTest`, `benchmark` (testIde tasks).
+
+val psiTestDataDir = layout.projectDirectory.dir("testData").asFile
+
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        extensions.configure<KotlinJvmProjectExtension> {
+            jvmToolchain(21)
+            // The platform bundles Kotlin stdlib 2.3.x; the code must not use newer stdlib APIs.
+            compilerOptions {
+                apiVersion.set(KotlinVersion.KOTLIN_2_3)
+                languageVersion.set(KotlinVersion.KOTLIN_2_3)
+            }
+        }
+    }
+
+    tasks.withType<Test>().configureEach {
+        systemProperty("gopsi.testDataPath", psiTestDataDir.absolutePath)
+        // Pass-through: ./gradlew test -Dgopsi.updateGoldens=true (or -Pgopsi.updateGoldens=true).
+        val updateGoldens = providers.systemProperty("gopsi.updateGoldens")
+            .orElse(providers.gradleProperty("gopsi.updateGoldens"))
+        updateGoldens.orNull?.let { systemProperty("gopsi.updateGoldens", it) }
+        // Pass-through for benchmarks: -Dgopsi.benchmark.update=true, -Dgopsi.benchmark.tolerance=2.0 (or -P).
+        listOf("gopsi.benchmark.update", "gopsi.benchmark.tolerance").forEach { key ->
+            providers.systemProperty(key).orElse(providers.gradleProperty(key)).orNull?.let { systemProperty(key, it) }
+        }
+        // The IntelliJ Platform Gradle Plugin attaches the kotlinx-coroutines debug agent to test JVMs. Its class
+        // transformer fails on some platform classes and prints dozens of "JPLISAgent.c ... ASSERTION FAILED" lines
+        // per run; tests do not need coroutine debug probes, so the agent is dropped (-Pgopsi.coroutinesAgent=true keeps it).
+        if (!providers.gradleProperty("gopsi.coroutinesAgent").map(String::toBoolean).getOrElse(false)) {
+            doFirst {
+                val original = jvmArgumentProviders.toList()
+                jvmArgumentProviders.clear()
+                original.forEach { provider ->
+                    jvmArgumentProviders.add(CommandLineArgumentProvider {
+                        provider.asArguments().filterNot { it.startsWith("-javaagent:") && "coroutines-javaagent" in it }
+                    })
+                }
+            }
+        }
+        // The platform class loader disables CDS for non-system classes and the JVM warns about it on every start.
+        jvmArgs("-Xlog:cds=off", "-Xlog:cds+dynamic=off")
+        testLogging {
+            events("failed", "skipped")
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
+    }
+}
+
+// Aggregate: runs the benchmark suites of all go-psi modules one after another (they must not compete for CPU).
+val benchmarkModules = listOf(":go-psi-core", ":go-psi-semantic", ":go-psi-ide")
+tasks.register("benchmark") {
+    group = "verification"
+    description = "Runs the benchmark suites of go-psi-core, go-psi-semantic and go-psi-ide."
+    dependsOn(benchmarkModules.map { "$it:benchmark" })
+}
+benchmarkModules.zipWithNext().forEach { (a, b) -> project(b).tasks.matching { it.name == "benchmark" }.configureEach { mustRunAfter("$a:benchmark") } }
+
+// Binary compatibility validation of the go-psi modules: Kotlin Gradle plugin built-in ABI validation, <module>/api/<module>.api
+// is the committed dump of the public API packages (docs/psi/API.md, "Binary compatibility"). `checkKotlinAbi` runs as part of
+// `check`; `./gradlew updateKotlinAbi` rewrites the dumps. @ApiStatus.Internal declarations are excluded.
+val abiPackages = listOf(
+    "io.github.golangsupport.lang.psi",
+    "io.github.golangsupport.lang.stubs",
+    "io.github.golangsupport.semantic.api",
+    "io.github.golangsupport.semantic.types",
+    "io.github.golangsupport.project.api",
+    "io.github.golangsupport.ide.completion.api",
+)
+val abiExcludedSubpackages = listOf(
+    "io.github.golangsupport.lang.psi.impl",
+    "io.github.golangsupport.lang.stubs.index",
+)
+configure(benchmarkModules.map { project(it) }) {
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+        extensions.configure<KotlinJvmProjectExtension> {
+            abiValidation {
+                // KGP 2.3 keeps the validation off unless enabled explicitly (go-psi on KGP 2.4 had it on by default).
+                enabled.set(true)
+                filters {
+                    // `**` also matches nested classes (`Outer.Nested`, `Companion`), so the non-API subpackages of the API
+                    // packages are excluded explicitly. A new subpackage shows up as a dump diff and is reviewed then.
+                    include { byNames.addAll(abiPackages.map { "$it.**" }) }
+                    exclude {
+                        byNames.addAll(abiExcludedSubpackages.map { "$it.**" })
+                        annotatedWith.add("org.jetbrains.annotations.ApiStatus.Internal")
+                    }
+                }
+            }
         }
     }
 }

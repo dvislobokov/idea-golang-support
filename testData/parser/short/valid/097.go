@@ -1,0 +1,1 @@
+package p; type I1[T any] interface{}; type I2[T any] interface{ I1[T] }

@@ -1,0 +1,1 @@
+package p; func f(... /* ERROR "can only use ... with final parameter" */ int, int)

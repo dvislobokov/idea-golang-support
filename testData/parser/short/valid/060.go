@@ -1,0 +1,1 @@
+package p; func _(x T[P1, P2, P3])

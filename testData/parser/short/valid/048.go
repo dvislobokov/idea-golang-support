@@ -1,0 +1,1 @@
+package p; func (R) _()

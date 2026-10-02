@@ -1,0 +1,1 @@
+package p; func f() { _ = <-chan int(nil) };

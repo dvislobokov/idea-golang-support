@@ -1,0 +1,67 @@
+== package clause
+<div class='definition'><pre>package doc</pre></div><div class='content'><p>Package doc is a fixture for documentation rendering.</p>
+<h3>Overview</h3>
+<p>It has a <code>Point</code> type and a list:</p>
+<ul><li>first item</li><li>second item</li></ul>
+<p>and code:</p>
+<pre><code>p := doc.Point{X: 1}
+p.Move(2)</code></pre>
+<p>See <a href="https://go.dev/doc/comment">https://go.dev/doc/comment</a> and <a href="https://go.dev/ref/spec">the spec</a>; escape &lt;b&gt;tags&lt;/b&gt; &amp; such.</p></div>
+
+== const Pi
+<div class='definition'><pre>const Pi untyped float = 3.14</pre></div><div class='content'><p>Pi is an untyped float constant.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== const Max
+<div class='definition'><pre>const Max int64 = 1024</pre></div><div class='content'><p>Max is typed.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== const Min
+<div class='definition'><pre>const Min int64 = -1024</pre></div><div class='content'><p>Min is derived.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== var Default
+<div class='definition'><pre>var Default Point</pre></div><div class='content'><p>Default is the default point.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== type Point
+<div class='definition'><pre>type Point struct {
+	X int
+	Y int
+	io.Reader
+}
+
+func (p *Point) Move(dx int)
+func (p Point) String() string</pre></div><div class='content'><p>Point is a 2D point.
+Use &ldquo;quotes&rdquo; freely.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== field X
+<div class='definition'><pre>field X int</pre></div><div class='content'><p>X is the horizontal coordinate.</p></div><table class='sections'><tr><td valign='top' class='section'><p>Struct:</td><td valign='top'><code>Point</code></td></tr><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== field Y
+<div class='definition'><pre>field Y int</pre></div><div class='content'><p>Y is vertical.</p></div><table class='sections'><tr><td valign='top' class='section'><p>Struct:</td><td valign='top'><code>Point</code></td></tr><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== embedded Reader
+<div class='definition'><pre>field io.Reader</pre></div><table class='sections'><tr><td valign='top' class='section'><p>Struct:</td><td valign='top'><code>Point</code></td></tr><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== method Move
+<div class='definition'><pre>func (p *Point) Move(dx int)</pre></div><div class='content'><p>Move moves the point by dx.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== type Shape
+<div class='definition'><pre>type Shape interface {
+	Area() float64
+}</pre></div><div class='content'><p>Shape is an interface.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== method spec Area
+<div class='definition'><pre>func (Shape) Area() float64</pre></div><div class='content'><p>Area returns the area.</p></div><table class='sections'><tr><td valign='top' class='section'><p>Interface:</td><td valign='top'><code>Shape</code></td></tr><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== func Map
+<div class='definition'><pre>func Map[T any, U any](s []T, f func(T) U) []U</pre></div><div class='content'><p>Map applies f to every element of s.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== func Sum
+<div class='definition'><pre>func Sum(xs ...int) (total int, err error)</pre></div><div class='content'><p>Sum returns the sum.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== param dx
+<div class='definition'><pre>var dx int</pre></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== type param T
+<div class='definition'><pre>type T any</pre></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>
+
+== local count
+<div class='definition'><pre>var count int</pre></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>doc.go</td></tr></table>

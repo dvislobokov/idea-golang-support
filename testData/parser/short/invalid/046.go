@@ -1,0 +1,1 @@
+package p; type _ struct { int, float } /* ERROR "expected type, found '}'" */ ;

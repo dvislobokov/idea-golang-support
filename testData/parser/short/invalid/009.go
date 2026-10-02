@@ -1,0 +1,1 @@
+package p; func f() { switch t = /* ERROR "expected ':=', found '='" */ t.(type) {} };
