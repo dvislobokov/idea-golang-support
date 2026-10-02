@@ -14,11 +14,11 @@
   Y int
   *Base
   label string
-  Move(dx, dy int)
-  String() string
+  (Point) Move(dx, dy int)
+  (Point) String() string
  Celsius
  List[T any]
  NewPoint(x, y int) *Point
  Map[K comparable, V any](m map[K]V, f func(V) V) (result map[K]V, err error)
- (*Base) Reset()
+ (Base) Reset()
  helper()

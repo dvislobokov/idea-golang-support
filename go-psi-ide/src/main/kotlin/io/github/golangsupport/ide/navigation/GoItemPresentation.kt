@@ -62,13 +62,10 @@ class GoItemPresentation(
             val name = element.name ?: return null
             return when (element) {
                 is GoFunctionDeclaration -> name + typeParametersText(element.typeParameters) + signatureText(element.signature)
+                // `(Server) Start(ctx context.Context) error`: the receiver type alone, as the pre-PSI plugin and the breadcrumbs show it.
                 is GoMethodDeclaration -> {
                     val receiver = element.receiverTypeName
-                    val prefix = if (withReceiver && receiver != null) {
-                        "(" + (if (element.isPointerReceiver) "*" else "") + receiver + ") "
-                    } else {
-                        ""
-                    }
+                    val prefix = if (withReceiver && receiver != null) "($receiver) " else ""
                     prefix + name + typeParametersText(element.typeParameters) + signatureText(element.signature)
                 }
                 is GoMethodSpec -> name + signatureText(element.signature)

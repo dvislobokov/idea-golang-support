@@ -26,6 +26,7 @@ import io.github.golangsupport.PluginLanguage
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
+import io.github.golangsupport.sdk.GoIgsLibraryRootsPolicy
 import javax.swing.JButton
 
 /** What the part of the plugin with the language server does when the settings it was started with change. Implemented where the LSP API of the platform is. */
@@ -94,6 +95,11 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "page.g
                 row(GoBundle.message("settings.buildTags")) {
                     textField().align(AlignX.FILL).bindText(settings::buildTags).comment(GoBundle.message("settings.buildTags.comment"))
                 }
+                row(GoBundle.message("settings.libraryRoots")) {
+                    // the renderer, not toString(): what the settings file keeps has to stay English whatever the language of the page
+                    comboBox(GoLibraryRoots.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::libraryRoots.toNullableProperty())
+                        .comment(GoBundle.message("settings.libraryRoots.comment"))
+                }
                 row { checkBox(GoBundle.message("settings.runConfigurations")).bindSelected(settings::createRunConfigurations).comment(GoBundle.message("settings.runConfigurations.comment")) }
                 row(GoBundle.message("settings.testArguments")) { textField().align(AlignX.FILL).bindText(settings::testArguments).comment(GoBundle.message("settings.testArguments.comment")) }
                 // the pages are rebuilt when the dialog is reopened: said here, since the texts around do not change at once
@@ -136,9 +142,11 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "page.g
     override fun isModified(): Boolean = super.isModified() || goPath.text.trim() != settings.goPath || toolRows.values.any { it.path.text.trim() != settings.toolPath(it.tool.command) }
 
     override fun apply() {
+        val libraryRoots = settings.libraryRoots
         super.apply()
         settings.goPath = goPath.text
         toolRows.values.forEach { settings.setToolPath(it.tool.command, it.path.text) }
+        if (settings.libraryRoots != libraryRoots) GoIgsLibraryRootsPolicy.settingChanged()
         refreshGoStatus()
     }
 

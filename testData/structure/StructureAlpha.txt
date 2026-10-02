@@ -12,12 +12,12 @@
  -Point
   *Base
   label string
-  Move(dx, dy int)
-  String() string
+  (Point) Move(dx, dy int)
+  (Point) String() string
   X int
   Y int
  registry
- (*Base) Reset()
+ (Base) Reset()
  -Shape
   Area() float64
   fmt.Stringer

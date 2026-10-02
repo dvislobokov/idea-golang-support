@@ -24,10 +24,12 @@
     </content>
 
     <!-- the native Go PSI (go-psi-core, go-psi-semantic; docs/psi/, MIGRATION.md): stub and file indices, project model and semantic services.
-         Not the parser (go-psi-core-language.xml, step 4), not the library roots (go-psi-semantic-roots.xml, step 7), not the IDE features
-         (go-psi-ide-*.xml, one per feature at step 8) -->
+         Not the parser (go-psi-core-language.xml, step 4), not the IDE features (go-psi-ide-*.xml, one per feature at step 8) -->
     <xi:include href="/META-INF/go-psi-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/go-psi-semantic.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- $GOROOT/src and the modules of the build list as indexed library roots (step 7); what is indexed is the setting "Index for navigation":
+         GoIgsLibraryRootsPolicy below -->
+    <xi:include href="/META-INF/go-psi-semantic-roots.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- the parser, PSI and lexer of go-psi-core (MIGRATION.md step 4); the stub indices of go-psi-core.xml fill up from here on -->
     <xi:include href="/META-INF/go-psi-core-language.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- editor features over that PSI: structure, breadcrumbs, folding, Go to Class / Symbol, commenter, braces, quotes, find-usages words -->
@@ -48,6 +50,8 @@
         <!-- the toolchain of the native project model is the plugin's: its go, its go env, the build tags and GOOS/GOARCH of the settings (MIGRATION.md step 7) -->
         <applicationService serviceInterface="io.github.golangsupport.project.api.GoToolchainProvider"
                             serviceImplementation="io.github.golangsupport.sdk.GoIgsToolchainProvider" overrides="true"/>
+        <applicationService serviceInterface="io.github.golangsupport.project.impl.GoLibraryRootsPolicy"
+                            serviceImplementation="io.github.golangsupport.sdk.GoIgsLibraryRootsPolicy" overrides="true"/>
         <!-- *_test.go are tests: the "Tests" scope of the platform, and with it the green background in the tree and the tabs -->
         <testSourcesFilter implementation="io.github.golangsupport.testing.GoTestSourcesFilter"/>
 

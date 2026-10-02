@@ -12,6 +12,18 @@ class GoFoldingTest : GoIdeTestBase() {
         myFixture.testFolding("$testDataPath/Folding.go")
     }
 
+    fun testNestedBlocksFoldOnce() {
+        myFixture.configureByText(
+            "a.go",
+            "package p\n\nfunc f(x int) {\n\tif x > 0 {\n\t\tfor x > 0 {\n\t\t\tx--\n\t\t}\n\t}\n\tg := func() {\n\t\tx++\n\t}\n\tg()\n\t// one\n}\n",
+        )
+        val descriptors = LanguageFolding.buildFoldingDescriptors(GoFoldingBuilder(), myFixture.file, myFixture.editor.document, false)
+        val ranges = descriptors.map { it.range }
+        assertEquals(ranges.toSet().size, ranges.size)
+        assertEquals(4, descriptors.count { it.placeholderText == "{...}" })
+        assertEmpty(descriptors.filter { it.placeholderText == "//..." })
+    }
+
     fun testImportsCollapsedBySetting() {
         myFixture.configureByText("a.go", "package p\n\nimport (\n\t\"fmt\"\n)\n\nfunc f() {\n\tfmt.Println()\n}\n")
         val builder = GoFoldingBuilder()

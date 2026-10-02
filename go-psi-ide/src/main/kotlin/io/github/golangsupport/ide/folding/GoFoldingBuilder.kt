@@ -12,21 +12,23 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.SyntaxTraverser
 import io.github.golangsupport.lang.psi.GoBlock
 import io.github.golangsupport.lang.psi.GoConstDeclaration
-import io.github.golangsupport.lang.psi.GoFunctionLit
-import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
+import io.github.golangsupport.lang.psi.GoExprSwitchStatement
 import io.github.golangsupport.lang.psi.GoImportDeclaration
 import io.github.golangsupport.lang.psi.GoInterfaceType
 import io.github.golangsupport.lang.psi.GoLiteralValue
+import io.github.golangsupport.lang.psi.GoSelectStatement
 import io.github.golangsupport.lang.psi.GoStructType
 import io.github.golangsupport.lang.psi.GoTypeDeclaration
+import io.github.golangsupport.lang.psi.GoTypeSwitchStatement
 import io.github.golangsupport.lang.psi.GoTypes
 import io.github.golangsupport.lang.psi.GoVarDeclaration
 
 /**
- * Syntax-only folding: function and function literal bodies, composite literal values,
- * struct/interface bodies, parenthesised import/const/var/type groups, multi-line block comments
- * and runs of at least [MIN_LINE_COMMENT_RUN] whole-line `//` comments. Every region spans more
- * than one line. Import groups are collapsed by default when "Fold imports" is on.
+ * Syntax-only folding: every `{...}` block (function and function literal bodies, `if`/`else`/`for`
+ * blocks, `switch`/`select` bodies), composite literal values, struct/interface bodies,
+ * parenthesised import/const/var/type groups, multi-line block comments and runs of at least
+ * [MIN_LINE_COMMENT_RUN] whole-line `//` comments (a doc comment above a declaration too). Every
+ * region spans more than one line. Import groups are collapsed by default when "Fold imports" is on.
  */
 class GoFoldingBuilder : FoldingBuilderEx(), DumbAware {
 
@@ -37,9 +39,11 @@ class GoFoldingBuilder : FoldingBuilderEx(), DumbAware {
 
         for (element in SyntaxTraverser.psiTraverser(root)) {
             when (element) {
-                is GoBlock -> if (element.parent is GoFunctionOrMethodDeclaration || element.parent is GoFunctionLit) {
-                    addBetween(result, text, element, element.lbrace, element.rbrace, BRACES)
-                }
+                // Nested blocks too: the pre-PSI plugin folded every brace pair inside a function body.
+                is GoBlock -> addBetween(result, text, element, element.lbrace, element.rbrace, BRACES)
+                is GoExprSwitchStatement, is GoTypeSwitchStatement, is GoSelectStatement -> addBetween(
+                    result, text, element, element.node.findChildByType(GoTypes.LBRACE)?.psi, element.node.findChildByType(GoTypes.RBRACE)?.psi, BRACES,
+                )
                 is GoLiteralValue -> addBetween(result, text, element, element.lbrace, element.rbrace, BRACES)
                 is GoStructType -> addBetween(result, text, element, element.lbrace, element.rbrace, BRACES)
                 is GoInterfaceType -> addBetween(result, text, element, element.lbrace, element.rbrace, BRACES)
@@ -128,7 +132,7 @@ class GoFoldingBuilder : FoldingBuilderEx(), DumbAware {
     }
 
     private companion object {
-        const val MIN_LINE_COMMENT_RUN = 3
+        const val MIN_LINE_COMMENT_RUN = 2
         const val BRACES = "{...}"
         const val PARENS = "(...)"
         const val BLOCK_COMMENT = "/*...*/"

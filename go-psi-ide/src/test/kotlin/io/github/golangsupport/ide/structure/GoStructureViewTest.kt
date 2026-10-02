@@ -28,6 +28,23 @@ class GoStructureViewTest : GoIdeTestBase() {
         }
     }
 
+    /** The receiver type alone, as the pre-PSI plugin titled a method: no pointer, no type parameters, under the type and on the top level alike. */
+    fun testMethodTitlesCarryTheReceiver() {
+        myFixture.configureByText(
+            "a.go",
+            "package p\n\ntype Store[T any] struct{}\n\nfunc (s *Store[T]) Add(item T) {}\n\nfunc (s Store[T]) Len() int { return 0 }\n\n" +
+                "func (c *Cache) Get(key string) (string, bool) { return \"\", false }\n\nfunc (c Cache) Size() int { return 0 }\n",
+        )
+        myFixture.testStructureView { component ->
+            PlatformTestUtil.expandAll(component.tree)
+            val actual = PlatformTestUtil.print(component.tree, false).trimEnd()
+            val expected = listOf(
+                "-a.go", " -Store[T any]", "  (Store) Add(item T)", "  (Store) Len() int", " (Cache) Get(key string) (string, bool)", " (Cache) Size() int",
+            )
+            assertEquals(expected.joinToString("\n"), actual)
+        }
+    }
+
     private fun doTest(source: String, golden: String = source, sorter: String? = null) {
         myFixture.configureByFile("$source.go")
         myFixture.testStructureView { component ->

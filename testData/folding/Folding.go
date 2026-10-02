@@ -44,11 +44,30 @@ func f() <fold text='{...}'>{
 		Y: 2,
 	}</fold>
 	_ = p
-	if x > 0 {
+	if x > 0 <fold text='{...}'>{
 		x--
-	}
-	// two
-	// lines
+		for i := 0; i < 2; i++ <fold text='{...}'>{
+			x += i
+		}</fold>
+	}</fold> else <fold text='{...}'>{
+		x++
+	}</fold>
+	switch x <fold text='{...}'>{
+	case 1:
+		x--
+	}</fold>
+	select <fold text='{...}'>{
+	default:
+	}</fold>
+	if x < 0 { x = 0 }
+	// one line alone does not fold
+	_ = p
+	<fold text='//...'>// two
+	// lines</fold>
 }</fold>
 
+// A lone comment line above a blank line does not fold.
+
+<fold text='//...'>// Doc comment of short: two lines fold above a declaration too.
+// Second line of the doc comment.</fold>
 func short() { return }

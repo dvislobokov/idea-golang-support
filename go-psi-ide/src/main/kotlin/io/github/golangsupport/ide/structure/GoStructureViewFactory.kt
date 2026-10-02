@@ -87,13 +87,12 @@ class GoStructureViewModel(file: GoFile, editor: Editor?) :
         }
 }
 
-/** One node of the Go structure tree. [topLevel] marks methods shown outside their type (receiver in the text). */
-class GoStructureViewElement(element: PsiElement, private val topLevel: Boolean = false) :
-    PsiTreeElementBase<PsiElement>(element), SortableTreeElement {
+/** One node of the Go structure tree. A method is titled with its receiver, `(Point) Move(dx, dy int)`, under its type too. */
+class GoStructureViewElement(element: PsiElement) : PsiTreeElementBase<PsiElement>(element), SortableTreeElement {
 
     override fun getPresentableText(): String? = when (val e = element) {
         is GoFile -> e.name
-        is GoNamedElement -> GoItemPresentation.detailedText(e, withReceiver = topLevel)
+        is GoNamedElement -> GoItemPresentation.detailedText(e)
         is GoConstraintElem -> GoItemPresentation.normalize(e.text)
         else -> null
     }
@@ -119,7 +118,7 @@ class GoStructureViewElement(element: PsiElement, private val topLevel: Boolean 
             when (child) {
                 is GoTypeDeclaration -> child.typeSpecList.mapTo(result) { GoStructureViewElement(it) }
                 is GoFunctionDeclaration -> result += GoStructureViewElement(child)
-                is GoMethodDeclaration -> if (child.receiverTypeName !in typeNames) result += GoStructureViewElement(child, topLevel = true)
+                is GoMethodDeclaration -> if (child.receiverTypeName !in typeNames) result += GoStructureViewElement(child)
                 is GoVarDeclaration -> child.varSpecList.flatMap { it.varDefinitionList }.mapTo(result) { GoStructureViewElement(it) }
                 is GoConstDeclaration -> child.constSpecList.flatMap { it.constDefinitionList }.mapTo(result) { GoStructureViewElement(it) }
             }

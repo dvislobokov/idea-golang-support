@@ -10,6 +10,7 @@ import com.intellij.util.execution.ParametersListUtil
 import io.github.golangsupport.GoBundle
 import io.github.golangsupport.PluginLanguage
 import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.project.impl.GoLibraryRootsMode
 
 /** Where delve builds the binary of a debug session. */
 enum class GoDebugBinaryLocation(val title: String) {
@@ -35,6 +36,17 @@ enum class GoFeatureSource(val title: String) {
 
     /** What a combo shows; [toString] is what the settings file keeps, so it stays English. */
     val label: String get() = GoBundle.messageOr("featureSource.$name", title)
+
+    override fun toString(): String = title
+}
+
+/** Which Go sources outside the project the native PSI indexes as library roots ([io.github.golangsupport.sdk.GoIgsLibraryRootsPolicy]). */
+enum class GoLibraryRoots(val mode: GoLibraryRootsMode, val title: String) {
+    STANDARD_LIBRARY(GoLibraryRootsMode.STANDARD_LIBRARY, "Standard library"),
+    STANDARD_LIBRARY_AND_DEPENDENCIES(GoLibraryRootsMode.STANDARD_LIBRARY_AND_DEPENDENCIES, "Standard library and dependencies");
+
+    /** What the combo shows; [toString] is what the settings file keeps, so it stays English. */
+    val label: String get() = GoBundle.messageOr("libraryRoots.$name", title)
 
     override fun toString(): String = title
 }
@@ -70,6 +82,9 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** GOOS / GOARCH the code is analysed for (which files a package has, which `//go:build` lines hold); empty: the ones of the machine. */
         var analysisGoos by string("")
         var analysisGoarch by string("")
+
+        /** The library roots of the native PSI: `$GOROOT/src` alone, or also the module directories of the build list. */
+        var libraryRoots by enum(GoLibraryRoots.STANDARD_LIBRARY_AND_DEPENDENCIES)
 
         var languageServerEnabled by property(true)
         /** On: the analyzers of staticcheck come with fixes, and fixes are what Alt+Enter is made of here. */
@@ -207,6 +222,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var analysisGoarch: String
         get() = state.analysisGoarch.orEmpty()
         set(value) { state.analysisGoarch = value.trim() }
+
+    var libraryRoots: GoLibraryRoots
+        get() = state.libraryRoots
+        set(value) { state.libraryRoots = value }
 
     var languageServerEnabled: Boolean
         get() = state.languageServerEnabled

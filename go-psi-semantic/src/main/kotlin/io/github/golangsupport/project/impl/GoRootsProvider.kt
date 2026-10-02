@@ -24,14 +24,16 @@ import org.jetbrains.annotations.TestOnly
  * libraries, so they are indexed (stubs, imports) and navigable. `testdata` directories (and
  * `$GOROOT/src/cmd` unless `gopsi.libraryRoots.includeCmd`) are excluded.
  *
- * Guarded by the registry key `gopsi.libraryRoots` (default true). Disabled in unit-test mode
- * unless [enableInTests] is set, so light test projects do not index GOROOT.
+ * What is exposed is decided by [GoLibraryRootsPolicy] (the registry key `gopsi.libraryRoots` by default, a setting of the host
+ * plugin otherwise): nothing, the standard library, or both. Disabled in unit-test mode unless [enableInTests] is set, so light
+ * test projects do not index GOROOT. The roots of the last answer are remembered per project, so that [scheduleRootsUpdate] can
+ * tell the platform what changed after the project model or the policy changes.
  */
 @ApiStatus.Internal
 class GoRootsProvider : AdditionalLibraryRootsProvider() {
 
     override fun getAdditionalProjectLibraries(project: Project): Collection<SyntheticLibrary> {
-        if (!isEnabled()) return emptyList()
+        // computed even when disabled (empty roots): a later change of the policy is then a change the platform is told about
         val roots = computeRoots(project)
         val result = mutableListOf<SyntheticLibrary>()
         roots.goroot?.let { src ->
@@ -44,10 +46,7 @@ class GoRootsProvider : AdditionalLibraryRootsProvider() {
         return result
     }
 
-    override fun getRootsToWatch(project: Project): Collection<VirtualFile> {
-        if (!isEnabled()) return emptyList()
-        return computeRoots(project).all()
-    }
+    override fun getRootsToWatch(project: Project): Collection<VirtualFile> = computeRoots(project).all()
 
     private fun excludeCondition(gorootSrc: VirtualFile?, excludeCmd: Boolean): SyntheticLibrary.ExcludeFileCondition =
         // (isDir, name, isRoot, isStrictRootChild, hasParentNotGrandparent)
@@ -62,7 +61,6 @@ class GoRootsProvider : AdditionalLibraryRootsProvider() {
     }
 
     companion object {
-        private const val REGISTRY_KEY = "gopsi.libraryRoots"
         private const val REGISTRY_INCLUDE_CMD = "gopsi.libraryRoots.includeCmd"
         private val LAST_ROOTS = Key.create<List<VirtualFile>>("gopsi.libraryRoots.last")
 
@@ -75,23 +73,30 @@ class GoRootsProvider : AdditionalLibraryRootsProvider() {
             enabledInTests = enabled
         }
 
+        /** The mode of the policy for [project]; [GoLibraryRootsMode.NONE] in unit tests unless [enableInTests]. */
         @JvmStatic
-        fun isEnabled(): Boolean {
-            if (ApplicationManager.getApplication().isUnitTestMode && !enabledInTests) return false
-            return registryFlag(REGISTRY_KEY, true)
+        fun modeFor(project: Project): GoLibraryRootsMode {
+            if (ApplicationManager.getApplication().isUnitTestMode && !enabledInTests) return GoLibraryRootsMode.NONE
+            return GoLibraryRootsPolicy.getInstance().modeFor(project)
         }
+
+        @JvmStatic
+        fun isEnabled(project: Project): Boolean = modeFor(project) != GoLibraryRootsMode.NONE
 
         private fun includeCmd(): Boolean = registryFlag(REGISTRY_INCLUDE_CMD, false)
 
         private fun registryFlag(key: String, default: Boolean): Boolean =
             runCatching { Registry.`is`(key, default) }.getOrDefault(default)
 
-        /** GOROOT/src plus every non-main module directory of the content-root graphs that lies outside the project. */
+        /** What the policy allows of: GOROOT/src, plus every non-main module directory of the content-root graphs that lies outside the project. */
         @JvmStatic
         fun computeRoots(project: Project): Roots {
+            val mode = modeFor(project)
+            if (mode == GoLibraryRootsMode.NONE) return Roots(null, emptyList())
             val toolchain = GoToolchainProvider.getInstance().toolchainFor(project)
             val lfs = LocalFileSystem.getInstance()
             val goroot = toolchain?.gorootSrc?.let { lfs.findFileByNioFile(it) }
+            if (mode == GoLibraryRootsMode.STANDARD_LIBRARY) return Roots(goroot, emptyList())
             val provider = GoModuleGraphProvider.getInstance(project) as? DefaultGoModuleGraphProvider ?: return Roots(goroot, emptyList())
             val contentRoots = com.intellij.openapi.roots.ProjectRootManager.getInstance(project).contentRoots
             val modules = provider.projectGraphs()
@@ -103,12 +108,13 @@ class GoRootsProvider : AdditionalLibraryRootsProvider() {
         }
 
         /**
-         * Recomputes the roots in the background after a project model change and notifies the
-         * platform when they differ. Never blocks the EDT.
+         * Recomputes the roots in the background after a project model or policy change and notifies the platform when they
+         * differ. Never blocks the EDT. Nothing happens while the platform has not asked yet (no last answer): the first query
+         * computes the current roots anyway.
          */
         @JvmStatic
         fun scheduleRootsUpdate(project: Project) {
-            if (!isEnabled() || project.isDisposed) return
+            if (project.isDisposed) return
             val old = project.getUserData(LAST_ROOTS) ?: return
             ReadAction.nonBlocking<List<VirtualFile>> { computeRoots(project).all() }
                 .expireWith(project)

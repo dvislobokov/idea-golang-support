@@ -10,14 +10,14 @@
   X int
   Y int
   *Base
-  Move(dx, dy int)
-  String() string
+  (Point) Move(dx, dy int)
+  (Point) String() string
   label string
  Celsius
  List[T any]
  NewPoint(x, y int) *Point
  Map[K comparable, V any](m map[K]V, f func(V) V) (result map[K]V, err error)
- (*Base) Reset()
+ (Base) Reset()
  limit int
  registry
  count int

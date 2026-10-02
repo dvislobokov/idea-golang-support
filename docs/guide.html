@@ -570,6 +570,7 @@ footer a { color: var(--text-2); }
       <tbody>
         <tr><td>Path to go</td><td>Путь к команде <code>go</code>. Пусто: поиск в PATH, GOROOT и стандартных каталогах.</td></tr>
         <tr><td>Build tags</td><td>Теги сборки для анализа кода, сборки и тестов.</td></tr>
+        <tr><td>Index for navigation <span class="new">новое</span></td><td>Какие исходники Go вне проекта индексируются для навигации и поиска: только стандартная библиотека toolchain (<code>$GOROOT/src</code>) или ещё и модули из build list проекта. Зависимости при первом открытии индексируются дольше; смена значения переиндексирует без перезапуска.</td></tr>
         <tr><td>Create run configurations for the programs of the project</td><td>Создаёт конфигурацию для каждого каталога с <code>func main</code>. Удалённая вручную не создаётся снова.</td></tr>
         <tr><td>Test arguments</td><td>Добавляются к каждому <code>go test</code>.</td></tr>
       </tbody>
