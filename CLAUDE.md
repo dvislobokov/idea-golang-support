@@ -2,9 +2,10 @@
 
 Плагин «Go Project Support» (`io.github.golangsupport`) для IDE на платформе IntelliJ, в которых нет поддержки Go (IntelliJ IDEA, PyCharm, WebStorm, Rider…).
 Сделан по образцу `../idea-dotnet-support`, но устроен иначе: смысл кода даёт **gopls** (платформенный LSP-клиент), отладку — **delve** (`dlv dap`,
-**свой** DAP-клиент на XDebugger API, как в dotnet-плагине: модуль `intellij.platform.dap` есть не во всех IDE и форках), остальное — команда `go` и инструменты экосистемы. Своего парсера Go нет: лексер + сканер верхнего уровня
-(`lang/GoDeclarations`), по которому строятся PSI-узлы `GoDeclaration` (Structure view, breadcrumbs, folding, Go to Symbol, gutter-иконки, строки для
-точек останова) — это работает и без gopls. Меняешь, что сканер считает объявлением, — подними `VERSION` у `GoDeclarationIndex`.
+**свой** DAP-клиент на XDebugger API, как в dotnet-плагине: модуль `intellij.platform.dap` есть не во всех IDE и форках), остальное — команда `go` и инструменты экосистемы. Парсер Go — свой (go-psi, см. ниже; подключён с шага 4 `MIGRATION.md`): Structure view, breadcrumbs,
+folding, Go to Class / Symbol, commenter, скобки — из `go-psi-ide-editor.xml`. Текстовый сканер верхнего уровня `lang/GoDeclarations` остаётся инструментом
+(receivers, сигнатуры, тела как диапазоны; `GoDeclarationIndex`, run-иконки, Go to Test, аннотатор) до шага 10; мост PSI ↔ сканер — `lang/GoDeclarationPsi`
+(поиск по смещению имени: док-комментарий входит в PSI-объявление). Меняешь, что сканер считает объявлением, — подними `VERSION` у `GoDeclarationIndex`.
 
 С плагином JetBrains (`org.jetbrains.plugins.go`, GoLand) объявлена несовместимость: тот же тип файлов, и добавить там нечего.
 

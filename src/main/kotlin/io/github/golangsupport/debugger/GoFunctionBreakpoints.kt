@@ -23,7 +23,7 @@ import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointBase
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.run.HitCondition
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap

@@ -18,6 +18,9 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import io.github.golangsupport.settings.GoSettings
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoTokenSets
+import io.github.golangsupport.lang.psi.GoTypes
 
 /**
  * What a keyword can begin here, as items of the completion list: `ty` at the top of a file offers `type Name struct {...}`, `fo` in a
@@ -215,7 +218,7 @@ class GoKeywordCompletionContributor : CompletionContributor() {
         val file = parameters.originalFile as? GoFile ?: return
         if (!GoSettings.getInstance().completionKeywordTemplates) return
         val elementType = parameters.position.node.elementType
-        if (elementType in GoTextTokens.COMMENTS || elementType in GoTextTokens.STRINGS) return
+        if (elementType in GoTokenSets.COMMENTS || elementType in GoTokenSets.STRING_LITERALS || elementType == GoTypes.CHAR) return
         val text = parameters.editor.document.immutableCharSequence
         val context = GoKeywordTemplates.contextAt(text, parameters.offset, file.isTestFile, GoStructure.of(file)) ?: return
         val typed = GoKeywordTemplates.typed(text, parameters.offset)

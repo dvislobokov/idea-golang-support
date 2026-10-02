@@ -37,7 +37,8 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 OUT = os.path.join(REPO, "build", "ui-robot")
 SOURCE_PROJECT = os.path.join(HERE, "project")
 SCRATCH = os.path.join(tempfile.gettempdir(), "gopsi-ui-project")
-SANDBOX_LOG = os.path.join(REPO, ".intellijPlatform", "sandbox", "plugin", "IU-2026.1.5", "log_runIdeForUiTests", "idea.log")
+# The sandbox of this repository (idea-golang-support, IDEA 2026.1.4); GOPSI_SANDBOX_LOG overrides it (the go-psi layout was sandbox/plugin/IU-2026.1.5).
+SANDBOX_LOG = os.environ.get("GOPSI_SANDBOX_LOG") or os.path.join(REPO, ".intellijPlatform", "sandbox", "idea-golang-support", "IU-2026.1.4", "log_runIdeForUiTests", "idea.log")
 GOROOT = os.environ.get("GOROOT") or r"C:\Program Files\Go"
 GOFMT = os.path.join(GOROOT, "bin", "gofmt.exe")
 PLUGIN_LINE = "Go PSI (0.0.9)"

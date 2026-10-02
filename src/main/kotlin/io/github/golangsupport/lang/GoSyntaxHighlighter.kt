@@ -13,16 +13,21 @@ import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.GoIcons
+import io.github.golangsupport.lang.lexer.GoLexer
+import io.github.golangsupport.lang.psi.GoTokenSets
+import io.github.golangsupport.lang.psi.GoTypes
 import javax.swing.Icon
 
 class GoSyntaxHighlighter : SyntaxHighlighterBase() {
-    override fun getHighlightingLexer(): Lexer = GoTextLexer()
+    override fun getHighlightingLexer(): Lexer = GoLexer()
 
     override fun getTokenHighlights(tokenType: IElementType): Array<TextAttributesKey> = pack(KEYS[tokenType])
 
@@ -61,27 +66,26 @@ class GoSyntaxHighlighter : SyntaxHighlighterBase() {
         val PACKAGE_VARIABLE = GoColors.PACKAGE_VARIABLE
         val LABEL = GoColors.LABEL
 
-        private val KEYS: Map<IElementType, TextAttributesKey> = mapOf(
-            GoTextTokens.KEYWORD to KEYWORD,
-            GoTextTokens.STRING to STRING,
-            GoTextTokens.RAW_STRING to STRING,
-            GoTextTokens.CHAR to STRING,
-            GoTextTokens.NUMBER to NUMBER,
-            GoTextTokens.LINE_COMMENT to LINE_COMMENT,
-            GoTextTokens.BLOCK_COMMENT to BLOCK_COMMENT,
-            GoTextTokens.DIRECTIVE to DIRECTIVE,
-            GoTextTokens.LBRACE to BRACES,
-            GoTextTokens.RBRACE to BRACES,
-            GoTextTokens.LPAREN to PARENTHESES,
-            GoTextTokens.RPAREN to PARENTHESES,
-            GoTextTokens.LBRACKET to BRACKETS,
-            GoTextTokens.RBRACKET to BRACKETS,
-            GoTextTokens.SEMICOLON to SEMICOLON,
-            GoTextTokens.COMMA to COMMA,
-            GoTextTokens.DOT to DOT,
-            GoTextTokens.OPERATOR to OPERATOR,
-            TokenType.BAD_CHARACTER to BAD_CHARACTER,
-        )
+        private val KEYS: Map<IElementType, TextAttributesKey> = HashMap<IElementType, TextAttributesKey>().apply {
+            GoTokenSets.KEYWORDS.types.forEach { put(it, KEYWORD) }
+            GoTokenSets.OPERATORS.types.forEach { put(it, OPERATOR) }
+            GoTokenSets.NUMBERS.types.forEach { put(it, NUMBER) }
+            put(GoTypes.STRING, STRING)
+            put(GoTypes.RAW_STRING, STRING)
+            put(GoTypes.CHAR, STRING)
+            put(GoTypes.LINE_COMMENT, LINE_COMMENT)
+            put(GoTypes.BLOCK_COMMENT, BLOCK_COMMENT)
+            put(GoTypes.LBRACE, BRACES)
+            put(GoTypes.RBRACE, BRACES)
+            put(GoTypes.LPAREN, PARENTHESES)
+            put(GoTypes.RPAREN, PARENTHESES)
+            put(GoTypes.LBRACK, BRACKETS)
+            put(GoTypes.RBRACK, BRACKETS)
+            put(GoTypes.SEMICOLON, SEMICOLON)
+            put(GoTypes.COMMA, COMMA)
+            put(GoTypes.PERIOD, DOT)
+            put(TokenType.BAD_CHARACTER, BAD_CHARACTER)
+        }
     }
 }
 
@@ -128,36 +132,40 @@ class GoSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
 }
 
 /**
- * Colours what the lexer cannot tell apart: predeclared identifiers, the names of declarations, calls. No resolve here: a shadowed
- * `len` is still coloured as the builtin. The semantic tokens of gopls, where it runs, are laid over this.
+ * Colours what the lexer cannot tell apart: predeclared identifiers, the names of declarations, calls, compiler directives (the lexer has
+ * no token of their own: `//go:build` is a line comment). No resolve here: a shadowed `len` is still coloured as the builtin. The semantic
+ * tokens of gopls, where it runs, are laid over this.
  */
 class GoIdentifierAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        if (element.elementType != GoTextTokens.IDENTIFIER) return
-        val key = classify(element) ?: return
+        val key = when {
+            element is PsiComment -> GoSyntaxHighlighter.DIRECTIVE.takeIf { isDirective(element.text) }
+            element.elementType == GoTypes.IDENTIFIER -> classify(element)
+            else -> null
+        } ?: return
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(element).textAttributes(key).create()
     }
 
     private fun classify(element: PsiElement): TextAttributesKey? {
-        val declaration = element.parent as? GoDeclaration
-        if (declaration != null && declaration.info?.nameRange == element.textRange) return when (declaration.kind) {
+        val declaration = GoDeclarationPsi.ofName(element)
+        if (declaration != null) return when (GoDeclarationPsi.kindOf(declaration)) {
             GoDeclarationKind.FUNCTION, GoDeclarationKind.METHOD, GoDeclarationKind.INTERFACE_METHOD -> GoSyntaxHighlighter.FUNCTION_DECLARATION
             GoDeclarationKind.STRUCT, GoDeclarationKind.INTERFACE, GoDeclarationKind.TYPE -> GoSyntaxHighlighter.TYPE_DECLARATION
             GoDeclarationKind.FIELD -> GoSyntaxHighlighter.FIELD
             GoDeclarationKind.CONST -> GoSyntaxHighlighter.CONSTANT
-            GoDeclarationKind.VAR -> null
+            GoDeclarationKind.VAR, null -> null
         }
-        val previous = PsiTreeUtil.skipWhitespacesAndCommentsBackward(element)
-        val afterDot = previous.elementType == GoTextTokens.DOT
-        val next = PsiTreeUtil.skipWhitespacesAndCommentsForward(element).elementType
-        val isCall = next == GoTextTokens.LPAREN
+        val previous = GoCodeLeaves.before(element)
+        val afterDot = previous.elementType == GoTypes.PERIOD
+        val next = GoCodeLeaves.after(element).elementType
+        val isCall = next == GoTypes.LPAREN
         val text = element.text
         return when {
             // the names of packages are coloured here and not by gopls, which is told not to (GoplsDefaults): the clause of the file,
             // the name an import is given, and `fmt.` where the file imports something named fmt; a variable that shadows it gopls repaints
             previous?.text == "package" -> GoSyntaxHighlighter.PACKAGE
-            (next == GoTextTokens.STRING || next == GoTextTokens.RAW_STRING) && isImportAlias(element) -> GoSyntaxHighlighter.PACKAGE
-            !afterDot && next == GoTextTokens.DOT && text in importedNames(element) -> GoSyntaxHighlighter.PACKAGE
+            (next == GoTypes.STRING || next == GoTypes.RAW_STRING) && isImportAlias(element) -> GoSyntaxHighlighter.PACKAGE
+            !afterDot && next == GoTypes.PERIOD && text in importedNames(element) -> GoSyntaxHighlighter.PACKAGE
             !afterDot && text in GoTextTokens.BUILTIN_TYPES -> GoSyntaxHighlighter.BUILTIN_TYPE
             !afterDot && text in GoTextTokens.BUILTIN_CONSTANTS -> GoSyntaxHighlighter.BUILTIN_CONSTANT
             !afterDot && isCall && text in GoTextTokens.BUILTIN_FUNCTIONS -> GoSyntaxHighlighter.BUILTIN_FUNCTION
@@ -165,6 +173,22 @@ class GoIdentifierAnnotator : Annotator {
             else -> null
         }
     }
+
+    companion object {
+        /** `//go:build`, `//go:generate`, `//line f.go:1`, `//export F`: what the toolchain reads, as gofmt and go/build tell them. */
+        fun isDirective(comment: String): Boolean = comment.startsWith("//go:") || comment.startsWith("//line ") || comment.startsWith("//export ")
+    }
+}
+
+/**
+ * The neighbour tokens of a PSI leaf across the tree, skipping whitespace, comments and the semicolons the lexer inserts at line ends
+ * (a [GoTypes.SEMICOLON_SYNTHETIC] is a token of the parser, not whitespace). `fmt` of `fmt.Println` is a node of its own, so the dot
+ * is not its sibling: the walk goes by leaves.
+ */
+object GoCodeLeaves {
+    fun before(element: PsiElement): PsiElement? = generateSequence(PsiTreeUtil.prevLeaf(element)) { PsiTreeUtil.prevLeaf(it) }.firstOrNull(::isCode)
+    fun after(element: PsiElement): PsiElement? = generateSequence(PsiTreeUtil.nextLeaf(element)) { PsiTreeUtil.nextLeaf(it) }.firstOrNull(::isCode)
+    private fun isCode(leaf: PsiElement): Boolean = leaf !is PsiWhiteSpace && leaf !is PsiComment && leaf.elementType != GoTypes.SEMICOLON_SYNTHETIC && leaf.textLength > 0
 }
 
 /** `f` of `import f "fmt"`: the import begins with it. */
@@ -183,7 +207,7 @@ class GoColorSettingsPage : ColorSettingsPage {
     override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey> = TAGS
 
     override fun getDemoText(): String = """
-        //go:build linux
+        <directive>//go:build linux</directive>
 
         // Package shop sells things.
         package shop
@@ -242,7 +266,7 @@ class GoColorSettingsPage : ColorSettingsPage {
             "bt" to GoSyntaxHighlighter.BUILTIN_TYPE, "bc" to GoSyntaxHighlighter.BUILTIN_CONSTANT, "bf" to GoSyntaxHighlighter.BUILTIN_FUNCTION,
             "fn" to GoSyntaxHighlighter.FUNCTION_DECLARATION, "type" to GoSyntaxHighlighter.TYPE_DECLARATION, "field" to GoSyntaxHighlighter.FIELD,
             "const" to GoSyntaxHighlighter.CONSTANT, "call" to GoSyntaxHighlighter.FUNCTION_CALL,
-            "tref" to GoSyntaxHighlighter.TYPE_REFERENCE, "pkg" to GoSyntaxHighlighter.PACKAGE, "param" to GoSyntaxHighlighter.PARAMETER,
+            "tref" to GoSyntaxHighlighter.TYPE_REFERENCE, "directive" to GoSyntaxHighlighter.DIRECTIVE, "pkg" to GoSyntaxHighlighter.PACKAGE, "param" to GoSyntaxHighlighter.PARAMETER,
         )
     }
 }

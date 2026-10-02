@@ -19,7 +19,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.platform.lsp.api.LspClient
 import com.intellij.platform.lsp.api.customization.LspIntentionAction
 import com.intellij.psi.PsiFile
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import org.eclipse.lsp4j.CodeAction
 import org.eclipse.lsp4j.CodeActionContext
 import org.eclipse.lsp4j.CodeActionParams

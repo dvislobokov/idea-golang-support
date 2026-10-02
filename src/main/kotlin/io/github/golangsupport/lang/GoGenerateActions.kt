@@ -21,6 +21,7 @@ import com.intellij.ui.CheckBoxList
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * Alt+Insert in a Go file (the Generate popup of the platform): a constructor, getters and setters, `String()`, struct tags, the

@@ -289,7 +289,8 @@ COMMANDS = {
 def check_sandbox():
     """Refuses to touch an IDE that is not a go-psi sandbox: another agent may have one on the same port."""
     path = (js("com.intellij.openapi.application.PathManager.getConfigPath()") or "").replace("\\", "/")
-    if "go-psi" not in path or "/sandbox/" not in path or "_runIdeForUiTests" not in path:
+    # this repository (idea-golang-support) or the former go-psi one, never another plugin's sandbox on the same port
+    if ("go-psi" not in path and "idea-golang-support" not in path) or "/sandbox/" not in path or "_runIdeForUiTests" not in path:
         raise RobotError("robot: the IDE on %s is not a go-psi sandbox (its configuration is in %r): wrong port?" % (BASE, path))
 
 

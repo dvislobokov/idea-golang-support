@@ -2,7 +2,8 @@ package io.github.golangsupport.catalogue
 
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoTestNames
+import io.github.golangsupport.lang.psi.GoFile
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
@@ -53,7 +54,7 @@ object GoCatalogueScanner {
         return result
     }
 
-    fun isSource(fileName: String): Boolean = fileName.endsWith(".go") && !fileName.endsWith(GoFile.TEST_SUFFIX)
+    fun isSource(fileName: String): Boolean = fileName.endsWith(".go") && !fileName.endsWith(GoTestNames.TEST_SUFFIX)
 
     /** `cmd` of the standard library is the toolchain, not packages to import. */
     fun isPackageDirectory(name: String, topOfStandardLibrary: Boolean): Boolean =

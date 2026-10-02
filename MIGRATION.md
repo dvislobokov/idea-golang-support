@@ -38,8 +38,8 @@
 | 1 | Переключатели фич: `GoFeatures` + настройки + чтение в lsp-кастомайзерах | день | — | [x] 2026-10-02, ветка `migration` |
 | 2 | Единые `GoLanguage`/`GoFileType`; переименование старых текстовых помощников | день | — | [x] 2026-10-02, ветка `migration` |
 | 3 | Подключение модулей в плагин: Gradle + `xi:include`, без регистрации парсера | полдня | 2 | [x] 2026-10-02, ветка `migration` |
-| 4 | Подмена парсера + мост `GoDeclaration` + токены (атомарно) | 2–3 дня | 1, 3 | [ ] |
-| 5 | Полный гейт шага 4: тесты, корпус, робот, живая проверка | день | 4 | [ ] |
+| 4 | Подмена парсера + мост `GoDeclaration` + токены (атомарно) | 2–3 дня | 1, 3 | [x] 2026-10-02, ветка `migration` |
+| 5 | Полный гейт шага 4: тесты, корпус, робот, живая проверка | день | 4 | [x] 2026-10-02 (робот); живая проверка — за пользователем |
 | 6 | Stub-индексы вместо `GoDeclarationIndex` и `GoExportsIndex` | 1–2 дня | 5 | [ ] |
 | 7 | Project model `project.api` поверх `cli`/`mod`/`settings`; library roots | 2 дня | 5 | [ ] |
 | 8 | Фичи с gopls на PSI, по одной за флагом (8a–8k) | по фиче | 6, 7 | [ ] |
@@ -445,7 +445,19 @@ generics, missing return, init cycles — 0 ложных срабатывани�
 - [x] Шаг 1 — переключатели (2026-10-02). Отступления: строки «Source of …» на странице настроек появятся вместе с первой нативной фичей (8a) — на странице только то, за чем есть реализация; `GoFormatter.NATIVE` — на 8j по той же причине. Кастомайзеры дескриптора читают только настройку (`GoFeatures.configuredNative`), dumb-режим учитывают обработчики.
 - [x] Шаг 2 — единые `GoLanguage`/`GoFileType` (2026-10-02). Отступления: старый `lang.GoFile : PsiFileBase` оставлен под своим именем в `lang/GoFile.kt` (с `lang.psi.GoFile` не конфликтует, удаляется на шаге 4); палитра `GO_*` живёт в `go-psi-core` как `lang.GoColors` (ключи IGS дословно, компаньон `GoSyntaxHighlighter` — алиасы) — иначе аннотатору go-psi-ide не на что компилироваться; `GO_IDENTIFIER`/`GO_RUNE` не добавлены (PSI-подсветка их не требует после удаления); `GoIdeIcons` → `AllIcons.Nodes.*` как у `GoDeclarationIcons`; корень уже `pluginComposedModule(:go-psi-core)` (иначе `GoLanguage` не найти в рантайме) — остальное подключение на шаге 3.
 - [x] Шаг 3 — модули в плагине (2026-10-02): три `pluginComposedModule`, `plugin.xml` включает `go-psi-core.xml` (стабы, индексы) и `go-psi-semantic.xml` (сервисы); `go-psi-core-language.xml` (fileType, парсер, AST factory) — шаг 4; `go-psi-semantic-roots.xml` (`GoRootsProvider`, registry `gopsi.libraryRoots`) вынесен отдельно и **не включён** — решение по library roots на шаге 7; `go-psi-ide-{editor,formatter,navigation,refactoring,documentation,completion,inspections}.xml` — шаг 8. `verifyPlugin` — по локальной IDEA 2026.1.4 (`localIdePath`), падает только на несовместимостях; internal/override-only находки старого кода остаются в отчёте `build/reports/pluginVerifier`. Проверено: jar один (все классы PSI в нём), verdict «Compatible», песочница на playground: Structure, подсветка, gopls стартует, 0 «Plugin to blame: Go».
-- [ ] Шаг 4–5 — парсер.
+- [x] Шаг 4 — парсер (2026-10-02): `lang.parserDefinition` → `lang.parser.GoParserDefinition` (`go-psi-core-language.xml`), editor-фичи — `go-psi-ide-editor.xml`
+  (structure, breadcrumbs, folding, Go to Class/Symbol по stub-индексам, commenter, скобки, кавычки, find-usages provider); `GoPsi.kt` и старый `lang.GoFile` удалены,
+  мост `lang/GoDeclarationPsi` (+ `GoFileStructure.findByName`), `GoSyntaxHighlighter` на PSI-лексере, `GoIdentifierAnnotator` на PSI-листьях (директивы `//go:` красит он:
+  у PSI-лексера нет токена), gopls-обработчики целятся в `GoNamedElement`; старые goto-контрибьюторы и find-usages provider IGS удалены. Отличия от старого, видимые
+  роботом: заголовок метода в Structure без получателя (`Add(item Item)`), PSI-свёртка не сворачивает вложенные блоки тел и серии `//`-комментариев (старые `GoBlockFolds`/
+  `GoCommentRuns` — кандидаты на перенос в `ide.folding`, волна 11). Попутно: semantic tokens у gopls не спрашиваются для файлов > 100 000 байт (его лимит; иначе исключение платформы на каждый запрос).
+- [x] Шаг 5 — гейт (2026-10-02): `test buildPlugin checkKotlinAbi`, `verifyPlugin` (Compatible); `:go-psi-core:corpusTest` 0 расхождений, `:go-psi-semantic:corpusTest`
+  метрики без изменений; `benchmark`: core/semantic в допуске, у go-psi-ide `GoCompletionLatencyBenchmark` шумит на этой машине ±40 % в обе стороны (база `1a42af5` при повторе
+  подряд тоже вышла за порог, HEAD прошёл) — регресса от миграции нет, пороги не трогал; робот IGS (8083): structure.js, folds.js, markers.js (run, подтесты, implementations gopls),
+  targets.js, navigation.js (usages 4/7, implementations 2), Ctrl+B из `order_test.go` и `main.go`, Go to Symbol/Class, отступы, format on save, снимок редактора — цвета прежние,
+  0 «Plugin to blame: Go». `tools/psi-ui-robot/autotest.py --attach --perf` (порт 8084, минимально адаптирован к раскладке IGS): P8 `check()` warm 0.3 мс / после правки тела
+  соседа 0.6 мс (база 0.4), P9 53 МБ (база 45 МБ, с gopls в процессе), P6 первое открытие 1057 мс, P7 без GOROOT (roots не включены — шаг 7); P2–P5 падают по построению: completion,
+  документация, форматтер go-psi на шаге 4 не подключены (их даёт gopls), сценарий переписывается на шаге 10. Живая проверка пользователем — отдельно.
 - [ ] Шаг 6 — stub-индексы. [ ] Шаг 7 — project model, library roots.
 - [ ] 8a [ ] 8b [ ] 8c [ ] 8d [ ] 8e [ ] 8f [ ] 8g [ ] 8h [ ] 8i [ ] 8j.
 - [ ] Шаг 9, [ ] шаг 10, [ ] шаг 11.

@@ -8,12 +8,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.util.parentOfType
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoDeclaration
+import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoNamedElement
 import org.eclipse.lsp4j.Position
 import java.util.function.Supplier
 
@@ -31,19 +31,19 @@ class GoplsGotoSuperHandler : LanguageCodeInsightActionHandler {
         if (GoFeatures.native(GoFeature.NAVIGATION, project)) return
         val declaration = declarationAt(file, editor.caretModel.offset) ?: return
         val name = declaration.name ?: return
-        val title = if (declaration.kind == GoDeclarationKind.METHOD) "Interface Methods $name Implements" else "Interfaces $name Implements"
+        val title = if (GoDeclarationPsi.kindOf(declaration) == GoDeclarationKind.METHOD) "Interface Methods $name Implements" else "Interfaces $name Implements"
         PsiTargetNavigator(Supplier<Collection<PsiElement>> { targets(project, declaration) }).navigate(editor, title)
     }
 
-    private fun targets(project: Project, declaration: GoDeclaration): Collection<PsiElement> {
+    private fun targets(project: Project, declaration: GoNamedElement): Collection<PsiElement> {
         val (_, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> { GoplsTargets.of(declaration) } ?: return emptyList()
         val client = Gopls.client(project) ?: return emptyList()
         return Gopls.implementations(client, file, position, TIMEOUT_MS).mapNotNull { place -> ReadAction.compute<PsiElement?, RuntimeException> { Gopls.element(project, place) } }
     }
 
     /** The method, or the type, the caret is in: anywhere in its declaration, its body included. */
-    private fun declarationAt(file: PsiFile, offset: Int): GoDeclaration? =
-        file.findElementAt(offset)?.parentOfType<GoDeclaration>(withSelf = true)?.takeIf { it.kind == GoDeclarationKind.METHOD || it.kind.isType }
+    private fun declarationAt(file: PsiFile, offset: Int): GoNamedElement? =
+        GoDeclarationPsi.at(file, offset)?.takeIf { GoDeclarationPsi.kindOf(it).let { kind -> kind == GoDeclarationKind.METHOD || kind?.isType == true } }
 
     private companion object {
         const val TIMEOUT_MS = 15_000

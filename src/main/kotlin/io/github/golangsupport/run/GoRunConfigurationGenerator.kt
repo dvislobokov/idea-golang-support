@@ -14,7 +14,8 @@ import com.intellij.openapi.vfs.newvfs.RefreshQueue
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileVisitor
 import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoTestNames
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoSettings
 
@@ -53,7 +54,7 @@ class GoRunConfigurationGenerator(private val project: Project) {
                 override fun visitFile(file: VirtualFile): Boolean {
                     if (file.isDirectory) return file.name !in SKIPPED_DIRECTORIES && !file.name.startsWith(".") && !file.name.startsWith("_")
                     val directory = file.parent ?: return true
-                    if (file.extension != "go" || file.name.endsWith(GoFile.TEST_SUFFIX) || directory in programs || programs.size >= MAX_TARGETS) return true
+                    if (file.extension != "go" || file.name.endsWith(GoTestNames.TEST_SUFFIX) || directory in programs || programs.size >= MAX_TARGETS) return true
                     val text = runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: return true
                     if (isProgram(text)) programs += directory
                     return true

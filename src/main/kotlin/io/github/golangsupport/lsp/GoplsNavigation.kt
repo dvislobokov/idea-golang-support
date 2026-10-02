@@ -24,11 +24,11 @@ import com.intellij.usages.UsageInfo2UsageAdapter
 import com.intellij.util.Processor
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoDeclaration
+import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoFile
-import io.github.golangsupport.lang.GoFindUsagesProvider
-import io.github.golangsupport.lang.GoTextTokens
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoNamedElement
+import io.github.golangsupport.lang.psi.GoTypes
 import io.github.golangsupport.lint.GoSignatureProvider
 import io.github.golangsupport.lint.GoSignatures
 import com.intellij.openapi.util.TextRange
@@ -145,7 +145,7 @@ object Gopls {
     /** The PSI element of a place: the declaration, when the place is the name of one (it presents itself better), otherwise the token. */
     fun element(project: Project, place: Place): PsiElement? {
         val leaf = PsiManager.getInstance(project).findFile(place.file)?.findElementAt(place.startOffset) ?: return null
-        return (leaf.parent as? GoDeclaration)?.takeIf { it.nameIdentifier == leaf } ?: leaf
+        return GoDeclarationPsi.ofName(leaf) ?: leaf
     }
 }
 
@@ -165,7 +165,7 @@ class GoplsSignatureProvider : GoSignatureProvider {
  */
 class GoplsGotoDeclarationHandler : GotoDeclarationHandler {
     override fun getGotoDeclarationTargets(sourceElement: PsiElement?, offset: Int, editor: Editor): Array<PsiElement>? {
-        val element = sourceElement?.takeIf { it.containingFile is GoFile && it.node?.elementType == GoTextTokens.IDENTIFIER } ?: return null
+        val element = sourceElement?.takeIf { it.containingFile is GoFile && it.node?.elementType == GoTypes.IDENTIFIER } ?: return null
         val project = element.project
         if (GoFeatures.native(GoFeature.NAVIGATION, project)) return null
         val file = element.containingFile.virtualFile ?: return null
@@ -190,7 +190,10 @@ class GoplsUsageSearcher : CustomUsageSearcher() {
     override fun processElementUsages(element: PsiElement, processor: Processor<in Usage>, options: FindUsagesOptions) {
         // called on a background thread without a read action (seen live): everything about the element is read in one
         val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> {
-            if (element is GoDeclaration || GoFindUsagesProvider.isLocalName(element)) GoplsTargets.of(element) else null
+            // a local comes as its PSI definition (the Find Usages provider of the PSI takes named elements) or as a bare token
+            val accepted = GoDeclarationPsi.declaration(element) != null || GoDeclarationPsi.isLocalName(element) ||
+                element is GoNamedElement && element.nameIdentifier?.let(GoDeclarationPsi::isLocalName) == true
+            if (accepted) GoplsTargets.of(element) else null
         } ?: return
         if (GoFeatures.native(GoFeature.USAGES, project)) return
         val client = Gopls.client(project) ?: return
@@ -211,9 +214,10 @@ class GoplsUsageSearcher : CustomUsageSearcher() {
 class GoplsImplementationSearch : QueryExecutorBase<PsiElement, DefinitionsScopedSearch.SearchParameters>() {
     override fun processQuery(parameters: DefinitionsScopedSearch.SearchParameters, consumer: Processor<in PsiElement>) {
         if (GoFeatures.native(GoFeature.NAVIGATION, parameters.project)) return
-        val declaration = parameters.element as? GoDeclaration ?: return
-        // gopls answers a question about a plain function, a field or a value with an error, which the platform logs as a warning
-        if (declaration.kind !in WITH_IMPLEMENTATIONS) return
+        val declaration = ReadAction.compute<GoNamedElement?, RuntimeException> {
+            // gopls answers a question about a plain function, a field or a value with an error, which the platform logs as a warning
+            GoDeclarationPsi.declaration(parameters.element)?.takeIf { GoDeclarationPsi.kindOf(it) in WITH_IMPLEMENTATIONS }
+        } ?: return
         val (project, file, position) = ReadAction.compute<Triple<Project, VirtualFile, Position>?, RuntimeException> { GoplsTargets.of(declaration) } ?: return
         val client = Gopls.client(project) ?: return
         for (place in Gopls.implementations(client, file, position, TIMEOUT_MS)) {
@@ -229,11 +233,11 @@ class GoplsImplementationSearch : QueryExecutorBase<PsiElement, DefinitionsScope
 }
 
 object GoplsTargets {
-    /** The project, the file and the position of the name of a declaration (or of a bare identifier): what a request about it is made with. Needs read access. */
+    /** The project, the file and the position of the name of a named element (or of a bare identifier): what a request about it is made with. Needs read access. */
     fun of(element: PsiElement): Triple<Project, VirtualFile, Position>? {
         if (!element.isValid) return null
         val file = element.containingFile?.virtualFile ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
-        return Triple(element.project, file, Gopls.position(document, element.textOffset))
+        return Triple(element.project, file, Gopls.position(document, GoDeclarationPsi.nameOffset(element)))
     }
 }

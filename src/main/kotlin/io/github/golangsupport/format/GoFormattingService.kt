@@ -8,7 +8,7 @@ import com.intellij.psi.PsiFile
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.settings.GoFormatter
 import io.github.golangsupport.settings.GoSettings
 import java.io.File

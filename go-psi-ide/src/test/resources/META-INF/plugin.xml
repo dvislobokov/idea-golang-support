@@ -21,4 +21,7 @@
     <!-- The plugin's highlighter is the root module's; editor features under test need one over the PSI lexer. -->
     <lang.syntaxHighlighterFactory language="Go" implementationClass="io.github.golangsupport.ide.GoTestSyntaxHighlighterFactory"/>
   </extensions>
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType name="Go" language="Go" extensions="go" implementationClass="io.github.golangsupport.lang.GoFileType" fieldName="INSTANCE"/>
+  </extensions>
 </idea-plugin>

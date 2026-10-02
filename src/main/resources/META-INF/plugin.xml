@@ -28,6 +28,10 @@
          (go-psi-ide-*.xml, one per feature at step 8) -->
     <xi:include href="/META-INF/go-psi-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/go-psi-semantic.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- the parser, PSI and lexer of go-psi-core (MIGRATION.md step 4); the stub indices of go-psi-core.xml fill up from here on -->
+    <xi:include href="/META-INF/go-psi-core-language.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- editor features over that PSI: structure, breadcrumbs, folding, Go to Class / Symbol, commenter, braces, quotes, find-usages words -->
+    <xi:include href="/META-INF/go-psi-ide-editor.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->
@@ -44,24 +48,14 @@
         <!-- *_test.go are tests: the "Tests" scope of the platform, and with it the green background in the tree and the tabs -->
         <testSourcesFilter implementation="io.github.golangsupport.testing.GoTestSourcesFilter"/>
 
-        <lang.parserDefinition language="Go" implementationClass="io.github.golangsupport.lang.GoParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Go" implementationClass="io.github.golangsupport.lang.GoSyntaxHighlighterFactory"/>
         <annotator language="Go" implementationClass="io.github.golangsupport.lang.GoIdentifierAnnotator"/>
         <!-- on the declarations GoDeclarations finds by tokens -->
-        <lang.psiStructureViewFactory language="Go" implementationClass="io.github.golangsupport.lang.GoStructureViewFactory"/>
-        <breadcrumbsInfoProvider implementation="io.github.golangsupport.lang.GoBreadcrumbsProvider"/>
-        <lang.foldingBuilder language="Go" implementationClass="io.github.golangsupport.lang.GoFoldingBuilder"/>
         <testFinder implementation="io.github.golangsupport.lang.GoTestFinder"/>
         <testCreator language="Go" implementationClass="io.github.golangsupport.lang.GoTestCreator"/>
         <fileBasedIndex implementation="io.github.golangsupport.lang.GoDeclarationIndex"/>
         <!-- what every file of the project exports: the packages of the project in the catalogue of completion -->
         <fileBasedIndex implementation="io.github.golangsupport.catalogue.GoExportsIndex"/>
-        <lang.findUsagesProvider language="Go" implementationClass="io.github.golangsupport.lang.GoFindUsagesProvider"/>
-        <gotoClassContributor implementation="io.github.golangsupport.lang.GoGotoClassContributor"/>
-        <gotoSymbolContributor implementation="io.github.golangsupport.lang.GoGotoSymbolContributor"/>
-        <lang.commenter language="Go" implementationClass="io.github.golangsupport.lang.GoCommenter"/>
-        <lang.braceMatcher language="Go" implementationClass="io.github.golangsupport.lang.GoBraceMatcher"/>
-        <lang.quoteHandler language="Go" implementationClass="io.github.golangsupport.lang.GoQuoteHandler"/>
         <!-- indentation while typing, the way gofmt would have it; whole files are formatted by gofmt itself -->
         <lineIndentProvider implementation="io.github.golangsupport.lang.GoLineIndentProvider"/>
         <enterHandlerDelegate order="first" implementation="io.github.golangsupport.lang.GoEnterBetweenBracketsHandler"/>

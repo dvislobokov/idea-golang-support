@@ -9,4 +9,7 @@
   <xi:include href="/META-INF/go-psi-core-language.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-semantic.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-semantic-roots.xml" xpointer="xpointer(/idea-plugin/*)"/>
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType name="Go" language="Go" extensions="go" implementationClass="io.github.golangsupport.lang.GoFileType" fieldName="INSTANCE"/>
+  </extensions>
 </idea-plugin>

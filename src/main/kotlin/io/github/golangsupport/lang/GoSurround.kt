@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * Surround With (Ctrl+Alt+T), by the text: whole lines go into a block with one more level of indentation, a piece of a line into

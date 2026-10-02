@@ -1,6 +1,5 @@
 package io.github.golangsupport.lang
 
-import com.intellij.codeInsight.editorActions.SimpleTokenSetQuoteHandler
 import com.intellij.codeInsight.template.Expression
 import com.intellij.codeInsight.template.ExpressionContext
 import com.intellij.codeInsight.template.Result
@@ -8,69 +7,13 @@ import com.intellij.codeInsight.template.TemplateActionContext
 import com.intellij.codeInsight.template.TemplateContextType
 import com.intellij.codeInsight.template.TextResult
 import com.intellij.codeInsight.template.macro.MacroBase
-import com.intellij.lang.ASTNode
-import com.intellij.lang.BracePair
-import com.intellij.lang.Commenter
-import com.intellij.lang.PairedBraceMatcher
-import com.intellij.lang.folding.FoldingBuilderEx
-import com.intellij.lang.folding.FoldingDescriptor
-import com.intellij.openapi.editor.Document
-import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
-import com.intellij.psi.tree.IElementType
-
-class GoCommenter : Commenter {
-    override fun getLineCommentPrefix(): String = "//"
-    override fun getBlockCommentPrefix(): String = "/*"
-    override fun getBlockCommentSuffix(): String = "*/"
-    override fun getCommentedBlockCommentPrefix(): String? = null
-    override fun getCommentedBlockCommentSuffix(): String? = null
-}
-
-class GoBraceMatcher : PairedBraceMatcher {
-    override fun getPairs(): Array<BracePair> = PAIRS
-    override fun isPairedBracesAllowedBeforeType(lbraceType: IElementType, contextType: IElementType?): Boolean = true
-    override fun getCodeConstructStart(file: PsiFile, openingBraceOffset: Int): Int = openingBraceOffset
-
-    private companion object {
-        val PAIRS = arrayOf(
-            BracePair(GoTextTokens.LBRACE, GoTextTokens.RBRACE, true),
-            BracePair(GoTextTokens.LPAREN, GoTextTokens.RPAREN, false),
-            BracePair(GoTextTokens.LBRACKET, GoTextTokens.RBRACKET, false),
-        )
-    }
-}
-
-class GoQuoteHandler : SimpleTokenSetQuoteHandler(GoTextTokens.STRING, GoTextTokens.RAW_STRING, GoTextTokens.CHAR)
-
-/** Function bodies, struct and interface bodies, the groups of `import (...)` / `const (...)`, block comments and runs of line comments. */
-class GoFoldingBuilder : FoldingBuilderEx(), DumbAware {
-    override fun buildFoldRegions(root: PsiElement, document: Document, quick: Boolean): Array<FoldingDescriptor> {
-        val file = root.containingFile ?: return FoldingDescriptor.EMPTY_ARRAY
-        val structure = GoStructure.of(file)
-        val result = ArrayList<FoldingDescriptor>()
-        fun add(range: TextRange, placeholder: String) {
-            val valid = range.endOffset <= document.textLength && range.length > 1 && document.getLineNumber(range.startOffset) != document.getLineNumber(range.endOffset)
-            if (valid) result += FoldingDescriptor(root.node, range, null, placeholder)
-        }
-        structure.all().mapNotNull { it.body }.forEach { add(it, "{...}") }
-        val text = document.immutableCharSequence
-        structure.declarations.filter { it.kind == GoDeclarationKind.FUNCTION || it.kind == GoDeclarationKind.METHOD }.mapNotNull { it.body }
-            .forEach { body -> GoBlockFolds.find(text, body).forEach { add(it, "{...}") } }
-        structure.groups.forEach { add(it, "(...)") }
-        GoCommentRuns.find(document.immutableCharSequence).forEach { (range, placeholder) -> add(range, placeholder) }
-        return result.toTypedArray()
-    }
-
-    override fun getPlaceholderText(node: ASTNode): String = "..."
-    override fun isCollapsedByDefault(node: ASTNode): Boolean = false
-}
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * The braces inside the body of a function: `if`, `for`, `switch`, `select`, a function literal, a composite literal. Every pair but
- * the body itself; which of them fold is for the caller to decide by their lines.
+ * the body itself; which of them fold is for the caller to decide by their lines. The folding of the editor is the PSI builder of
+ * go-psi-ide since step 4 of MIGRATION.md; this text scan stays with its test until step 6 retires the scanner.
  */
 object GoBlockFolds {
     fun find(text: CharSequence, body: TextRange): List<TextRange> {
@@ -87,49 +30,6 @@ object GoBlockFolds {
         }
         return result.sortedBy { it.startOffset }
     }
-}
-
-/** What of the comments folds: every block comment, and two or more line comments in a row that have their lines to themselves. */
-object GoCommentRuns {
-    fun find(text: CharSequence): List<Pair<TextRange, String>> {
-        val result = ArrayList<Pair<TextRange, String>>()
-        val lexer = GoTextLexer()
-        lexer.start(text, 0, text.length, 0)
-        var runStart = -1
-        var runEnd = -1
-        var runLines = 0
-        fun flush() {
-            if (runLines > 1) result += TextRange(runStart, runEnd) to "//..."
-            runLines = 0
-        }
-        while (true) {
-            val type = lexer.tokenType ?: break
-            when {
-                type == GoTextTokens.LINE_COMMENT && ownsLine(text, lexer.tokenStart) -> {
-                    if (runLines == 0) runStart = lexer.tokenStart
-                    runEnd = lexer.tokenEnd
-                    runLines++
-                }
-                // a blank line between two comments ends the run, a line break does not
-                type == com.intellij.psi.TokenType.WHITE_SPACE -> if (lineBreaks(text, lexer.tokenStart, lexer.tokenEnd) > 1) flush()
-                else -> {
-                    flush()
-                    if (type == GoTextTokens.BLOCK_COMMENT) result += TextRange(lexer.tokenStart, lexer.tokenEnd) to "/*...*/"
-                }
-            }
-            lexer.advance()
-        }
-        flush()
-        return result
-    }
-
-    private fun ownsLine(text: CharSequence, offset: Int): Boolean {
-        var i = offset - 1
-        while (i >= 0 && text[i] != '\n') if (!text[i--].isWhitespace()) return false
-        return true
-    }
-
-    private fun lineBreaks(text: CharSequence, from: Int, to: Int): Int = (from until to).count { text[it] == '\n' }
 }
 
 /**

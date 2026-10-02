@@ -18,7 +18,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoTool
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoReorderFieldsIntention
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoSettings

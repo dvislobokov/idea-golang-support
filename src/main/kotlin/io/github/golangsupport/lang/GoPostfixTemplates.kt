@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * `expr.if`, `err.nil`, `items.for`, `value.return`, `call.var`: the postfix templates of GoLand, by text. The expression is what stands

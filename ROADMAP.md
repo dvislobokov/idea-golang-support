@@ -6,6 +6,7 @@
 - [x] Лексер, подсветка, директивы `//go:`, страница цветов — робот
 - [x] Аннотатор: встроенные типы / константы / функции, имена объявлений, вызовы — робот
 - [x] Сканер объявлений → PSI, Structure view, breadcrumbs — робот
+- [x] (2026-10-02) Свой парсер Go (go-psi) вместо сканера-псевдо-PSI: Structure, breadcrumbs, folding, Go to Class / Symbol (stub-индексы), commenter, скобки, кавычки — из `go-psi-ide`; сканер остался текстовым инструментом за мостом `GoDeclarationPsi` (`MIGRATION.md`, шаги 4–5) — робот, вживую не проверено
 - [x] Folding (тела, группы, комментарии), Go to Class / Symbol, commenter, скобки, кавычки — проверено пользователем (2026-09-30)
 - [x] Live templates (`err`, `errw`, `forr`, `fori`, `main`, `meth`, `test`, `ttest`, `bench`, `gof`, `deff`, `sel`, `pf`, `json`) — проверено пользователем (2026-09-30)
 - [x] Отступы при наборе как у gofmt (`GoIndentEngine`: уровень на строку с открытыми скобками, `case` на уровне `switch`, продолжение выражения), Enter между скобками, Code Style | Go (табы) — робот

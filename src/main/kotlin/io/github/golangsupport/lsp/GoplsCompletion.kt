@@ -21,7 +21,7 @@ import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoExpectedTypes
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoSnippets
 import io.github.golangsupport.lang.GoStructLiterals
 import io.github.golangsupport.settings.GoSettings

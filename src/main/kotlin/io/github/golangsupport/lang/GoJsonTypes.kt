@@ -20,6 +20,7 @@ import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.panel
 import java.awt.datatransfer.DataFlavor
 import javax.swing.JComponent
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * Go types for a JSON document, the way GoLand's "type from JSON" writes them: a struct per object, named after its key, with

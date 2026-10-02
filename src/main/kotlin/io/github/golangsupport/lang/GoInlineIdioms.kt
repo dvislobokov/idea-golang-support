@@ -10,6 +10,7 @@ import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSin
 import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSuggestion
 import com.intellij.openapi.application.readAction
 import io.github.golangsupport.settings.GoSettings
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * [GoIdioms] as grey text at the caret: Enter after `f, err := os.Open(name)` shows `if err != nil { return nil, err }`, Tab accepts it,

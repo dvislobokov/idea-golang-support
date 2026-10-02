@@ -15,7 +15,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.psi.PsiFile
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lint.GoLintOutput
 import io.github.golangsupport.settings.GoLanguageServerControl
 import io.github.golangsupport.settings.GoSettings

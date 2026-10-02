@@ -10,10 +10,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoDeclaration
-import io.github.golangsupport.lang.GoFile
-import io.github.golangsupport.lang.GoFindUsagesProvider
-import io.github.golangsupport.lang.GoTextTokens
+import io.github.golangsupport.lang.GoDeclarationPsi
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoNamedElement
+import io.github.golangsupport.lang.psi.GoTypes
 import org.eclipse.lsp4j.Position
 
 /**
@@ -23,16 +23,17 @@ import org.eclipse.lsp4j.Position
 class GoplsTargetElementEvaluator : TargetElementEvaluatorEx2() {
     override fun getNamedElement(element: PsiElement): PsiElement? {
         if (GoFeatures.native(GoFeature.NAVIGATION, element.project)) return null
-        if (element.containingFile !is GoFile || element.elementType != GoTextTokens.IDENTIFIER) return null
-        (element.parent as? GoDeclaration)?.takeIf { it.nameIdentifier == element }?.let { return it }
+        if (element.containingFile !is GoFile || element.elementType != GoTypes.IDENTIFIER) return null
+        GoDeclarationPsi.namedOf(element)?.let { return it }
         val file = element.containingFile.virtualFile ?: return null
         val client = Gopls.client(element.project) ?: return null
         val document = FileDocumentManager.getInstance().getDocument(file) ?: return null
         val place = Gopls.definition(client, file, Gopls.position(document, element.textRange.startOffset), TIMEOUT_MS).firstOrNull() ?: return null
-        // a declaration of the file structure, or the identifier that declares a local: Find Usages accepts both (GoFindUsagesProvider);
+        // a declaration of the file structure, or the PSI definition of a local: the Find Usages provider of the PSI takes named elements;
         // a package name leads to a directory or a package clause, which is no target to search from
         val target = Gopls.element(element.project, place) ?: return null
-        return target as? GoDeclaration ?: target.takeIf { GoFindUsagesProvider.isLocalName(it) && it.containingFile == element.containingFile }
+        GoDeclarationPsi.declaration(target)?.let { return it }
+        return target.takeIf { GoDeclarationPsi.isLocalName(it) && it.containingFile == element.containingFile }?.let { GoDeclarationPsi.namedOf(it) ?: it }
     }
 
     private companion object {
@@ -44,7 +45,7 @@ class GoplsTargetElementEvaluator : TargetElementEvaluatorEx2() {
 class GoplsTypeDeclarationProvider : TypeDeclarationProvider {
     override fun getSymbolTypeDeclarations(symbol: PsiElement): Array<PsiElement>? {
         if (GoFeatures.native(GoFeature.NAVIGATION, symbol.project)) return null
-        val leaf = if (symbol is GoDeclaration) symbol.nameIdentifier else symbol
+        val leaf = if (symbol is GoNamedElement) symbol.nameIdentifier else symbol
         if (leaf == null || leaf.containingFile !is GoFile) return null
         val file = leaf.containingFile.virtualFile ?: return null
         val client = Gopls.client(leaf.project) ?: return null
@@ -62,7 +63,7 @@ class GoplsTypeDeclarationProvider : TypeDeclarationProvider {
 class GoplsExpressionTypeProvider : ExpressionTypeProvider<PsiElement>() {
     override fun getExpressionsAt(elementAt: PsiElement): List<PsiElement> = when {
         GoFeatures.native(GoFeature.HOVER, elementAt.project) -> emptyList()
-        elementAt.containingFile is GoFile && elementAt.elementType == GoTextTokens.IDENTIFIER -> listOf(elementAt)
+        elementAt.containingFile is GoFile && elementAt.elementType == GoTypes.IDENTIFIER -> listOf(elementAt)
         else -> emptyList()
     }
 

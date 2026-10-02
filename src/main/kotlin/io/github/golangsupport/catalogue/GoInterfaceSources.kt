@@ -7,7 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoFileStructure
 import io.github.golangsupport.lang.GoImports
 import io.github.golangsupport.lang.GoInterfaceMethod

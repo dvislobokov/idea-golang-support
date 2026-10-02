@@ -47,7 +47,8 @@ import com.intellij.util.ui.tree.TreeUtil
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoTestNames
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.run.GoRunLauncher
 import java.awt.event.MouseEvent
@@ -79,7 +80,7 @@ object GoTestExplorerModel {
             VfsUtilCore.visitChildrenRecursively(root, object : VirtualFileVisitor<Unit>() {
                 override fun visitFile(file: VirtualFile): Boolean {
                     if (file.isDirectory) return file.name !in SKIPPED_DIRECTORIES && !file.name.startsWith("_")
-                    if (!file.name.endsWith(GoFile.TEST_SUFFIX)) return true
+                    if (!file.name.endsWith(GoTestNames.TEST_SUFFIX)) return true
                     val text = runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: return true
                     val directory = file.parent ?: return true
                     GoTests.find(GoDeclarations.scan(text), file.name).mapTo(byDirectory.getOrPut(directory) { ArrayList() }) { (declaration, kind) -> DiscoveredGoTest(declaration, kind, file, directory) }
@@ -196,7 +197,7 @@ private class GoTestExplorerPanel(private val project: Project, toolWindow: Tool
         val connection = project.messageBus.connect(toolWindow.disposable)
         connection.subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
             override fun after(events: List<VFileEvent>) {
-                if (events.any { it.path.endsWith(GoFile.TEST_SUFFIX) }) reloadAlarm.cancelAndRequest()
+                if (events.any { it.path.endsWith(GoTestNames.TEST_SUFFIX) }) reloadAlarm.cancelAndRequest()
             }
         })
         connection.subscribe(FileDocumentManagerListener.TOPIC, object : FileDocumentManagerListener {
@@ -289,7 +290,7 @@ object GoAutoTest {
             ApplicationManager.getApplication().invokeLater({
                 if (project.isDisposed || !directory.isValid) return@invokeLater
                 // a package without tests: nothing to run, and `go test` would only say so
-                if (directory.children.none { it.name.endsWith(GoFile.TEST_SUFFIX) }) return@invokeLater
+                if (directory.children.none { it.name.endsWith(GoTestNames.TEST_SUFFIX) }) return@invokeLater
                 GoRunLauncher.runTests(project, directory.path, "go test ${directory.name}", null, benchmark = false)
             }, ModalityState.nonModal())
         }, 1500, TimeUnit.MILLISECONDS)

@@ -60,7 +60,7 @@ import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoSemanticColors
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
@@ -205,7 +205,7 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         override val goToDefinitionCustomizer: LspGoToDefinitionCustomizer get() = LspGoToDefinitionDisabled
 
         /**
-         * Folding is [io.github.golangsupport.lang.GoFoldingBuilder]: bodies, blocks inside them, groups, comments. The regions of gopls
+         * Folding is [io.github.golangsupport.ide.folding.GoFoldingBuilder]: bodies, blocks inside them, groups, comments. The regions of gopls
          * would come on top of the same ranges (seen live: every body twice, `{...}` and `...`), plus ones of a single line for parameters.
          */
         override val foldingRangeCustomizer: LspFoldingRangeCustomizer get() = LspFoldingRangeDisabled
@@ -216,7 +216,9 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
          * Follows [GoFeature.SEMANTIC_COLORS].
          */
         override val semanticTokensCustomizer: LspSemanticTokensCustomizer = if (native(GoFeature.SEMANTIC_COLORS)) LspSemanticTokensDisabled else object : LspSemanticTokensSupport() {
-            override fun shouldAskServerForSemanticTokens(psiFile: PsiFile): Boolean = psiFile is GoFile
+            // gopls refuses the request for a file above 100 000 bytes ("semantic tokens: range ... too large", seen live on a 140 KB
+            // net/http/server.go); the platform reports every refusal as an unhandled exception, so such a file keeps the lexer colours
+            override fun shouldAskServerForSemanticTokens(psiFile: PsiFile): Boolean = psiFile is GoFile && psiFile.textLength <= GOPLS_SEMANTIC_TOKENS_MAX_BYTES
             override val tokenModifiers: List<String> get() = super.tokenModifiers + GoSemanticColors.MODIFIERS
             override fun getTextAttributesKey(tokenType: String, modifiers: List<String>): TextAttributesKey? = GoSemanticColors.key(tokenType, modifiers)
         }
@@ -264,6 +266,9 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
     /** gopls asks for the section `gopls` after `workspace/didChangeConfiguration`. */
     override fun getWorkspaceConfiguration(item: ConfigurationItem): Any? = if (item.section == "gopls") GoplsOptions.build(GoSettings.getInstance()) else null
 }
+
+/** `maxFullFileSize` of gopls (golang.org/x/tools/gopls/internal/golang/semtok.go): a bigger file gets an error instead of tokens. */
+const val GOPLS_SEMANTIC_TOKENS_MAX_BYTES = 100_000
 
 /** The arguments of `gopls serve`, from the settings; pure, for the tests. */
 object GoplsServerArguments {

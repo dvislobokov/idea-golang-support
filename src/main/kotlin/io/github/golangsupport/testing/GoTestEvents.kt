@@ -5,7 +5,8 @@ import com.google.gson.JsonParser
 import com.intellij.execution.testframework.sm.ServiceMessageBuilder
 import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoTestNames
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoFileStructure
 
 enum class GoTestKind(val prefix: String) { TEST("Test"), BENCHMARK("Benchmark"), FUZZ("Fuzz"), EXAMPLE("Example") }
@@ -17,7 +18,7 @@ object GoTests {
     }
 
     fun kindOf(declaration: GoDeclarationInfo, fileName: String): GoTestKind? =
-        if (declaration.kind == GoDeclarationKind.FUNCTION && fileName.endsWith(GoFile.TEST_SUFFIX)) kindOf(declaration.name) else null
+        if (declaration.kind == GoDeclarationKind.FUNCTION && fileName.endsWith(GoTestNames.TEST_SUFFIX)) kindOf(declaration.name) else null
 
     fun find(structure: GoFileStructure, fileName: String): List<Pair<GoDeclarationInfo, GoTestKind>> =
         structure.declarations.mapNotNull { declaration -> kindOf(declaration, fileName)?.let { declaration to it } }

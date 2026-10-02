@@ -5,6 +5,13 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, steps 4-5 (MIGRATION.md)
+- The host plugin registers this parser and the editor descriptor (`go-psi-ide-editor.xml`); the file type is the host's
+  (the test descriptors of the modules register it themselves, `go-psi-core-language.xml` no longer does).
+- `tools/psi-ui-robot`: the robot accepts this repository's sandbox (`idea-golang-support` in the config path), `autotest.py`
+  reads the sandbox log of this repository (`GOPSI_SANDBOX_LOG` overrides). The scenario still assumes go-psi completion,
+  documentation and formatter, which the host wires at step 8; P1/P6/P8/P9 are comparable now, P7 after step 7 (library roots).
+
 ### 2026-10-02 - Transplant into idea-golang-support, step 3 (MIGRATION.md)
 - Descriptors split by what the host includes when: `go-psi-core.xml` (stub types, stub and file indices) and
   `go-psi-core-language.xml` (file type, parser, AST factory); `go-psi-semantic.xml` (services) and

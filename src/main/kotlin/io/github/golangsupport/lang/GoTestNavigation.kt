@@ -6,16 +6,19 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.util.parentOfType
 import com.intellij.testIntegration.TestCreator
 import com.intellij.testIntegration.TestFinder
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoNamedElement
 
 /** How the tests of Go are named after what they test: `x_test.go` for `x.go`, `TestF` and `TestT_F` for `F` and `(T) F`. Pure. */
 object GoTestNames {
+    const val TEST_SUFFIX = "_test.go"
+
     private val PREFIXES = listOf("Test", "Benchmark", "Example", "Fuzz")
 
-    fun testFileName(fileName: String): String = fileName.removeSuffix(".go") + GoFile.TEST_SUFFIX
-    fun sourceFileName(testFileName: String): String = testFileName.removeSuffix(GoFile.TEST_SUFFIX) + ".go"
+    fun testFileName(fileName: String): String = fileName.removeSuffix(".go") + TEST_SUFFIX
+    fun sourceFileName(testFileName: String): String = testFileName.removeSuffix(TEST_SUFFIX) + ".go"
 
     /**
      * Whether [testName] tests [name] (a method of [receiver]): `TestF`, `Test_f` (gotests writes it so for an unexported name),
@@ -50,15 +53,18 @@ object GoTestNames {
  * tests. Without a test file the platform offers to create one: [GoTestCreator], the Generate Test of the plugin.
  */
 class GoTestFinder : TestFinder {
-    override fun findSourceElement(from: PsiElement): PsiElement? =
-        from.parentOfType<GoDeclaration>(withSelf = true)?.takeIf { it.kind == GoDeclarationKind.FUNCTION || it.kind == GoDeclarationKind.METHOD } ?: from.containingFile as? GoFile
+    override fun findSourceElement(from: PsiElement): PsiElement? {
+        val file = from.containingFile as? GoFile ?: return null
+        val declaration = if (from is GoFile) null else GoDeclarationPsi.at(file, from.textRange.startOffset)
+        return declaration?.takeIf { GoDeclarationPsi.kindOf(it).let { kind -> kind == GoDeclarationKind.FUNCTION || kind == GoDeclarationKind.METHOD } } ?: file
+    }
 
     override fun isTest(element: PsiElement): Boolean = (element.containingFile as? GoFile)?.isTestFile == true
 
     override fun findTestsForClass(element: PsiElement): Collection<PsiElement> {
         val file = element.containingFile as? GoFile ?: return emptyList()
         val testFile = sibling(file, GoTestNames.testFileName(file.name)) ?: return emptyList()
-        val info = (element as? GoDeclaration)?.info ?: return listOf(testFile)
+        val info = GoDeclarationPsi.infoOf(element) ?: return listOf(testFile)
         val tests = declarations(testFile).filter { it.first.kind == GoDeclarationKind.FUNCTION && GoTestNames.isTestOf(it.first.name, info.name, info.receiver) }
         return tests.map { it.second }.ifEmpty { listOf(testFile) }
     }
@@ -66,7 +72,7 @@ class GoTestFinder : TestFinder {
     override fun findClassesForTest(element: PsiElement): Collection<PsiElement> {
         val file = element.containingFile as? GoFile ?: return emptyList()
         val source = sibling(file, GoTestNames.sourceFileName(file.name)) ?: return emptyList()
-        val info = (element as? GoDeclaration)?.info ?: return listOf(source)
+        val info = GoDeclarationPsi.infoOf(element) ?: return listOf(source)
         val subjects = GoTestNames.subjectsOf(info.name)
         val found = declarations(source).filter { (d, _) ->
             subjects.any { (name, receiver) -> d.name == name && (receiver == null && d.kind == GoDeclarationKind.FUNCTION || receiver != null && d.kind == GoDeclarationKind.METHOD && d.receiver == receiver) }
@@ -80,8 +86,8 @@ class GoTestFinder : TestFinder {
         file.virtualFile?.parent?.findChild(name)?.let { PsiManager.getInstance(file.project).findFile(it) as? GoFile }
 
     /** The top-level functions and methods of a file with their PSI elements. */
-    private fun declarations(file: GoFile): List<Pair<GoDeclarationInfo, GoDeclaration>> =
-        GoStructure.of(file).declarations.mapNotNull { info -> file.findElementAt(info.nameRange.startOffset)?.parentOfType<GoDeclaration>(withSelf = true)?.let { info to it } }
+    private fun declarations(file: GoFile): List<Pair<GoDeclarationInfo, GoNamedElement>> =
+        GoStructure.of(file).declarations.mapNotNull { info -> GoDeclarationPsi.psiOf(file, info)?.let { info to it } }
 }
 
 /** "Create New Test" of Navigate | Test when there is none: the table-driven test of Alt+Insert. */

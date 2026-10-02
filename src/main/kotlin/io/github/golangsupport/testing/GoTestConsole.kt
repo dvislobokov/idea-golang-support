@@ -33,7 +33,8 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
 import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoTestNames
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.monitor.GoProfile
 import io.github.golangsupport.monitor.GoProfileServers
@@ -130,7 +131,7 @@ object GoTestLocator : SMTestLocator {
         if (test.isEmpty()) return listOfNotNull(psiManager.findDirectory(directory)?.let { PsiLocation(it) })
         val function = test.substringBefore('/')
         val subtest = test.substringAfter('/', "").substringBefore('/')
-        for (file in directory.children.filter { it.name.endsWith(GoFile.TEST_SUFFIX) }) {
+        for (file in directory.children.filter { it.name.endsWith(GoTestNames.TEST_SUFFIX) }) {
             val text = runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: continue
             val declaration = GoDeclarations.scan(text).declarations.firstOrNull { it.name == function && it.receiver == null } ?: continue
             val psiFile = psiManager.findFile(file) ?: continue

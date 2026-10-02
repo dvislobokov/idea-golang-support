@@ -7,6 +7,7 @@ import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.settings.GoSettings
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * Complete Statement (Ctrl+Shift+Enter): the braces of an `if`, `for`, `switch`, `select`, `func`, `struct`, `interface` that has none

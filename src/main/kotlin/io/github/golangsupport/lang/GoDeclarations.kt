@@ -1,6 +1,9 @@
 package io.github.golangsupport.lang
 
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiFile
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
 
@@ -45,6 +48,13 @@ class GoDeclarationInfo(
 
 class GoImport(val path: String, val alias: String?, val range: TextRange)
 
+/** The declarations of a file as [GoDeclarations] sees its current text; scanned once per change. */
+object GoStructure {
+    fun of(file: PsiFile): GoFileStructure = CachedValuesManager.getCachedValue(file) {
+        CachedValueProvider.Result.create(GoDeclarations.scan(file.viewProvider.contents), file)
+    }
+}
+
 class GoFileStructure(
     val packageName: String?,
     val imports: List<GoImport>,
@@ -70,6 +80,11 @@ class GoFileStructure(
         }
     }
     private val byStart: Map<Pair<Int, GoDeclarationKind>, GoDeclarationInfo> by lazy { flat.associateBy { it.range.startOffset to it.kind } }
+
+    /** By the offset of the name: how a PSI declaration finds its info ([GoDeclarationPsi]), its own start being the doc comment. */
+    fun findByName(nameOffset: Int, kind: GoDeclarationKind): GoDeclarationInfo? = byName[nameOffset to kind]
+
+    private val byName: Map<Pair<Int, GoDeclarationKind>, GoDeclarationInfo> by lazy { flat.associateBy { it.nameRange.startOffset to it.kind } }
 
     val isMainPackage: Boolean get() = packageName == "main"
     val mainFunction: GoDeclarationInfo? get() = declarations.firstOrNull { it.kind == GoDeclarationKind.FUNCTION && it.name == "main" }.takeIf { isMainPackage }

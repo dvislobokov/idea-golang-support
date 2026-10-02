@@ -12,16 +12,16 @@ import com.intellij.icons.AllIcons
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoIdioms
 import io.github.golangsupport.lang.GoImport
 import io.github.golangsupport.lang.GoImports
 import io.github.golangsupport.lang.GoPrefixMatcher
 import io.github.golangsupport.lang.GoStructLiterals
-import io.github.golangsupport.lang.GoTextTokens
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoSettings
 import javax.swing.Icon
+import io.github.golangsupport.lang.psi.GoTypes
 
 /** How a symbol of the catalogue is written into a file, given what the file imports; pure, for the tests. */
 object GoCatalogueInsertion {
@@ -62,7 +62,7 @@ object GoCatalogueInsertion {
 class GoCatalogueCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
         val file = parameters.originalFile as? GoFile ?: return
-        if (!GoSettings.getInstance().completionCatalogue || parameters.position.node?.elementType != GoTextTokens.IDENTIFIER) return
+        if (!GoSettings.getInstance().completionCatalogue || parameters.position.node?.elementType != GoTypes.IDENTIFIER) return
         val text = parameters.editor.document.immutableCharSequence
         val typed = GoCompletionOrder.typed(text, parameters.offset)
         if (typed.length < MIN_TYPED || !GoImports.isPackagePlace(text, parameters.offset - typed.length)) return

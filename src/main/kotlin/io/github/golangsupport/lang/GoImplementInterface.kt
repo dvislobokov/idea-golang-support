@@ -25,6 +25,7 @@ import io.github.golangsupport.catalogue.GoInterfaceSources
 import io.github.golangsupport.settings.GoSettings
 import javax.swing.JList
 import javax.swing.ListCellRenderer
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * An interface to implement: of the project, with what is known of it from the scanner, or of the catalogue (the standard library and

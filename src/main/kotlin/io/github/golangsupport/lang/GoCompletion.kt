@@ -7,6 +7,7 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
 import io.github.golangsupport.settings.GoSettings
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * The order of the completion list. gopls matches fuzzily and ranks by a score of its own: `return ni` gives `net.IP`, `net.IPAddr`,

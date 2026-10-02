@@ -8,7 +8,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.util.Consumer
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.settings.GoSettings
 
 /**

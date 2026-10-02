@@ -14,6 +14,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.lint.GoErrcheckFixes
 import io.github.golangsupport.lint.GoSignatureProvider
+import io.github.golangsupport.lang.psi.GoFile
 
 /** The line of the caret: its text, its bounds, its indent and the unit of indentation of the file. */
 private class CaretLine(document: Document, offset: Int) {

@@ -10,11 +10,12 @@ import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
-import io.github.golangsupport.lang.GoDeclaration
+import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoStructure
-import io.github.golangsupport.lang.GoTextTokens
+import io.github.golangsupport.lang.psi.GoFunctionDeclaration
+import io.github.golangsupport.lang.psi.GoTypes
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -91,10 +92,9 @@ class GoRunLineMarkerContributor : RunLineMarkerContributor() {
     override fun getInfo(element: PsiElement): Info? {
         val file = element.containingFile as? GoFile ?: return null
         val type = element.elementType
-        if (type == GoTextTokens.STRING || type == GoTextTokens.RAW_STRING) return subtestInfo(file, element)
-        if (type != GoTextTokens.IDENTIFIER) return null
-        val declaration = element.parent as? GoDeclaration ?: return null
-        val info = declaration.info?.takeIf { it.kind == GoDeclarationKind.FUNCTION && it.nameRange == element.textRange } ?: return null
+        if (type == GoTypes.STRING || type == GoTypes.RAW_STRING) return subtestInfo(file, element)
+        val declaration = GoDeclarationPsi.ofName(element) as? GoFunctionDeclaration ?: return null
+        val info = GoDeclarationPsi.infoOf(declaration)?.takeIf { it.kind == GoDeclarationKind.FUNCTION } ?: return null
         val actions = ExecutorAction.getActions(0)
         return when (GoTests.kindOf(info, file.name)) {
             null -> if (!file.isTestFile && info.name == "main" && GoStructure.of(file).isMainPackage) Info(AllIcons.RunConfigurations.TestState.Run, actions) { "Run the program" } else null

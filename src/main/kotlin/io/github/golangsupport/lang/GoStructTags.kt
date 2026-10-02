@@ -9,6 +9,7 @@ import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * What a struct tag may say, for the completion inside its backquotes: the keys the common libraries read, the names a field is written

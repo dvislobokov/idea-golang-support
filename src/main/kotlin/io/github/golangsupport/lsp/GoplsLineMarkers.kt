@@ -13,10 +13,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
-import io.github.golangsupport.lang.GoDeclaration
+import io.github.golangsupport.lang.GoDeclarationPsi
 import io.github.golangsupport.lang.GoDeclarationKind
-import io.github.golangsupport.lang.GoFile
-import io.github.golangsupport.lang.GoTextTokens
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoNamedElement
+import io.github.golangsupport.lang.psi.GoTypes
 import java.util.function.Supplier
 
 /**
@@ -29,10 +30,10 @@ import java.util.function.Supplier
  */
 class GoplsImplementationLineMarkerProvider : LineMarkerProvider {
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
-        if (element.elementType != GoTextTokens.IDENTIFIER) return null
+        if (element.elementType != GoTypes.IDENTIFIER) return null
         if (GoFeatures.native(GoFeature.CODE_VISION, element.project)) return null
-        val declaration = (element.parent as? GoDeclaration)?.takeIf { it.nameIdentifier == element } ?: return null
-        val info = declaration.info ?: return null
+        val declaration = GoDeclarationPsi.ofName(element) ?: return null
+        val info = GoDeclarationPsi.infoOf(declaration) ?: return null
         val file = (element.containingFile as? GoFile)?.virtualFile ?: return null
         val document = FileDocumentManager.getInstance().getCachedDocument(file) ?: return null
         val project = element.project
@@ -45,7 +46,7 @@ class GoplsImplementationLineMarkerProvider : LineMarkerProvider {
         val tooltip = if (isInterface) "Is implemented by $count ${what}${if (count == 1) "" else "s"}" else "Implements $count interface${if (what == "method") " method" else ""}${if (count == 1) "" else "s"}"
         val title = if (isInterface) "Implementations of ${info.name}" else "Implemented by ${info.name}"
         val navigation = GutterIconNavigationHandler<PsiElement> { event, clicked ->
-            val target = clicked.parent as? GoDeclaration ?: return@GutterIconNavigationHandler
+            val target = GoDeclarationPsi.ofName(clicked) ?: return@GutterIconNavigationHandler
             // the supplier is run by the navigator in the background, with a progress: a request to the server has no place on EDT
             PsiTargetNavigator(Supplier<Collection<PsiElement>> { targets(target) }).navigate(event, title, project)
         }
@@ -55,7 +56,7 @@ class GoplsImplementationLineMarkerProvider : LineMarkerProvider {
         )
     }
 
-    private fun targets(declaration: GoDeclaration): Collection<PsiElement> {
+    private fun targets(declaration: GoNamedElement): Collection<PsiElement> {
         val (project, file, position) = ReadAction.compute<Triple<com.intellij.openapi.project.Project, com.intellij.openapi.vfs.VirtualFile, org.eclipse.lsp4j.Position>?, RuntimeException> {
             GoplsTargets.of(declaration)
         } ?: return emptyList()

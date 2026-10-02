@@ -25,6 +25,7 @@ import com.intellij.psi.codeStyle.CommonCodeStyleSettings
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider
 import com.intellij.psi.codeStyle.lineIndent.LineIndentProvider
 import com.intellij.psi.tree.IElementType
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * The indent of a line while typing, the way gofmt would have it: gofmt is the only style there is, so unlike the C# sibling of this

@@ -8,6 +8,9 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
 import io.github.golangsupport.settings.GoSettings
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoTokenSets
+import io.github.golangsupport.lang.psi.GoTypes
 
 /**
  * Values that have a name: an HTTP status typed as a number becomes its constant of `net/http`, `404` → `http.StatusNotFound`, with the
@@ -106,8 +109,8 @@ class GoValueCompletionContributor : CompletionContributor() {
         val text = parameters.editor.document.immutableCharSequence
         val offset = parameters.offset
         val elementType = parameters.position.node.elementType
-        if (elementType in GoTextTokens.COMMENTS) return
-        if (elementType == GoTextTokens.STRING) timeLayouts(text, offset, result) else httpStatuses(file, text, offset, result)
+        if (elementType in GoTokenSets.COMMENTS) return
+        if (elementType == GoTypes.STRING) timeLayouts(text, offset, result) else httpStatuses(file, text, offset, result)
     }
 
     private fun httpStatuses(file: GoFile, text: CharSequence, offset: Int, result: CompletionResultSet) {

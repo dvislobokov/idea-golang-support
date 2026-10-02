@@ -5,7 +5,7 @@ import com.intellij.psi.TokenType
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import io.github.golangsupport.lang.GoDeclarationInfo
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoTextLexer
 import io.github.golangsupport.lang.GoStructure
 import io.github.golangsupport.lang.GoTextTokens

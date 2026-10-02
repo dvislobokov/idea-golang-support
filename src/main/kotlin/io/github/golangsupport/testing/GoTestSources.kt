@@ -3,7 +3,8 @@ package io.github.golangsupport.testing
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.TestSourcesFilter
 import com.intellij.openapi.vfs.VirtualFile
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.GoTestNames
+import io.github.golangsupport.lang.psi.GoFile
 
 /**
  * Go keeps tests next to the code, so there is no test source root to mark: a test is a file named `*_test.go`. Telling the platform so
@@ -11,5 +12,5 @@ import io.github.golangsupport.lang.GoFile
  * results (Settings | Appearance | File Colors), "Tests" as a scope of Find in Files, and test files after production code in navigation.
  */
 class GoTestSourcesFilter : TestSourcesFilter() {
-    override fun isTestSource(file: VirtualFile, project: Project): Boolean = !file.isDirectory && file.name.endsWith(GoFile.TEST_SUFFIX)
+    override fun isTestSource(file: VirtualFile, project: Project): Boolean = !file.isDirectory && file.name.endsWith(GoTestNames.TEST_SUFFIX)
 }

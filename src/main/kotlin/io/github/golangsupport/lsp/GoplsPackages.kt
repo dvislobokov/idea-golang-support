@@ -18,15 +18,15 @@ import io.github.golangsupport.GoIcons
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoCompletionOrder
-import io.github.golangsupport.lang.GoFile
+import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoImports
 import io.github.golangsupport.lang.GoPrefixMatcher
 import io.github.golangsupport.lang.GoSemanticColors
-import io.github.golangsupport.lang.GoTextTokens
 import io.github.golangsupport.settings.GoSettings
 import org.eclipse.lsp4j.ExecuteCommandParams
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
+import io.github.golangsupport.lang.psi.GoTypes
 
 /**
  * The packages a file may import and does not: the standard library, the modules of go.mod, the packages of the workspace, as gopls
@@ -85,7 +85,7 @@ class GoplsPackageCompletionContributor : CompletionContributor() {
         if (GoFeatures.native(GoFeature.COMPLETION, file.project)) return
         if (!GoSettings.getInstance().completionUnimportedPackages) return
         val virtualFile = file.virtualFile ?: return
-        if (parameters.position.node?.elementType != GoTextTokens.IDENTIFIER) return
+        if (parameters.position.node?.elementType != GoTypes.IDENTIFIER) return
         val text = parameters.editor.document.immutableCharSequence
         val typed = GoCompletionOrder.typed(text, parameters.offset)
         if (typed.isEmpty() || !GoImports.isPackagePlace(text, parameters.offset - typed.length)) return
