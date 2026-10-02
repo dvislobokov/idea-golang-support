@@ -6,9 +6,9 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import io.github.golangsupport.lang.GoDeclarationInfo
 import io.github.golangsupport.lang.GoFile
-import io.github.golangsupport.lang.GoLexer
+import io.github.golangsupport.lang.GoTextLexer
 import io.github.golangsupport.lang.GoStructure
-import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.lang.GoTextTokens
 
 /**
  * A subtest a test function names in its body: `t.Run("empty", ...)`, or a case of a table, `{name: "empty", ...}`. [nameRange] is the string
@@ -26,23 +26,23 @@ object GoSubtests {
 
     fun find(text: CharSequence, function: GoDeclarationInfo): List<GoSubtest> {
         val body = function.body ?: return emptyList()
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, body.startOffset, body.endOffset, 0)
         val tokens = ArrayList<Pair<com.intellij.psi.tree.IElementType, TextRange>>()
         while (true) {
             val type = lexer.tokenType ?: break
-            if (type != TokenType.WHITE_SPACE && type !in GoTokenTypes.COMMENTS) tokens += type to TextRange(lexer.tokenStart, lexer.tokenEnd)
+            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS) tokens += type to TextRange(lexer.tokenStart, lexer.tokenEnd)
             lexer.advance()
         }
         val result = ArrayList<GoSubtest>()
         val seen = HashSet<String>()
         for (i in tokens.indices) {
             val (type, range) = tokens[i]
-            if (type != GoTokenTypes.STRING && type != GoTokenTypes.RAW_STRING) continue
-            val word = { j: Int -> tokens.getOrNull(j)?.takeIf { it.first == GoTokenTypes.IDENTIFIER }?.let { text.subSequence(it.second.startOffset, it.second.endOffset).toString() } }
-            val isRun = tokens.getOrNull(i - 1)?.first == GoTokenTypes.LPAREN && word(i - 2) == "Run" && tokens.getOrNull(i - 3)?.first == GoTokenTypes.DOT && word(i - 4) != null
-            val isCase = tokens.getOrNull(i - 1)?.let { it.first == GoTokenTypes.OPERATOR && text[it.second.startOffset] == ':' } == true && word(i - 2) in CASE_FIELDS &&
-                tokens.getOrNull(i - 3)?.first.let { it == GoTokenTypes.LBRACE || it == GoTokenTypes.COMMA }
+            if (type != GoTextTokens.STRING && type != GoTextTokens.RAW_STRING) continue
+            val word = { j: Int -> tokens.getOrNull(j)?.takeIf { it.first == GoTextTokens.IDENTIFIER }?.let { text.subSequence(it.second.startOffset, it.second.endOffset).toString() } }
+            val isRun = tokens.getOrNull(i - 1)?.first == GoTextTokens.LPAREN && word(i - 2) == "Run" && tokens.getOrNull(i - 3)?.first == GoTextTokens.DOT && word(i - 4) != null
+            val isCase = tokens.getOrNull(i - 1)?.let { it.first == GoTextTokens.OPERATOR && text[it.second.startOffset] == ':' } == true && word(i - 2) in CASE_FIELDS &&
+                tokens.getOrNull(i - 3)?.first.let { it == GoTextTokens.LBRACE || it == GoTextTokens.COMMA }
             if (!isRun && !isCase) continue
             val name = subtestName(text.subSequence(range.startOffset, range.endOffset).toString()) ?: continue
             if (seen.add(name)) result += GoSubtest(name, range, function)

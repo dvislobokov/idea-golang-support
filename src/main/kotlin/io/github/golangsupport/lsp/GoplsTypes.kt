@@ -13,7 +13,7 @@ import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoFindUsagesProvider
-import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.lang.GoTextTokens
 import org.eclipse.lsp4j.Position
 
 /**
@@ -23,7 +23,7 @@ import org.eclipse.lsp4j.Position
 class GoplsTargetElementEvaluator : TargetElementEvaluatorEx2() {
     override fun getNamedElement(element: PsiElement): PsiElement? {
         if (GoFeatures.native(GoFeature.NAVIGATION, element.project)) return null
-        if (element.containingFile !is GoFile || element.elementType != GoTokenTypes.IDENTIFIER) return null
+        if (element.containingFile !is GoFile || element.elementType != GoTextTokens.IDENTIFIER) return null
         (element.parent as? GoDeclaration)?.takeIf { it.nameIdentifier == element }?.let { return it }
         val file = element.containingFile.virtualFile ?: return null
         val client = Gopls.client(element.project) ?: return null
@@ -62,7 +62,7 @@ class GoplsTypeDeclarationProvider : TypeDeclarationProvider {
 class GoplsExpressionTypeProvider : ExpressionTypeProvider<PsiElement>() {
     override fun getExpressionsAt(elementAt: PsiElement): List<PsiElement> = when {
         GoFeatures.native(GoFeature.HOVER, elementAt.project) -> emptyList()
-        elementAt.containingFile is GoFile && elementAt.elementType == GoTokenTypes.IDENTIFIER -> listOf(elementAt)
+        elementAt.containingFile is GoFile && elementAt.elementType == GoTextTokens.IDENTIFIER -> listOf(elementAt)
         else -> emptyList()
     }
 

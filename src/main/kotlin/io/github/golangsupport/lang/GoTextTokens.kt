@@ -3,34 +3,34 @@ package io.github.golangsupport.lang
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
 
-class GoTokenType(debugName: String) : IElementType(debugName, GoLanguage) {
+class GoTextTokenType(debugName: String) : IElementType(debugName, GoLanguage) {
     override fun toString(): String = "Go:" + super.toString()
 }
 
-object GoTokenTypes {
-    @JvmField val LINE_COMMENT = GoTokenType("LINE_COMMENT")
-    @JvmField val BLOCK_COMMENT = GoTokenType("BLOCK_COMMENT")
+object GoTextTokens {
+    @JvmField val LINE_COMMENT = GoTextTokenType("LINE_COMMENT")
+    @JvmField val BLOCK_COMMENT = GoTextTokenType("BLOCK_COMMENT")
 
     /** `//go:build`, `//go:generate`, `//go:embed`, ...: a comment for the compiler, a command for the toolchain. */
-    @JvmField val DIRECTIVE = GoTokenType("DIRECTIVE")
+    @JvmField val DIRECTIVE = GoTextTokenType("DIRECTIVE")
 
-    @JvmField val STRING = GoTokenType("STRING")
-    @JvmField val RAW_STRING = GoTokenType("RAW_STRING")
-    @JvmField val CHAR = GoTokenType("CHAR")
-    @JvmField val NUMBER = GoTokenType("NUMBER")
-    @JvmField val KEYWORD = GoTokenType("KEYWORD")
-    @JvmField val IDENTIFIER = GoTokenType("IDENTIFIER")
+    @JvmField val STRING = GoTextTokenType("STRING")
+    @JvmField val RAW_STRING = GoTextTokenType("RAW_STRING")
+    @JvmField val CHAR = GoTextTokenType("CHAR")
+    @JvmField val NUMBER = GoTextTokenType("NUMBER")
+    @JvmField val KEYWORD = GoTextTokenType("KEYWORD")
+    @JvmField val IDENTIFIER = GoTextTokenType("IDENTIFIER")
 
-    @JvmField val LBRACE = GoTokenType("LBRACE")
-    @JvmField val RBRACE = GoTokenType("RBRACE")
-    @JvmField val LPAREN = GoTokenType("LPAREN")
-    @JvmField val RPAREN = GoTokenType("RPAREN")
-    @JvmField val LBRACKET = GoTokenType("LBRACKET")
-    @JvmField val RBRACKET = GoTokenType("RBRACKET")
-    @JvmField val SEMICOLON = GoTokenType("SEMICOLON")
-    @JvmField val COMMA = GoTokenType("COMMA")
-    @JvmField val DOT = GoTokenType("DOT")
-    @JvmField val OPERATOR = GoTokenType("OPERATOR")
+    @JvmField val LBRACE = GoTextTokenType("LBRACE")
+    @JvmField val RBRACE = GoTextTokenType("RBRACE")
+    @JvmField val LPAREN = GoTextTokenType("LPAREN")
+    @JvmField val RPAREN = GoTextTokenType("RPAREN")
+    @JvmField val LBRACKET = GoTextTokenType("LBRACKET")
+    @JvmField val RBRACKET = GoTextTokenType("RBRACKET")
+    @JvmField val SEMICOLON = GoTextTokenType("SEMICOLON")
+    @JvmField val COMMA = GoTextTokenType("COMMA")
+    @JvmField val DOT = GoTextTokenType("DOT")
+    @JvmField val OPERATOR = GoTextTokenType("OPERATOR")
 
     @JvmField val COMMENTS = TokenSet.create(LINE_COMMENT, BLOCK_COMMENT, DIRECTIVE)
     @JvmField val STRINGS = TokenSet.create(STRING, RAW_STRING, CHAR)

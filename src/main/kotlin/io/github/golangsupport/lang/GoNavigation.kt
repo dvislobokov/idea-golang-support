@@ -115,7 +115,7 @@ class GoFindUsagesProvider : FindUsagesProvider {
          * function body are children of the node of the function, so the parent being a declaration says nothing; its name does.
          */
         fun isLocalName(element: PsiElement): Boolean =
-            element.containingFile is GoFile && element.node?.elementType == GoTokenTypes.IDENTIFIER && (element.parent as? GoDeclaration)?.nameIdentifier != element
+            element.containingFile is GoFile && element.node?.elementType == GoTextTokens.IDENTIFIER && (element.parent as? GoDeclaration)?.nameIdentifier != element
     }
 }
 

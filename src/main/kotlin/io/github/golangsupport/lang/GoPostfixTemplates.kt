@@ -101,7 +101,7 @@ object GoPostfixExpressions {
         val expression = text.substring(i, end)
         if (expression.trim().isEmpty() || expression.first().isDigit() && !expression.all { it.isDigit() || it == '.' || it == '_' }) return null
         val head = expression.takeWhile { it.isLetterOrDigit() || it == '_' }
-        if (head in GoTokenTypes.KEYWORDS && head != "func") return null
+        if (head in GoTextTokens.KEYWORDS && head != "func") return null
         return com.intellij.openapi.util.TextRange(i, end)
     }
 

@@ -138,7 +138,7 @@ object GoStructTags {
         val head = beforeCaret.substring(0, open).trim()
         if (head.isEmpty() || head.startsWith("//")) return null
         val field = Regex("""^\*?(?:\w+\.)?(\w+)""").find(head)?.groupValues?.get(1) ?: return null
-        if (field in GoTokenTypes.KEYWORDS) return null
+        if (field in GoTextTokens.KEYWORDS) return null
         // inside the braces of a struct type
         val structure = GoDeclarations.scan(text)
         val inStruct = structure.declarations.any { it.kind == GoDeclarationKind.STRUCT && it.body?.let { body -> offset > body.startOffset && offset < body.endOffset } == true } ||

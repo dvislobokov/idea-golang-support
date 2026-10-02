@@ -4,10 +4,7 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.lexer.Lexer
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
-import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
-import com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighter
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
@@ -25,63 +22,64 @@ import io.github.golangsupport.GoIcons
 import javax.swing.Icon
 
 class GoSyntaxHighlighter : SyntaxHighlighterBase() {
-    override fun getHighlightingLexer(): Lexer = GoLexer()
+    override fun getHighlightingLexer(): Lexer = GoTextLexer()
 
     override fun getTokenHighlights(tokenType: IElementType): Array<TextAttributesKey> = pack(KEYS[tokenType])
 
+    /** Aliases of [GoColors], where the keys are defined once for the whole plugin. */
     companion object {
-        val KEYWORD = createTextAttributesKey("GO_KEYWORD", Default.KEYWORD)
-        val STRING = createTextAttributesKey("GO_STRING", Default.STRING)
-        val NUMBER = createTextAttributesKey("GO_NUMBER", Default.NUMBER)
-        val LINE_COMMENT = createTextAttributesKey("GO_LINE_COMMENT", Default.LINE_COMMENT)
-        val BLOCK_COMMENT = createTextAttributesKey("GO_BLOCK_COMMENT", Default.BLOCK_COMMENT)
-        val DIRECTIVE = createTextAttributesKey("GO_DIRECTIVE", Default.METADATA)
-        val BRACES = createTextAttributesKey("GO_BRACES", Default.BRACES)
-        val PARENTHESES = createTextAttributesKey("GO_PARENTHESES", Default.PARENTHESES)
-        val BRACKETS = createTextAttributesKey("GO_BRACKETS", Default.BRACKETS)
-        val SEMICOLON = createTextAttributesKey("GO_SEMICOLON", Default.SEMICOLON)
-        val COMMA = createTextAttributesKey("GO_COMMA", Default.COMMA)
-        val DOT = createTextAttributesKey("GO_DOT", Default.DOT)
-        val OPERATOR = createTextAttributesKey("GO_OPERATOR", Default.OPERATION_SIGN)
-        val BAD_CHARACTER = createTextAttributesKey("GO_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER)
+        val KEYWORD = GoColors.KEYWORD
+        val STRING = GoColors.STRING
+        val NUMBER = GoColors.NUMBER
+        val LINE_COMMENT = GoColors.LINE_COMMENT
+        val BLOCK_COMMENT = GoColors.BLOCK_COMMENT
+        val DIRECTIVE = GoColors.DIRECTIVE
+        val BRACES = GoColors.BRACES
+        val PARENTHESES = GoColors.PARENTHESES
+        val BRACKETS = GoColors.BRACKETS
+        val SEMICOLON = GoColors.SEMICOLON
+        val COMMA = GoColors.COMMA
+        val DOT = GoColors.DOT
+        val OPERATOR = GoColors.OPERATOR
+        val BAD_CHARACTER = GoColors.BAD_CHARACTER
 
         // by GoIdentifierAnnotator
-        val BUILTIN_TYPE = createTextAttributesKey("GO_BUILTIN_TYPE", Default.KEYWORD)
-        val BUILTIN_CONSTANT = createTextAttributesKey("GO_BUILTIN_CONSTANT", Default.KEYWORD)
-        val BUILTIN_FUNCTION = createTextAttributesKey("GO_BUILTIN_FUNCTION", Default.PREDEFINED_SYMBOL)
-        val FUNCTION_DECLARATION = createTextAttributesKey("GO_FUNCTION_DECLARATION", Default.FUNCTION_DECLARATION)
-        val TYPE_DECLARATION = createTextAttributesKey("GO_TYPE_DECLARATION", Default.CLASS_NAME)
-        val FUNCTION_CALL = createTextAttributesKey("GO_FUNCTION_CALL", Default.FUNCTION_CALL)
-        val FIELD = createTextAttributesKey("GO_FIELD", Default.INSTANCE_FIELD)
-        val CONSTANT = createTextAttributesKey("GO_CONSTANT", Default.CONSTANT)
+        val BUILTIN_TYPE = GoColors.BUILTIN_TYPE
+        val BUILTIN_CONSTANT = GoColors.BUILTIN_CONSTANT
+        val BUILTIN_FUNCTION = GoColors.BUILTIN_FUNCTION
+        val FUNCTION_DECLARATION = GoColors.FUNCTION_DECLARATION
+        val TYPE_DECLARATION = GoColors.TYPE_DECLARATION
+        val FUNCTION_CALL = GoColors.FUNCTION_CALL
+        val FIELD = GoColors.FIELD
+        val CONSTANT = GoColors.CONSTANT
 
         // by the semantic tokens of gopls (GoSemanticColors), and what of it the annotator can tell by itself
-        val TYPE_REFERENCE = createTextAttributesKey("GO_TYPE_REFERENCE", Default.CLASS_REFERENCE)
-        val PACKAGE = createTextAttributesKey("GO_PACKAGE", Default.IDENTIFIER)
-        val PARAMETER = createTextAttributesKey("GO_PARAMETER", Default.PARAMETER)
-        val LOCAL_VARIABLE = createTextAttributesKey("GO_LOCAL_VARIABLE", Default.LOCAL_VARIABLE)
-        val PACKAGE_VARIABLE = createTextAttributesKey("GO_PACKAGE_VARIABLE", Default.GLOBAL_VARIABLE)
-        val LABEL = createTextAttributesKey("GO_LABEL", Default.LABEL)
+        val TYPE_REFERENCE = GoColors.TYPE_REFERENCE
+        val PACKAGE = GoColors.PACKAGE
+        val PARAMETER = GoColors.PARAMETER
+        val LOCAL_VARIABLE = GoColors.LOCAL_VARIABLE
+        val PACKAGE_VARIABLE = GoColors.PACKAGE_VARIABLE
+        val LABEL = GoColors.LABEL
 
         private val KEYS: Map<IElementType, TextAttributesKey> = mapOf(
-            GoTokenTypes.KEYWORD to KEYWORD,
-            GoTokenTypes.STRING to STRING,
-            GoTokenTypes.RAW_STRING to STRING,
-            GoTokenTypes.CHAR to STRING,
-            GoTokenTypes.NUMBER to NUMBER,
-            GoTokenTypes.LINE_COMMENT to LINE_COMMENT,
-            GoTokenTypes.BLOCK_COMMENT to BLOCK_COMMENT,
-            GoTokenTypes.DIRECTIVE to DIRECTIVE,
-            GoTokenTypes.LBRACE to BRACES,
-            GoTokenTypes.RBRACE to BRACES,
-            GoTokenTypes.LPAREN to PARENTHESES,
-            GoTokenTypes.RPAREN to PARENTHESES,
-            GoTokenTypes.LBRACKET to BRACKETS,
-            GoTokenTypes.RBRACKET to BRACKETS,
-            GoTokenTypes.SEMICOLON to SEMICOLON,
-            GoTokenTypes.COMMA to COMMA,
-            GoTokenTypes.DOT to DOT,
-            GoTokenTypes.OPERATOR to OPERATOR,
+            GoTextTokens.KEYWORD to KEYWORD,
+            GoTextTokens.STRING to STRING,
+            GoTextTokens.RAW_STRING to STRING,
+            GoTextTokens.CHAR to STRING,
+            GoTextTokens.NUMBER to NUMBER,
+            GoTextTokens.LINE_COMMENT to LINE_COMMENT,
+            GoTextTokens.BLOCK_COMMENT to BLOCK_COMMENT,
+            GoTextTokens.DIRECTIVE to DIRECTIVE,
+            GoTextTokens.LBRACE to BRACES,
+            GoTextTokens.RBRACE to BRACES,
+            GoTextTokens.LPAREN to PARENTHESES,
+            GoTextTokens.RPAREN to PARENTHESES,
+            GoTextTokens.LBRACKET to BRACKETS,
+            GoTextTokens.RBRACKET to BRACKETS,
+            GoTextTokens.SEMICOLON to SEMICOLON,
+            GoTextTokens.COMMA to COMMA,
+            GoTextTokens.DOT to DOT,
+            GoTextTokens.OPERATOR to OPERATOR,
             TokenType.BAD_CHARACTER to BAD_CHARACTER,
         )
     }
@@ -135,7 +133,7 @@ class GoSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
  */
 class GoIdentifierAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        if (element.elementType != GoTokenTypes.IDENTIFIER) return
+        if (element.elementType != GoTextTokens.IDENTIFIER) return
         val key = classify(element) ?: return
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(element).textAttributes(key).create()
     }
@@ -150,19 +148,19 @@ class GoIdentifierAnnotator : Annotator {
             GoDeclarationKind.VAR -> null
         }
         val previous = PsiTreeUtil.skipWhitespacesAndCommentsBackward(element)
-        val afterDot = previous.elementType == GoTokenTypes.DOT
+        val afterDot = previous.elementType == GoTextTokens.DOT
         val next = PsiTreeUtil.skipWhitespacesAndCommentsForward(element).elementType
-        val isCall = next == GoTokenTypes.LPAREN
+        val isCall = next == GoTextTokens.LPAREN
         val text = element.text
         return when {
             // the names of packages are coloured here and not by gopls, which is told not to (GoplsDefaults): the clause of the file,
             // the name an import is given, and `fmt.` where the file imports something named fmt; a variable that shadows it gopls repaints
             previous?.text == "package" -> GoSyntaxHighlighter.PACKAGE
-            (next == GoTokenTypes.STRING || next == GoTokenTypes.RAW_STRING) && isImportAlias(element) -> GoSyntaxHighlighter.PACKAGE
-            !afterDot && next == GoTokenTypes.DOT && text in importedNames(element) -> GoSyntaxHighlighter.PACKAGE
-            !afterDot && text in GoTokenTypes.BUILTIN_TYPES -> GoSyntaxHighlighter.BUILTIN_TYPE
-            !afterDot && text in GoTokenTypes.BUILTIN_CONSTANTS -> GoSyntaxHighlighter.BUILTIN_CONSTANT
-            !afterDot && isCall && text in GoTokenTypes.BUILTIN_FUNCTIONS -> GoSyntaxHighlighter.BUILTIN_FUNCTION
+            (next == GoTextTokens.STRING || next == GoTextTokens.RAW_STRING) && isImportAlias(element) -> GoSyntaxHighlighter.PACKAGE
+            !afterDot && next == GoTextTokens.DOT && text in importedNames(element) -> GoSyntaxHighlighter.PACKAGE
+            !afterDot && text in GoTextTokens.BUILTIN_TYPES -> GoSyntaxHighlighter.BUILTIN_TYPE
+            !afterDot && text in GoTextTokens.BUILTIN_CONSTANTS -> GoSyntaxHighlighter.BUILTIN_CONSTANT
+            !afterDot && isCall && text in GoTextTokens.BUILTIN_FUNCTIONS -> GoSyntaxHighlighter.BUILTIN_FUNCTION
             isCall -> GoSyntaxHighlighter.FUNCTION_CALL
             else -> null
         }

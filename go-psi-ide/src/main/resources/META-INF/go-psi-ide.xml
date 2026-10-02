@@ -1,10 +1,6 @@
 <!-- Extensions contributed by go-psi-ide. Included into plugin/src/main/resources/META-INF/plugin.xml. -->
 <idea-plugin>
   <extensions defaultExtensionNs="com.intellij">
-    <lang.syntaxHighlighterFactory language="Go"
-                                   implementationClass="io.github.golangsupport.ide.highlighting.GoSyntaxHighlighterFactory"/>
-    <colorSettingsPage implementation="io.github.golangsupport.ide.highlighting.GoColorSettingsPage"/>
-
     <!-- Phase 6a: syntax-level editor features. -->
     <lang.braceMatcher language="Go" implementationClass="io.github.golangsupport.ide.editor.GoBraceMatcher"/>
     <lang.quoteHandler language="Go" implementationClass="io.github.golangsupport.ide.editor.GoQuoteHandler"/>

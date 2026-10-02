@@ -106,8 +106,8 @@ class GoValueCompletionContributor : CompletionContributor() {
         val text = parameters.editor.document.immutableCharSequence
         val offset = parameters.offset
         val elementType = parameters.position.node.elementType
-        if (elementType in GoTokenTypes.COMMENTS) return
-        if (elementType == GoTokenTypes.STRING) timeLayouts(text, offset, result) else httpStatuses(file, text, offset, result)
+        if (elementType in GoTextTokens.COMMENTS) return
+        if (elementType == GoTextTokens.STRING) timeLayouts(text, offset, result) else httpStatuses(file, text, offset, result)
     }
 
     private fun httpStatuses(file: GoFile, text: CharSequence, offset: Int, result: CompletionResultSet) {

@@ -1,13 +1,14 @@
 package io.github.golangsupport.ide.annotator
 
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.editor.colors.TextAttributesKey
 import io.github.golangsupport.ide.GoSemanticIdeTestBase
-import io.github.golangsupport.ide.highlighting.GoColorSettingsPage
-import io.github.golangsupport.ide.highlighting.GoHighlightingColors
+import io.github.golangsupport.lang.GoColors
 
 /**
  * Semantic highlighting: every identifier of `testData/highlighting/semantic.go` with the
- * attributes key the annotator assigns, as a golden list (`line:column text KEY`).
+ * attributes key the annotator assigns, as a golden list (`line:column text KEY`). Keys are
+ * the plugin palette (`GoColors`); the colour page and schemes are the root module's.
  */
 class GoSemanticHighlightingTest : GoSemanticIdeTestBase() {
     override val testDataSubdir: String = "highlighting"
@@ -24,6 +25,9 @@ class GoSemanticHighlightingTest : GoSemanticIdeTestBase() {
             "${line + 1}:${column + 1} ${document.charsSequence.subSequence(info.startOffset, info.endOffset)} ${info.forcedTextAttributesKey!!.externalName}"
         }
         assertGolden("semantic.txt", actual)
+        // the very key objects of the palette, not look-alikes with the same external name
+        val palette = GoColors::class.java.declaredFields.filter { it.type == TextAttributesKey::class.java }.map { it.isAccessible = true; it.get(null) }.toSet()
+        for (info in infos) assertTrue(info.forcedTextAttributesKey!!.externalName, info.forcedTextAttributesKey in palette)
     }
 
     fun testUnresolvedIdentifiersAreNotColoured() {
@@ -31,16 +35,5 @@ class GoSemanticHighlightingTest : GoSemanticIdeTestBase() {
         val keys = myFixture.doHighlighting().filter { myFixture.file.text.substring(it.startOffset, it.endOffset) == "unknown" }
             .mapNotNull { it.forcedTextAttributesKey }
         assertEmpty(keys)
-    }
-
-    fun testColorSettingsPageListsSemanticKeys() {
-        val page = GoColorSettingsPage()
-        val keys = page.attributeDescriptors.map { it.key }.toSet()
-        for (key in listOf(GoHighlightingColors.TYPE, GoHighlightingColors.FUNCTION_CALL, GoHighlightingColors.LOCAL_VARIABLE, GoHighlightingColors.BUILTIN_FUNCTION)) {
-            assertTrue(key.externalName, key in keys)
-        }
-        val tags = page.additionalHighlightingTagToDescriptorMap.keys
-        val used = Regex("<([a-z]+)>").findAll(page.demoText).map { it.groupValues[1] }.toSet()
-        assertEquals(tags, used)
     }
 }

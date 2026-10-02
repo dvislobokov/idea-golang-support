@@ -28,7 +28,7 @@ import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoFindUsagesProvider
-import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.lang.GoTextTokens
 import io.github.golangsupport.lint.GoSignatureProvider
 import io.github.golangsupport.lint.GoSignatures
 import com.intellij.openapi.util.TextRange
@@ -165,7 +165,7 @@ class GoplsSignatureProvider : GoSignatureProvider {
  */
 class GoplsGotoDeclarationHandler : GotoDeclarationHandler {
     override fun getGotoDeclarationTargets(sourceElement: PsiElement?, offset: Int, editor: Editor): Array<PsiElement>? {
-        val element = sourceElement?.takeIf { it.containingFile is GoFile && it.node?.elementType == GoTokenTypes.IDENTIFIER } ?: return null
+        val element = sourceElement?.takeIf { it.containingFile is GoFile && it.node?.elementType == GoTextTokens.IDENTIFIER } ?: return null
         val project = element.project
         if (GoFeatures.native(GoFeature.NAVIGATION, project)) return null
         val file = element.containingFile.virtualFile ?: return null

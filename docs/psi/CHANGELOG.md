@@ -5,6 +5,16 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, step 2 (MIGRATION.md)
+- `GoLanguage`/`GoFileType` are the host plugin's objects, hosted in `go-psi-core` under the same FQN; `GoIcons` and
+  `icons/go.svg` removed (the file icon comes from the host's `/icons/go.svg`; empty in the tests of this module).
+- `ide.highlighting.*` (lexer highlighter, `GoHighlightingColors`, colour settings page) removed: the host's
+  `GoSyntaxHighlighter` and colour schemes are the one palette, its keys hosted as `lang.GoColors`.
+  `GoSemanticHighlightingAnnotator` maps onto them: a type's name in its spec is `GO_TYPE_DECLARATION`, other types and
+  type parameters `GO_TYPE_REFERENCE`, methods share the function keys. Golden `testData/highlighting/semantic.txt` updated.
+- `GoIdeIcons` uses the platform `AllIcons.Nodes.*` (no SVGs of its own). Tests of go-psi-ide register a colourless
+  highlighter over the PSI lexer (brace matching, quotes and TODO read the editor highlighter's tokens).
+
 ### 2026-10-02 - Performance wave: results on a quiet machine
 - Items 1-4, 6 and 8 of `docs/PERF-BACKLOG.md` merged (per-body diagnostics, package scope on own
   stamps with import edges from the index, import path cache, marker existence cache, lazy

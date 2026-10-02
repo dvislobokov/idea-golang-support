@@ -5,7 +5,7 @@ import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.psi.PsiElement
-import io.github.golangsupport.ide.highlighting.GoHighlightingColors as C
+import io.github.golangsupport.lang.GoColors as C
 import io.github.golangsupport.lang.psi.GoAnonymousFieldDefinition
 import io.github.golangsupport.lang.psi.GoConstDefinition
 import io.github.golangsupport.lang.psi.GoFieldDefinition
@@ -37,6 +37,7 @@ import io.github.golangsupport.semantic.scope.GoUniverse
  * packages, labels and builtins). Uses only the cached resolve of each reference (never
  * expression typing directly), so it stays cheap; not dumb-aware because resolve uses indices.
  * Unresolved references are left to the lexer colours (the unresolved-reference inspection marks them).
+ * Keys are the plugin palette [C] (`GoColors`): a type's name in its spec is a declaration, every other type and type parameter a reference.
  */
 class GoSemanticHighlightingAnnotator : Annotator {
 
@@ -56,10 +57,9 @@ class GoSemanticHighlightingAnnotator : Annotator {
     }
 
     private fun declarationKey(e: GoNamedElement): TextAttributesKey? = when (e) {
-        is GoTypeSpec -> C.TYPE
-        is GoTypeParamDefinition -> C.TYPE_PARAMETER
-        is GoFunctionDeclaration -> C.FUNCTION_DECLARATION
-        is GoMethodDeclaration, is GoMethodSpec -> C.METHOD_DECLARATION
+        is GoTypeSpec -> C.TYPE_DECLARATION
+        is GoTypeParamDefinition -> C.TYPE_REFERENCE
+        is GoFunctionDeclaration, is GoMethodDeclaration, is GoMethodSpec -> C.FUNCTION_DECLARATION
         is GoFieldDefinition -> C.FIELD
         is GoAnonymousFieldDefinition -> null // its identifier is the embedded type's reference
         is GoParamDefinition, is GoReceiver -> C.PARAMETER
@@ -79,7 +79,7 @@ class GoSemanticHighlightingAnnotator : Annotator {
         return when (result) {
             is GoResolver.Result.Import, is GoResolver.Result.Package -> C.PACKAGE
             is GoResolver.Result.Label -> C.LABEL
-            is GoResolver.Result.ReceiverTypeParam -> C.TYPE_PARAMETER
+            is GoResolver.Result.ReceiverTypeParam -> C.TYPE_REFERENCE
             is GoResolver.Result.Cgo -> null
             else -> targetKey(result.element ?: return null, file)
         }
@@ -88,10 +88,10 @@ class GoSemanticHighlightingAnnotator : Annotator {
     private fun typeReferenceKey(ref: GoTypeReferenceExpression): TextAttributesKey? {
         val target = GoResolver.getInstance(ref.project).resolveTypeReference(ref) ?: return null
         return when {
-            target is GoTypeSpec -> if (GoUniverse.isBuiltinDeclaration(target)) C.BUILTIN_TYPE else C.TYPE
-            target is GoTypeParamDefinition -> C.TYPE_PARAMETER
+            target is GoTypeSpec -> if (GoUniverse.isBuiltinDeclaration(target)) C.BUILTIN_TYPE else C.TYPE_REFERENCE
+            target is GoTypeParamDefinition -> C.TYPE_REFERENCE
             // Receiver type parameters (`func (l *List[T])`) resolve to their name in the receiver.
-            PsiTreeUtil.getParentOfType(target, GoReceiver::class.java, false) != null -> C.TYPE_PARAMETER
+            PsiTreeUtil.getParentOfType(target, GoReceiver::class.java, false) != null -> C.TYPE_REFERENCE
             else -> null
         }
     }
@@ -106,10 +106,8 @@ class GoSemanticHighlightingAnnotator : Annotator {
             }
         }
         return when (target) {
-            is GoTypeSpec -> C.TYPE
-            is GoTypeParamDefinition -> C.TYPE_PARAMETER
-            is GoFunctionDeclaration -> C.FUNCTION_CALL
-            is GoMethodDeclaration, is GoMethodSpec -> C.METHOD_CALL
+            is GoTypeSpec, is GoTypeParamDefinition -> C.TYPE_REFERENCE
+            is GoFunctionDeclaration, is GoMethodDeclaration, is GoMethodSpec -> C.FUNCTION_CALL
             is GoFieldDefinition, is GoAnonymousFieldDefinition -> C.FIELD
             is GoParamDefinition, is GoReceiver -> C.PARAMETER
             // Locals are only visible in their own file; anything else is package level (stub-backed).

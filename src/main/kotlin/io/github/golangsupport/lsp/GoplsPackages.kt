@@ -22,7 +22,7 @@ import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoImports
 import io.github.golangsupport.lang.GoPrefixMatcher
 import io.github.golangsupport.lang.GoSemanticColors
-import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.lang.GoTextTokens
 import io.github.golangsupport.settings.GoSettings
 import org.eclipse.lsp4j.ExecuteCommandParams
 import java.util.concurrent.ConcurrentHashMap
@@ -85,7 +85,7 @@ class GoplsPackageCompletionContributor : CompletionContributor() {
         if (GoFeatures.native(GoFeature.COMPLETION, file.project)) return
         if (!GoSettings.getInstance().completionUnimportedPackages) return
         val virtualFile = file.virtualFile ?: return
-        if (parameters.position.node?.elementType != GoTokenTypes.IDENTIFIER) return
+        if (parameters.position.node?.elementType != GoTextTokens.IDENTIFIER) return
         val text = parameters.editor.document.immutableCharSequence
         val typed = GoCompletionOrder.typed(text, parameters.offset)
         if (typed.isEmpty() || !GoImports.isPackagePlace(text, parameters.offset - typed.length)) return

@@ -13,7 +13,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.ide.GoIdeIcons
-import io.github.golangsupport.lang.GoIcons
+import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.lang.psi.GoAnonymousFieldDefinition
 import io.github.golangsupport.lang.psi.GoFieldDefinition
 import io.github.golangsupport.lang.psi.GoFile
@@ -56,7 +56,7 @@ class GoDocumentationTarget(private val element: PsiElement) : DocumentationTarg
             is GoNamedElement -> element.name ?: "?"
             else -> "?"
         }
-        val icon = if (element is PsiDirectory || element is GoImportSpec || element is GoPackageClause) GoIcons.FILE else GoIdeIcons.forElement(element)
+        val icon = if (element is PsiDirectory || element is GoImportSpec || element is GoPackageClause) GoFileType.icon else GoIdeIcons.forElement(element)
         return TargetPresentation.builder(name).icon(icon).presentation()
     }
 

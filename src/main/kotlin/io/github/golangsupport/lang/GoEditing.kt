@@ -36,14 +36,14 @@ class GoBraceMatcher : PairedBraceMatcher {
 
     private companion object {
         val PAIRS = arrayOf(
-            BracePair(GoTokenTypes.LBRACE, GoTokenTypes.RBRACE, true),
-            BracePair(GoTokenTypes.LPAREN, GoTokenTypes.RPAREN, false),
-            BracePair(GoTokenTypes.LBRACKET, GoTokenTypes.RBRACKET, false),
+            BracePair(GoTextTokens.LBRACE, GoTextTokens.RBRACE, true),
+            BracePair(GoTextTokens.LPAREN, GoTextTokens.RPAREN, false),
+            BracePair(GoTextTokens.LBRACKET, GoTextTokens.RBRACKET, false),
         )
     }
 }
 
-class GoQuoteHandler : SimpleTokenSetQuoteHandler(GoTokenTypes.STRING, GoTokenTypes.RAW_STRING, GoTokenTypes.CHAR)
+class GoQuoteHandler : SimpleTokenSetQuoteHandler(GoTextTokens.STRING, GoTextTokens.RAW_STRING, GoTextTokens.CHAR)
 
 /** Function bodies, struct and interface bodies, the groups of `import (...)` / `const (...)`, block comments and runs of line comments. */
 class GoFoldingBuilder : FoldingBuilderEx(), DumbAware {
@@ -74,14 +74,14 @@ class GoFoldingBuilder : FoldingBuilderEx(), DumbAware {
  */
 object GoBlockFolds {
     fun find(text: CharSequence, body: TextRange): List<TextRange> {
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, body.startOffset, body.endOffset, 0)
         val open = ArrayList<Int>()
         val result = ArrayList<TextRange>()
         while (lexer.tokenType != null) {
             when (lexer.tokenType) {
-                GoTokenTypes.LBRACE -> open += lexer.tokenStart
-                GoTokenTypes.RBRACE -> open.removeLastOrNull()?.let { start -> if (start != body.startOffset) result += TextRange(start, lexer.tokenEnd) }
+                GoTextTokens.LBRACE -> open += lexer.tokenStart
+                GoTextTokens.RBRACE -> open.removeLastOrNull()?.let { start -> if (start != body.startOffset) result += TextRange(start, lexer.tokenEnd) }
             }
             lexer.advance()
         }
@@ -93,7 +93,7 @@ object GoBlockFolds {
 object GoCommentRuns {
     fun find(text: CharSequence): List<Pair<TextRange, String>> {
         val result = ArrayList<Pair<TextRange, String>>()
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, 0, text.length, 0)
         var runStart = -1
         var runEnd = -1
@@ -105,7 +105,7 @@ object GoCommentRuns {
         while (true) {
             val type = lexer.tokenType ?: break
             when {
-                type == GoTokenTypes.LINE_COMMENT && ownsLine(text, lexer.tokenStart) -> {
+                type == GoTextTokens.LINE_COMMENT && ownsLine(text, lexer.tokenStart) -> {
                     if (runLines == 0) runStart = lexer.tokenStart
                     runEnd = lexer.tokenEnd
                     runLines++
@@ -114,7 +114,7 @@ object GoCommentRuns {
                 type == com.intellij.psi.TokenType.WHITE_SPACE -> if (lineBreaks(text, lexer.tokenStart, lexer.tokenEnd) > 1) flush()
                 else -> {
                     flush()
-                    if (type == GoTokenTypes.BLOCK_COMMENT) result += TextRange(lexer.tokenStart, lexer.tokenEnd) to "/*...*/"
+                    if (type == GoTextTokens.BLOCK_COMMENT) result += TextRange(lexer.tokenStart, lexer.tokenEnd) to "/*...*/"
                 }
             }
             lexer.advance()
@@ -146,21 +146,21 @@ class GoTemplateContext : TemplateContextType("Go") {
 object GoTemplateContexts {
     /** Whether [offset] is inside a string, a rune or a comment; the token that ends at [offset] counts, the caret stands at its end while typing. */
     fun isInLiteralOrComment(text: CharSequence, offset: Int): Boolean {
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, 0, text.length, 0)
         while (true) {
             val type = lexer.tokenType ?: return false
             if (lexer.tokenStart >= offset) return false
             val inside = offset > lexer.tokenStart && (offset < lexer.tokenEnd || offset == lexer.tokenEnd && !isClosed(text, lexer.tokenStart, lexer.tokenEnd, type))
-            if (inside && (type in GoTokenTypes.STRINGS || type in GoTokenTypes.COMMENTS)) return true
+            if (inside && (type in GoTextTokens.STRINGS || type in GoTextTokens.COMMENTS)) return true
             lexer.advance()
         }
     }
 
     /** A string or a block comment that has its closing quote or `*` + `/`; a line comment never closes before the line ends. */
     private fun isClosed(text: CharSequence, start: Int, end: Int, type: com.intellij.psi.tree.IElementType): Boolean = when {
-        type == GoTokenTypes.LINE_COMMENT || type == GoTokenTypes.DIRECTIVE -> false
-        type == GoTokenTypes.BLOCK_COMMENT -> end - start >= 4 && text[end - 1] == '/' && text[end - 2] == '*'
+        type == GoTextTokens.LINE_COMMENT || type == GoTextTokens.DIRECTIVE -> false
+        type == GoTextTokens.BLOCK_COMMENT -> end - start >= 4 && text[end - 1] == '/' && text[end - 2] == '*'
         else -> end - start >= 2 && text[end - 1] == text[start]
     }
 }

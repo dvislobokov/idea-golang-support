@@ -43,35 +43,35 @@ object GoIndentEngine {
         var lineHasSwitch = false
         var lastCode: Token? = null
         var beforeLast: Token? = null
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, 0, text.length, 0)
         while (true) {
             val type = lexer.tokenType ?: break
             val start = lexer.tokenStart
             if (start >= lineStart) break
             // a token that spans the line start: the line is a part of it
-            if (lexer.tokenEnd > lineStart && (type == GoTokenTypes.RAW_STRING || type == GoTokenTypes.BLOCK_COMMENT)) return null
+            if (lexer.tokenEnd > lineStart && (type == GoTextTokens.RAW_STRING || type == GoTextTokens.BLOCK_COMMENT)) return null
             val tokenText = text.subSequence(start, lexer.tokenEnd)
             when {
-                type == TokenType.WHITE_SPACE || type == GoTokenTypes.RAW_STRING || type == GoTokenTypes.BLOCK_COMMENT -> {
+                type == TokenType.WHITE_SPACE || type == GoTextTokens.RAW_STRING || type == GoTextTokens.BLOCK_COMMENT -> {
                     val breaks = tokenText.count { it == '\n' }
                     if (breaks > 0) {
                         line += breaks
                         lineHasSwitch = false
                     }
                     // a raw string is a value: the statement it ends is over, however many lines it took
-                    if (type == GoTokenTypes.RAW_STRING) {
+                    if (type == GoTextTokens.RAW_STRING) {
                         beforeLast = lastCode
                         lastCode = Token(type, start, tokenText)
                     }
                 }
-                type in GoTokenTypes.COMMENTS -> {}
+                type in GoTextTokens.COMMENTS -> {}
                 else -> {
                     when (type) {
-                        GoTokenTypes.KEYWORD -> if (tokenText.toString() == "switch" || tokenText.toString() == "select") lineHasSwitch = true
-                        GoTokenTypes.LBRACE -> stack += Open(line, lineHasSwitch)
-                        GoTokenTypes.LPAREN, GoTokenTypes.LBRACKET -> stack += Open(line, false)
-                        GoTokenTypes.RBRACE, GoTokenTypes.RPAREN, GoTokenTypes.RBRACKET -> if (stack.isNotEmpty()) stack.removeAt(stack.lastIndex)
+                        GoTextTokens.KEYWORD -> if (tokenText.toString() == "switch" || tokenText.toString() == "select") lineHasSwitch = true
+                        GoTextTokens.LBRACE -> stack += Open(line, lineHasSwitch)
+                        GoTextTokens.LPAREN, GoTextTokens.LBRACKET -> stack += Open(line, false)
+                        GoTextTokens.RBRACE, GoTextTokens.RPAREN, GoTextTokens.RBRACKET -> if (stack.isNotEmpty()) stack.removeAt(stack.lastIndex)
                     }
                     beforeLast = lastCode
                     lastCode = Token(type, start, tokenText)
@@ -103,11 +103,11 @@ object GoIndentEngine {
     /** A line whose last token cannot end a statement is continued by the next one: `total :=`, `a +`, `x.` - and not `i++`, not a label's or a case's `:`. */
     private fun continues(last: Token?, beforeLast: Token?): Boolean {
         if (last == null) return false
-        if (last.type == GoTokenTypes.DOT) return true
-        if (last.type != GoTokenTypes.OPERATOR) return false
+        if (last.type == GoTextTokens.DOT) return true
+        if (last.type != GoTextTokens.OPERATOR) return false
         val c = last.text[0]
         if (c == ':') return false
-        val doubled = beforeLast != null && beforeLast.type == GoTokenTypes.OPERATOR && beforeLast.text[0] == c && beforeLast.start + 1 == last.start
+        val doubled = beforeLast != null && beforeLast.type == GoTextTokens.OPERATOR && beforeLast.text[0] == c && beforeLast.start + 1 == last.start
         return !(doubled && (c == '+' || c == '-'))
     }
 

@@ -1,8 +1,8 @@
 package io.github.golangsupport.ide
 
-import com.intellij.openapi.util.IconLoader
+import com.intellij.icons.AllIcons
 import com.intellij.psi.PsiElement
-import io.github.golangsupport.lang.GoIcons
+import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.lang.psi.GoAnonymousFieldDefinition
 import io.github.golangsupport.lang.psi.GoConstDefinition
 import io.github.golangsupport.lang.psi.GoFieldDefinition
@@ -21,23 +21,23 @@ import io.github.golangsupport.lang.psi.GoVarDefinition
 import javax.swing.Icon
 
 /**
- * Placeholder node icons of the IDE layer. The destination plugin (idea-golang-support) supplies
- * the real icon set at the transplant; only [forElement] is expected to survive.
+ * Node icons of the IDE layer: the platform `AllIcons.Nodes.*` the root module's `GoDeclarationIcons` uses for the same kinds,
+ * the file icon from [GoFileType]. PSI modules ship no icons of their own (icons come from the root module).
  */
 object GoIdeIcons {
-    @JvmField val FUNCTION: Icon = load("function")
-    @JvmField val METHOD: Icon = load("method")
-    @JvmField val TYPE: Icon = load("type")
-    @JvmField val STRUCT: Icon = load("struct")
-    @JvmField val INTERFACE: Icon = load("interface")
-    @JvmField val VARIABLE: Icon = load("variable")
-    @JvmField val CONSTANT: Icon = load("constant")
-    @JvmField val FIELD: Icon = load("field")
+    @JvmField val FUNCTION: Icon = AllIcons.Nodes.Function
+    @JvmField val METHOD: Icon = AllIcons.Nodes.Method
+    @JvmField val TYPE: Icon = AllIcons.Nodes.Type
+    @JvmField val STRUCT: Icon = AllIcons.Nodes.Class
+    @JvmField val INTERFACE: Icon = AllIcons.Nodes.Interface
+    @JvmField val VARIABLE: Icon = AllIcons.Nodes.Variable
+    @JvmField val CONSTANT: Icon = AllIcons.Nodes.Constant
+    @JvmField val FIELD: Icon = AllIcons.Nodes.Field
 
     /** The node icon of a Go declaration; stub-safe (the kind of a type spec comes from its stubbed type child). */
     @JvmStatic
     fun forElement(element: PsiElement): Icon? = when (element) {
-        is GoFile -> GoIcons.FILE
+        is GoFile -> GoFileType.icon
         is GoFunctionDeclaration, is GoFunctionLit -> FUNCTION
         is GoMethodDeclaration, is GoMethodSpec -> METHOD
         is GoTypeSpec -> when (element.type) {
@@ -51,6 +51,4 @@ object GoIdeIcons {
         is GoVarDefinition, is GoParamDefinition, is GoReceiver -> VARIABLE
         else -> null
     }
-
-    private fun load(name: String): Icon = IconLoader.getIcon("/icons/ide/$name.svg", GoIdeIcons::class.java)
 }

@@ -215,7 +215,7 @@ class GoKeywordCompletionContributor : CompletionContributor() {
         val file = parameters.originalFile as? GoFile ?: return
         if (!GoSettings.getInstance().completionKeywordTemplates) return
         val elementType = parameters.position.node.elementType
-        if (elementType in GoTokenTypes.COMMENTS || elementType in GoTokenTypes.STRINGS) return
+        if (elementType in GoTextTokens.COMMENTS || elementType in GoTextTokens.STRINGS) return
         val text = parameters.editor.document.immutableCharSequence
         val context = GoKeywordTemplates.contextAt(text, parameters.offset, file.isTestFile, GoStructure.of(file)) ?: return
         val typed = GoKeywordTemplates.typed(text, parameters.offset)

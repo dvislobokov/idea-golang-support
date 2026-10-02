@@ -14,7 +14,7 @@ import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFile
 import io.github.golangsupport.lang.GoStructure
-import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.lang.GoTextTokens
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -91,8 +91,8 @@ class GoRunLineMarkerContributor : RunLineMarkerContributor() {
     override fun getInfo(element: PsiElement): Info? {
         val file = element.containingFile as? GoFile ?: return null
         val type = element.elementType
-        if (type == GoTokenTypes.STRING || type == GoTokenTypes.RAW_STRING) return subtestInfo(file, element)
-        if (type != GoTokenTypes.IDENTIFIER) return null
+        if (type == GoTextTokens.STRING || type == GoTextTokens.RAW_STRING) return subtestInfo(file, element)
+        if (type != GoTextTokens.IDENTIFIER) return null
         val declaration = element.parent as? GoDeclaration ?: return null
         val info = declaration.info?.takeIf { it.kind == GoDeclarationKind.FUNCTION && it.nameRange == element.textRange } ?: return null
         val actions = ExecutorAction.getActions(0)

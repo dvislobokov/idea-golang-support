@@ -8,7 +8,7 @@ import com.intellij.psi.tree.IElementType
  * Hand-written Go lexer. Every token is self-contained (a raw string is a single token), so the lexer is stateless
  * and can be restarted from any token boundary.
  */
-class GoLexer : LexerBase() {
+class GoTextLexer : LexerBase() {
     private var buffer: CharSequence = ""
     private var bufferEnd = 0
     private var tokenStart = 0
@@ -40,22 +40,22 @@ class GoLexer : LexerBase() {
         val c = buffer[start]
         when {
             c.isWhitespace() -> token(TokenType.WHITE_SPACE, skipWhile(start) { it.isWhitespace() })
-            c == '/' && charAt(start + 1) == '/' -> token(if (isDirective(start)) GoTokenTypes.DIRECTIVE else GoTokenTypes.LINE_COMMENT, lineEnd(start))
+            c == '/' && charAt(start + 1) == '/' -> token(if (isDirective(start)) GoTextTokens.DIRECTIVE else GoTextTokens.LINE_COMMENT, lineEnd(start))
             c == '/' && charAt(start + 1) == '*' -> {
                 val close = indexOf("*/", start + 2)
-                token(GoTokenTypes.BLOCK_COMMENT, if (close < 0) bufferEnd else close + 2)
+                token(GoTextTokens.BLOCK_COMMENT, if (close < 0) bufferEnd else close + 2)
             }
-            c == '"' -> token(GoTokenTypes.STRING, scanQuoted(start, '"'))
-            c == '\'' -> token(GoTokenTypes.CHAR, scanQuoted(start, '\''))
+            c == '"' -> token(GoTextTokens.STRING, scanQuoted(start, '"'))
+            c == '\'' -> token(GoTextTokens.CHAR, scanQuoted(start, '\''))
             c == '`' -> {
                 val close = skipWhile(start + 1) { it != '`' }
-                token(GoTokenTypes.RAW_STRING, if (close >= bufferEnd) bufferEnd else close + 1)
+                token(GoTextTokens.RAW_STRING, if (close >= bufferEnd) bufferEnd else close + 1)
             }
-            c.isDigit() || (c == '.' && charAt(start + 1).isDigit()) -> token(GoTokenTypes.NUMBER, scanNumber(start))
+            c.isDigit() || (c == '.' && charAt(start + 1).isDigit()) -> token(GoTextTokens.NUMBER, scanNumber(start))
             isIdentifierStart(c) -> {
                 val end = skipWhile(start, ::isIdentifierPart)
-                val isKeyword = buffer.subSequence(start, end).toString() in GoTokenTypes.KEYWORDS
-                token(if (isKeyword) GoTokenTypes.KEYWORD else GoTokenTypes.IDENTIFIER, end)
+                val isKeyword = buffer.subSequence(start, end).toString() in GoTextTokens.KEYWORDS
+                token(if (isKeyword) GoTextTokens.KEYWORD else GoTextTokens.IDENTIFIER, end)
             }
             else -> token(punctuation(c), start + 1)
         }
@@ -67,16 +67,16 @@ class GoLexer : LexerBase() {
     }
 
     private fun punctuation(c: Char): IElementType = when (c) {
-        '{' -> GoTokenTypes.LBRACE
-        '}' -> GoTokenTypes.RBRACE
-        '(' -> GoTokenTypes.LPAREN
-        ')' -> GoTokenTypes.RPAREN
-        '[' -> GoTokenTypes.LBRACKET
-        ']' -> GoTokenTypes.RBRACKET
-        ';' -> GoTokenTypes.SEMICOLON
-        ',' -> GoTokenTypes.COMMA
-        '.' -> GoTokenTypes.DOT
-        '+', '-', '*', '/', '%', '&', '|', '^', '!', '~', '=', '<', '>', ':' -> GoTokenTypes.OPERATOR
+        '{' -> GoTextTokens.LBRACE
+        '}' -> GoTextTokens.RBRACE
+        '(' -> GoTextTokens.LPAREN
+        ')' -> GoTextTokens.RPAREN
+        '[' -> GoTextTokens.LBRACKET
+        ']' -> GoTextTokens.RBRACKET
+        ';' -> GoTextTokens.SEMICOLON
+        ',' -> GoTextTokens.COMMA
+        '.' -> GoTextTokens.DOT
+        '+', '-', '*', '/', '%', '&', '|', '^', '!', '~', '=', '<', '>', ':' -> GoTextTokens.OPERATOR
         else -> TokenType.BAD_CHARACTER
     }
 

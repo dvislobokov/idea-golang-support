@@ -16,7 +16,7 @@ import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.GoDeclaration
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFile
-import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.lang.GoTextTokens
 import java.util.function.Supplier
 
 /**
@@ -29,7 +29,7 @@ import java.util.function.Supplier
  */
 class GoplsImplementationLineMarkerProvider : LineMarkerProvider {
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
-        if (element.elementType != GoTokenTypes.IDENTIFIER) return null
+        if (element.elementType != GoTextTokens.IDENTIFIER) return null
         if (GoFeatures.native(GoFeature.CODE_VISION, element.project)) return null
         val declaration = (element.parent as? GoDeclaration)?.takeIf { it.nameIdentifier == element } ?: return null
         val info = declaration.info ?: return null

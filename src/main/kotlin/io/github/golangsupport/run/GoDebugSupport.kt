@@ -5,8 +5,8 @@ import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoDeclarations
-import io.github.golangsupport.lang.GoLexer
-import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.lang.GoTextLexer
+import io.github.golangsupport.lang.GoTextTokens
 
 /** What of debugging is pure: how delve is started and what it says, which lines take a breakpoint, what an expression under the mouse is. */
 object DlvDap {
@@ -93,12 +93,12 @@ object GoBreakpointLines {
         fun lineOf(offset: Int): Int = lineStarts.binarySearch(offset).let { if (it >= 0) it else -it - 2 }
 
         val result = HashSet<Int>()
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, 0, text.length, 0)
         while (true) {
             val type = lexer.tokenType ?: break
             val start = lexer.tokenStart
-            if (type != TokenType.WHITE_SPACE && type !in GoTokenTypes.COMMENTS && bodies.any { start > it.startOffset && start < it.endOffset - 1 }) result += lineOf(start)
+            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS && bodies.any { start > it.startOffset && start < it.endOffset - 1 }) result += lineOf(start)
             lexer.advance()
         }
         // the header of a function is a place to stop at as well: delve puts the breakpoint at its first instruction
@@ -117,21 +117,21 @@ object GoHoverExpression {
 
     fun rangeAt(text: CharSequence, offset: Int): TextRange? {
         val tokens = ArrayList<Token>()
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, 0, text.length, 0)
         while (true) {
             val type = lexer.tokenType ?: break
-            if (type != TokenType.WHITE_SPACE && type !in GoTokenTypes.COMMENTS) tokens += Token(type, lexer.tokenStart, lexer.tokenEnd)
+            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS) tokens += Token(type, lexer.tokenStart, lexer.tokenEnd)
             if (lexer.tokenStart > offset) break // one token past the pointer is enough to see a call
             lexer.advance()
         }
         val index = tokens.indexOfFirst { offset >= it.start && offset < it.end }
-        if (index < 0 || tokens[index].type != GoTokenTypes.IDENTIFIER) return null
-        if (tokens.getOrNull(index + 1)?.type == GoTokenTypes.LPAREN) return null
+        if (index < 0 || tokens[index].type != GoTextTokens.IDENTIFIER) return null
+        if (tokens.getOrNull(index + 1)?.type == GoTextTokens.LPAREN) return null
         var first = index
-        while (first >= 2 && tokens[first - 1].type == GoTokenTypes.DOT && tokens[first - 2].type == GoTokenTypes.IDENTIFIER) first -= 2
+        while (first >= 2 && tokens[first - 1].type == GoTextTokens.DOT && tokens[first - 2].type == GoTextTokens.IDENTIFIER) first -= 2
         // `f().x`, `items[0].Name`: what is to the left is not a plain name, the chain would be evaluated out of its context
-        if (first >= 1 && tokens[first - 1].type == GoTokenTypes.DOT) return null
+        if (first >= 1 && tokens[first - 1].type == GoTextTokens.DOT) return null
         return TextRange(tokens[first].start, tokens[index].end)
     }
 }
@@ -141,7 +141,7 @@ object GoEvaluate {
     private val CALL = Regex("""^([A-Za-z_][\w.]*)\s*\(.*\)$""", RegexOption.DOT_MATCHES_ALL)
 
     /** The builtins and conversions delve evaluates by itself; with `call` in front it would look for a function of that name. */
-    private val OWN = setOf("len", "cap", "complex", "imag", "real", "min", "max") + io.github.golangsupport.lang.GoTokenTypes.BUILTIN_TYPES
+    private val OWN = setOf("len", "cap", "complex", "imag", "real", "min", "max") + io.github.golangsupport.lang.GoTextTokens.BUILTIN_TYPES
 
     fun expression(text: String): String {
         val trimmed = text.trim()
@@ -181,23 +181,23 @@ object GoDebugCompletion {
      */
     fun contextAt(text: CharSequence, offset: Int): Context? {
         val tokens = ArrayList<Token>()
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, 0, text.length, 0)
         while (true) {
             val type = lexer.tokenType ?: break
             if (lexer.tokenStart >= offset) break
             // the caret inside or at the end of a literal or a comment
-            if ((type in GoTokenTypes.COMMENTS || type in GoTokenTypes.STRINGS) && offset <= lexer.tokenEnd) return null
-            if (type != TokenType.WHITE_SPACE && type !in GoTokenTypes.COMMENTS) tokens += Token(type, lexer.tokenStart, lexer.tokenEnd)
+            if ((type in GoTextTokens.COMMENTS || type in GoTextTokens.STRINGS) && offset <= lexer.tokenEnd) return null
+            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS) tokens += Token(type, lexer.tokenStart, lexer.tokenEnd)
             lexer.advance()
         }
         val last = tokens.lastOrNull() ?: return Context(null, "")
-        if (last.type == GoTokenTypes.NUMBER && last.end >= offset) return null
+        if (last.type == GoTextTokens.NUMBER && last.end >= offset) return null
 
-        val typing = last.end >= offset && (last.type == GoTokenTypes.IDENTIFIER || last.type == GoTokenTypes.KEYWORD)
+        val typing = last.end >= offset && (last.type == GoTextTokens.IDENTIFIER || last.type == GoTextTokens.KEYWORD)
         val prefix = if (typing) text.subSequence(last.start, offset).toString() else ""
         val before = if (typing) tokens.size - 2 else tokens.size - 1
-        if (before < 0 || tokens[before].type != GoTokenTypes.DOT) return Context(null, prefix)
+        if (before < 0 || tokens[before].type != GoTextTokens.DOT) return Context(null, prefix)
 
         // `name.`: the chain that ends with that name, found the way a hover finds it
         val name = before - 1
@@ -233,7 +233,7 @@ object GoInlineValues {
             .filter { offset >= it.range.startOffset && offset < it.range.endOffset }.maxByOrNull { it.range.startOffset }?.range?.startOffset ?: 0
 
         val result = LinkedHashSet<Int>()
-        val lexer = GoLexer()
+        val lexer = GoTextLexer()
         lexer.start(text, 0, text.length, 0)
         var previousCode: String? = null
         var line = 0
@@ -244,8 +244,8 @@ object GoInlineValues {
             if (start >= lineEnd) break
             while (position < start) if (text[position++] == '\n') line++
             val token = text.subSequence(start, lexer.tokenEnd).toString()
-            if (start >= from && type == GoTokenTypes.IDENTIFIER && token == name && previousCode != ".") result += line
-            if (type != TokenType.WHITE_SPACE && type !in GoTokenTypes.COMMENTS) previousCode = token
+            if (start >= from && type == GoTextTokens.IDENTIFIER && token == name && previousCode != ".") result += line
+            if (type != TokenType.WHITE_SPACE && type !in GoTextTokens.COMMENTS) previousCode = token
             lexer.advance()
         }
         return result.toList()

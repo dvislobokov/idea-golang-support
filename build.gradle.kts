@@ -32,6 +32,9 @@ dependencies {
         // for the content module io.github.golangsupport.lsp only: the rest of the plugin must not touch these classes
         bundledModule("intellij.platform.lsp")
         testFramework(TestFrameworkType.Platform)
+        // GoLanguage / GoFileType / GoColors live in go-psi-core (migration step 2); composed: its classes go into the main jar, which a
+        // plugin loads (lib/modules only serves declared content modules). Its META-INF/go-psi-core.xml is not included yet (step 3).
+        pluginComposedModule(implementation(project(":go-psi-core")))
     }
     testImplementation("junit:junit:4.13.2")
 }
@@ -136,8 +139,8 @@ intellijPlatform {
 }
 
 // --- go-psi library modules (go-psi-core, go-psi-semantic, go-psi-ide; docs/psi/) ------------------------------------------
-// Copied from go-psi with the package renamed to io.github.golangsupport. Not consumed by the plugin yet: the root project
-// neither depends on them nor includes their META-INF/go-psi-*.xml, so the shipped plugin is unchanged.
+// Copied from go-psi with the package renamed to io.github.golangsupport. The root project compiles against go-psi-core only
+// (one GoLanguage / GoFileType / GoColors) and includes none of their META-INF/go-psi-*.xml yet.
 // Their slow gates run with `--no-configuration-cache`: `:go-psi-core:corpusTest`, `benchmark` (testIde tasks).
 
 val psiTestDataDir = layout.projectDirectory.dir("testData").asFile

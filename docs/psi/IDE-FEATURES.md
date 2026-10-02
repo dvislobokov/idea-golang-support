@@ -8,7 +8,7 @@ behaviour is PSI/semantic based (`GoSemanticService`, stub indices); no LSP. Cod
 
 | EP | Class | Notes |
 |---|---|---|
-| `lang.syntaxHighlighterFactory`, `colorSettingsPage` | `highlighting.*` | lexer-based colors |
+| `lang.syntaxHighlighterFactory`, `colorSettingsPage` | — | none here: the root module's `lang.GoSyntaxHighlighter` / `GoColorSettingsPage`, keys `lang.GoColors` (go-psi-core) |
 | `lang.braceMatcher`, `lang.quoteHandler`, `lang.commenter`, `indexPatternBuilder` | `editor.*` | |
 | `lang.findUsagesProvider` | `editor.GoFindUsagesProvider` | words scanner + kind names |
 | `lang.foldingBuilder` | `folding.GoFoldingBuilder` | |
@@ -179,7 +179,7 @@ of another file (`setAssertOnFileLoadingFilter`).
 
 ### Lookup elements and insertion (`GoLookupElementFactory`)
 
-- Presentation: `GoIdeIcons` icon, tail text `(a int, b string) error` for functions and methods,
+- Presentation: `GoIdeIcons` icon (platform `AllIcons.Nodes.*` as the root module's `GoDeclarationIcons`, files `GoFileType.icon`), tail text `(a int, b string) error` for functions and methods,
   ` T` for variables/constants/fields/parameters, ` struct`/` interface`/` func`/` type` for
   types, ` (path)` for packages; type text: owning type for members, package for package
   members, `import` for unimported packages. Keywords and `nil true false iota` are bold.
@@ -300,9 +300,9 @@ gets the id appended.
 
 An `Annotator` that colours identifiers by declaration kind and by what references resolve to,
 using only the cached resolve (`GoResolver`; struct literal keys through `resolveFieldKey`),
-never expression typing directly. Keys (`GoHighlightingColors`, colour settings page
-"Identifiers" and "Builtins"): `GO_PACKAGE`, `GO_TYPE`, `GO_TYPE_PARAMETER`,
-`GO_FUNCTION_DECLARATION`, `GO_FUNCTION_CALL`, `GO_METHOD_DECLARATION`, `GO_METHOD_CALL`,
+never expression typing directly. Keys (`lang.GoColors` in go-psi-core, the palette of the root module's `GoSyntaxHighlighter` and
+colour page): `GO_PACKAGE`, `GO_TYPE_DECLARATION` (the name of a type spec), `GO_TYPE_REFERENCE` (other types, type parameters),
+`GO_FUNCTION_DECLARATION`, `GO_FUNCTION_CALL` (functions and methods alike),
 `GO_FIELD`, `GO_PARAMETER` (also receivers and named results), `GO_LOCAL_VARIABLE`,
 `GO_PACKAGE_VARIABLE`, `GO_CONSTANT`, `GO_LABEL`, `GO_BUILTIN_TYPE`, `GO_BUILTIN_FUNCTION`,
 `GO_BUILTIN_CONSTANT` (`true`, `false`, `nil`, `iota`), each falling back to a
@@ -312,7 +312,7 @@ dumb-aware.
 ### Tests
 
 `inspections.GoInspectionsTest` (17), `inspections.GoQuickFixesTest` (14),
-`inspections.GoInspectionsGorootTest` (2), `annotator.GoSemanticHighlightingTest` (3, golden
+`inspections.GoInspectionsGorootTest` (2), `annotator.GoSemanticHighlightingTest` (2, golden
 `testData/highlighting/semantic.txt`). Fixtures: `testData/inspections/*.go` (markup with the
 checker's messages), `testData/inspections/fixes/*.go` and `*_after.go`.
 

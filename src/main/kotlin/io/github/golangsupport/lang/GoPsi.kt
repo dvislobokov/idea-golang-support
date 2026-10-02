@@ -43,11 +43,11 @@ import javax.swing.Icon
  * a flat list: enough for highlighting, commenting, brace matching and word selection. The meaning of the code comes from gopls.
  */
 class GoParserDefinition : ParserDefinition {
-    override fun createLexer(project: Project?): Lexer = GoLexer()
+    override fun createLexer(project: Project?): Lexer = GoTextLexer()
     override fun createParser(project: Project?): PsiParser = PsiParser(GoTreeBuilder::build)
     override fun getFileNodeType(): IFileElementType = FILE
-    override fun getCommentTokens(): TokenSet = GoTokenTypes.COMMENTS
-    override fun getStringLiteralElements(): TokenSet = GoTokenTypes.STRINGS
+    override fun getCommentTokens(): TokenSet = GoTextTokens.COMMENTS
+    override fun getStringLiteralElements(): TokenSet = GoTextTokens.STRINGS
     override fun createElement(node: ASTNode): PsiElement = if (GoElementTypes.kindOf(node.elementType) != null) GoDeclaration(node) else ASTWrapperPsiElement(node)
     override fun createFile(viewProvider: FileViewProvider): PsiFile = GoFile(viewProvider)
 
@@ -58,7 +58,7 @@ class GoParserDefinition : ParserDefinition {
 
 /** One element type per kind of declaration: the PSI knows what it is without looking at the text again. */
 object GoElementTypes {
-    private val BY_KIND: Map<GoDeclarationKind, IElementType> = GoDeclarationKind.entries.associateWith { GoTokenType("DECLARATION_" + it.name) }
+    private val BY_KIND: Map<GoDeclarationKind, IElementType> = GoDeclarationKind.entries.associateWith { GoTextTokenType("DECLARATION_" + it.name) }
     private val KINDS: Map<IElementType, GoDeclarationKind> = BY_KIND.entries.associate { it.value to it.key }
 
     fun of(kind: GoDeclarationKind): IElementType = BY_KIND.getValue(kind)

@@ -18,7 +18,7 @@ import io.github.golangsupport.lang.GoImport
 import io.github.golangsupport.lang.GoImports
 import io.github.golangsupport.lang.GoPrefixMatcher
 import io.github.golangsupport.lang.GoStructLiterals
-import io.github.golangsupport.lang.GoTokenTypes
+import io.github.golangsupport.lang.GoTextTokens
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoSettings
 import javax.swing.Icon
@@ -62,7 +62,7 @@ object GoCatalogueInsertion {
 class GoCatalogueCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
         val file = parameters.originalFile as? GoFile ?: return
-        if (!GoSettings.getInstance().completionCatalogue || parameters.position.node?.elementType != GoTokenTypes.IDENTIFIER) return
+        if (!GoSettings.getInstance().completionCatalogue || parameters.position.node?.elementType != GoTextTokens.IDENTIFIER) return
         val text = parameters.editor.document.immutableCharSequence
         val typed = GoCompletionOrder.typed(text, parameters.offset)
         if (typed.length < MIN_TYPED || !GoImports.isPackagePlace(text, parameters.offset - typed.length)) return
