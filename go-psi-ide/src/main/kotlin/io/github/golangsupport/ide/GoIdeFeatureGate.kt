@@ -11,6 +11,14 @@ enum class GoIdeFeature {
     USAGES,
     /** The implementation gutter markers. */
     IMPLEMENTATION_MARKERS,
+    /** Code completion: the contributor and its confidence. */
+    COMPLETION,
+    /** Quick documentation, parameter info, expression type. */
+    HOVER,
+    /** The inspections over the semantic check, with their quick fixes, and the import optimizer. */
+    DIAGNOSTICS,
+    /** The semantic highlighting annotator (colours by resolve). */
+    SEMANTIC_COLORS,
 }
 
 /**

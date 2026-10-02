@@ -18,6 +18,10 @@ class GoIgsIdeFeatureGate : GoIdeFeatureGate {
             GoIdeFeature.NAVIGATION -> GoFeature.NAVIGATION
             GoIdeFeature.USAGES -> GoFeature.USAGES
             GoIdeFeature.IMPLEMENTATION_MARKERS -> GoFeature.CODE_VISION
+            GoIdeFeature.COMPLETION -> GoFeature.COMPLETION
+            GoIdeFeature.HOVER -> GoFeature.HOVER
+            GoIdeFeature.DIAGNOSTICS -> GoFeature.DIAGNOSTICS
+            GoIdeFeature.SEMANTIC_COLORS -> GoFeature.SEMANTIC_COLORS
         }
     }
 }

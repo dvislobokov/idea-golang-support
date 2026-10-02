@@ -66,6 +66,10 @@ class GoIdeFeatureGateTest : BasePlatformTestCase() {
         assertEquals(GoFeature.NAVIGATION, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.NAVIGATION))
         assertEquals(GoFeature.USAGES, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.USAGES))
         assertEquals(GoFeature.CODE_VISION, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.IMPLEMENTATION_MARKERS))
+        assertEquals(GoFeature.COMPLETION, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.COMPLETION))
+        assertEquals(GoFeature.HOVER, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.HOVER))
+        assertEquals(GoFeature.DIAGNOSTICS, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.DIAGNOSTICS))
+        assertEquals(GoFeature.SEMANTIC_COLORS, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.SEMANTIC_COLORS))
         settings.languageServerEnabled = true
         settings.navigationSource = GoFeatureSource.NATIVE
         settings.usagesSource = GoFeatureSource.GOPLS
