@@ -5,6 +5,8 @@ import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.psi.PsiElement
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.GoColors as C
 import io.github.golangsupport.lang.psi.GoAnonymousFieldDefinition
 import io.github.golangsupport.lang.psi.GoConstDefinition
@@ -38,11 +40,14 @@ import io.github.golangsupport.semantic.scope.GoUniverse
  * expression typing directly), so it stays cheap; not dumb-aware because resolve uses indices.
  * Unresolved references are left to the lexer colours (the unresolved-reference inspection marks them).
  * Keys are the plugin palette [C] (`GoColors`): a type's name in its spec is a declaration, every other type and type parameter a reference.
+ * Stands down while [GoIdeFeature.SEMANTIC_COLORS] is off at the host's gate (another source colours then).
  */
 class GoSemanticHighlightingAnnotator : Annotator {
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         val file = element.containingFile as? GoFile ?: return
+        // a settings read per element: the gate is cheap, and the host switch may flip between two highlighting passes
+        if (!GoIdeFeatureGate.enabled(GoIdeFeature.SEMANTIC_COLORS, element.project)) return
         when (element) {
             is GoReferenceExpression -> referenceKey(element, file)?.let { highlight(holder, element.identifier, it) }
             is GoTypeReferenceExpression -> typeReferenceKey(element)?.let { highlight(holder, element.identifier, it) }

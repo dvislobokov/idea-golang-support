@@ -3,6 +3,7 @@ package io.github.golangsupport.ide
 import com.intellij.codeInsight.navigation.actions.TypeDeclarationProvider
 import com.intellij.find.findUsages.FindUsagesHandlerFactory
 import com.intellij.lang.ImportOptimizer
+import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.lang.LanguageImportStatements
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
@@ -26,7 +27,7 @@ import io.github.golangsupport.ide.usages.GoFindUsagesHandlerFactory
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoTypeSpec
 
-/** A closed gate: every navigation, usages, completion, documentation and diagnostics extension of go-psi-ide stands down; the default gate lets everything through. */
+/** A closed gate: every navigation, usages, completion, documentation, diagnostics and semantic colours extension of go-psi-ide stands down; the default gate lets everything through. */
 class GoIdeFeatureGateTest : GoSemanticIdeTestBase() {
 
     private val shapes = """
@@ -147,6 +148,22 @@ class GoIdeFeatureGateTest : GoSemanticIdeTestBase() {
         assertTrue(problems.toString(), problems.any { it.startsWith("GoUnresolvedReference: ") && "undefinedName" in it })
         assertTrue(problems.toString(), problems.any { it.startsWith("GoUnusedImport: ") && "\"os\"" in it })
         assertTrue(goImportOptimizer().supports(myFixture.file))
+    }
+
+    /** The `GO_*` keys the semantic annotator laid over [name] with [text], in order of offset. */
+    private fun semanticColours(name: String, text: String): List<String> {
+        myFixture.configureByText(name, text)
+        return myFixture.doHighlighting().filter { it.severity == HighlightSeverity.INFORMATION }
+            .mapNotNull { it.forcedTextAttributesKey?.externalName?.takeIf { key -> key.startsWith("GO_") } }
+    }
+
+    /** SEMANTIC_COLORS off: the annotator colours nothing; the default gate colours the declarations and the resolved references. */
+    fun testClosedGateSemanticColours() {
+        val open = semanticColours("open.go", shapes)
+        assertTrue(open.toString(), "GO_TYPE_DECLARATION" in open && "GO_FUNCTION_DECLARATION" in open && "GO_TYPE_REFERENCE" in open)
+        close(GoIdeFeature.SEMANTIC_COLORS)
+        val closed = semanticColours("closed.go", shapes)
+        assertEmpty("no colour of the semantic annotator: $closed", closed)
     }
 
     fun testClosedGateFindUsagesOfMethod() {

@@ -43,8 +43,11 @@
     <!-- quick documentation, parameter info, expression type over the PSI (MIGRATION.md step 8f; the gate follows the switch Documentation) -->
     <xi:include href="/META-INF/go-psi-ide-documentation.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- diagnostics over that PSI: the inspections over the semantic check with their quick fixes, the suppressor and the import optimizer
-         (MIGRATION.md step 8g; the gate follows the switch Diagnostics; the annotator of go-psi-ide-highlighting.xml comes at 8d) -->
+         (MIGRATION.md step 8g; the gate follows the switch Diagnostics) -->
     <xi:include href="/META-INF/go-psi-ide-inspections.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- semantic colours over that PSI: the annotator that colours identifiers by what they resolve to; with it on duty the semantic tokens of gopls
+         and the text rules of GoIdentifierAnnotator stand down (MIGRATION.md step 8d; the gate follows the switch Semantic colours) -->
+    <xi:include href="/META-INF/go-psi-ide-highlighting.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->

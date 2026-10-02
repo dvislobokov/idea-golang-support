@@ -61,7 +61,6 @@ import com.intellij.platform.lsp.api.customization.LspSemanticTokensCustomizer
 import com.intellij.platform.lsp.api.customization.LspSignatureHelpCustomizer
 import com.intellij.platform.lsp.api.customization.LspSignatureHelpDisabled
 import com.intellij.platform.lsp.api.customization.LspSignatureHelpSupport
-import com.intellij.platform.lsp.api.customization.LspSemanticTokensDisabled
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.lang.GoFeature
@@ -219,12 +218,14 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         /**
          * The colours of the editor beyond what a lexer can tell: packages, references to types, fields, constants, parameters. The
          * platform asks for semantic tokens where a file has no highlighting of its own; a Go file has one, so it is said here.
-         * Follows [GoFeature.SEMANTIC_COLORS].
+         * Follows [GoFeature.SEMANTIC_COLORS] per file, not per descriptor: while the IDE indexes the native annotator is blind and gopls
+         * colours; in smart mode with the Built-in source the semantic annotator of go-psi-ide colours by resolve (MIGRATION.md step 8d).
          */
-        override val semanticTokensCustomizer: LspSemanticTokensCustomizer = if (native(GoFeature.SEMANTIC_COLORS)) LspSemanticTokensDisabled else object : LspSemanticTokensSupport() {
+        override val semanticTokensCustomizer: LspSemanticTokensCustomizer = object : LspSemanticTokensSupport() {
             // gopls refuses the request for a file above 100 000 bytes ("semantic tokens: range ... too large", seen live on a 140 KB
             // net/http/server.go); the platform reports every refusal as an unhandled exception, so such a file keeps the lexer colours
-            override fun shouldAskServerForSemanticTokens(psiFile: PsiFile): Boolean = psiFile is GoFile && psiFile.textLength <= GOPLS_SEMANTIC_TOKENS_MAX_BYTES
+            override fun shouldAskServerForSemanticTokens(psiFile: PsiFile): Boolean =
+                psiFile is GoFile && psiFile.textLength <= GOPLS_SEMANTIC_TOKENS_MAX_BYTES && !GoFeatures.native(GoFeature.SEMANTIC_COLORS, psiFile.project)
             override val tokenModifiers: List<String> get() = super.tokenModifiers + GoSemanticColors.MODIFIERS
             override fun getTextAttributesKey(tokenType: String, modifiers: List<String>): TextAttributesKey? = GoSemanticColors.key(tokenType, modifiers)
         }

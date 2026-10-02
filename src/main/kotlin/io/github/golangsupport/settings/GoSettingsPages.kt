@@ -70,6 +70,10 @@ class GoLanguageServerConfigurable(project: Project) : GoSettingsPage(project, "
                 comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::diagnosticsSource.toNullableProperty())
                     .comment(GoBundle.message("features.diagnostics.comment"))
             }
+            row(GoBundle.message("features.semanticColors")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::semanticColorsSource.toNullableProperty())
+                    .comment(GoBundle.message("features.semanticColors.comment"))
+            }
         }
     }
 

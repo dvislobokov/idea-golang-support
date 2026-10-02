@@ -11,6 +11,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiComment
@@ -134,13 +135,15 @@ class GoSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
 /**
  * Colours what the lexer cannot tell apart: predeclared identifiers, the names of declarations, calls, compiler directives (the lexer has
  * no token of their own: `//go:build` is a line comment). No resolve here: a shadowed `len` is still coloured as the builtin. The semantic
- * tokens of gopls, where it runs, are laid over this.
+ * tokens of gopls, where it runs, are laid over this. With the Built-in source of the semantic colours the identifiers are left to the
+ * semantic annotator of go-psi-ide, which colours them by resolve (MIGRATION.md step 8d); the directives are coloured here in every mode,
+ * no other source knows them.
  */
 class GoIdentifierAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         val key = when {
             element is PsiComment -> GoSyntaxHighlighter.DIRECTIVE.takeIf { isDirective(element.text) }
-            element.elementType == GoTypes.IDENTIFIER -> classify(element)
+            element.elementType == GoTypes.IDENTIFIER -> if (coloursIdentifiers(element.project)) classify(element) else null
             else -> null
         } ?: return
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(element).textAttributes(key).create()
@@ -177,6 +180,13 @@ class GoIdentifierAnnotator : Annotator {
     companion object {
         /** `//go:build`, `//go:generate`, `//line f.go:1`, `//export F`: what the toolchain reads, as gofmt and go/build tell them. */
         fun isDirective(comment: String): Boolean = comment.startsWith("//go:") || comment.startsWith("//line ") || comment.startsWith("//export ")
+
+        /**
+         * The text rules colour the identifiers while gopls is the source of the semantic colours (the tokens of the server are laid over
+         * them) and while the IDE indexes (the semantic annotator of go-psi-ide is not dumb-aware); with the Built-in source in smart mode
+         * that annotator colours every identifier it resolves, and these rules would paint a shadowed `len` over it.
+         */
+        fun coloursIdentifiers(project: Project): Boolean = !GoFeatures.native(GoFeature.SEMANTIC_COLORS, project) || DumbService.isDumb(project)
     }
 }
 

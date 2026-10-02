@@ -5,6 +5,12 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, step 8d (MIGRATION.md)
+- go-psi-ide: `GoSemanticHighlightingAnnotator` asks `GoIdeFeatureGate` for `SEMANTIC_COLORS` at its entry (per element: a settings read)
+  and colours nothing while the group is off; the host includes `go-psi-ide-highlighting.xml` and lets the semantic tokens of gopls and its
+  own text-rule annotator stand down when the group is on, so each identifier is coloured by one source. `GoIdeFeatureGateTest` covers the
+  closed gate (no `GO_*` info of the annotator in a highlighting pass).
+
 ### 2026-10-02 - Transplant into idea-golang-support, step 8g (MIGRATION.md)
 - go-psi-ide: the diagnostics follow `GoIdeFeatureGate` (`DIAGNOSTICS`): `GoDiagnosticsInspectionBase.checkFile` reports nothing and
   `GoImportOptimizer.supports` declines the file while the group is off; `GoInspectionSuppressor` works regardless. The semantic
