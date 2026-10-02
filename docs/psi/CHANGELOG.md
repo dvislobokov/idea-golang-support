@@ -6,6 +6,8 @@ stable on real-world projects.
 ## Unreleased
 
 ### 2026-10-02 - Transplant into idea-golang-support, step 8d (MIGRATION.md)
+- The default application services a host overrides (`DefaultGoToolchainProvider`, `DefaultGoLibraryRootsPolicy`, `DefaultGoIdeFeatureGate`) carry
+  `open="true"`: IntelliJ 2026.1 warns `InstanceNotOverridableException` for an `overrides="true"` of a service not declared open.
 - go-psi-ide: `GoSemanticHighlightingAnnotator` asks `GoIdeFeatureGate` for `SEMANTIC_COLORS` at its entry (per element: a settings read)
   and colours nothing while the group is off; the host includes `go-psi-ide-highlighting.xml` and lets the semantic tokens of gopls and its
   own text-rule annotator stand down when the group is on, so each identifier is coloured by one source. `GoIdeFeatureGateTest` covers the

@@ -19,7 +19,7 @@
 
     <!-- Which groups of go-psi-ide-navigation.xml answer: everything by default, a host plugin overrides the service with its switches. -->
     <applicationService serviceInterface="io.github.golangsupport.ide.GoIdeFeatureGate"
-                        serviceImplementation="io.github.golangsupport.ide.DefaultGoIdeFeatureGate"/>
+                        serviceImplementation="io.github.golangsupport.ide.DefaultGoIdeFeatureGate" open="true"/>
   </extensions>
   <!-- Warns once per session about plugins that register Go extensions under language="go" instead of "Go". -->
   <extensions defaultExtensionNs="com.intellij">

@@ -4,7 +4,7 @@
   <extensions defaultExtensionNs="com.intellij">
     <!-- Project model (Phase 4). Host plugins may replace these with overrides="true". -->
     <applicationService serviceInterface="io.github.golangsupport.project.api.GoToolchainProvider"
-                        serviceImplementation="io.github.golangsupport.project.impl.DefaultGoToolchainProvider"/>
+                        serviceImplementation="io.github.golangsupport.project.impl.DefaultGoToolchainProvider" open="true"/>
     <projectService serviceInterface="io.github.golangsupport.project.api.GoModuleGraphProvider"
                     serviceImplementation="io.github.golangsupport.project.impl.DefaultGoModuleGraphProvider"/>
     <projectService serviceInterface="io.github.golangsupport.project.api.GoPackageResolver"

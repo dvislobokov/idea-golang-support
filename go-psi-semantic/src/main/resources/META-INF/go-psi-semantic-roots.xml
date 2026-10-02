@@ -5,7 +5,7 @@
   <extensions defaultExtensionNs="com.intellij">
     <additionalLibraryRootsProvider implementation="io.github.golangsupport.project.impl.GoRootsProvider"/>
     <applicationService serviceInterface="io.github.golangsupport.project.impl.GoLibraryRootsPolicy"
-                        serviceImplementation="io.github.golangsupport.project.impl.DefaultGoLibraryRootsPolicy"/>
+                        serviceImplementation="io.github.golangsupport.project.impl.DefaultGoLibraryRootsPolicy" open="true"/>
     <registryKey key="gopsi.libraryRoots" defaultValue="true"
                  description="Index $GOROOT/src and resolved Go module directories as library roots (go-psi)."/>
     <registryKey key="gopsi.libraryRoots.includeCmd" defaultValue="false"
