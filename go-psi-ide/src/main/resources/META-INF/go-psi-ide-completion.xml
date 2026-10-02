@@ -3,7 +3,7 @@
 <idea-plugin>
   <extensions defaultExtensionNs="com.intellij">
     <!-- Phase 6d: completion (docs/IDE-FEATURES.md). -->
-    <completion.contributor language="Go" order="first"
+    <completion.contributor language="Go" id="goPsiCompletion" order="first"
                             implementationClass="io.github.golangsupport.ide.completion.GoCompletionContributor"/>
     <completion.confidence language="Go" order="first"
                            implementationClass="io.github.golangsupport.ide.completion.GoCompletionConfidence"/>

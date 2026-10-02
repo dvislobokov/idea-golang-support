@@ -13,8 +13,11 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns.psiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.completion.GoCompletionContext.Kind
 import io.github.golangsupport.ide.completion.api.GoCompletionCandidate
 import io.github.golangsupport.ide.completion.api.GoCompletionRanker
@@ -48,8 +51,21 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
         if (context.file is GoFile) context.dummyIdentifier = CompletionUtil.DUMMY_IDENTIFIER_TRIMMED
     }
 
+    /** Nothing when the host serves completion from another source ([GoIdeFeature.COMPLETION] off) or in a code fragment. */
+    override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
+        if (!GoIdeFeatureGate.enabled(GoIdeFeature.COMPLETION, parameters.position.project)) return
+        if (isCodeFragment(parameters.originalFile)) return
+        super.fillCompletionVariants(parameters, result)
+    }
+
     companion object {
         private val LOG = logger<GoCompletionContributor>()
+
+        /**
+         * A Go file made from text and kept in no directory (a non-physical file, or a light one without a parent): the expression
+         * editor of a debugger, a preview. It has no package around it, and the host that made it completes it itself.
+         */
+        fun isCodeFragment(file: PsiFile): Boolean = file.virtualFile?.parent == null
 
         /** Converts candidates, lets a registered [GoCompletionRanker] score them, and adds them to [result]. */
         fun emit(candidates: List<GoCandidate>, context: GoCompletionContext, result: CompletionResultSet) {

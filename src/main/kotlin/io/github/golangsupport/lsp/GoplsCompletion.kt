@@ -44,6 +44,10 @@ class GoplsCompletionSupport : LspCompletionSupport() {
 
     @Volatile private var expected: Expected? = null
 
+    /** Not when the plugin's PSI is the source of completion; while the IDE indexes the PSI stands down and the server answers. */
+    override fun shouldRunCodeCompletion(parameters: CompletionParameters): Boolean =
+        !GoFeatures.native(GoFeature.COMPLETION, parameters.originalFile.project) && super.shouldRunCodeCompletion(parameters)
+
     override fun createLookupElement(parameters: CompletionParameters, item: CompletionItem): LookupElement? {
         if (item.insertTextFormat == InsertTextFormat.Snippet) {
             item.insertText = item.insertText?.let(GoSnippets::unescape)

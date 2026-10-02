@@ -17,6 +17,7 @@ import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.builder.toNullableProperty
 import com.intellij.ui.layout.selectedValueMatches
 import io.github.golangsupport.GoBundle
+import io.github.golangsupport.lang.GoFeature
 
 /**
  * A page under Settings | Tools | Go: one area each, so that a page is read in one look. The settings are application-level; the
@@ -57,14 +58,28 @@ class GoLanguageServerConfigurable(project: Project) : GoSettingsPage(project, "
                 comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::usagesSource.toNullableProperty())
                     .comment(GoBundle.message("features.usages.comment"))
             }
+            row(GoBundle.message("features.completion")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::completionSource.toNullableProperty())
+                    .comment(GoBundle.message("features.completion.comment"))
+            }
+            row(GoBundle.message("features.hover")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::hoverSource.toNullableProperty())
+                    .comment(GoBundle.message("features.hover.comment"))
+            }
+            row(GoBundle.message("features.diagnostics")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::diagnosticsSource.toNullableProperty())
+                    .comment(GoBundle.message("features.diagnostics.comment"))
+            }
         }
     }
 
+    private fun sources() = GoFeature.entries.map(settings::featureSource)
+
     /** A changed source shows at once: the error elements and the gopls annotations are both decided per highlighting pass, so a restart of the daemon is enough. */
     override fun apply() {
-        val before = listOf(settings.syntaxErrorsSource, settings.navigationSource, settings.usagesSource)
+        val before = sources()
         super.apply()
-        val after = listOf(settings.syntaxErrorsSource, settings.navigationSource, settings.usagesSource)
+        val after = sources()
         if (after != before) ProjectManager.getInstance().openProjects.forEach { DaemonCodeAnalyzer.getInstance(it).restart() }
     }
 }

@@ -1,9 +1,9 @@
-<!-- go-psi-ide, inspections and semantic highlighting: the annotator over resolve, the inspections over GoSemanticService.check, the suppressor and import optimizer.
-     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<!-- go-psi-ide, inspections: the inspections over GoSemanticService.check with their quick fixes, the suppressor and the import optimizer
+     (the semantic highlighting annotator is go-psi-ide-highlighting.xml). Included by the host plugin when the feature moves to the PSI
+     (MIGRATION.md, step 8g; the inspections and the optimizer ask GoIdeFeatureGate for DIAGNOSTICS first); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
 <idea-plugin>
   <extensions defaultExtensionNs="com.intellij">
-    <!-- Phase 6d: inspections over GoSemanticService.check, quick fixes, semantic highlighting (docs/IDE-FEATURES.md). -->
-    <annotator language="Go" implementationClass="io.github.golangsupport.ide.annotator.GoSemanticHighlightingAnnotator"/>
+    <!-- Phase 6d: inspections over GoSemanticService.check, quick fixes (docs/IDE-FEATURES.md). -->
     <lang.inspectionSuppressor language="Go" implementationClass="io.github.golangsupport.ide.inspections.GoInspectionSuppressor"/>
     <lang.importOptimizer language="Go" implementationClass="io.github.golangsupport.ide.inspections.GoImportOptimizer"/>
     <localInspection language="Go" shortName="GoUnresolvedReference" displayName="Unresolved reference"

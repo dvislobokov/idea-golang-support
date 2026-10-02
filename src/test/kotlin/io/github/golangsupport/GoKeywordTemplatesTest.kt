@@ -20,6 +20,16 @@ class GoKeywordTemplatesTest {
     private fun labels(source: String, test: Boolean = false): List<String> = GoKeywordTemplates.items(context(source, test) ?: error("no context")).map { it.label }
 
     @Test
+    fun aBareWordOfAnotherContributorHidesBehindTheTemplateOfTheSameWord() {
+        val own = setOf("if", "err", "for", "t.Run", "Run")
+        assertTrue("a bare keyword", GoKeywordTemplates.hides("if", hasDeclaration = false, own = own))
+        assertTrue("an extra lookup", GoKeywordTemplates.hides("Run", hasDeclaration = false, own = own))
+        assertFalse("a declaration of the same name stays", GoKeywordTemplates.hides("Run", hasDeclaration = true, own = own))
+        assertFalse("another word", GoKeywordTemplates.hides("iferr", hasDeclaration = false, own = own))
+        assertFalse("nothing of our own", GoKeywordTemplates.hides("if", hasDeclaration = false, own = emptySet()))
+    }
+
+    @Test
     fun theTopOfAFileOffersDeclarations() {
         val labels = labels("package main\n\nimport \"fmt\"\n\nty|\n\nfunc main() {}\n")
         assertTrue(labels.toString(), "type Name struct {...}" in labels && "type Name interface {...}" in labels && "const (... = iota)" in labels && "import (...)" in labels)

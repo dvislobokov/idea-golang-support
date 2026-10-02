@@ -1,0 +1,7 @@
+<!-- go-psi-ide, semantic highlighting: the annotator that colours identifiers by what they resolve to (phase 6d, docs/IDE-FEATURES.md).
+     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8d); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <annotator language="Go" implementationClass="io.github.golangsupport.ide.annotator.GoSemanticHighlightingAnnotator"/>
+  </extensions>
+</idea-plugin>

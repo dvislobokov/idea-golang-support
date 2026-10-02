@@ -9,6 +9,8 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.completion.GoImportInserter
 import io.github.golangsupport.ide.completion.GoImportPaths
 import io.github.golangsupport.ide.formatter.GoImportSorter
@@ -175,7 +177,8 @@ class GoOptimizeImportsFix : LocalQuickFix {
  * Existing blank-line groups are kept; specs are not regrouped into standard/third-party blocks.
  */
 class GoImportOptimizer : com.intellij.lang.ImportOptimizer {
-    override fun supports(file: PsiFile): Boolean = file is GoFile
+    /** Not ours while the diagnostics come from another source: Optimize Imports then falls back to whatever the host has. */
+    override fun supports(file: PsiFile): Boolean = file is GoFile && GoIdeFeatureGate.enabled(GoIdeFeature.DIAGNOSTICS, file.project)
 
     override fun processFile(file: PsiFile): Runnable {
         val go = file as? GoFile ?: return Runnable {}

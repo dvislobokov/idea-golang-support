@@ -34,7 +34,6 @@ import com.intellij.platform.lsp.api.customization.LspCodeLensSupport
 import com.intellij.platform.lsp.api.customization.LspCommandsCustomizer
 import com.intellij.platform.lsp.api.customization.LspCommandsSupport
 import com.intellij.platform.lsp.api.customization.LspCompletionCustomizer
-import com.intellij.platform.lsp.api.customization.LspCompletionDisabled
 import com.intellij.platform.lsp.api.customization.LspCustomization
 import com.intellij.platform.lsp.api.customization.LspDiagnosticsCustomizer
 import com.intellij.platform.lsp.api.customization.LspDiagnosticsDisabled
@@ -59,6 +58,9 @@ import com.intellij.platform.lsp.api.customization.LspRenameCustomizer
 import com.intellij.platform.lsp.api.customization.LspRenameDisabled
 import com.intellij.platform.lsp.api.customization.LspRenameSupport
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensCustomizer
+import com.intellij.platform.lsp.api.customization.LspSignatureHelpCustomizer
+import com.intellij.platform.lsp.api.customization.LspSignatureHelpDisabled
+import com.intellij.platform.lsp.api.customization.LspSignatureHelpSupport
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensDisabled
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
 import com.intellij.psi.PsiFile
@@ -227,11 +229,20 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
             override fun getTextAttributesKey(tokenType: String, modifiers: List<String>): TextAttributesKey? = GoSemanticColors.key(tokenType, modifiers)
         }
 
-        /** Follows [GoFeature.COMPLETION]. */
-        override val completionCustomizer: LspCompletionCustomizer = if (native(GoFeature.COMPLETION)) LspCompletionDisabled else GoplsCompletionSupport()
+        /**
+         * Follows [GoFeature.COMPLETION] per request, not per descriptor ([GoplsCompletionSupport.shouldRunCodeCompletion]): with the
+         * PSI as the source gopls still answers while the IDE indexes, when the native contributor is blind.
+         */
+        override val completionCustomizer: LspCompletionCustomizer = GoplsCompletionSupport()
 
         /** Follows [GoFeature.HOVER]. */
         override val hoverCustomizer: LspHoverCustomizer = if (native(GoFeature.HOVER)) LspHoverDisabled else LspHoverSupport()
+
+        /**
+         * Parameter info (Ctrl+P): the platform's `LspParameterInfoHandler` is registered for every language and asks this customizer
+         * before `textDocument/signatureHelp`. Follows [GoFeature.HOVER] with the native handler of go-psi-ide, so one of the two answers.
+         */
+        override val signatureHelpCustomizer: LspSignatureHelpCustomizer = if (native(GoFeature.HOVER)) LspSignatureHelpDisabled else LspSignatureHelpSupport()
 
         /** Follows [GoFeature.RENAME]. */
         override val renameCustomizer: LspRenameCustomizer = if (native(GoFeature.RENAME)) LspRenameDisabled else LspRenameSupport()
@@ -382,14 +393,16 @@ class RestartGoplsAction : AnAction(), DumbAware {
  * The diagnostics of gopls as annotations, minus the ones that no longer fit the file: a diagnostic published for a longer version
  * of a big file (format on save shrank it) arrives with a range past the end, and the platform threw "Range must be inside element
  * being annotated" instead of dropping it (seen live on a 135 KB file). The next publish replaces them anyway.
- * Minus, too, the syntax errors when the plugin's parser shows its own ([GoFeature.SYNTAX_ERRORS], MIGRATION.md step 8a): one underline per
- * error, not two. Type errors (`source == "compiler"`) stay until the native diagnostics (step 8g).
+ * Minus, too, the syntax errors when the plugin's parser shows its own ([GoFeature.SYNTAX_ERRORS], MIGRATION.md step 8a) and the type errors
+ * (`source == "compiler"`) when the native inspections report them ([GoFeature.DIAGNOSTICS], step 8g): one underline per error, not two.
+ * The analyzers of gopls stay in every mode: the PSI has none yet.
  */
 class GoplsDiagnosticsSupport : LspDiagnosticsSupport() {
     override fun createAnnotation(holder: AnnotationHolder, diagnostic: Diagnostic, textRange: TextRange, quickFixes: List<IntentionAction>) {
         val file = holder.currentAnnotationSession.file
         if (!fits(textRange, file.textLength)) return
-        if (!accepts(diagnostic.source, GoFeatures.native(GoFeature.SYNTAX_ERRORS, file.project))) return
+        val project = file.project
+        if (!accepts(diagnostic.source, GoFeatures.native(GoFeature.SYNTAX_ERRORS, project), GoFeatures.native(GoFeature.DIAGNOSTICS, project))) return
         super.createAnnotation(holder, diagnostic, textRange, quickFixes)
     }
 
@@ -397,7 +410,16 @@ class GoplsDiagnosticsSupport : LspDiagnosticsSupport() {
         /** Whether a diagnostic at [range] can be annotated in a file of [textLength] characters. */
         fun fits(range: TextRange, textLength: Int): Boolean = range.startOffset >= 0 && range.endOffset <= textLength
 
-        /** Whether a diagnostic of [source] is shown: the syntax errors of gopls are not when the plugin's parser shows its own ([nativeSyntaxErrors]). */
-        fun accepts(source: String?, nativeSyntaxErrors: Boolean): Boolean = !(nativeSyntaxErrors && source == "syntax")
+        /**
+         * Whether a diagnostic of [source] is shown: the syntax errors of gopls (`source == "syntax"`) are not when the plugin's parser shows its own
+         * ([nativeSyntaxErrors]), its type-checker errors (`"compiler"`) are not when the native inspections report them ([nativeDiagnostics]).
+         * Everything else stays whatever the switches say: the analyzers (`printf`, `unusedparams`, staticcheck's `SA…`/`ST…`, …) have no
+         * native counterpart yet, `go list` / `go mod tidy` speak for the module, and a source-less diagnostic is nobody's to drop.
+         */
+        fun accepts(source: String?, nativeSyntaxErrors: Boolean, nativeDiagnostics: Boolean): Boolean = when (source) {
+            "syntax" -> !nativeSyntaxErrors
+            "compiler" -> !nativeDiagnostics
+            else -> true
+        }
     }
 }

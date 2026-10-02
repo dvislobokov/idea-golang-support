@@ -5,6 +5,25 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, step 8g (MIGRATION.md)
+- go-psi-ide: the diagnostics follow `GoIdeFeatureGate` (`DIAGNOSTICS`): `GoDiagnosticsInspectionBase.checkFile` reports nothing and
+  `GoImportOptimizer.supports` declines the file while the group is off; `GoInspectionSuppressor` works regardless. The semantic
+  highlighting annotator moved from `go-psi-ide-inspections.xml` to its own descriptor `go-psi-ide-highlighting.xml`, so a host can
+  include the inspections (step 8g) without the colours (step 8d); the test descriptor includes both.
+
+### 2026-10-02 - Transplant into idea-golang-support, step 8f (MIGRATION.md)
+- go-psi-ide: the extensions of `go-psi-ide-documentation.xml` ask `GoIdeFeatureGate` for `HOVER` at their entry: `GoDocumentationTargetProvider`
+  gives no target, `GoExpressionTypeProvider` no expressions, `GoParameterInfoHandler` no argument list when the group is off (the platform's
+  `ShowParameterInfoHandler` takes the first handler of the language that answers, so no ordering is needed).
+
+### 2026-10-02 - Transplant into idea-golang-support, step 8e (MIGRATION.md)
+- go-psi-ide: `GoCompletionContributor` (now `id="goPsiCompletion"`, so a host can order its own contributors around it) and
+  `GoCompletionConfidence` ask `GoIdeFeatureGate` for `COMPLETION` at the entry and stand down when it is off (the contributor adds nothing,
+  the confidence answers `UNSURE`). A Go file in no directory (`virtualFile?.parent == null`: a code fragment made from text, such as a
+  debugger's expression editor) is not completed either: `GoCompletionContributor.isCodeFragment`. Weighers unchanged.
+- Known gap of the host's Built-in source: braces after a struct type and parameter info after `(` of a completed call
+  (`completionStructBraces` / `completionArguments`) apply to gopls and catalogue items only; PSI items get them at step 9.
+
 ### 2026-10-02 - Transplant into idea-golang-support, step 8c (MIGRATION.md)
 - go-psi-ide: `ide.GoIdeFeatureGate` (application service, default `DefaultGoIdeFeatureGate` in `go-psi-ide-editor.xml`) is asked at the
   entry of every extension of `go-psi-ide-navigation.xml` for its group (`NAVIGATION`, `USAGES`, `IMPLEMENTATION_MARKERS`); the host

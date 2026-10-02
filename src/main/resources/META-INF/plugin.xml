@@ -38,6 +38,13 @@
          read/write access, Find Usages handler, exit points (MIGRATION.md step 8c; the gate GoIgsIdeFeatureGate follows the switches
          Navigation / Usages / Code vision) -->
     <xi:include href="/META-INF/go-psi-ide-navigation.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- code completion over that PSI: contributor, confidence, weighers (MIGRATION.md step 8e; the gate follows the switch Completion) -->
+    <xi:include href="/META-INF/go-psi-ide-completion.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- quick documentation, parameter info, expression type over the PSI (MIGRATION.md step 8f; the gate follows the switch Documentation) -->
+    <xi:include href="/META-INF/go-psi-ide-documentation.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- diagnostics over that PSI: the inspections over the semantic check with their quick fixes, the suppressor and the import optimizer
+         (MIGRATION.md step 8g; the gate follows the switch Diagnostics; the annotator of go-psi-ide-highlighting.xml comes at 8d) -->
+    <xi:include href="/META-INF/go-psi-ide-inspections.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->
@@ -90,8 +97,9 @@
         <postStartupActivity implementation="io.github.golangsupport.help.GoWelcomePageActivity"/>
         <!-- `nil, err` after `return`: the values of the function as one item -->
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoReturnCompletionContributor"/>
-        <!-- `type Name struct {...}`, `for i, x := range xs`: what a keyword can begin here, expanded as live templates -->
-        <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoKeywordCompletionContributor"/>
+        <!-- `type Name struct {...}`, `for i, x := range xs`: what a keyword can begin here, expanded as live templates; before the native
+             contributor, whose bare keywords and snippets of the same lookup string it hides when the PSI is the source (step 8e) -->
+        <completion.contributor language="Go" order="first, before goPsiCompletion" implementationClass="io.github.golangsupport.lang.GoKeywordCompletionContributor"/>
         <!-- `404` → `http.StatusNotFound`; the layouts of time.Parse / Format inside the string -->
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoValueCompletionContributor"/>
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>

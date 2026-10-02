@@ -8,6 +8,8 @@ import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.semantic.api.GoDiagnostic
 
@@ -15,7 +17,8 @@ import io.github.golangsupport.semantic.api.GoDiagnostic
  * Base of the inspections that report type-checker diagnostics ([GoDiagnosticsCache]): each
  * subclass owns a set of diagnostic classes ([GoDiagnosticClasses]), so every class can be
  * toggled and its severity changed in the inspection profile. Not dumb-aware: the checker
- * resolves through stub indices, so the inspections are skipped while indexing.
+ * resolves through stub indices, so the inspections are skipped while indexing. Reports nothing
+ * while the host serves diagnostics from another source ([GoIdeFeature.DIAGNOSTICS] off).
  */
 abstract class GoDiagnosticsInspectionBase : LocalInspectionTool() {
 
@@ -31,7 +34,7 @@ abstract class GoDiagnosticsInspectionBase : LocalInspectionTool() {
     protected open fun fixes(d: GoDiagnostic, file: GoFile, element: PsiElement): List<LocalQuickFix> = emptyList()
 
     override fun checkFile(file: PsiFile, manager: InspectionManager, isOnTheFly: Boolean): Array<ProblemDescriptor>? {
-        if (file !is GoFile) return null
+        if (file !is GoFile || !GoIdeFeatureGate.enabled(GoIdeFeature.DIAGNOSTICS, file.project)) return null
         val out = ArrayList<ProblemDescriptor>()
         for (d in GoDiagnosticsCache.diagnostics(file)) {
             if (!accepts(d.code) || !isReported(d)) continue

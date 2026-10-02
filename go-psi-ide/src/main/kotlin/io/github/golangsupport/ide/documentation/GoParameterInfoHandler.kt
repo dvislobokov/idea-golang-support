@@ -6,6 +6,9 @@ import com.intellij.lang.parameterInfo.ParameterInfoUIContext
 import com.intellij.lang.parameterInfo.ParameterInfoUtils
 import com.intellij.lang.parameterInfo.UpdateParameterInfoContext
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoArgumentList
 import io.github.golangsupport.lang.psi.GoCallExpr
 import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
@@ -104,7 +107,9 @@ class GoParameterInfoHandler : ParameterInfoHandler<GoArgumentList, GoParameterI
     }
 
     companion object {
-        private fun findArgumentList(file: com.intellij.psi.PsiFile, offset: Int): GoArgumentList? {
+        /** The argument list at [offset]; null when [GoIdeFeature.HOVER] is off: `ShowParameterInfoHandler` asks every handler of the language and takes the first answer. */
+        private fun findArgumentList(file: PsiFile, offset: Int): GoArgumentList? {
+            if (!GoIdeFeatureGate.enabled(GoIdeFeature.HOVER, file.project)) return null
             val list = ParameterInfoUtils.findParentOfType(file, offset, GoArgumentList::class.java) ?: return null
             // The caret must be after '(' (and before or at ')').
             if (offset <= list.textRange.startOffset) return null

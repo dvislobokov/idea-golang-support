@@ -12,6 +12,8 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.GoIdeIcons
 import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.lang.psi.GoAnonymousFieldDefinition
@@ -26,10 +28,11 @@ import io.github.golangsupport.project.api.GoPackageResolver
 
 /**
  * `platform.backend.documentation.psiTargetProvider`: Quick Documentation (Ctrl+Q) and hover for
- * Go declarations, imports and package directories.
+ * Go declarations, imports and package directories. Stands down when the host serves [GoIdeFeature.HOVER] otherwise.
  */
 class GoDocumentationTargetProvider : PsiDocumentationTargetProvider {
     override fun documentationTarget(element: PsiElement, originalElement: PsiElement?): DocumentationTarget? = when {
+        !GoIdeFeatureGate.enabled(GoIdeFeature.HOVER, element.project) -> null
         element is GoNamedElement && element.containingFile is GoFile -> GoDocumentationTarget(element)
         element is PsiDirectory && element.files.any { it is GoFile } -> GoDocumentationTarget(element)
         else -> null

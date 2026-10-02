@@ -195,6 +195,13 @@ object GoKeywordTemplates {
         else -> "v"
     }
 
+    /**
+     * Whether an item of another contributor with [lookupString] is hidden behind the templates whose lookups are [own]: a bare keyword
+     * or a snippet of the native contributor (`if`, `for`, `switch`: nothing declared behind it) says the same as the template of that
+     * word; a declaration that happens to share the word (a method named `Run`) stays.
+     */
+    fun hides(lookupString: String, hasDeclaration: Boolean, own: Set<String>): Boolean = !hasDeclaration && lookupString in own
+
     /** The names of the stops of a template, in the order of their first appearance; `$END$` is the caret, not a stop. */
     fun stops(template: String): List<String> = STOP.findAll(template).map { it.groupValues[1] }.filter { it != "END" }.distinct().toList()
 
@@ -225,11 +232,19 @@ class GoKeywordCompletionContributor : CompletionContributor() {
         if (typed.isEmpty() && !parameters.isExtendedCompletion) return
         val items = result.withPrefixMatcher(GoPrefixMatcher(typed))
         val missingMethods = if (context.place == GoKeywordTemplates.Place.TOP && context.methods.isNotEmpty()) GoKeywordTemplates.interfaceItems(context, interfacesOf(file)) else emptyList()
+        val own = HashSet<String>()
         for (item in missingMethods + GoKeywordTemplates.items(context)) {
             val element = LookupElementBuilder.create(item, item.keyword).withLookupStrings(item.lookups).withPresentableText(item.label).withTypeText(item.typeText, true)
                 .withIcon(if (item.action != null) AllIcons.Actions.Edit else if (item in missingMethods) AllIcons.Gutter.ImplementingMethod else AllIcons.Nodes.Template)
                 .withInsertHandler { context, _ -> if (item.action == GoKeywordTemplates.JSON) fromJson(context, file) else expand(context, item) }
             items.addElement(PrioritizedLookupElement.withPriority(element, if (item in missingMethods) PRIORITY + 1 else PRIORITY))
+            own += item.keyword
+            own += item.lookups
+        }
+        // the native contributor comes next (plugin.xml: this one is "before goPsiCompletion"): its bare keywords and snippets of the
+        // same word would double a template; gopls has no bare keywords, so with it the list is left as it is
+        if (own.isNotEmpty() && GoFeatures.native(GoFeature.COMPLETION, file.project)) {
+            result.runRemainingContributors(parameters) { r -> if (!GoKeywordTemplates.hides(r.lookupElement.lookupString, r.lookupElement.psiElement != null, own)) result.passResult(r) }
         }
     }
 

@@ -6,6 +6,8 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.ThreeState
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoImportSpec
 import io.github.golangsupport.lang.psi.GoStringLiteral
 import io.github.golangsupport.lang.psi.GoTokenSets
@@ -17,6 +19,8 @@ import io.github.golangsupport.lang.psi.GoTypes
  */
 class GoCompletionConfidence : CompletionConfidence() {
     override fun shouldSkipAutopopup(editor: Editor, contextElement: PsiElement, psiFile: PsiFile, offset: Int): ThreeState {
+        // another source completes: its own confidence decides
+        if (!GoIdeFeatureGate.enabled(GoIdeFeature.COMPLETION, psiFile.project)) return ThreeState.UNSURE
         val type = contextElement.node?.elementType ?: return ThreeState.UNSURE
         if (contextElement is PsiComment || GoTokenSets.COMMENTS.contains(type)) return ThreeState.YES
         if (GoTokenSets.STRING_LITERALS.contains(type)) {

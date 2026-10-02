@@ -15,6 +15,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.psi.PsiFile
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lint.GoLintOutput
 import io.github.golangsupport.settings.GoLanguageServerControl
@@ -53,8 +55,18 @@ class GoBuildProblems(private val project: Project) {
     companion object {
         fun getInstance(project: Project): GoBuildProblems = project.service()
 
-        /** The language server takes over as soon as it is there and switched on: two underlines for one error help nobody. */
-        fun shouldShow(): Boolean = GoLanguageServerControl.EP.extensionList.isEmpty() || !GoSettings.getInstance().languageServerEnabled
+        /**
+         * Whether the editor shows the messages of the last build in [project]. The language server takes over as soon as it is there and
+         * switched on: two underlines for one error help nobody. With the native PSI as the source of diagnostics gopls no longer underlines
+         * compiler errors ([io.github.golangsupport.lang.GoFeature.DIAGNOSTICS]), and the messages of an explicit build are the compiler's
+         * word on what the checker may have missed, so they come back.
+         */
+        fun shouldShow(project: Project): Boolean =
+            shouldShow(GoLanguageServerControl.EP.extensionList.isEmpty(), GoSettings.getInstance().languageServerEnabled, GoFeatures.native(GoFeature.DIAGNOSTICS, project))
+
+        /** The pure rule of [shouldShow]: no server module, the server off, or the diagnostics served natively. */
+        fun shouldShow(noLanguageServerModule: Boolean, languageServerEnabled: Boolean, nativeDiagnostics: Boolean): Boolean =
+            noLanguageServerModule || !languageServerEnabled || nativeDiagnostics
     }
 }
 
@@ -63,7 +75,7 @@ class GoBuildProblemsAnnotator : ExternalAnnotator<List<GoBuildProblem>, List<Go
     override fun collectInformation(file: PsiFile, editor: Editor, hasErrors: Boolean): List<GoBuildProblem>? = collectInformation(file)
 
     override fun collectInformation(file: PsiFile): List<GoBuildProblem>? {
-        if (file !is GoFile || !GoBuildProblems.shouldShow()) return null
+        if (file !is GoFile || !GoBuildProblems.shouldShow(file.project)) return null
         val virtualFile = file.virtualFile?.takeIf { it.isInLocalFileSystem } ?: return null
         if (FileDocumentManager.getInstance().isFileModified(virtualFile)) return null
         return GoBuildProblems.getInstance(file.project).of(virtualFile.path).takeIf { it.isNotEmpty() }
