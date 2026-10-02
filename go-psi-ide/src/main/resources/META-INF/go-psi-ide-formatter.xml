@@ -1,0 +1,13 @@
+<!-- go-psi-ide, formatter: gofmt-compatible formatting model and code style.
+     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Phase 6b: gofmt-compatible formatter. -->
+    <lang.formatter language="Go" implementationClass="io.github.golangsupport.ide.formatter.GoFormattingModelBuilder"/>
+    <langCodeStyleSettingsProvider implementation="io.github.golangsupport.ide.formatter.GoLanguageCodeStyleSettingsProvider"/>
+    <codeStyleSettingsProvider implementation="io.github.golangsupport.ide.formatter.GoCodeStyleSettingsProvider"/>
+    <preFormatProcessor implementation="io.github.golangsupport.ide.formatter.GoImportSorter"/>
+    <postFormatProcessor implementation="io.github.golangsupport.ide.formatter.GoFileEdgesPostFormatProcessor"/>
+
+  </extensions>
+</idea-plugin>

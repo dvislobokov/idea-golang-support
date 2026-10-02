@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
     <id>io.github.golangsupport</id>
     <name>Go Project Support</name>
     <vendor>dvislobokov</vendor>
@@ -22,6 +22,12 @@
     <content>
         <module name="io.github.golangsupport.lsp"/>
     </content>
+
+    <!-- the native Go PSI (go-psi-core, go-psi-semantic; docs/psi/, MIGRATION.md): stub and file indices, project model and semantic services.
+         Not the parser (go-psi-core-language.xml, step 4), not the library roots (go-psi-semantic-roots.xml, step 7), not the IDE features
+         (go-psi-ide-*.xml, one per feature at step 8) -->
+    <xi:include href="/META-INF/go-psi-core.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="/META-INF/go-psi-semantic.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->

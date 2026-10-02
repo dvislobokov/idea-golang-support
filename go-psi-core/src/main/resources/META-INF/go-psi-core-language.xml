@@ -1,0 +1,15 @@
+<!-- The language registrations of go-psi-core: file type, parser, AST factory. Kept apart from go-psi-core.xml because the host
+     plugin registers the file type itself and switches to this parser at migration step 4 (MIGRATION.md); the tests of the modules include both. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType name="Go"
+              language="Go"
+              extensions="go"
+              implementationClass="io.github.golangsupport.lang.GoFileType"
+              fieldName="INSTANCE"/>
+    <lang.parserDefinition language="Go"
+                           implementationClass="io.github.golangsupport.lang.parser.GoParserDefinition"/>
+    <!-- Comments as GoCommentImpl: a PsiComment without the injection-host overhead (docs/FORMATTER.md). -->
+    <lang.ast.factory language="Go" implementationClass="io.github.golangsupport.lang.psi.impl.GoASTFactory"/>
+  </extensions>
+</idea-plugin>

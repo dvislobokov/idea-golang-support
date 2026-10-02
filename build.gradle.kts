@@ -1,4 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -32,9 +33,12 @@ dependencies {
         // for the content module io.github.golangsupport.lsp only: the rest of the plugin must not touch these classes
         bundledModule("intellij.platform.lsp")
         testFramework(TestFrameworkType.Platform)
-        // GoLanguage / GoFileType / GoColors live in go-psi-core (migration step 2); composed: its classes go into the main jar, which a
-        // plugin loads (lib/modules only serves declared content modules). Its META-INF/go-psi-core.xml is not included yet (step 3).
+        // The native Go PSI (go-psi-core, go-psi-semantic, go-psi-ide; MIGRATION.md): composed, so the classes go into the main jar, which
+        // a v1 descriptor loads (lib/modules only serves declared content modules). What of their META-INF/go-psi-*.xml plugin.xml
+        // includes is decided per migration step; the lsp content module sees these classes (same classloader), never the other way round.
         pluginComposedModule(implementation(project(":go-psi-core")))
+        pluginComposedModule(implementation(project(":go-psi-semantic")))
+        pluginComposedModule(implementation(project(":go-psi-ide")))
     }
     testImplementation("junit:junit:4.13.2")
 }
@@ -136,11 +140,19 @@ intellijPlatform {
             untilBuild = provider { null }
         }
     }
+    // `./gradlew.bat verifyPlugin --offline`: against the installed IDE only (the target of the plugin; nothing is downloaded through the proxy of this machine).
+    pluginVerification {
+        ides {
+            providers.gradleProperty("localIdePath").orNull?.takeIf { file(it).exists() }?.let { local(file(it)) }
+        }
+        // What fails the build: incompatibilities. Internal and override-only usages of the older code (BuildViewCommandOutput, the
+        // wizard, breakpoint types) stay in the report (build/reports/pluginVerifier) as warnings to work off; a new one shows up there.
+        failureLevel = listOf(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS, VerifyPluginTask.FailureLevel.MISSING_DEPENDENCIES, VerifyPluginTask.FailureLevel.INVALID_PLUGIN)
+    }
 }
 
 // --- go-psi library modules (go-psi-core, go-psi-semantic, go-psi-ide; docs/psi/) ------------------------------------------
-// Copied from go-psi with the package renamed to io.github.golangsupport. The root project compiles against go-psi-core only
-// (one GoLanguage / GoFileType / GoColors) and includes none of their META-INF/go-psi-*.xml yet.
+// Copied from go-psi with the package renamed to io.github.golangsupport; composed into the plugin jar (see dependencies above).
 // Their slow gates run with `--no-configuration-cache`: `:go-psi-core:corpusTest`, `benchmark` (testIde tasks).
 
 val psiTestDataDir = layout.projectDirectory.dir("testData").asFile

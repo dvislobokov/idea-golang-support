@@ -37,7 +37,7 @@
 | 0 | Перенос кода как библиотечных модулей | — | — | [x] 2026-10-02, `82c34a1` |
 | 1 | Переключатели фич: `GoFeatures` + настройки + чтение в lsp-кастомайзерах | день | — | [x] 2026-10-02, ветка `migration` |
 | 2 | Единые `GoLanguage`/`GoFileType`; переименование старых текстовых помощников | день | — | [x] 2026-10-02, ветка `migration` |
-| 3 | Подключение модулей в плагин: Gradle + `xi:include`, без регистрации парсера | полдня | 2 | [ ] |
+| 3 | Подключение модулей в плагин: Gradle + `xi:include`, без регистрации парсера | полдня | 2 | [x] 2026-10-02, ветка `migration` |
 | 4 | Подмена парсера + мост `GoDeclaration` + токены (атомарно) | 2–3 дня | 1, 3 | [ ] |
 | 5 | Полный гейт шага 4: тесты, корпус, робот, живая проверка | день | 4 | [ ] |
 | 6 | Stub-индексы вместо `GoDeclarationIndex` и `GoExportsIndex` | 1–2 дня | 5 | [ ] |
@@ -444,7 +444,7 @@ generics, missing return, init cycles — 0 ложных срабатывани�
 - [x] Перенос: 3 подпроекта, `testData`, `tools`, `docs/psi`; `test checkKotlinAbi buildPlugin --offline` зелёные; ZIP без изменений.
 - [x] Шаг 1 — переключатели (2026-10-02). Отступления: строки «Source of …» на странице настроек появятся вместе с первой нативной фичей (8a) — на странице только то, за чем есть реализация; `GoFormatter.NATIVE` — на 8j по той же причине. Кастомайзеры дескриптора читают только настройку (`GoFeatures.configuredNative`), dumb-режим учитывают обработчики.
 - [x] Шаг 2 — единые `GoLanguage`/`GoFileType` (2026-10-02). Отступления: старый `lang.GoFile : PsiFileBase` оставлен под своим именем в `lang/GoFile.kt` (с `lang.psi.GoFile` не конфликтует, удаляется на шаге 4); палитра `GO_*` живёт в `go-psi-core` как `lang.GoColors` (ключи IGS дословно, компаньон `GoSyntaxHighlighter` — алиасы) — иначе аннотатору go-psi-ide не на что компилироваться; `GO_IDENTIFIER`/`GO_RUNE` не добавлены (PSI-подсветка их не требует после удаления); `GoIdeIcons` → `AllIcons.Nodes.*` как у `GoDeclarationIcons`; корень уже `pluginComposedModule(:go-psi-core)` (иначе `GoLanguage` не найти в рантайме) — остальное подключение на шаге 3.
-- [ ] Шаг 3 — модули в плагине.
+- [x] Шаг 3 — модули в плагине (2026-10-02): три `pluginComposedModule`, `plugin.xml` включает `go-psi-core.xml` (стабы, индексы) и `go-psi-semantic.xml` (сервисы); `go-psi-core-language.xml` (fileType, парсер, AST factory) — шаг 4; `go-psi-semantic-roots.xml` (`GoRootsProvider`, registry `gopsi.libraryRoots`) вынесен отдельно и **не включён** — решение по library roots на шаге 7; `go-psi-ide-{editor,formatter,navigation,refactoring,documentation,completion,inspections}.xml` — шаг 8. `verifyPlugin` — по локальной IDEA 2026.1.4 (`localIdePath`), падает только на несовместимостях; internal/override-only находки старого кода остаются в отчёте `build/reports/pluginVerifier`. Проверено: jar один (все классы PSI в нём), verdict «Compatible», песочница на playground: Structure, подсветка, gopls стартует, 0 «Plugin to blame: Go».
 - [ ] Шаг 4–5 — парсер.
 - [ ] Шаг 6 — stub-индексы. [ ] Шаг 7 — project model, library roots.
 - [ ] 8a [ ] 8b [ ] 8c [ ] 8d [ ] 8e [ ] 8f [ ] 8g [ ] 8h [ ] 8i [ ] 8j.

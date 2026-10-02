@@ -5,6 +5,12 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, step 3 (MIGRATION.md)
+- Descriptors split by what the host includes when: `go-psi-core.xml` (stub types, stub and file indices) and
+  `go-psi-core-language.xml` (file type, parser, AST factory); `go-psi-semantic.xml` (services) and
+  `go-psi-semantic-roots.xml` (`GoRootsProvider`, registry keys); `go-psi-ide.xml` -> `go-psi-ide-{editor,formatter,
+  navigation,refactoring,documentation,completion,inspections}.xml`. The test descriptors of the modules include them all.
+
 ### 2026-10-02 - Transplant into idea-golang-support, step 2 (MIGRATION.md)
 - `GoLanguage`/`GoFileType` are the host plugin's objects, hosted in `go-psi-core` under the same FQN; `GoIcons` and
   `icons/go.svg` removed (the file icon comes from the host's `/icons/go.svg`; empty in the tests of this module).

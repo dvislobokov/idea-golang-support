@@ -7,6 +7,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Migration to the native Go PSI (branch `migration`, `MIGRATION.md`)
+- Step 3: the PSI modules are composed into the plugin jar; `plugin.xml` includes their stub and file indices, project model and semantic services (not the parser, not the library roots, not the IDE features yet). `verifyPlugin` runs against the installed IDE 2026.1.4.
 - Step 2: one `GoLanguage`/`GoFileType` for the plugin (hosted in `go-psi-core`, icon from the root module); the text-level helpers renamed to `GoTextLexer`/`GoTextTokens`; the `GO_*` colour keys defined once in `lang.GoColors`; the PSI modules ship no icons or colour page of their own.
 - Step 1: per-feature source switches `GOPLS | NATIVE` in `GoSettings` (syntax errors, diagnostics, completion, hover, navigation, usages, rename, semantic colours, code vision) read through `GoFeatures`; the gopls customizers and handlers stand down when a feature is served natively. Defaults stay `GOPLS`; no settings UI until a native source exists.
 

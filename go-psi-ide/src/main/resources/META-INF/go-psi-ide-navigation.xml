@@ -1,0 +1,17 @@
+<!-- go-psi-ide, navigation and usages: type declaration, implementations, target element, goto super, implementation markers, references search, usage types, exit points.
+     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <typeDeclarationProvider implementation="io.github.golangsupport.ide.navigation.GoTypeDeclarationProvider"/>
+    <definitionsScopedSearch implementation="io.github.golangsupport.ide.navigation.GoImplementationSearch"/>
+    <targetElementEvaluator language="Go" implementationClass="io.github.golangsupport.ide.navigation.GoTargetElementEvaluator"/>
+    <codeInsight.gotoSuper language="Go" implementationClass="io.github.golangsupport.ide.navigation.GoGotoSuperHandler"/>
+    <codeInsight.lineMarkerProvider language="Go"
+                                    implementationClass="io.github.golangsupport.ide.navigation.GoImplementationLineMarkerProvider"/>
+    <referencesSearch implementation="io.github.golangsupport.ide.usages.GoReferencesSearch"/>
+    <usageTypeProvider implementation="io.github.golangsupport.ide.usages.GoUsageTypeProvider"/>
+    <readWriteAccessDetector implementation="io.github.golangsupport.ide.usages.GoReadWriteAccessDetector"/>
+    <findUsagesHandlerFactory implementation="io.github.golangsupport.ide.usages.GoFindUsagesHandlerFactory"/>
+    <highlightUsagesHandlerFactory implementation="io.github.golangsupport.ide.usages.GoHighlightExitPointsHandlerFactory"/>
+  </extensions>
+</idea-plugin>

@@ -1,4 +1,5 @@
-<!-- Extensions contributed by go-psi-semantic. Included into plugin/src/main/resources/META-INF/plugin.xml. -->
+<!-- Extensions contributed by go-psi-semantic: project model and semantic services. Included into the host plugin's META-INF/plugin.xml
+     (migration step 3). The library roots for GOROOT and dependencies are go-psi-semantic-roots.xml, included at step 7 (MIGRATION.md). -->
 <idea-plugin>
   <extensions defaultExtensionNs="com.intellij">
     <!-- Project model (Phase 4). Host plugins may replace these with overrides="true". -->
@@ -14,12 +15,6 @@
                         serviceImplementation="io.github.golangsupport.semantic.resolve.GoReferenceProviderImpl"/>
     <projectService serviceInterface="io.github.golangsupport.semantic.api.GoSemanticService"
                     serviceImplementation="io.github.golangsupport.semantic.impl.GoSemanticServiceImpl"/>
-
-    <additionalLibraryRootsProvider implementation="io.github.golangsupport.project.impl.GoRootsProvider"/>
-    <registryKey key="gopsi.libraryRoots" defaultValue="true"
-                 description="Index $GOROOT/src and resolved Go module directories as library roots (go-psi)."/>
-    <registryKey key="gopsi.libraryRoots.includeCmd" defaultValue="false"
-                 description="Also index $GOROOT/src/cmd when gopsi.libraryRoots is on (go-psi)."/>
   </extensions>
 
   <projectListeners>

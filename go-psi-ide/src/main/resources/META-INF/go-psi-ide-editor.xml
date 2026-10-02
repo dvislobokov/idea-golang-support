@@ -1,0 +1,25 @@
+<!-- go-psi-ide, editor: brace matcher, quotes, commenter, TODO, find-usages words, folding, structure, breadcrumbs, presentation, Go to Class/Symbol.
+     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Phase 6a: syntax-level editor features. -->
+    <lang.braceMatcher language="Go" implementationClass="io.github.golangsupport.ide.editor.GoBraceMatcher"/>
+    <lang.quoteHandler language="Go" implementationClass="io.github.golangsupport.ide.editor.GoQuoteHandler"/>
+    <lang.commenter language="Go" implementationClass="io.github.golangsupport.ide.editor.GoCommenter"/>
+    <indexPatternBuilder implementation="io.github.golangsupport.ide.editor.GoIndexPatternBuilder"/>
+    <lang.findUsagesProvider language="Go" implementationClass="io.github.golangsupport.ide.editor.GoFindUsagesProvider"/>
+    <lang.foldingBuilder language="Go" implementationClass="io.github.golangsupport.ide.folding.GoFoldingBuilder"/>
+    <lang.psiStructureViewFactory language="Go"
+                                  implementationClass="io.github.golangsupport.ide.structure.GoStructureViewFactory"/>
+    <breadcrumbsInfoProvider implementation="io.github.golangsupport.ide.structure.GoBreadcrumbsProvider"/>
+    <itemPresentationProvider forClass="io.github.golangsupport.lang.psi.GoNamedElement"
+                              implementationClass="io.github.golangsupport.ide.navigation.GoItemPresentationProvider"/>
+    <gotoSymbolContributor implementation="io.github.golangsupport.ide.navigation.GoGotoSymbolContributor"/>
+    <gotoClassContributor implementation="io.github.golangsupport.ide.navigation.GoGotoClassContributor"/>
+
+  </extensions>
+  <!-- Warns once per session about plugins that register Go extensions under language="go" instead of "Go". -->
+  <extensions defaultExtensionNs="com.intellij">
+    <postStartupActivity implementation="io.github.golangsupport.ide.startup.GoLanguageIdCheckActivity"/>
+  </extensions>
+</idea-plugin>

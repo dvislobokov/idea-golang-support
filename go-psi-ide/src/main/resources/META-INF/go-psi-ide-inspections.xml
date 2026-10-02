@@ -1,0 +1,40 @@
+<!-- go-psi-ide, inspections and semantic highlighting: the annotator over resolve, the inspections over GoSemanticService.check, the suppressor and import optimizer.
+     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Phase 6d: inspections over GoSemanticService.check, quick fixes, semantic highlighting (docs/IDE-FEATURES.md). -->
+    <annotator language="Go" implementationClass="io.github.golangsupport.ide.annotator.GoSemanticHighlightingAnnotator"/>
+    <lang.inspectionSuppressor language="Go" implementationClass="io.github.golangsupport.ide.inspections.GoInspectionSuppressor"/>
+    <lang.importOptimizer language="Go" implementationClass="io.github.golangsupport.ide.inspections.GoImportOptimizer"/>
+    <localInspection language="Go" shortName="GoUnresolvedReference" displayName="Unresolved reference"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoUnresolvedReferenceInspection"/>
+    <localInspection language="Go" shortName="GoUnusedImport" displayName="Unused import"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoUnusedImportInspection"/>
+    <localInspection language="Go" shortName="GoUnusedVariable" displayName="Unused variable"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoUnusedVariableInspection"/>
+    <localInspection language="Go" shortName="GoUnusedLabel" displayName="Unused label"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoUnusedLabelInspection"/>
+    <localInspection language="Go" shortName="GoTypeMismatch" displayName="Type mismatch"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoTypeMismatchInspection"/>
+    <localInspection language="Go" shortName="GoCallArity" displayName="Wrong number of arguments or values"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoCallArityInspection"/>
+    <localInspection language="Go" shortName="GoDuplicateDeclaration" displayName="Duplicate declaration"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoDuplicateDeclarationInspection"/>
+    <localInspection language="Go" shortName="GoGenerics" displayName="Generic instantiation and constraint errors"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoGenericsInspection"/>
+    <localInspection language="Go" shortName="GoMissingReturn" displayName="Missing return"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoMissingReturnInspection"/>
+    <localInspection language="Go" shortName="GoChecker" displayName="Other type-checker errors"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoCheckerInspection"/>
+  </extensions>
+</idea-plugin>

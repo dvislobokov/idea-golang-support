@@ -1,0 +1,10 @@
+<!-- go-psi-ide, documentation: quick doc, parameter info, expression type.
+     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <platform.backend.documentation.psiTargetProvider
+        implementation="io.github.golangsupport.ide.documentation.GoDocumentationTargetProvider"/>
+    <codeInsight.parameterInfo language="Go" implementationClass="io.github.golangsupport.ide.documentation.GoParameterInfoHandler"/>
+    <expressionTypeProvider language="Go" implementationClass="io.github.golangsupport.ide.documentation.GoExpressionTypeProvider"/>
+  </extensions>
+</idea-plugin>

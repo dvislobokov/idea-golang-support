@@ -1,0 +1,11 @@
+<!-- $GOROOT/src and the module directories of the build list as synthetic library roots (indexed, navigable). Apart from
+     go-psi-semantic.xml: the host plugin indexes nothing beyond the project until migration step 7 decides the roots (MIGRATION.md). -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <additionalLibraryRootsProvider implementation="io.github.golangsupport.project.impl.GoRootsProvider"/>
+    <registryKey key="gopsi.libraryRoots" defaultValue="true"
+                 description="Index $GOROOT/src and resolved Go module directories as library roots (go-psi)."/>
+    <registryKey key="gopsi.libraryRoots.includeCmd" defaultValue="false"
+                 description="Also index $GOROOT/src/cmd when gopsi.libraryRoots is on (go-psi)."/>
+  </extensions>
+</idea-plugin>

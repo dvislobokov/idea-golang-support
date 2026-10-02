@@ -38,6 +38,7 @@ import com.intellij.platform.lsp.api.customization.LspCompletionDisabled
 import com.intellij.platform.lsp.api.customization.LspCustomization
 import com.intellij.platform.lsp.api.customization.LspDiagnosticsCustomizer
 import com.intellij.platform.lsp.api.customization.LspDiagnosticsDisabled
+import com.intellij.platform.lsp.api.customization.LspDiagnosticsSupport
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsCustomizer
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsDisabled
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsSupport
@@ -49,8 +50,10 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.platform.lsp.api.customization.LspGoToDefinitionDisabled
 import com.intellij.platform.lsp.api.customization.LspHoverCustomizer
 import com.intellij.platform.lsp.api.customization.LspHoverDisabled
+import com.intellij.platform.lsp.api.customization.LspHoverSupport
 import com.intellij.platform.lsp.api.customization.LspRenameCustomizer
 import com.intellij.platform.lsp.api.customization.LspRenameDisabled
+import com.intellij.platform.lsp.api.customization.LspRenameSupport
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensCustomizer
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensDisabled
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensSupport
@@ -222,13 +225,13 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         override val completionCustomizer: LspCompletionCustomizer = if (native(GoFeature.COMPLETION)) LspCompletionDisabled else GoplsCompletionSupport()
 
         /** Follows [GoFeature.HOVER]. */
-        override val hoverCustomizer: LspHoverCustomizer = if (native(GoFeature.HOVER)) LspHoverDisabled else super.hoverCustomizer
+        override val hoverCustomizer: LspHoverCustomizer = if (native(GoFeature.HOVER)) LspHoverDisabled else LspHoverSupport()
 
         /** Follows [GoFeature.RENAME]. */
-        override val renameCustomizer: LspRenameCustomizer = if (native(GoFeature.RENAME)) LspRenameDisabled else super.renameCustomizer
+        override val renameCustomizer: LspRenameCustomizer = if (native(GoFeature.RENAME)) LspRenameDisabled else LspRenameSupport()
 
         /** Follows [GoFeature.DIAGNOSTICS]. */
-        override val diagnosticsCustomizer: LspDiagnosticsCustomizer = if (native(GoFeature.DIAGNOSTICS)) LspDiagnosticsDisabled else super.diagnosticsCustomizer
+        override val diagnosticsCustomizer: LspDiagnosticsCustomizer = if (native(GoFeature.DIAGNOSTICS)) LspDiagnosticsDisabled else LspDiagnosticsSupport()
 
         /**
          * The usages of the name at the caret, reads and writes apart, and the exit points of a function on `func` or `return`: the

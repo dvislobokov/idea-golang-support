@@ -1,0 +1,18 @@
+<!-- go-psi-ide, rename: element manipulators, refactoring support, names validator, rename processors.
+     Included by the host plugin when the feature moves to the PSI (MIGRATION.md, step 8); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <lang.elementManipulator forClass="io.github.golangsupport.lang.psi.GoReferenceExpression"
+                             implementationClass="io.github.golangsupport.ide.rename.GoReferenceExpressionManipulator"/>
+    <lang.elementManipulator forClass="io.github.golangsupport.lang.psi.GoTypeReferenceExpression"
+                             implementationClass="io.github.golangsupport.ide.rename.GoTypeReferenceExpressionManipulator"/>
+    <lang.elementManipulator forClass="io.github.golangsupport.lang.psi.GoLabelRef"
+                             implementationClass="io.github.golangsupport.ide.rename.GoLabelRefManipulator"/>
+    <lang.elementManipulator forClass="io.github.golangsupport.lang.psi.GoImportSpec"
+                             implementationClass="io.github.golangsupport.ide.rename.GoImportSpecManipulator"/>
+    <lang.refactoringSupport language="Go" implementationClass="io.github.golangsupport.ide.rename.GoRefactoringSupportProvider"/>
+    <lang.namesValidator language="Go" implementationClass="io.github.golangsupport.ide.rename.GoNamesValidator"/>
+    <renameInputValidator implementation="io.github.golangsupport.ide.rename.GoRenameInputValidator"/>
+    <renamePsiElementProcessor implementation="io.github.golangsupport.ide.rename.GoRenameMethodProcessor"/>
+  </extensions>
+</idea-plugin>

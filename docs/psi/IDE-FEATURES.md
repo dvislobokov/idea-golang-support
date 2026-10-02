@@ -1,6 +1,6 @@
 # IDE features (go-psi-ide)
 
-Extensions contributed by `go-psi-ide` (`META-INF/go-psi-ide.xml`), grouped by phase. All
+Extensions contributed by `go-psi-ide` (`META-INF/go-psi-ide-*.xml`, one descriptor per feature: editor, formatter, navigation, refactoring, documentation, completion, inspections), grouped by phase. All
 behaviour is PSI/semantic based (`GoSemanticService`, stub indices); no LSP. Code lives in
 `io.github.golangsupport.ide.<feature>`.
 
