@@ -46,6 +46,9 @@ import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsCustomiz
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsDisabled
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsSupport
 import com.intellij.platform.lsp.api.customization.LspFoldingRangeCustomizer
+import com.intellij.platform.lsp.api.customization.LspFormattingCustomizer
+import com.intellij.platform.lsp.api.customization.LspFormattingDisabled
+import com.intellij.platform.lsp.api.customization.LspFormattingSupport
 import com.intellij.platform.lsp.api.customization.LspFoldingRangeDisabled
 import com.intellij.platform.lsp.api.lsWidget.LspClientWidgetItem
 import com.intellij.platform.lsp.api.customization.LspGoToDefinitionCustomizer
@@ -55,7 +58,6 @@ import com.intellij.platform.lsp.api.customization.LspHoverCustomizer
 import com.intellij.platform.lsp.api.customization.LspHoverDisabled
 import com.intellij.platform.lsp.api.customization.LspHoverSupport
 import com.intellij.platform.lsp.api.customization.LspRenameCustomizer
-import com.intellij.platform.lsp.api.customization.LspRenameDisabled
 import com.intellij.platform.lsp.api.customization.LspRenameSupport
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensCustomizer
 import com.intellij.platform.lsp.api.customization.LspSignatureHelpCustomizer
@@ -245,8 +247,24 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
          */
         override val signatureHelpCustomizer: LspSignatureHelpCustomizer = if (native(GoFeature.HOVER)) LspSignatureHelpDisabled else LspSignatureHelpSupport()
 
-        /** Follows [GoFeature.RENAME]. */
-        override val renameCustomizer: LspRenameCustomizer = if (native(GoFeature.RENAME)) LspRenameDisabled else LspRenameSupport()
+        /**
+         * Follows [GoFeature.RENAME] per request, not per descriptor ([LspRenameSupport.shouldRunRename], asked by the platform's
+         * `LspRenameHandler` before it offers itself): with the PSI as the source gopls still renames while the IDE indexes, when the
+         * native rename (the platform's refactoring over the references of go-psi) is blind. The registry of rename handlers takes the
+         * handlers that answer and the default PSI handler only when none does, so with gopls on duty it renames alone (MIGRATION.md step 8h).
+         */
+        override val renameCustomizer: LspRenameCustomizer = object : LspRenameSupport() {
+            override fun shouldRunRename(psiFile: PsiFile): Boolean = psiFile is GoFile && !GoFeatures.native(GoFeature.RENAME, psiFile.project)
+        }
+
+        /**
+         * Follows [GoFeature.FORMATTING]: the plugin formats with a tool or the Built-in formatter of go-psi-ide (MIGRATION.md step 8j),
+         * and only with the formatter set to None does gopls. Said explicitly for Go files: since step 8j a Go file has a `lang.formatter`,
+         * and the platform's default then leaves the file to the IDE.
+         */
+        override val formattingCustomizer: LspFormattingCustomizer = if (native(GoFeature.FORMATTING)) LspFormattingDisabled else object : LspFormattingSupport() {
+            override fun shouldFormatThisFileExclusivelyByServer(file: VirtualFile, ideCanFormatThisFileItself: Boolean, serverExplicitlyEnabled: Boolean): Boolean = file.fileType == GoFileType
+        }
 
         /** Follows [GoFeature.DIAGNOSTICS]. */
         override val diagnosticsCustomizer: LspDiagnosticsCustomizer = if (native(GoFeature.DIAGNOSTICS)) LspDiagnosticsDisabled else GoplsDiagnosticsSupport()

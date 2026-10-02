@@ -32,7 +32,7 @@ Legend:
 | workspaceSymbol | `gotoSymbolContributor` / `gotoClassContributor` | done | | |
 | codeAction (quick fix) | `LocalQuickFix` | partial | fix kinds: add import, remove import, optimize imports, unused variable (remove, rename to `_`, replace with `_ =`), wrap in conversion; see section 3 | M |
 | codeAction (refactor / source) | intentions, refactorings | missing | see sections 3 and 4 | L |
-| codeLens | Code Vision (`codeInsight.codeVisionProvider`) | missing | usages / implementations counts; run test (needs `go`) | S |
+| codeLens | Code Vision (`codeInsight.daemonBoundCodeVisionProvider`) | done | usages / implementations counts (`ide.codevision`); run test stays with the host's run line markers | |
 | documentLink | references in import paths, `//go:embed` | partial | import paths navigate; embed patterns do not | S |
 | formatting / rangeFormatting | `lang.formatter` (gofmt-compatible) | done | | |
 | onTypeFormatting | `typedHandler`, `enterHandler` | partial | platform defaults only; no Go-specific handlers | S |
@@ -58,7 +58,9 @@ Legend:
 | Live templates: `fori`, `forr`, `meth`, `func`, `test`, `bench`, `fuzz`, `main`, `err`, `json` tag | missing | `defaultLiveTemplates` + Go template context | S | |
 | Inlay hints: parameter names, `:=` and range variable types, `iota` constant values, composite literal field names and types, type parameter instantiation (`f[int]`) | missing | the same hint set as gopls; types of every `:=` in the visible range go through the per-body inference cache, measured with the UI robot | M | perf |
 | Struct size/alignment inlay, padding warning, "reorder fields" fix | missing | uses `GoSizes`; GoLand does not have it | S | |
-| Smart completion (Ctrl+Shift+Space) by expected type, second-level `x.F.M()` chains | missing | `GoExpectedTypes` exists | M | perf |
+| Smart completion (Ctrl+Shift+Space) by expected type, second-level `x.F.M()` chains | missing | `GoExpectedTypes` exists; plan: `expectedTypeAt(element)` in `semantic.api` (assignment, argument by position, `return` by index, literal element, binary operand, `case`, channel, condition), assignability filter in SMART, weigher boost in BASIC, chains one level deep with a candidate cap | M | perf |
+| Smart `return`: values by result type from the scope (`err` for `error`, nearest variable of the type) else zero values, `fmt.Errorf("…: %w", err)` when `err` is in scope; the same candidates behind a "Fill return values" fix | missing | the host has a text version (`GoIdioms.returnValues`, step 9 moves it to PSI); `GoSnippets.iferrText` has the zero values | S | |
+| Type-aware idioms as inline grey text: `if err != nil {…}` after `x, err :=`, `defer f.Close()` when the type has `Close() error`, `defer mu.Unlock()` after `Lock()` | missing | the host shows them by text rules (`GoInlineIdiomsProvider`); step 9 | S | |
 | Completion of map keys, struct tag keys and options, `go.mod` versions from GOMODCACHE | missing | | S | |
 | Completion of members of unimported packages (`Println` → `fmt.Println` + import) | missing | gopls unimported completion; unimported package names are done | M | perf |
 | Smart Enter (complete statement) | missing | `lang.smartEnterProcessor` | S | |
@@ -151,14 +153,18 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 
 ## 8. Run, test, debug (outside PSI)
 
+Since the transplant (2026-10-02) the host plugin idea-golang-support provides all of this outside go-psi (packages `run`, `testing`,
+`debugger`, `monitor`; see its CLAUDE.md and ROADMAP.md). go-psi only has to feed it PSI inputs where it still uses the text scanner
+(MIGRATION.md step 9: run gutters, Go to Test, generators).
+
 | Feature | Status | Effort | Needs |
 |---|---|---|---|
-| Run configurations: `go run`, `go build`, `go test` (package, file, function, subtest) | missing | M | `go` |
-| Run gutter icons on `main`, `TestXxx`, `BenchmarkXxx`, `FuzzXxx`, subtests `t.Run("name")`, table-test rows | missing | M | `go` |
-| Test tree from `go test -json`, rerun failed, benchmark results | missing | M | `go` |
-| Coverage | missing | M | `go` |
-| Navigate test ↔ subject, `Example` functions from docs | missing | S | |
-| Debugger | missing | L | `dlv` |
+| Run configurations: `go run`, `go build`, `go test` (package, file, function, subtest) | host | | `go` |
+| Run gutter icons on `main`, `TestXxx`, `BenchmarkXxx`, `FuzzXxx`, subtests `t.Run("name")`, table-test rows | host (text scanner; PSI inputs at step 9) | S | `go` |
+| Test tree from `go test -json`, rerun failed, benchmark results | host | | `go` |
+| Coverage | host | | `go` |
+| Navigate test ↔ subject, `Example` functions from docs | host (test ↔ subject; `Example` from docs missing) | S | |
+| Debugger | host (own DAP client over `dlv dap`) | | `dlv` |
 
 ## 9. Performance and platform
 
@@ -174,12 +180,10 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 
 ## 10. Decisions needed
 
-- **D1. The `go` binary outside the project model.** Section 8 and `go generate` need it.
-  Proposal: allowed only in explicitly user-triggered actions (run configurations, tests,
-  coverage, `go generate`), never in analysis, highlighting or indexing; analysis keeps its pure
-  fallback.
-- **D2. Delve.** A debugger is a separate milestone with its own protocol client; decide whether it
-  is in scope at all.
+- **D1. The `go` binary outside the project model.** Decided by the host: `go` runs only in
+  user-triggered actions (run configurations, tests, coverage, `go generate`, build, lint), never
+  in analysis, highlighting or indexing; go-psi keeps its pure fallback (`DefaultGoToolchainProvider`).
+- **D2. Delve.** Decided by the host: its own DAP client over `dlv dap` (package `debugger`); not a go-psi concern.
 - **D3. Optional plugin dependencies** (Database for SQL injection) through `<depends optional>`.
 
 ## 11. Order
@@ -197,7 +201,26 @@ Each wave is measured with the benchmarks and the UI robot before and after, lik
    `context` checks.
 5. **Wave 5 (platform):** shared indexes for GOROOT, call and type hierarchy, headless
    inspections.
-6. **Wave 6 (after D1):** run configurations, test runner, coverage, run gutter icons.
+6. **Wave 6:** done by the host (section 8); what remains is the PSI inputs of step 9 of MIGRATION.md.
 7. **Wave 7 (refactorings):** introduce variable, rename package, safe delete, then extract,
    inline, change signature, move.
 8. **Later:** string languages (RE2, templates, SQL), assembly and cgo, Delve (after D2).
+
+## 12. Beyond GoLand (host plugin, after the migration)
+
+What GoLand does not have and what the base of this plugin makes cheap. Not go-psi work alone: most of it lives in the host
+(`monitor`, `testing`, `lint`, `settings`) and uses go-psi for types and declarations.
+
+| Feature | Base | Effort |
+|---|---|---|
+| Exhaustive `switch` over `iota` enums and sealed interfaces, with "fill switch" (section 5) | `GoImplementations`, constants of a type from the stubs | M |
+| Error flow and nil flow checks (section 5, wave 4) | per-function data-flow framework over `GoSemanticService` | M |
+| Struct size / alignment inlay with padding warning and "reorder fields" fix (section 2) | `GoSizes` | S |
+| Declarative rule engine for project rules (`docs/RULES.md`): YAML rules over the PSI, ruleguard importer | types and resolve of go-psi | L |
+| Benchmarks as first-class: history of results per function, benchstat-style comparison with a base, regression marker in the gutter | host `testing` (`go test -json`), stubs for the function list | M |
+| Goroutine tree with states and GC / scheduler timeline in Go Monitor; pprof flame graph of a test or benchmark in an editor tab | host `monitor` (`GoRuntimeTrace`, `GoSnapshot`, `GoProfiles`) | M |
+| Test failure diff: expected / actual of `go test` output side by side, navigable | host `testing` console | S |
+| Analysis for another GOOS / GOARCH without changing the environment: a switch in the status bar over the toolchain of the project model | `GoToolchainProvider` (host override), `GoSettings.analysisGoos/analysisGoarch` | S |
+| Format on type (gofmt-compatible, no process) and instant Reformat (step 8j) | `lang.formatter` of go-psi-ide | S |
+| Go next to other languages in IDEs that have them: Protobuf / gRPC stubs ↔ Go navigation, SQL in strings (section 6), `html/template` fields | optional plugin dependencies (D3) | M |
+| Full function without gopls and without the network (MIGRATION.md step 12) on large monorepositories: indexes by build list only | library roots policy (step 7) | — |

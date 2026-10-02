@@ -23,25 +23,39 @@ class GoIgsToolchainProvider : GoToolchainProvider {
     private val tracker = SimpleModificationTracker()
     private val fallback = DefaultGoToolchainProvider()
 
-    /** What the last answer was made of: when `go env` arrives or the settings change, the caches of the model are told. */
-    @Volatile private var lastKey: Key? = null
+    /**
+     * The last answer with what it was made of. Asked on every import resolve of the model (thousands of times per highlighting pass):
+     * the detection walks the PATH and GOROOT on disk (`GoCli.findExecutable`, `detectPure`), which held a read action for 12 s in a
+     * freeze (seen live). Recomputed when the settings or `go env` change, and on [invalidate] (Go | Reanalyze), not per call.
+     */
+    @Volatile private var last: Answer? = null
 
-    private data class Key(val executable: String?, val envKnown: Boolean, val tags: List<String>, val goos: String, val goarch: String)
+    private data class Key(val configuredGo: String, val envKnown: Boolean, val tags: List<String>, val goos: String, val goarch: String)
+
+    private class Answer(val key: Key, val info: GoToolchainInfo?)
 
     override val modificationTracker: ModificationTracker get() = tracker
 
     override fun toolchainFor(project: Project?): GoToolchainInfo? {
         val settings = GoSettings.getInstance()
-        val executable = GoCli.findExecutable()
-        val key = Key(executable, GoEnvironment.isKnown(), settings.tagList(), settings.analysisGoos, settings.analysisGoarch)
-        if (key != lastKey) {
-            lastKey = key
-            tracker.incModificationCount()
-            for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) GoProjectModelTracker.getInstance(p).incModificationCount()
-        }
-        if (executable == null) return adjust(fallback.toolchainFor(project), settings)
+        val key = Key(settings.goPath, GoEnvironment.isKnown(), settings.tagList(), settings.analysisGoos, settings.analysisGoarch)
+        last?.takeIf { it.key == key }?.let { return it.info }
+        val info = compute(project, settings)
+        last = Answer(key, info)
+        tracker.incModificationCount()
+        for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) GoProjectModelTracker.getInstance(p).incModificationCount()
+        return info
+    }
+
+    /** Forgets the last answer: the next question looks at the disk again (a `go` installed meanwhile, a changed PATH). */
+    fun invalidate() {
+        last = null
+    }
+
+    private fun compute(project: Project?, settings: GoSettings): GoToolchainInfo? {
+        val executable = GoCli.findExecutable() ?: return adjust(fallback.toolchainFor(project), settings)
         if (!GoEnvironment.isKnown()) {
-            // the answer of `go env` comes later and bumps the trackers through the key above; until then the pure detection, with this go
+            // the answer of `go env` comes later and changes the key; until then the pure detection, with this go
             GoEnvironment.whenKnown { toolchainFor(project) }
             return adjust(pureFor(executable), settings)
         }

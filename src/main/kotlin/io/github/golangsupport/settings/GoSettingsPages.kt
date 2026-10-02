@@ -74,6 +74,14 @@ class GoLanguageServerConfigurable(project: Project) : GoSettingsPage(project, "
                 comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::semanticColorsSource.toNullableProperty())
                     .comment(GoBundle.message("features.semanticColors.comment"))
             }
+            row(GoBundle.message("features.rename")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::renameSource.toNullableProperty())
+                    .comment(GoBundle.message("features.rename.comment"))
+            }
+            row(GoBundle.message("features.codeVision")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::codeVisionSource.toNullableProperty())
+                    .comment(GoBundle.message("features.codeVision.comment"))
+            }
         }
     }
 

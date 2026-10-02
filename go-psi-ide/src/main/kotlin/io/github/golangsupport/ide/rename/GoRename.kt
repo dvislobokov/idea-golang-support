@@ -9,6 +9,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.search.LocalSearchScope
 import com.intellij.refactoring.rename.RenameInputValidatorEx
 import com.intellij.util.ProcessingContext
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.lang.psi.GoNamedElement
 import io.github.golangsupport.lang.psi.GoPackageClause
 
@@ -61,12 +63,16 @@ class GoRenameInputValidator : RenameInputValidatorEx {
 /**
  * Rename modes: in-place for declarations visible only in one function or file (locals,
  * parameters, receivers, labels, imports); the dialog for package-level declarations.
+ * While [GoIdeFeature.RENAME] is off no in-place rename is offered: the platform's
+ * `VariableInplaceRenameHandler` would otherwise stand next to the host's other rename
+ * handler (a language server's) and the registry would ask the user to choose between them.
  */
 class GoRefactoringSupportProvider : RefactoringSupportProvider() {
     override fun isAvailable(context: PsiElement): Boolean = context is GoNamedElement
 
     override fun isInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean =
-        element is GoNamedElement && element !is GoPackageClause && element.useScope is LocalSearchScope
+        element is GoNamedElement && element !is GoPackageClause && element.useScope is LocalSearchScope &&
+            GoIdeFeatureGate.enabled(GoIdeFeature.RENAME, element.project)
 
     override fun isMemberInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean = false
 }

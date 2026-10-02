@@ -48,6 +48,16 @@
     <!-- semantic colours over that PSI: the annotator that colours identifiers by what they resolve to; with it on duty the semantic tokens of gopls
          and the text rules of GoIdentifierAnnotator stand down (MIGRATION.md step 8d; the gate follows the switch Semantic colours) -->
     <xi:include href="/META-INF/go-psi-ide-highlighting.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- rename over that PSI: element manipulators, names and rename-input validators (passive, every mode), in-place availability and the
+         interface-method processor (MIGRATION.md step 8h; the gate follows the switch Rename) -->
+    <xi:include href="/META-INF/go-psi-ide-refactoring.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- the gofmt-compatible formatter over that PSI: formatting model, code style pages, import sorter, post-format processor
+         (MIGRATION.md step 8j; chosen by the formatter setting, Built-in: with a tool chosen GoFormattingService claims the file and the
+         platform never reaches this model; with None the language server formats) -->
+    <xi:include href="/META-INF/go-psi-ide-formatter.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- code vision over that PSI: the "N usages" / "N implementations" hints above the declarations; with it on duty the gopls hints stand down
+         (MIGRATION.md step 8i; the gate follows the switch Code vision) -->
+    <xi:include href="/META-INF/go-psi-ide-codevision.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->

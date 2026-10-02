@@ -1,6 +1,8 @@
 package io.github.golangsupport.ide.navigation
 
+import com.intellij.codeInsight.codeVision.settings.CodeVisionSettings
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFileFilter
 import com.intellij.psi.impl.PsiManagerEx
 import com.intellij.psi.impl.source.PsiFileImpl
@@ -16,6 +18,12 @@ import io.github.golangsupport.lang.psi.GoFile
 class GoImplementationsAstLoadingTest : GoSemanticIdeTestBase() {
 
     fun testMarkersAndSearchDoNotLoadImplementationFiles() {
+        // the highlighting pass also runs the code vision; its usages count resolves references and loads the implementing file
+        // (the nature of the word-index search, not of the markers): off for this test, the implementations hint has its own guard
+        val settings = CodeVisionSettings.getInstance()
+        val wasEnabled = settings.codeVisionEnabled
+        settings.codeVisionEnabled = false
+        Disposer.register(testRootDisposable) { settings.codeVisionEnabled = wasEnabled }
         val impl = myFixture.addFileToProject("p/impl.go", """
             package p
 

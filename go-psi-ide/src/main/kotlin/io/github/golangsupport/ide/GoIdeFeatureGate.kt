@@ -9,7 +9,7 @@ enum class GoIdeFeature {
     NAVIGATION,
     /** Find Usages, reference search, usage types, read/write access, exit points. */
     USAGES,
-    /** The implementation gutter markers. */
+    /** The implementation gutter markers and the code vision hints (usages, implementations). */
     IMPLEMENTATION_MARKERS,
     /** Code completion: the contributor and its confidence. */
     COMPLETION,
@@ -19,6 +19,8 @@ enum class GoIdeFeature {
     DIAGNOSTICS,
     /** The semantic highlighting annotator (colours by resolve). */
     SEMANTIC_COLORS,
+    /** Rename: in-place availability and the interface-method processor (the manipulators and name validators stay passive in every mode). */
+    RENAME,
 }
 
 /**

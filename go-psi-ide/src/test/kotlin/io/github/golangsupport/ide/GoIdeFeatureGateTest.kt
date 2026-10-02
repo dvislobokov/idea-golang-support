@@ -3,6 +3,7 @@ package io.github.golangsupport.ide
 import com.intellij.codeInsight.navigation.actions.TypeDeclarationProvider
 import com.intellij.find.findUsages.FindUsagesHandlerFactory
 import com.intellij.lang.ImportOptimizer
+import com.intellij.lang.LanguageRefactoringSupport
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.lang.LanguageImportStatements
 import com.intellij.openapi.application.ApplicationManager
@@ -10,6 +11,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFileFactory
 import com.intellij.platform.backend.documentation.PsiDocumentationTargetProvider
 import com.intellij.psi.search.searches.DefinitionsScopedSearch
+import com.intellij.refactoring.rename.RenamePsiElementProcessor
 import com.intellij.testFramework.replaceService
 import com.intellij.testFramework.utils.parameterInfo.MockCreateParameterInfoContext
 import com.intellij.util.ThreeState
@@ -23,11 +25,13 @@ import io.github.golangsupport.ide.inspections.GoImportOptimizer
 import io.github.golangsupport.ide.inspections.GoInspectionClasses
 import io.github.golangsupport.lang.GoLanguage
 import io.github.golangsupport.ide.navigation.GoTypeDeclarationProvider
+import io.github.golangsupport.ide.rename.GoRenameMethodProcessor
 import io.github.golangsupport.ide.usages.GoFindUsagesHandlerFactory
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoTypeSpec
+import io.github.golangsupport.lang.psi.GoVarDefinition
 
-/** A closed gate: every navigation, usages, completion, documentation, diagnostics and semantic colours extension of go-psi-ide stands down; the default gate lets everything through. */
+/** A closed gate: every navigation, usages, completion, documentation, diagnostics, semantic colours and rename extension of go-psi-ide stands down; the default gate lets everything through. */
 class GoIdeFeatureGateTest : GoSemanticIdeTestBase() {
 
     private val shapes = """
@@ -173,5 +177,20 @@ class GoIdeFeatureGateTest : GoSemanticIdeTestBase() {
         assertTrue(factory.canFindUsages(method))
         close(GoIdeFeature.USAGES)
         assertFalse(factory.canFindUsages(method))
+    }
+
+    /** RENAME off: no in-place rename (the platform's in-place handler would compete with a host's rename handler) and the method processor declines. */
+    fun testClosedGateRename() {
+        myFixture.configureByText("shapes.go", shapes + "\n\nfunc f() { local := 1; _ = local }\n")
+        val method = myFixture.findElementByText("Area() float64 { return", GoMethodDeclaration::class.java)
+        val local = myFixture.findElementByText("local", GoVarDefinition::class.java)
+        val support = LanguageRefactoringSupport.getInstance().forLanguage(GoLanguage)
+        val processor = RenamePsiElementProcessor.EP_NAME.extensionList.filterIsInstance<GoRenameMethodProcessor>().single()
+        assertTrue(processor.canProcessElement(method))
+        assertTrue(support.isInplaceRenameAvailable(local, null))
+        close(GoIdeFeature.RENAME)
+        assertFalse(processor.canProcessElement(method))
+        assertFalse(support.isInplaceRenameAvailable(local, null))
+        assertFalse(support.isMemberInplaceRenameAvailable(local, null))
     }
 }

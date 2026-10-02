@@ -1,0 +1,11 @@
+<!-- go-psi-ide, code vision: the "N usages" / "N implementations" hints above the package-level declarations, from the PSI
+     (references in the use scope, implementations from the stub indices as the gutter markers). Included by the host plugin when the feature
+     moves to the PSI (MIGRATION.md, step 8i); the tests of go-psi-ide include every go-psi-ide-*.xml. Both providers ask
+     io.github.golangsupport.ide.GoIdeFeatureGate (IMPLEMENTATION_MARKERS, the group of the gutters) first and stand down when it is off.
+     The group ids are the platform's ("references", "inheritors"), so Settings | Editor | Inlay Hints | Code vision switches them too. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.codevision.GoUsagesCodeVisionProvider"/>
+    <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.codevision.GoImplementationsCodeVisionProvider"/>
+  </extensions>
+</idea-plugin>

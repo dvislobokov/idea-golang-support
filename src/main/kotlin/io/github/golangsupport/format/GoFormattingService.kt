@@ -14,10 +14,15 @@ import io.github.golangsupport.settings.GoSettings
 import java.io.File
 import java.nio.charset.StandardCharsets
 
-/** Reformat Code of a Go file is `gofmt` or `goimports` over the text of the editor: the formatter of Go is not a matter of taste. */
+/**
+ * Reformat Code of a Go file is `gofmt` or `goimports` over the text of the editor: the formatter of Go is not a matter of taste.
+ * The platform takes the first service that [canFormat] a file and no other (`FormattingServiceUtil.findService`; `CoreFormattingService`,
+ * the one of `lang.formatter`, is the fallback), so a file claimed here is never formatted by the gofmt port of go-psi-ide on top. With
+ * [GoFormatter.NATIVE] the file is not claimed and that port formats (MIGRATION.md step 8j); with [GoFormatter.NONE] the language server does.
+ */
 class GoFormattingService : AsyncDocumentFormattingService() {
     override fun getFeatures(): Set<FormattingService.Feature> = emptySet()
-    override fun canFormat(file: PsiFile): Boolean = file is GoFile && GoSettings.getInstance().formatter != GoFormatter.NONE
+    override fun canFormat(file: PsiFile): Boolean = file is GoFile && GoSettings.getInstance().formatter.isExternalTool
     override fun getNotificationGroupId(): String = GoCli.NOTIFICATION_GROUP
     override fun getName(): String = GoSettings.getInstance().formatter.title
 
@@ -59,7 +64,7 @@ class GoFormattingService : AsyncDocumentFormattingService() {
             GoFormatter.GOLANGCI_LINT_FMT -> GoTool.GOLANGCI_LINT.find()
             GoFormatter.GOFMT -> listOfNotNull(GoCli.findExecutable()?.let { File(it).parentFile }, GoEnvironment.quick().goRoot?.let { File(it, "bin") })
                 .map { File(it, GoCli.executableName("gofmt")) }.firstOrNull { it.isFile }
-            GoFormatter.NONE -> null
+            GoFormatter.NONE, GoFormatter.NATIVE -> null
         }
 
         /** The text comes on stdin, the result on stdout, for every formatter; golangci-lint needs to be told so (`fmt --stdin`, v2). */

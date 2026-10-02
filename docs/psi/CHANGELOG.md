@@ -5,6 +5,26 @@ stable on real-world projects.
 
 ## Unreleased
 
+### 2026-10-02 - Transplant into idea-golang-support, step 8i (MIGRATION.md)
+- go-psi-ide: code vision over the PSI (`ide.codevision`, `go-psi-ide-codevision.xml`): `GoUsagesCodeVisionProvider` ("N usages", references in
+  the use scope, stopped at 100) and `GoImplementationsCodeVisionProvider` ("N implementations" on interfaces and their method specs only,
+  from the stub indices as the gutters) above package-level functions (not entry points or tests), methods, type specs and interface method
+  specs, anchored below the doc comment; a click runs `ShowUsages` / `GotoImplementation` on the name. Both follow `GoIdeFeatureGate`
+  (`IMPLEMENTATION_MARKERS`) and stand down in dumb mode. `GoCodeVisionTest` (7, with the AST-loading guard on the implementing file).
+
+### 2026-10-02 - Transplant into idea-golang-support, step 8j (MIGRATION.md)
+- The host includes `go-psi-ide-formatter.xml`: the formatting model, code style pages, `GoImportSorter` and the post-format processor
+  are in the plugin behind its formatter setting (`GoFormatter.NATIVE`, "Built-in"). No gate in go-psi-ide: the host's `FormattingService`
+  claims a Go file whenever an external tool is chosen, and the platform engine (`CoreFormattingService`, the one that builds this model)
+  is only the fallback, so the port formats exactly when nothing claims the file. Nothing changed in the module itself.
+
+### 2026-10-02 - Transplant into idea-golang-support, step 8h (MIGRATION.md)
+- go-psi-ide: `GoIdeFeature.RENAME`; `GoRefactoringSupportProvider.isInplaceRenameAvailable` and `GoRenameMethodProcessor.canProcessElement`
+  ask the gate and stand down while the group is off (a host's other rename handler, a language server's, would otherwise share the
+  registry's chooser with the platform's `VariableInplaceRenameHandler`; the default `PsiElementRenameHandler` is the registry's fallback,
+  not an extension, so it never runs next to another handler). The manipulators, `GoNamesValidator` and `GoRenameInputValidator` stay
+  passive in every mode. `GoIdeFeatureGateTest.testClosedGateRename`.
+
 ### 2026-10-02 - Transplant into idea-golang-support, step 8d (MIGRATION.md)
 - The default application services a host overrides (`DefaultGoToolchainProvider`, `DefaultGoLibraryRootsPolicy`, `DefaultGoIdeFeatureGate`) carry
   `open="true"`: IntelliJ 2026.1 warns `InstanceNotOverridableException` for an `overrides="true"` of a service not declared open.

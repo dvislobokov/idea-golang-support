@@ -59,7 +59,13 @@ enum class GoFormatter(val title: String) {
     GOLANGCI_LINT_FMT("golangci-lint fmt"),
 
     /** Reformat Code is left to the language server, or to nobody. */
-    NONE("None");
+    NONE("None"),
+
+    /** The gofmt-compatible formatter of go-psi-ide (`lang.formatter`): no process, the platform engine formats (MIGRATION.md step 8j). */
+    NATIVE("Built-in");
+
+    /** An external tool over the text of the editor, run by [io.github.golangsupport.format.GoFormattingService]. */
+    val isExternalTool: Boolean get() = this != NONE && this != NATIVE
 
     override fun toString(): String = title
 }
@@ -296,7 +302,7 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         get() = state.codeVisionSource
         set(value) { state.codeVisionSource = value }
 
-    /** The source of [feature]; formatting has no switch of its own: the plugin formats unless the formatter is left to the language server. */
+    /** The source of [feature]; formatting has no switch of its own: the plugin formats (a tool or the Built-in formatter) unless the formatter is left to the language server. */
     fun featureSource(feature: GoFeature): GoFeatureSource = when (feature) {
         GoFeature.SYNTAX_ERRORS -> syntaxErrorsSource
         GoFeature.DIAGNOSTICS -> diagnosticsSource

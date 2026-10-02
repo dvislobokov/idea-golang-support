@@ -19,7 +19,9 @@ import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.mod.GoModFileType
 import io.github.golangsupport.settings.GoLanguageServerControl
 import io.github.golangsupport.settings.GoSettings
+import io.github.golangsupport.project.api.GoToolchainProvider
 import io.github.golangsupport.project.impl.GoProjectModelTracker
+import io.github.golangsupport.sdk.GoIgsToolchainProvider
 import io.github.golangsupport.semantic.cache.GoTrackers
 
 /**
@@ -60,6 +62,7 @@ class GoReanalyzeAction : AnAction(), DumbAware {
                     GoBuildProblems.getInstance(project).clear(null)
                     // the caches of the native PSI: types, resolve, the project model
                     GoTrackers.getInstance(project).invalidateAll()
+                    (GoToolchainProvider.getInstance() as? GoIgsToolchainProvider)?.invalidate()
                     GoProjectModelTracker.getInstance(project).incModificationCount()
                     if (GoSettings.getInstance().completionCatalogue) GoCatalogueService.getInstance(project).refresh(rescan = true)
                 }

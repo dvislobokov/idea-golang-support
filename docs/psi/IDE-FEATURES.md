@@ -57,6 +57,18 @@ asserts that markers and search do not load the AST of the implementing file.
 | `findUsagesHandlerFactory` | `GoFindUsagesHandlerFactory` | Find Usages of a method implementing interface methods asks whether to include the interface methods (calls through interfaces resolve to the method spec). |
 | `highlightUsagesHandlerFactory` | `GoHighlightExitPointsHandlerFactory` | On `func`/`return`: the function's `return` statements and statement-level `panic(...)` (nested literals excluded). On `break`/`continue`: the target `for`/`switch`/`select` keyword and all jumps to it (labels honoured). On `for`/`switch`/`select`: the keyword and its jumps. DumbAware. Identifier highlighting itself comes from references. |
 
+### Code vision (`ide.codevision`, `go-psi-ide-codevision.xml`)
+
+| EP | Class | Behaviour |
+|---|---|---|
+| `codeInsight.daemonBoundCodeVisionProvider` | `GoUsagesCodeVisionProvider` (group `references`) | "no usages" / "1 usage" / "N usages" / "100+ usages" above package-level functions (not `main`, `init` or the test functions of a `_test.go`), methods, type specs and the method specs of package-level interfaces: `ReferencesSearch` in the use scope, stopped after 100 references. A click runs `ShowUsages` with the caret on the name. |
+| `codeInsight.daemonBoundCodeVisionProvider` | `GoImplementationsCodeVisionProvider` (group `inheritors`) | "N implementations" above interfaces and their method specs when there is at least one (`GoImplementations` in project content, stubs only, stopped after 100); nothing on the concrete side, where the gutter icon already says "implements". A click runs `GotoImplementation`. |
+
+The anchor is the declaration without its doc comment (the hint sits right above the `func`/`type` line). Both providers follow the
+gate group `IMPLEMENTATION_MARKERS` and answer nothing in dumb mode; at most 300 declarations of a file are asked, with a
+cancellation check between them. `codevision.GoCodeVisionTest` (7) covers the anchors, the wording, the cap, the closed gate and that
+counting implementations keeps the implementing file's AST unloaded.
+
 ### Rename (`ide.rename`)
 
 | EP | Class | Behaviour |

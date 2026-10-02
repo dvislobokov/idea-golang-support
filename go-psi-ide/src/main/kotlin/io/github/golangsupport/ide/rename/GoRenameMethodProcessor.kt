@@ -6,6 +6,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.SearchScope
 import com.intellij.refactoring.rename.RenamePsiElementProcessor
+import io.github.golangsupport.ide.GoIdeFeature
+import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.navigation.GoImplementations
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoMethodSpec
@@ -20,11 +22,13 @@ import io.github.golangsupport.lang.psi.GoMethodSpec
  *   transitively, other project interface methods those implementations satisfy (so the group
  *   stays consistent).
  *
- * Library interfaces and implementations are never renamed.
+ * Library interfaces and implementations are never renamed. Stands down while [GoIdeFeature.RENAME]
+ * is off (the platform's default processor renames the one element then).
  */
 class GoRenameMethodProcessor : RenamePsiElementProcessor() {
 
-    override fun canProcessElement(element: PsiElement): Boolean = element is GoMethodDeclaration || element is GoMethodSpec
+    override fun canProcessElement(element: PsiElement): Boolean =
+        (element is GoMethodDeclaration || element is GoMethodSpec) && GoIdeFeatureGate.enabled(GoIdeFeature.RENAME, element.project)
 
     override fun substituteElementToRename(element: PsiElement, editor: Editor?): PsiElement? {
         val method = element as? GoMethodDeclaration ?: return element

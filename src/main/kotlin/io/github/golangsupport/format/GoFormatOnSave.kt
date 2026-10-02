@@ -1,13 +1,16 @@
 package io.github.golangsupport.format
 
+import com.intellij.codeInsight.actions.ReformatCodeProcessor
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.ide.actionsOnSave.impl.ActionsOnSaveFileDocumentManagerListener
+import com.intellij.lang.LanguageFormatting
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiDocumentManager
 import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.settings.GoFormatter
@@ -33,13 +36,17 @@ object GoTextDiff {
  * gofmt (or goimports) over every Go file that is being saved: unformatted Go does not pass a review anywhere, so the formatter runs
  * where other languages ask. The save itself is not held back: the platform forbids waiting for a process on EDT (seen live, an error in
  * the log), so the file is saved as typed, formatted in the background, and saved again if the text has not changed meanwhile. A file
- * the formatter cannot parse stays as it is.
+ * the formatter cannot parse stays as it is. The Built-in formatter ([GoFormatter.NATIVE]) runs no process: the file is reformatted
+ * before the save by the platform engine, the way the platform's own "Reformat code" on save does it ([ReformatCodeProcessor]).
  */
 class GoFormatOnSave : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
     override fun isEnabledForProject(project: Project): Boolean = GoSettings.getInstance().let { it.formatOnSave && it.formatter != GoFormatter.NONE }
 
     override fun processDocuments(project: Project, documents: Array<Document>) {
         val files = FileDocumentManager.getInstance()
+        if (GoSettings.getInstance().formatter == GoFormatter.NATIVE) return reformatNatively(project, documents.mapNotNull { document ->
+            files.getFile(document)?.takeIf { it.fileType == GoFileType }?.let { document }
+        })
         for (document in documents) {
             val file = files.getFile(document)?.takeIf { it.fileType == GoFileType } ?: continue
             val text = document.immutableCharSequence.toString()
@@ -57,6 +64,16 @@ class GoFormatOnSave : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
                 }, project.disposed)
             }
         }
+    }
+
+    /** On the EDT, before the save: the gofmt port of go-psi-ide through the platform engine, whole files (gofmt knows no changed-lines mode either). */
+    private fun reformatNatively(project: Project, documents: List<Document>) {
+        val psiDocuments = PsiDocumentManager.getInstance(project)
+        val psiFiles = documents.mapNotNull { document ->
+            psiDocuments.commitDocument(document)
+            psiDocuments.getPsiFile(document)?.takeIf { LanguageFormatting.INSTANCE.forContext(it) != null }
+        }
+        if (psiFiles.isNotEmpty()) ReformatCodeProcessor(project, psiFiles.toTypedArray(), null, false).run()
     }
 
     private fun format(executable: java.io.File, directory: String?, text: String): String? = try {

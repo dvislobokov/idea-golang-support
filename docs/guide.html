@@ -594,6 +594,8 @@ footer a { color: var(--text-2); }
         <tr><td>Source of features: Documentation and parameter info <span class="new">новое</span></td><td>Кто отвечает на Quick Documentation, parameter info и Type Info: gopls или плагин (Built-in).</td></tr>
         <tr><td>Source of features: Diagnostics <span class="new">новое</span></td><td>Кто подчёркивает семантические ошибки: gopls или инспекции плагина (Built-in: неразрешённые имена, неиспользуемые импорты и переменные, несовпадение типов, арность, дубликаты, пропущенный return — с быстрыми исправлениями). Анализаторы gopls (staticcheck, vet) остаются в обоих режимах; при Built-in в редактор возвращаются сообщения последней сборки (Go | Build).</td></tr>
         <tr><td>Source of features: Semantic colours <span class="new">новое</span></td><td>Кто красит идентификаторы по смыслу (типы, поля, параметры, пакеты): семантические токены gopls или resolve плагина (Built-in). Лексическая подсветка — ключевые слова, строки, комментарии — всегда плагина. Пока IDE индексирует, красит gopls и текстовые правила плагина.</td></tr>
+        <tr><td>Source of features: Rename <span class="new">новое</span></td><td>Кто переименовывает имя Go (Shift+F6): gopls или плагин по своим ссылкам (Built-in; метод интерфейса — вместе с реализациями по запросу).</td></tr>
+        <tr><td>Source of features: Code vision <span class="new">новое</span></td><td>Откуда счётчики «N usages» / «N implementations» над объявлениями и значки реализаций в gutter: gopls или плагин (Built-in).</td></tr>
       </tbody>
     </table></div>
 
@@ -641,7 +643,7 @@ footer a { color: var(--text-2); }
     <div class="table"><table class="two">
       <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
       <tbody>
-        <tr><td>Reformat Code with</td><td>gofmt, goimports, <code>golangci-lint fmt</code> или None. goimports также правит импорты.</td></tr>
+        <tr><td>Reformat Code with</td><td>gofmt, goimports, <code>golangci-lint fmt</code>, None или Built-in (gofmt-совместимый форматтер плагина: без внешнего процесса). goimports также правит импорты.</td></tr>
         <tr><td>Format Go files on save</td><td>Форматирование при сохранении. Файл с синтаксической ошибкой сохраняется как есть.</td></tr>
         <tr><td>Show golangci-lint warnings in the editor</td><td>Замечания линтера после сохранения файла. Используется конфигурация проекта.</td></tr>
       </tbody>

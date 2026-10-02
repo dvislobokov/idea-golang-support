@@ -33,6 +33,21 @@ class GoToolchainProviderTest : BasePlatformTestCase() {
         assertTrue(GoToolchainProvider.getInstance().javaClass.name, GoToolchainProvider.getInstance() is GoIgsToolchainProvider)
     }
 
+    /** Asked per import resolve: the answer is kept until the settings change or [GoIgsToolchainProvider.invalidate] (a 12 s freeze otherwise, seen live). */
+    fun testTheAnswerIsCachedUntilTheSettingsChangeOrAReanalyze() {
+        val provider = GoIgsToolchainProvider()
+        val first = provider.toolchainFor(project) ?: return // no Go on this machine
+        val stamp = provider.modificationTracker.modificationCount
+        assertSame("the same question gives the same answer, no detection", first, provider.toolchainFor(project))
+        assertEquals(stamp, provider.modificationTracker.modificationCount)
+        settings.buildTags = "cached_test_tag"
+        val changed = provider.toolchainFor(project)!!
+        assertNotSame(first, changed)
+        assertTrue(changed.buildTags.contains("cached_test_tag"))
+        provider.invalidate()
+        assertNotSame("a reanalyze looks at the disk again", changed, provider.toolchainFor(project))
+    }
+
     fun testTheSettingsReachTheBuildContext() {
         val provider = GoIgsToolchainProvider()
         val before = provider.toolchainFor(project) ?: return // no Go on this machine: nothing to adjust, and nothing to assert
