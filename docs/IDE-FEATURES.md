@@ -287,6 +287,22 @@ are joined with `; ` because problem descriptions are single-line.
 - Not dumb-aware (the checker resolves through stub indices); library sources are not
   inspected by the platform.
 
+### Analysis inspections (wave 2 of FEATURES.md §11, part E)
+
+PSI walkers on `GoAnalysisInspectionBase` (a `buildVisitor` that returns the empty visitor while `GoIdeFeature.DIAGNOSTICS` is off,
+like the checker inspections); types and resolve come from `GoSemanticService` (cached per body), no project-wide search except the
+implementations of a type switch's interface (stub indices, as Fill Switch). All WARNING, enabled by default.
+
+| Short name | Rules | Quick fixes |
+|---|---|---|
+| `GoExhaustiveSwitch` | `switch` over an enum (constants of a named type in its package; equal values are one member, unexported constants of another package are not members, bit flags skipped) or a type switch over an interface of the project content (library interfaces skipped) without `default` (option: with `default` too): `Missing cases in switch of type Color: Red, Green, Blue and 2 more` on the `switch` keyword | Add missing cases (`GoSwitchCases`, the Fill Switch computation) |
+| `GoStructTag` | vet `structtag`: "struct field tag ‹tag› not compatible with reflect.StructTag.Get: ‹vet reason›"; `Duplicate key "json" in struct field tag`; `struct field B repeats json tag "id" also at field A` (`json`, `xml` with attributes apart and `XMLName` skipped, `yaml`, `db`; `-` and empty names skipped, embedded structs not descended into); `struct field x has json tag but is not exported` (`json`, `xml`) | Fix quoting (`GoStructTags.repaired`: bare value quoted, space after the colon, missing closing quote at the end, comma or nothing between pairs); Remove duplicate key |
+| `GoContextPlacement` | `context.Context should be the first parameter of a function` (declarations and methods; `testing` `*T`/`*B`/`*F`/`TB` may come first); `'ctx' is replaced/shadowed by context.Background(): …` inside the innermost function that has a context parameter; `context.Background() is passed where 'ctx' is available` (weak warning; function literals without their own context parameter are not reported) | Use ctx; Use ctx (remove the assignment) |
+| `GoErrorsPackage` | vet `errorsas` (`second argument to errors.As must be a non-nil pointer …`, `… should not be *error`; `any` targets accepted); `err == ErrX` / `!=` with a package-level `error` variable (weak warning; not `nil`, not inside `Is` methods) | Take the address of target; Replace with errors.Is(err, ErrX) (imports `errors`) |
+
+Struct tag parsing is pure (`GoStructTags`: vet's `validateStructTag`, reflect's `Lookup`, `strconv.Unquote`), tested by `GoStructTagsTest`;
+the inspections by `GoAnalysisInspectionsTest`.
+
 ### Quick fixes
 
 - Add import (`GoAddImportFix`, high priority): for `undefined: pkg` on a qualifier `pkg.X` or
@@ -326,9 +342,11 @@ written as the file spells them (`GoSourceText`: import name of another package,
   whose body the checker reports as "missing return" (and whose last statement is not a `return`), the same intention reads
   "Add missing return" and inserts the statement before the closing brace.
 - Fill switch (`GoFillSwitchIntention`): expression switch over a named non-interface type — `case C:` for every constant of exactly that
-  type in its package (files in order, unexported ones only in the own package), minus the ones resolved or named in a case; type switch
+  type in its package (files in order, unexported ones only in the own package), minus the ones resolved or named in a case and the ones
+  whose constant value is already in a case or added for an earlier constant (no duplicate case for `Ptr = Pointer`); type switch
   over a named interface — every implementing type of the project (`GoImplementations.implementingTypes`, project scope, generic types
-  skipped), `*T` when only the pointer implements it; a case naming the type with or without `*` counts. Inserted after the existing
+  skipped), `*T` when only the pointer implements it; a case naming the type with or without `*`, or naming an interface the type
+  implements, counts. The computation is `GoSwitchCases`, shared with `GoExhaustiveSwitchInspection`. Inserted after the existing
   cases, before `default`.
 - Fill select / Fill select with default (`GoFillSelectIntention`, `GoFillSelectWithDefaultIntention`): `case <-ctx.Done():` with
   `return …, ctx.Err()` (zero values, or bare `return` without results) for every `context.Context` in scope, `case v := <-ch:` for
@@ -341,8 +359,28 @@ written as the file spells them (`GoSourceText`: import name of another package,
 - Wrap error with fmt.Errorf (`GoWrapErrorIntention`): the last value of a `return` that is an `error` variable becomes
   `fmt.Errorf("<func>: %w", err)` (`Type.Method` for methods); `fmt` is imported when missing.
 
-Known gaps: enum constants with the same value both get a case (duplicate case); no exhaustiveness inspection yet; values in filled
-literals are not aligned until the file is formatted.
+Editing intentions (FEATURES.md section 11, wave 2 G), the same base and gate, text edits with tabs (no reformat):
+
+- Change quote (`GoChangeQuoteIntention`, gopls `changequote`): "Convert to raw string literal" when the value passes
+  `strconv.CanBackquote` (no backquote, newline or other control character but a tab; `\x80`+ byte escapes refused), "Convert to
+  interpreted string literal" always (`strconv.Quote`; carriage returns of the raw literal dropped as the compiler does). `GoStringQuotes`.
+- `if` (`GoIfIntentions.kt`, caret on the `if` header): Invert 'if' condition (needs an `else` block, also on the `else` keyword; branches
+  swapped; `==`↔`!=`, `<`↔`>=` only for integer/string operands, otherwise `!(a < b)`; `!x`→`x`; De Morgan one level over a flattened
+  `&&`/`||` chain); Invert 'if' with early return / continue (last statement of a function without results or of a loop body, no `else`,
+  no init statement, no name of the body already declared in the enclosing block or the parameters); Merge nested 'if' (outer body is
+  only the inner `if`, no `else`, no init on the inner one, no comments between); Split 'if' condition (at the `&&` under the caret, else
+  the last one; no `else`); Convert 'if' to 'switch' (two or more `if`s, every condition `s == v` or an `||` of them over one plain
+  reference `s`, init only on the first `if`, no duplicate values, no unlabeled `break` in a branch, comparable operand type); Convert
+  'switch' to 'if' (expression switch whose tag is a plain reference or absent; no `fallthrough`, no unlabeled `break`; `default` becomes
+  the final `else` wherever it stands).
+- Declarations (`GoDeclarationIntentions.kt`): Split into separate declarations (`var a, b T` / `var a, b = 1, 2` per name, a `var (…)`
+  or `const (…)` group per spec; not for `iota` or implicit-value const groups, nor when a value names a declared name); Group
+  declarations (adjacent single `var` or `const` declarations into one group, no comments inside, no `iota`); Join declaration and
+  assignment (`GoDeclarationJoin`, shared with Join Lines: `x := v` when `defaultType(typeOf(v))` is `T`, otherwise `var x T = v`);
+  Convert to 'var' declaration (`x := v` → `var x T = v`, `T` through `GoSourceText`, not for unexported types of other packages);
+  Convert to short variable declaration (`var x = v`, or `var x T = v` when the types agree).
+
+Known gaps: values in filled literals are not aligned until the file is formatted.
 
 ### Suppression (`GoInspectionSuppressor`, `lang.inspectionSuppressor`)
 
@@ -380,3 +418,60 @@ checker's messages), `testData/inspections/fixes/*.go` and `*_after.go`.
 - Optimize imports does not regroup standard and third-party imports, and does not remove
   duplicate imports.
 - Add import does not consider packages outside the build list (no `go get`).
+
+## Wave 1 of `docs/FEATURES.md` §11 (2026-10-02, versions 0.2.2–0.2.13)
+
+Editing features over the PSI; none of them talks to gopls, and only inlay hints and doc links stand behind the feature gate.
+
+### Editing (`ide.editor`, `go-psi-ide-editing.xml`; no gate)
+- `GoSurroundDescriptors`: statement surrounders (`if`, `if / else`, `for`, `func() {…}()`, `go func`, `defer func`, `{…}`; the selection grows to whole
+  statements of one block or `case` body) and expression surrounders (`(expr)`, `!(expr)` for booleans, `for range` with variables by type, `if err != nil {…}`
+  after a call whose last result is `error` — a nested `(T, error)` call is moved out before its statement, the `return` gets zero values of the enclosing function).
+- `GoUnwrapDescriptor`: unwrap `if` (init kept, `else` dropped), unwrap / remove `else`, unwrap `for`, unwrap `func() {…}()` (also under `go` / `defer`),
+  remove `defer` / `go`, unwrap `case` of `switch` / type switch / `select`, unwrap braces. Bodies move one tab left; raw strings and block comments stay.
+- `GoStatementMover` (`statementUpDownMover`, `order="first"`): statements, `case` clauses, struct fields, interface methods, specs of grouped declarations and
+  top-level declarations with the comments right above; stops at the edge of its list; blank lines between neighbours stay in place; anything else falls back to the line mover.
+- `GoJoinLinesHandler`: `var x T` + `x = v` → `x := v` (or `var x T = v` when the default type of `v` differs), adjacent string literals of one kind, call arguments
+  and composite literal elements (trailing comma removed). Edits are text with tabs, as gofmt writes them; no `CodeStyleManager` pass (the host may format with an external gofmt).
+- `GoEditText`: shared helpers (statement lists, line shifts that skip raw strings and block comments, body extraction).
+
+### Paste (`ide.editor.paste`, `go-psi-ide-paste.xml`; no gate)
+- `GoPasteImportsProcessor` (`copyPastePostProcessor`): on copy, every `pkg.X` qualifier of the range is recorded with its import path and alias; on paste into
+  another Go file the missing imports are added through `GoImportInserter` (sorted into the std / non-std group; a qualifier that already means something in the
+  target is left alone). `CodeInsightSettings.ADD_IMPORTS_ON_PASTE`: YES silent, NO nothing, ASK a `ChooseElementsDialog`.
+- Text without copy metadata: unresolved qualifiers go to the EP `io.github.golangsupport.pasteImportResolver` (`GoPasteImportResolver`); the host answers from
+  its stdlib catalogue when exactly one standard package of that name has every used member.
+
+### Spelling (`ide.spelling`, `go-psi-ide-spelling.xml` — loaded through `<depends optional="true">com.intellij.modules.spellchecker</depends>` of the host)
+- `GoSpellcheckingStrategy`: identifiers at their declaration (not package names, import aliases, builtins), comments through `CommentSplitter` (directives,
+  indented code, URLs, `[pkg.Name]` links, back-quoted text and the cgo preamble skipped), string literals through `PlainTextSplitter` with escapes and `fmt`
+  verbs blanked (import paths and struct tags skipped), never runes. The concrete inspection is Grazie's Typo; the tests check `SpellCheckingInspection.tokenize`.
+
+### Doc links (`ide.documentation.GoDocLinks`, `GoDocLinkReference`; gate `NAVIGATION`)
+- `[Name]`, `[A.B]`, `[pkg.T.M]`, `[import/path.Name]`, `[*T]`, `[pkg]` in `//` doc comments outside function bodies (brackets standing apart from words; not
+  indented lines, not `[Text]: URL` definitions) are soft references, one per name, resolved like go/doc through `GoPackageModel` / `GoScopes` / `GoUniverse` and
+  `lookupFieldOrMethod`; Rename rewrites the comment leaf. `GoDocHtml` renders the resolvable ones as `psi_element://` links; `GoDocLinkHandler` opens the target's documentation.
+
+### Inlay hints (`ide.hints`, `go-psi-ide-hints.xml`; gate `INLAY_HINTS` for the gopls set, none for the struct size)
+- Declarative providers: `go.parameter.names`, `go.literal.fields`, `go.types` (options `assign`, `range`, `literal` off, `instantiation` off), `go.constant.values`,
+  `go.struct.size` (`24 bytes, 11 padding (16 if reordered)`, 64-bit GOARCH only, not for generic or empty structs). Parameter-name heuristics follow gopls (the
+  argument says the name, a one-parameter function says it, one-letter parameters, `f(g())` with a multi-value `g` gets nothing). Types are printed with the
+  import name of the file; `:=` types come from `declarationType` and the per-body caches, call signatures from `calleeSignature` (type arguments from `partialSubst`).
+- `GoInlayHintsBenchmark` (`net/http/server.go`, 688 hints): cold ≈ 139 ms, warm ≈ 15 ms, after a body edit ≈ 24 ms (`testData/benchmark/thresholds.json`).
+- Tests dump the hints of a real `DeclarativeInlayHintsPass` in the `/*<# … #>*/` format; `testHintsDoNotLoadOtherFiles` keeps the AST of the callee's file unloaded.
+
+### Printf checks (`ide.inspections.printf`, `GoPrintfInspection`; gate `DIAGNOSTICS`) and verb completion (wave 2, part F)
+- `GoFormatString` is a pure parser of `fmt` directives (flags, `[n]` indexes, `*` width/precision) with a decoder that maps every character of an
+  interpreted or raw literal back to its source range, so a problem is reported on the directive, not on the call. `GoPrintfVerbs` holds vet's verb /
+  flag / argument-class table; `GoPrintfTypes` is vet's `matchArgType` over `GoType` (Stringer / `error` for `%s`, `fmt.Formatter` accepts all, elements of
+  slices / arrays / maps, fields of structs, unknown types and interfaces always match).
+- `GoPrintfCalls` recognises `fmt`, `log`, `(*log.Logger)`, `testing` methods, `runtime/trace.Logf`, and the package's own wrappers: a function whose last
+  parameters are `(format string, args ...any)` (or only `args ...any` for Print-like) and whose body forwards them to a printf-like callee; forwards are
+  cached per body in `GoBodyCache` (`gopsi.printf.forwards`), chains up to depth 3, same package only (no AST of other packages is loaded).
+- Checks and messages follow vet (`fmt.Printf format %d has arg s of wrong type string`, `call needs 1 arg but has 2 args`, unknown verb / flag, `%w` only
+  in `Errorf` with an `error` argument, several `%w` only from Go 1.20, Println with directives or a redundant `
+`, func values not called, recursive
+  `String`); the check stops at the first bad directive. Fixes: replace the verb with the one the argument type takes, remove extra arguments, add `%v`
+  placeholders; `%v` of an error in `Errorf` is an INFORMATION-level suggestion with "Replace %v with %w".
+- `GoFormatVerbCompletion`: typing `%` in the format string of a printf-like call opens the verb list (`GoFormatVerbTypedHandler` + confidence), ranked by the
+  type of the argument the directive will read; `%w` only in Errorf-like calls; flags and width typed before the verb are kept. Nothing in non-printf calls.

@@ -6,6 +6,135 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
+gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+
+## [0.2.22] - 2026-10-02
+
+### Added — Printf verb completion
+- Printf verb completion: typing `%` in the format string of a printf-like call (including package wrappers) opens `%v %+v %#v %T %d %s %q %x %t %f %.2f …`, with `%w` only in `Errorf`; flags and width typed before the verb are kept.
+- Verbs are ranked by the type of the argument the directive will read (`%d` for ints, `%s` for strings, `%f` for floats, `%w` for errors in `Errorf`).
+
+## [0.2.21] - 2026-10-02
+
+### Added — `var` / `const` split and join
+- **Split into separate declarations** (`var a, b int`, `var (…)` / `const (…)` groups without `iota`) and **Group declarations** (adjacent `var` or `const` lines into one group).
+- **Join declaration and assignment**: `var x T` + `x = v` → `x := v`, or `var x T = v` when `v` alone would give `x` another type — the same rule as Join Lines, which now keeps a comment above the declaration.
+- **Convert to 'var' declaration** (`x := v` → `var x T = v`, the type written with the file's import names) and **Convert to short variable declaration** (`var x T = v` → `x := v` when the types agree). Built-in language features only.
+
+## [0.2.20] - 2026-10-02
+
+### Added — `if` intentions
+- **Invert 'if' condition** (also from the `else` keyword) swaps the branches and negates the condition: `==`↔`!=`, `<`↔`>=` for integers and strings (`!(a < b)` for floats), `!x`→`x`, De Morgan one level.
+- **Invert 'if' with early return / continue** for an `if` ending a function without results or a loop body; **Merge nested 'if'** and **Split 'if' condition** (at the `&&` under the caret).
+- **Convert 'if' to 'switch'** for `if x == 1 … else if x == 2 || x == 3 … else …` over one variable or field, and **Convert 'switch' to 'if'** back (`default` becomes the last `else`; not offered with `fallthrough` or a `break` leaving the switch). Built-in language features only.
+
+## [0.2.19] - 2026-10-02
+
+### Added — Change quote
+- **Change quote** (Alt+Enter on a string literal): "Convert to raw string literal" / "Convert to interpreted string literal", like gopls `changequote`. An interpreted string becomes raw only when its value fits between backquotes unchanged (no backquote, newline or other control character but a tab); escapes are converted. Built-in language features only (gopls offers its own).
+
+## [0.2.18] - 2026-10-02
+
+### Added — errors.Is / errors.As
+- errors.Is / errors.As inspection (`GoErrorsPackage`): vet `errorsas` (the target of `errors.As` must be a non-nil pointer to an error type or an interface, never `*error`), and `err == ErrX` / `!=` against a package-level `error` variable (weak warning; not `nil`, not inside `Is` methods).
+- Quick fixes "Take the address of target" and "Replace with errors.Is(err, ErrX)" (`errors` imported when missing).
+
+## [0.2.17] - 2026-10-02
+
+### Added — context.Context placement
+- context.Context inspection (`GoContextPlacement`): a `context.Context` parameter that is not first (testing `*T`/`*B`/`TB` may precede it), a context parameter replaced or shadowed by `context.Background()`/`TODO()`, and `context.Background()` passed as an argument where the function has a context parameter (weak warning).
+- Quick fixes "Use ctx" and "Use ctx (remove the assignment)"; function literals without their own context parameter (detached goroutines) are not reported.
+
+## [0.2.16] - 2026-10-02
+
+### Added — Struct tags
+- Struct tag inspection (`GoStructTag`, vet `structtag`): tags `reflect.StructTag.Get` cannot read (unquoted values, missing colon, unbalanced quotes, pairs not separated by spaces, suspicious spaces), a key repeated in one tag, the same `json`/`xml`/`yaml`/`db` name on two fields of a struct, `json`/`xml` tags on unexported fields.
+- Quick fixes "Fix quoting" (`json:id` → `json:"id"`, when unambiguous) and "Remove duplicate key"; the tag parser is pure (`GoStructTags`) and unit-tested.
+
+## [0.2.15] - 2026-10-02
+
+### Added — Printf checks
+- Printf checks without gopls (`GoPrintf`, vet `printf`): verb against argument type, argument count with `[n]` indexes and `*` width/precision, unknown verbs and flags, `%w` only in `Errorf` and only with an `error`, Printf directives and redundant newlines in `Println`; `fmt`, `log`, `testing` and the package's own `(format string, args ...any)` wrappers.
+- Warnings point at the directive inside the string (escapes are mapped back to the source); fixes: replace the verb with the one the argument's type takes, remove extra arguments, add `%v` placeholders; `%v` of an error in `Errorf` offers `%w`.
+
+## [0.2.14] - 2026-10-02
+
+### Added — Exhaustive switch
+- Exhaustive switch inspection (`GoExhaustiveSwitch`, go-psi-ide): a `switch` over an enum (constants of a named type in its package) or a type switch over an interface of the project that misses members and has no `default` is reported on the `switch` keyword ("Missing cases in switch of type Color: Green, Blue and 1 more"); constants with equal values are one member, bit-flag enums and library interfaces are skipped; option to report switches with `default` too.
+- Quick fix "Add missing cases" inserts the same cases as Fill Switch (`GoSwitchCases`, shared).
+- Fixed: Fill switch no longer adds a duplicate case for constants with the same value (`Ptr = Pointer`), and a case naming an interface covers its implementations.
+
+## [0.2.13] - 2026-10-02
+
+### Added — Doc links
+- **Doc links** of Go 1.19 doc comments are references: `[Name]`, `[Type.Method]`, `[pkg.Name]`, `[pkg.Type.Field]`, `[import/path.Name]`, `[*T]` in `//` comments outside function bodies navigate with Ctrl+click, show up in Find Usages and follow Rename (each name of a link separately). Built-in language features only (gopls serves its own).
+- Quick Documentation renders the doc links that resolve as links that open the documentation of their target.
+
+## [0.2.12] - 2026-10-02
+
+### Added — Spelling
+- **Spelling** in Go files (the platform's Typo inspection, through an optional dependency on the spellchecker): identifiers where they are declared (camel case and underscores split, Rename fix), comments and string literals. Directives (`//go:build`, `//nolint`, `//export`), indented code in doc comments, URLs, `[pkg.Name]` doc links, back-quoted code, the cgo preamble, import paths, struct tags, escapes, `fmt` verbs and rune literals are not checked.
+
+## [0.2.11] - 2026-10-02
+
+### Added — Add imports on paste
+- **Add imports on paste**: Go code copied from one Go file into another brings its imports along: every `pkg.X` qualifier of the copied range is recorded with the import it resolved to (and its alias), and the imports the target misses are added in place (no duplicates; a name that already means something in the target is left alone). Settings | Editor | General | Auto Import, "Insert imports on paste": Ask / All / None.
+- Text pasted from outside the IDE: an unresolved qualifier gets the import of the one standard package with that name that has every name used through it (`json.Marshal` → `encoding/json`; `template.New` stays as it is). go-psi-ide asks the new extension point `pasteImportResolver`, the plugin answers from its package catalogue.
+
+## [0.2.10] - 2026-10-02
+
+### Added — Struct size inlay
+- **Struct size inlay**: after `type T struct {` the size of the struct as gc lays it out for the GOARCH of the build, the bytes lost to padding and the size with the fields reordered — `24 bytes, 11 padding (16 if reordered)`; Alt+Enter → Reorder fields gets there. 64-bit targets only, in both language-feature modes (gopls has no such hint); Settings | Editor | Inlay Hints | Go | Other.
+
+## [0.2.9] - 2026-10-02
+
+### Added — Inlay hints
+- **Inlay hints over the PSI** (Settings | Editor | Inlay Hints | Go): the hint set of gopls drawn by the IDE itself — parameter names at call sites (silent when the argument already says the name, or a one-parameter function says it by its own name), struct literal field names, types of `:=` and `for … range` variables, values of `iota` and computed constants (on by default); types of elided nested literals and inferred type arguments of generic calls (off by default). Types are printed with the import name of their package.
+- With **Language features: Built-in** the hints of gopls are not requested (per file, so while the IDE indexes gopls still shows them); with gopls the native providers collect nothing (`GoFeature.INLAY_HINTS`). Every `:=` type comes from the per-function-body inference cache: 688 hints of `net/http/server.go` in ~15 ms warm, ~24 ms after an edit in one function (`GoInlayHintsBenchmark`).
+- The type renderer of go-psi-semantic keeps its qualifier per thread: the checker, the intentions and now the hints render types from different daemon threads at once.
+
+## [0.2.8] - 2026-10-02
+
+### Added — Join Lines
+- **Join Lines** (Ctrl+Shift+J) for Go: `var x T` + `x = v` → `x := v` (`var x T = v` when `v` alone would change the type), `"a" +` + `"b"` → `"ab"` (two interpreted or two raw literals), and call arguments / composite literal elements spread over lines join to `f(a, b)` / `T{A: 1, B: 2}` without the trailing comma. Everything else joins as before.
+
+## [0.2.7] - 2026-10-02
+
+### Added — Move Statement
+- **Move Statement Up/Down** (Ctrl+Shift+Up/Down) moves whole Go elements: statements (all lines of a multi-line literal at once), `case` clauses, struct fields, interface methods, specs of `var (…)` / `const (…)` / `type (…)` / `import (…)` groups and top-level declarations, with the comment lines right above them. The element swaps with its neighbour and stops at the edge of its list; blank lines between declarations stay in place, so the gofmt layout does not change. Anything else falls back to moving the line.
+
+## [0.2.6] - 2026-10-02
+
+### Added — Unwrap/Remove
+- **Unwrap/Remove** (Ctrl+Shift+Delete) for Go: Unwrap `if` (the init statement is kept, `else` dropped), Unwrap `else` (the last branch replaces the whole chain), Remove `else`, Unwrap `for` (the init of a three-clause loop is kept), Unwrap `func() {…}()` (also under `go` / `defer`), Remove `defer` / `go`, Unwrap `case` of `switch` / type switch / `select`, Unwrap braces. The body moves one tab to the left; raw strings and block comments stay as they are.
+
+## [0.2.5] - 2026-10-02
+
+### Added — Surround With
+- **Surround With** (Ctrl+Alt+T) works on the Go PSI: the selection grows to whole statements of one block or `case` body (a trailing comment goes along, raw-string lines are not reindented), then `if`, `if / else`, `for`, `func() {…}()`, `go func() {…}()`, `defer func() {…}()`, `{…}`; a selected expression gets `(expr)`, `!(expr)` (booleans only), `for range` (variables by type: `_, v` / `k, v` / `v` / `i` / `_, r`) and `if err != nil {…}` after a call returning an `error` (`v, err := call` with zero values of the enclosing function's results in the `return`; a nested `(T, error)` call is moved out before its statement). The text-based surrounder of the plugin is gone.
+
+## [0.2.4] - 2026-10-02
+
+### Added — Smart Enter
+- Complete Statement (Ctrl+Shift+Enter) reads the PSI of the caret line: `if`/`for`/`switch`/`select`/`else`/`func`/`struct`/`interface` without a body get `{}` with the caret inside (`func run` also gets `()`), unclosed calls, indexes and one-line literals are closed (parentheses in strings no longer count), an element of a multi-line literal or call gets its `,`, `go func`/`defer func` get `() {…}()`, and a complete statement moves the caret to a new indented line.
+- A bare `for` no longer takes the next line as its header; a header with a doc comment above it is recognised; `//` alone above a declaration becomes `// Name `. The line-based text engine is gone.
+
+## [0.2.3] - 2026-10-02
+
+### Added — Live templates
+- Live templates apply only where they make sense: statements (`fori`, `forr`, `err`, `sel`, `mu`, …) inside function bodies, declarations (`func`, `meth`, `main`, `test`, `bench`, `fuzz`, …) at the top level of a file, the `json` tag in a struct field, `errf` in an expression; new templates `func` and `errf` (`fmt.Errorf("…: %w", err)`).
+- New template contexts Go statement / Go top level / Go struct field / Go expression under Go (Settings | Editor | Live Templates), decided by the PSI, by the lexer's tokens while the document is not committed; `goTypeName()` / `goErrorReturn()` read the text of the file when the PSI has not seen it yet.
+
+## [0.2.2] - 2026-10-02
+
+### Added — Postfix templates
+- Postfix templates are offered by the type of the expression: `.if`/`.not` on booleans, `.nil`/`.nn` on nillable types, `.for` on what `range` takes (`for k, v := range m`, `for v := range ch`, `for i := range n`), `.sort`/`.append` on slices, `.len` on what has a length, `.go`/`.defer` on calls; an unresolved expression keeps them.
+- `.err` on a call returning an error last declares its results and checks the error (`v, err := load()` + `if err != nil { return 0, err }`), on an `error` call it checks inline; `.return` puts the value among the function's results with zero values for the rest (`return 0, err`); `.var` declares every result of a call; new `.par`, `.nn`; `.not` writes `!(a == b)` and turns `!x` into `x`; `.sort` uses `slices.Sort` for ordered elements; `.print`, `.printf`, `.wrap`, `.sort` add their import.
+- The expression comes from the go-psi PSI (statement templates only on an expression statement); the text matcher remains only for a document that is not committed yet.
+
+## Before 0.2.2 — unversioned (migration steps 1–10 and the logs window, shipped with 0.2.2)
+
 ### Logs
 - **Go | Plugin Logs**: the journal of the plugin in a tool window (only the events of the plugin; Clear, Warnings and Errors Only, Open Logs Folder), and a "Plugin Logs" button on every error notification. One folder for every log, `~/idea-golang-logs`: `plugin/plugin-DATE.log` (the journal), `commands/commands-DATE.log` (every `go` command and tool the plugin runs, with its output, timestamps and exit code), `delve/` (the debugger logs moved here from the log directory of the IDE). Files are kept for two weeks. **Go | Open Logs Folder** opens it.
 

@@ -1,0 +1,13 @@
+<!-- go-psi-ide, editing actions over the PSI: Surround With (statements and expressions), Unwrap/Remove, Move Statement Up/Down,
+     Join Lines. gopls has nothing of the kind, so they are always on: no GoIdeFeatureGate check. Included by the host plugin
+     (MIGRATION.md, step 11); the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <lang.surroundDescriptor language="Go" implementationClass="io.github.golangsupport.ide.editor.GoStatementSurroundDescriptor"/>
+    <lang.surroundDescriptor language="Go" implementationClass="io.github.golangsupport.ide.editor.GoExpressionSurroundDescriptor"/>
+    <lang.unwrapDescriptor language="Go" implementationClass="io.github.golangsupport.ide.editor.GoUnwrapDescriptor"/>
+    <!-- first: it answers false outside Go files, and in a Go file for what it does not recognise (then the line mover of the platform moves the line) -->
+    <statementUpDownMover implementation="io.github.golangsupport.ide.editor.GoStatementMover" id="goStatement" order="first"/>
+    <joinLinesHandler implementation="io.github.golangsupport.ide.editor.GoJoinLinesHandler"/>
+  </extensions>
+</idea-plugin>

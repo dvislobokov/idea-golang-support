@@ -25,33 +25,35 @@ object GoImportInserter {
         PsiDocumentManager.getInstance(ctx.project).commitDocument(document)
     }
 
-    fun addImport(file: GoFile, document: Document, path: String) {
+    /** Adds `import [alias] "path"`; nothing when the file has that spec already. */
+    fun addImport(file: GoFile, document: Document, path: String, alias: String? = null) {
         val specs = PsiTreeUtil.findChildrenOfType(file, GoImportSpec::class.java)
-        if (specs.any { it.path == path && it.alias == null }) return
+        if (specs.any { it.path == path && it.alias == alias }) return
+        val line = (alias?.let { "$it " } ?: "") + quote(path)
         val importList = PsiTreeUtil.getChildOfType(file, GoImportList::class.java)
         val declarations = importList?.importDeclarationList.orEmpty()
         val grouped = declarations.firstOrNull { it.lparen != null && it.rparen != null }
         when {
-            grouped != null -> insertIntoGroup(grouped, document, path)
+            grouped != null -> insertIntoGroup(grouped, document, path, line)
             declarations.isNotEmpty() -> {
                 val single = declarations.first()
                 val existing = single.importSpecList.map { it.text }
-                val lines = (existing + quote(path)).sortedBy { specPath(it) }
+                val lines = (existing + line).sortedBy { specPath(it) }
                 val text = "import (\n" + lines.joinToString("") { "\t$it\n" } + ")"
                 document.replaceString(single.textRange.startOffset, single.textRange.endOffset, text)
             }
             else -> {
                 val clause = file.packageClause
                 if (clause == null) {
-                    document.insertString(0, "import ${quote(path)}\n\n")
+                    document.insertString(0, "import $line\n\n")
                 } else {
-                    document.insertString(clause.textRange.endOffset, "\n\nimport ${quote(path)}")
+                    document.insertString(clause.textRange.endOffset, "\n\nimport $line")
                 }
             }
         }
     }
 
-    private fun insertIntoGroup(declaration: GoImportDeclaration, document: Document, path: String) {
+    private fun insertIntoGroup(declaration: GoImportDeclaration, document: Document, path: String, line: String) {
         val text = document.charsSequence
         val specs = declaration.importSpecList
         val isStd = isStdPath(path)
@@ -59,8 +61,8 @@ object GoImportInserter {
         val blocks = ArrayList<MutableList<GoImportSpec>>()
         var previousLine = -10
         for (spec in specs) {
-            val line = document.getLineNumber(spec.textRange.startOffset)
-            if (blocks.isEmpty() || line > previousLine + 1) blocks += ArrayList<GoImportSpec>()
+            val specLine = document.getLineNumber(spec.textRange.startOffset)
+            if (blocks.isEmpty() || specLine > previousLine + 1) blocks += ArrayList<GoImportSpec>()
             blocks.last() += spec
             previousLine = document.getLineNumber(spec.textRange.endOffset)
         }
@@ -71,20 +73,20 @@ object GoImportInserter {
             val lineStart = document.getLineStartOffset(document.getLineNumber(rparen))
             val separator = if (specs.isEmpty()) "" else "\n"
             if (text.subSequence(lineStart, rparen).isBlank()) {
-                document.insertString(lineStart, "$separator\t${quote(path)}\n")
+                document.insertString(lineStart, "$separator\t$line\n")
             } else {
-                document.insertString(rparen, "\n$separator\t${quote(path)}\n")
+                document.insertString(rparen, "\n$separator\t$line\n")
             }
             return
         }
         val before = block.firstOrNull { it.path > path }
         if (before != null) {
             val lineStart = document.getLineStartOffset(document.getLineNumber(before.textRange.startOffset))
-            document.insertString(lineStart, "\t${quote(path)}\n")
+            document.insertString(lineStart, "\t$line\n")
         } else {
             val last = block.last()
             val lineEnd = document.getLineEndOffset(document.getLineNumber(last.textRange.endOffset))
-            document.insertString(lineEnd, "\n\t${quote(path)}")
+            document.insertString(lineEnd, "\n\t$line")
         }
     }
 

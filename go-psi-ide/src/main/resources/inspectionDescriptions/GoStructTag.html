@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports struct tags that are malformed or ambiguous (vet <code>structtag</code>):
+<ul>
+  <li>a tag <code>reflect.StructTag.Get</code> cannot read: a value without quotes, a missing colon, an unbalanced quote, pairs not
+    separated by spaces, suspicious spaces in <code>json</code>/<code>xml</code> values;</li>
+  <li>the same key twice in one tag (only the first is read);</li>
+  <li>two fields of one struct with the same <code>json</code>, <code>xml</code>, <code>yaml</code> or <code>db</code> name
+    (<code>-</code> and empty names are skipped, XML attributes have their own names, embedded structs are not descended into);</li>
+  <li>a <code>json</code> or <code>xml</code> tag on an unexported field, which the encoders ignore.</li>
+</ul>
+<p>Quick fixes: <b>Fix quoting</b> (<code>json:name</code> to <code>json:"name"</code>) when the repair is unambiguous,
+<b>Remove duplicate key</b>.</p>
+</body>
+</html>

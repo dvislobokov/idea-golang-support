@@ -25,6 +25,7 @@ class GoIgsIdeFeatureGate : GoIdeFeatureGate {
             GoIdeFeature.SEMANTIC_COLORS -> GoFeature.SEMANTIC_COLORS
             GoIdeFeature.CODE_ACTIONS -> GoFeature.CODE_ACTIONS
             GoIdeFeature.RENAME -> GoFeature.RENAME
+            GoIdeFeature.INLAY_HINTS -> GoFeature.INLAY_HINTS
         }
     }
 }

@@ -39,7 +39,7 @@ class GoLanguageServerConfigurable(project: Project) : GoSettingsPage(project, "
         row { checkBox(GoBundle.message("ls.enabled")).bindSelected(settings::languageServerEnabled) }
         row { checkBox(GoBundle.message("ls.staticcheck")).bindSelected(settings::goplsStaticcheck) }
         row { checkBox(GoBundle.message("ls.gofumpt")).bindSelected(settings::goplsGofumpt) }
-        row { checkBox(GoBundle.message("ls.inlayHints")).bindSelected(settings::goplsInlayHints) }
+        row { checkBox(GoBundle.message("ls.inlayHints")).bindSelected(settings::goplsInlayHints).comment(GoBundle.message("ls.inlayHints.comment")) }
         row { checkBox(GoBundle.message("ls.highlightUsages")).bindSelected(settings::goplsHighlightUsages).comment(GoBundle.message("ls.highlightUsages.comment")) }
         row { checkBox(GoBundle.message("ls.trace")).bindSelected(settings::goplsTrace).comment(GoBundle.message("ls.trace.comment")) }
         row { checkBox(GoBundle.message("ls.debugPages")).bindSelected(settings::goplsDebugPages).comment(GoBundle.message("ls.debugPages.comment")) }

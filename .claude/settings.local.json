@@ -3,7 +3,10 @@
     "allow": [
       "Bash(jbr/Contents/Home/bin/java -version)",
       "Bash(cp gradle/wrapper/gradle-wrapper.properties /tmp/claude-290220593/wrapper.bak)",
-      "Bash(cp gradle/wrapper/gradle-wrapper.properties gradle/wrapper/gradle-wrapper.properties.bak)"
+      "Bash(cp gradle/wrapper/gradle-wrapper.properties gradle/wrapper/gradle-wrapper.properties.bak)",
+      "Bash(unzip -p build/distributions/idea-golang-support-0.2.0.zip 'idea-golang-support/lib/*.jar')",
+      "Bash(unzip -o -q build/distributions/idea-golang-support-0.2.0.zip -d /tmp/gochk)",
+      "Read(//tmp/gochk/idea-golang-support/**)"
     ]
   }
 }

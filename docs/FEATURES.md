@@ -54,28 +54,28 @@ Legend:
 | Feature | Status | Notes | Effort | Needs |
 |---|---|---|---|---|
 | Completion snippets: `iferr`, `for range`, `switch`, `select` | done | `GoSnippets` | | |
-| Postfix templates: `.err`, `.nn`, `.nil`, `.if`, `.not`, `.for`, `.forr`, `.var`, `.return`, `.par`, `.sort`, `.print` | missing | `codeInsight.template.postfixTemplateProvider` | S | |
-| Live templates: `fori`, `forr`, `meth`, `func`, `test`, `bench`, `fuzz`, `main`, `err`, `json` tag | missing | `defaultLiveTemplates` + Go template context | S | |
-| Inlay hints: parameter names, `:=` and range variable types, `iota` constant values, composite literal field names and types, type parameter instantiation (`f[int]`) | missing | the same hint set as gopls; types of every `:=` in the visible range go through the per-body inference cache, measured with the UI robot | M | perf |
-| Struct size/alignment inlay, padding warning, "reorder fields" fix | missing | uses `GoSizes`; GoLand does not have it | S | |
+| Postfix templates: `.err`, `.nn`, `.nil`, `.if`, `.not`, `.for`, `.forr`, `.var`, `.return`, `.par`, `.sort`, `.print`, … | done (wave 1, 0.2.2) | `lang.GoPostfixTemplates` of the host: the expression and its type from the PSI, `.forr` is the reverse index loop, `.for` the range loop | | |
+| Live templates: `fori`, `forr`, `meth`, `func`, `test`, `bench`, `fuzz`, `main`, `err`, `json` tag (~40) | done (wave 1, 0.2.3) | `liveTemplates/Go.xml` of the host; contexts Go statement / top level / struct field / expression from the PSI | | |
+| Inlay hints: parameter names, `:=` and range variable types, `iota` constant values, composite literal field names and types, type parameter instantiation (`f[int]`) | done (wave 1, 0.2.9) | `ide.hints`, behind `GoIdeFeature.INLAY_HINTS` (gopls stands down per file); `GoInlayHintsBenchmark` | | |
+| Struct size/alignment inlay, padding warning, "reorder fields" fix | done (wave 1, 0.2.10) | `ide.hints` (`24 bytes, 11 padding (16 if reordered)`), the fix is Reorder Fields of the host | | |
 | Scope-aware `select`: Alt+Enter "Fill select", keyword templates `select` / `for { select {…} }`, and grey inline text after `select {` — cases from the scope (`<-ctx.Done()` for a `context.Context`, `<-t.C` for timers/tickers, `v := <-ch` per channel, `ch <- zero` for send-only, `<-time.After(d)` for a `time.Duration`) | done (step 9) | typed, never by name | | |
 | Scope-aware `switch`: grey `case`s after `switch x {` over an `iota` enum (all constants) or a type switch over an interface (implementing types), Alt+Enter "Fill switch" | done (step 9) | pairs with the exhaustive-switch check of section 5 | | |
 | `make` by expected type: completion inside `make(` (`chan T`, `[]T, 0, len(x)`, `map[K]V`), templates `make(chan T[, n])` / slice / map, `v, ok := <-ch`, `for v := range ch`, `close(ch)` / `defer close(ch)` for a channel made in the function | done (step 9) | `expectedTypeAt` | | |
 | Smart completion (Ctrl+Shift+Space) by expected type, second-level `x.F.M()` chains | missing | `GoExpectedTypes` exists; plan: `expectedTypeAt(element)` in `semantic.api` (assignment, argument by position, `return` by index, literal element, binary operand, `case`, channel, condition), assignability filter in SMART, weigher boost in BASIC, chains one level deep with a candidate cap | M | perf |
-| Smart `return`: values by result type from the scope (`err` for `error`, nearest variable of the type) else zero values, `fmt.Errorf("…: %w", err)` when `err` is in scope; the same candidates behind a "Fill return values" fix | missing | the host has a text version (`GoIdioms.returnValues`, step 9 moves it to PSI); `GoSnippets.iferrText` has the zero values | S | |
-| Type-aware idioms as inline grey text: `if err != nil {…}` after `x, err :=`, `defer f.Close()` when the type has `Close() error`, `defer mu.Unlock()` after `Lock()` | missing | the host shows them by text rules (`GoInlineIdiomsProvider`); step 9 | S | |
+| Smart `return`: values by result type from the scope else zero values, `fmt.Errorf("…: %w", err)` when `err` is in scope; the same candidates behind "Fill return values" | done (step 9) | `lang.GoReturnValues` on the PSI | | |
+| Type-aware idioms as inline grey text: `if err != nil {…}` after `x, err :=`, `defer f.Close()`, `defer mu.Unlock()` | done (step 9) | `lang.GoIdioms` on the PSI | | |
 | Completion of map keys, struct tag keys and options, `go.mod` versions from GOMODCACHE | missing | | S | |
 | Completion of members of unimported packages (`Println` → `fmt.Println` + import) | missing | gopls unimported completion; unimported package names are done | M | perf |
-| Smart Enter (complete statement) | missing | `lang.smartEnterProcessor` | S | |
-| Move statement / element up/down | missing | `statementUpDownMover` | S | |
-| Surround with (`if`, `for`, `func(){}()`, `if err != nil`) | missing | `lang.surroundDescriptor` | S | |
-| Unwrap / remove (`if`, `for`, `else`, `func(){}()`, `defer`/`go`) | missing | `lang.unwrapDescriptor` | S | |
-| Join Lines: `var x T` + `x = v` → `x := v`, string concatenation, call arguments | missing | `joinLinesHandler` | S | |
-| Add imports on paste (resolve pasted `pkg.X` against the source file's imports) | missing | `copyPastePostProcessor` | S | |
-| Spelling in identifiers, comments and strings | missing | `spellchecker.support`; skip import paths, struct tags, directives | S | |
+| Smart Enter (complete statement) | done (wave 1, 0.2.4) | `lang.GoSmartEnter` of the host, on the PSI | | |
+| Move statement / element up/down | done (wave 1, 0.2.7) | `ide.editor.GoStatementMover` | | |
+| Surround with (`if`, `for`, `func(){}()`, `if err != nil`, `for range`, `(…)`, `!(…)`) | done (wave 1, 0.2.5) | `ide.editor.GoSurroundDescriptors` | | |
+| Unwrap / remove (`if`, `for`, `else`, `func(){}()`, `defer`/`go`, `case`, braces) | done (wave 1, 0.2.6) | `ide.editor.GoUnwrapDescriptor` | | |
+| Join Lines: `var x T` + `x = v` → `x := v`, string concatenation, call arguments / literal elements | done (wave 1, 0.2.8) | `ide.editor.GoJoinLinesHandler` | | |
+| Add imports on paste (resolve pasted `pkg.X` against the source file's imports; external text through the stdlib catalogue) | done (wave 1, 0.2.11) | `ide.editor.paste`, EP `pasteImportResolver` answered by the host catalogue | | |
+| Spelling in identifiers, comments and strings | done (wave 1, 0.2.12) | `ide.spelling`, optional dependency on `com.intellij.modules.spellchecker` | | |
 | Extend selection with Go-specific steps | partial | | S | |
 | Paste JSON as struct, struct → JSON sample | missing | | S | |
-| Doc comments (Go 1.19 syntax): navigable `[pkg.Name]` links, rename updates links, lists and headings | partial | rendering exists, links do not navigate | S | |
+| Doc comments (Go 1.19 syntax): navigable `[pkg.Name]` links, rename updates links, lists and headings | done (wave 1, 0.2.13) | `ide.documentation.GoDocLinks`: references in `//` doc comments, Quick Documentation links | | |
 | Goimports-style grouping (std / third-party / `-local`) in Optimize Imports | partial | sorting only, no regrouping | S | |
 
 ## 3. Quick fixes, intentions, generation
@@ -90,9 +90,9 @@ Legend:
 | Fill return values (`return` with too few values) | done | `GoFillReturnValuesIntention`, also "Add missing return" | S |
 | Handle error: `if err != nil { return ..., err }`, wrap with `fmt.Errorf("...: %w", err)` | done | `GoHandleErrorIntention`, `GoWrapErrorIntention` | S |
 | Fill select: `ctx.Done()`, channel receives/sends, timer/ticker `C`, `time.After(d)` from the scope, optional `default` | done | `GoFillSelectIntention`, `GoFillSelectWithDefaultIntention` | S |
-| Invert / flip `if`, merge nested `if`, `if` ↔ `switch` | missing | | S |
-| Split / join `var` declarations, `var x T = v` ↔ `x := v` | missing | | S |
-| Change quote (interpreted ↔ raw string) | missing | gopls `changequote` | S |
+| Invert / flip `if`, merge nested `if`, `if` ↔ `switch` | done (wave 2, 0.2.20) | `GoIfIntentions`: invert (also early return / continue), merge, split condition, if ↔ switch | |
+| Split / join `var` declarations, `var x T = v` ↔ `x := v` | done (wave 2, 0.2.21) | `GoDeclarationIntentions`: split / group, join declaration and assignment (shared with Join Lines), `:=` ↔ `var` | |
+| Change quote (interpreted ↔ raw string) | done (wave 2, 0.2.19) | `GoChangeQuoteIntention` (`strconv`-like quoting rules) | |
 | Remove unused parameter (with call sites) | missing | gopls `unusedparams` | M |
 | Add/convert struct tags for all fields | missing | | S |
 | Generate: constructor, getters/setters, `String()` for `iota` enums (`stringer` without the tool), `Equal` | missing | `codeInsight.generate` actions | M |
@@ -120,14 +120,14 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | Check | Status | Notes | Effort |
 |---|---|---|---|
 | Unresolved, unused import/variable/label, type mismatch, call arity, duplicates, generics, missing return | done | | |
-| Exhaustive `switch` over `iota` enums and sealed interfaces | missing | with the "fill switch" fix; GoLand has no equivalent. Go has no sealed interfaces: here one is an interface with an unexported method whose implementations all live in its package. Off by default or weak warning: non-exhaustive switches are often intentional (the `exhaustive` linter is opt-in) | S |
-| `Printf` family: verb vs argument type, argument count, `%w` only in `Errorf`, completion of verbs; user wrappers detected like vet | missing | | M |
+| Exhaustive `switch` over `iota` enums and sealed interfaces | done (wave 2, 0.2.14) | `GoExhaustiveSwitchInspection`, fix "Add missing cases" shares `GoSwitchCases` with Fill switch; interfaces of the project content stand in for sealed ones; bit-flag enums skipped | |
+| `Printf` family: verb vs argument type, argument count, `%w` only in `Errorf`, completion of verbs; user wrappers detected like vet | done (wave 2, 0.2.15, 0.2.22) | `ide.inspections.printf` (pure parser + vet tables), `GoPrintfInspection`, verb completion `GoFormatVerbCompletion`; wrappers within the call's package, depth 3 | |
 | Error flow: error assigned and not checked, overwritten unchecked, wrong `err` checked | missing | needs a per-function data-flow framework | M |
 | Nil flow: dereference after `x == nil` without exit, `defer resp.Body.Close()` before the error check | missing | same framework | M |
 | Concurrency: copying locks (`copylocks`), `wg.Add` inside the goroutine, loop variable capture for `go` < 1.22, send on a closed channel | missing | | M |
-| `context.Context` not first, lost or replaced by `context.Background()` | missing | | S |
-| Struct tags: syntax, duplicate keys/names | missing | vet `structtag` | S |
-| `errors.As` with a non-pointer target, `errors.Is` vs `==` | missing | | S |
+| `context.Context` not first, lost or replaced by `context.Background()` | done (wave 2, 0.2.17) | `GoContextPlacementInspection`, fixes "Use ctx" | |
+| Struct tags: syntax, duplicate keys/names | done (wave 2, 0.2.16) | `GoStructTagInspection` (vet `structtag` + repeated names, unexported fields with `json`), fixes "Fix quoting", "Remove duplicate key" | |
+| `errors.As` with a non-pointer target, `errors.Is` vs `==` | done (wave 2, 0.2.18) | `GoErrorsPackageInspection` (vet `errorsas`; sentinel comparison is a weak warning) | |
 | Unreachable code, self-assignment, impossible `nil` comparison, shadowing (optional) | missing | vet passes | M |
 | Unused exported declarations across the project, import cycles, `internal/` violations | partial | `internal/` is detected by the project model, not reported | M |
 | Doc comment lint (exported symbol without a comment, comment not starting with the name) | missing | | S |
@@ -194,11 +194,12 @@ Since the transplant (2026-10-02) the host plugin idea-golang-support provides a
 
 Each wave is measured with the benchmarks and the UI robot before and after, like the cache work.
 
-1. **Wave 1 (S, visible daily):** postfix and live templates, inlay hints, struct size inlay, Smart
-   Enter, statement mover, surround with, unwrap, Join Lines, imports on paste, spelling, Code
-   Vision counts, doc links.
-2. **Wave 2 (analysis with the highest value):** exhaustive switch with fill switch, `Printf`
-   checks, struct tags, fill struct/returns, handle error, change quote, `if` intentions.
+1. **Wave 1 (S, visible daily):** done 2026-10-02 (versions 0.2.2–0.2.13, one feature per version): postfix and live templates, inlay hints, struct size inlay, Smart
+   Enter, statement mover, surround with, unwrap, Join Lines, imports on paste, spelling, doc links; Code Vision counts came with step 8i. Robot-checked
+   (`tools/ui-robot/scripts/editop.js`).
+2. **Wave 2 (analysis with the highest value):** done 2026-10-02 (versions 0.2.14–0.2.22): exhaustive switch with fill switch, `Printf`
+   checks and verb completion, struct tags, `context.Context` placement, `errors.Is`/`errors.As`, change quote, `if` intentions, `var` split/join;
+   fill struct/returns and handle error came with step 9.
 3. **Wave 3 (code creation):** create from usage, implement interface, Generate actions,
    goimports grouping, smart and chain completion, completion of unimported members.
 4. **Wave 4 (data flow):** per-function data-flow framework, error and nil flow, concurrency and

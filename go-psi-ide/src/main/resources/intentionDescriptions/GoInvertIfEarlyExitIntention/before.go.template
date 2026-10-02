@@ -1,0 +1,5 @@
+for _, x := range xs {
+	if x.Valid() {
+		process(x)
+	}
+}

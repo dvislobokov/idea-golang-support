@@ -57,6 +57,8 @@ import com.intellij.platform.lsp.api.customization.LspGoToDefinitionDisabled
 import com.intellij.platform.lsp.api.customization.LspHoverCustomizer
 import com.intellij.platform.lsp.api.customization.LspHoverDisabled
 import com.intellij.platform.lsp.api.customization.LspHoverSupport
+import com.intellij.platform.lsp.api.customization.LspInlayHintCustomizer
+import com.intellij.platform.lsp.api.customization.LspInlayHintSupport
 import com.intellij.platform.lsp.api.customization.LspRenameCustomizer
 import com.intellij.platform.lsp.api.customization.LspRenameSupport
 import com.intellij.platform.lsp.api.customization.LspSemanticTokensCustomizer
@@ -237,6 +239,14 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
          * PSI as the source gopls still answers while the IDE indexes, when the native contributor is blind.
          */
         override val completionCustomizer: LspCompletionCustomizer = GoplsCompletionSupport()
+
+        /**
+         * Follows [GoFeature.INLAY_HINTS] per file, not per descriptor: with the PSI as the source the hints of go-psi-ide
+         * (Settings | Editor | Inlay Hints | Go) stand in, and gopls still answers while the IDE indexes, when they are blind.
+         */
+        override val inlayHintCustomizer: LspInlayHintCustomizer = object : LspInlayHintSupport() {
+            override fun shouldAskServerForInlayHints(file: VirtualFile): Boolean = file.fileType != GoFileType || !GoFeatures.native(GoFeature.INLAY_HINTS, project)
+        }
 
         /** Follows [GoFeature.HOVER]. */
         override val hoverCustomizer: LspHoverCustomizer = if (native(GoFeature.HOVER)) LspHoverDisabled else LspHoverSupport()

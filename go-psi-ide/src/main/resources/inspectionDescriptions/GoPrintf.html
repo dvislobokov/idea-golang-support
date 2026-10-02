@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports calls of printf-like functions whose format does not match the arguments, as <code>go vet</code>'s <code>printf</code> check does:
+a verb that does not fit the argument's type (<code>%d</code> of a string, <code>%s</code> of an <code>int</code> without a <code>String</code> method),
+too few or too many arguments (<code>%[n]d</code> indexes and <code>*</code> width and precision are counted), unknown verbs and flags,
+<code>%w</code> outside <code>fmt.Errorf</code> or with an argument that is not an <code>error</code>, a Printf directive in a <code>Println</code>
+argument and a redundant newline at the end of a <code>Println</code>.
+<p>Checked: <code>fmt</code>, <code>log</code>, <code>*log.Logger</code>, <code>testing.T/B/F/TB</code>, and the functions and methods of the
+same package whose last parameters are <code>(format string, args ...any)</code> and that pass both on to a printf-like function.
+Formats that are not constant are skipped.</p>
+<p>Quick fixes replace the verb with the one the argument's type takes, remove the extra arguments or add <code>%v</code> placeholders for them.
+In <code>fmt.Errorf</code>, <code>%v</code> of an error offers <code>%w</code>.</p>
+</body>
+</html>

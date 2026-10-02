@@ -24,6 +24,9 @@ dependencies {
         } else {
             intellijIdea(providers.gradleProperty("platformVersion"))
         }
+        // ide.spelling: the spellchecker is a product module (com.intellij.modules.spellchecker), not on the core classpath;
+        // the host declares it as an optional dependency (go-psi-ide-spelling.xml)
+        bundledModule("intellij.spellchecker")
         testFramework(TestFrameworkType.Platform)
     }
     testImplementation(libs.junit)

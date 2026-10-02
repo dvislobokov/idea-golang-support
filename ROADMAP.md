@@ -89,6 +89,16 @@
 - [x] Страница помощи Go | Help Page (и Help-меню): вкладка редактора в стиле сайтов JetBrains, светлая/тёмная по теме, клавиши из текущей раскладки, разделы Editing / Generate and fix / Navigation / Run… / Tools / Tips — робот (снимок)
 - [x] Страницы плагина в самом плагине, как у dotnet-плагина (`GoPages`): `docs/demo.html` (о плагине) и `docs/guide.html` (справочник: клавиши, серый текст, подсказки, действия, шаблоны, меню Go, окна, запуск, настройки, «если не работает», поиск по строкам) пакуются сборкой в `welcome/` и открываются во вкладке редактора. О плагине — один раз после установки и после каждого обновления (`GoWelcomePageActivity`) и Go | Welcome to Go Project Support; справочник — Go | Help Page вместо прежней страницы, собиравшейся в коде. Клавиши справочника (`<kbd data-action>`) заменяются клавишами раскладки IDE. Тесты на платформе: страницы упакованы и самодостаточны, у каждой клавиши есть действие IDE, каждый пункт меню Go назван в справочнике; в браузере проверены вёрстка, поиск, темы, 1280 и 420 px. Показ во вкладке IDE проверен пользователем (2026-09-30)
 
+- [x] (2026-10-02, робот) **Волна 1 новых фич на PSI** (`docs/FEATURES.md` §11, шаг 11 `MIGRATION.md`; версии 0.2.2–0.2.13): postfix templates по типу выражения (`.err`, `.for`, `.return`, `.sort`, `.nn`, `.par`),
+  live templates с контекстами (statement / top level / struct field / expression; `func`, `errf`), Smart Enter на PSI, Surround With (`if err != nil` с выносом вызова, `for range`), Unwrap/Remove,
+  Move Statement (операторы, case, поля, объявления с комментариями), Join Lines (`x := v`, строки, аргументы), inlay hints набора gopls за переключателем Language features + struct size inlay,
+  импорты при вставке (и внешний текст через каталог stdlib), орфография (Typo), ссылки `[pkg.Name]` в doc-комментариях (переход, usages, rename, Quick Documentation).
+
+- [x] (2026-10-02, робот) **Волна 2 новых фич на PSI** (`docs/FEATURES.md` §11; версии 0.2.14–0.2.22, только при Language features: Built-in): инспекции exhaustive switch
+  (фикс «Add missing cases» общий с Fill switch), Printf по правилам vet с пользовательскими обёртками и completion глаголов по `%`, struct tags (vet structtag + повторы имён),
+  `context.Context` не первым / подмена `ctx`, `errors.As` с не-указателем и `== ErrX` вместо `errors.Is`; intentions change quote, invert / early return / merge / split `if`,
+  `if` ↔ `switch`, split / group объявлений, `var x T` + `x = v` → `x := v`, `:=` ↔ `var`.
+
 ## Модули
 - [x] go.mod / go.work: тип файла, подсветка, разбор (`GoModFile`)
 - [x] Folding блоков `require (…)`, `replace (…)` и остальных в go.mod / go.work (`GoModFoldingBuilder`) — робот

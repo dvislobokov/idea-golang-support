@@ -11,6 +11,8 @@
              implementationClass="io.github.golangsupport.ide.completion.GoCompletionWeigher"/>
     <weigher key="completion" id="goAlphabetical" order="after proximity, before grouping"
              implementationClass="io.github.golangsupport.ide.completion.GoAlphabeticalWeigher"/>
+    <!-- Printf verbs: `%` typed in a call's string argument opens the popup (GoFormatVerbProvider decides what it shows). -->
+    <typedHandler implementation="io.github.golangsupport.ide.completion.GoFormatVerbTypedHandler" id="goFormatVerbTypedHandler"/>
 
   </extensions>
   <extensionPoints>

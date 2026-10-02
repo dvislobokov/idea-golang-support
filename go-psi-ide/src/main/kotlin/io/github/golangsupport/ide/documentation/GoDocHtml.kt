@@ -12,7 +12,7 @@ import com.intellij.openapi.util.text.StringUtil
  *   since gofmt indents them anyway);
  * - `# Heading` on a line of its own, surrounded by blank lines, is a heading;
  * - `[Text]: URL` link definitions at the end are removed and turn `[Text]` into links;
- * - `[Name]`, `[pkg.Name]`, `[*pkg.Name]` doc links are rendered as code;
+ * - `[Name]`, `[pkg.Name]`, `[*pkg.Name]` doc links are rendered as code, as links where the `link` of [toHtml] gives them an href;
  * - bare `http://` / `https://` URLs become links;
  * - ```` `` ```` and `''` become typographic quotes.
  */
@@ -25,21 +25,23 @@ object GoDocHtml {
         data class ListBlock(val ordered: Boolean, val items: List<List<String>>) : Block()
     }
 
+    /** [link] maps the text of a doc link (`pkg.Name`, `*T`) to its href; null where it names nothing (rendered as plain code). */
     @JvmStatic
-    fun toHtml(text: String): String {
+    @JvmOverloads
+    fun toHtml(text: String, link: ((String) -> String?)? = null): String {
         val lines = text.replace("\r\n", "\n").split('\n').toMutableList()
         val links = extractLinkDefinitions(lines)
         val blocks = parse(lines)
         val sb = StringBuilder()
         for (b in blocks) {
             when (b) {
-                is Block.Paragraph -> sb.append("<p>").append(inline(b.lines.joinToString("\n"), links)).append("</p>")
-                is Block.Heading -> sb.append("<h3>").append(inline(b.text, links)).append("</h3>")
+                is Block.Paragraph -> sb.append("<p>").append(inline(b.lines.joinToString("\n"), links, link)).append("</p>")
+                is Block.Heading -> sb.append("<h3>").append(inline(b.text, links, link)).append("</h3>")
                 is Block.Code -> sb.append("<pre><code>").append(StringUtil.escapeXmlEntities(b.lines.joinToString("\n"))).append("</code></pre>")
                 is Block.ListBlock -> {
                     val tag = if (b.ordered) "ol" else "ul"
                     sb.append('<').append(tag).append('>')
-                    for (item in b.items) sb.append("<li>").append(inline(item.joinToString("\n"), links)).append("</li>")
+                    for (item in b.items) sb.append("<li>").append(inline(item.joinToString("\n"), links, link)).append("</li>")
                     sb.append("</").append(tag).append('>')
                 }
             }
@@ -146,7 +148,7 @@ object GoDocHtml {
     }
 
     /** Escapes text, then turns URLs, link definitions and doc links into markup. */
-    private fun inline(text: String, links: Map<String, String>): String {
+    private fun inline(text: String, links: Map<String, String>, link: ((String) -> String?)?): String {
         val sb = StringBuilder()
         var i = 0
         while (i < text.length) {
@@ -169,7 +171,10 @@ object GoDocHtml {
                             continue
                         }
                         DOC_LINK.matches(inner) -> {
+                            val href = link?.invoke(inner)
+                            if (href != null) sb.append("<a href=\"").append(StringUtil.escapeXmlEntities(href)).append("\">")
                             sb.append("<code>").append(StringUtil.escapeXmlEntities(inner)).append("</code>")
+                            if (href != null) sb.append("</a>")
                             i = close + 1
                             continue
                         }

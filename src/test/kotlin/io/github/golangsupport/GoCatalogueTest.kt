@@ -167,6 +167,21 @@ class GoCatalogueTest {
         assertNull(catalogue.packageOf("r", setOf("Body")))
     }
 
+    /** What pasted text from outside the IDE gets imported from: only the standard library, every candidate (the caller wants one). */
+    @Test fun theStandardPackagesOfAName() {
+        fun types(path: String, name: String, vararg types: String) = GoPackageSymbols(path, name, types.map { GoSymbol(it, GoDeclarationKind.STRUCT, null) })
+        val catalogue = GoSymbolIndex(listOf(
+            GoModuleSymbols("dep", false, listOf(types("example.com/json", "json", "Marshal"))),
+            GoModuleSymbols("std", true, listOf(
+                types("encoding/json", "json", "Marshal", "Unmarshal"), types("text/template", "template", "New"), types("html/template", "template", "New", "HTML"),
+            )),
+        ))
+        assertEquals(listOf("encoding/json"), catalogue.standardPackagesOf("json", setOf("Marshal")))
+        assertEquals(listOf("text/template", "html/template"), catalogue.standardPackagesOf("template", setOf("New")))
+        assertEquals(listOf("html/template"), catalogue.standardPackagesOf("template", setOf("New", "HTML")))
+        assertEquals(emptyList<String>(), catalogue.standardPackagesOf("json", setOf("Decode")))
+    }
+
     @Test fun aFunctionWithoutParametersAndAType() {
         val entries = GoSymbolIndex(listOf(GoModuleSymbols("std", true, listOf(GoPackageSymbols("time", "time", listOf(
             GoSymbol("Now", GoDeclarationKind.FUNCTION, "() Time"), GoSymbol("Duration", GoDeclarationKind.TYPE, "int64"),

@@ -17,6 +17,8 @@
     <depends>com.intellij.modules.platform</depends>
     <!-- GoLand, or the JetBrains Go plugin in IntelliJ IDEA: the same file type, and nothing this plugin could add -->
     <incompatible-with>org.jetbrains.plugins.go</incompatible-with>
+    <!-- the spellchecker strategy for Go (go-psi-ide-spelling.xml): only where the IDE has the spellchecker -->
+    <depends optional="true" config-file="go-psi-ide-spelling.xml">com.intellij.modules.spellchecker</depends>
 
     <!-- optional parts: a module is loaded only where its dependencies are (see the descriptor of the module next to META-INF) -->
     <content>
@@ -62,6 +64,15 @@
          handle error, wrap error; with them on duty the same actions of gopls stand down
          (MIGRATION.md step 9; the gate follows GoFeature.CODE_ACTIONS) -->
     <xi:include href="/META-INF/go-psi-ide-intentions.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- editing actions over that PSI: Surround With, Unwrap/Remove, Move Statement Up/Down, Join Lines (MIGRATION.md step 11; no gopls
+         counterpart, so no gate) -->
+    <xi:include href="/META-INF/go-psi-ide-editing.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- imports follow pasted Go code (copy record of the qualifiers; text from outside: pasteImportResolver below, the catalogue) -->
+    <xi:include href="/META-INF/go-psi-ide-paste.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- inlay hints over that PSI: the gopls hint set (parameter names, variable types, constant values, literal fields and types, type arguments)
+         and the struct size; with them on duty the hints of gopls stand down (MIGRATION.md step 11; the gate follows GoFeature.INLAY_HINTS,
+         the struct size is not gated) -->
+    <xi:include href="/META-INF/go-psi-ide-hints.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->
@@ -73,6 +84,8 @@
     <extensions defaultExtensionNs="io.github.golangsupport">
         <!-- the signature of a call from the PSI, before the gopls one: the content module's provider answers when this one cannot -->
         <signatureProvider order="first" implementation="io.github.golangsupport.lang.GoNativeSignatureProvider"/>
+        <!-- pasted text from outside the IDE: an unresolved `json.Marshal` gets the import of the one standard package that fits -->
+        <pasteImportResolver implementation="io.github.golangsupport.catalogue.GoCataloguePasteImportResolver"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -130,8 +143,6 @@
         <codeInsight.template.postfixTemplateProvider language="Go" implementationClass="io.github.golangsupport.lang.GoPostfixTemplateProvider"/>
         <codeInsight.implementMethod language="Go" implementationClass="io.github.golangsupport.lang.GoImplementMethodsHandler"/>
         <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
-        <!-- Ctrl+Alt+T: the selected lines into if / for / func() {}() by the text -->
-        <lang.surroundDescriptor language="Go" implementationClass="io.github.golangsupport.lang.GoSurroundDescriptor"/>
         <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>
         <!-- a Cyrillic letter typed in code is a key of the Russian layout left on: the handlers of the platform are given its Latin
              character. The last of the handlers of the editor is the one around the others, the completion list among them -->
@@ -162,6 +173,10 @@
             <category>Go</category>
         </intentionAction>
         <liveTemplateContext contextId="GO" implementation="io.github.golangsupport.lang.GoTemplateContext"/>
+        <liveTemplateContext contextId="GO_STATEMENT" baseContextId="GO" implementation="io.github.golangsupport.lang.GoStatementTemplateContext"/>
+        <liveTemplateContext contextId="GO_TOP_LEVEL" baseContextId="GO" implementation="io.github.golangsupport.lang.GoTopLevelTemplateContext"/>
+        <liveTemplateContext contextId="GO_STRUCT_FIELD" baseContextId="GO" implementation="io.github.golangsupport.lang.GoStructFieldTemplateContext"/>
+        <liveTemplateContext contextId="GO_EXPRESSION" baseContextId="GO" implementation="io.github.golangsupport.lang.GoExpressionTemplateContext"/>
         <liveTemplateMacro implementation="io.github.golangsupport.lang.GoTypeNameMacro"/>
         <liveTemplateMacro implementation="io.github.golangsupport.lang.GoErrorReturnMacro"/>
 

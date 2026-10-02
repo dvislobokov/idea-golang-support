@@ -8,14 +8,15 @@ object GoTypeRenderer {
     @JvmOverloads
     fun render(type: GoType, qualified: Boolean = false): String = StringBuilder().also { write(it, type, qualified) }.toString()
 
-    /** Renders with a custom package qualifier for named types (null = unqualified); not thread-safe across nested renders. */
+    /** Renders with a custom package qualifier for named types (null = unqualified). */
     fun render(type: GoType, qualifier: (GoNamedType) -> String?): String {
-        val prev = this.qualifier
-        this.qualifier = qualifier
-        try { return render(type, false) } finally { this.qualifier = prev }
+        val prev = qualifiers.get()
+        qualifiers.set(qualifier)
+        try { return render(type, false) } finally { qualifiers.set(prev) }
     }
 
-    private var qualifier: ((GoNamedType) -> String?)? = null
+    // Per thread: the checker, the inlay hints and the intentions render on several daemon threads at once.
+    private val qualifiers = ThreadLocal<((GoNamedType) -> String?)?>()
 
 
     private fun write(sb: StringBuilder, type: GoType, qualified: Boolean) {
@@ -57,7 +58,7 @@ object GoTypeRenderer {
             }
             is GoNamedType -> {
                 if (qualified) type.pkgPath?.let { sb.append(it.substringAfterLast('/')).append('.') }
-                else qualifier?.invoke(type)?.let { sb.append(it).append('.') }
+                else qualifiers.get()?.invoke(type)?.let { sb.append(it).append('.') }
                 sb.append(type.name)
                 if (type.typeArgs.isNotEmpty()) { sb.append('['); type.typeArgs.forEachIndexed { i, t -> if (i > 0) sb.append(", "); write(sb, t, qualified) }; sb.append(']') }
             }

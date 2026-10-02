@@ -1,0 +1,8 @@
+switch mode {
+case 1:
+	fast()
+case 2, 3:
+	slow()
+default:
+	fail()
+}

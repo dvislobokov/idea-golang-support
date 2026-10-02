@@ -1,0 +1,5 @@
+if n <= 0 || !ok {
+	skip()
+} else {
+	use(n)
+}

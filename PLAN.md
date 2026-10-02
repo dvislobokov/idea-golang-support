@@ -114,6 +114,25 @@
 - [ ] **Change Signature / Extract Interface / Safe Delete на gopls.** Полного Change Signature у gopls нет; есть code actions `refactor.rewrite.removeUnusedParam`
   и `moveParamLeft` / `moveParamRight` (v0.17+) — они уже попадают в попап «Refactorings and actions of gopls…», нужно лишь проверить и упомянуть на Help Page.
   Extract Interface — свой генератор по методам типа (сканер знает сигнатуры) — день; Safe Delete — `references` перед удалением объявления с диалогом — день.
+- [ ] (2026-10-02, после волны 1 §11 FEATURES) **go.mod как в GoLand: подсветка и действия в файле.** Сейчас в go.mod своё — подсветка, folding, completion, баннер tidy;
+  диагностики и линзы (Tidy, Upgrade, Check for upgrades, govulncheck) даёт только gopls. Свой слой без сервера: аннотатор над `GoModPsiFile` по кэшу результатов
+  `go list -m -u -json all` и `govulncheck` (тот же кэш, что у окна Go Dependencies; `go` зовётся только по действию пользователя — после Check for upgrades / открытия
+  окна): неиспользуемый require (по импортам проекта из `GoExportsIndex`), есть новее, уязвим, `replace` на несуществующий каталог, дубликат, `go` старше toolchain;
+  intentions на строке: Upgrade to latest / to version…, Remove requirement (`go get path@none`), Make direct / indirect, Add replace, Exclude; `psi.referenceContributor`:
+  путь модуля → каталог в module cache, Find Usages пути в импортах; inlay «последняя версия, дата» у require. Правки go.mod — только через `go get` / `go mod tidy`
+  (иначе разойдётся go.sum). Как: `mod/GoModAnnotator`, `mod/GoModIntentions`, `mod/GoModReferences`, кэш `mod/GoModuleStates` (чистый, с тестами). 2 дня.
+- [ ] (2026-10-02) **Менеджер пакетов через GOPROXY: окно Go Packages.** Расширение окна Go Dependencies. Чистый клиент `mod/GoProxyClient` по протоколу прокси
+  (`/@v/list`, `/@latest`, `/@v/<v>.info`, `.mod`, `.zip`; GOPROXY из `go env` с `,`/`|` и `direct`, GOPRIVATE/GONOSUMDB уважать; разбор ответов — без сети, тесты):
+  ввод пути модуля с подсказкой из `index.golang.org/index` (кэш ленты, поиск по подстроке локально — у GOPROXY поиска нет) и из GOMODCACHE, кнопка «Open on pkg.go.dev»;
+  карточка модуля: версии с датами, зависимости из `.mod`, README и лицензия из `.zip` (один файл, лениво, в памяти), требуемая версия Go; Add dependency… с выбором версии,
+  Remove, обновление — через `go get path@version` и `go mod tidy`; уязвимости — `govulncheck` (есть) и `vuln.go.dev` по пути модуля. Fallback на `go list -m -versions`,
+  если корпоративный прокси не отдаёт `@latest`/index. Один кэш состояний модулей кормит окно и подсветку go.mod (пункт выше). 2–3 дня.
+- [ ] (2026-10-02) **Подсказки имён переменных и эвристический ранкер completion.** Имён нет вовсе: `NameSuggestionProvider` платформы (rename, completion после `:=`,
+  параметры и результаты функции, `for … range`) по таблице «тип → имя» (`*os.File` → `file`/`f`, `context.Context` → `ctx`, `error` → `err`, `bytes.Buffer` → `buf`,
+  `sync.Mutex` → `mu`, `*testing.T` → `t`, `time.Duration` → `d`/`timeout`) с откатом к последнему слову имени типа и инициалам, множественное число для срезов и map;
+  тип — `GoSemanticService.typeOf`. Ранжирование: реализация точки `GoCompletionRanker` go-psi-ide без модели — частота имени в файле и пакете (стабы), недавность
+  (последние выбранные элементы из `CompletionStatistician`/своего LRU), совпадение с ожидаемым типом уже учтено weigher'ом; каталог символов (`ope` → `os.Open` + импорт,
+  уже работает) подключить к тому же ранжированию (волна 3 §11: unimported members). ML-версия — `docs/ML.md`, только после этого. 1–2 дня.
 - [ ] **Go SDK из IDE.** Список версий с go.dev/dl, загрузка и распаковка в `~/sdk/goX`, запись в Path to go; переключение между установленными. 2 дня.
 - [ ] **Run Targets (Docker / WSL / SSH)** — зависит от IDE-хоста; сначала WSL: путь `\\wsl$`, `go` из дистрибутива, delve там же по TCP. 2–3 дня.
 

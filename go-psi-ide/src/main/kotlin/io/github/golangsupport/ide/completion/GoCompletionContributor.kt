@@ -41,6 +41,11 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
             psiElement().withElementType(GoTokenSets.STRING_LITERALS).withSuperParent(2, GoImportSpec::class.java),
             GoImportPathProvider(),
         )
+        extend(
+            CompletionType.BASIC,
+            psiElement().withElementType(GoTokenSets.STRING_LITERALS).withSuperParent(2, GoArgumentList::class.java),
+            GoFormatVerbProvider(),
+        )
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withParent(GoLabelRef::class.java), GoLabelProvider())
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withParent(GoPackageClause::class.java), GoPackageClauseProvider())
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withLanguage(GoLanguage), GoIdentifierProvider())

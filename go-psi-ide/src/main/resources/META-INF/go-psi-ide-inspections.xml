@@ -33,8 +33,25 @@
     <localInspection language="Go" shortName="GoMissingReturn" displayName="Missing return"
                      groupName="Go" enabledByDefault="true" level="ERROR"
                      implementationClass="io.github.golangsupport.ide.inspections.GoMissingReturnInspection"/>
+    <!-- vet printf over the PSI (docs/FEATURES.md section 5): format against arguments of fmt/log/testing calls and package wrappers. -->
+    <localInspection language="Go" shortName="GoPrintf" displayName="Printf format and arguments"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoPrintfInspection"/>
     <localInspection language="Go" shortName="GoChecker" displayName="Other type-checker errors"
                      groupName="Go" enabledByDefault="true" level="ERROR"
                      implementationClass="io.github.golangsupport.ide.inspections.GoCheckerInspection"/>
+    <!-- Wave 2 (docs/FEATURES.md §11), part E: analysis inspections over the PSI (GoAnalysisInspectionBase, gate DIAGNOSTICS). -->
+    <localInspection language="Go" shortName="GoExhaustiveSwitch" displayName="Non-exhaustive switch over an enum or interface"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoExhaustiveSwitchInspection"/>
+    <localInspection language="Go" shortName="GoStructTag" displayName="Malformed or duplicate struct tag"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoStructTagInspection"/>
+    <localInspection language="Go" shortName="GoContextPlacement" displayName="context.Context not first, lost or replaced"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoContextPlacementInspection"/>
+    <localInspection language="Go" shortName="GoErrorsPackage" displayName="Misuse of errors.As and comparison with sentinel errors"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoErrorsPackageInspection"/>
   </extensions>
 </idea-plugin>

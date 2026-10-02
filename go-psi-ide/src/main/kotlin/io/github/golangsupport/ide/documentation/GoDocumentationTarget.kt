@@ -3,8 +3,10 @@ package io.github.golangsupport.ide.documentation
 import com.intellij.lang.documentation.DocumentationMarkup
 import com.intellij.model.Pointer
 import com.intellij.openapi.util.text.StringUtil
+import com.intellij.platform.backend.documentation.DocumentationLinkHandler
 import com.intellij.platform.backend.documentation.DocumentationResult
 import com.intellij.platform.backend.documentation.DocumentationTarget
+import com.intellij.platform.backend.documentation.LinkResolveResult
 import com.intellij.platform.backend.documentation.PsiDocumentationTargetProvider
 import com.intellij.platform.backend.presentation.TargetPresentation
 import com.intellij.pom.Navigatable
@@ -46,7 +48,7 @@ class GoDocumentationTargetProvider : PsiDocumentationTargetProvider {
  * file. Packages (import specs, package clauses, directories) show the package doc from `doc.go`
  * or the first file with a package comment.
  */
-class GoDocumentationTarget(private val element: PsiElement) : DocumentationTarget {
+class GoDocumentationTarget(val element: PsiElement) : DocumentationTarget {
 
     override fun createPointer(): Pointer<out DocumentationTarget> {
         val pointer = SmartPointerManager.createPointer(element)
@@ -86,7 +88,7 @@ class GoDocumentationTarget(private val element: PsiElement) : DocumentationTarg
         sb.append(DocumentationMarkup.DEFINITION_END)
         if (short) return sb.toString()
         GoDocComment.docText(element)?.let { doc ->
-            sb.append(DocumentationMarkup.CONTENT_START).append(GoDocHtml.toHtml(doc)).append(DocumentationMarkup.CONTENT_END)
+            sb.append(DocumentationMarkup.CONTENT_START).append(GoDocHtml.toHtml(doc, docLinks(element))).append(DocumentationMarkup.CONTENT_END)
         }
         val sections = ArrayList<Pair<String, String>>()
         containerOf(element)?.let { sections += it }
@@ -109,7 +111,7 @@ class GoDocumentationTarget(private val element: PsiElement) : DocumentationTarg
         sb.append(DocumentationMarkup.DEFINITION_END)
         if (short) return sb.toString()
         packageDoc(files)?.let { doc ->
-            sb.append(DocumentationMarkup.CONTENT_START).append(GoDocHtml.toHtml(doc)).append(DocumentationMarkup.CONTENT_END)
+            sb.append(DocumentationMarkup.CONTENT_START).append(GoDocHtml.toHtml(doc, files.firstOrNull()?.let(::docLinks))).append(DocumentationMarkup.CONTENT_END)
         }
         val sections = ArrayList<Pair<String, String>>()
         if (importPath != null) sections += "Package:" to "<code>${StringUtil.escapeXmlEntities(importPath)}</code>"
@@ -145,6 +147,12 @@ class GoDocumentationTarget(private val element: PsiElement) : DocumentationTarg
     }
 
     companion object {
+        /** The href prefix of doc links ([GoDocLinks]); [GoDocLinkHandler] resolves the rest of the URL from the documented element. */
+        const val LINK_PREFIX: String = "psi_element://"
+
+        /** Doc links that name something from [context] become [LINK_PREFIX] links. */
+        private fun docLinks(context: PsiElement): (String) -> String? = { text -> if (GoDocLinks.resolveText(context, text) != null) LINK_PREFIX + text else null }
+
         /** The package directory documented by [element]: a directory, a resolved import, or the package clause's directory. */
         private fun packageOf(element: PsiElement): PsiDirectory? = when (element) {
             is PsiDirectory -> element
@@ -158,5 +166,19 @@ class GoDocumentationTarget(private val element: PsiElement) : DocumentationTarg
         fun packageDoc(files: List<GoFile>): String? =
             files.sortedWith(compareBy<GoFile>({ it.name != "doc.go" }, { it.name }))
                 .firstNotNullOfOrNull { f -> f.packageClause?.let(GoDocComment::docText) }
+    }
+}
+
+/**
+ * `platform.backend.documentation.linkHandler`: a click on a doc link ([GoDocumentationTarget.LINK_PREFIX]) in Quick Documentation
+ * opens the documentation of what it names, resolved from the documented element's file.
+ */
+class GoDocLinkHandler : DocumentationLinkHandler {
+    override fun resolveLink(target: DocumentationTarget, url: String): LinkResolveResult? {
+        if (target !is GoDocumentationTarget || !url.startsWith(GoDocumentationTarget.LINK_PREFIX)) return null
+        val element = target.element
+        val context = if (element is PsiDirectory) element.files.firstOrNull { it is GoFile } ?: return null else element
+        val resolved = GoDocLinks.resolveText(context, url.removePrefix(GoDocumentationTarget.LINK_PREFIX)) ?: return null
+        return LinkResolveResult.resolvedTarget(GoDocumentationTarget(resolved))
     }
 }

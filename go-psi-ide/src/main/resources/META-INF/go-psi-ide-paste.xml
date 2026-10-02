@@ -1,0 +1,12 @@
+<!-- go-psi-ide, paste: the imports of copied Go code follow it into the file it is pasted to (FEATURES.md section 2, "Add imports on paste"),
+     and the pasteImportResolver extension point for text pasted without the copy record (a host with a package catalogue answers it).
+     Included by the host plugin; the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <copyPastePostProcessor implementation="io.github.golangsupport.ide.editor.paste.GoPasteImportsProcessor"/>
+  </extensions>
+  <extensionPoints>
+    <extensionPoint qualifiedName="io.github.golangsupport.pasteImportResolver"
+                    interface="io.github.golangsupport.ide.editor.paste.GoPasteImportResolver" dynamic="true"/>
+  </extensionPoints>
+</idea-plugin>

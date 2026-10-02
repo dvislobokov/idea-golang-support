@@ -1,0 +1,5 @@
+if user != nil {
+	if user.Admin {
+		grant(user)
+	}
+}

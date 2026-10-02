@@ -186,6 +186,14 @@ class GoSymbolIndex(modules: List<GoModuleSymbols>) {
     fun packageOf(name: String, symbols: Collection<String>): String? =
         byName[name]?.firstOrNull { (_, names) -> names.containsAll(symbols) }?.first?.importPath
 
+    /** The paths of the standard library's packages called [name] that have all of [symbols]: `template` with `New` is two of them. */
+    fun standardPackagesOf(name: String, symbols: Collection<String>): List<String> =
+        standardByName[name].orEmpty().filter { it.symbols.mapTo(HashSet()) { s -> s.name }.containsAll(symbols) }.map { it.importPath }
+
+    private val standardByName: Map<String, List<GoPackageSymbols>> by lazy {
+        modules.filter { it.standard }.flatMap { it.packages }.groupBy { it.name }
+    }
+
     /**
      * The names that begin with [prefix], whatever the case of the letters, the best first: the case as typed, a package of
      * [preferred] (the ones the file imports), the project before the standard library before the modules, a shorter name. No more

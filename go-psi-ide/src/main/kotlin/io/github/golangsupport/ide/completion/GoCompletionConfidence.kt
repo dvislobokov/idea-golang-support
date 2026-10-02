@@ -15,7 +15,7 @@ import io.github.golangsupport.lang.psi.GoTypes
 
 /**
  * No autopopup in comments, ordinary strings, runes and numbers (`1.` must not pop up members);
- * import path strings do pop up.
+ * import path strings and a `%` directive in a call's string argument (Printf verbs) do pop up.
  */
 class GoCompletionConfidence : CompletionConfidence() {
     override fun shouldSkipAutopopup(editor: Editor, contextElement: PsiElement, psiFile: PsiFile, offset: Int): ThreeState {
@@ -25,7 +25,9 @@ class GoCompletionConfidence : CompletionConfidence() {
         if (contextElement is PsiComment || GoTokenSets.COMMENTS.contains(type)) return ThreeState.YES
         if (GoTokenSets.STRING_LITERALS.contains(type)) {
             val literal = contextElement.parent
-            return if (literal is GoStringLiteral && literal.parent is GoImportSpec) ThreeState.NO else ThreeState.YES
+            if (literal is GoStringLiteral && literal.parent is GoImportSpec) return ThreeState.NO
+            // `"%` in a call argument: Printf verbs (GoFormatVerbProvider); the provider checks that the call is printf-like.
+            return if (GoFormatVerbCompletion.isDirectivePosition(contextElement, offset)) ThreeState.NO else ThreeState.YES
         }
         if (GoTokenSets.NUMBERS.contains(type) || type == GoTypes.CHAR) return ThreeState.YES
         return ThreeState.UNSURE

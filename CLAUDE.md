@@ -70,7 +70,7 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 - **GUI агент проверяет сам через UI-робота**: `./gradlew.bat runIdeForUiTests` (в фоне) поднимает песочницу с Remote Robot на `127.0.0.1:8083` (**не 8082**: там песочница dotnet-плагина, и два агента иначе управляют IDE друг друга и закрывают её; другой порт — `-ProbotPort=N` и `ROBOT_PORT=N`),
   `tools/ui-robot/robot.py` открывает проект, ставит точки останова, запускает Run/Debug, снимает окно IDE (`robot.py script NAME KEY=VALUE` — скрипт с подстановкой); `tools/ui-robot/autotest.py` (`--attach`, `--perf`, `--cold`, `--steps`; шаги 1–16 и P1–P9 из go-psi, проект `tools/ui-robot/project-psi`, отчёты `build/ui-robot/report.md` и `perf.md`, `SANDBOX_LOG` переопределяет путь к логу) — на том же роботе и порту; `. tools/ui-robot/scripts/session.sh` даёт
   `state`, `evaluate "выражение" [дети]`, `stop_all`, `invoke ACTION_ID`, `setting Name value`, `toolwindow ID`, `openfile store/x.go [строка]` и `robot_js скрипт.js "s|__X__|…|"`
-  для скриптов из `tools/ui-robot/scripts` (markers, structure, coverage, gomod_banner, targets, test_results, replace_text, monitor_targets…; к каждому
+  для скриптов из `tools/ui-robot/scripts` (markers, structure, coverage, gomod_banner, targets, test_results, replace_text, monitor_targets, editop — одна правка редактора: caret / select / action / type с `<TAB>` / surround / unwrap / hints / typos / targets…; к каждому
   подклеивается `prelude.js` с `cls("io.github…")` — классы плагина Rhino иначе не видит; `const` в цикле Rhino хранит первое значение — писать `var`;
   `robot.py action` не срабатывает, если фокус на невидимом компоненте, — тогда `invoke`; format on save платформа зовёт только из `saveAllDocuments`).
   Скрипт `highlights.js` не видит подсветок аннотаторов в новом UI — смотреть снимок редактора. Работать на копии: `build/ui-robot/playground` (без `.idea`). Плагин в песочнице обновляется
@@ -144,6 +144,34 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 
 `src/test/kotlin/io/github/golangsupport/*Test.kt`. Чистая логика — обычный JUnit 4 (`@Test`), без платформы: так тесты идут секунды. Для того, чему нужна
 платформа, — `BasePlatformTestCase` (JUnit 3-стиль, `fun testXxx()`); light-проект общий между тестами, убирать за собой. Реальные `go`, `gopls`, `dlv` в тестах не запускать.
+
+## Субагенты: модели и нарезка задач (экономия токенов)
+
+Факты с волн 1–2 (2026-10-02): агент-реализатор на Opus с брифом на одну группу фич тратит 220–290 тыс. токенов и 15–90 минут; четыре таких агента
+в одном рабочем дереве портят общую тестовую песочницу `.intellijPlatform/sandbox/<модуль>` (Trigram index, `FileDeletedException`), подвешивают демоны Gradle
+и исчерпывают память машины (32 ГБ). Отсюда правила.
+
+**Выбор модели.**
+- **Opus** — реализация с проектированием: новая подсистема или фича с тестами, правка грамматики / типов / resolve, всё, где бриф длинный и решения
+  принимает агент. Один агент — одна связная группа фич в одном пакете (как E/F/G волны 2), не больше трёх агентов параллельно.
+- **Sonnet** — механика по готовому образцу: ещё одна инспекция / intention по шаблону существующей, перенос тестов, правка документов, golden-файлов,
+  описаний, сценариев робота; разведка кода (Explore «medium») и прогон тестов с кратким отчётом (`test-runner`, `log-analyzer`).
+- **Haiku** — только поиск и подсчёт: «где используется X», список файлов, grep по корпусу, сверка ключей бандла. Никакой правки кода.
+- Ревью чужого диффа — Opus, но без права правки и только с указанием файлов: он читает дифф, а не весь модуль.
+
+**Нарезка задач.**
+- Границы по пакетам и дескрипторам: агент владеет своим пакетом и своим `go-psi-ide-*.xml`; в общих файлах (`plugin.xml`, `GoFeatures.kt`,
+  `GoBundle*.properties`, `docs/IDE-FEATURES.md`) — только свои строки, об этом в брифе явно. Файлы, которые трогают двое, — повод объединить задачи или выстроить их последовательно.
+- Бриф самодостаточен (`docs/AGENT_BRIEFS.md`): файлы для чтения перечислены, «не читать» перечислено (генерированные исходники, `node_modules`, большие
+  корпуса), публичный API зафиксирован, «Done when» — только целевые тесты модуля, где лежат тесты (`:go-psi-ide:test --tests "…pkg.*"`), один полный модульный прогон в конце.
+- Агентам запрещены `benchmark`, `corpusTest`, `buildPlugin`, UI-робот и остановка чужих процессов: это делает оркестратор один раз после слияния.
+  При трёх и более агентах — каждому `isolation: worktree`, слияние и общий гейт у оркестратора.
+- CHANGELOG, версии (`pluginVersion`), ROADMAP / MIGRATION / FEATURES правит оркестратор по блокам из отчётов: иначе четыре агента пишут один файл.
+- Отчёт агента — готовый к вставке результат (changelog-блоки, сценарии для робота, список «не сделано и почему»), не пересказ хода работы: оркестратор
+  не читает транскрипт агента, только отчёт.
+
+**Экономия контекста оркестратора.** Широкие вопросы («что уже есть по X», «как устроен Y») — Explore на Sonnet/Haiku с просьбой вернуть вывод, а не файлы;
+логи и результаты тестов — через `log-analyzer`/`test-runner`; свои проверки роботом — одним скриптом с подстановками (`editop.js`), а не десятком ручных шагов.
 
 ## Git
 

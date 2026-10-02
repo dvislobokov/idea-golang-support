@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports misuse of the <code>errors</code> package:
+<ul>
+  <li>the second argument of <code>errors.As</code> is not a non-nil pointer to a type that implements <code>error</code> or to an
+    interface type, or is a <code>*error</code> (vet <code>errorsas</code>). Quick fix: <b>Take the address of target</b>;</li>
+  <li><code>err == ErrX</code> or <code>err != ErrX</code> with a package-level <code>error</code> variable: the comparison is false
+    once the error is wrapped (weak warning). Comparisons with <code>nil</code> and comparisons inside <code>Is</code> methods are not
+    reported. Quick fix: <b>Replace with errors.Is(err, ErrX)</b>.</li>
+</ul>
+</body>
+</html>

@@ -3,7 +3,6 @@ package io.github.golangsupport
 import io.github.golangsupport.lang.GoDocComments
 import io.github.golangsupport.lang.GoGenerators
 import io.github.golangsupport.lang.GoPostfixExpressions
-import io.github.golangsupport.lang.GoStatements
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -50,16 +49,6 @@ class GoGeneratorsTest {
         assertEquals("\"text\"", before("\t\"text\"."))
         assertNull(before("\t."))
         assertNull(before("\treturn."))
-    }
-
-    @Test fun completeStatement() {
-        assertEquals("\tif x > 0 {" to true, GoStatements.complete("\tif x > 0"))
-        assertEquals("\tfor {" to true, GoStatements.complete("\tfor"))
-        assertEquals("func run() {" to true, GoStatements.complete("func run"))
-        assertEquals("\tfmt.Println(x)" to false, GoStatements.complete("\tfmt.Println(x"))
-        assertEquals("\tgo func() {" to true, GoStatements.complete("\tgo func"))
-        assertNull(GoStatements.complete("\tx := 1"))
-        assertNull(GoStatements.complete("\tif x {"))
     }
 
     @Test fun docComments() {

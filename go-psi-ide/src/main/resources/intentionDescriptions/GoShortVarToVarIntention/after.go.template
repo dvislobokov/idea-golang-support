@@ -1,0 +1,1 @@
+var buf *bytes.Buffer = bytes.NewBuffer(nil)

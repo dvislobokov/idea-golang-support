@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports a <code>context.Context</code> that is out of place:
+<ul>
+  <li>a <code>context.Context</code> parameter that is not the first parameter of a function or method (a <code>testing</code>
+    <code>*T</code>, <code>*B</code>, <code>*F</code> or <code>TB</code> parameter may come before it);</li>
+  <li>a context parameter replaced (<code>ctx = context.Background()</code>) or shadowed (<code>ctx := context.TODO()</code>) inside
+    its function: the caller's deadline and cancellation are lost;</li>
+  <li><code>context.Background()</code> or <code>context.TODO()</code> passed as an argument where the function has a context
+    parameter (weak warning).</li>
+</ul>
+<p>Only the innermost function counts: a function literal without its own context parameter (a detached goroutine) is not reported.
+Quick fix: <b>Use ctx</b>.</p>
+</body>
+</html>

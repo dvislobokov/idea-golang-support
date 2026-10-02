@@ -40,6 +40,8 @@ class GoCompletionContext private constructor(val parameters: CompletionParamete
         STRUCT_KEY,
         /** The path string of an import spec. */
         IMPORT_PATH,
+        /** An ordinary string literal that is a call argument: Printf verbs when it is the format of a printf-like call ([GoFormatVerbProvider]). */
+        STRING_ARGUMENT,
         /** A label after `goto`/`break`/`continue`. */
         LABEL,
         /** The name in the package clause. */
@@ -129,6 +131,7 @@ class GoCompletionContext private constructor(val parameters: CompletionParamete
         if (leaf is PsiComment || GoTokenSets.COMMENTS.contains(type)) return
         if (GoTokenSets.STRING_LITERALS.contains(type)) {
             if (leaf.parent is GoStringLiteral && leaf.parent.parent is GoImportSpec) kind = Kind.IMPORT_PATH
+            else if (leaf.parent is GoStringLiteral && leaf.parent.parent is GoArgumentList) kind = Kind.STRING_ARGUMENT
             return
         }
         if (type != GoTypes.IDENTIFIER) return

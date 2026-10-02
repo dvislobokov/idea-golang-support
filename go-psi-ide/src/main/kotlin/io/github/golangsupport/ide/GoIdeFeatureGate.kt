@@ -23,6 +23,8 @@ enum class GoIdeFeature {
     CODE_ACTIONS,
     /** Rename: in-place availability and the interface-method processor (the manipulators and name validators stay passive in every mode). */
     RENAME,
+    /** The inlay hints of the gopls set: parameter names, variable types, constant values, literal fields and types, type arguments (not the struct size). */
+    INLAY_HINTS,
 }
 
 /**

@@ -49,6 +49,8 @@ func (o *Order) Total() int {
 		total += item.Price * item.Quantity
 	}
 	return total
+
+	Open
 }
 
 func (o *Order) Validate() error {

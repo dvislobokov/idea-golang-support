@@ -67,6 +67,7 @@ class GoIdeFeatureGateTest : BasePlatformTestCase() {
         assertEquals(GoFeature.SEMANTIC_COLORS, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.SEMANTIC_COLORS))
         assertEquals(GoFeature.CODE_ACTIONS, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.CODE_ACTIONS))
         assertEquals(GoFeature.RENAME, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.RENAME))
+        assertEquals(GoFeature.INLAY_HINTS, GoIgsIdeFeatureGate.featureOf(GoIdeFeature.INLAY_HINTS))
         settings.languageServerEnabled = true
         settings.languageFeaturesSource = GoFeatureSource.NATIVE
         // the light project is in smart mode: the groups that need the indexes are on too

@@ -1,0 +1,29 @@
+<!-- go-psi-ide, inlay hints (Settings | Editor | Inlay Hints | Go): the hint set of gopls over the PSI and the size of a struct type.
+     Included by the host plugin (MIGRATION.md, step 11); the tests of go-psi-ide include every go-psi-ide-*.xml. The providers of the gopls
+     set ask io.github.golangsupport.ide.GoIdeFeatureGate (INLAY_HINTS) first and collect nothing when it is off; the struct size has no
+     gopls counterpart and is not gated. Defaults as the host has them for gopls: parameter names, variable types, constant values and
+     literal field names on; elided literal types and type arguments off. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <codeInsight.declarativeInlayProvider language="Go" providerId="go.parameter.names" group="PARAMETERS_GROUP" isEnabledByDefault="true"
+                                          implementationClass="io.github.golangsupport.ide.hints.GoParameterNameHintsProvider"
+                                          bundle="messages.GoInlayHintsBundle" nameKey="hints.parameters.name" descriptionKey="hints.parameters.description"/>
+    <codeInsight.declarativeInlayProvider language="Go" providerId="go.literal.fields" group="PARAMETERS_GROUP" isEnabledByDefault="true"
+                                          implementationClass="io.github.golangsupport.ide.hints.GoLiteralFieldHintsProvider"
+                                          bundle="messages.GoInlayHintsBundle" nameKey="hints.fields.name" descriptionKey="hints.fields.description"/>
+    <codeInsight.declarativeInlayProvider language="Go" providerId="go.types" group="TYPES_GROUP" isEnabledByDefault="true"
+                                          implementationClass="io.github.golangsupport.ide.hints.GoTypeHintsProvider"
+                                          bundle="messages.GoInlayHintsBundle" nameKey="hints.types.name" descriptionKey="hints.types.description">
+      <option optionId="assign" enabledByDefault="true" bundle="messages.GoInlayHintsBundle" nameKey="hints.types.assign.name" descriptionKey="hints.types.assign.description"/>
+      <option optionId="range" enabledByDefault="true" bundle="messages.GoInlayHintsBundle" nameKey="hints.types.range.name" descriptionKey="hints.types.range.description"/>
+      <option optionId="literal" enabledByDefault="false" bundle="messages.GoInlayHintsBundle" nameKey="hints.types.literal.name" descriptionKey="hints.types.literal.description"/>
+      <option optionId="instantiation" enabledByDefault="false" bundle="messages.GoInlayHintsBundle" nameKey="hints.types.instantiation.name" descriptionKey="hints.types.instantiation.description"/>
+    </codeInsight.declarativeInlayProvider>
+    <codeInsight.declarativeInlayProvider language="Go" providerId="go.constant.values" group="VALUES_GROUP" isEnabledByDefault="true"
+                                          implementationClass="io.github.golangsupport.ide.hints.GoConstantValueHintsProvider"
+                                          bundle="messages.GoInlayHintsBundle" nameKey="hints.constants.name" descriptionKey="hints.constants.description"/>
+    <codeInsight.declarativeInlayProvider language="Go" providerId="go.struct.size" group="OTHER_GROUP" isEnabledByDefault="true"
+                                          implementationClass="io.github.golangsupport.ide.hints.GoStructSizeHintsProvider"
+                                          bundle="messages.GoInlayHintsBundle" nameKey="hints.struct.name" descriptionKey="hints.struct.description"/>
+  </extensions>
+</idea-plugin>

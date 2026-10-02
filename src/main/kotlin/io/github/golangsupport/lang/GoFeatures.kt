@@ -18,6 +18,8 @@ enum class GoFeature(val needsIndexes: Boolean) {
     CODE_VISION(true),
     /** Alt+Enter actions that rewrite code by its types: fill struct, fill returns, fill switch, handle error. */
     CODE_ACTIONS(true),
+    /** Inlay hints of the gopls set (parameter names, variable types, constant values, ...); the struct size hint is the plugin's alone. */
+    INLAY_HINTS(true),
     FORMATTING(false),
 }
 

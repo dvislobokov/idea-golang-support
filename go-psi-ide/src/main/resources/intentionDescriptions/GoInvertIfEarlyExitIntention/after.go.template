@@ -1,0 +1,6 @@
+for _, x := range xs {
+	if !x.Valid() {
+		continue
+	}
+	process(x)
+}

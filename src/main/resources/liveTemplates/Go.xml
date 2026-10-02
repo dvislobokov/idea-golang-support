@@ -1,25 +1,25 @@
 <templateSet group="Go">
   <template name="err" value="if err != nil {&#10;&#9;$RESULT$&#10;}$END$" description="if err != nil { return ... }" toReformat="false" toShortenFQNames="false">
     <variable name="RESULT" expression="goErrorReturn()" defaultValue='"return err"' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="errw" value="if err != nil {&#10;&#9;return fmt.Errorf(&quot;$MESSAGE$: %w&quot;, err)&#10;}$END$" description="if err != nil { return fmt.Errorf(...: %w) }" toReformat="false" toShortenFQNames="false">
     <variable name="MESSAGE" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="forr" value="for $KEY$, $VALUE$ := range $COLLECTION$ {&#10;&#9;$END$&#10;}" description="for range loop" toReformat="false" toShortenFQNames="false">
     <variable name="KEY" expression="" defaultValue='"_"' alwaysStopAt="true"/>
     <variable name="VALUE" expression="" defaultValue='"v"' alwaysStopAt="true"/>
     <variable name="COLLECTION" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="fori" value="for $INDEX$ := 0; $INDEX$ &lt; $LIMIT$; $INDEX$++ {&#10;&#9;$END$&#10;}" description="for loop with an index" toReformat="false" toShortenFQNames="false">
     <variable name="INDEX" expression="" defaultValue='"i"' alwaysStopAt="true"/>
     <variable name="LIMIT" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="main" value="func main() {&#10;&#9;$END$&#10;}" description="func main" toReformat="false" toShortenFQNames="false">
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="meth" value="func ($RECEIVER$ $TYPE$) $NAME$($PARAMS$) $RESULT$ {&#10;&#9;$END$&#10;}" description="Method" toReformat="false" toShortenFQNames="false">
     <variable name="RECEIVER" expression="" defaultValue='"r"' alwaysStopAt="true"/>
@@ -27,55 +27,55 @@
     <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true"/>
     <variable name="PARAMS" expression="" defaultValue="" alwaysStopAt="true"/>
     <variable name="RESULT" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="test" value="func Test$NAME$(t *testing.T) {&#10;&#9;$END$&#10;}" description="Test function" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="ttest" value="func Test$NAME$(t *testing.T) {&#10;&#9;tests := []struct {&#10;&#9;&#9;name string&#10;&#9;&#9;$FIELDS$&#10;&#9;}{&#10;&#9;&#9;{name: &quot;$CASE$&quot;},&#10;&#9;}&#10;&#9;for _, tt := range tests {&#10;&#9;&#9;t.Run(tt.name, func(t *testing.T) {&#10;&#9;&#9;&#9;$END$&#10;&#9;&#9;})&#10;&#9;}&#10;}" description="Table-driven test" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true"/>
     <variable name="FIELDS" expression="" defaultValue="" alwaysStopAt="true"/>
     <variable name="CASE" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="bench" value="func Benchmark$NAME$(b *testing.B) {&#10;&#9;for b.Loop() {&#10;&#9;&#9;$END$&#10;&#9;}&#10;}" description="Benchmark function" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="gof" value="go func() {&#10;&#9;$END$&#10;}()" description="Goroutine with an anonymous function" toReformat="false" toShortenFQNames="false">
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="deff" value="defer func() {&#10;&#9;$END$&#10;}()" description="Deferred anonymous function" toReformat="false" toShortenFQNames="false">
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="sel" value="select {&#10;case $CASE$:&#10;&#9;$END$&#10;}" description="select statement" toReformat="false" toShortenFQNames="false">
     <variable name="CASE" expression="" defaultValue='"&lt;-ctx.Done()"' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="pf" value="fmt.Printf(&quot;$FORMAT$\n&quot;, $ARGS$)$END$" description="fmt.Printf" toReformat="false" toShortenFQNames="false">
     <variable name="FORMAT" expression="" defaultValue='"%v"' alwaysStopAt="true"/>
     <variable name="ARGS" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="json" value="`json:&quot;$NAME$&quot;`$END$" description="json struct tag" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STRUCT_FIELD" value="true"/></context>
   </template>
   <template name="errn" value="if err != nil {&#10;&#9;return nil, err&#10;}$END$" description="if err != nil { return nil, err }" toReformat="false" toShortenFQNames="false">
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="ife" value="if $VAR$, err := $CALL$; err != nil {&#10;&#9;return $RESULT$&#10;}$END$" description="if v, err := f(); err != nil {}" toReformat="false" toShortenFQNames="false">
     <variable name="VAR" expression="" defaultValue='"_"' alwaysStopAt="true"/>
     <variable name="CALL" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="RESULT" expression="" defaultValue='"err"' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="fn" value="func $NAME$($PARAMS$) $RESULT$ {&#10;&#9;$END$&#10;}" description="func name(params) result {}" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="PARAMS" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="RESULT" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="ctx" value="ctx context.Context$END$" description="ctx context.Context" toReformat="false" toShortenFQNames="false">
     <context><option name="GO" value="true"/></context>
@@ -91,101 +91,112 @@
   <template name="enum" value="type $NAME$ int&#10;&#10;const (&#10;&#9;$FIRST$ $NAME$ = iota&#10;&#9;$END$&#10;)" description="typed constants with iota" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="FIRST" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="init" value="func init() {&#10;&#9;$END$&#10;}" description="func init() {}" toReformat="false" toShortenFQNames="false">
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="hf" value="func $NAME$(w http.ResponseWriter, r *http.Request) {&#10;&#9;$END$&#10;}" description="HTTP handler function" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="mu" value="$MU$.Lock()&#10;defer $MU$.Unlock()&#10;$END$" description="mu.Lock(); defer mu.Unlock()" toReformat="false" toShortenFQNames="false">
     <variable name="MU" expression="" defaultValue='"mu"' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="wg" value="var wg sync.WaitGroup&#10;wg.Add(1)&#10;go func() {&#10;&#9;defer wg.Done()&#10;&#9;$END$&#10;}()&#10;wg.Wait()" description="sync.WaitGroup with a goroutine" toReformat="false" toShortenFQNames="false">
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="mk" value="$VAR$ := make($TYPE$)$END$" description="make(map / slice)" toReformat="false" toShortenFQNames="false">
     <variable name="VAR" expression="" defaultValue='"m"' alwaysStopAt="true"/>
     <variable name="TYPE" expression="" defaultValue='"map[string]int"' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="sw" value="switch $VALUE$ {&#10;case $CASE$:&#10;&#9;$END$&#10;default:&#10;}" description="switch value {}" toReformat="false" toShortenFQNames="false">
     <variable name="VALUE" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="CASE" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="tsw" value="switch $VAR$ := $VALUE$.(type) {&#10;case $TYPE$:&#10;&#9;$END$&#10;}" description="type switch" toReformat="false" toShortenFQNames="false">
     <variable name="VAR" expression="" defaultValue='"v"' alwaysStopAt="true"/>
     <variable name="VALUE" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="TYPE" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="ch" value="$VAR$ := make(chan $TYPE$$SIZE$)$END$" description="make(chan T)" toReformat="false" toShortenFQNames="false">
     <variable name="VAR" expression="" defaultValue='"ch"' alwaysStopAt="true"/>
     <variable name="TYPE" expression="" defaultValue='"struct{}"' alwaysStopAt="true"/>
     <variable name="SIZE" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="ticker" value="$VAR$ := time.NewTicker($PERIOD$)&#10;defer $VAR$.Stop()&#10;for range $VAR$.C {&#10;&#9;$END$&#10;}" description="time.NewTicker with a loop" toReformat="false" toShortenFQNames="false">
     <variable name="VAR" expression="" defaultValue='"ticker"' alwaysStopAt="true"/>
     <variable name="PERIOD" expression="" defaultValue='"time.Second"' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="tctx" value="ctx, cancel := context.WithTimeout($PARENT$, $TIMEOUT$)&#10;defer cancel()&#10;$END$" description="context.WithTimeout with defer cancel" toReformat="false" toShortenFQNames="false">
     <variable name="PARENT" expression="" defaultValue='"ctx"' alwaysStopAt="true"/>
     <variable name="TIMEOUT" expression="" defaultValue='"5 * time.Second"' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="lf" value='log.Printf("$FORMAT$", $ARGS$)$END$' description="log.Printf" toReformat="false" toShortenFQNames="false">
     <variable name="FORMAT" expression="" defaultValue='"%v"' alwaysStopAt="true"/>
     <variable name="ARGS" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="tr" value='t.Run("$NAME$", func(t *testing.T) {&#10;&#9;$END$&#10;})' description="t.Run subtest" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="helper" value="func $NAME$(t *testing.T$PARAMS$) {&#10;&#9;t.Helper()&#10;&#9;$END$&#10;}" description="test helper" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="PARAMS" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="fuzz" value="func Fuzz$NAME$(f *testing.F) {&#10;&#9;f.Add($SEED$)&#10;&#9;f.Fuzz(func(t *testing.T, $ARG$ $TYPE$) {&#10;&#9;&#9;$END$&#10;&#9;})&#10;}" description="Fuzz test" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="SEED" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="ARG" expression="" defaultValue='"s"' alwaysStopAt="true"/>
     <variable name="TYPE" expression="" defaultValue='"string"' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="example" value="func Example$NAME$() {&#10;&#9;$END$&#10;&#9;// Output:&#10;}" description="Example function" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="tmain" value="func TestMain(m *testing.M) {&#10;&#9;$END$&#10;&#9;os.Exit(m.Run())&#10;}" description="TestMain" toReformat="false" toShortenFQNames="false">
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="errt" value="if errors.Is(err, $TARGET$) {&#10;&#9;$END$&#10;}" description="errors.Is check" toReformat="false" toShortenFQNames="false">
     <variable name="TARGET" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="erras" value="var $VAR$ $TYPE$&#10;if errors.As(err, &amp;$VAR$) {&#10;&#9;$END$&#10;}" description="errors.As check" toReformat="false" toShortenFQNames="false">
     <variable name="VAR" expression="" defaultValue='"target"' alwaysStopAt="true"/>
     <variable name="TYPE" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_STATEMENT" value="true"/></context>
   </template>
   <template name="sentinel" value='var Err$NAME$ = errors.New("$MESSAGE$")$END$' description="var ErrName = errors.New(...)" toReformat="false" toShortenFQNames="false">
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="MESSAGE" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
   </template>
   <template name="opt" value="type Option func(*$TYPE$)&#10;&#10;func With$NAME$(v $VALUE$) Option {&#10;&#9;return func(o *$TYPE$) {&#10;&#9;&#9;o.$FIELD$ = v&#10;&#9;}&#10;}$END$" description="functional option" toReformat="false" toShortenFQNames="false">
     <variable name="TYPE" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="VALUE" expression="" defaultValue='""' alwaysStopAt="true"/>
     <variable name="FIELD" expression="" defaultValue='""' alwaysStopAt="true"/>
-    <context><option name="GO" value="true"/></context>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
+  </template>
+  <template name="func" value="func $NAME$($PARAMS$) $RESULT$ {&#10;&#9;$END$&#10;}" description="Function declaration" toReformat="false" toShortenFQNames="false">
+    <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <variable name="PARAMS" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <variable name="RESULT" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
+  </template>
+  <template name="errf" value="fmt.Errorf(&quot;$MESSAGE$: %w&quot;, $ERR$)$END$" description="fmt.Errorf wrapping an error" toReformat="false" toShortenFQNames="false">
+    <variable name="MESSAGE" expression="" defaultValue="" alwaysStopAt="true"/>
+    <variable name="ERR" expression="" defaultValue='"err"' alwaysStopAt="true"/>
+    <context><option name="GO_EXPRESSION" value="true"/></context>
   </template>
 </templateSet>

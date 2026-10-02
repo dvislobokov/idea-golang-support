@@ -1,0 +1,7 @@
+if mode == 1 {
+	fast()
+} else if mode == 2 || mode == 3 {
+	slow()
+} else {
+	fail()
+}

@@ -1,0 +1,7 @@
+<!-- go-psi-ide, spelling: the spellchecker strategy for Go (identifiers, comments, strings). Only the spellchecker registration lives here:
+     the host loads this file through an optional dependency on com.intellij.modules.spellchecker, so the plugin works in IDEs without it. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <spellchecker.support language="Go" implementationClass="io.github.golangsupport.ide.spelling.GoSpellcheckingStrategy"/>
+  </extensions>
+</idea-plugin>
