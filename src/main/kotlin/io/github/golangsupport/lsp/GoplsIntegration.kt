@@ -39,6 +39,10 @@ import com.intellij.platform.lsp.api.customization.LspCustomization
 import com.intellij.platform.lsp.api.customization.LspDiagnosticsCustomizer
 import com.intellij.platform.lsp.api.customization.LspDiagnosticsDisabled
 import com.intellij.platform.lsp.api.customization.LspDiagnosticsSupport
+import com.intellij.lang.annotation.AnnotationHolder
+import com.intellij.codeInsight.intention.IntentionAction
+import org.eclipse.lsp4j.Diagnostic
+import com.intellij.openapi.util.TextRange
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsCustomizer
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsDisabled
 import com.intellij.platform.lsp.api.customization.LspDocumentHighlightsSupport
@@ -233,7 +237,7 @@ class GoplsDescriptor(project: Project) : ProjectWideLspClientDescriptor(project
         override val renameCustomizer: LspRenameCustomizer = if (native(GoFeature.RENAME)) LspRenameDisabled else LspRenameSupport()
 
         /** Follows [GoFeature.DIAGNOSTICS]. */
-        override val diagnosticsCustomizer: LspDiagnosticsCustomizer = if (native(GoFeature.DIAGNOSTICS)) LspDiagnosticsDisabled else LspDiagnosticsSupport()
+        override val diagnosticsCustomizer: LspDiagnosticsCustomizer = if (native(GoFeature.DIAGNOSTICS)) LspDiagnosticsDisabled else GoplsDiagnosticsSupport()
 
         /**
          * The usages of the name at the caret, reads and writes apart, and the exit points of a function on `func` or `return`: the
@@ -371,5 +375,22 @@ class RestartGoplsAction : AnAction(), DumbAware {
     }
     override fun actionPerformed(e: AnActionEvent) {
         e.project?.let(GoplsIntegrationProvider::restart)
+    }
+}
+
+/**
+ * The diagnostics of gopls as annotations, minus the ones that no longer fit the file: a diagnostic published for a longer version
+ * of a big file (format on save shrank it) arrives with a range past the end, and the platform threw "Range must be inside element
+ * being annotated" instead of dropping it (seen live on a 135 KB file). The next publish replaces them anyway.
+ */
+class GoplsDiagnosticsSupport : LspDiagnosticsSupport() {
+    override fun createAnnotation(holder: AnnotationHolder, diagnostic: Diagnostic, textRange: TextRange, quickFixes: List<IntentionAction>) {
+        if (!fits(textRange, holder.currentAnnotationSession.file.textLength)) return
+        super.createAnnotation(holder, diagnostic, textRange, quickFixes)
+    }
+
+    companion object {
+        /** Whether a diagnostic at [range] can be annotated in a file of [textLength] characters. */
+        fun fits(range: TextRange, textLength: Int): Boolean = range.startOffset >= 0 && range.endOffset <= textLength
     }
 }
