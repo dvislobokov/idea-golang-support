@@ -113,6 +113,7 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var renameSource by enum(GoFeatureSource.GOPLS)
         var semanticColorsSource by enum(GoFeatureSource.GOPLS)
         var codeVisionSource by enum(GoFeatureSource.GOPLS)
+        var codeActionsSource by enum(GoFeatureSource.GOPLS)
 
         /** `-rpc.trace`: every message of the protocol in the log window of gopls. Big; for looking into what the server was asked. */
         var goplsTrace by property(false)
@@ -302,6 +303,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         get() = state.codeVisionSource
         set(value) { state.codeVisionSource = value }
 
+    var codeActionsSource: GoFeatureSource
+        get() = state.codeActionsSource
+        set(value) { state.codeActionsSource = value }
+
     /** The source of [feature]; formatting has no switch of its own: the plugin formats (a tool or the Built-in formatter) unless the formatter is left to the language server. */
     fun featureSource(feature: GoFeature): GoFeatureSource = when (feature) {
         GoFeature.SYNTAX_ERRORS -> syntaxErrorsSource
@@ -313,6 +318,7 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         GoFeature.RENAME -> renameSource
         GoFeature.SEMANTIC_COLORS -> semanticColorsSource
         GoFeature.CODE_VISION -> codeVisionSource
+        GoFeature.CODE_ACTIONS -> codeActionsSource
         GoFeature.FORMATTING -> if (formatter == GoFormatter.NONE) GoFeatureSource.GOPLS else GoFeatureSource.NATIVE
     }
 

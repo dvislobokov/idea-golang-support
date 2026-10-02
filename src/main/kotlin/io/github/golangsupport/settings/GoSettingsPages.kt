@@ -82,6 +82,10 @@ class GoLanguageServerConfigurable(project: Project) : GoSettingsPage(project, "
                 comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::codeVisionSource.toNullableProperty())
                     .comment(GoBundle.message("features.codeVision.comment"))
             }
+            row(GoBundle.message("features.codeActions")) {
+                comboBox(GoFeatureSource.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::codeActionsSource.toNullableProperty())
+                    .comment(GoBundle.message("features.codeActions.comment"))
+            }
         }
     }
 

@@ -16,6 +16,8 @@ enum class GoFeature(val needsIndexes: Boolean) {
     RENAME(true),
     SEMANTIC_COLORS(true),
     CODE_VISION(true),
+    /** Alt+Enter actions that rewrite code by its types: fill struct, fill returns, fill switch, handle error. */
+    CODE_ACTIONS(true),
     FORMATTING(false),
 }
 

@@ -23,6 +23,7 @@ class GoIgsIdeFeatureGate : GoIdeFeatureGate {
             GoIdeFeature.HOVER -> GoFeature.HOVER
             GoIdeFeature.DIAGNOSTICS -> GoFeature.DIAGNOSTICS
             GoIdeFeature.SEMANTIC_COLORS -> GoFeature.SEMANTIC_COLORS
+            GoIdeFeature.CODE_ACTIONS -> GoFeature.CODE_ACTIONS
             GoIdeFeature.RENAME -> GoFeature.RENAME
         }
     }

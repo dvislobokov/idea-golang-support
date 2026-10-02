@@ -19,6 +19,8 @@ enum class GoIdeFeature {
     DIAGNOSTICS,
     /** The semantic highlighting annotator (colours by resolve). */
     SEMANTIC_COLORS,
+    /** The intentions that rewrite code by its types: fill struct, fill returns, fill switch, handle error. */
+    CODE_ACTIONS,
     /** Rename: in-place availability and the interface-method processor (the manipulators and name validators stay passive in every mode). */
     RENAME,
 }
