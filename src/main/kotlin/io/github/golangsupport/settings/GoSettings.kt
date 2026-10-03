@@ -150,6 +150,9 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** GOEXPERIMENT of the analysis (`goexperiment.X` tags) and of the go commands; empty: the environment's. */
         var goExperiments by string("")
 
+        /** Where the plugin keeps the programs it builds and installs, its catalogue and temporary builds; empty: the system directory of the IDE. */
+        var pluginDataDirectory by string("")
+
         /** The library roots of the native PSI: `$GOROOT/src` alone, or also the module directories of the build list. */
         var libraryRoots by enum(GoLibraryRoots.STANDARD_LIBRARY_AND_DEPENDENCIES)
 
@@ -315,6 +318,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var libraryRoots: GoLibraryRoots
         get() = state.libraryRoots
         set(value) { state.libraryRoots = value }
+
+    var pluginDataDirectory: String
+        get() = state.pluginDataDirectory ?: ""
+        set(value) { state.pluginDataDirectory = value }
 
     var languageServerEnabled: Boolean
         get() = state.languageServerEnabled

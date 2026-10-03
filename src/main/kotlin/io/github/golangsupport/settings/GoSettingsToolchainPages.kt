@@ -24,6 +24,8 @@ import com.intellij.ui.dsl.builder.toNullableProperty
 import com.intellij.util.ui.UIUtil
 import io.github.golangsupport.GoBundle
 import io.github.golangsupport.cli.GoEnvironment
+import io.github.golangsupport.cli.GoPluginData
+import io.github.golangsupport.cli.GoPluginRelocation
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.mod.GoModule
 import io.github.golangsupport.mod.GoModulesService
@@ -155,9 +157,12 @@ class GoBuildTagsConfigurable(project: Project) : GoSettingsPage(project, "page.
                     .comment(GoBundle.message("buildTags.cgo.comment")).component
             }
             row(GoBundle.message("buildTags.experiments")) {
-                textField().align(AlignX.FILL).bindText(settings::goExperiments).comment(GoBundle.message("buildTags.experiments.comment"))
+                val field = textField().align(AlignX.FILL).resizableColumn().bindText(settings::goExperiments).comment(GoBundle.message("buildTags.experiments.comment"))
                     .validationOnInput { field -> GoSettings.invalidExperiment(field.text)?.let { error(GoBundle.message("buildTags.experiments.invalid", it)) } }
                     .validationOnApply { field -> GoSettings.invalidExperiment(field.text)?.let { error(GoBundle.message("buildTags.experiments.invalid", it)) } }
+                    .component
+                // the names come from the sources of the installed toolchain: they change with Go versions
+                button(GoBundle.message("buildTags.experiments.choose")) { GoExperimentsDialog.choose(project, field.text)?.let { field.text = it } }.align(AlignY.TOP)
             }
         }
         group(GoBundle.message("buildTags.tags")) {
@@ -250,6 +255,18 @@ class GoToolsConfigurable(project: Project) : GoSettingsPage(project, "page.tool
             row("") { cell(row.status) }
         }
         row { comment(GoBundle.message("tools.comment")) }
+        group(GoBundle.message("pluginData.group")) {
+            row(GoBundle.message("pluginData.directory")) {
+                cell(dataDirectory).align(AlignX.FILL).comment(GoBundle.message("pluginData.comment"))
+            }
+        }
+    }
+
+    /** Where the plugin keeps delve, installed tools, the catalogue and temporary builds: moved in the background on apply. */
+    private val dataDirectory = TextFieldWithBrowseButton().apply {
+        addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(GoBundle.message("pluginData.directory")))
+        text = settings.pluginDataDirectory
+        (textField as? JBTextField)?.emptyText?.text = GoPluginData.defaultRoot().toString()
     }
 
     /** GOBIN comes from `go env`, which blocks: asked off EDT, then the tools are looked for. */
@@ -260,11 +277,13 @@ class GoToolsConfigurable(project: Project) : GoSettingsPage(project, "page.tool
         }
     }
 
-    override fun isModified(): Boolean = super.isModified() || toolRows.values.any { it.path.text.trim() != settings.toolPath(it.tool.command) }
+    override fun isModified(): Boolean = super.isModified() || toolRows.values.any { it.path.text.trim() != settings.toolPath(it.tool.command) } ||
+        dataDirectory.text.trim() != settings.pluginDataDirectory
 
     override fun apply() {
         super.apply()
         toolRows.values.forEach { settings.setToolPath(it.tool.command, it.path.text) }
+        if (dataDirectory.text.trim() != settings.pluginDataDirectory) GoPluginRelocation.relocate(project, dataDirectory.text)
         refreshTools()
     }
 

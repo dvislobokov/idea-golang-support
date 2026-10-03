@@ -1,5 +1,6 @@
 package io.github.golangsupport.catalogue
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
@@ -205,14 +206,16 @@ class GoCatalogueService(private val project: Project) : Disposable {
         /** The modules read in this IDE, whatever the project: a second project with the same dependencies reads nothing. */
         private val LOADED = ConcurrentHashMap<String, GoModuleSymbols>()
 
-        private val DIRECTORY: File get() = File(PathManager.getSystemPath(), "go-support/catalogue/v${GoCatalogueFiles.VERSION}")
+        private val DIRECTORY: File get() = io.github.golangsupport.cli.GoPluginData.catalogue().resolve("v${GoCatalogueFiles.VERSION}").toFile()
 
         fun getInstance(project: Project): GoCatalogueService = project.service()
     }
 }
 
 class GoCatalogueStartupActivity : ProjectActivity {
-    override suspend fun execute(project: Project) = GoCatalogueService.getInstance(project).refresh(false)
+    override suspend fun execute(project: Project) {
+        if (GoProjectPresence.hasGoFiles(project)) GoCatalogueService.getInstance(project).refresh(false)
+    }
 }
 
 /** Go | Read Packages Again: for a module cache that was changed by hand, or a cache file that went wrong. */

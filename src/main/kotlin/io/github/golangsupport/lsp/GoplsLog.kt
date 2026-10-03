@@ -1,5 +1,6 @@
 package io.github.golangsupport.lsp
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
@@ -154,6 +155,10 @@ class GoplsLogToolWindowFactory : ToolWindowFactory, DumbAware {
         }
         toolWindow.contentManager.addContent(ContentFactory.getInstance().createContent(panel, "", false))
     }
+
+    // later changes: GoProjectPresence.Ui switches the window by its id
+    // gopls is off by default: no stripe button for its log then (GoProjectPresence.refreshUi follows the setting)
+    override fun shouldBeAvailable(project: Project): Boolean = GoProjectPresence.hasGoFiles(project) && io.github.golangsupport.settings.GoSettings.getInstance().languageServerEnabled
 }
 
 class ShowGoplsLogAction : AnAction(), DumbAware {

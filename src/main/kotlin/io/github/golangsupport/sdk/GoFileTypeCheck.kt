@@ -1,5 +1,6 @@
 package io.github.golangsupport.sdk
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
@@ -96,5 +97,7 @@ object GoFileTypeCheck {
 
 /** On startup of a Go project: the modal dialog if the file type associations were hijacked. */
 class GoFileTypeCheckActivity : ProjectActivity {
-    override suspend fun execute(project: Project) = GoFileTypeCheck.verify(project)
+    override suspend fun execute(project: Project) {
+        if (GoProjectPresence.hasGoFiles(project)) GoFileTypeCheck.verify(project)
+    }
 }

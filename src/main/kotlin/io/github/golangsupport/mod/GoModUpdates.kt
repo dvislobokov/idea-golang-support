@@ -74,8 +74,10 @@ object GoModUpdates {
     private fun ask(project: Project, path: String, key: String, modules: List<String>) {
         try {
             val dir = File(path).parent
-            // -e: a module the proxy does not know (private, removed) gets an Error field instead of failing the others
-            val output = runCatching { GoCli.execute(GoCli.commandLine(dir, "list", "-m", "-e", "-json", *modules.map { "$it@latest" }.toTypedArray()), 120_000) }.getOrNull()
+            // -e: a module the proxy does not know (private, removed) gets an Error field instead of failing the others;
+            // -mod=readonly: with a vendor/ directory go defaults to -mod=vendor and refuses every query (seen live); readonly writes nothing
+            val arguments = arrayOf("list", "-m", "-e", "-mod=readonly", "-json") + modules.map { "$it@latest" }
+            val output = runCatching { GoCli.execute(GoCli.commandLine(dir, *arguments), 120_000) }.getOrNull()
             val parsed = output?.takeIf { it.exitCode == 0 || it.stdout.isNotBlank() }?.let { GoModuleList.parse(it.stdout) }
             if (parsed == null) GoPluginLog.info("go", "No update check for $path: " + (output?.stderr?.lines()?.firstOrNull { it.isNotBlank() } ?: "go list has failed"))
             val previous = cache[path]?.updates
@@ -85,6 +87,16 @@ object GoModUpdates {
         } finally {
             running.remove(path)
         }
+    }
+
+    /** `go get targets...` in the background, then `go mod vendor` when the module vendors: a stale vendor/ breaks the build. */
+    fun goGet(project: Project, dir: String, title: String, targets: List<String>) {
+        if (targets.isEmpty()) return
+        val vendored = File(dir, "vendor/modules.txt").isFile
+        val commands = GoCli.commandLinesOrNotify(project, title) {
+            listOfNotNull(GoCli.commandLine(dir, "get", *targets.toTypedArray()), if (vendored) GoCli.commandLine(dir, "mod", "vendor") else null)
+        } ?: return
+        GoCli.runInBackground(project, title, commands, refresh = listOf(File(dir)))
     }
 
     private fun rehighlight(project: Project, path: String) {
@@ -124,8 +136,6 @@ class UpgradeRequireFix(private val path: String, private val version: String) :
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val dir = descriptor.psiElement?.containingFile?.virtualFile?.parent?.path ?: return
-        val title = "Go Get $path@$version"
-        val commands = GoCli.commandLinesOrNotify(project, title) { listOf(GoCli.commandLine(dir, "get", "$path@$version")) } ?: return
-        GoCli.runInBackground(project, title, commands, refresh = listOf(File(dir)))
+        GoModUpdates.goGet(project, dir, "Go Get $path@$version", listOf("$path@$version"))
     }
 }

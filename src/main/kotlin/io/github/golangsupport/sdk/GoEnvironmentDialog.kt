@@ -22,6 +22,7 @@ import com.intellij.util.ui.JBUI
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
+import io.github.golangsupport.lang.GoProjectPresence
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoLanguageServerControl
 import io.github.golangsupport.settings.GoSettings
@@ -91,38 +92,44 @@ private class GoEnvironmentDialog(project: Project, private val report: GoEnviro
  * the plugin drives that are missing are named in one notification with one Install All, instead of one balloon per tool as each is needed.
  */
 class GoToolchainCheckActivity : ProjectActivity {
+    // a project without Go files does not run `go env` at all; the check runs when Go files appear (GoProjectPresence)
     override suspend fun execute(project: Project) {
-        val hasGo = ReadAction.compute<Boolean, RuntimeException> { !project.isDisposed && GoModulesService.getInstance(project).modules().isNotEmpty() }
-        if (GoCli.findExecutable() != null) {
-            // while at it: warm up `go env`, so that the first thing that needs GOMODCACHE on EDT has it (and the tools are looked for in GOBIN)
-            GoEnvironment.get()
-            if (hasGo) offerMissingTools(project)
-            return
+        if (GoProjectPresence.hasGoFiles(project)) check(project)
+    }
+
+    companion object {
+        private const val DISMISSED_KEY = "io.github.golangsupport.tools.dismissed"
+
+        /** Blocking (`go env`): off EDT. */
+        fun check(project: Project) {
+            val hasGo = ReadAction.compute<Boolean, RuntimeException> { !project.isDisposed && GoModulesService.getInstance(project).modules().isNotEmpty() }
+            if (GoCli.findExecutable() != null) {
+                // while at it: warm up `go env`, so that the first thing that needs GOMODCACHE on EDT has it (and the tools are looked for in GOBIN)
+                GoEnvironment.get()
+                if (hasGo) offerMissingTools(project)
+                return
+            }
+            if (!hasGo) return
+            NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
+                .createNotification("Go is not found", "The project has a go.mod, but there is no <code>go</code> on PATH. Build, run, tests and the language server need it.", NotificationType.WARNING)
+                .addAction(NotificationAction.createSimple("Download Go") { BrowserUtil.browse("https://go.dev/dl/") })
+                .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoGorootConfigurable::class.java) })
+                .notify(project)
         }
-        if (!hasGo) return
-        NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
-            .createNotification("Go is not found", "The project has a go.mod, but there is no <code>go</code> on PATH. Build, run, tests and the language server need it.", NotificationType.WARNING)
-            .addAction(NotificationAction.createSimple("Download Go") { BrowserUtil.browse("https://go.dev/dl/") })
-            .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoGorootConfigurable::class.java) })
-            .notify(project)
-    }
 
-    private fun offerMissingTools(project: Project) {
-        if (PropertiesComponent.getInstance().getBoolean(DISMISSED_KEY)) return
-        // govulncheck is offered in the Go Dependencies window, golangci-lint only once it is turned on: see GoTool.offeredAtStart
-        val missing = GoTool.offeredAtStart(GoSettings.getInstance().golangciLint, GoSettings.getInstance().languageServerEnabled).filter { it.find() == null }
-        if (missing.isEmpty()) return
-        val names = missing.joinToString(", ") { "<code>${it.command}</code>" }
-        NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
-            .createNotification("Go tools are missing", "$names: ${missing.joinToString("; ") { it.purpose.substringBefore(':').lowercase() }}. Installed with <code>go install</code> into GOBIN.", NotificationType.INFORMATION)
-            // the language server among them: started for the open files once it is there, not at the next opening of a file
-            .addAction(NotificationAction.createSimpleExpiring("Install All") { GoTool.installAll(project, missing) { GoLanguageServerControl.restartAll(project) } })
-            .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoToolsConfigurable::class.java) })
-            .addAction(NotificationAction.createSimpleExpiring("Don't Ask Again") { PropertiesComponent.getInstance().setValue(DISMISSED_KEY, true) })
-            .notify(project)
-    }
-
-    private companion object {
-        const val DISMISSED_KEY = "io.github.golangsupport.tools.dismissed"
+        private fun offerMissingTools(project: Project) {
+            if (PropertiesComponent.getInstance().getBoolean(DISMISSED_KEY)) return
+            // govulncheck is offered in the Go Dependencies window, golangci-lint only once it is turned on: see GoTool.offeredAtStart
+            val missing = GoTool.offeredAtStart(GoSettings.getInstance().golangciLint, GoSettings.getInstance().languageServerEnabled).filter { it.find() == null }
+            if (missing.isEmpty()) return
+            val names = missing.joinToString(", ") { "<code>${it.command}</code>" }
+            NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
+                .createNotification("Go tools are missing", "$names: ${missing.joinToString("; ") { it.purpose.substringBefore(':').lowercase() }}. Installed with <code>go install</code> into GOBIN.", NotificationType.INFORMATION)
+                // the language server among them: started for the open files once it is there, not at the next opening of a file
+                .addAction(NotificationAction.createSimpleExpiring("Install All") { GoTool.installAll(project, missing) { GoLanguageServerControl.restartAll(project) } })
+                .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoToolsConfigurable::class.java) })
+                .addAction(NotificationAction.createSimpleExpiring("Don't Ask Again") { PropertiesComponent.getInstance().setValue(DISMISSED_KEY, true) })
+                .notify(project)
+        }
     }
 }

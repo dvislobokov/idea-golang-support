@@ -23,6 +23,8 @@ import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.settings.GoLintersConfigurable
 import io.github.golangsupport.settings.GoToolsConfigurable
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 
 /**
  * One logger for everything about finding Go and its tools: where the plugin looked and what it took. The questions from a user are
@@ -72,6 +74,11 @@ class GoEnvironment(val values: Map<String, String>) {
         }
 
         @Volatile private var cached: Pair<String, GoEnvironment>? = null
+        private val generation = java.util.concurrent.atomic.AtomicLong()
+        private val flights = SingleFlight<String, GoEnvironment>()
+        /** The disk cache is looked at once per session (and not after [reset]: the user asked to read the environment again). */
+        private val diskChecked = java.util.concurrent.atomic.AtomicBoolean()
+        private val listeners = java.util.concurrent.CopyOnWriteArrayList<() -> Unit>()
 
         /** Of the `go` the plugin uses; asked once per executable. Blocks on the first call: not for EDT. */
         fun get(): GoEnvironment {
@@ -81,35 +88,119 @@ class GoEnvironment(val values: Map<String, String>) {
                 return EMPTY
             }
             cached?.takeIf { it.first == executable }?.let { return it.second }
+            if (loadFromDisk(executable)) cached?.takeIf { it.first == executable }?.let { return it.second }
+            // one process for every thread that asks meanwhile (scanning threads, resolve, the language server)
+            return flights.run(executable, onDone = ::logJoined) { cached?.takeIf { it.first == executable }?.second ?: ask(executable) }
+        }
+
+        private fun logJoined(callers: Int) {
+            if (callers > 1) GoPluginLog.info(GoLog.CATEGORY_TOOLS, "go env: $callers callers joined one process")
+        }
+
+        /** Runs `go env -json`; a non-empty answer becomes the known one and is kept on disk. */
+        private fun ask(executable: String): GoEnvironment {
             val started = System.currentTimeMillis()
             val output = runCatching { GoCli.execute(GoCli.commandLine(null, "env", "-json"), 15_000) }
                 .onFailure { GoPluginLog.info(GoLog.CATEGORY_TOOLS, "go env has failed to start: ${it.message}") }.getOrNull()
             val environment = if (output != null && output.exitCode == 0) parse(output.stdout) else EMPTY
             if (environment !== EMPTY) {
-                cached = executable to environment
-                GoPluginLog.info(GoLog.CATEGORY_TOOLS, 
+                GoPluginLog.info(GoLog.CATEGORY_TOOLS,
                     "go env of $executable in ${System.currentTimeMillis() - started} ms: GOVERSION=${environment.goVersion}, GOROOT=${environment.goRoot}, " +
                         "GOPATH=${environment.goPath}, GOBIN=${environment.values["GOBIN"]}, tools are looked for in ${environment.binDirectory}",
                 )
+                remember(executable, environment)
+                save(executable, environment)
             } else {
                 GoPluginLog.warn(GoLog.CATEGORY_TOOLS, "go env of $executable gave nothing: exit code ${output?.exitCode}, ${output?.stderr?.lines()?.firstOrNull { it.isNotBlank() }.orEmpty()}")
             }
             return environment
         }
 
+        /** Makes [environment] the known one; a different answer than before moves [generation] and tells the listeners. */
+        private fun remember(executable: String, environment: GoEnvironment) {
+            val previous = cached
+            cached = executable to environment
+            if (previous == null || previous.first != executable || !GoEnvDiskCache.sameAnswer(previous.second.values, environment.values)) {
+                generation.incrementAndGet()
+                for (listener in listeners) runCatching(listener).onFailure { GoPluginLog.warn(GoLog.CATEGORY_TOOLS, "go env listener failed", it) }
+            }
+        }
+
+        private fun diskFile(): Path = GoPluginData.root().resolve(GoEnvDiskCache.FILE_NAME)
+
+        private fun diskKey(executable: String, values: Map<String, String>?): String {
+            val environment = EnvironmentUtil.getEnvironmentMap()
+            val goEnvFile = GoEnvDiskCache.goEnvFile(environment, values, SystemInfo.isWindows, SystemInfo.isMac, System.getProperty("user.home"))
+            return GoEnvDiskCache.key(File(executable), goEnvFile, environment)
+        }
+
+        private fun save(executable: String, environment: GoEnvironment) {
+            runCatching {
+                val file = diskFile()
+                Files.createDirectories(file.parent)
+                Files.writeString(file, GoEnvDiskCache.encode(GoEnvDiskCache.Stored(diskKey(executable, environment.values), environment.values, System.currentTimeMillis())))
+            }.onFailure { GoPluginLog.info(GoLog.CATEGORY_TOOLS, "go env is not kept on disk: ${GoPluginLog.describe(it)}") }
+        }
+
+        /**
+         * The answer of an earlier session, when nothing it depends on has changed ([GoEnvDiskCache.key]): known at once, checked by one
+         * `go env` in the background afterwards. Never on EDT (the shell environment of the IDE may still be loading). True when served.
+         */
+        private fun loadFromDisk(executable: String): Boolean {
+            val application = ApplicationManager.getApplication() ?: return false
+            if (application.isDispatchThread || !diskChecked.compareAndSet(false, true)) return false
+            val stored = runCatching { diskFile().takeIf { Files.isRegularFile(it) }?.let { GoEnvDiskCache.decode(Files.readString(it)) } }.getOrNull() ?: return false
+            if (GoEnvDiskCache.valid(stored, diskKey(executable, stored.values)) == null) {
+                GoPluginLog.info(GoLog.CATEGORY_TOOLS, "go env on disk is stale (the go executable, the go env file or the environment changed): asking go")
+                return false
+            }
+            if (cached == null) {
+                remember(executable, GoEnvironment(stored.values))
+                GoPluginLog.info(GoLog.CATEGORY_TOOLS, "go env served from the disk cache (age ${(System.currentTimeMillis() - stored.savedAt) / 1000} s), checking it in the background")
+            }
+            application.executeOnPooledThread { refresh(executable) }
+            return true
+        }
+
+        /** The background check of an answer served from disk: one process; a different answer replaces it and the listeners hear of it. */
+        private fun refresh(executable: String) {
+            val before = cached?.second?.values
+            val fresh = flights.run(executable, onDone = ::logJoined) { ask(executable) }
+            if (fresh !== EMPTY) GoPluginLog.info(GoLog.CATEGORY_TOOLS, if (before != null && GoEnvDiskCache.sameAnswer(fresh.values, before)) "go env checked: the same as on disk" else "go env checked: changed since the disk cache, updated")
+        }
+
         /** What is known without starting a process, for EDT: the last answer of `go env`, otherwise the environment variables and defaults. */
-        fun quick(): GoEnvironment = cached?.second ?: GoEnvironment(buildMap {
+        fun quick(): GoEnvironment = known() ?: GoEnvironment(buildMap {
             System.getenv("GOBIN")?.let { put("GOBIN", it) }
             put("GOPATH", System.getenv("GOPATH") ?: File(System.getProperty("user.home"), "go").path)
         })
 
-        /** Whether `go env` has been read: until then [quick] guesses GOPATH, and a tool installed elsewhere is not found. */
-        fun isKnown(): Boolean = cached != null
+        /** The known answer; off EDT the disk cache is looked at the first time. */
+        private fun known(): GoEnvironment? {
+            cached?.let { return it.second }
+            if (!diskChecked.get() && ApplicationManager.getApplication()?.isDispatchThread == false) {
+                // without a go nothing is looked at again: this is on the path of every toolchain question
+                val executable = GoCli.findExecutable()
+                if (executable == null) diskChecked.set(true) else loadFromDisk(executable)
+            }
+            return cached?.second
+        }
+
+        /** Whether `go env` has been read (in this session or from the disk cache): until then [quick] guesses GOPATH, and a tool installed elsewhere is not found. */
+        fun isKnown(): Boolean = known() != null
+
+        /** Moves whenever the known answer changes (first read, a different answer of the background check, [reset]): a part of the toolchain key. */
+        fun generation(): Long = generation.get()
+
+        /** [listener] runs, on the thread that read `go env`, whenever the known answer changes. */
+        fun addChangeListener(listener: () -> Unit) {
+            listeners += listener
+        }
 
         /**
          * Reads `go env` in the background, once, and calls [onReady] when it is there (at once when it is already). GOPATH is not
          * always `$HOME/go` and GOBIN is not always on PATH (seen live: a machine where `go env GOPATH` was under another home, so
-         * gopls was "not installed" until something else had asked `go env`).
+         * gopls was "not installed" until something else had asked `go env`). Callers that come meanwhile join the same process.
          */
         fun whenKnown(onReady: () -> Unit) {
             if (isKnown()) return onReady()
@@ -119,7 +210,10 @@ class GoEnvironment(val values: Map<String, String>) {
             }
         }
 
+        /** Forgets the answer: the next [get] runs `go env` again (the disk cache is not trusted for the rest of the session either). */
         fun reset() {
+            diskChecked.set(true)
+            if (cached != null) generation.incrementAndGet()
             cached = null
         }
     }
@@ -155,7 +249,8 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
         val home = System.getProperty("user.home")
         val environment = GoEnvironment.quick()
         val wellKnown = if (SystemInfo.isWindows) listOf("$home\\go\\bin") else listOf("$home/go/bin", "$home/.local/bin", "/usr/local/bin", "/opt/homebrew/bin", "/usr/local/go/bin")
-        return (listOfNotNull(environment.binDirectory) + wellKnown.map(::File)).distinctBy { it.path }
+        // the tools installed into the plugin data directory (GOBIN of `go install` when the user chose one) come first
+        return (listOfNotNull(GoPluginData.bin().toFile().takeIf { GoPluginData.isCustom }, environment.binDirectory) + wellKnown.map(::File)).distinctBy { it.path }
     }
 
     fun find(): File? {

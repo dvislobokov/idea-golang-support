@@ -4,7 +4,9 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import io.github.golangsupport.project.api.GoToolchainProvider
 import io.github.golangsupport.sdk.GoIgsToolchainProvider
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.project.api.GoPackageResolver
+import io.github.golangsupport.project.impl.GoProjectModelTracker
 import io.github.golangsupport.settings.GoCgoMode
 import io.github.golangsupport.settings.GoPlatformChoices
 import io.github.golangsupport.settings.GoSettings
@@ -55,7 +57,27 @@ class GoToolchainProviderTest : BasePlatformTestCase() {
         assertNotSame(first, changed)
         assertTrue(changed.buildTags.contains("cached_test_tag"))
         provider.invalidate()
-        assertNotSame("a reanalyze looks at the disk again", changed, provider.toolchainFor(project))
+        assertEquals("a reanalyze looks at the disk again", changed, provider.toolchainFor(project))
+    }
+
+    /** Every bump drops the caches of the model and recomputes the roots: an identical answer must not move the trackers (seen live: a bump per `go env`). */
+    fun testAnIdenticalAnswerDoesNotBumpTheTrackers() {
+        // the environment settled first: its arrival is a real change of the answer
+        if (GoCli.findExecutable() != null) GoEnvironment.get()
+        val provider = GoIgsToolchainProvider()
+        val first = provider.toolchainFor(project)
+        val stamp = provider.modificationTracker.modificationCount
+        val model = GoProjectModelTracker.getInstance(project).modificationCount
+        provider.invalidate()
+        val again = provider.toolchainFor(project)
+        assertSame("the old instance is kept", first, again)
+        assertEquals(stamp, provider.modificationTracker.modificationCount)
+        assertEquals(model, GoProjectModelTracker.getInstance(project).modificationCount)
+        first ?: return // no Go on this machine: the rest needs an answer to change
+        settings.buildTags = "bump_test_tag"
+        provider.toolchainFor(project)
+        assertTrue("a different answer moves them", provider.modificationTracker.modificationCount > stamp)
+        assertTrue(GoProjectModelTracker.getInstance(project).modificationCount > model)
     }
 
     fun testTheSettingsReachTheBuildContext() {

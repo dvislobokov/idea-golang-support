@@ -1,5 +1,6 @@
 package io.github.golangsupport.run
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.execution.RunManager
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.application.ApplicationManager
@@ -105,5 +106,8 @@ class GoRunConfigurationGenerator(private val project: Project) {
 }
 
 class GoRunConfigurationStartupActivity : ProjectActivity {
-    override suspend fun execute(project: Project) = GoRunConfigurationGenerator.getInstance(project).schedule()
+    // without Go files there is nothing to generate, and the scan would refresh the whole project directory
+    override suspend fun execute(project: Project) {
+        if (GoProjectPresence.hasGoFiles(project)) GoRunConfigurationGenerator.getInstance(project).schedule()
+    }
 }

@@ -6,6 +6,7 @@ import com.intellij.openapi.util.ModificationTracker
 import com.intellij.openapi.util.SimpleModificationTracker
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.project.api.GoToolchainInfo
 import io.github.golangsupport.project.api.GoToolchainProvider
 import io.github.golangsupport.project.impl.DefaultGoToolchainProvider
@@ -31,26 +32,48 @@ class GoIgsToolchainProvider : GoToolchainProvider {
      */
     @Volatile private var last: Answer? = null
 
-    private data class Key(val configuredGo: String, val envKnown: Boolean, val tags: List<String>, val goos: String, val goarch: String, val cgo: GoCgoMode, val experiments: String)
+    private data class Key(val configuredGo: String, val envGeneration: Long, val tags: List<String>, val goos: String, val goarch: String, val cgo: GoCgoMode, val experiments: String)
 
-    private class Answer(val key: Key, val info: GoToolchainInfo?)
+    private class Answer(val key: Key?, val info: GoToolchainInfo?)
+
+    /** One computation at a time: before it, every scanning thread computed and scheduled its own `go env` (seen live: 22-28 processes per open). */
+    private val lock = Any()
+
+    init {
+        // a background check of `go env` that found a different answer: the next question must see it, and the caches must hear of it
+        GoEnvironment.addChangeListener { if (last != null) toolchainFor(null) }
+    }
 
     override val modificationTracker: ModificationTracker get() = tracker
 
     override fun toolchainFor(project: Project?): GoToolchainInfo? {
         val settings = GoSettings.getInstance()
-        val key = Key(settings.goPath, GoEnvironment.isKnown(), settings.tagList(), settings.analysisGoos, settings.analysisGoarch, settings.cgoMode, settings.goExperiments)
+        GoEnvironment.isKnown() // reads the disk cache of `go env` first, so that the key below already has its generation
+        val key = key(settings)
         last?.takeIf { it.key == key }?.let { return it.info }
-        val info = compute(project, settings)
-        last = Answer(key, info)
-        tracker.incModificationCount()
-        for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) GoProjectModelTracker.getInstance(p).incModificationCount()
+        val (info, changed) = synchronized(lock) {
+            val current = key(settings)
+            val previous = last
+            if (previous != null && previous.key == current) return previous.info
+            val computed = compute(project, settings)
+            // an equal answer keeps the old instance and the trackers: every bump drops the caches of the model and recomputes the roots
+            val same = previous != null && previous.info == computed
+            last = Answer(current, if (same) previous!!.info else computed)
+            last!!.info to (previous != null && !same)
+        }
+        if (changed) {
+            tracker.incModificationCount()
+            for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) GoProjectModelTracker.getInstance(p).bump("toolchain changed: ${info?.goroot} go${info?.version}")
+        }
         return info
     }
 
-    /** Forgets the last answer: the next question looks at the disk again (a `go` installed meanwhile, a changed PATH). */
+    private fun key(settings: GoSettings) =
+        Key(settings.goPath, GoEnvironment.generation(), settings.tagList(), settings.analysisGoos, settings.analysisGoarch, settings.cgoMode, settings.goExperiments)
+
+    /** Forgets the last answer: the next question looks at the disk again (a `go` installed meanwhile, a changed PATH); trackers move only if the answer differs. */
     fun invalidate() {
-        last = null
+        synchronized(lock) { last = last?.let { Answer(null, it.info) } }
     }
 
     private fun compute(project: Project?, settings: GoSettings): GoToolchainInfo? {
@@ -84,4 +107,9 @@ class GoIgsToolchainProvider : GoToolchainProvider {
             env = if (experiments.isEmpty()) info.env else info.env + ("GOEXPERIMENT" to experiments),
         )
     }
+}
+
+/** The journal lines of the project model of go-psi (bumps with their reasons, `go list` from the disk cache): what a slow project open is measured by. */
+class GoProjectModelJournal : GoProjectModelTracker.Journal {
+    override fun log(project: Project, message: String) = GoPluginLog.info("go", "$message [${project.name}]")
 }

@@ -1,14 +1,17 @@
 package io.github.golangsupport.debugger
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.ide.plugins.PluginManagerCore
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoExecutionProbe
+import io.github.golangsupport.cli.GoPluginData
 import io.github.golangsupport.cli.GoPluginLog
 import java.io.File
 import java.nio.file.Files
@@ -30,6 +33,11 @@ object GoBundledDelve {
 
     val isBuilding: Boolean get() = building.get()
 
+    /** After the plugin data moved: a build refused for the old directory may succeed in the new one. */
+    fun forgetFailure() {
+        failedHash = null
+    }
+
     /** Whether the build of the shipped sources failed in this session (no go, an old toolchain): the caller offers `go install` instead. */
     fun failed(): Boolean = sources()?.let { hash(it) }?.let { it == failedHash } ?: true
 
@@ -37,9 +45,15 @@ object GoBundledDelve {
 
     fun hash(sources: Path): String? = runCatching { Files.readString(sources.resolve("SOURCE-HASH")).trim() }.getOrNull()?.takeIf { it.isNotEmpty() }
 
-    fun binaryPath(systemDirectory: Path, hash: String): Path = systemDirectory.resolve("go-plugin").resolve("delve").resolve(hash).resolve(GoCli.executableName("dlv"))
+    /** [directory]: the delve part of the plugin data ([GoPluginData.delve]), one subdirectory per hash of the sources. */
+    fun binaryPath(directory: Path, hash: String): Path = directory.resolve(hash).resolve(GoCli.executableName("dlv"))
 
-    fun buildArguments(output: String): List<String> = listOf("build", "-mod=vendor", "-trimpath", "-o", output, "./cmd/dlv")
+    /** [quiet]: the build at project open, two packages at a time ([QUIET_PARALLELISM]) so that indexing and highlighting keep most of the cores. */
+    fun buildArguments(output: String, quiet: Boolean = false): List<String> =
+        listOf("build") + (if (quiet) listOf("-p", QUIET_PARALLELISM.toString()) else emptyList()) + listOf("-mod=vendor", "-trimpath", "-o", output, "./cmd/dlv")
+
+    /** `-p` of the quiet build; also its GOMAXPROCS, which the compiler processes inherit (their own backend threads). */
+    const val QUIET_PARALLELISM = 2
 
     /** Offline and independent of the user's workspace: the vendored modules, the installed toolchain (no auto-download of the one go.mod names). */
     val BUILD_ENVIRONMENT: Map<String, String> = mapOf("GOFLAGS" to "-mod=vendor", "GOWORK" to "off", "GOTOOLCHAIN" to "local")
@@ -48,19 +62,45 @@ object GoBundledDelve {
     fun binary(): File? {
         val sources = sources() ?: return null
         val hash = hash(sources) ?: return null
-        return binaryPath(PathManager.getSystemDir(), hash).toFile().takeIf { it.isFile }
+        return binaryPath(GoPluginData.delve(), hash).toFile().takeIf { it.isFile }
     }
 
-    /** Builds the binary in a background task (its progress is in the status bar) unless it is there, being built, or failed this session. */
-    fun ensureBuilt(project: Project) {
+    /** Whether the binary is still to be built: not there, not being built, not failed this session. */
+    private fun needed(): Boolean {
+        val hash = sources()?.let(::hash) ?: return false
+        return !building.get() && failedHash != hash && !Files.isRegularFile(binaryPath(GoPluginData.delve(), hash))
+    }
+
+    /**
+     * The build at project open: after indexing (`go build` took the cores the indexer needed, seen in the sandbox logs) and with limited
+     * parallelism. Debug does not wait for this: it calls [ensureBuilt] itself when the binary is missing.
+     */
+    fun ensureBuiltWhenSmart(project: Project) {
+        if (!needed()) return
+        val dumb = DumbService.getInstance(project)
+        if (dumb.isDumb) GoPluginLog.info(GoDebuggerLogs.CATEGORY, "The bundled delve build is deferred until smart mode")
+        val asked = System.currentTimeMillis()
+        dumb.runWhenSmart {
+            if (project.isDisposed) return@runWhenSmart
+            val waited = System.currentTimeMillis() - asked
+            if (waited > 100) GoPluginLog.info(GoDebuggerLogs.CATEGORY, "The bundled delve build starts after $waited ms of indexing")
+            ensureBuilt(project, quiet = true)
+        }
+    }
+
+    /**
+     * Builds the binary in a background task (its progress is in the status bar) unless it is there, being built, or failed this session.
+     * [quiet]: the build nobody waits for, with limited parallelism; Debug builds at full speed.
+     */
+    fun ensureBuilt(project: Project, quiet: Boolean = false) {
         val sources = sources() ?: return
         val hash = hash(sources) ?: return
-        val target = binaryPath(PathManager.getSystemDir(), hash)
+        val target = binaryPath(GoPluginData.delve(), hash)
         if (Files.isRegularFile(target) || failedHash == hash || !building.compareAndSet(false, true)) return
         object : Task.Backgroundable(project, "Building delve", true) {
             override fun run(indicator: ProgressIndicator) {
                 try {
-                    build(sources, hash, target, indicator)
+                    build(sources, hash, target, indicator, quiet)
                 } finally {
                     building.set(false)
                 }
@@ -68,16 +108,24 @@ object GoBundledDelve {
         }.queue()
     }
 
-    private fun build(sources: Path, hash: String, target: Path, indicator: ProgressIndicator) {
+    private fun build(sources: Path, hash: String, target: Path, indicator: ProgressIndicator, quiet: Boolean) {
         val go = GoCli.findExecutable() ?: run {
             failedHash = hash
             GoPluginLog.warn(GoDebuggerLogs.CATEGORY, "The bundled delve is not built: go is not found")
             return
         }
+        // a binary built where nothing may run is no debugger: GoPluginDataCheck tells the user where to move the plugin data
+        if (GoExecutionProbe.check(target.parent.parent) == GoExecutionProbe.Result.NOT_EXECUTABLE) {
+            failedHash = hash
+            GoPluginLog.warn(GoDebuggerLogs.CATEGORY, "The bundled delve is not built: programs cannot run in ${target.parent.parent} (${GoExecutionProbe.reason(target.parent.parent).orEmpty()})")
+            return
+        }
         indicator.text = "Building delve from the plugin's sources"
         Files.createDirectories(target.parent)
         val temporary = target.resolveSibling(target.fileName.toString() + ".tmp")
-        val command = GoCli.toolCommandLine(go, sources.toString(), *buildArguments(temporary.toString()).toTypedArray()).withEnvironment(BUILD_ENVIRONMENT)
+        val environment = if (quiet && System.getenv("GOMAXPROCS").isNullOrEmpty()) BUILD_ENVIRONMENT + ("GOMAXPROCS" to QUIET_PARALLELISM.toString()) else BUILD_ENVIRONMENT
+        val command = GoCli.toolCommandLine(go, sources.toString(), *buildArguments(temporary.toString(), quiet).toTypedArray()).withEnvironment(environment)
+        val started = System.currentTimeMillis()
         val output = CapturingProcessHandler(command).runProcessWithProgressIndicator(indicator, 600_000)
         if (output.isCancelled) return
         if (output.exitCode != 0 || !Files.isRegularFile(temporary)) {
@@ -88,7 +136,7 @@ object GoBundledDelve {
         }
         Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING)
         target.parent.parent.toFile().listFiles()?.filter { it.isDirectory && it.name != hash }?.forEach { it.deleteRecursively() }
-        GoPluginLog.info(GoDebuggerLogs.CATEGORY, "The bundled delve is built: $target")
+        GoPluginLog.info(GoDebuggerLogs.CATEGORY, "The bundled delve is built in ${System.currentTimeMillis() - started} ms (${if (quiet) "-p $QUIET_PARALLELISM" else "full parallelism"}): $target")
     }
 }
 
@@ -97,5 +145,8 @@ object GoBundledDelve {
  * when the binary was lost (the system directory cleaned, an antivirus took it), since [GoBundledDelve.ensureBuilt] checks the file itself.
  */
 class GoBundledDelveActivity : ProjectActivity {
-    override suspend fun execute(project: Project) = GoBundledDelve.ensureBuilt(project)
+    // a project without Go files builds nothing; the build starts when Go files appear (GoProjectPresence.resume)
+    override suspend fun execute(project: Project) {
+        if (GoProjectPresence.hasGoFiles(project)) GoBundledDelve.ensureBuiltWhenSmart(project)
+    }
 }

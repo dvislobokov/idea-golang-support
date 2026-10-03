@@ -27,6 +27,8 @@ object GoLogs {
 
     val root: Path
         get() = if (ApplicationManager.getApplication()?.isUnitTestMode == true) Path.of(PathManager.getTempPath(), "idea-golang-logs")
+        // a data directory chosen by the user takes the logs along: the home directory may be where nothing of the plugin should be
+        else if (GoPluginData.isCustom) GoPluginData.root().resolve("logs")
         else Path.of(System.getProperty("user.home"), "idea-golang-logs")
 
     fun directory(name: String): Path = root.resolve(name)

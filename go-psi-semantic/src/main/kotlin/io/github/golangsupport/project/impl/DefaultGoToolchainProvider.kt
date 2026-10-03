@@ -56,7 +56,7 @@ class DefaultGoToolchainProvider : GoToolchainProvider {
                     LOG.info("go-psi: toolchain refined by 'go env -json': ${refined.get()?.goroot} ${refined.get()?.version}")
                     tracker.incModificationCount()
                     for (p in ProjectManager.getInstance().openProjects) {
-                        if (!p.isDisposed) GoProjectModelTracker.getInstance(p).incModificationCount()
+                        if (!p.isDisposed) GoProjectModelTracker.getInstance(p).bump("toolchain refined by go env")
                     }
                 } else {
                     LOG.info("go-psi: 'go env -json' failed; keeping the pure toolchain detection")

@@ -51,13 +51,16 @@ object GoListModuleGraph {
     }
 
     /** Runs `go list -m -json -e all` in [moduleDir] and converts the result; null on failure. */
-    fun load(goBinary: Path, moduleDir: Path): GoModuleGraph? {
+    fun load(goBinary: Path, moduleDir: Path): GoModuleGraph? = loadOutput(goBinary, moduleDir)?.let(::parse)
+
+    /** The raw output of `go list -m -json -e all` in [moduleDir] (what [GoListDiskCache] keeps); null on failure. */
+    fun loadOutput(goBinary: Path, moduleDir: Path): String? {
         val out = runGo(goBinary, moduleDir, listOf("list", "-m", "-json", "-e", "all"), mapOf("GOFLAGS" to "-mod=readonly")) ?: return null
         if (out.exitCode != 0 && out.stdout.isBlank()) {
             LOG.info("go-psi: go list -m failed in $moduleDir: ${out.stderr.take(500)}")
             return null
         }
-        return parse(out.stdout)
+        return out.stdout
     }
 
     /** Converts `go list -m -json` output into a graph. Main-module directives are read from their go.mod. */

@@ -130,7 +130,7 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
     var pathSubstitutions by string()
 }
 
-class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
+open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
     LocatableConfigurationBase<GoRunConfigurationOptions>(project, factory, name) {
 
     public override fun getOptions(): GoRunConfigurationOptions = super.getOptions() as GoRunConfigurationOptions

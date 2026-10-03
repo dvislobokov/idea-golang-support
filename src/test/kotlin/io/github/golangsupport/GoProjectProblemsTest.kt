@@ -102,6 +102,31 @@ class GoProjectProblemsTest : BasePlatformTestCase() {
         }
     }
 
+    private fun <T> background(block: () -> T): T = PlatformTestUtil.waitForFuture(ApplicationManager.getApplication().executeOnPooledThread(Callable { block() }), 60_000)
+
+    fun testTheSnapshotOfAnUnchangedProjectIsShownWithoutAPass() {
+        fixture()
+        full()
+        val before = shown()
+        assertTrue("written after a complete pass", background { service.saveSnapshot() })
+        service.clearForTests()
+        assertEquals(emptyList<String>(), shown())
+        assertTrue("the same project: restored", background { service.restoreSnapshot() })
+        assertEquals(before, shown())
+        assertEquals("no pass is due", emptyList<String>(), drain())
+    }
+
+    fun testAChangedProjectIsAnalysedAgain() {
+        fixture()
+        full()
+        assertTrue(background { service.saveSnapshot() })
+        edit("pp/other/o.go", "oo := 1", "oo := 2")
+        assertFalse("an unsaved Go file: no snapshot", background { service.saveSnapshot() })
+        FileDocumentManager.getInstance().saveAllDocuments()
+        service.clearForTests()
+        assertFalse("a file changed since the snapshot", background { service.restoreSnapshot() })
+    }
+
     fun testTheFilesOfTheProject() {
         val root = fixture()
         val files = ReadAction.compute<List<String?>, Throwable> { GoProblemsScope.files(project).filter { VfsUtilCore.isAncestor(root, it, true) }.map { VfsUtilCore.getRelativePath(it, root, '/') } }

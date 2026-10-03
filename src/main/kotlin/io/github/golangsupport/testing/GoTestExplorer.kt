@@ -1,5 +1,6 @@
 package io.github.golangsupport.testing
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsAdapter
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
@@ -135,6 +136,8 @@ class GoTestExplorerToolWindowFactory : ToolWindowFactory, DumbAware {
         val panel = GoTestExplorerPanel(project, toolWindow)
         toolWindow.contentManager.addContent(toolWindow.contentManager.factory.createContent(panel, "", false).apply { isCloseable = false })
     }
+
+    override fun shouldBeAvailable(project: Project): Boolean = GoProjectPresence.hasGoFiles(project)
 }
 
 private class GoTestExplorerPanel(private val project: Project, toolWindow: ToolWindow) : SimpleToolWindowPanel(true, true) {

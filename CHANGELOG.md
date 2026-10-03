@@ -11,7 +11,10 @@ gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (ed
 Version 0.2.77 bundles delve as sources built on the user's machine.
 Versions 0.2.78–0.2.81: unreachable code greyed out; grey text by the name alone (values and field types) and next to the completion
 list; types only where a type stands.
-Versions 0.2.82–0.2.83: gopls is off by default and not started; go.mod shows newer versions of dependencies itself.
+Versions 0.2.82–0.2.85: gopls is off by default and not started; go.mod shows newer versions of dependencies and update lines
+itself; go.sum nested under go.mod.
+Versions 0.2.86–0.2.92: GoLand run configurations understood; plugin data directory checked for running programs; nothing of
+the plugin in projects without Go files; GOEXPERIMENT from a list; one `go env` per project open; project problems kept between sessions.
 Versions 0.2.67–0.2.76 are the sixth batch (native lint rule engine with 136 rules, project-wide problems, grey text from context in
 colours, Go settings at the root with a table of every check).
 Versions 0.2.60–0.2.66 are the fifth batch (Go assembly, project-wide checks, interface hierarchy refactorings, unchecked errors, optional
@@ -26,6 +29,101 @@ Language features: Built-in.
 Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, directive comments, struct tag naming style).
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
+
+## [0.2.92] - 2026-10-03
+
+### Changed
+- Problems | Project Errors is not analysed again at every project open: after a complete pass the findings are kept on disk with a
+  fingerprint of the project (the analysed files by size and time, go.mod / go.sum / go.work / vendor/modules.txt, the toolchain, GOOS /
+  GOARCH / build tags / GOEXPERIMENT, the inspection profile, the plugin version). Opened again unchanged, the tab is filled from it at
+  once and no pass runs; any difference runs the full pass as before. No snapshot is written while a Go file has unsaved changes.
+
+## [0.2.91] - 2026-10-03
+
+### Fixed
+- "Accessing invalid virtual file" from the package scope when a Go file was deleted and created again at the same path (seen on
+  `~/.aws/main.go`): a package remembered by the project model finds the new file by its path, a file gone for good is skipped.
+
+## [0.2.90] - 2026-10-03
+
+### Changed — faster project open
+- Project open runs `go env -json` once: concurrent callers share one process, and the answer of the previous session is served from
+  disk (`go-env.json` in the plugin data directory, keyed by the go executable, the go env file and the GO* environment) and checked once
+  in the background.
+- The toolchain of the project model is computed once at a time and bumps the model only when it actually changes; every bump is logged
+  with its reason and a counter.
+- The `go list -m -json all` fallback of the module graph is kept on disk per go.mod and reused by later sessions with the same
+  go.mod/go.sum/go.work and go; one run per module at a time, and the model is bumped only when the result has other modules than the
+  pure graph.
+- The bundled delve is built at project open only after indexing, with `-p 2` and `GOMAXPROCS=2`; Debug still builds it at once at full speed.
+- The first pass of Problems | Project Errors waits until the daemon has highlighted the open editors (at most 15 s after indexing).
+
+### Fixed
+- 22–28 `go env` processes at every project open, each dropping the caches of the project model.
+- The background check of `go env` no longer counts every answer as new: `GOGCCFLAGS` names a random `go-build` directory each run.
+- A go.mod in the IDE's own directories (the sources of the bundled delve in the plugin, rewritten on every update) no longer bumps the
+  model of every open project at start.
+
+## [0.2.89] - 2026-10-03
+
+### Added
+- Settings | Go | Build Tags → Experiments → Choose…: a checklist of the GOEXPERIMENT names the installed Go knows, read from its sources
+  (`internal/goexperiment/flags.go`, defaults from `internal/buildcfg/exp.go`), so the list follows the Go version. Defaults are marked;
+  only differences from them are written (`arenas,nogreenteagc`); names the toolchain does not know are kept.
+
+### Fixed
+- The gopls tool window button is not shown while the language server is off (the default); it comes back when gopls is turned on.
+
+## [0.2.88] - 2026-10-03
+
+### Added — the plugin stays out of projects without Go
+- A project without Go files (no `.go`, `go.mod`, `go.work`) shows nothing of the plugin: the Go main menu and the Go entries of the
+  Project view popup are hidden, the Go Tests, Go Monitor, Go Dependencies and gopls tool windows and the Go status bar widgets are not
+  there. As soon as a Go file appears (created, copied, updated from VCS), everything comes back without a restart.
+
+### Changed
+- A project without Go files pays nothing at startup: no toolchain check (`go env`), no build of the bundled delve, no package catalogue,
+  no project problems pass, no run configuration scan, no welcome page, no check of the plugin data directory. When Go files appear,
+  the toolchain check, the delve build, the file type check, the catalogue, the interfaces warm-up, the run configurations and the
+  project analysis start then.
+
+## [0.2.87] - 2026-10-03
+
+### Added — plugin data directory, checked for running programs
+- Settings | Go | Tools → Plugin data directory: where the plugin keeps the delve it builds, the tools installed from that page (`GOBIN`),
+  the symbol catalogue, temporary `go run` / `go test` builds and, when chosen, the logs. Default: the system directory of the IDE.
+  Changing it moves the files in the background and builds delve again there.
+- On start the plugin checks that programs can run from that directory (a copy of `/bin/true` is started there): a `noexec` mount or an
+  execution policy that allows only `/home/work/<user>` gives a notification with "Use /home/work/<user>/.go-plugin" or the settings
+  page. When the system temporary directory cannot run programs, go commands get `GOTMPDIR` in the plugin data directory. Not checked
+  on Windows.
+- The bundled delve now lives in `<plugin data>/delve/<hash>` (built once more after the update).
+
+## [0.2.86] - 2026-10-03
+
+### Fixed
+- Projects with GoLand run configurations (`.idea/workspace.xml` or shared `.run` files) no longer show "Plugin Go supporting run
+  configuration 'GoApplicationRunConfiguration' is currently not installed": the plugin registers GoLand's configuration type ids itself.
+
+### Added
+- GoLand's Go Build and Go Test run configurations load as Go configurations and run with the plugin's runner and debugger: package,
+  file or directory, working directory, program and go tool arguments, environment, test pattern and benchmarks. They are saved back in
+  GoLand's format, so a shared `.run` file still opens in GoLand; unchanged ones are not rewritten.
+
+## [0.2.85] - 2026-10-03
+
+### Added — file nesting
+- go.sum is nested under go.mod and go.work.sum under go.work in the Project view (Project view | File Nesting), as in GoLand.
+
+## [0.2.84] - 2026-10-03
+
+### Added — update lines in go.mod
+- "Update all dependencies" and "Update direct dependencies" above the first `require` of go.mod, as in GoLand: `go get module@latest`
+  for the requires, then `go mod vendor` when the module vendors (the Upgrade quick fix does the same).
+
+### Fixed
+- Newer versions were never shown in a module with a `vendor/` directory: go then defaults to `-mod=vendor` and refuses every query.
+  The check asks with `-mod=readonly`, which writes nothing.
 
 ## [0.2.83] - 2026-10-03
 

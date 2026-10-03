@@ -31,4 +31,12 @@ class GoModUpdatesTest {
         assertEquals(true, GoModUpdates.newer("v2.0.0+incompatible", "v1.9.0"))
         assertEquals(false, GoModUpdates.newer("latest", "v1.0.0"))
     }
+
+    @Test
+    fun updateLinesTargetAllOrDirectRequires() {
+        assertEquals(listOf("github.com/google/uuid@latest", "golang.org/x/text@latest"), io.github.golangsupport.mod.GoModCodeVision.targets(requires, direct = false))
+        assertEquals(listOf("github.com/google/uuid@latest"), io.github.golangsupport.mod.GoModCodeVision.targets(requires, direct = true))
+        assertEquals(4, io.github.golangsupport.mod.GoModCodeVision.anchorLine("module m\n\ngo 1.24\n\nrequire (\n\tx v1\n)\n"))
+        assertEquals(2, io.github.golangsupport.mod.GoModCodeVision.anchorLine("module m\n// requirements\nrequire x v1\n"))
+    }
 }

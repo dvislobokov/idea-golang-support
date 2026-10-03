@@ -25,15 +25,16 @@ import java.util.concurrent.ConcurrentHashMap
  * on [GoProjectModelTracker].
  *
  * When the pure graph misses modules (go.mod files absent from the module cache) and a `go`
- * binary is known, `go list -m -json -e all` runs once per input state on a pooled thread; its
- * result replaces the pure graph after the tracker is bumped. The choice is logged at INFO level.
+ * binary is known, `go list -m -json -e all` runs once per input state on a pooled thread (one run
+ * per module at a time); its output is kept on disk ([GoListDiskCache]) and reused by later sessions
+ * with the same inputs. The tracker is bumped only when the result has other modules than the pure graph.
  */
 @ApiStatus.Internal
 class DefaultGoModuleGraphProvider(private val project: Project) : GoModuleGraphProvider {
 
     private val graphs = ConcurrentHashMap<GoModuleGraphBuilder.Location, CachedValue<GoModuleGraph?>>()
     private val goListResults = ConcurrentHashMap<GoModuleGraphBuilder.Location, Pair<String, GoModuleGraph>>()
-    private val goListRunning = ConcurrentHashMap.newKeySet<String>()
+    private val goListRunning = ConcurrentHashMap.newKeySet<GoModuleGraphBuilder.Location>()
 
     override fun graphFor(fileOrDirectory: VirtualFile): GoModuleGraph? {
         val path = fileOrDirectory.fileSystem.getNioPath(fileOrDirectory) ?: return null
@@ -77,23 +78,36 @@ class DefaultGoModuleGraphProvider(private val project: Project) : GoModuleGraph
             LOG.info("go-psi: module graph for ${location.goMod ?: location.goWork}: ${pure.missing.size} module(s) missing from the cache and no go binary; using the incomplete pure graph (run 'go mod download')")
             return pure
         }
-        val key = stampKey(location, pure)
+        val key = stampKey(location, pure) + "|go=$binary@${toolchain.version?.value}"
         goListResults[location]?.takeIf { it.first == key }?.let {
-            LOG.info("go-psi: module graph for ${location.goMod ?: location.goWork} from 'go list -m -json all' (${it.second.modules.size} modules; pure MVS missed ${pure.missing.size})")
+            if (LOG.isDebugEnabled) LOG.debug("go-psi: module graph for ${location.goMod ?: location.goWork} from 'go list -m -json all' (${it.second.modules.size} modules; pure MVS missed ${pure.missing.size})")
             return it.second
         }
+        // an earlier session ran it for the same go.mod / go.sum / go.work and the same go: no process, no second bump of the model
+        GoListDiskCache.read(location, key)?.let { output ->
+            val graph = runCatching { GoListModuleGraph.parse(output) }.getOrNull()
+            if (graph != null) {
+                goListResults[location] = key to graph
+                GoProjectModelTracker.journal(project, "go list -m served from the disk cache for ${location.goMod ?: location.goWork} (${graph.modules.size} modules; pure MVS missed ${pure.missing.size})")
+                return graph
+            }
+        }
         val runDir = location.goWork?.parent ?: location.goMod?.parent ?: return pure
-        if (goListRunning.add(key)) {
+        // one run per module at a time, whatever the stamps: a burst of go.sum writes is not a burst of processes
+        if (goListRunning.add(location)) {
             LOG.info("go-psi: pure MVS missed ${pure.missing.size} module(s) (first: ${pure.missing.first()}); running 'go list -m -json all' in $runDir in the background")
             ApplicationManager.getApplication().executeOnPooledThread {
                 try {
-                    val graph = GoListModuleGraph.load(binary, runDir)
-                    if (graph != null) {
+                    val output = GoListModuleGraph.loadOutput(binary, runDir)
+                    val graph = output?.let { runCatching { GoListModuleGraph.parse(it) }.getOrNull() }
+                    if (output != null && graph != null) {
                         goListResults[location] = key to graph
-                        if (!project.isDisposed) GoProjectModelTracker.getInstance(project).incModificationCount()
+                        GoListDiskCache.write(location, key, output)
+                        // the caches already hold the pure graph: they are dropped only when the result is a different set of modules
+                        if (!project.isDisposed && differs(graph, pure)) GoProjectModelTracker.getInstance(project).bump("go list -m result for ${location.goMod ?: location.goWork}")
                     }
                 } finally {
-                    goListRunning.remove(key)
+                    goListRunning.remove(location)
                 }
             }
         }
@@ -108,6 +122,13 @@ class DefaultGoModuleGraphProvider(private val project: Project) : GoModuleGraph
 
     companion object {
         private val LOG = logger<DefaultGoModuleGraphProvider>()
+
+        /** Whether [goList] gives other modules (path and version) than [pure]: only then the caches built on [pure] are wrong. */
+        @JvmStatic
+        fun differs(goList: GoModuleGraph, pure: GoModuleGraph): Boolean {
+            fun versions(graph: GoModuleGraph) = graph.modules.mapTo(HashSet()) { it.path to it.version }
+            return versions(goList) != versions(pure)
+        }
 
         /** Directory of [file] as a NIO path (local file system only). */
         @JvmStatic

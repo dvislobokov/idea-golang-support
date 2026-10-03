@@ -133,7 +133,11 @@ class GoPackageModel(private val project: Project) {
         return PackageScope(files, pkg?.importPath ?: packagePathOf(file), packageName)
     }
 
-    private fun goFile(vf: VirtualFile): GoFile? = PsiManager.getInstance(project).findFile(vf) as? GoFile
+    // a cached GoPackage may still hold a file deleted and created again at the same path (seen live: InvalidVirtualFileAccessException)
+    private fun goFile(vf: VirtualFile): GoFile? {
+        val valid = if (vf.isValid) vf else vf.fileSystem.findFileByPath(vf.path)?.takeIf { it.isValid } ?: return null
+        return PsiManager.getInstance(project).findFile(valid) as? GoFile
+    }
 
     companion object {
         private val FILE_DECLARATIONS = Key.create<CachedValue<FileDeclarations>>("gopsi.fileDeclarations")

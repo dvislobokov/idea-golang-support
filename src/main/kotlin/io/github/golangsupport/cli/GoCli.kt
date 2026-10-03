@@ -84,7 +84,7 @@ object GoCli {
      */
     fun buildEnvironment(subcommand: String?): Map<String, String> {
         if (subcommand == "env" || ApplicationManager.getApplication() == null) return emptyMap()
-        return GoSettings.getInstance().goCommandEnvironment()
+        return GoSettings.getInstance().goCommandEnvironment() + GoPluginData.goEnvironment(install = subcommand == "install")
     }
 
     /** A command line of `go` or of one of its tools: a tool started from the IDE must find the same `go` the plugin uses. */

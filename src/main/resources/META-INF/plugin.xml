@@ -141,6 +141,8 @@
         <completion.contributor language="Go" order="first" implementationClass="io.github.golangsupport.lang.GoStructTagCompletionContributor"/>
         <!-- functions and types of the standard library and of the modules of go.mod by their own names: `Printl` is `fmt.Println` -->
         <completion.contributor language="Go" implementationClass="io.github.golangsupport.catalogue.GoCatalogueCompletionContributor"/>
+        <!-- does the project have Go files at all: without them the menu Go, the tool windows and the startup work of a Go project are not there -->
+        <postStartupActivity implementation="io.github.golangsupport.lang.GoProjectPresence$Startup" order="first"/>
         <postStartupActivity implementation="io.github.golangsupport.catalogue.GoCatalogueStartupActivity"/>
         <!-- the interfaces of the project are read once the index is there: Implement Interface opens at once -->
         <postStartupActivity implementation="io.github.golangsupport.lang.GoProjectInterfacesStartup"/>
@@ -198,6 +200,7 @@
         <liveTemplateMacro implementation="io.github.golangsupport.lang.GoTypeNameMacro"/>
         <liveTemplateMacro implementation="io.github.golangsupport.lang.GoErrorReturnMacro"/>
 
+        <projectViewNestingRulesProvider implementation="io.github.golangsupport.view.GoFileNestingRules"/>
         <lang.parserDefinition language="GoModule" implementationClass="io.github.golangsupport.mod.GoModParserDefinition"/>
         <lang.syntaxHighlighterFactory language="GoModule" implementationClass="io.github.golangsupport.mod.GoModSyntaxHighlighterFactory"/>
         <lang.commenter language="GoModule" implementationClass="io.github.golangsupport.mod.GoModCommenter"/>
@@ -214,6 +217,9 @@
         <!-- newer versions from the module proxy (go list -m -u), in the background: what gopls showed before it was turned off by default -->
         <localInspection language="GoModule" shortName="GoModUpdates" displayName="Newer version of a dependency" groupName="Go modules" enabledByDefault="true" level="WEAK WARNING"
                          implementationClass="io.github.golangsupport.mod.GoModUpdatesInspection"/>
+        <!-- "Update all / direct dependencies" above the first require of go.mod, as in GoLand -->
+        <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.mod.GoModUpdateAllCodeVisionProvider"/>
+        <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.mod.GoModUpdateDirectCodeVisionProvider"/>
         <localInspection language="GoModule" shortName="GoModVersions" displayName="Go and toolchain versions" groupName="Go modules" enabledByDefault="true" level="WARNING"
                          implementationClass="io.github.golangsupport.mod.GoModVersionsInspection"/>
         <!-- the requirements of a module with their updates and vulnerabilities -->
@@ -274,6 +280,8 @@
                     factoryClass="io.github.golangsupport.cli.GoPluginLogsToolWindowFactory"/>
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
         <!-- delve from the sources inside the plugin: built in the background once per version of the sources, again when the binary is lost -->
+        <!-- can programs run from the plugin data directory? A notification with a better place when not (noexec, execution policies) -->
+        <postStartupActivity implementation="io.github.golangsupport.cli.GoPluginDataCheck"/>
         <postStartupActivity implementation="io.github.golangsupport.debugger.GoBundledDelveActivity"/>
         <!-- a user/leftover association can shadow the declarative .go / go.mod one: tell the user in a dialog and offer to claim it back -->
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoFileTypeCheckActivity"/>
@@ -281,6 +289,9 @@
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoPluginAdvisorActivity"/>
 
         <configurationType implementation="io.github.golangsupport.run.GoConfigurationType"/>
+        <!-- GoLand's run configuration ids: its configurations in a project load and run as ours instead of advertising the GoLand plugin -->
+        <configurationType implementation="io.github.golangsupport.run.GoLandApplicationConfigurationType"/>
+        <configurationType implementation="io.github.golangsupport.run.GoLandTestConfigurationType"/>
         <runConfigurationProducer implementation="io.github.golangsupport.run.GoRunConfigurationProducer"/>
         <runLineMarkerContributor language="Go" implementationClass="io.github.golangsupport.run.GoRunLineMarkerContributor"/>
         <formattingService implementation="io.github.golangsupport.format.GoFormattingService"/>
@@ -308,7 +319,7 @@
         </action>
 
         <!-- a menu of the main menu bar, next to Tools -->
-        <group id="Go.MainMenu" text="_Go" popup="true">
+        <group id="Go.MainMenu" class="io.github.golangsupport.lang.GoProjectActionGroup" text="_Go" popup="true">
             <action id="Go.Build" class="io.github.golangsupport.build.GoBuildAction" text="Build" icon="AllIcons.Actions.Compile"
                     description="go build ./... in every module of the project"/>
             <action id="Go.Vet" class="io.github.golangsupport.build.GoVetAction" text="Vet" description="go vet ./..."/>
@@ -395,7 +406,7 @@
                     description="Write every DAP message of the debug sessions that start from now on next to the debugger logs"/>
             <add-to-group group-id="Go.MainMenu" anchor="last"/>
         </group>
-        <group id="Go.ProjectViewPopup">
+        <group id="Go.ProjectViewPopup" class="io.github.golangsupport.lang.GoProjectActionGroup">
             <separator/>
             <reference ref="Go.Build"/>
             <reference ref="Go.Vet"/>
@@ -417,6 +428,10 @@
     </applicationListeners>
 
     <projectListeners>
+        <!-- the project model of go-psi says why it was bumped (each bump drops its caches and recomputes the roots): the plugin journal -->
+        <listener class="io.github.golangsupport.sdk.GoProjectModelJournal" topic="io.github.golangsupport.project.impl.GoProjectModelTracker$Journal"/>
+        <!-- Go files came or went: the tool windows, the widgets and the startup work of a Go project follow -->
+        <listener class="io.github.golangsupport.lang.GoProjectPresence$Ui" topic="io.github.golangsupport.lang.GoProjectPresence$Listener"/>
         <listener class="io.github.golangsupport.testing.GoTestStatuses$Listener" topic="com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener"/>
         <listener class="io.github.golangsupport.monitor.GoProcessStartListener" topic="com.intellij.execution.ExecutionListener"/>
     </projectListeners>

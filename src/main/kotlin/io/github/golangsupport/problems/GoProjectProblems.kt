@@ -1,6 +1,8 @@
 package io.github.golangsupport.problems
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.analysis.problemsView.ProblemsCollector
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.codeInspection.ex.InspectionProfileImpl
 import com.intellij.codeInspection.ex.LocalInspectionToolWrapper
 import com.intellij.ide.PowerSaveMode
@@ -10,6 +12,8 @@ import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditor
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressIndicator
@@ -43,6 +47,17 @@ import io.github.golangsupport.ci.GoInspectRun
 import io.github.golangsupport.ci.GoSarif
 import io.github.golangsupport.ci.GoSarifLevel
 import io.github.golangsupport.cli.GoPluginLog
+import io.github.golangsupport.cli.GoEnvironment
+import io.github.golangsupport.cli.GoEnvDiskCache
+import io.github.golangsupport.cli.GoPluginData
+import io.github.golangsupport.help.GoPages
+import com.intellij.codeInsight.daemon.HighlightDisplayKey
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.psi.search.FilenameIndex
+import com.intellij.psi.search.GlobalSearchScope
+import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
 import io.github.golangsupport.project.api.GoBuildContext
 import io.github.golangsupport.project.api.GoToolchainProvider
 import io.github.golangsupport.semantic.cache.GoTrackers
@@ -125,6 +140,130 @@ class GoProjectProblems(private val project: Project) : Disposable {
         synchronized(lock) { fullPending = true }
         kick()
     }
+
+    private val firstPassAlarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
+    private val firstPassAsked = java.util.concurrent.atomic.AtomicBoolean()
+
+    /**
+     * The first full pass at project open, once in smart mode: after the daemon has finished the open editors (and [FIRST_PASS_QUIET_MS] of
+     * quiet), at most [FIRST_PASS_MAX_WAIT_MS] later. Started at once it took 3.6-7.6 s of CPU in the first seconds, competing with the
+     * highlighting of the editor the user looks at (seen in the sandbox logs). The incremental passes are not delayed.
+     */
+    fun requestFirstFull() {
+        if (!settings.projectAnalysis || !firstPassAsked.compareAndSet(false, true) || firstPassAlarm.isDisposed) return
+        val smartAt = System.currentTimeMillis()
+        val started = java.util.concurrent.atomic.AtomicBoolean()
+        val connection = project.messageBus.connect(this)
+        fun start(reason: String) {
+            if (project.isDisposed || !started.compareAndSet(false, true)) return
+            connection.disconnect()
+            firstPassAlarm.cancelAllRequests()
+            GoPluginLog.info(CATEGORY, "project problems first pass delayed by ${System.currentTimeMillis() - smartAt} ms after smart mode ($reason)")
+            requestFull()
+        }
+        if (FileEditorManager.getInstance(project).openFiles.isEmpty()) {
+            firstPassAlarm.addRequest({ start("no open editors") }, FIRST_PASS_QUIET_MS)
+            return
+        }
+        connection.subscribe(DaemonCodeAnalyzer.DAEMON_EVENT_TOPIC, object : DaemonCodeAnalyzer.DaemonListener {
+            override fun daemonFinished(fileEditors: Collection<FileEditor>) {
+                if (started.get() || firstPassAlarm.isDisposed) return
+                // a restart of the daemon (a change, the language server) finishes again: the quiet period starts over
+                firstPassAlarm.cancelAllRequests()
+                firstPassAlarm.addRequest({ start("the daemon finished the open editors") }, FIRST_PASS_QUIET_MS)
+                firstPassAlarm.addRequest({ start("waited the longest") }, (FIRST_PASS_MAX_WAIT_MS - (System.currentTimeMillis() - smartAt)).coerceAtLeast(0L))
+            }
+        })
+        firstPassAlarm.addRequest({ start("waited the longest") }, FIRST_PASS_MAX_WAIT_MS)
+    }
+
+    private val snapshotAlarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
+
+    private fun snapshotFile(): java.nio.file.Path = GoPluginData.root().resolve("problems").resolve("${project.locationHash}.json")
+
+    /**
+     * The fingerprint lines of the project as it is now ([GoProblemsSnapshot]); under a read action in smart mode. Disk stats rather than
+     * the VFS where there is a disk: a file changed while the IDE was closed is seen before the refresh reaches it.
+     */
+    private fun fingerprintLines(): List<String> {
+        val lines = ArrayList<String>()
+        val scope = GlobalSearchScope.projectScope(project)
+        val inputs = LinkedHashSet<VirtualFile>(GoProblemsScope.files(project))
+        for (name in listOf("go.mod", "go.sum", "go.work", "go.work.sum", "modules.txt")) inputs += FilenameIndex.getVirtualFilesByName(name, scope)
+        for (file in inputs) {
+            val nio = runCatching { file.fileSystem.getNioPath(file) }.getOrNull()
+            val attributes = nio?.let { runCatching { Files.readAttributes(it, BasicFileAttributes::class.java) }.getOrNull() }
+            lines += if (attributes != null) GoProblemsSnapshot.fileLine(file.path, attributes.size(), attributes.lastModifiedTime().toMillis())
+            else GoProblemsSnapshot.fileLine(file.path, file.length, file.timeStamp)
+        }
+        val profile = InspectionProjectProfileManager.getInstance(project).currentProfile
+        lines += "profile\t${profile.name}"
+        for (tool in GoInspectRun.tools(project, profile, null)) lines += "tool\t${tool.shortName}\t${HighlightDisplayKey.find(tool.shortName)?.let { profile.getErrorLevel(it, null) }}"
+        // not toString(): its env holds GOGCCFLAGS, which names a random go-build directory on every run (seen live: no snapshot ever matched)
+        GoToolchainProvider.getInstance().toolchainFor(project)?.let { t ->
+            lines += "toolchain\t${t.goroot}\t${t.version}\t${t.goos}/${t.goarch}\t${t.cgoEnabled}\t${t.buildTags.sorted()}\t${t.gomodcache}\t${t.gopath}"
+            for ((k, v) in t.env) if (k !in GoEnvDiskCache.VOLATILE) lines += "env\t$k=$v"
+        }
+        val environment = GoEnvironment.quick().values
+        lines += "go\t${environment["GOVERSION"]}\t${environment["GOROOT"]}"
+        lines += "settings\t${settings.analysisGoos}\t${settings.analysisGoarch}\t${settings.buildTags}\t${settings.cgoMode}\t${settings.goExperiments}"
+        lines += "plugin\t${GoPages.pluginVersion()}\t${GoProblemsSnapshot.FORMAT}"
+        return lines
+    }
+
+    /** A few seconds after a drain that left nothing pending: the snapshot of what the tab knows. */
+    private fun scheduleSnapshot() {
+        if (!automatic || snapshotAlarm.isDisposed) return
+        snapshotAlarm.cancelAllRequests()
+        snapshotAlarm.addRequest({ saveSnapshot() }, SNAPSHOT_DELAY_MS)
+    }
+
+    /** Writes the snapshot; returns whether it did. Not when work is queued or an analysed file has unsaved changes: the findings must be those of the files on disk. */
+    fun saveSnapshot(): Boolean {
+        if (!active() || !fullDone) return false
+        val started = System.currentTimeMillis()
+        val inputs = runCatching {
+            ReadAction.nonBlocking<List<String>?> {
+                val documents = FileDocumentManager.getInstance()
+                val unsaved = documents.unsavedDocuments.any { d -> documents.getFile(d)?.let { GoInspectFiles.isCandidate(it.name) } == true }
+                if (unsaved || pendingCount() > 0 || synchronized(lock) { worker != null }) null else fingerprintLines()
+            }.inSmartMode(project).expireWith(this).executeSynchronously()
+        }.getOrNull() ?: return false
+        val files = findings.entries.filter { it.key.isValid }.associate { it.key.path to it.value }
+        return runCatching { GoProblemsSnapshot.write(snapshotFile(), GoProblemsSnapshot.Snapshot(GoProblemsSnapshot.FORMAT, GoProblemsSnapshot.fingerprint(inputs), files, inputs.sorted())) }
+            .onFailure { GoPluginLog.warn(CATEGORY, "project problems snapshot not written: ${GoPluginLog.describe(it)}") }
+            .onSuccess { GoPluginLog.info(CATEGORY, "project problems snapshot written: ${files.size} files with problems, ${System.currentTimeMillis() - started} ms") }
+            .isSuccess
+    }
+
+    /**
+     * At project open: the findings of the last session when the project is the same as then ([GoProblemsSnapshot]); returns whether they
+     * were shown, otherwise the caller runs the first full pass. Off the EDT.
+     */
+    fun restoreSnapshot(): Boolean {
+        if (!active()) return false
+        val started = System.currentTimeMillis()
+        val snapshot = GoProblemsSnapshot.read(snapshotFile())
+        if (snapshot == null) { GoPluginLog.info(CATEGORY, "project problems snapshot: none, analysing"); return false }
+        val inputs = runCatching {
+            ReadAction.nonBlocking<List<String>> { fingerprintLines() }.inSmartMode(project).expireWith(this).executeSynchronously()
+        }.getOrNull() ?: return false
+        if (GoProblemsSnapshot.fingerprint(inputs) != snapshot.fingerprint) {
+            val changed = GoProblemsSnapshot.difference((snapshot.inputs as List<String>?).orEmpty(), inputs).joinToString("; ") { it.replace('\t', ' ') }
+            GoPluginLog.info(CATEGORY, "project problems snapshot: the project changed since ($changed), analysing")
+            return false
+        }
+        val restored = snapshot.files.mapNotNull { (path, found) -> findByPath(path)?.let { it to found } }
+        for ((file, found) in restored) publish(file, found)
+        fullDone = true
+        GoPluginLog.info(CATEGORY, "project problems restored from the snapshot: ${restored.size} files with problems, ${restored.sumOf { it.second.size }} problems, " +
+            "${System.currentTimeMillis() - started} ms")
+        return true
+    }
+
+    // the light tests keep their files in temp://
+    private fun findByPath(path: String): VirtualFile? =
+        LocalFileSystem.getInstance().findFileByPath(path) ?: if (automatic) null else VirtualFileManager.getInstance().findFileByUrl("temp://$path")
 
     /** The page of the settings applied: off clears the tab, the warnings switch filters what was found. */
     fun settingsChanged() {
@@ -315,6 +454,7 @@ class GoProjectProblems(private val project: Project) : Disposable {
                 current = null
             }
             if (full && pendingCount() == 0) fullDone = true
+            if (fullDone && analysed.isNotEmpty()) scheduleSnapshot()
             analysedLast = analysed
             if (analysed.isNotEmpty()) GoPluginLog.info(CATEGORY, summary(analysed.size, failures, System.currentTimeMillis() - started))
         } catch (e: ProcessCanceledException) {
@@ -433,6 +573,12 @@ class GoProjectProblems(private val project: Project) : Disposable {
         /** The short name of the parser's errors among the inspections. */
         const val SYNTAX = "GoSyntax"
         private const val DELAY_MS = 1500
+        /** Quiet after the daemon finished the open editors before the first full pass. */
+        private const val FIRST_PASS_QUIET_MS = 2_000
+        /** The first full pass starts at the latest this long after smart mode, whatever the daemon does. */
+        private const val FIRST_PASS_MAX_WAIT_MS = 15_000L
+        /** After the last drain, before the snapshot is written. */
+        private const val SNAPSHOT_DELAY_MS = 3_000
         /** Fewer changed files than this go without a progress bar in the status bar. */
         private const val VISIBLE_FROM = 50
 
@@ -440,10 +586,16 @@ class GoProjectProblems(private val project: Project) : Disposable {
     }
 }
 
-/** The first full pass once the project is open and indexed. */
+/** The first full pass once the project is open and indexed, and the open editors are highlighted ([GoProjectProblems.requestFirstFull]). */
 class GoProjectProblemsStartup : ProjectActivity {
     override suspend fun execute(project: Project) {
-        if (!GoSettings.getInstance().projectAnalysis) return
-        DumbService.getInstance(project).runWhenSmart { GoProjectProblems.getInstance(project).requestFull() }
+        if (!GoSettings.getInstance().projectAnalysis || !GoProjectPresence.hasGoFiles(project)) return
+        // the findings of the last session when nothing changed since; otherwise the first full pass
+        DumbService.getInstance(project).runWhenSmart {
+            ApplicationManager.getApplication().executeOnPooledThread {
+                val problems = GoProjectProblems.getInstance(project)
+                if (!project.isDisposed && !problems.restoreSnapshot()) problems.requestFirstFull()
+            }
+        }
     }
 }

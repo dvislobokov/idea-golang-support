@@ -45,6 +45,7 @@ abstract class GoSettingsPage(protected val project: Project, titleKey: String) 
     override fun apply() {
         super.apply()
         GoLanguageServerControl.restartAll(project)
+        io.github.golangsupport.lang.GoProjectPresence.Windows.refreshUi(project)
     }
 }
 

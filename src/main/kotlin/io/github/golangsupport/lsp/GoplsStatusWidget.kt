@@ -1,5 +1,6 @@
 package io.github.golangsupport.lsp
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
@@ -99,7 +100,7 @@ class GoplsServerState(private val project: Project) : Disposable {
 class GoplsStatusWidgetFactory : StatusBarWidgetFactory {
     override fun getId(): String = ID
     override fun getDisplayName(): String = "Go Language Server (gopls)"
-    override fun isAvailable(project: Project): Boolean = GoplsServerState.getInstance(project).isRunning
+    override fun isAvailable(project: Project): Boolean = GoProjectPresence.hasGoFiles(project) && GoplsServerState.getInstance(project).isRunning
     override fun createWidget(project: Project): StatusBarWidget = GoplsStatusWidget(project)
     override fun canBeEnabledOn(statusBar: StatusBar): Boolean = true
 

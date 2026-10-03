@@ -1,5 +1,6 @@
 package io.github.golangsupport.settings
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
@@ -55,7 +56,7 @@ object GoPlatformChoices {
 class GoPlatformWidgetFactory : StatusBarWidgetFactory {
     override fun getId(): String = ID
     override fun getDisplayName(): String = "Go Build Target (GOOS/GOARCH)"
-    override fun isAvailable(project: Project): Boolean = GoModulesService.getInstance(project).let { it.modules().isNotEmpty() || it.workspace() != null }
+    override fun isAvailable(project: Project): Boolean = GoProjectPresence.hasGoFiles(project) && GoModulesService.getInstance(project).let { it.modules().isNotEmpty() || it.workspace() != null }
     override fun createWidget(project: Project): StatusBarWidget = GoPlatformWidget(project)
     override fun canBeEnabledOn(statusBar: StatusBar): Boolean = true
 

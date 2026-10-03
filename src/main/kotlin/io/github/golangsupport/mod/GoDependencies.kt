@@ -1,5 +1,6 @@
 package io.github.golangsupport.mod
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
@@ -93,6 +94,8 @@ class GoDependenciesToolWindowFactory : ToolWindowFactory, DumbAware {
         val panel = GoDependenciesPanel(project)
         toolWindow.contentManager.addContent(toolWindow.contentManager.factory.createContent(panel, "", false).apply { isCloseable = false })
     }
+
+    override fun shouldBeAvailable(project: Project): Boolean = GoProjectPresence.hasGoFiles(project)
 
     companion object {
         const val ID = "Go Dependencies"

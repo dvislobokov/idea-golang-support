@@ -1,5 +1,6 @@
 package io.github.golangsupport.monitor
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionUpdateThread
@@ -38,6 +39,8 @@ class GoMonitorToolWindowFactory : ToolWindowFactory, DumbAware {
         val panel = GoMonitorPanel(project, toolWindow.disposable)
         toolWindow.contentManager.addContent(toolWindow.contentManager.factory.createContent(panel, "", false))
     }
+
+    override fun shouldBeAvailable(project: Project): Boolean = GoProjectPresence.hasGoFiles(project)
 
     companion object {
         const val ID = "Go Monitor"

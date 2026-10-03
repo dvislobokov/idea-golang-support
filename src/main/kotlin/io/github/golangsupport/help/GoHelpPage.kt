@@ -1,5 +1,6 @@
 package io.github.golangsupport.help
 
+import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.ide.util.PropertiesComponent
@@ -90,6 +91,8 @@ class GoWelcomePageActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         val application = ApplicationManager.getApplication()
         if (application.isUnitTestMode || application.isHeadlessEnvironment) return
+        // shown in a Go project only: a Java project opened in IDEA gets no page about Go
+        if (!GoProjectPresence.hasGoFiles(project)) return
         val properties = PropertiesComponent.getInstance()
         val version = GoPages.pluginVersion()
         if (!GoPages.isNewFor(properties.getValue(GoPages.SHOWN_VERSION_KEY), version)) return

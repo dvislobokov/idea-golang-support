@@ -110,5 +110,7 @@ class GoProjectInterfaces(private val project: Project) {
 }
 
 class GoProjectInterfacesStartup : ProjectActivity {
-    override suspend fun execute(project: Project) = GoProjectInterfaces.getInstance(project).warmUp()
+    override suspend fun execute(project: Project) {
+        if (GoProjectPresence.hasGoFiles(project)) GoProjectInterfaces.getInstance(project).warmUp()
+    }
 }
