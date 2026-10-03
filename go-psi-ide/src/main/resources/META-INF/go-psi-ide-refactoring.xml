@@ -17,5 +17,7 @@
     <renamePsiElementProcessor implementation="io.github.golangsupport.ide.rename.GoRenamePackageProcessor" order="first"/>
     <vetoRenameCondition implementation="io.github.golangsupport.ide.rename.GoLibraryPackageRenameVeto"/>
     <refactoring.safeDeleteProcessor implementation="io.github.golangsupport.ide.refactoring.GoSafeDeleteProcessor"/>
+    <inlineActionHandler implementation="io.github.golangsupport.ide.refactoring.GoInlineActionHandler"/>
+    <refactoring.moveHandler implementation="io.github.golangsupport.ide.refactoring.GoMoveHandler" id="goMoveDeclarations" order="before moveFileOrDir"/>
   </extensions>
 </idea-plugin>

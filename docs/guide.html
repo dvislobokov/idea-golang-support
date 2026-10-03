@@ -177,6 +177,7 @@ footer a { color: var(--text-2); }
     <a href="#windows"><b>Окна</b><span>Тесты, монитор, зависимости</span></a>
     <a href="#run"><b>Запуск и отладка</b><span>Конфигурация Go</span></a>
     <a href="#settings"><b>Настройки</b><span>Settings, Tools, Go</span></a>
+    <a href="#ci"><b>Инспекции в CI</b><span>Отчёт SARIF без окна IDE</span></a>
     <a href="#trouble"><b>Если не работает</b><span>Куда смотреть</span></a>
   </div>
 </nav>
@@ -663,6 +664,23 @@ footer a { color: var(--text-2); }
       </tbody>
     </table></div>
     <p>У каждого инструмента показан найденный путь. Путь можно задать вручную, инструмент можно установить или обновить кнопкой: выполняется <code>go install</code>.</p>
+  </div>
+</section>
+
+<section class="band" id="ci">
+  <div class="wrap">
+    <h2>Инспекции в CI</h2>
+    <p>Те же проверки Go и <code>go.mod</code>, что в редакторе в режиме Built-in, запускаются без окна IDE и пишут отчёт SARIF 2.1.0: его читают GitHub code scanning, GitLab и другие. gopls для этого не нужен. Команда — <code>bin/idea.sh go-inspect</code>; на Windows и в CI удобнее обёртки <code>tools/ci/go-inspect.sh</code> и <code>go-inspect.cmd</code>: они ставят плагин в отдельную конфигурацию и не мешают открытой IDE. Подробности и пример задания GitHub Actions — <code>docs/CI.md</code>.</p>
+    <div class="table"><table class="two">
+      <thead><tr><th>Аргумент</th><th>Что задаёт</th></tr></thead>
+      <tbody>
+        <tr><td><code>&lt;projectDir&gt; &lt;out.sarif&gt;</code></td><td>Каталог проекта (с <code>go.mod</code> или <code>go.work</code>) и файл отчёта.</td></tr>
+        <tr><td><code>--inspections A,B</code></td><td>Только эти инспекции по коротким именам, даже если профиль их выключает. Без него — все включённые в профиле проекта.</td></tr>
+        <tr><td><code>--min-severity</code></td><td><code>weak</code> (всё, по умолчанию), <code>warning</code> или <code>error</code>: что слабее, в отчёт не попадает.</td></tr>
+        <tr><td>Код выхода</td><td>0 — замечаний нет, 1 — есть, 2 — ошибка аргументов или запуска.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Пропускаются <code>vendor</code>, <code>testdata</code>, каталоги с <code>.</code> и <code>_</code> в начале, сгенерированные файлы (<code>// Code generated … DO NOT EDIT.</code>) и файлы, которые условия сборки исключают. Нужен <code>go</code> в PATH: без него не найти стандартную библиотеку.</p>
   </div>
 </section>
 

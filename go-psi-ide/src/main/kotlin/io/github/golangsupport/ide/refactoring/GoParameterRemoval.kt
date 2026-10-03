@@ -53,23 +53,35 @@ internal object GoParameterRemoval {
         return signature.parent.takeIf { it is GoFunctionDeclaration || it is GoMethodDeclaration || it is GoMethodSpec }
     }
 
-    /** Every reference to [decl] in [scope] (comments and other languages skipped); with [stopAtValue] the search ends at the first value use. */
-    fun references(decl: GoFunctionOrMethodDeclaration, scope: SearchScope, stopAtValue: Boolean): References {
+    /**
+     * Every reference to [decl] (a function or method declaration, or an interface method spec) in [scope] (comments and other languages
+     * skipped); with [stopAtValue] the search ends at the first value use.
+     */
+    fun references(decl: PsiElement, scope: SearchScope, stopAtValue: Boolean): References {
         val calls = ArrayList<CallSite>()
         val values = ArrayList<PsiElement>()
         ReferencesSearch.search(decl, scope).forEach(Processor { reference ->
             ProgressManager.checkCanceled()
             val element = reference.element
-            if (element.containingFile !is GoFile || PsiTreeUtil.getParentOfType(element, PsiComment::class.java, false) != null) return@Processor true
-            val call = (element as? GoReferenceExpression)?.let(::callOf)
-            if (call == null) {
+            if (!isCodeReference(element)) return@Processor true
+            val site = callSiteOf(element, decl)
+            if (site == null) {
                 values += element
                 return@Processor !stopAtValue
             }
-            calls += CallSite(call, decl is GoMethodDeclaration && isTypeOperand(element.qualifier))
+            calls += site
             true
         })
         return References(calls, values)
+    }
+
+    /** A reference in Go code: not in a comment nor in another language. */
+    fun isCodeReference(element: PsiElement): Boolean = element.containingFile is GoFile && PsiTreeUtil.getParentOfType(element, PsiComment::class.java, false) == null
+
+    /** The call [element] (a reference to [decl]) is the callee of, or null when it uses [decl] as a value. */
+    fun callSiteOf(element: PsiElement, decl: PsiElement): CallSite? {
+        val call = (element as? GoReferenceExpression)?.let(::callOf) ?: return null
+        return CallSite(call, (decl is GoMethodDeclaration || decl is GoMethodSpec) && isTypeOperand(element.qualifier))
     }
 
     /** Every reference to [decl] in [scope] as a call, or null when one of them uses the function as a value. */

@@ -532,6 +532,14 @@ a function used as a value (`ReferencesSearch` in the package's directory). Fixe
 site, unused imports dropped; not with side-effect arguments, method expressions, multi-value arguments). The flow corpus cannot judge it (references
 and implementations of GOROOT files are not searched there): its count is recorded, its noise is reviewed by the regression tests.
 
+### Inspections in CI (host `ci`; 0.2.59)
+
+`GoInspectStarter` (`appStarter` `go-inspect`, headless, not on EDT): opens the project, waits for configuration and smart mode, forces Built-in
+and gopls off for the run, runs every enabled Go / GoModule `LocalInspectionTool` per file under a progress indicator (inspections refuse to run
+without one — seen live), writes SARIF through the pure `GoSarif`; arguments and file filters in `GoInspectOptions` / `GoInspectFiles`. Exit code also
+goes to `GO_INSPECT_EXIT_CODE_FILE` (`idea.bat` drops it). Wrappers `tools/ci/go-inspect.sh|cmd` (the `.cmd` calls System32 `tar.exe`: GNU tar from
+Git Bash takes `C:` for a host — seen live). Tests: `GoSarifTest`, `GoInspectOptionsTest`. Guide: `docs/CI.md`.
+
 ### SQL injection (`ide.injection.sql.GoSqlInjector`, `go-psi-ide-injection-sql.xml`, optional `com.intellij.database`; gate `SEMANTIC_COLORS`; 0.2.53)
 
 Methods of `database/sql` `DB` / `Tx` / `Conn`, sqlx and pgx v5 / pgxpool, resolved through `GoSemanticService.resolve` to the receiver type and its
@@ -562,6 +570,10 @@ arguments and JSON-looking raw literals named `…json…` (`GoJsonDetect`). Tes
 | Introduce Variable | `GoIntroduceVariableHandler`, `GoExtraction` (availability, anchor, occurrences, names) | `GoRefactoringSupportProvider.getIntroduceVariableHandler` | `GoIntroduceTest` |
 | Introduce Constant | `GoIntroduceConstantHandler` | `getIntroduceConstantHandler` | `GoIntroduceTest` |
 | Safe Delete | `GoSafeDeleteProcessor` (`SafeDeleteProcessorDelegateBase`; companions removed in `prepareForDeletion`); parameters (0.2.54) through `GoParameterRemoval` (signature + argument at every call, method expressions; conflicts: used in body, function value, implements interface, side-effect / multi-value argument, interface spec) | `refactoring.safeDeleteProcessor`, `isSafeDeleteAvailable` | `GoSafeDeleteTest`, `GoSafeDeleteParameterTest` |
+| Extract Function / Method (0.2.55) | `GoExtractFunctionHandler`, `GoExtractFunction` (selection, inputs / outputs from `GoControlFlow`, jumps, receiver, type parameters, text) | `GoRefactoringSupportProvider.getExtractMethodHandler` | `GoExtractFunctionTest` |
+| Inline (0.2.56) | `GoInlineActionHandler`, `GoInlineVariable`, `GoInlineConstant`, `GoInlineFunction`, `GoInlineSupport` (precedence, conversions, side effects, name capture) | `inlineActionHandler` (`isEnabledForLanguage` Go) | `GoInlineTest` |
+| Change Signature (0.2.57) | `GoChangeSignatureHandler`, `GoChangeSignatureDialog` (`RefactoringDialog`), `GoChangeSignatureProcessor` (`BaseRefactoringProcessor`; calls through `GoParameterRemoval`), `GoChangeSignature` (model, text) | `getChangeSignatureHandler` | `GoChangeSignatureTest` |
+| Move (0.2.58) | `GoMoveHandler` (`MoveHandlerDelegate`), `GoMoveDialog`, `GoMoveProcessor` (planner, conflicts), `GoMoveDeclarations` (units, refusals) | `refactoring.moveHandler` (before `moveFileOrDir`) | `GoMoveTest` |
 
 The platform has no language-neutral Introduce Variable base: the handler is our own over `IntroduceTargetChooser`, `OccurrencesChooser.simpleChooser`
 and `VariableInplaceRenamer` / `MemberInplaceRenamer`. `GoRefactoringSupportProvider.isAvailable` accepts any Go element while Rename is Built-in:

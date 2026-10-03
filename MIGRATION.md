@@ -592,5 +592,14 @@ generics, missing return, init cycles — 0 ложных срабатывани�
   в `db.Query`, `tx.ExecContext` и `const …Query`, `"SELECT 1"` без инъекции (без источника данных Database показывает своё «No data sources are
   configured» — не наше); Safe Delete `y` в методе (вызов и method expression) и `b` с аргументом-вызовом; виджет `windows/amd64` → `js/wasm · integration`
   → обратно. Ошибок плагина в логе нет.
+- [x] Шаг 11, партия рефакторингов (2026-10-03; пять агентов Opus по очереди, не больше трёх сразу: Extract, Inline, CI/SARIF, Change Signature,
+  Move; версии 0.2.55–0.2.59). Move стартовал на worktree с наложенными патчами Extract и Inline; конфликт двух строк в `GoRename.kt` (Extract и
+  Change Signature) решён вручную. Гейты: `:test` 411, go-psi-core 98, go-psi-semantic 176, go-psi-ide 843; checkKotlinAbi и buildPlugin зелёные.
+  `go-inspect` вживую на playground: 48 инспекций, 27 файлов, 92 находки, код 1. Первый прогон нашёл три ошибки (GNU tar в `.cmd`, инспекции без
+  индикатора прогресса — 1148 падений и пустой отчёт, код 0 при сплошных падениях) — исправлены. Робот (8083, Built-in): Extract выражения
+  (`extracted(w, h) / 2`) и операторов (`a, b := extracted1(x)`); Inline переменной, вызова и константы (`(x + 1) * (10 + 5)`), отказ подсказкой;
+  Change Signature процессором (`c9Total("a", 1, 2, 3)`, spread сохранён) и снимок диалога; Move `M9Item` с методом в новый пакет `m9model` (импорт,
+  квалификатор) и снимок диалога. Снимок робота не видит модальных окон: диалог рисуется в PNG скриптом (`Window.paint`). Ошибок плагина в логе нет.
+  Сделаны все рефакторинги плана: остаётся 12.1.
 - [ ] 12.1 gopls опционален, [ ] 12.2 gopls удалён.
 - [ ] 13 линтеры по запросу, [ ] 13A vet-класс, [x] 13B data-flow (волна 4), [ ] 13C движок правил.

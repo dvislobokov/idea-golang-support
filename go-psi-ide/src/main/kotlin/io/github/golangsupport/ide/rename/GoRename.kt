@@ -12,6 +12,8 @@ import com.intellij.refactoring.rename.RenameInputValidatorEx
 import com.intellij.util.ProcessingContext
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
+import io.github.golangsupport.ide.refactoring.GoChangeSignatureHandler
+import io.github.golangsupport.ide.refactoring.GoExtractFunctionHandler
 import io.github.golangsupport.ide.refactoring.GoIntroduceConstantHandler
 import io.github.golangsupport.ide.refactoring.GoIntroduceVariableHandler
 import io.github.golangsupport.ide.refactoring.GoSafeDeleteProcessor
@@ -93,6 +95,11 @@ class GoRefactoringSupportProvider : RefactoringSupportProvider() {
     override fun getIntroduceVariableHandler(element: PsiElement?): RefactoringActionHandler? = getIntroduceVariableHandler().takeIf { enabled(element) }
 
     override fun getIntroduceConstantHandler(): RefactoringActionHandler = GoIntroduceConstantHandler()
+
+    // Extract Function / Method (Ctrl+Alt+M); the handler itself does nothing while RENAME is off.
+    override fun getExtractMethodHandler(): RefactoringActionHandler = GoExtractFunctionHandler()
+
+    override fun getChangeSignatureHandler(): GoChangeSignatureHandler = GoChangeSignatureHandler()
 
     override fun isSafeDeleteAvailable(element: PsiElement): Boolean = GoSafeDeleteProcessor.isSupported(element) && enabled(element)
 

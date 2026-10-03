@@ -211,6 +211,8 @@
 
         <treeStructureProvider implementation="io.github.golangsupport.view.GoDependenciesTreeProvider"/>
         <notificationGroup id="Go" displayType="BALLOON"/>
+        <!-- `idea64 go-inspect <projectDir> <out.sarif>`: the Go and go.mod inspections without the UI, a SARIF report for CI (docs/CI.md) -->
+        <appStarter id="go-inspect" implementation="io.github.golangsupport.ci.GoInspectStarter"/>
         <projectConfigurable parentId="tools" id="io.github.golangsupport.settings" displayName="Go"
                              instance="io.github.golangsupport.settings.GoSettingsConfigurable"/>
         <!-- every setting of the installed gopls, from `gopls api-json` -->

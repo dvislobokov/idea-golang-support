@@ -8,6 +8,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.55–0.2.59 are the refactoring batch (Extract Function / Method, Inline, Change Signature, Move) and inspections in CI (SARIF).
 Versions 0.2.51–0.2.54 are the third batch (GOOS/GOARCH in the status bar, unused requires, SQL in strings, Safe Delete of parameters).
 Versions 0.2.48–0.2.50 are the second batch (rename package, unused parameters, regular expressions and JSON in strings).
 Versions 0.2.44–0.2.47 are the first batch after wave 4 (go.mod checks, call and type hierarchy, Introduce Variable / Constant, Safe Delete).
@@ -20,6 +21,64 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
 
 ### Changed
 - Exhaustive switch inspection (`GoExhaustiveSwitch`) is a weak warning: a plain warning was noise on `reflect.Kind`-like switches without `default`.
+
+## [0.2.59] - 2026-10-03
+
+### Added — Inspections in CI (SARIF)
+- `go-inspect` command: the plugin's Go and go.mod inspections run without the IDE UI and write a SARIF 2.1.0 report
+  (`idea.sh go-inspect <projectDir> <out.sarif> [--inspections A,B] [--min-severity weak|warning|error]`). No gopls: the run switches Language
+  features to Built-in and the language server off, and restores both. Takes the inspections the project profile enables (or the listed ones),
+  honours `//noinspection`, skips vendor / testdata / generated files and files excluded by build constraints. Exit code 0 (clean), 1 (findings at
+  or above the minimal severity), 2 (bad arguments, a failed run, or inspections that failed while nothing was found). Results sorted, paths
+  relative to the project.
+- `tools/ci/go-inspect.sh` / `.cmd` install the plugin ZIP into a throwaway IDE config and return the exit code (`idea.bat` loses it); `docs/CI.md`
+  has the options, the report format and a GitHub Actions job with `upload-sarif`. The platform's `inspect` writes only XML / JSON (SARIF is Qodana's).
+
+## [0.2.58] - 2026-10-03
+
+### Added — Move
+- Move (F6) of package-level declarations on the built-in PSI: functions, types (with their methods), vars and consts, chosen by the caret, a
+  reference at the caret, a selection or the Project / Structure view; a dialog with the target directory, the file name and "Move methods of the types too".
+- Another file of the same package (existing or new): the text moves with its doc comments, needed imports are added to the target, imports left
+  unused in the source are removed; a spec taken out of a group becomes its own declaration.
+- Another package of the project (existing directory or a new one under the module, `package <dirname>`): references are qualified or unqualified,
+  imports added and cleaned, the moved code qualifies what it uses from the source package; a type takes its methods.
+- Conflicts: unexported names across the new boundary, import cycles, names the target declares already, dot imports, qualifier clashes, package
+  main. Refused: one name of a multi-name spec, one constant of an iota group, a target outside the project or a Go module.
+
+## [0.2.57] - 2026-10-03
+
+### Added — Change Signature
+- Change Signature (Ctrl+F6) for functions, methods and interface methods: a dialog with the name, the parameter table (name, type, default value
+  for new ones; add, remove, move up / down), the results as text and a signature preview. The declaration is regenerated (receiver, type parameters
+  and doc comment kept), every reference gets the new name, every call gets its arguments mapped from the old slots (defaults for new parameters;
+  method expressions keep the receiver first; `f(xs...)` keeps the spread); a renamed parameter is renamed in the body.
+- Refused: a variadic parameter not last, a new parameter without a default value, invalid names, mixing named and unnamed. Conflicts: reordered or
+  removed arguments with side effects, `f(g())`, the function used as a value, interface methods and their implementations (changed alone), a
+  removed parameter used in the body, a changed result count where calls use the results, name clashes. Results are not rewritten at call sites.
+
+## [0.2.56] - 2026-10-03
+
+### Added — Inline
+- Inline (Ctrl+Alt+N), no dialog, a refusal is an error hint with the reason. Inline Variable: a local `x := v` / `var x T = v` has every read
+  replaced by `v` (parenthesised by precedence, `T(v)` when the explicit type differs) when, on the flow graph, its definition is the only one reaching
+  each read and the variables of `v` hold the same values there; values with calls or memory reads only into a single use of the same block.
+- Inline Constant: package-level or local, every use in the package becomes the value (`T(value)` for a typed constant), the spec goes; not `iota`.
+- Inline Function: on a call, that call of a one-statement function or method (`return expr` or an expression statement); on the declaration's name,
+  every call and the declaration (functions only). Refused: recursive, generic, variadic, named or several results, several statements, arguments
+  with side effects, a non-trivial argument used twice, calls from another package.
+
+## [0.2.55] - 2026-10-03
+
+### Added — Extract Function / Method
+- Extract Function / Method (Ctrl+Alt+M): whole statements of one block or a single expression become a new function after the enclosing
+  declaration, named `extracted` (a free variant) and renamed in place. No dialog.
+- Parameters: variables declared outside and used inside, in order of first use. Results from the flow graph: written variables read after
+  (`x = extracted(…)`), variables declared inside and used after (`a, b := extracted(x)`), read-and-written live variables go in and come back.
+  A selection using the method receiver becomes a method on the same receiver. Every path returning → `return extracted(…)`. Generic functions copy
+  the used type parameters with their constraints.
+- Refused with a hint: partial statements, `return` on some paths, `break` / `continue` / `goto` / `fallthrough` leaving the selection, `defer`,
+  assigning the receiver, local types and constants used inside.
 
 ## [0.2.54] - 2026-10-03
 

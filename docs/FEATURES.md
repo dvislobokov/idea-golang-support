@@ -105,10 +105,10 @@ Legend:
 | Rename (locals, package-level, fields, methods with interface propagation) | ✅ | |
 | Rename package (directory, package clause, import paths in the module) | ✅ (0.2.48) | |
 | Introduce variable / constant | ✅ (0.2.46) | |
-| Extract function / method (free variables, results, `return` / `break` handling) | ❌ | L |
-| Inline variable / function call | ❌ | L |
-| Change signature (parameters, results, call sites, interface implementations) | ❌ | L |
-| Move declaration to another file / package (imports, exportedness) | ❌ | L |
+| Extract function / method (free variables, results, `return` / `break` handling) | ✅ (0.2.55) | no dialog, `if err != nil` tails not special-cased |
+| Inline variable / function call | ✅ (0.2.56) | one-statement functions; multi-statement bodies 🗓️ |
+| Change signature (parameters, results, call sites, interface implementations) | ✅ (0.2.57) | interface implementations and results at call sites 🗓️ |
+| Move declaration to another file / package (imports, exportedness) | ✅ (0.2.58) | no automatic export |
 | Safe delete | ✅ (0.2.47, parameters 0.2.54) | |
 
 ## 5. Analysis
@@ -180,7 +180,7 @@ Since the transplant (2026-10-02) the host plugin idea-golang-support provides a
 | One inference cache per function body | ✅ | CHANGELOG 2026-10-02 | |
 | Lazy reparse of function bodies | ✅ | `GoLazyBlockElementType`, CHANGELOG 2026-10-02 | |
 | Shared indexes for GOROOT per Go version | ❌ | first open spends 3-5 s indexing GOROOT (UI robot P7); platform shared-indexes mechanism | M |
-| Headless inspections (CLI, SARIF report for CI) | ❌ | the same analysis without gopls; library use | M |
+| Headless inspections (CLI, SARIF report for CI) | ✅ (0.2.59) | `go-inspect` app starter (`ci.GoInspectStarter`), SARIF 2.1.0, `tools/ci/go-inspect.sh|cmd`, `docs/CI.md` | |
 | ML completion ranking, name suggestions | 🗓️ | `docs/ML.md` | L |
 | Declarative lint rules, ruleguard importer | 🗓️ | `docs/RULES.md` | L |
 
@@ -206,10 +206,10 @@ Each wave is measured with the benchmarks and the UI robot before and after, lik
    and `Equal`, goimports grouping, smart and chain completion, completion of unimported project members.
 4. **Wave 4 (data flow):** done 2026-10-03 (versions 0.2.37–0.2.43): per-function data-flow framework (`semantic.flow`), 25 checks of error and nil flow,
    resources, concurrency and dead code; noise reviewed on GOROOT/src by `:go-psi-ide:corpusTest`. Robot-checked (`store/wave6.go`, `store/wave7.go`).
-5. **Wave 5 (platform):** call and type hierarchy done 2026-10-03 (0.2.45); shared indexes for GOROOT and headless inspections remain.
+5. **Wave 5 (platform):** call and type hierarchy (0.2.45) and headless inspections (0.2.59) done 2026-10-03; shared indexes for GOROOT remain.
 6. **Wave 6:** done by the host (section 8); what remains is the PSI inputs of step 9 of MIGRATION.md.
 7. **Wave 7 (refactorings):** introduce variable / constant (0.2.46), safe delete (0.2.47), rename package (0.2.48) and remove unused parameter
-   (0.2.49), safe delete of parameters (0.2.54) done 2026-10-03; then extract, inline, change signature, move.
+   (0.2.49), safe delete of parameters (0.2.54), extract (0.2.55), inline (0.2.56), change signature (0.2.57) and move (0.2.58) done 2026-10-03.
 8. **Later:** string languages (RE2, templates, SQL), assembly and cgo, Delve (after D2).
 
 ## 12. Beyond GoLand (host plugin, after the migration)
