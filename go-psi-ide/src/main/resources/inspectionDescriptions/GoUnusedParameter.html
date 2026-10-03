@@ -1,0 +1,18 @@
+<html>
+<body>
+Reports a named parameter of a function or method declaration that its body never uses (gopls <code>unusedparams</code>).
+<p>To avoid false positives the check stays quiet where the signature is dictated from outside: functions without a body, with an
+empty body or a body that only panics; <code>init</code> and <code>main</code>; test, benchmark, fuzz and example functions;
+functions marked <code>//export</code> or <code>//go:linkname</code>; HTTP handlers <code>(http.ResponseWriter, *http.Request)</code>;
+exported functions and methods (callers in other modules fix the signature); parameters of type <code>*testing.T</code>, <code>*testing.B</code>, <code>*testing.F</code>, <code>testing.TB</code>; methods that implement an interface method; functions used as values anywhere in the project (passed as a callback, assigned).
+Function literals and parameters named <code>_</code> are never reported.</p>
+<p>Quick fixes:</p>
+<ul>
+  <li><b>Rename to _</b> keeps the signature.</li>
+  <li><b>Remove unused parameter</b> removes it from the signature and the matching argument from every call in the project
+  (imports left unused by the removal are dropped). It is offered only when every reference to the function is a direct call
+  whose argument at that position has no side effects (no calls, no receives) and no call is a method expression <code>T.M(recv, …)</code>.
+</li>
+</ul>
+</body>
+</html>

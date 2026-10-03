@@ -63,6 +63,7 @@ internal object GoFlowCorpus {
         io.github.golangsupport.ide.inspections.lint.GoSelfAssignmentInspection(), io.github.golangsupport.ide.inspections.lint.GoUnusedResultInspection(),
         io.github.golangsupport.ide.inspections.lint.GoDeferInLoopInspection(), io.github.golangsupport.ide.inspections.lint.GoCopyLocksInspection(),
         io.github.golangsupport.ide.inspections.lint.GoLoopClosureInspection(), io.github.golangsupport.ide.inspections.lint.GoTestingGoroutineInspection(),
+        io.github.golangsupport.ide.inspections.lint.GoUnusedParameterInspection(),
     )
 
     class Result(val files: Long, val crashed: Long, val millis: Long, val counts: Map<String, Long>, val reports: Map<String, List<String>>, val crashes: List<String>) {

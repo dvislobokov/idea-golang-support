@@ -107,6 +107,9 @@
   самоссылки `require`, версии `go` / `toolchain`, рассинхрон `vendor/`); Call Hierarchy и Type Hierarchy на своём PSI; Introduce Variable / Constant;
   Safe Delete.
 
+- [x] (2026-10-03, робот) **Вторая партия** (версии 0.2.48–0.2.50): Rename Package (каталог, `package`, пути импорта, квалификаторы); неиспользуемые
+  параметры с удалением аргументов на вызовах; RE2 в `regexp.*` и JSON в строках (инъекции, ошибки RE2-диалекта).
+
 - [x] (2026-10-03, робот) **Быстрые задачи после волны 3** (версии 0.2.31–0.2.33): Implement Interface хоста (Ctrl+I, Alt+Insert, Alt+Enter) на типизированных заглушках
   `GoImplementStubs` (получатель как у методов типа, импорты по файлу); инспекция doc-комментариев экспортируемых имён (opt-in, правила golint, фиксы Add doc comment /
   Start comment with 'Name'); проверка `//go:build` (синтаксис, место, повтор, опечатки GOOS/GOARCH, перевод `// +build`).

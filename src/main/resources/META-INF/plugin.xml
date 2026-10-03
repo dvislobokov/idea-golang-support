@@ -19,6 +19,8 @@
     <incompatible-with>org.jetbrains.plugins.go</incompatible-with>
     <!-- the spellchecker strategy for Go (go-psi-ide-spelling.xml): only where the IDE has the spellchecker -->
     <depends optional="true" config-file="go-psi-ide-spelling.xml">com.intellij.modules.spellchecker</depends>
+    <!-- JSON injected into Go strings (go-psi-ide-injection-json.xml): only where the IDE has the JSON plugin -->
+    <depends optional="true" config-file="go-psi-ide-injection-json.xml">com.intellij.modules.json</depends>
 
     <!-- optional parts: a module is loaded only where its dependencies are (see the descriptor of the module next to META-INF) -->
     <content>
@@ -42,6 +44,8 @@
     <xi:include href="/META-INF/go-psi-ide-navigation.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- call and type hierarchy over that PSI (wave 5; the gate follows Navigation) -->
     <xi:include href="/META-INF/go-psi-ide-hierarchy.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- RE2 regular expressions in regexp calls (go-psi-ide-injection.xml; the gate follows Semantic colors) -->
+    <xi:include href="/META-INF/go-psi-ide-injection.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- code completion over that PSI: contributor, confidence, weighers (MIGRATION.md step 8e; the gate follows GoFeature.COMPLETION) -->
     <xi:include href="/META-INF/go-psi-ide-completion.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- quick documentation, parameter info, expression type over the PSI (MIGRATION.md step 8f; the gate follows GoFeature.HOVER) -->

@@ -1,0 +1,10 @@
+<!-- go-psi-ide, language injection: RegExp (RE2 dialect) into the pattern argument of the regexp package calls. RegExp is part of the platform
+     core, so the host includes this file unconditionally. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <multiHostInjector implementation="io.github.golangsupport.ide.injection.GoRegExpInjector"/>
+    <annotator language="RegExp" implementationClass="io.github.golangsupport.ide.injection.GoRegExpAnnotator"/>
+    <regExpLanguageHost forClass="io.github.golangsupport.lang.psi.GoStringLiteral" implementationClass="io.github.golangsupport.ide.injection.GoRegExpLanguageHost"/>
+    <regExpCapabilitiesProvider language="Go" implementationClass="io.github.golangsupport.ide.injection.GoRegExpCapabilities"/>
+  </extensions>
+</idea-plugin>

@@ -80,8 +80,11 @@ counting implementations keeps the implementing file's AST unloaded.
 | `renamePsiElementProcessor` | `GoRenameMethodProcessor` | Renaming a method that implements project interface methods asks "Rename the interface method and all its implementations?" (Yes: the interface method spec is renamed with every implementation, transitively; No: only this method). Renaming an interface method spec renames all project implementations. Library code is never renamed. |
 
 Struct literal keys follow field renames through their references (`GoFieldKeyReference`);
-promoted fields (`w.Name` through an embedded struct) follow too. Package rename is not
-supported.
+promoted fields (`w.Name` through an embedded struct) follow too. Package rename: `GoRenamePackageProcessor` (`renamePsiElementProcessor`,
+order first) renames the clause of every file of the directory (`old_test` → `new_test`), unaliased qualifiers and import paths in importers
+(found by `GoFileImportsIndex`, re-checked by resolve) and the directory when it is named after the package; a directory rename rewrites import paths of the
+package and its subpackages. Conflicts: another import or package-level name with the new name in an importer; existing directory.
+`GoLibraryPackageRenameVeto` keeps GOROOT and module cache packages. Tests: `GoRenamePackageTest`.
 
 ### Documentation (`ide.documentation`)
 
@@ -121,7 +124,7 @@ roots are off in unit-test mode), so library-side searches are covered with proj
 - Implementations of generic interfaces and implementation checks that need instantiation.
 - Sub-interfaces (interfaces embedding an interface) are not listed as its implementations.
 - Doc links (`[Name]`) are rendered as code, not as navigable links.
-- Inlay hints, run line markers and package rename are out of scope.
+- Inlay hints and run line markers are out of scope.
 
 ## Phase 6d: completion (`ide.completion`)
 
@@ -520,6 +523,22 @@ Editing features over the PSI; none of them talks to gopls, and only inlay hints
 - `go.time.layout` (0.2.34, VALUES_GROUP): `t.Format("2006-01-02 15:04"/*→ 2026-03-07 15:09*/)`, the layout argument (literal or string constant) rendered with the sample Saturday 2026-03-07 15:09:08.123456789 +03:00 MSK; only when the callee resolves to package `time` (`GoTimeLayout.render`, a port of `nextStdChunk`).
 - `GoInlayHintsBenchmark` (`net/http/server.go`, 688 hints): cold ≈ 139 ms, warm ≈ 15 ms, after a body edit ≈ 24 ms (`testData/benchmark/thresholds.json`).
 - Tests dump the hints of a real `DeclarativeInlayHintsPass` in the `/*<# … #>*/` format; `testHintsDoNotLoadOtherFiles` keeps the AST of the callee's file unloaded.
+
+### Unused parameters (`ide.inspections.lint.GoUnusedParameterInspection`; gate `DIAGNOSTICS`; 0.2.49)
+
+gopls `unusedparams`, weak warning, unexported functions and methods only. Skips: no / empty / panic-only body, `init` / `main`, test functions,
+`//export`, `//go:linkname`, HTTP handler shape, `*testing.T`-like parameters, a method implementing an interface method (`GoImplementations.superMethods`),
+a function used as a value (`ReferencesSearch` in the package's directory). Fixes: "Rename to _", "Remove unused parameter" (signature + every call
+site, unused imports dropped; not with side-effect arguments, method expressions, multi-value arguments). The flow corpus cannot judge it (references
+and implementations of GOROOT files are not searched there): its count is recorded, its noise is reviewed by the regression tests.
+
+### String injections (`ide.injection`, `go-psi-ide-injection.xml`, `go-psi-ide-injection-json.xml`; gate `SEMANTIC_COLORS`; 0.2.50)
+
+`GoStringLiteral` is a `PsiLanguageInjectionHost` (`GoStringLiteralMixin`: raw strings verbatim, interpreted strings through `GoInterpretedStringEscaper`).
+`GoRegExpInjector` injects RegExp into the first argument of the `regexp` constructors and matchers (callee resolved after a cheap name check);
+`GoRegExpLanguageHost` + `GoRegExpCapabilities` set the RE2 dialect, `GoRegExpAnnotator` reports what the platform has no host hook for (lookahead,
+atomic groups, branch reset, backreferences). `json/GoJsonInjector` (loaded only with the JSON plugin): `json.Unmarshal` / `Valid` / `NewDecoder`
+arguments and JSON-looking raw literals named `…json…` (`GoJsonDetect`). Tests: `GoInjectionTest`.
 
 ### Hierarchies (`ide.hierarchy`, `go-psi-ide-hierarchy.xml`; gate `NAVIGATION`; 0.2.45)
 

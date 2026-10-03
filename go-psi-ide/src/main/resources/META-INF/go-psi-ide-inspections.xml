@@ -123,6 +123,9 @@
     <localInspection language="Go" shortName="GoTestingGoroutine" displayName="Test failure from a goroutine"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.lint.GoTestingGoroutineInspection"/>
+    <localInspection language="Go" shortName="GoUnusedParameter" displayName="Unused parameter"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.lint.GoUnusedParameterInspection"/>
     <localInspection language="Go" shortName="GoErrNilReturned" displayName="Nil error returned where it is known to be nil"
                      groupName="Go" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.flow.GoErrNilReturnedInspection"/>

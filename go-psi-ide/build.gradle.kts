@@ -27,6 +27,8 @@ dependencies {
         // ide.spelling: the spellchecker is a product module (com.intellij.modules.spellchecker), not on the core classpath;
         // the host declares it as an optional dependency (go-psi-ide-spelling.xml)
         bundledModule("intellij.spellchecker")
+        // injection: the JSON language injected into Go strings (go-psi-ide-injection-json.xml; an optional dependency of the host)
+        bundledPlugin("com.intellij.modules.json")
         testFramework(TestFrameworkType.Platform)
     }
     testImplementation(libs.junit)

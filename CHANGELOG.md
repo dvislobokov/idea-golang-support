@@ -8,6 +8,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.48–0.2.50 are the second batch (rename package, unused parameters, regular expressions and JSON in strings).
 Versions 0.2.44–0.2.47 are the first batch after wave 4 (go.mod checks, call and type hierarchy, Introduce Variable / Constant, Safe Delete).
 Versions 0.2.37–0.2.43 are wave 4 (data flow): the per-function control-flow graph and analyses, then the checks built on it; every check
 is gated by the false-positive corpus over GOROOT/src (`:go-psi-ide:corpusTest`, `testData/metrics/goroot-src-flow.json`). Like wave 2, they act only with
@@ -18,6 +19,40 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
 
 ### Changed
 - Exhaustive switch inspection (`GoExhaustiveSwitch`) is a weak warning: a plain warning was noise on `reflect.Kind`-like switches without `default`.
+
+## [0.2.50] - 2026-10-03
+
+### Added — Regular expressions and JSON in strings
+- RE2 regular expressions in the pattern argument of `regexp.Compile`, `MustCompile`, `CompilePOSIX`, `MustCompilePOSIX`, `MatchString`, `Match` and
+  `MatchReader`: highlighting, completion and the platform's RegExp checks in the RE2 dialect. Named groups `(?P<n>…)` / `(?<n>…)`, `\Q…\E`,
+  `[[:alpha:]]` and `\pL` are accepted; lookahead, lookbehind, backreferences, atomic groups and possessive quantifiers are errors
+  ("RE2 (Go regexp) does not support lookahead"). Acts with the Semantic colors switch on Built-in.
+- JSON in the argument of `json.Unmarshal([]byte("…"), …)` / `json.Valid`, in `json.NewDecoder(strings.NewReader("…"))`, and in a raw string that looks
+  like JSON assigned to a const or variable whose name contains "json". Needs the JSON plugin (optional dependency); without it there is no injection.
+- Go string literals are language injection hosts (interpreted strings decode their escapes, raw strings are taken verbatim): `GoStringLiteralMixin`
+  in go-psi-core, tree and stubs unchanged.
+
+## [0.2.49] - 2026-10-03
+
+### Added — Unused parameters
+- Inspection "Unused parameter" (`GoUnusedParameter`, weak warning, gopls `unusedparams`): a named parameter of an unexported function or method that
+  its body never uses. Quiet for exported declarations (callers in other modules fix the signature), `*testing.T` / `B` / `F` / `TB` parameters, functions
+  without a body, with an empty or panic-only body, `init` / `main`, test functions, `//export` / `//go:linkname`, HTTP handlers, methods implementing an
+  interface method, functions used as values (references searched in the package's directory), function literals and `_`.
+- Fixes: "Rename to _" keeps the signature; "Remove unused parameter" removes it from the signature (groups, variadic) and the argument at every call,
+  dropping imports left unused. Offered only when every reference is a direct call whose argument has no side effects and none is a method expression.
+
+## [0.2.48] - 2026-10-03
+
+### Added — Rename package
+- Rename Package on the native PSI (Rename: Built-in): Shift+F6 on a package clause, on the qualifier of an unaliased import of a project package
+  (`store.Load`), on an import path or on a package directory in the Project view.
+- Clause `old` → `new`: every file of the directory gets `package new` (`old_test` → `new_test`), unaliased qualifiers in importers become `new.X`
+  (aliased imports keep their alias), import paths follow, and the directory is renamed when it is named after the package (not the module root).
+- Directory rename: import paths `…/old` and `…/old/sub…` in the project are rewritten (quote style kept); the clause follows when the package is named
+  after the directory, is not `main` and the new name is an identifier (`my-store` renames the directory only).
+- Conflicts dialog: the new name clashes with another import or a package-level name in an importing file, or the directory exists. Packages outside
+  the project (GOROOT, module cache) cannot be renamed. Shift+F6 on an unaliased project import qualifier now renames the package instead of adding an alias.
 
 ## [0.2.47] - 2026-10-03
 

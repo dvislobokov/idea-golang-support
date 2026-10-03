@@ -32,6 +32,8 @@ dependencies {
         }
         // for the content module io.github.golangsupport.lsp only: the rest of the plugin must not touch these classes
         bundledModule("intellij.platform.lsp")
+        // JSON in Go strings (go-psi-ide-injection-json.xml, optional dependency of plugin.xml)
+        bundledPlugin("com.intellij.modules.json")
         testFramework(TestFrameworkType.Platform)
         // The native Go PSI (go-psi-core, go-psi-semantic, go-psi-ide; MIGRATION.md): composed, so the classes go into the main jar, which
         // a v1 descriptor loads (lib/modules only serves declared content modules). What of their META-INF/go-psi-*.xml plugin.xml

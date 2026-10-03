@@ -426,7 +426,7 @@ private ExpressionOrType ::= Expression | Type
 FunctionLit ::= func Signature <<lazyBlock Block>> {pin=3}
 
 Literal ::= INT | FLOAT | IMAG | CHAR
-StringLiteral ::= STRING | RAW_STRING
+StringLiteral ::= STRING | RAW_STRING {mixin="io.github.golangsupport.lang.psi.impl.GoStringLiteralMixin" implements="com.intellij.psi.PsiLanguageInjectionHost"}
 
 // go/parser parsePrimaryExpr case LBRACE (docs/GRAMMAR.md section B): a named 'type' followed by
 // '{' is a composite literal only outside control clause headers; explicit literal types always are.

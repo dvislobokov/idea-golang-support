@@ -93,7 +93,7 @@ Legend:
 | Invert / flip `if`, merge nested `if`, `if` ↔ `switch` | ✅ (wave 2, 0.2.20) | `GoIfIntentions`: invert (also early return / continue), merge, split condition, if ↔ switch | |
 | Split / join `var` declarations, `var x T = v` ↔ `x := v` | ✅ (wave 2, 0.2.21) | `GoDeclarationIntentions`: split / group, join declaration and assignment (shared with Join Lines), `:=` ↔ `var` | |
 | Change quote (interpreted ↔ raw string) | ✅ (wave 2, 0.2.19) | `GoChangeQuoteIntention` (`strconv`-like quoting rules) | |
-| Remove unused parameter (with call sites) | ❌ | gopls `unusedparams` | M |
+| Remove unused parameter (with call sites) | ✅ (0.2.49) | `GoUnusedParameter`, fixes "Rename to _" / "Remove unused parameter" | |
 | Add/convert struct tags for all fields | ✅ | host Generate → Struct Tags (`GoGenerateStructTagsAction`: json/yaml/xml/db/mapstructure, case styles) | |
 | Generate: constructor, getters/setters, `String()` for `iota` enums (`stringer` without the tool), `Equal` | ✅ (wave 3, 0.2.23–0.2.24) | host `GoGenerateActions` (Alt+Insert) | |
 | Generate table-driven test for a function | ✅ | host Generate → Test (`GoGenerators.testFunction`) | |
@@ -103,7 +103,7 @@ Legend:
 | Refactoring | Status | Effort |
 |---|---|---|
 | Rename (locals, package-level, fields, methods with interface propagation) | ✅ | |
-| Rename package (directory, package clause, import paths in the module) | ❌ | M |
+| Rename package (directory, package clause, import paths in the module) | ✅ (0.2.48) | |
 | Introduce variable / constant | ✅ (0.2.46) | |
 | Extract function / method (free variables, results, `return` / `break` handling) | ❌ | L |
 | Inline variable / function call | ❌ | L |
@@ -140,11 +140,11 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 
 | Feature | Status | Notes | Effort | Needs |
 |---|---|---|---|---|
-| RE2 regular expressions in `regexp.Compile`/`MustCompile` (highlighting, RE2-specific validation, Check RegExp) | ❌ | `languageInjector` + RE2 dialect | M | |
+| RE2 regular expressions in `regexp.Compile`/`MustCompile` (highlighting, RE2-specific validation, Check RegExp) | ✅ (0.2.50) | `ide.injection`: `GoRegExpInjector`, `GoRegExpLanguageHost`, `GoRegExpAnnotator`; literal first argument only | | |
 | `text/template` / `html/template`: highlighting, navigation to fields of the data type | ❌ | own lexer/parser | L | |
 | SQL in `database/sql` calls | ❌ | | S | plugin (Database) |
 | `time.Format` layouts: validation, hint of the rendered example | ✅ (0.2.34) | `GoTimeLayoutInspection`, `GoTimeLayoutHintsProvider`; the inspection checks literals only | | |
-| JSON in raw strings | ❌ | | S | |
+| JSON in raw strings | ✅ (0.2.50) | `GoJsonInjector` (optional JSON plugin): Unmarshal / Valid / NewDecoder arguments, `…json…`-named raw literals | | |
 
 ## 7. Go-specific files and directives
 
@@ -208,8 +208,8 @@ Each wave is measured with the benchmarks and the UI robot before and after, lik
    resources, concurrency and dead code; noise reviewed on GOROOT/src by `:go-psi-ide:corpusTest`. Robot-checked (`store/wave6.go`, `store/wave7.go`).
 5. **Wave 5 (platform):** call and type hierarchy done 2026-10-03 (0.2.45); shared indexes for GOROOT and headless inspections remain.
 6. **Wave 6:** done by the host (section 8); what remains is the PSI inputs of step 9 of MIGRATION.md.
-7. **Wave 7 (refactorings):** introduce variable / constant (0.2.46) and safe delete (0.2.47) done 2026-10-03; rename package, then extract,
-   inline, change signature, move.
+7. **Wave 7 (refactorings):** introduce variable / constant (0.2.46), safe delete (0.2.47), rename package (0.2.48) and remove unused parameter
+   (0.2.49) done 2026-10-03; then extract, inline, change signature, move.
 8. **Later:** string languages (RE2, templates, SQL), assembly and cgo, Delve (after D2).
 
 ## 12. Beyond GoLand (host plugin, after the migration)

@@ -1,0 +1,7 @@
+<!-- go-psi-ide, language injection: JSON into Go strings. The host loads this file through an optional dependency on
+     com.intellij.modules.json, so IDEs without the JSON plugin simply have no JSON injection. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <multiHostInjector implementation="io.github.golangsupport.ide.injection.json.GoJsonInjector"/>
+  </extensions>
+</idea-plugin>

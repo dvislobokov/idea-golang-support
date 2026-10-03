@@ -16,6 +16,7 @@ import io.github.golangsupport.ide.refactoring.GoIntroduceConstantHandler
 import io.github.golangsupport.ide.refactoring.GoIntroduceVariableHandler
 import io.github.golangsupport.ide.refactoring.GoSafeDeleteProcessor
 import io.github.golangsupport.lang.GoLanguage
+import io.github.golangsupport.lang.psi.GoImportSpec
 import io.github.golangsupport.lang.psi.GoNamedElement
 import io.github.golangsupport.lang.psi.GoPackageClause
 
@@ -55,8 +56,9 @@ class GoNamesValidator : NamesValidator {
 class GoRenameInputValidator : RenameInputValidatorEx {
     override fun getPattern(): ElementPattern<out PsiElement> = PlatformPatterns.psiElement(GoNamedElement::class.java)
 
+    // `package _` is not allowed by the spec.
     override fun isInputValid(newName: String, element: PsiElement, context: ProcessingContext): Boolean =
-        GoNamesValidator.isValidIdentifier(newName)
+        GoNamesValidator.isValidIdentifier(newName) && !(element is GoPackageClause && newName == "_")
 
     override fun getErrorMessage(newName: String, project: Project): String? = when {
         newName in GoNamesValidator.KEYWORDS -> "'$newName' is a Go keyword"
@@ -79,7 +81,9 @@ class GoRefactoringSupportProvider : RefactoringSupportProvider() {
 
     override fun isInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean =
         element is GoNamedElement && element !is GoPackageClause && element.useScope is LocalSearchScope &&
-            GoIdeFeatureGate.enabled(GoIdeFeature.RENAME, element.project)
+            GoIdeFeatureGate.enabled(GoIdeFeature.RENAME, element.project) &&
+            // An unaliased import of a project package renames the package (the dialog substitutes its clause).
+            !(element is GoImportSpec && GoRenamePackageProcessor.importedClause(element) != null)
 
     override fun isMemberInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean = false
 
