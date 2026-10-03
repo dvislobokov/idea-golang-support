@@ -24,7 +24,10 @@ class GoImportsTest {
 
     @Test fun intoTheBlockNextToItsKind() {
         val block = "package main\n\nimport (\n\t\"fmt\"\n\t\"os\" // files\n\n\t\"github.com/google/uuid\"\n)\n"
-        assertEquals("package main\n\nimport (\n\t\"fmt\"\n\t\"os\" // files\n\t\"net/http\"\n\n\t\"github.com/google/uuid\"\n)\n", imported(block, "net/http"))
+        assertEquals("package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"os\" // files\n\n\t\"github.com/google/uuid\"\n)\n", imported(block, "net/http"))
+        assertEquals("package main\n\nimport (\n\t\"fmt\"\n\t\"os\" // files\n\t\"strings\"\n\n\t\"github.com/google/uuid\"\n)\n", imported(block, "strings"))
+        assertEquals("package main\n\nimport (\n\t\"bytes\"\n\t\"fmt\"\n\t\"os\" // files\n\n\t\"github.com/google/uuid\"\n)\n", imported(block, "bytes"))
+        assertEquals("package main\n\nimport (\n\t\"fmt\"\n\t\"os\" // files\n\n\t\"github.com/a/b\"\n\t\"github.com/google/uuid\"\n)\n", imported(block, "github.com/a/b"))
         assertEquals("package main\n\nimport (\n\t\"fmt\"\n\t\"os\" // files\n\n\t\"github.com/google/uuid\"\n\t\"golang.org/x/sync/errgroup\"\n)\n", imported(block, "golang.org/x/sync/errgroup"))
         assertNull(GoImports.add(block, "os"))
     }

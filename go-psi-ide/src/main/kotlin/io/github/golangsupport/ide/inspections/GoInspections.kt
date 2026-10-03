@@ -38,11 +38,11 @@ class GoUnusedLabelInspection : GoDiagnosticsInspectionBase() {
     override fun highlightType(d: GoDiagnostic) = ProblemHighlightType.LIKE_UNUSED_SYMBOL
 }
 
-/** Assignability, representability and conversion errors. Fix: wrap the value in a conversion `T(x)`. */
+/** Assignability, representability and conversion errors. Fixes: wrap the value in a conversion `T(x)`; add the methods a type lacks to implement an interface. */
 class GoTypeMismatchInspection : GoDiagnosticsInspectionBase() {
     override fun accepts(code: String) = code in GoDiagnosticClasses.TYPE_MISMATCH
     override fun fixes(d: GoDiagnostic, file: GoFile, element: PsiElement): List<LocalQuickFix> =
-        if (d.code == "assignability") listOfNotNull(GoWrapConversionFix.create(file, d, element)) else emptyList()
+        if (d.code == "assignability") listOfNotNull(GoWrapConversionFix.create(file, d, element), GoImplementMissingMethodsFix.create(file, d, element)) else emptyList()
 }
 
 /** Wrong number of arguments, return values or assigned values; multi-value and no-value misuse. */
@@ -78,9 +78,12 @@ class GoMissingReturnInspection : GoDiagnosticsInspectionBase() {
     override fun accepts(code: String) = code in GoDiagnosticClasses.MISSING_RETURN
 }
 
-/** Every other type-checker error (operators, indexing, literals, statements, builtins, ...). */
+/** Every other type-checker error (operators, indexing, literals, statements, builtins, ...). Fix of an impossible type assertion: add the missing methods. */
 class GoCheckerInspection : GoDiagnosticsInspectionBase() {
     override fun accepts(code: String) = code !in GoDiagnosticClasses.CLAIMED
+
+    override fun fixes(d: GoDiagnostic, file: GoFile, element: PsiElement): List<LocalQuickFix> =
+        if (d.code == "type-assertion") listOfNotNull(GoImplementMissingMethodsFix.create(file, d, element)) else emptyList()
 }
 
 /** The inspection classes contributed by go-psi-ide (for tests and docs). */

@@ -1,0 +1,7 @@
+func (s *Store) Save() {
+	s.flush(true)
+}
+
+<spot>func (s *Store) flush(b bool) {
+	panic("not implemented")
+}</spot>

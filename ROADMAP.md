@@ -94,6 +94,15 @@
   Move Statement (операторы, case, поля, объявления с комментариями), Join Lines (`x := v`, строки, аргументы), inlay hints набора gopls за переключателем Language features + struct size inlay,
   импорты при вставке (и внешний текст через каталог stdlib), орфография (Typo), ссылки `[pkg.Name]` в doc-комментариях (переход, usages, rename, Quick Documentation).
 
+- [x] (2026-10-03, робот) **Быстрые задачи после волны 3** (версии 0.2.31–0.2.33): Implement Interface хоста (Ctrl+I, Alt+Insert, Alt+Enter) на типизированных заглушках
+  `GoImplementStubs` (получатель как у методов типа, импорты по файлу); инспекция doc-комментариев экспортируемых имён (opt-in, правила golint, фиксы Add doc comment /
+  Start comment with 'Name'); проверка `//go:build` (синтаксис, место, повтор, опечатки GOOS/GOARCH, перевод `// +build`).
+
+- [x] (2026-10-03, робот) **Волна 3 новых фич на PSI** (`docs/FEATURES.md` §11; версии 0.2.23–0.2.30): Generate → String() for Enum и Equal Method, группы импортов
+  как у goimports (Optimize Imports и auto-import), smart completion (Ctrl+Shift+Space) с литералами по типу, цепочки `u.Profile.Email`, `pkg.Name` пакетов проекта по
+  голому имени с импортом; create function / method / field / variable / type from usage на типах и quick fix «Implement 'I' for T: add missing methods»
+  (completion и create — только при Language features: Built-in). Exhaustive switch стал weak warning.
+
 - [x] (2026-10-02, робот) **Волна 2 новых фич на PSI** (`docs/FEATURES.md` §11; версии 0.2.14–0.2.22, только при Language features: Built-in): инспекции exhaustive switch
   (фикс «Add missing cases» общий с Fill switch), Printf по правилам vet с пользовательскими обёртками и completion глаголов по `%`, struct tags (vet structtag + повторы имён),
   `context.Context` не первым / подмена `ctx`, `errors.As` с не-указателем и `== ErrX` вместо `errors.Is`; intentions change quote, invert / early return / merge / split `if`,

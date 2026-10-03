@@ -126,5 +126,36 @@
       <category>Go</category>
       <descriptionDirectoryName>GoVarToShortVarIntention</descriptionDirectoryName>
     </intentionAction>
+    <!-- create from usage (FEATURES.md section 11, wave 3 B1): a declaration for an undefined name at the caret -->
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoCreateFunctionFromUsageIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoCreateFunctionFromUsageIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoCreateMethodFromUsageIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoCreateMethodFromUsageIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoCreateFieldFromUsageIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoCreateFieldFromUsageIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoCreateVariableFromUsageIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoCreateVariableFromUsageIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoCreateTypeFromUsageIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoCreateTypeFromUsageIntention</descriptionDirectoryName>
+    </intentionAction>
   </extensions>
 </idea-plugin>

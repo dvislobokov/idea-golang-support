@@ -32,6 +32,8 @@ class GoCreateFunctionIntention : IntentionAction {
 
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
         if (file !is GoFile || editor == null) return false
+        // Built-in code actions: the typed Create function of go-psi-ide answers instead
+        if (GoFeatures.native(GoFeature.CODE_ACTIONS, project)) return false
         val text = editor.document.immutableCharSequence
         val (called, qualifier) = GoGenerators.calledName(text, editor.caretModel.offset) ?: return false
         name = called

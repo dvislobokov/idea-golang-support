@@ -13,6 +13,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns.psiElement
+import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
@@ -25,7 +26,12 @@ import io.github.golangsupport.ide.completion.api.GoCompletionRankingContext
 import io.github.golangsupport.lang.GoLanguage
 import io.github.golangsupport.lang.psi.*
 import io.github.golangsupport.semantic.psi.GoPsiUtil
+import io.github.golangsupport.semantic.types.GoBasicType
+import io.github.golangsupport.semantic.types.GoPointerType
+import io.github.golangsupport.semantic.types.GoSliceType
 import io.github.golangsupport.semantic.types.GoStructType
+import io.github.golangsupport.semantic.types.GoType
+import io.github.golangsupport.semantic.types.GoTypePredicates
 
 /**
  * Go code completion (docs/IDE-FEATURES.md, "Phase 6d: completion"). Providers are keyed by the
@@ -49,6 +55,7 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withParent(GoLabelRef::class.java), GoLabelProvider())
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withParent(GoPackageClause::class.java), GoPackageClauseProvider())
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withLanguage(GoLanguage), GoIdentifierProvider())
+        extend(CompletionType.SMART, psiElement(GoTypes.IDENTIFIER).withLanguage(GoLanguage), GoSmartProvider())
     }
 
     /** A trimmed dummy identifier keeps `x.<caret>(` and `T{<caret>}` parsing like the final code. */
@@ -110,23 +117,79 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
 private class GoIdentifierProvider : CompletionProvider<CompletionParameters>(), DumbAware {
     override fun addCompletions(parameters: CompletionParameters, processing: ProcessingContext, result: CompletionResultSet) {
         val context = GoCompletionContext.of(parameters) ?: return
+        GoBasicCompletion.fill(context, result)
+    }
+}
+
+/**
+ * Smart completion (Ctrl+Shift+Space): only what fits the expected type at the caret (identical first): values of the scope or
+ * members of the qualifier, functions and methods by their first result, literals written for the type ([GoSmartLiterals]),
+ * chains `x.F.M` ([GoChainCandidates]) and members of unimported project packages ([GoProjectMemberCandidates]) that fit.
+ * Without an expected type (or outside an expression) it is the basic set: an empty list helps nobody.
+ */
+private class GoSmartProvider : CompletionProvider<CompletionParameters>(), DumbAware {
+    override fun addCompletions(parameters: CompletionParameters, processing: ProcessingContext, result: CompletionResultSet) {
+        val context = GoCompletionContext.of(parameters) ?: return
+        val smartKind = context.isExpression || context.kind == Kind.SELECTOR
+        val expected = if (smartKind) context.semantics.expectedType else null
+        if (expected == null) {
+            GoBasicCompletion.fill(context, result)
+            return
+        }
+        val fits = { c: GoCandidate ->
+            GoLookupElementFactory.smartMatch(c, expected) > 0 || c.kind == GoCandidateKind.BUILTIN_FUNCTION && builtinFits(c.name, expected)
+        }
+        val candidates = ArrayList<GoCandidate>()
         val out = ArrayList<GoCandidate>()
+        if (context.kind == Kind.SELECTOR) {
+            GoMemberCandidates(context).collect(candidates, typesOnly = false)
+            candidates.filterTo(out, fits)
+            GoCompletionContributor.emit(out, context, result)
+            return
+        }
+        GoScopeCandidates(context).collect(context.reference ?: context.typeReference ?: context.leaf, GoScopeCandidates.Filter.ALL, candidates)
+        candidates.filterTo(out, fits)
+        GoSmartLiterals(context).collect(expected, out)
+        GoCompletionContributor.emit(out, context, result)
+        GoBasicCompletion.later(context, result, candidates, typesOnly = false, accept = fits)
+    }
+
+    /** Builtins whose result type is known without their arguments: `len`/`cap` for an int, `append` for a slice, `new` for a pointer. */
+    private fun builtinFits(name: String, expected: GoType): Boolean = when (name) {
+        "len", "cap" -> GoTypePredicates.assignable(GoBasicType.INT, expected)
+        "append" -> expected.underlying() is GoSliceType
+        "new" -> expected.underlying() is GoPointerType
+        else -> false
+    }
+}
+
+/** The basic set of an identifier position; shared by basic completion and by smart completion without an expected type. */
+private object GoBasicCompletion {
+    /** Chains and project members need this many typed characters in basic completion (fewer would list half the project). */
+    const val MIN_PREFIX = 2
+
+    fun fill(context: GoCompletionContext, result: CompletionResultSet) {
+        val out = ArrayList<GoCandidate>()
+        var scope: List<GoCandidate>? = null
+        var typesOnly = false
         when (context.kind) {
             Kind.STATEMENT, Kind.EXPRESSION -> {
                 structKeys(context, out)
-                expression(context, result, out)
+                scope = expression(context, result, out)
             }
             Kind.STRUCT_KEY -> {
                 // A key of a map or slice literal is an ordinary expression.
-                if (!structKeys(context, out)) expression(context, result, out)
+                if (!structKeys(context, out)) scope = expression(context, result, out)
             }
             Kind.TYPE -> {
-                val scope = ArrayList<GoCandidate>()
+                val types = ArrayList<GoCandidate>()
                 val place = context.typeReference ?: context.leaf
-                GoScopeCandidates(context).collect(place, GoScopeCandidates.Filter.TYPES, scope)
-                out += scope
+                GoScopeCandidates(context).collect(place, GoScopeCandidates.Filter.TYPES, types)
+                out += types
                 GoKeywordCandidates.collect(context, out)
-                unimportedPackages(context, result.prefixMatcher, scope, out)
+                unimportedPackages(context, result.prefixMatcher, types, out)
+                scope = types
+                typesOnly = true
             }
             Kind.RECEIVER_TYPE -> receiverTypes(context, out)
             Kind.SELECTOR -> GoMemberCandidates(context).collect(out, typesOnly = false)
@@ -135,9 +198,32 @@ private class GoIdentifierProvider : CompletionProvider<CompletionParameters>(),
             else -> return
         }
         GoCompletionContributor.emit(out, context, result)
+        if (scope != null) later(context, result, scope, typesOnly, accept = null)
     }
 
-    private fun expression(context: GoCompletionContext, result: CompletionResultSet, out: MutableList<GoCandidate>) {
+    /**
+     * The costly sources, after the cheap set is in the list: chains ([GoChainCandidates], not in type positions) and exported
+     * names of unimported project packages ([GoProjectMemberCandidates]). Basic completion asks for [MIN_PREFIX] typed characters
+     * (and restarts when the prefix reaches it); smart completion ([accept] given) builds chains whatever the prefix.
+     */
+    fun later(context: GoCompletionContext, result: CompletionResultSet, scope: List<GoCandidate>, typesOnly: Boolean, accept: ((GoCandidate) -> Boolean)?) {
+        val matcher = result.prefixMatcher
+        val longEnough = matcher.prefix.length >= MIN_PREFIX
+        if (!longEnough) result.restartCompletionOnPrefixChange(StandardPatterns.string().withLength(MIN_PREFIX))
+        if (result.isStopped || (!longEnough && accept == null)) return
+        val extra = ArrayList<GoCandidate>()
+        if (!typesOnly) {
+            val matches = { c: GoCandidate -> matcher.prefixMatches(c.name) || matcher.prefixMatches(c.lookupString) }
+            GoChainCandidates(context).collect(scope, { c -> matches(c) && (accept == null || accept(c)) }, extra)
+            GoCompletionContributor.emit(extra, context, result)
+        }
+        if (result.isStopped || !longEnough) return
+        extra.clear()
+        GoProjectMemberCandidates(context).collect(matcher, typesOnly, scope.mapTo(HashSet()) { it.name }, extra)
+        GoCompletionContributor.emit(if (accept == null) extra else extra.filter(accept), context, result)
+    }
+
+    private fun expression(context: GoCompletionContext, result: CompletionResultSet, out: MutableList<GoCandidate>): List<GoCandidate> {
         val scope = ArrayList<GoCandidate>()
         val place: GoCompositeElement? = context.reference ?: context.typeReference
         GoScopeCandidates(context).collect(place ?: context.leaf, GoScopeCandidates.Filter.ALL, scope)
@@ -145,6 +231,7 @@ private class GoIdentifierProvider : CompletionProvider<CompletionParameters>(),
         GoKeywordCandidates.collect(context, out)
         GoSnippets.collect(context, scope, out)
         unimportedPackages(context, result.prefixMatcher, scope, out)
+        return scope
     }
 
     /** Field names of a struct literal (promoted and embedded ones included) not used yet; false when the literal is not a struct. */

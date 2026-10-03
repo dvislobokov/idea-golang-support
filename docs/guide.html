@@ -340,7 +340,7 @@ footer a { color: var(--text-2); }
         <tr><td>Implement interface…</td><td>Тип</td><td>Попап с поиском по интерфейсам проекта и, с галочкой Non-project, стандартной библиотеки и зависимостей; дописывает недостающие методы. Тот же попап — <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
         <tr><td>Generate test</td><td>Функция или метод</td><td>Табличный тест в файле <code>_test.go</code>.</td></tr>
         <tr><td>Fill all fields <span class="new">новое</span></td><td>Литерал структуры или имя типа</td><td>Заполняет поля нулевыми значениями и добавляет импорты. На имени типа без скобок сначала дописывает <code>{}</code>.</td></tr>
-        <tr><td>Optimize imports <span class="new">новое</span></td><td>Строки импортов</td><td>Убирает неиспользуемые, добавляет недостающие, сортирует.</td></tr>
+        <tr><td>Optimize imports <span class="new">новое</span></td><td>Строки импортов</td><td>Убирает неиспользуемые, добавляет недостающие, сортирует и раскладывает по группам, как goimports: стандартная библиотека, сторонние модули, модуль проекта — через пустую строку.</td></tr>
         <tr><td>Действия gopls <span class="new">новое</span></td><td>Курсор или выделение</td><td>Extract variable, Extract function, Inline call, Invert if, Add test и другие, под своими именами. Извлечение доступно при выделении.</td></tr>
         <tr><td>Refactorings and actions of gopls…</td><td>Любое место</td><td>Те же действия отдельным списком. Стоит внизу.</td></tr>
         <tr><td>Исправления линтера</td><td>Замечание golangci-lint</td><td>Handle error, Ignore error explicitly, Suppress with <code>//nolint</code>.</td></tr>
@@ -355,6 +355,8 @@ footer a { color: var(--text-2); }
         <tr><td>Constructor…</td><td>Функцию <code>NewT</code> с выбранными полями.</td></tr>
         <tr><td>Getters…, Setters…, Getters and Setters…</td><td>Методы доступа к выбранным полям.</td></tr>
         <tr><td>String() Method…</td><td>Метод <code>String()</code> с выбранными полями.</td></tr>
+        <tr><td>String() for Enum <span class="new">новое</span></td><td>На целочисленном типе с константами (<code>type Color int</code> + <code>iota</code>): метод <code>String()</code>, как пишет <code>stringer</code>, — <code>case</code> на каждое значение (у равных значений — первое имя), для прочих <code>Color(%d)</code>; импорт <code>fmt</code>. Нет у битовых флагов и у типа, где <code>String()</code> уже есть.</td></tr>
+        <tr><td>Equal Method… <span class="new">новое</span></td><td>Метод <code>Equal</code> по выбранным полям: <code>==</code>, <code>bytes.Equal</code> для <code>[]byte</code>, <code>slices.Equal</code> / <code>maps.Equal</code> для срезов и карт со сравнимыми элементами, <code>time.Time.Equal</code>; импорты добавляются. Поля, которые так не сравнить, в диалоге не отмечены (отмеченные вручную — <code>reflect.DeepEqual</code>).</td></tr>
         <tr><td>Struct Tags…</td><td>Теги полей: ключи, стиль имён, <code>omitempty</code>.</td></tr>
         <tr><td>Implement Interface…</td><td>Методы выбранного интерфейса (проект, stdlib, зависимости), которых у типа ещё нет: типы чужого пакета получают его имя, пакет импортируется, встроенные интерфейсы раскрываются. Также <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
         <tr><td>Type from JSON… <span class="new">новое</span></td><td>Структуры с тегами <code>json</code> по документу из буфера обмена или из диалога.</td></tr>

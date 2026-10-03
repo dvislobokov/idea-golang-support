@@ -1,11 +1,10 @@
 package p
 
 import (
-	"fmt"
-	"strings"
-
 	"bytes"
 	"errors"
+	"fmt"
+	"strings"
 )
 
 func f() error {

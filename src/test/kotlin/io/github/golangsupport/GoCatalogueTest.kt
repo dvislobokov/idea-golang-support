@@ -207,4 +207,15 @@ class GoCatalogueTest {
         assertEquals("http.ConnState caret-0", written("ConnState", true))
         assertEquals("http.Get() caret-1", written("Get", true))
     }
+
+    @Test fun theProjectPackagesAreLeftToTheNativeCompletion() {
+        val entries = GoSymbolIndex(listOf(
+            GoModuleSymbols("std", true, listOf(GoPackageSymbols("os", "os", listOf(GoSymbol("Handle", GoDeclarationKind.FUNCTION, "()"))))),
+            GoModuleSymbols("project", false, listOf(GoPackageSymbols("example.com/shop/api", "api", listOf(GoSymbol("Handler", GoDeclarationKind.STRUCT, null)))), project = true),
+        ))
+        val found = entries.find("Hand", Int.MAX_VALUE)
+        assertEquals(listOf("api.Handler", "os.Handle"), GoCatalogueInsertion.offered(found, nativeCompletion = false, limit = 40).map { it.pack.name + "." + it.symbol.name })
+        assertEquals(listOf("os.Handle"), GoCatalogueInsertion.offered(found, nativeCompletion = true, limit = 40).map { it.pack.name + "." + it.symbol.name })
+        assertEquals(1, GoCatalogueInsertion.offered(found, nativeCompletion = false, limit = 1).size)
+    }
 }

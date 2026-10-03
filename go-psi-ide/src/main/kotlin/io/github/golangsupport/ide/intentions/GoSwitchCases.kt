@@ -11,17 +11,13 @@ import io.github.golangsupport.lang.psi.GoReferenceExpression
 import io.github.golangsupport.lang.psi.GoTypeSpec
 import io.github.golangsupport.lang.psi.GoTypeSwitchStatement
 import io.github.golangsupport.semantic.api.GoSemanticService
-import io.github.golangsupport.semantic.infer.GoExpressionTyper
 import io.github.golangsupport.semantic.psi.GoPsiUtil.guard
 import io.github.golangsupport.semantic.psi.GoPsiUtil.isDefault
 import io.github.golangsupport.semantic.psi.GoPsiUtil.tag
 import io.github.golangsupport.semantic.psi.GoPsiUtil.types
-import io.github.golangsupport.semantic.scope.GoPackageModel
 import io.github.golangsupport.semantic.types.GoConstant
-import io.github.golangsupport.semantic.types.GoInterfaceType
 import io.github.golangsupport.semantic.types.GoNamedType
 import io.github.golangsupport.semantic.types.GoPointerType
-import io.github.golangsupport.semantic.types.GoTypePredicates
 
 /**
  * The cases a switch lacks, shared by Fill Switch ([GoFillSwitchIntention]) and the exhaustiveness inspection
@@ -81,13 +77,9 @@ object GoSwitchCases {
         val project = switch.project
         val service = GoSemanticService.getInstance(project)
         val type = service.typeOf(tag) as? GoNamedType ?: return null
-        if (type.underlying() is GoInterfaceType) return null
         val declarationFile = type.declaration.containingFile as? GoFile ?: return null
-        if (declarationFile.packageName == "builtin") return null
         val own = source.isOwnPackage(declarationFile)
-        val constants = GoPackageModel.getInstance(project).scopeOf(declarationFile).files.flatMap { it.consts }
-            .filter { it.name != null && it.name != "_" && (own || it.isPublic()) && GoTypePredicates.identical(service.declarationType(it), type) }
-        if (constants.isEmpty()) return null
+        val members = GoEnumConstants.of(type, own) ?: return null
         val present = HashSet<PsiElement>()
         val presentNames = HashSet<String>()
         val covered = HashSet<GoConstant>()
@@ -97,13 +89,13 @@ object GoSwitchCases {
             present += service.resolve(ref)
             ref.identifier.text?.let(presentNames::add)
         }
-        val typer = GoExpressionTyper.getInstance(project)
-        val values = constants.map { typer.constantValueOf(it) }
+        val values = members.map { it.value }
         val prefix = if (own) "" else source.prefix(type.pkgPath ?: return null, declarationFile.packageName)
         val cases = LinkedHashSet<String>()
-        for ((i, constant) in constants.withIndex()) {
+        for (member in members) {
+            val constant = member.constant
             if (constant in present || constant.name in presentNames) continue
-            val value = values[i]
+            val value = member.value
             // a value already in a case, or added for an earlier constant of the same value, would be a duplicate case
             if (value != null && !covered.add(value)) continue
             cases += prefix + constant.name
@@ -111,13 +103,7 @@ object GoSwitchCases {
         val default = switch.exprCaseClauseList.firstOrNull { it.default != null }
         val anchor = (default ?: switch.rbrace)?.textRange?.startOffset ?: return null
         val typeName = if (own) type.name else "${declarationFile.packageName}.${type.name}"
-        return Missing(typeName, cases.toList(), anchor, default != null, isFlags(values), null, source.imports)
-    }
-
-    /** At least three non-zero values, every one a distinct power of two (`1 << iota`). */
-    private fun isFlags(values: List<GoConstant?>): Boolean {
-        val nonZero = values.map { (it as? GoConstant.Int)?.value ?: return false }.filter { it.signum() != 0 }
-        return nonZero.size >= 3 && nonZero.all { it.signum() > 0 && it.bitCount() == 1 } && nonZero.toSet().size == nonZero.size
+        return Missing(typeName, cases.toList(), anchor, default != null, GoEnumConstants.isFlags(values), null, source.imports)
     }
 
     private fun typeCases(switch: GoTypeSwitchStatement, source: GoSourceText, interfaceFilter: (GoTypeSpec) -> Boolean): Missing? {

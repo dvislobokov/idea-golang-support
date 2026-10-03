@@ -11,6 +11,8 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoDeclarationKind
+import io.github.golangsupport.lang.GoFeature
+import io.github.golangsupport.lang.GoFeatures
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoIdioms
 import io.github.golangsupport.lang.GoImport
@@ -48,6 +50,13 @@ object GoCatalogueInsertion {
         return Text("$name()", if (takesArguments) 1 else 0, importPath)
     }
 
+    /**
+     * What the catalogue offers of [found]: the packages of the project belong to the built-in completion when it serves completion
+     * ([nativeCompletion]: it types them and adds the import itself), so they are left out then; the standard library and the modules stay.
+     */
+    fun offered(found: List<GoSymbolIndex.Entry>, nativeCompletion: Boolean, limit: Int): List<GoSymbolIndex.Entry> =
+        found.asSequence().filter { !(nativeCompletion && it.project) }.take(limit).toList()
+
     /** A struct, and a type that is a map, a slice or an array: `http.Header{}`. An interface and a number have no literal. */
     fun hasLiteral(symbol: GoSymbol): Boolean = symbol.kind == GoDeclarationKind.STRUCT ||
         symbol.kind == GoDeclarationKind.TYPE && symbol.signature?.trim()?.let { it.startsWith("map[") || it.startsWith("[") } == true
@@ -77,7 +86,9 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         // with the Russian layout on the dot is a letter, and `аьеюЗкште` is one word: `fmt.Print`
         val qualifier = matcher.latin.substringBeforeLast('.', "").takeIf { it.isNotEmpty() }
         val wanted = matcher.latin.substringAfterLast('.')
-        val found = index.find(wanted, LIMIT, imports.mapTo(HashSet()) { it.path }, qualifier) { it.importPath != own && GoCatalogueScanner.isVisible(it.importPath, own) }
+        val native = GoFeatures.native(GoFeature.COMPLETION, file.project)
+        val candidates = index.find(wanted, if (native) Int.MAX_VALUE else LIMIT, imports.mapTo(HashSet()) { it.path }, qualifier) { it.importPath != own && GoCatalogueScanner.isVisible(it.importPath, own) }
+        val found = GoCatalogueInsertion.offered(candidates, native, LIMIT)
         found.forEachIndexed { rank, entry ->
             val insertion = GoCatalogueInsertion.of(entry, imports) ?: return@forEachIndexed
             val item = LookupElementBuilder.create(entry, entry.symbol.name)

@@ -67,7 +67,10 @@ object GoImports {
         if (grouped.isEmpty()) return Insertion(lineEnd(text, imports.last().range.endOffset), "\nimport $quoted")
         val standard = isStandard(path)
         val sameKind = grouped.lastOrNull { isStandard(it.path) == standard }
+        // at its sorted place among the imports of its kind, as goimports puts it (seen live: Generate Equal appended `bytes` after `strings`)
+        val next = grouped.firstOrNull { isStandard(it.path) == standard && it.path > path }
         return when {
+            next != null -> Insertion(lineStart(text, next.range.startOffset), "\t$quoted\n")
             sameKind != null -> Insertion(lineEnd(text, sameKind.range.endOffset), "\n\t$quoted")
             // the first of its kind: the standard library above the rest, the rest below it, a blank line between them
             standard -> Insertion(lineStart(text, grouped.first().range.startOffset), "\t$quoted\n\n")

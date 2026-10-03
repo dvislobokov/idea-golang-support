@@ -8,6 +8,83 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
+Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
+
+### Changed
+- Exhaustive switch inspection (`GoExhaustiveSwitch`) is a weak warning: a plain warning was noise on `reflect.Kind`-like switches without `default`.
+
+## [0.2.33] - 2026-10-03
+
+### Added — Build constraint checks
+- Inspection "Build constraint comments" (`GoBuildConstraint`, vet `buildtag`): syntax errors in `//go:build` expressions, a misplaced or repeated `//go:build` line (errors), and tags one edit away from a known GOOS/GOARCH (`linx`, weak warning) with the fix "Replace with 'linux'"; custom tags like `integration` stay quiet.
+- A `// +build` line without `//go:build` gets a weak warning and the fix "Add //go:build line", which converts the old syntax (space = OR, comma = AND, `!` = NOT) into the new one.
+
+## [0.2.32] - 2026-10-03
+
+### Added — Doc comment inspection
+- `GoDocComment` inspection (opt-in, weak warning, golint / revive `exported` rules): an exported package-level function, method, type, const or var without a doc comment, and a doc comment that does not start with the declared name (`A`, `An` and `The` are allowed, `Deprecated:` is ignored). A comment on a `const (...)` / `var (...)` group counts for its specs. `_test.go`, `main` packages and generated files are skipped.
+- Quick fixes "Add doc comment" (inserts `// Name ` above the declaration with its indentation) and "Start comment with 'Name'" (rewrites the first word or prepends the name).
+
+## [0.2.31] - 2026-10-03
+
+### Changed — Implement Interface on the typed API
+- Ctrl+I / Alt+Insert / Alt+Enter "Implement interface" write the method stubs through `GoImplementStubs.compute` (the computation of the "Implement missing methods" fix): types are spelled as the target file writes them, the needed imports are added, and the receiver name and kind follow the type's own methods.
+- In dumb mode, and for catalogue-only interfaces the PSI cannot resolve, the previous text generator is used.
+
+## [0.2.30] - 2026-10-03
+
+### Added — Implement missing methods quick fix
+- `T does not implement I` (assignment, argument, return, composite literal element, impossible type assertion) gets the fix `Implement 'I' for T: add missing methods`: stubs after T's last method with the interface's parameter names (names from the types when it has none), types and imports as the file writes them, a pointer receiver for `*T` and a value receiver for `T`.
+- Methods T has with a pointer receiver or another signature are not stubbed again; no fix when nothing is missing. The gopls `stubmethods` fix is hidden with Built-in features.
+
+## [0.2.29] - 2026-10-03
+
+### Added — Create from usage on the native PSI
+- Alt+Enter on an undefined name creates it from its use: `Create function 'f'` (parameter types and names from the arguments, results from the context: `x, err := f()` gives `(any, error)`, a call statement has none), `Create method 'M' on T` (after T's last method, receiver named and pointed like T's methods), `Create field 'F' in T` (type from the assigned value or the expected type), `Create variable 'x'` (`x := <zero>` or `var x T` before the statement, `var x T` at package level), `Create type 'T'` (`struct{}`, `interface{}` in a constraint). Bodies are `panic("not implemented")`.
+- `pkg.F(...)` of a package of the project is created in that package; nothing is offered for the standard library, the module cache, generic code or a name that resolves.
+- With Built-in language features the text-based Create function and the gopls "Create function / variable" fix are hidden.
+- A field created in a one-line struct (`struct{ A int }`) spreads the struct over lines; `time` of `time.Time` without its import is never offered as a variable.
+
+## [0.2.28] - 2026-10-03
+
+### Added — Members of unimported project packages
+- Typing two or more characters of an exported function, type, var or const of another package of the module offers `pkg.Name`; inserting it adds the import. Typed values rank by the expected type, below names in scope.
+- Read from the stub index without loading files. Skipped: the current package, `main` packages, test files, `vendor`/`testdata`, `internal` packages the file may not import, and packages whose name is already taken in the file.
+- The host catalogue no longer lists the project's own packages when built-in completion is active (stdlib and dependencies stay there).
+
+## [0.2.27] - 2026-10-03
+
+### Added — Chain completion
+- `u.Profile.Email` / `u.Settings().Theme()`: a field or a parameterless method of a variable or parameter, then a member of its type, promoted fields included; it matches by its last name too.
+- Smart completion keeps only chains of the expected type; basic completion shows them from two typed characters. Capped at 50 chains.
+
+## [0.2.26] - 2026-10-03
+
+### Added — Smart completion by expected type
+- Ctrl+Shift+Space in an expression offers only what fits the expected type, identical types first: variables, members of the qualifier, functions and methods by their first result, `len`/`cap`/`append`/`new` where they fit.
+- Values written for the type: `T{}` / `&T{}` for structs, `make(T)` / `make(T, 0)` for maps, channels and slices, a `func(...) R {}` literal for function types, `""` and `0`; the caret lands inside braces or quotes.
+- Without an expected type smart completion falls back to the basic list.
+
+## [0.2.25] - 2026-10-03
+
+### Added — goimports grouping of imports
+- Optimize Imports (Built-in diagnostics) regroups each `import ( … )` like `goimports -local <main module>`: `"C"`, standard library, third-party, the project's own module, one blank line apart, each group sorted. Comment lines above a spec move with it, named/dot/blank imports stay in their group, and a single import keeps its form.
+- Auto-import (completion, Add import fix, paste, intentions) puts a new path into its group and creates the group with its blank line when it is missing; a single-line import becomes a grouped declaration in that order.
+- Reformat Code still only sorts within the existing blank-line groups, as gofmt does.
+
+## [0.2.24] - 2026-10-03
+
+### Added — Generate Equal method
+- Alt+Insert → Equal Method... on a struct: a dialog of fields, then `func (p Point) Equal(other Point) bool` comparing them with `==`, `bytes.Equal` for `[]byte`, `slices.Equal` / `maps.Equal` for slices and maps of comparable elements, and `t.Equal(...)` for `time.Time`; the packages are imported.
+- Fields that cannot be compared that way (funcs, slices of slices, maps of slices) are unticked; ticked by hand they use `reflect.DeepEqual`. Receiver form and name follow the type's existing methods (value receiver when there are none).
+- Fixed: an import added by the host's generators, postfix templates and catalogue completion goes to its sorted place among the imports of its kind, not to the end of the block (`bytes` after `strings`).
+
+## [0.2.23] - 2026-10-03
+
+### Added — Generate String() for an enum
+- Alt+Insert → String() for Enum on an integer type with constants in its package (`type Color int` + `iota`): writes `String()` the way `stringer` does, with a `case` per value (equal values give one case, the first name wins) and `fmt.Sprintf("Color(%d)", int(c))` for any other value; `fmt` is imported.
+- Not offered for bit flags (`1 << iota`), for a type that already has `String()`, or while the IDE is indexing; the receiver name of the type's existing methods is kept. The enum lookup (`GoEnumConstants`) is shared with Fill Switch and the exhaustive-switch inspection.
 
 ## [0.2.22] - 2026-10-02
 

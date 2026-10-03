@@ -267,6 +267,41 @@ class GoStructPsiTest : BasePlatformTestCase() {
     }
 
     /**
+     * The typed path of Implement Interface ([io.github.golangsupport.ide.intentions.GoImplementStubs]): the receiver name of the type's
+     * own methods (not the first letter), a pointer receiver when a method has one, a method the type has skipped, and a type of
+     * another package written as the file imports it, the path of a package it does not import returned for the import.
+     */
+    fun testImplementInterfaceTypedStubs() {
+        myFixture.addFileToProject("store/api.go", """
+            package store
+
+            import "net/http"
+
+            type Handler interface {
+            	Serve(w http.ResponseWriter, r *http.Request) error
+            	Close() error
+            	Name() string
+            }
+        """.trimIndent())
+        val target = myFixture.addFileToProject("store/memory.go", """
+            package store
+
+            type Memory struct{}
+
+            func (self *Memory) Name() string { return "" }
+
+            type Plain struct{}
+        """.trimIndent()) as GoFile
+        val directory = target.virtualFile.parent
+        val plan = GoInterfaceChooser.plan(spec(target, "Memory"), target, null, directory, "Handler")!!
+        assertEquals(listOf("func (self *Memory) Serve(w http.ResponseWriter, r *http.Request) error {", "func (self *Memory) Close() error {"), lines(plan).sortedBy { if ("Serve" in it) 0 else 1 })
+        assertEquals(listOf("net/http"), plan.imports)
+        assertTrue(plan.stubs.endsWith("}\n"))
+        // a struct without methods gets a pointer receiver named by the first letter
+        assertTrue(lines(GoInterfaceChooser.plan(spec(target, "Plain"), target, null, directory, "Handler")!!).all { it.startsWith("func (p *Plain) ") })
+    }
+
+    /**
      * The method sets of interfaces of the standard library, read from the PSI of GOROOT (the toolchain pinned without running `go`, as
      * go-psi tests do), rendered for a file that imports `io` under an alias and does not import `fmt`. Skipped without a GOROOT.
      * [GoInterfaceSources.methodsFor] itself reads GOROOT this way only when it is in the indices (library roots, off in unit tests);

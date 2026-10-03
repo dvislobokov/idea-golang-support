@@ -13,6 +13,7 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
@@ -28,6 +29,8 @@ import javax.swing.ListCellRenderer
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoTypeSpec
 import io.github.golangsupport.semantic.api.GoSemanticService
+import io.github.golangsupport.ide.intentions.GoImplementStubs
+import io.github.golangsupport.semantic.types.GoInterfaceType
 import io.github.golangsupport.semantic.types.GoNamedType
 import io.github.golangsupport.semantic.types.GoPointerType
 
@@ -60,6 +63,7 @@ class GoInterfaceCandidate(
  */
 object GoInterfaceChooser {
     private const val NON_PROJECT = "io.github.golangsupport.implement.nonProject"
+    private const val BLANK = "\n\n"
 
     fun show(context: GenerateContext) {
         PsiDocumentManager.getInstance(context.project).commitDocument(context.document)
@@ -116,11 +120,25 @@ object GoInterfaceChooser {
     /** The plan for the interface ([importPath], [directory], [name] as [GoInterfaceSources.methodsFor] takes them); null when it is not found. */
     fun plan(spec: GoTypeSpec, target: GoFile, importPath: String?, directory: VirtualFile?, name: String): Plan? {
         val typeName = spec.name ?: return null
+        typedPlan(spec, target, importPath, directory, name)?.let { return it }
         val methods = GoInterfaceSources(spec.project).methodsFor(target, importPath, directory, name) ?: return null
         val existing = existingMethods(spec)
         val missing = methods.filter { it.name !in existing }
         val stubs = if (missing.isEmpty()) "" else GoGenerators.methodStubs(typeName, missing.map { it.name to it.signature }, pointerReceiver(spec))
         return Plan(typeName, stubs, missing.flatMap { it.imports }.distinct())
+    }
+
+    /**
+     * The one decision point: stubs of the typed API ([GoImplementStubs.compute]: types as the file spells them, the receiver name and kind
+     * of the type's methods) when the interface resolves to a semantic type in smart mode, else null and [plan] falls back to the text path
+     * (dumb mode, catalogue-only interfaces). Not gated by GoFeatures: it only reads the PSI semantics, which are on whatever the switch says.
+     */
+    private fun typedPlan(spec: GoTypeSpec, target: GoFile, importPath: String?, directory: VirtualFile?, name: String): Plan? {
+        if (DumbService.isDumb(spec.project)) return null
+        val ifaceSpec = GoInterfaceSources(spec.project).interfaceSpec(target, importPath, directory, name) ?: return null
+        val iface = GoSemanticService.getInstance(spec.project).declarationType(ifaceSpec).underlying() as? GoInterfaceType ?: return null
+        val stubs = GoImplementStubs.compute(spec, iface, null) ?: return null
+        return Plan(spec.name ?: return null, stubs.stubs.joinToString(BLANK, postfix = "\n"), stubs.imports.distinct())
     }
 
     private fun apply(context: GenerateContext, chosen: GoInterfaceCandidate) {

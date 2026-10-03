@@ -36,6 +36,8 @@ import io.github.golangsupport.lang.psi.GoType as PsiType
 enum class GoCandidateKind {
     LOCAL, PARAMETER, VARIABLE, CONSTANT, FUNCTION, METHOD, FIELD, TYPE, TYPE_PARAMETER, PACKAGE,
     BUILTIN_FUNCTION, BUILTIN_TYPE, BUILTIN_CONSTANT, KEYWORD, SNIPPET, LABEL, IMPORT_PATH, STRUCT_KEY, PACKAGE_NAME,
+    /** A value written for the expected type by smart completion: `T{}`, `&T{}`, `make(T)`, `func(...) {}`, `""`, `0`. */
+    LITERAL,
 }
 
 /** Scope distance used by the deterministic ranking (lower is closer). */
@@ -93,6 +95,8 @@ class GoCandidate(
     val insertHandler: InsertHandler<LookupElement>? = null,
     val lookupString: String = name,
     val presentableText: String? = null,
+    /** More strings the prefix is matched against (`Name` for the chain `u.Profile.Name`, `Handler` for `api.Handler`). */
+    val lookupStrings: Collection<String> = emptyList(),
 )
 
 /** Builds lookup elements: icon, tail and type texts, insert handlers, ranking info. */
@@ -108,6 +112,7 @@ object GoLookupElementFactory {
             .withBoldness(candidate.bold)
         candidate.element?.let { builder = builder.withPsiElement(it) }
         candidate.presentableText?.let { builder = builder.withPresentableText(it) }
+        if (candidate.lookupStrings.isNotEmpty()) builder = builder.withLookupStrings(candidate.lookupStrings)
         val tailSupplier = candidate.tailSupplier
         val typeSupplier = candidate.typeSupplier
         if (tailSupplier != null || typeSupplier != null) {
@@ -147,7 +152,7 @@ object GoLookupElementFactory {
     fun iconFor(candidate: GoCandidate): Icon? = when (candidate.kind) {
         GoCandidateKind.PACKAGE, GoCandidateKind.IMPORT_PATH, GoCandidateKind.PACKAGE_NAME -> AllIcons.Nodes.Package
         GoCandidateKind.KEYWORD -> null
-        GoCandidateKind.SNIPPET -> AllIcons.Nodes.Template
+        GoCandidateKind.SNIPPET, GoCandidateKind.LITERAL -> AllIcons.Nodes.Template
         GoCandidateKind.LABEL -> AllIcons.Nodes.Tag
         GoCandidateKind.BUILTIN_FUNCTION -> GoIdeIcons.FUNCTION
         GoCandidateKind.BUILTIN_TYPE -> GoIdeIcons.TYPE
@@ -181,7 +186,18 @@ object GoLookupElementFactory {
         }
     }
 
-    private fun matchValue(value: GoType, expected: GoType): Int = when {
+    /**
+     * The match of smart completion: as [expectedMatch], except that a function or method is matched by its first result whatever
+     * the number of results (`f()` of `func f() (T, error)` fits a `T`).
+     */
+    fun smartMatch(candidate: GoCandidate, expected: GoType): Int {
+        if (candidate.kind != GoCandidateKind.FUNCTION && candidate.kind != GoCandidateKind.METHOD) return expectedMatch(candidate, expected)
+        val signature = candidate.valueType as? GoSignatureType ?: return 0
+        if (expected.underlying() is GoSignatureType) return if (GoTypePredicates.assignable(signature, expected)) 2 else 0
+        return signature.results.firstOrNull()?.let { matchValue(it.type, expected) } ?: 0
+    }
+
+    fun matchValue(value: GoType, expected: GoType): Int = when {
         value is GoUnknownType -> 0
         GoTypePredicates.identical(value, expected) -> 2
         value == GoBasicType.UNTYPED_NIL -> if (GoTypePredicates.assignable(value, expected)) 1 else 0

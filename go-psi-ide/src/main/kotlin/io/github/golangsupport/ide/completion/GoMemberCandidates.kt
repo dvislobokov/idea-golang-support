@@ -162,7 +162,7 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
         return result
     }
 
-    private fun visible(exported: Boolean, memberPkg: String?): Boolean =
+    fun visible(exported: Boolean, memberPkg: String?): Boolean =
         exported || memberPkg == null || semantics.packagePath == null || memberPkg == semantics.packagePath
 
     /** Variables, fields of addressable operands, pointer indirections and slice elements are addressable. */

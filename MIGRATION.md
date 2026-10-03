@@ -525,7 +525,29 @@ generics, missing return, init cycles — 0 ложных срабатывани�
   через обёртку), фиксы Add missing cases / Fix quoting / Use ctx / Take the address / `!errors.Is` с импортом / `%d`→`%s` / `%v`→`%w`; intentions raw string, invert `if` с комментарием,
   early continue, `if`→`switch` с `case 2, 3:`, `n := count()`; список глаголов после `%` (20 пунктов); при gopls после перезапуска демона 0 своих проблем (смена настройки роботом напрямую
   демон не перезапускает — старая подсветка висит до правки); «Plugin to blame: Go» 0. **Урок:** три агента в одном дереве портят общую тестовую песочницу `.intellijPlatform/sandbox/go-psi-ide`
-  (Trigram index, `FileDeletedException`) и подвешивают демоны Gradle — следующие волны гонять в worktree или по одному агенту на модульный прогон. Открыто: уровень exhaustive switch
-  оставлен WARNING (FEATURES предлагал weak) — на `reflect.Kind`-подобных `switch` без `default` может шуметь, решение за пользователем.
+  (Trigram index, `FileDeletedException`) и подвешивают демоны Gradle — следующие волны гонять в worktree или по одному агенту на модульный прогон. Решено 2026-10-03: уровень exhaustive switch
+  переведён на WEAK WARNING (как в плане §13; на `reflect.Kind`-подобных `switch` без `default` обычный WARNING шумел), включена по умолчанию.
+  Бенчмарк перемерен на холодной машине 2026-10-03 (демоны остановлены, одна JVM): `go-psi-core` снова +50–86 % по парсеру/индексу/стабам, но базовый
+  коммит 6b3358c без единой правки в `go-psi-core` в соседнем worktree даёт те же цифры — это состояние машины, не регрессия; пороги не меняются.
+- [x] Шаг 11, волна 3 (2026-10-03, три агента Opus A/B/C, каждый в worktree; версии 0.2.23–0.2.30): C — Generate `String()` для enum (`stringer`-вид, поиск констант
+  `GoEnumConstants` общий с Fill switch / exhaustive switch) и Equal Method (сравнение по типам полей), группировка импортов goimports (`GoImportGroups`: Optimize Imports
+  перегруппировывает, auto-import вставляет в свою группу; Reformat Code по-прежнему только сортирует, как gofmt); A — smart completion по ожидаемому типу с литералами,
+  цепочки `x.F.M` (один уровень, лимиты), голые имена экспортов пакетов проекта из стаб-индекса (каталог хоста их тогда не дублирует); B — create function / method /
+  field / variable / type from usage на типах, quick fix «Implement 'I' for T» на ошибке «does not implement» (API `GoImplementStubs` для Ctrl+I хоста ещё не подключён),
+  дубли gopls скрыты. Гейты: `:go-psi-core:test` 98, `:go-psi-semantic:test` 153, `:go-psi-ide:test` 522, `:test` 364, 0 падений; `checkKotlinAbi` зелёный;
+  `:go-psi-ide:corpusTest` 4621/4621; бенчмарк go-psi-ide HEAD против базы cd920e2 подряд с остановленными демонами — HEAD не хуже базы (база падала по порогам
+  чаще: 7 против 5; на этой машине пороги сейчас не выдерживает ни одна сторона). Робот (8083, Built-in, `store/wave3.go`, `editop.js` с новыми `smart`/`pick`,
+  `dialog_ok.js`): smart → `W3Item{}` и `w3load` без `n`; `Emai` → `u.Profile.Email`; `Forma` → `money.Format` с импортом в группу модуля, без дубля каталога;
+  Create function / method / field / variable / type, Implement `http.Handler` — по одному пункту, без gopls; Optimize Imports разнёс std / local; String() без
+  `W3Crimson`; Equal с `slices`/`bytes`/`maps`/`.Equal`, `Fn` снят; «Plugin to blame: Go» 0. Робот нашёл и исправлено с тестами: импорт хоста (`GoImports.add`)
+  вставлялся в конец блока, поле в однострочную структуру — на строку скобки, «Create variable 'time'» на `time.Time` без импорта. **Урок:** worktree агента
+  создаётся от `master`, а не от текущей ветки — агенты сами делали `git reset --hard migration`; в брифе указывать базу явно. Клик робота по OK модального
+  диалога в RDP не доходит, а скрипты с `invokeLater` без `ModalityState.any()` при открытом диалоге висят — `dialog_ok.js`.
+- [x] Шаг 11, быстрые задачи (2026-10-03, три агента Sonnet, worktree от `migration` с наложенным незакоммиченным диффом в индексе — дифф агента потом
+  `git add -N . && git diff`; версии 0.2.31–0.2.33): Ctrl+I хоста на `GoImplementStubs`, `GoDocComment`, `GoBuildConstraint` (парсер — `GoBuildConstraintEvaluator`
+  project model, списки GOOS/GOARCH — `GoPlatforms`). Гейты: `:go-psi-ide:test` 548, `:test` 365, 0 падений. Робот (8083, Built-in, `store/wave4.go`,
+  новый `enable_inspection.js`): 4 предупреждения doc-комментариев и оба фикса; Ctrl+I `W4Square` → `W4Shape`: `Area`/`Describe` с получателем `self`, `Name`
+  не продублирован; `// +build linx,!cgo darwin` → два предупреждения, Add //go:build line → `(linx && !cgo) || darwin`, Replace with 'linux', `darwin &&` → ошибка
+  синтаксиса; «Plugin to blame: Go» 0. Замечено: анонимный интерфейс в заглушке пишется как `interface{Write(…)}` (вид go/types, gofmt поставил бы пробелы).
 - [ ] 12.1 gopls опционален, [ ] 12.2 gopls удалён.
 - [ ] 13 линтеры по запросу, [ ] 13A vet-класс, [ ] 13B data-flow, [ ] 13C движок правил.

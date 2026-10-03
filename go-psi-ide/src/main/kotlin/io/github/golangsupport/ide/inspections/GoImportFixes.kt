@@ -13,9 +13,11 @@ import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.completion.GoImportInserter
 import io.github.golangsupport.ide.completion.GoImportPaths
+import io.github.golangsupport.ide.formatter.GoImportGroups
 import io.github.golangsupport.ide.formatter.GoImportSorter
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoImportDeclaration
+import io.github.golangsupport.lang.psi.GoImportList
 import io.github.golangsupport.lang.psi.GoImportSpec
 import io.github.golangsupport.lang.psi.GoReferenceExpression
 import io.github.golangsupport.lang.psi.GoTypeReferenceExpression
@@ -85,7 +87,10 @@ internal object GoImportEdits {
         return i
     }
 
-    /** Removes the unused imports reported by the checker, then sorts the import groups like gofmt. */
+    /**
+     * Removes the unused imports reported by the checker, then regroups each parenthesised declaration like goimports ([GoImportGroups]);
+     * a declaration it cannot regroup (several specs on a line) is still sorted like gofmt.
+     */
     fun optimize(file: GoFile, unused: List<TextRange>) {
         val document = document(file) ?: return
         val specs = file.imports.filter { it.textRange in unused }
@@ -93,8 +98,19 @@ internal object GoImportEdits {
             removeSpecs(document, specs)
             commit(file, document)
         }
+        regroup(file, document)
         GoImportSorter().process(file.node, file.textRange)
         PsiDocumentManager.getInstance(file.project).doPostponedOperationsAndUnblockDocument(document)
+    }
+
+    private fun regroup(file: GoFile, document: Document) {
+        val declarations = PsiTreeUtil.getChildOfType(file, GoImportList::class.java)?.importDeclarationList.orEmpty().filter { it.lparen != null && it.rparen != null }
+        if (declarations.isEmpty()) return
+        val locals = GoImportGroups.localPrefixes(file)
+        val edits = declarations.mapNotNull { decl -> GoImportGroups.regroup(decl.text, locals)?.let { decl.textRange to it } }
+        if (edits.isEmpty()) return
+        for ((range, text) in edits.sortedByDescending { it.first.startOffset }) document.replaceString(range.startOffset, range.endOffset, text)
+        commit(file, document)
     }
 
     fun unusedImportRanges(file: GoFile): List<TextRange> =
@@ -173,8 +189,9 @@ class GoOptimizeImportsFix : LocalQuickFix {
 
 /**
  * Code | Optimize Imports: removes imports the checker reports as unused (`_`, `.` and `"C"`
- * imports are never reported) and sorts each run of import specs like gofmt ([GoImportSorter]).
- * Existing blank-line groups are kept; specs are not regrouped into standard/third-party blocks.
+ * imports are never reported) and regroups the specs like `goimports -local <main module>`
+ * ([GoImportGroups]): `"C"`, the standard library, third-party modules, the main module, one blank
+ * line between the groups, each sorted. Blank-line groups written by hand are not kept.
  */
 class GoImportOptimizer : com.intellij.lang.ImportOptimizer {
     /** Not ours while the diagnostics come from another source: Optimize Imports then falls back to whatever the host has. */

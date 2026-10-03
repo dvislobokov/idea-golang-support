@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports missing or malformed doc comments of exported package-level declarations (golint / revive <code>exported</code>; off by default):
+<ul>
+  <li>an exported function, method (of an exported type), type, const or var without a doc comment. A comment on a
+    <code>const (...)</code> / <code>var (...)</code> group counts for all its specs. Quick fix: <b>Add doc comment</b>
+    (inserts <code>// Name </code> above the declaration and puts the caret after it);</li>
+  <li>a doc comment that does not start with the declared name (<code>A Name</code>, <code>An Name</code> and <code>The Name</code>
+    are accepted, <code>Deprecated:</code> paragraphs are ignored). Quick fix: <b>Start comment with 'Name'</b>.</li>
+</ul>
+<code>_test.go</code> files, <code>main</code> packages and generated files (<code>// Code generated ... DO NOT EDIT.</code>) are skipped.
+</body>
+</html>

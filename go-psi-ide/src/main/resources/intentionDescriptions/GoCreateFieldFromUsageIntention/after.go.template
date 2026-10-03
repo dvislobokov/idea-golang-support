@@ -1,0 +1,8 @@
+type User struct {
+	Name string
+	<spot>Age int</spot>
+}
+
+func f(u *User) {
+	u.Age = 3
+}

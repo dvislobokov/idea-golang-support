@@ -1,6 +1,7 @@
 // One editing operation of wave 1 (FEATURES §11) in the selected editor, which must be a scratch copy, then the lines around the caret.
 // __OP__: caret TEXT | select TEXT | lines FROM-TO | action ID | type TEXT (typed character by character, `<TAB>` presses Tab, `<NL>` Enter)
 //         | surround TITLE | unwrap TITLE | hints | typos | targets TEXT | text FROM-TO (print lines) | setting NAME=VALUE (CodeInsightSettings int field)
+//         | problems | lookup N | smart (smart completion items) | pick ITEM / pick smart:ITEM (insert a completion item)
 // __ARG__ is the argument; the result is the operation's report plus lines __FROM__..__TO__ of the document (tabs as <TAB>).
 importClass(com.intellij.openapi.project.ProjectManager)
 importClass(com.intellij.openapi.application.ApplicationManager)
@@ -150,6 +151,26 @@ else if (op == "lookup") onEdt(function () {
     if (lookup == null) return "no lookup"
     var items = lookup.getItems(), out = []
     for (var i = 0; i < items.size() && i < parseInt(arg || "10"); i++) out.push(String(items.get(i).getLookupString()))
+    return items.size() + " items: " + out.join(" ")
+})
+else if (op == "smart" || op == "pick") onEdt(function () {
+    // smart: smart completion at the caret, then the first 15 items; pick: basic completion (or the open lookup), then the item whose
+    // lookup string is arg is inserted (arg `smart:ITEM` picks from smart completion)
+    importClass(com.intellij.codeInsight.lookup.LookupManager)
+    importClass(com.intellij.codeInsight.lookup.Lookup)
+    var wanted = arg, smart = op == "smart"
+    if (op == "pick" && arg.indexOf("smart:") == 0) { smart = true; wanted = arg.substring(6) }
+    var lookup = LookupManager.getActiveLookup(editor)
+    if (lookup == null) performAction(smart ? "SmartTypeCompletion" : "CodeCompletion")
+    for (var w = 0; w < 50 && lookup == null; w++) { java.lang.Thread.sleep(100); lookup = LookupManager.getActiveLookup(editor) }
+    if (lookup == null) { commit(); return "no lookup (a single item may have been inserted)" }
+    var items = lookup.getItems(), out = []
+    for (var i = 0; i < items.size(); i++) {
+        var s = String(items.get(i).getLookupString())
+        if (op == "pick" && s == wanted) { lookup.setCurrentItem(items.get(i)); lookup.finishLookup(Lookup.NORMAL_SELECT_CHAR); commit(); return "picked " + s }
+        if (i < 15) out.push(s)
+    }
+    if (op == "pick") { lookup.hideLookup(true); return "not found " + wanted + " in " + items.size() + " items: " + out.join(" ") }
     return items.size() + " items: " + out.join(" ")
 })
 else if (op == "targets") onEdt(function () {

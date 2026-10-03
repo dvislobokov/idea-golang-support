@@ -42,8 +42,11 @@
                      implementationClass="io.github.golangsupport.ide.inspections.GoCheckerInspection"/>
     <!-- Wave 2 (docs/FEATURES.md §11), part E: analysis inspections over the PSI (GoAnalysisInspectionBase, gate DIAGNOSTICS). -->
     <localInspection language="Go" shortName="GoExhaustiveSwitch" displayName="Non-exhaustive switch over an enum or interface"
-                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoExhaustiveSwitchInspection"/>
+    <localInspection language="Go" shortName="GoDocComment" displayName="Missing or malformed doc comment of an exported declaration"
+                     groupName="Go" enabledByDefault="false" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoDocCommentInspection"/>
     <localInspection language="Go" shortName="GoStructTag" displayName="Malformed or duplicate struct tag"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoStructTagInspection"/>
@@ -53,5 +56,8 @@
     <localInspection language="Go" shortName="GoErrorsPackage" displayName="Misuse of errors.As and comparison with sentinel errors"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoErrorsPackageInspection"/>
+    <localInspection language="Go" shortName="GoBuildConstraint" displayName="Build constraint comments"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoBuildConstraintInspection"/>
   </extensions>
 </idea-plugin>

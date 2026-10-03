@@ -250,6 +250,64 @@ class GoInsertCompletionTest : GoCompletionTestBase() {
         """)
     }
 
+    fun testAutoImportPutsTheStandardLibraryAboveModules() {
+        checkInsert("""
+            package main
+
+            import (
+                mux "github.com/gorilla/mux"
+            )
+
+            var _ = mux.NewRouter
+
+            func main() {
+                strings.ToUpp<caret>
+            }
+        """, "ToUpper", """
+            package main
+
+            import (
+                "strings"
+
+                mux "github.com/gorilla/mux"
+            )
+
+            var _ = mux.NewRouter
+
+            func main() {
+                strings.ToUpper(<caret>)
+            }
+        """)
+    }
+
+    fun testAutoImportGroupsASingleModuleImport() {
+        checkInsert("""
+            package main
+
+            import mux "github.com/gorilla/mux"
+
+            var _ = mux.NewRouter
+
+            func main() {
+                strings.ToUpp<caret>
+            }
+        """, "ToUpper", """
+            package main
+
+            import (
+                "strings"
+
+                mux "github.com/gorilla/mux"
+            )
+
+            var _ = mux.NewRouter
+
+            func main() {
+                strings.ToUpper(<caret>)
+            }
+        """)
+    }
+
     fun testUnimportedPackagesNotOfferedWhenNameIsTaken() {
         val items = lookups("""
             package main

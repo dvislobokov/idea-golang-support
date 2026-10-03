@@ -83,6 +83,58 @@ object GoGenerators {
         return "func ($r ${struct.name}) String() string {\n\treturn fmt.Sprintf(\"${struct.name}{$format}\"${if (arguments.isEmpty()) "" else ", $arguments"})\n}\n"
     }
 
+    /**
+     * `String()` of an enum the way `stringer` writes it: a case per member (one name per value, the caller decides which), the number
+     * in the type's name for any other value. The number is converted to the [underlying] type: `%d` on the value itself would call
+     * this `String()` again.
+     */
+    fun enumStringMethod(typeName: String, receiver: String, members: List<String>, underlying: String): String {
+        val cases = members.joinToString("") { "\tcase $it:\n\t\treturn \"$it\"\n" }
+        return "func ($receiver $typeName) String() string {\n\tswitch $receiver {\n$cases\t}\n\treturn fmt.Sprintf(\"$typeName(%d)\", $underlying($receiver))\n}\n"
+    }
+
+    /** How Equal compares a field; [importPath] is the package the comparison calls. */
+    enum class EqualKind(val importPath: String?) {
+        /** `==`: every comparable type, pointers by address. */
+        OPERATOR(null),
+        BYTES("bytes"),
+        /** `slices.Equal` for a slice of comparable elements. */
+        SLICES("slices"),
+        /** `maps.Equal` for a map with comparable values. */
+        MAPS("maps"),
+        /** `time.Time` has its own `Equal`: `==` compares the location too. */
+        TIME(null),
+        /** Not comparable otherwise (a func, a slice of slices): `reflect.DeepEqual`, only when the field is ticked by hand. */
+        DEEP("reflect");
+
+        /** Whether the field is ticked in the dialog at the start. */
+        val byDefault: Boolean get() = this != DEEP
+    }
+
+    fun equalComparison(field: String, kind: EqualKind, a: String, b: String): String = when (kind) {
+        EqualKind.OPERATOR -> "$a.$field == $b.$field"
+        EqualKind.BYTES -> "bytes.Equal($a.$field, $b.$field)"
+        EqualKind.SLICES -> "slices.Equal($a.$field, $b.$field)"
+        EqualKind.MAPS -> "maps.Equal($a.$field, $b.$field)"
+        EqualKind.TIME -> "$a.$field.Equal($b.$field)"
+        EqualKind.DEEP -> "reflect.DeepEqual($a.$field, $b.$field)"
+    }
+
+    /**
+     * `func (p Point) Equal(other Point) bool { return p.X == other.X && … }`; the parameter has the receiver's type ([pointer]: `*T`).
+     * More than three comparisons go one per line.
+     */
+    fun equalMethod(typeName: String, receiver: String, pointer: Boolean, fields: List<Pair<String, EqualKind>>): String {
+        val other = if (receiver == "other") "o" else "other"
+        val type = if (pointer) "*$typeName" else typeName
+        val comparisons = fields.map { (name, kind) -> equalComparison(name, kind, receiver, other) }
+        val body = if (comparisons.isEmpty()) "true" else comparisons.joinToString(if (comparisons.size > 3) " &&\n\t\t" else " && ")
+        return "func ($receiver $type) Equal($other $type) bool {\n\treturn $body\n}\n"
+    }
+
+    /** The packages the comparisons of [kinds] call, sorted. */
+    fun equalImports(kinds: Collection<EqualKind>): List<String> = kinds.mapNotNull { it.importPath }.distinct().sorted()
+
     enum class TagCase(val title: String, val apply: (String) -> String) {
         SNAKE("snake_case", ::snakeCase), CAMEL("camelCase", ::camelCase), AS_IS("as the field", { it }), LOWER("lowercase", { it.lowercase() });
 

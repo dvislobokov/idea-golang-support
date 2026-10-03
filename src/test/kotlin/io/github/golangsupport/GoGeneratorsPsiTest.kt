@@ -2,8 +2,11 @@ package io.github.golangsupport
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import io.github.golangsupport.lang.GoDeclarationInfo
+import io.github.golangsupport.lang.GoGenerateEnumStringAction
+import io.github.golangsupport.lang.GoGenerateEqualAction
 import io.github.golangsupport.lang.GoGenerators
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoTypeSpec
 
 /** The generators over declarations of the PSI ([GoDeclarationInfo.of]): what Alt+Insert writes for a struct, an interface, a function. */
 class GoGeneratorsPsiTest : BasePlatformTestCase() {
@@ -80,5 +83,91 @@ class GoGeneratorsPsiTest : BasePlatformTestCase() {
         assertTrue(test, test.contains("got0, got1 := Total(tt.items, tt.discount)"))
         assertTrue(GoGenerators.testFunction(declaration("Start"), "store").startsWith("func TestServer_Start(t *testing.T) {"))
         assertEquals("return 0, nil", GoGenerators.returnStatement(total.signature))
+    }
+
+    private fun spec(file: GoFile, name: String): GoTypeSpec = file.types.first { it.name == name }
+
+    fun testEnumStringFromTheConstantsOfThePackage() {
+        val colors = myFixture.addFileToProject("color.go", """
+            package store
+
+            type Color int
+
+            const (
+            	Red Color = iota
+            	Green
+            	Blue
+            	Crimson = Red
+            	count = 3
+            )
+
+            type Mode uint8
+
+            func (m *Mode) Set() {}
+
+            const Fast, Slow Mode = 0, 1
+
+            type Flags int
+
+            const (
+            	Read Flags = 1 << iota
+            	Write
+            	Exec
+            )
+
+            type Named int
+
+            const One Named = 1
+
+            func (Named) String() string { return "" }
+
+            type NoConstants int
+        """.trimIndent()) as GoFile
+        // equal values are one member, the first name wins; an untyped constant is no member
+        assertEquals(
+            "func (c Color) String() string {\n\tswitch c {\n\tcase Red:\n\t\treturn \"Red\"\n\tcase Green:\n\t\treturn \"Green\"\n\tcase Blue:\n\t\treturn \"Blue\"\n" +
+                "\t}\n\treturn fmt.Sprintf(\"Color(%d)\", int(c))\n}\n",
+            GoGenerateEnumStringAction.code(spec(colors, "Color")),
+        )
+        // another file of the package counts too
+        myFixture.addFileToProject("more.go", "package store\n\nconst Yellow Color = 7\n")
+        assertEquals(setOf("Red", "Green", "Blue", "Yellow"), GoGenerateEnumStringAction.members(spec(colors, "Color"))?.map { it.name }?.toSet())
+        // the receiver name of the methods there are, the underlying type in the conversion
+        val mode = GoGenerateEnumStringAction.code(spec(colors, "Mode"))!!
+        assertTrue(mode, mode.startsWith("func (m Mode) String() string {") && mode.contains("uint8(m)"))
+        assertNull("bit flags", GoGenerateEnumStringAction.code(spec(colors, "Flags")))
+        assertNull("String() is there", GoGenerateEnumStringAction.code(spec(colors, "Named")))
+        assertNull("no constants", GoGenerateEnumStringAction.code(spec(colors, "NoConstants")))
+        assertNull("a struct", GoGenerateEnumStringAction.code(spec(file, "Server")))
+    }
+
+    fun testEqualKindsOfTheFields() {
+        val types = myFixture.addFileToProject("record.go", """
+            package store
+
+            type ID int
+
+            type Record struct {
+            	id      ID
+            	Name    string
+            	Data    []byte
+            	Tags    []string
+            	Matrix  [][]int
+            	Counts  map[string]int
+            	Groups  map[string][]int
+            	Owner   *Server
+            	Handler func()
+            	Inner   struct{ A int }
+            }
+        """.trimIndent()) as GoFile
+        val kinds = GoGenerateEqualAction.kinds(spec(types, "Record"))
+        val k = GoGenerators.EqualKind.entries.associateBy { it.name }
+        assertEquals(
+            mapOf(
+                "id" to k["OPERATOR"], "Name" to k["OPERATOR"], "Data" to k["BYTES"], "Tags" to k["SLICES"], "Matrix" to k["DEEP"], "Counts" to k["MAPS"],
+                "Groups" to k["DEEP"], "Owner" to k["OPERATOR"], "Handler" to k["DEEP"], "Inner" to k["OPERATOR"],
+            ),
+            kinds,
+        )
     }
 }

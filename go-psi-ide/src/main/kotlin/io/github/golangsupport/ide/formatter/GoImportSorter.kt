@@ -2,6 +2,7 @@ package io.github.golangsupport.ide.formatter
 
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiFile
 import com.intellij.psi.TokenType
 import com.intellij.psi.impl.source.codeStyle.PreFormatProcessor
 import com.intellij.psi.util.PsiTreeUtil
@@ -10,6 +11,7 @@ import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoImportDeclaration
 import io.github.golangsupport.lang.psi.GoTokenSets
 import io.github.golangsupport.lang.psi.GoTypes
+import io.github.golangsupport.project.api.GoModuleGraphProvider
 
 /**
  * Sorts the specs of every parenthesised import declaration like gofmt (`go/ast.SortImports`):
@@ -19,6 +21,7 @@ import io.github.golangsupport.lang.psi.GoTypes
  * It runs before formatting (a pre-format processor rather than a post-format one) so that the
  * alignment of trailing comments is computed on the sorted order. Only the order of whole lines
  * changes; token and comment text is preserved. Unlike gofmt, duplicate imports are not removed.
+ * Specs do not move between groups here (gofmt does not move them either); Optimize Imports does that ([GoImportGroups]).
  */
 class GoImportSorter : PreFormatProcessor {
 
@@ -119,5 +122,69 @@ class GoImportSorter : PreFormatProcessor {
         var line = 0
         for (i in 0 until minOf(offset, text.length)) if (text[i] == '\n') line++
         return line
+    }
+}
+
+/**
+ * The import groups of goimports (`goimports -local <main module>`): cgo's `"C"`, the standard library (no dot in the first path
+ * element), third-party modules, the main module(s) of the file. Optimize Imports regroups a parenthesised declaration into them
+ * ([regroup]); auto-import puts a new path into its group. Reformat Code ([GoImportSorter]) does not regroup: gofmt does not either.
+ */
+object GoImportGroups {
+    enum class Group { CGO, STANDARD, THIRD_PARTY, LOCAL }
+
+    fun groupOf(path: String, locals: Collection<String>): Group = when {
+        path == "C" -> Group.CGO
+        locals.any { path == it || path.startsWith("$it/") } -> Group.LOCAL
+        '.' !in path.substringBefore('/') -> Group.STANDARD
+        else -> Group.THIRD_PARTY
+    }
+
+    /** The module paths of the main modules (go.mod, or every `use` of go.work) the file belongs to; empty outside a module. Read action. */
+    fun localPrefixes(file: PsiFile): List<String> {
+        val virtualFile = file.originalFile.virtualFile ?: file.virtualFile ?: return emptyList()
+        return GoModuleGraphProvider.getInstance(file.project).graphFor(virtualFile)?.mainModules?.map { it.path }?.filter { it.isNotEmpty() }.orEmpty()
+    }
+
+    /** One spec: its line, the comment lines just above it (they move with it), and what gofmt sorts by. */
+    private class Spec(val lines: List<String>, val path: String, val name: String, val comment: String)
+
+    private val SPEC = Regex("""^(?:([\p{L}_][\p{L}\p{N}_]*|\.)\s+)?("(?:[^"\\]|\\.)*"|`[^`]*`)\s*(//.*|/\*.*?\*/)?$""")
+
+    /**
+     * The text of a parenthesised import declaration ([declaration], `import (` … `)`) with its specs in goimports groups, each sorted
+     * by path, name, comment and separated by one blank line; null when nothing changes or the layout is not one spec per line (then
+     * gofmt's sort is all it gets). Comment lines above a spec move with it; those after the last spec stay at the end.
+     */
+    fun regroup(declaration: String, locals: Collection<String>): String? {
+        val open = declaration.indexOf('(')
+        val close = declaration.lastIndexOf(')')
+        if (open < 0 || close < open) return null
+        val afterOpen = declaration.indexOf('\n', open)
+        val beforeClose = declaration.lastIndexOf('\n', close)
+        if (afterOpen < 0 || afterOpen >= beforeClose) return null
+        if (declaration.substring(open + 1, afterOpen).isNotBlank() || declaration.substring(beforeClose + 1, close).isNotBlank()) return null
+        val specs = ArrayList<Spec>()
+        var pending = ArrayList<String>()
+        for (raw in declaration.substring(afterOpen + 1, beforeClose).split('\n')) {
+            val line = raw.trim()
+            when {
+                line.isEmpty() -> {}
+                line.startsWith("//") || line.startsWith("/*") && line.indexOf("*/") == line.length - 2 -> pending += line
+                else -> {
+                    val match = SPEC.matchEntire(line) ?: return null
+                    val path = match.groupValues[2].let { it.substring(1, it.length - 1) }
+                    specs += Spec(pending + line, path, match.groupValues[1], match.groupValues[3])
+                    pending = ArrayList()
+                }
+            }
+        }
+        if (specs.size < 2) return null
+        val groups = specs.groupBy { groupOf(it.path, locals) }.toSortedMap().values
+            .map { group -> group.sortedWith(compareBy<Spec>({ it.path }, { it.name }, { it.comment })) }
+        val body = groups.joinToString("\n") { group -> group.joinToString("") { spec -> spec.lines.joinToString("") { "\t$it\n" } } } +
+            pending.joinToString("") { "\t$it\n" }
+        val result = declaration.substring(0, open + 1) + "\n" + body + declaration.substring(close)
+        return result.takeIf { it != declaration }
     }
 }

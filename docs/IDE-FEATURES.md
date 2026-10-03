@@ -211,9 +211,10 @@ of another file (`setAssertOnFileLoadingFilter`).
 - Keywords: trailing space (`return `, `if `, `case `), `default:`, `struct{<caret>}`,
   `interface{<caret>}`, `map[<caret>]`, `func(<caret>)`; none for `break`/`continue`/`fallthrough`.
 - Auto-import (`GoImportInserter`, text-based): into the first parenthesised import group, inside
-  the block (blank-line separated) of the same kind (standard library vs. module paths) at the
-  sorted position, or as a new block; a single-line import becomes a group; without imports a
-  declaration is added after the package clause.
+  the block (blank-line separated) of its goimports group (`GoImportGroups`: `"C"`, standard library,
+  third-party, main module from `GoModuleGraphProvider`) at the sorted position, or as a new block
+  where that group goes; a single-line import becomes a grouped declaration split into groups
+  (`import "C"` is never grouped); without imports a declaration is added after the package clause.
 - Snippets at a statement start inside a function (`GoSnippets`): `iferr` ->
   `if err != nil { return <zero values> }` with the enclosing function's (or literal's) results
   (`0`, `""`, `false`, `nil`, `T{}`/`pkg.T{}`, `*new(T)` for type parameters, `err` for `error`);
@@ -236,8 +237,17 @@ start-vs-middle-match classifier runs before all weighers, so the order above ap
 each match class (an exact prefix match of a universe name still precedes a middle match of a
 local).
 
+### Smart, chain and project-member completion (wave 3 of FEATURES.md §11, 0.2.26–0.2.28)
+
+| Where | Class | What |
+|---|---|---|
+| `completion.contributor` (SMART) | `GoSmartProvider` + `GoSmartLiterals` | Smart completion (Ctrl+Shift+Space) in expressions and after `.`: candidates filtered by `GoLookupElementFactory.smartMatch` against `expectedTypeAt` (functions and methods by their first result; `len`/`cap`/`append`/`new` by rule), plus `LITERAL` items `T{}`, `&T{}`, `make(T)`, `make(T, 0)`, `func(...) R {}`, `""`, `0` written as the file sees the type (no literal for a type of an unimported package). No expected type: the basic set. |
+| `completion.contributor` (chains) | `GoChainCandidates` | `x.F.M` / `x.F().M`: roots are locals, parameters and variables with a known type (30); first steps are fields with promotion and parameterless one-result methods (20 per root, 200 expansions); 50 chains. Lookup string is the whole chain; parentheses as for methods. In smart filtered by type, in basic from a 2-character prefix (restart at length 2). Level `UNIMPORTED`. |
+| `completion.contributor` (project members) | `GoProjectMemberCandidates` | Bare names to `pkg.Name` from `GoAllPublicNamesIndex` (project scope, prefix ≥ 2, ≤ 200 keys / ≤ 100 items). Import path from `GoPackageResolver.importPathOf(dir)`; skips the current package, `main`, `_test.go`, `vendor`/`testdata`, `internal` per the go rule, imported paths and taken names. Import through `GoImportInserter`; `expectedMatch` from stub declaration types. The host `GoCatalogueCompletionContributor` leaves project entries out when `GoFeatures.native(COMPLETION)`. |
+
 ### Tests
 
+`completion.GoSmartCompletionTest` (10), `GoProjectMemberCompletionTest` (6),
 `completion.GoScopeCompletionTest` (15), `GoMemberCompletionTest` (19),
 `GoKeywordCompletionTest` (19), `GoInsertCompletionTest` (11), `GoRankingCompletionTest` (9),
 `GoCompletionEnvironmentTest` (10: import paths from GOROOT and from an on-disk module copied
@@ -248,8 +258,8 @@ stub-only candidates, a 3000-line file with 500 package-level symbols under 300 
 
 - Tail texts print `byte`/`rune` as `uint8`/`int32` (the type model does not keep aliases).
 - Method expressions on `(*T)`, completion of generic instantiation arguments by constraint,
-  postfix templates, smart (type-filtered) completion and second-level completion
-  (`x.Field.Method` chains) are not implemented.
+  postfix templates are not implemented. Smart literals are not offered for types of packages
+  the file does not import; chains go one level deep only.
 - `GoCompletionRanker` has no implementation; the ML module is planned (docs/ML.md).
 
 ## Phase 6d: inspections, quick fixes, semantic highlighting
@@ -291,13 +301,15 @@ are joined with `; ` because problem descriptions are single-line.
 
 PSI walkers on `GoAnalysisInspectionBase` (a `buildVisitor` that returns the empty visitor while `GoIdeFeature.DIAGNOSTICS` is off,
 like the checker inspections); types and resolve come from `GoSemanticService` (cached per body), no project-wide search except the
-implementations of a type switch's interface (stub indices, as Fill Switch). All WARNING, enabled by default.
+implementations of a type switch's interface (stub indices, as Fill Switch). WARNING and enabled by default unless the row says otherwise.
 
 | Short name | Rules | Quick fixes |
 |---|---|---|
-| `GoExhaustiveSwitch` | `switch` over an enum (constants of a named type in its package; equal values are one member, unexported constants of another package are not members, bit flags skipped) or a type switch over an interface of the project content (library interfaces skipped) without `default` (option: with `default` too): `Missing cases in switch of type Color: Red, Green, Blue and 2 more` on the `switch` keyword | Add missing cases (`GoSwitchCases`, the Fill Switch computation) |
+| `GoExhaustiveSwitch` | `switch` over an enum (constants of a named type in its package; equal values are one member, unexported constants of another package are not members, bit flags skipped) or a type switch over an interface of the project content (library interfaces skipped) without `default` (option: with `default` too): `Missing cases in switch of type Color: Red, Green, Blue and 2 more` on the `switch` keyword (weak warning) | Add missing cases (`GoSwitchCases`, the Fill Switch computation) |
 | `GoStructTag` | vet `structtag`: "struct field tag ‹tag› not compatible with reflect.StructTag.Get: ‹vet reason›"; `Duplicate key "json" in struct field tag`; `struct field B repeats json tag "id" also at field A` (`json`, `xml` with attributes apart and `XMLName` skipped, `yaml`, `db`; `-` and empty names skipped, embedded structs not descended into); `struct field x has json tag but is not exported` (`json`, `xml`) | Fix quoting (`GoStructTags.repaired`: bare value quoted, space after the colon, missing closing quote at the end, comma or nothing between pairs); Remove duplicate key |
 | `GoContextPlacement` | `context.Context should be the first parameter of a function` (declarations and methods; `testing` `*T`/`*B`/`*F`/`TB` may come first); `'ctx' is replaced/shadowed by context.Background(): …` inside the innermost function that has a context parameter; `context.Background() is passed where 'ctx' is available` (weak warning; function literals without their own context parameter are not reported) | Use ctx; Use ctx (remove the assignment) |
+| `GoDocComment` | golint `exported` (opt-in, weak warning, off by default): `exported function Foo should have comment or be unexported` (also method `T.Foo`, type, const, var; in a group without a group comment: `… should have comment (or a comment on this block) or be unexported`); `comment on exported type Foo should be of the form "Foo ..."` (`A`/`An`/`The Foo` and a `Deprecated:` paragraph accepted; the group comment is not checked for the form; only the first name of a spec is checked). Skipped: `_test.go`, `package main`, generated files, methods of unexported types | Add doc comment (`// Name ` above the declaration; caret after it when the file is open in the selected editor); Start comment with 'Name' (`//` comments only) |
+| `GoBuildConstraint` | vet `buildtag`: `invalid //go:build expression: …`, `misplaced //go:build comment` (after the package clause, or no blank line before it), `multiple //go:build comments` (errors); `// +build is deprecated; use //go:build` and `unknown GOOS/GOARCH 'linx'` for a tag one edit from a known one (weak warnings; `cgo`, `unix`, `ignore`, `go1.*`, `goexperiment.*`, tags under 3 characters never) | Add //go:build line (converts `+build`, Go's printing: `(a && !b) \|\| c`); Replace with 'linux' |
 | `GoErrorsPackage` | vet `errorsas` (`second argument to errors.As must be a non-nil pointer …`, `… should not be *error`; `any` targets accepted); `err == ErrX` / `!=` with a package-level `error` variable (weak warning; not `nil`, not inside `Is` methods) | Take the address of target; Replace with errors.Is(err, ErrX) (imports `errors`) |
 
 Struct tag parsing is pure (`GoStructTags`: vet's `validateStructTag`, reflect's `Lookup`, `strconv.Unquote`), tested by `GoStructTagsTest`;
@@ -312,8 +324,11 @@ the inspections by `GoAnalysisInspectionsTest`.
 - Remove unused import (`GoRemoveImportFix`): the spec's line, or the whole declaration when it
   becomes empty; a blank line left between blank lines is collapsed.
 - Optimize imports: `lang.importOptimizer` `GoImportOptimizer` (Code | Optimize Imports and the
-  `GoOptimizeImportsFix`): removes the imports the checker reports unused, then sorts each run of
-  specs like gofmt (`GoImportSorter`). Blank-line groups are kept (no goimports regrouping).
+  `GoOptimizeImportsFix`): removes the imports the checker reports unused, then regroups each
+  parenthesised declaration like `goimports -local <main module>` (`GoImportGroups.regroup`: `"C"`,
+  std, third-party, local; comment lines above a spec move with it; one spec per line required,
+  otherwise only the gofmt sort applies). Reformat Code (`GoImportSorter`) still sorts within the
+  existing blank-line groups only, as gofmt does (wave 3, 0.2.25).
 - Unused variable (`GoUnusedVariableFixes`): a single-variable statement (`x := v`,
   `var x T = v`) is removed when its values have no calls or receives, otherwise replaced by
   `_ = v`; one of several variables (`a, x := f()`, `var a, x`, `for i, x := range`) is renamed
@@ -459,6 +474,26 @@ Editing features over the PSI; none of them talks to gopls, and only inlay hints
   import name of the file; `:=` types come from `declarationType` and the per-body caches, call signatures from `calleeSignature` (type arguments from `partialSubst`).
 - `GoInlayHintsBenchmark` (`net/http/server.go`, 688 hints): cold ≈ 139 ms, warm ≈ 15 ms, after a body edit ≈ 24 ms (`testData/benchmark/thresholds.json`).
 - Tests dump the hints of a real `DeclarativeInlayHintsPass` in the `/*<# … #>*/` format; `testHintsDoNotLoadOtherFiles` keeps the AST of the callee's file unloaded.
+
+### Wave 3: code creation (2026-10-03, versions 0.2.23–0.2.30)
+
+Completion parts are in "Smart, chain and project-member completion" above, import grouping in "Quick fixes". Create intentions:
+`ide.intentions.GoCreateFromUsageIntentions` on `GoCreateText` / `GoCreatePlan` (a plan may write into another file of the package;
+the preview shows only plans for the editor's file), gate `CODE_ACTIONS`; each reads the checker's `undefined` / `undefined-member`
+diagnostic at the caret, so nothing is offered for a name that resolves.
+
+| Feature | Class | What |
+|---|---|---|
+| Create function from usage | `GoCreateFunctionFromUsageIntention` | `undefined: f` on a call: params from argument types (untyped → default, nil → any), names from arguments/types (`v1, v2`), results from the context; `pkg.F` into the project package's file; generic arguments → not offered |
+| Create method from usage | `GoCreateMethodFromUsageIntention` | `x.M(...)` missing on a named non-generic type of the project: receiver name/pointer from T's methods (struct without methods → pointer); after T's last method in its file or after the type |
+| Create field from usage | `GoCreateFieldFromUsageIntention` | `x.F` missing on a struct of the project: type from `x.F = v` or `expectedTypeAt`, else `any`; appended before `}` |
+| Create variable from usage | `GoCreateVariableFromUsageIntention` | undefined value: `x := zero` when the literal has the exact type (int, string, bool, struct/array) else `var x T`, before the statement; package level `var x T` after the declaration |
+| Create type from usage | `GoCreateTypeFromUsageIntention` | undefined type reference: `type T struct{}`, `interface{}` inside a constraint; not for `T[...]` |
+| Implement missing methods (quick fix) | `GoImplementMissingMethodsFix` in `GoTypeMismatchInspection` (`assignability`) and `GoCheckerInspection` (`type-assertion`), gate `DIAGNOSTICS` | stubs from `GoTypePredicates.missingMethods` minus names T already has; `*T` → pointer receivers, `T` → value; API `GoImplementStubs.missing/compute`, also used by the host's Ctrl+I / Alt+Insert / Alt+Enter Implement Interface (0.2.31; text path in dumb mode) |
+| Generate (host) | `GoGenerateEnumStringAction`, `GoGenerateEqualAction` | String() for Enum: constants of the type from `GoEnumConstants` (shared with Fill Switch / exhaustive switch), one case per value, flags and types with String() excluded. Equal Method: per-field comparison from semantic types (`==`, bytes/slices/maps.Equal, time.Time.Equal; reflect.DeepEqual only when ticked by hand) |
+
+The host's text-based `GoCreateFunctionIntention` stands down with Built-in code actions; `GoplsActionKinds.isNativeCodeAction` hides the
+gopls `Create …`, `Implement …` and `Declare missing methods …` actions then.
 
 ### Printf checks (`ide.inspections.printf`, `GoPrintfInspection`; gate `DIAGNOSTICS`) and verb completion (wave 2, part F)
 - `GoFormatString` is a pure parser of `fmt` directives (flags, `[n]` indexes, `*` width/precision) with a decoder that maps every character of an

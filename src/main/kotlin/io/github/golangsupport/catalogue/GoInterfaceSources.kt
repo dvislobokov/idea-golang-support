@@ -51,6 +51,12 @@ class GoInterfaceSources(private val project: Project) {
         return methods.map { GoInterfaces.rewrite(it, importPathOf(project, target), targetImports) }
     }
 
+    /** The interface [name] as the type checker sees it, when its package is indexed (smart mode); null otherwise, then [methodsFor] reads sources. */
+    fun interfaceSpec(target: GoFile, importPath: String?, directory: VirtualFile?, name: String): GoTypeSpec? {
+        val packageDirectory = directory ?: importPath?.let { packageDirectory(it, target) }
+        return packageDirectory?.takeIf(::isIndexed)?.let { interfaceIn(it, name) }
+    }
+
     /** The directory of [importPath] as the project model resolves it from [target]: GOROOT, the module cache, the project. */
     private fun packageDirectory(importPath: String, target: GoFile): VirtualFile? {
         val from = target.originalFile.virtualFile ?: return null

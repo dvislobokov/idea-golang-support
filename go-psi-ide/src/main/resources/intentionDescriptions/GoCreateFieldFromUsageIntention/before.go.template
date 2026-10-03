@@ -1,0 +1,7 @@
+type User struct {
+	Name string
+}
+
+func f(u *User) {
+	u.Age = 3
+}

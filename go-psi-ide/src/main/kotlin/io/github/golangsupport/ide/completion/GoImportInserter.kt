@@ -4,16 +4,18 @@ import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.openapi.editor.Document
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.ide.formatter.GoImportGroups
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoImportDeclaration
 import io.github.golangsupport.lang.psi.GoImportList
 import io.github.golangsupport.lang.psi.GoImportSpec
 
 /**
- * Adds an import spec the way goimports does: into an existing parenthesised import group whose
- * specs are of the same kind (standard library vs. module paths, groups separated by blank
- * lines) at its sorted position; a single-line import is turned into a group; without imports a
- * declaration is added after the package clause. Text-based, so the formatter is not needed.
+ * Adds an import spec the way goimports does: into the block (specs separated from the others by
+ * blank lines) of its group ([GoImportGroups]: standard library, third-party, the main module) at
+ * its sorted position, or as a new block where that group goes; a single-line import is turned
+ * into a grouped declaration; without imports a declaration is added after the package clause.
+ * Text-based, so the formatter is not needed.
  */
 object GoImportInserter {
 
@@ -33,15 +35,18 @@ object GoImportInserter {
         val importList = PsiTreeUtil.getChildOfType(file, GoImportList::class.java)
         val declarations = importList?.importDeclarationList.orEmpty()
         val grouped = declarations.firstOrNull { it.lparen != null && it.rparen != null }
+        // `import "C"` keeps its own declaration: the cgo preamble is the comment above it
+        val single = declarations.firstOrNull { d -> d.importSpecList.none { it.path == "C" } }
+        val locals = GoImportGroups.localPrefixes(file)
         when {
-            grouped != null -> insertIntoGroup(grouped, document, path, line)
-            declarations.isNotEmpty() -> {
-                val single = declarations.first()
+            grouped != null -> insertIntoGroup(grouped, document, path, line, locals)
+            single != null -> {
                 val existing = single.importSpecList.map { it.text }
-                val lines = (existing + line).sortedBy { specPath(it) }
-                val text = "import (\n" + lines.joinToString("") { "\t$it\n" } + ")"
+                val groups = (existing + line).groupBy { GoImportGroups.groupOf(specPath(it), locals) }.toSortedMap().values
+                val text = "import (\n" + groups.joinToString("\n") { group -> group.sortedBy { specPath(it) }.joinToString("") { "\t$it\n" } } + ")"
                 document.replaceString(single.textRange.startOffset, single.textRange.endOffset, text)
             }
+            declarations.isNotEmpty() -> document.insertString(declarations.last().textRange.endOffset, "\n\nimport $line")
             else -> {
                 val clause = file.packageClause
                 if (clause == null) {
@@ -53,10 +58,11 @@ object GoImportInserter {
         }
     }
 
-    private fun insertIntoGroup(declaration: GoImportDeclaration, document: Document, path: String, line: String) {
+    private fun insertIntoGroup(declaration: GoImportDeclaration, document: Document, path: String, line: String, locals: List<String>) {
         val text = document.charsSequence
         val specs = declaration.importSpecList
-        val isStd = isStdPath(path)
+        val group = GoImportGroups.groupOf(path, locals)
+        fun groupOf(spec: GoImportSpec) = GoImportGroups.groupOf(spec.path, locals)
         // Blocks of consecutive specs (a blank line separates blocks).
         val blocks = ArrayList<MutableList<GoImportSpec>>()
         var previousLine = -10
@@ -66,8 +72,16 @@ object GoImportInserter {
             blocks.last() += spec
             previousLine = document.getLineNumber(spec.textRange.endOffset)
         }
-        val block = blocks.firstOrNull { b -> b.all { isStdPath(it.path) == isStd } }
+        // a block of the path's group; a block written by hand with several groups in it, when it has one of the group
+        val block = blocks.firstOrNull { b -> b.all { groupOf(it) == group } } ?: blocks.firstOrNull { b -> b.any { groupOf(it) == group } }
         val rparen = declaration.rparen!!.textRange.startOffset
+        val next = blocks.firstOrNull { b -> b.minOf(::groupOf) > group }
+        if (block == null && next != null) {
+            // A new block above the first block of a later group (the standard library above the modules).
+            val lineStart = document.getLineStartOffset(document.getLineNumber(next.first().textRange.startOffset))
+            document.insertString(lineStart, "\t$line\n\n")
+            return
+        }
         if (block == null) {
             // A new block at the end of the group.
             val lineStart = document.getLineStartOffset(document.getLineNumber(rparen))
@@ -93,7 +107,4 @@ object GoImportInserter {
     private fun quote(path: String) = "\"$path\""
 
     private fun specPath(specText: String): String = specText.substringAfter('"').substringBefore('"')
-
-    /** Standard-library paths have no dot in their first element (goimports' grouping rule). */
-    fun isStdPath(path: String): Boolean = !path.substringBefore('/').contains('.')
 }

@@ -1,0 +1,13 @@
+<html>
+<body>
+Checks build constraint comments (vet <code>buildtag</code>):
+<ul>
+  <li>a <code>//go:build</code> expression with a syntax error (error);</li>
+  <li>a <code>//go:build</code> line after the package clause or not followed by a blank line, and a second <code>//go:build</code> line;</li>
+  <li>a <code>// +build</code> line in a file without <code>//go:build</code> (weak warning). Quick fix: <b>Add //go:build line</b> with the
+    equivalent expression;</li>
+  <li>a tag one edit away from a known GOOS or GOARCH, such as <code>linx</code> (weak warning). Custom tags are not reported.
+    Quick fix: <b>Replace with 'linux'</b>.</li>
+</ul>
+</body>
+</html>

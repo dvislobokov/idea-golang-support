@@ -302,6 +302,10 @@
             <action id="Go.Generate.Setters" class="io.github.golangsupport.lang.GoGenerateSettersAction" text="Setters..."/>
             <action id="Go.Generate.GettersSetters" class="io.github.golangsupport.lang.GoGenerateGettersAndSettersAction" text="Getters and Setters..."/>
             <action id="Go.Generate.String" class="io.github.golangsupport.lang.GoGenerateStringAction" text="String() Method..."/>
+            <action id="Go.Generate.EnumString" class="io.github.golangsupport.lang.GoGenerateEnumStringAction" text="String() for Enum"
+                    description="func (c T) String() string with a case per constant of the integer type at the caret, as stringer writes it"/>
+            <action id="Go.Generate.Equal" class="io.github.golangsupport.lang.GoGenerateEqualAction" text="Equal Method..."
+                    description="func (t T) Equal(other T) bool comparing the chosen fields: ==, bytes.Equal, slices.Equal, maps.Equal, time.Time.Equal"/>
             <action id="Go.Generate.Tags" class="io.github.golangsupport.lang.GoGenerateStructTagsAction" text="Struct Tags..."/>
             <action id="Go.Generate.Implement" class="io.github.golangsupport.lang.GoImplementInterfaceAction" text="Implement Interface..."/>
             <action id="Go.Generate.Test" class="io.github.golangsupport.lang.GoGenerateTestAction" text="Test"/>

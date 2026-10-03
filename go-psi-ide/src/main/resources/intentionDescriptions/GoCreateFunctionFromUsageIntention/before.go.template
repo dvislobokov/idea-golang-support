@@ -1,0 +1,4 @@
+func run() {
+	n := parse("42")
+	_ = n
+}

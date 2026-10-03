@@ -43,6 +43,9 @@ class GoCodeActionsSwitchTest : BasePlatformTestCase() {
             "refactor.rewrite.fillSwitch" to "Add cases for Color",
             "quickfix" to "Fill in return values",
             null to "Add cases for b.TypeB",
+            "quickfix" to "Create function load",
+            "quickfix" to "Create variable x",
+            "quickfix" to "Declare missing methods of io.Writer",
         )
         for ((kind, title) in titles) {
             assertTrue("$kind $title", GoplsActionKinds.isNativeCodeAction(kind, title))

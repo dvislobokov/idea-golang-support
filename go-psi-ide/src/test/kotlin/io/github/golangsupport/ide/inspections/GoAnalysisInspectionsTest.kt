@@ -47,7 +47,7 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         withColors("""
 
         func f(c Color) {
-        	<warning descr="Missing cases in switch of type Color: Green, Blue, Cyan and 1 more">switch</warning> c {
+        	<weak_warning descr="Missing cases in switch of type Color: Green, Blue, Cyan and 1 more">switch</weak_warning> c {
         	case Red:
         	}
         	switch c {
@@ -75,7 +75,7 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         withColors("""
 
         func f(c Color) {
-        	<warning descr="Missing cases in switch of type Color: Red, Blue, Cyan and 1 more">switch</warning> c {
+        	<weak_warning descr="Missing cases in switch of type Color: Red, Blue, Cyan and 1 more">switch</weak_warning> c {
         	case Green:
         	default:
         	}
@@ -112,7 +112,7 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         import "reflect"
 
         func f(d reflect.ChanDir) {
-        	<warning descr="Missing cases in switch of type reflect.ChanDir: reflect.BothDir">switch</warning> d {
+        	<weak_warning descr="Missing cases in switch of type reflect.ChanDir: reflect.BothDir">switch</weak_warning> d {
         	case reflect.RecvDir, reflect.SendDir:
         	}
         }
@@ -141,7 +141,7 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         func (s Square) Sides() int     { return 4 }
 
         func f(s Shape, err error) {
-        	<warning descr="Missing cases in switch of type Shape: Square">switch</warning> s.(type) {
+        	<weak_warning descr="Missing cases in switch of type Shape: Square">switch</weak_warning> s.(type) {
         	case *Circle:
         	}
         	switch s.(type) {

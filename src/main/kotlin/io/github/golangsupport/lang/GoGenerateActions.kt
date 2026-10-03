@@ -20,7 +20,20 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiElement
+import com.intellij.openapi.project.DumbService
+import io.github.golangsupport.ide.intentions.GoEnumConstants
 import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
+import io.github.golangsupport.lang.psi.GoMethodDeclaration
+import io.github.golangsupport.semantic.api.GoSemanticService
+import io.github.golangsupport.semantic.types.GoBasicKind
+import io.github.golangsupport.semantic.types.GoBasicType
+import io.github.golangsupport.semantic.types.GoMapType
+import io.github.golangsupport.semantic.types.GoNamedType
+import io.github.golangsupport.semantic.types.GoSliceType
+import io.github.golangsupport.semantic.types.GoType
+import io.github.golangsupport.semantic.types.GoTypePredicates
+import io.github.golangsupport.semantic.types.GoUnknownType
+import io.github.golangsupport.semantic.types.GoStructType as SemanticStructType
 import io.github.golangsupport.lang.psi.GoStructType
 import io.github.golangsupport.lang.psi.GoTypeSpec
 import com.intellij.ui.CheckBoxList
@@ -124,12 +137,12 @@ class GenerateContext(val project: Project, val editor: Editor, val file: GoFile
     fun hint(message: String) = HintManager.getInstance().showErrorHint(editor, message)
 }
 
-/** The struct at the caret with the fields chosen in a dialog; [title] names the dialog. */
-private fun GenerateContext.chooseFields(title: String): Pair<GoDeclarationInfo, List<GoDeclarationInfo>>? {
+/** The struct at the caret with the fields chosen in a dialog; [title] names the dialog, [ticked] the fields ticked at the start. */
+private fun GenerateContext.chooseFields(title: String, ticked: (GoDeclarationInfo) -> Boolean = { true }): Pair<GoDeclarationInfo, List<GoDeclarationInfo>>? {
     val struct = structAtCaret ?: run { hint("Put the caret inside a struct type"); return null }
     val fields = GoGenerators.fields(struct)
     if (fields.isEmpty()) { hint("${struct.name} has no fields"); return null }
-    val dialog = FieldsDialog(project, title, struct.name, fields)
+    val dialog = FieldsDialog(project, title, struct.name, fields, ticked)
     if (!dialog.showAndGet()) return null
     val chosen = dialog.chosen()
     return if (chosen.isEmpty()) null else struct to chosen
@@ -172,6 +185,104 @@ class GoGenerateStringAction : GoGenerateAction() {
     override fun perform(context: GenerateContext) {
         val (struct, fields) = context.chooseFields("String() Method") ?: return
         context.insertAfter(struct, GoGenerators.stringMethod(struct, fields), "Generate String()")
+    }
+}
+
+/**
+ * `String()` of an enum (`type Color int` with its constants in the package), in the shape `stringer` writes: offered on an integer type
+ * that has constants, is no set of bit flags and has no `String()` yet.
+ */
+class GoGenerateEnumStringAction : GoGenerateAction() {
+    override fun isAvailable(context: GenerateContext): Boolean =
+        !DumbService.isDumb(context.project) && context.typeAtCaret?.kind == GoDeclarationKind.TYPE && context.typeSpecAtCaret?.let(::code) != null
+
+    override fun perform(context: GenerateContext) {
+        val type = context.typeAtCaret ?: return context.hint("Put the caret on a type declaration")
+        val code = context.typeSpecAtCaret?.let(::code) ?: return context.hint("${type.name} is no enum with constants, or has String() already")
+        WriteCommandAction.runWriteCommandAction(context.project, "Generate String() for Enum", null, {
+            context.insertAfter(type, code, "Generate String() for Enum")
+            // the import goes above: the caret, put on the method already, moves with the text
+            GoImports.add(context.document.immutableCharSequence, "fmt")?.let { context.document.insertString(it.offset, it.text) }
+            PsiDocumentManager.getInstance(context.project).commitDocument(context.document)
+        }, context.file)
+    }
+
+    companion object {
+        /** The members `String()` names: the constants of [spec] in its package, one per value (the first name wins). Read action, smart mode. */
+        fun members(spec: GoTypeSpec): List<GoEnumConstants.Member>? {
+            val type = GoSemanticService.getInstance(spec.project).declarationType(spec) as? GoNamedType ?: return null
+            if (spec.typeParameters != null || (type.underlying() as? GoBasicType)?.kind?.isInteger != true) return null
+            val members = GoEnumConstants.of(type, ownPackage = true) ?: return null
+            if (GoEnumConstants.isFlags(members.map { it.value })) return null
+            return GoEnumConstants.distinct(members)
+        }
+
+        /** The method for [spec]; null when it is no enum or has a `String` method already. */
+        fun code(spec: GoTypeSpec): String? {
+            val type = GoSemanticService.getInstance(spec.project).declarationType(spec) as? GoNamedType ?: return null
+            if (type.methods.any { it.name == "String" }) return null
+            val members = members(spec) ?: return null
+            val underlying = (type.underlying() as? GoBasicType)?.name ?: return null
+            return GoGenerators.enumStringMethod(type.name, receiverOf(type) ?: GoGenerators.receiverName(type.name), members.map { it.name }, underlying)
+        }
+
+        /** The receiver name the methods of [type] use already: a new method keeps it (staticcheck ST1016). */
+        fun receiverOf(type: GoNamedType): String? =
+            type.methods.firstNotNullOfOrNull { (it.declaration as? GoMethodDeclaration)?.receiver?.name?.takeIf { name -> name != "_" } }
+    }
+}
+
+/**
+ * `Equal(other T) bool` for the struct at the caret: `==` for comparable fields, `bytes.Equal`, `slices.Equal`, `maps.Equal`,
+ * `time.Time.Equal`; a field compared otherwise only by `reflect.DeepEqual` is not ticked at the start.
+ */
+class GoGenerateEqualAction : GoGenerateAction() {
+    override fun isAvailable(context: GenerateContext): Boolean {
+        if (context.structAtCaret == null) return false
+        if (DumbService.isDumb(context.project)) return true
+        val type = context.typeSpecAtCaret?.let { GoSemanticService.getInstance(it.project).declarationType(it) } as? GoNamedType
+        return type?.methods?.none { it.name == "Equal" } ?: true
+    }
+
+    override fun perform(context: GenerateContext) {
+        val spec = context.typeSpecAtCaret ?: return context.hint("Put the caret inside a struct type")
+        val kinds = kinds(spec)
+        val (struct, fields) = context.chooseFields("Equal Method") { kinds[it.name]?.byDefault ?: true } ?: return
+        val type = GoSemanticService.getInstance(spec.project).declarationType(spec) as? GoNamedType
+        val chosen = fields.map { it.name to (kinds[it.name] ?: GoGenerators.EqualKind.OPERATOR) }
+        val receiver = type?.let(GoGenerateEnumStringAction::receiverOf) ?: GoGenerators.receiverName(struct.name)
+        // the receiver form of the methods there are; a value one when there are none: Equal does not change the value
+        val code = GoGenerators.equalMethod(struct.name, receiver, type?.methods.orEmpty().any { it.pointerReceiver }, chosen)
+        WriteCommandAction.runWriteCommandAction(context.project, "Generate Equal Method", null, {
+            context.insertAfter(struct, code, "Generate Equal Method")
+            for (path in GoGenerators.equalImports(chosen.map { it.second })) {
+                GoImports.add(context.document.immutableCharSequence, path)?.let { context.document.insertString(it.offset, it.text) }
+            }
+            PsiDocumentManager.getInstance(context.project).commitDocument(context.document)
+        }, context.file)
+    }
+
+    companion object {
+        /** How each named field of the struct of [spec] is compared, by field name. Read action. */
+        fun kinds(spec: GoTypeSpec): Map<String, GoGenerators.EqualKind> {
+            val struct = GoSemanticService.getInstance(spec.project).declarationType(spec).underlying() as? SemanticStructType ?: return emptyMap()
+            return struct.fields.filter { !it.embedded }.associate { it.name to kindOf(it.type) }
+        }
+
+        fun kindOf(type: GoType): GoGenerators.EqualKind {
+            if (type is GoNamedType && type.name == "Time" && type.pkgPath == "time") return GoGenerators.EqualKind.TIME
+            return when (val underlying = type.underlying()) {
+                is GoSliceType -> when {
+                    (underlying.elem as? GoBasicType)?.kind == GoBasicKind.UINT8 -> GoGenerators.EqualKind.BYTES
+                    GoTypePredicates.comparable(underlying.elem) -> GoGenerators.EqualKind.SLICES
+                    else -> GoGenerators.EqualKind.DEEP
+                }
+                is GoMapType -> if (GoTypePredicates.comparable(underlying.value)) GoGenerators.EqualKind.MAPS else GoGenerators.EqualKind.DEEP
+                // a type the checker does not know: `==` is the likeliest to be right
+                GoUnknownType -> GoGenerators.EqualKind.OPERATOR
+                else -> if (GoTypePredicates.comparable(type)) GoGenerators.EqualKind.OPERATOR else GoGenerators.EqualKind.DEEP
+            }
+        }
     }
 }
 
@@ -269,12 +380,14 @@ class GoGenerateTestAction : GoGenerateAction() {
 }
 
 /** The fields to generate for: all ticked at the start. */
-private class FieldsDialog(project: Project, title: String, typeName: String, private val fields: List<GoDeclarationInfo>) : DialogWrapper(project) {
+private class FieldsDialog(
+    project: Project, title: String, typeName: String, private val fields: List<GoDeclarationInfo>, ticked: (GoDeclarationInfo) -> Boolean = { true },
+) : DialogWrapper(project) {
     private val list = CheckBoxList<GoDeclarationInfo>()
 
     init {
         this.title = "$title of $typeName"
-        fields.forEach { list.addItem(it, "${it.name} ${it.signature}", true) }
+        fields.forEach { list.addItem(it, "${it.name} ${it.signature}", ticked(it)) }
         init()
     }
 

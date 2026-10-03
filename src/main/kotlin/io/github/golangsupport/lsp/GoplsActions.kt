@@ -64,12 +64,16 @@ object GoplsActionKinds {
      * Whether a code action of gopls is one of those the native intentions replace when the switch Language features says Built-in:
      * fillstruct (`Fill Options`, `Fill anonymous struct`), fillswitch (`Add cases for Color`), the fillreturns quick fix
      * (`Fill in return values`); titles read in gopls v0.23 (`internal/analysis/fill*`). gopls has no action that handles an error.
+     * The undeclared-name fix (`Create function f`, `Create variable x`) and stubmethods (`Declare missing methods of I`) are done by
+     * the create-from-usage intentions and the implement-missing-methods fix of go-psi-ide.
      */
     fun isNativeCodeAction(kind: String?, title: String?): Boolean {
         if (kind != null && NATIVE_KINDS.any { kind == it || kind.startsWith("$it.") }) return true
         val text = title.orEmpty().trim()
-        return text.startsWith("Fill ") || text.startsWith("Add cases for ")
+        return text.startsWith("Fill ") || text.startsWith("Add cases for ") || NATIVE_TITLES.any { text.startsWith(it) }
     }
+
+    private val NATIVE_TITLES = listOf("Create function", "Create method", "Create field", "Create variable", "Create type", "Implement ", "Declare missing method")
 
     /** A name without what differs by habit: the case of the letters, the dots of a dialog to come, the quotes around a name (`Create function 'f'`). */
     private fun name(text: String?): String = text.orEmpty().trim().trimEnd('.', '…', ' ').replace("'", "").lowercase()
