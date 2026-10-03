@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports <code>x == nil</code> / <code>x != nil</code> where the nil-ness of <code>x</code> is known on every path: after <code>&amp;T{}</code>, <code>new</code>, <code>make</code>, a literal or an earlier <code>x != nil</code> check, or after <code>x = nil</code>. The condition is always true or false.
+<pre><code>p := &amp;T{}
+if p == nil {
+    return
+}</code></pre>
+</body>
+</html>

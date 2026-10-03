@@ -54,9 +54,11 @@ class GoGotoContributorTest : GoIdeTestBase() {
     }
 
     fun testSymbolNames() {
-        val names = names(GoGotoSymbolContributor())
+        val contributor = GoGotoSymbolContributor()
+        val names = names(contributor)
         assertTrue(names.toString(), names.containsAll(listOf("Shape", "point", "NewPoint", "Area", "Pi", "registry", "Alias", "helper")))
-        assertFalse("locals are not symbols", names.contains("local") || names.contains("inner"))
+        // names may hold stale keys of the persistent test index (other tests' top-level `local`), so the elements decide
+        assertTrue("locals are not symbols", elements(contributor, "local").isEmpty() && elements(contributor, "inner").isEmpty())
     }
 
     fun testSymbolElements() {

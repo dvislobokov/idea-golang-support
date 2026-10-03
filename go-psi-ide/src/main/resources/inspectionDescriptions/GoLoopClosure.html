@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports a <code>for</code> / <code>range</code> variable captured by a function literal that outlives the iteration (vet
+<code>loopclosure</code>): the literal of a <code>go</code> or <code>defer</code> statement, <code>errgroup.Group.Go</code> or a parallel
+<code>t.Run</code>, as the last statement of the loop body. Only for modules whose <code>go</code> directive is older than 1.22: since 1.22 every
+iteration has its own variable. Quick fix: <b>Insert <code>v := v</code></b>.
+</body>
+</html>

@@ -1,0 +1,7 @@
+<html>
+<body>
+Reports <code>defer</code> directly in the body of a <code>for</code> loop (weak warning, revive): the deferred call runs when the function
+returns, not at the end of the iteration, so resources pile up. Move the body to a function or call the cleanup explicitly. A <code>defer</code> inside
+a function literal in the loop is fine.
+</body>
+</html>

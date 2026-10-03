@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports a <code>return</code> that gives <code>nil</code> for the <code>error</code> result inside
+<code>if err != nil { ... }</code> (or the <code>else</code> of <code>if err == nil</code>) when the branch never uses <code>err</code>:
+the error is swallowed (like <code>nilerr</code>).
+<pre><code>v, err := strconv.Atoi(s)
+if err != nil {
+    return 0, nil
+}</code></pre>
+</body>
+</html>

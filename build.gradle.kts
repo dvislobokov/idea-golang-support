@@ -219,6 +219,7 @@ val abiPackages = listOf(
     "io.github.golangsupport.lang.stubs",
     "io.github.golangsupport.semantic.api",
     "io.github.golangsupport.semantic.types",
+    "io.github.golangsupport.semantic.flow",
     "io.github.golangsupport.project.api",
     "io.github.golangsupport.ide.completion.api",
 )

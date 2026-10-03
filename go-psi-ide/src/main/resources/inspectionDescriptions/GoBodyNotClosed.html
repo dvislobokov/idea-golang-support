@@ -1,0 +1,17 @@
+<html>
+<body>
+Reports <code>resp, err := http.Get(…)</code> (also <code>Post</code>, <code>Head</code>, <code>PostForm</code> and the same methods
+of <code>*http.Client</code>, <code>Do</code> included) when some path on which <code>err</code> is nil reaches a <code>return</code>
+without <code>resp.Body.Close()</code>, called or deferred: the connection is not reused and leaks (linter <code>bodyclose</code>).
+<pre><code>resp, err := http.Get(url)
+if err != nil {
+    return err
+}
+if resp.StatusCode != http.StatusOK {
+    return fmt.Errorf("status %d", resp.StatusCode) // the body is not closed on this path
+}
+defer resp.Body.Close()</code></pre>
+Not reported when <code>resp</code> is returned, passed to a function, stored or captured by a closure; a path that passes
+<code>resp.Body</code> to a call counts as handled. The quick fix adds <code>defer resp.Body.Close()</code> after the error check.
+</body>
+</html>

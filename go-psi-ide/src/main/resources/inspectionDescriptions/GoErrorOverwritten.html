@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports an <code>error</code> variable that receives the result of a call and, on some path, receives the result of
+another call before anything reads it: the first error is lost.
+<pre><code>_, err = w.Write(header)
+_, err = w.Write(body) // the error of the first Write is lost
+if err != nil {</code></pre>
+Resets (<code>err = nil</code>) and wrapping (<code>err = fmt.Errorf("...: %w", err)</code>, which reads the error first) do not count.
+Variables captured by a closure or whose address is taken are not checked.
+</body>
+</html>

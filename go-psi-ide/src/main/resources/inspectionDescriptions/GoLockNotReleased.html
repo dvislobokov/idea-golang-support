@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports <code>mu.Lock()</code> or <code>mu.RLock()</code> of a <code>sync.Mutex</code> / <code>sync.RWMutex</code> (a local, a
+parameter, or a field path such as <code>s.mu</code>) when some path from it reaches a <code>return</code> or the end of the function
+without the matching <code>Unlock()</code> / <code>RUnlock()</code>, called or deferred: the next <code>Lock</code> deadlocks.
+<pre><code>s.mu.Lock()
+if s.closed {
+    return errClosed // still locked
+}
+s.mu.Unlock()</code></pre>
+Not reported in functions whose name says they lock (<code>lock…</code>, <code>…Lock</code>, <code>acquire…</code>), when the function
+never unlocks that mutex (it is handed over on purpose), on paths that panic, pass the mutex to a call or return
+<code>mu.Unlock</code>.
+</body>
+</html>

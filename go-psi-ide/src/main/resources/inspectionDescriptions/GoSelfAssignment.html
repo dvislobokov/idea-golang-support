@@ -1,0 +1,6 @@
+<html>
+<body>
+Reports assignments of a value to itself, such as <code>x = x</code>, <code>s.f = s.f</code>, <code>a[i] = a[i]</code> or <code>a, b = a, b</code>
+(staticcheck SA4018): they do nothing. Operands with calls or receives are not compared. Quick fix: <b>Remove self-assignment</b>.
+</body>
+</html>

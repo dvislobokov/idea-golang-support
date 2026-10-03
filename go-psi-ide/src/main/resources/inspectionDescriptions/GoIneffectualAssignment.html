@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports a value assigned to a local variable that no path reads afterwards (like <code>ineffassign</code>).
+<pre><code>n := len(a)
+n = len(b) // the first value is never read
+return n</code></pre>
+Not reported: <code>_</code>, variables captured by a closure or whose address is taken, parameters, named results read by a bare
+<code>return</code>, zero-value initializations (<code>var x T</code>, <code>x := 0</code>, <code>x = nil</code>), values only followed by
+a panic, and error values reported by <b>Error overwritten before it is checked</b>.
+Quick fix: <b>Remove assignment</b> for an <code>=</code>, <code>op=</code> or <code>++</code> statement whose right side has no calls.
+</body>
+</html>

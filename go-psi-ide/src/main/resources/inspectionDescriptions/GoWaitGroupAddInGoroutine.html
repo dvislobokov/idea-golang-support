@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports <code>wg.Add(…)</code> of a <code>sync.WaitGroup</code> called inside the function literal of a <code>go</code> statement:
+the goroutine may start after <code>wg.Wait()</code> has already returned, so the wait does not cover it (vet <code>waitgroup</code>).
+<pre><code>go func() {
+    wg.Add(1) // call it before the go statement
+    defer wg.Done()
+    work()
+}()</code></pre>
+Reported for an <code>Add</code> in the literal's own body, or deeper when the literal also calls <code>wg.Done()</code>; not
+reported when the literal also calls <code>wg.Wait()</code>. The quick fix moves the call before the <code>go</code> statement when its
+arguments do not use the literal's parameters or locals.
+</body>
+</html>

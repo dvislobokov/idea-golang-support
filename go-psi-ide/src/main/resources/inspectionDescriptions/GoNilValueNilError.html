@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports <code>return nil, nil</code> in a function with results <code>(T, error)</code> where T is a pointer, interface, map, slice, channel or function (nilnil). Callers cannot tell a missing value from success. A doc comment mentioning <code>nil, nil</code> or <code>nil if</code> documents the contract and silences the report.
+<pre><code>func Find(id int) (*User, error) {
+    return nil, nil
+}</code></pre>
+</body>
+</html>

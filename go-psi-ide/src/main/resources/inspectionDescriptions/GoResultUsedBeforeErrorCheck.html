@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports a result (a pointer, slice, map, interface, ...) that is used before the error returned with it is checked. Comparisons with nil and the io.Reader idiom (<code>n, err := r.Read(p)</code>) are not reported; <code>defer</code> of the result is covered by the defer inspection.
+<pre><code>resp, err := http.Get(url)
+body := resp.Body
+if err != nil {
+    return err
+}</code></pre>
+</body>
+</html>

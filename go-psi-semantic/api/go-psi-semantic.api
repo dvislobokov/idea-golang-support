@@ -521,6 +521,225 @@ public final class io/github/golangsupport/semantic/api/GoSemanticService$Defaul
 	public static synthetic fun render$default (Lio/github/golangsupport/semantic/api/GoSemanticService;Lio/github/golangsupport/semantic/types/GoType;ZILjava/lang/Object;)Ljava/lang/String;
 }
 
+public final class io/github/golangsupport/semantic/flow/GoBits {
+	public static final field Companion Lio/github/golangsupport/semantic/flow/GoBits$Companion;
+	public synthetic fun <init> ([JLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun get (I)Z
+	public fun hashCode ()I
+	public final fun indices ()Ljava/util/List;
+	public final fun or (Lio/github/golangsupport/semantic/flow/GoBits;)Lio/github/golangsupport/semantic/flow/GoBits;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoBits$Builder {
+	public fun <init> ()V
+	public fun <init> (Lio/github/golangsupport/semantic/flow/GoBits;)V
+	public synthetic fun <init> (Lio/github/golangsupport/semantic/flow/GoBits;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lio/github/golangsupport/semantic/flow/GoBits;
+	public final fun clear (I)V
+	public final fun set (I)V
+}
+
+public final class io/github/golangsupport/semantic/flow/GoBits$Companion {
+	public final fun getEMPTY ()Lio/github/golangsupport/semantic/flow/GoBits;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoControlFlow {
+	public static final field Companion Lio/github/golangsupport/semantic/flow/GoControlFlow$Companion;
+	public final fun accessesAt (Lcom/intellij/psi/PsiElement;)Ljava/util/List;
+	public final fun accessesOf (Lio/github/golangsupport/lang/psi/GoNamedElement;)Ljava/util/List;
+	public final fun getAccesses ()Ljava/util/List;
+	public final fun getBody ()Lio/github/golangsupport/lang/psi/GoBlock;
+	public final fun getDeferStatements ()Ljava/util/List;
+	public final fun getDeferred ()Lio/github/golangsupport/semantic/flow/GoFlowNode;
+	public final fun getEntry ()Lio/github/golangsupport/semantic/flow/GoFlowNode;
+	public final fun getExit ()Lio/github/golangsupport/semantic/flow/GoFlowNode;
+	public final fun getNamedResults ()Ljava/util/List;
+	public final fun getNodes ()Ljava/util/List;
+	public final fun getOwner ()Lcom/intellij/psi/PsiElement;
+	public final fun getVariables ()Ljava/util/List;
+	public final fun indexOf (Lio/github/golangsupport/lang/psi/GoNamedElement;)I
+	public final fun isConditionallyEvaluated (Lcom/intellij/psi/PsiElement;)Z
+	public final fun isEscaping (Lio/github/golangsupport/lang/psi/GoNamedElement;)Z
+	public final fun isReachable (Lio/github/golangsupport/semantic/flow/GoFlowNode;)Z
+	public final fun isTracked (Lio/github/golangsupport/lang/psi/GoNamedElement;)Z
+	public final fun nextAccesses (Lio/github/golangsupport/semantic/flow/GoFlowAccess;)Ljava/util/List;
+	public final fun nodeFor (Lcom/intellij/psi/PsiElement;)Lio/github/golangsupport/semantic/flow/GoFlowNode;
+	public final fun nodeOf (Lcom/intellij/psi/PsiElement;)Lio/github/golangsupport/semantic/flow/GoFlowNode;
+	public fun toString ()Ljava/lang/String;
+	public final fun variableOf (Lio/github/golangsupport/lang/psi/GoReferenceExpression;)Lio/github/golangsupport/lang/psi/GoNamedElement;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoControlFlow$Companion {
+	public final fun enclosing (Lcom/intellij/psi/PsiElement;)Lio/github/golangsupport/semantic/flow/GoControlFlow;
+	public final fun of (Lio/github/golangsupport/lang/psi/GoFunctionLit;)Lio/github/golangsupport/semantic/flow/GoControlFlow;
+	public final fun of (Lio/github/golangsupport/lang/psi/GoFunctionOrMethodDeclaration;)Lio/github/golangsupport/semantic/flow/GoControlFlow;
+}
+
+public abstract interface class io/github/golangsupport/semantic/flow/GoDataflowAnalysis {
+	public abstract fun bottom (Lio/github/golangsupport/semantic/flow/GoControlFlow;)Ljava/lang/Object;
+	public abstract fun boundary (Lio/github/golangsupport/semantic/flow/GoControlFlow;)Ljava/lang/Object;
+	public abstract fun getDirection ()Lio/github/golangsupport/semantic/flow/GoDataflowDirection;
+	public abstract fun join (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun transfer (Lio/github/golangsupport/semantic/flow/GoFlowNode;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun transferEdge (Lio/github/golangsupport/semantic/flow/GoFlowEdge;Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoDataflowAnalysis$DefaultImpls {
+	public static fun transferEdge (Lio/github/golangsupport/semantic/flow/GoDataflowAnalysis;Lio/github/golangsupport/semantic/flow/GoFlowEdge;Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoDataflowDirection : java/lang/Enum {
+	public static final field BACKWARD Lio/github/golangsupport/semantic/flow/GoDataflowDirection;
+	public static final field FORWARD Lio/github/golangsupport/semantic/flow/GoDataflowDirection;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/flow/GoDataflowDirection;
+	public static fun values ()[Lio/github/golangsupport/semantic/flow/GoDataflowDirection;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoDataflowResult {
+	public final fun after (Lio/github/golangsupport/semantic/flow/GoFlowNode;)Ljava/lang/Object;
+	public final fun before (Lio/github/golangsupport/semantic/flow/GoFlowNode;)Ljava/lang/Object;
+	public final fun getFlow ()Lio/github/golangsupport/semantic/flow/GoControlFlow;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoDataflowSolver {
+	public static final field INSTANCE Lio/github/golangsupport/semantic/flow/GoDataflowSolver;
+	public final fun solve (Lio/github/golangsupport/semantic/flow/GoControlFlow;Lio/github/golangsupport/semantic/flow/GoDataflowAnalysis;)Lio/github/golangsupport/semantic/flow/GoDataflowResult;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoFlowAccess {
+	public final fun getElement ()Lcom/intellij/psi/PsiElement;
+	public final fun getIndex ()I
+	public final fun getKind ()Lio/github/golangsupport/semantic/flow/GoFlowAccess$Kind;
+	public final fun getNode ()Lio/github/golangsupport/semantic/flow/GoFlowNode;
+	public final fun getResultIndex ()I
+	public final fun getValue ()Lio/github/golangsupport/lang/psi/GoExpression;
+	public final fun getVariable ()Lio/github/golangsupport/lang/psi/GoNamedElement;
+	public final fun isCompound ()Z
+	public final fun isWrite ()Z
+	public final fun isZeroValue ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoFlowAccess$Kind : java/lang/Enum {
+	public static final field DEFINE Lio/github/golangsupport/semantic/flow/GoFlowAccess$Kind;
+	public static final field READ Lio/github/golangsupport/semantic/flow/GoFlowAccess$Kind;
+	public static final field WRITE Lio/github/golangsupport/semantic/flow/GoFlowAccess$Kind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/flow/GoFlowAccess$Kind;
+	public static fun values ()[Lio/github/golangsupport/semantic/flow/GoFlowAccess$Kind;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoFlowDump {
+	public static final field INSTANCE Lio/github/golangsupport/semantic/flow/GoFlowDump;
+	public final fun dump (Lio/github/golangsupport/semantic/flow/GoControlFlow;)Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoFlowEdge {
+	public final fun getFrom ()Lio/github/golangsupport/semantic/flow/GoFlowNode;
+	public final fun getKind ()Lio/github/golangsupport/semantic/flow/GoFlowEdge$Kind;
+	public final fun getTo ()Lio/github/golangsupport/semantic/flow/GoFlowNode;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoFlowEdge$Kind : java/lang/Enum {
+	public static final field FALSE Lio/github/golangsupport/semantic/flow/GoFlowEdge$Kind;
+	public static final field NORMAL Lio/github/golangsupport/semantic/flow/GoFlowEdge$Kind;
+	public static final field TRUE Lio/github/golangsupport/semantic/flow/GoFlowEdge$Kind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/flow/GoFlowEdge$Kind;
+	public static fun values ()[Lio/github/golangsupport/semantic/flow/GoFlowEdge$Kind;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoFlowNode {
+	public final fun getAccesses ()Ljava/util/List;
+	public final fun getElement ()Lcom/intellij/psi/PsiElement;
+	public final fun getIndex ()I
+	public final fun getKind ()Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public final fun getPredecessors ()Ljava/util/List;
+	public final fun getSuccessors ()Ljava/util/List;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoFlowNode$Kind : java/lang/Enum {
+	public static final field CASE Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field COMM Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field CONDITION Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field DEFERRED Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field ENTRY Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field EXIT Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field JOIN Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field PANIC Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field RANGE Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field RETURN Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field STATEMENT Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static final field TERMINATE Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+	public static fun values ()[Lio/github/golangsupport/semantic/flow/GoFlowNode$Kind;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoLiveness {
+	public static final field Companion Lio/github/golangsupport/semantic/flow/GoLiveness$Companion;
+	public synthetic fun <init> (Lio/github/golangsupport/semantic/flow/GoControlFlow;Lio/github/golangsupport/semantic/flow/GoDataflowResult;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun fatesAfter (Lio/github/golangsupport/semantic/flow/GoFlowAccess;)Ljava/util/Set;
+	public final fun fatesBefore (Lio/github/golangsupport/lang/psi/GoNamedElement;Lio/github/golangsupport/semantic/flow/GoFlowNode;)Ljava/util/Set;
+	public final fun getFlow ()Lio/github/golangsupport/semantic/flow/GoControlFlow;
+	public final fun isLiveBefore (Lio/github/golangsupport/lang/psi/GoNamedElement;Lio/github/golangsupport/semantic/flow/GoFlowNode;)Z
+	public final fun isReadAfter (Lio/github/golangsupport/semantic/flow/GoFlowAccess;)Z
+}
+
+public final class io/github/golangsupport/semantic/flow/GoLiveness$Companion {
+	public final fun of (Lio/github/golangsupport/semantic/flow/GoControlFlow;)Lio/github/golangsupport/semantic/flow/GoLiveness;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoNil : java/lang/Enum {
+	public static final field NIL Lio/github/golangsupport/semantic/flow/GoNil;
+	public static final field NOT_NIL Lio/github/golangsupport/semantic/flow/GoNil;
+	public static final field UNKNOWN Lio/github/golangsupport/semantic/flow/GoNil;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/flow/GoNil;
+	public static fun values ()[Lio/github/golangsupport/semantic/flow/GoNil;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoNilness {
+	public static final field Companion Lio/github/golangsupport/semantic/flow/GoNilness$Companion;
+	public synthetic fun <init> (Lio/github/golangsupport/semantic/flow/GoControlFlow;Lio/github/golangsupport/semantic/flow/GoDataflowResult;Lio/github/golangsupport/semantic/flow/GoNilness$Analysis;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun at (Lio/github/golangsupport/lang/psi/GoReferenceExpression;)Lio/github/golangsupport/semantic/flow/GoNil;
+	public final fun before (Lio/github/golangsupport/lang/psi/GoNamedElement;Lio/github/golangsupport/semantic/flow/GoFlowNode;)Lio/github/golangsupport/semantic/flow/GoNil;
+	public final fun getFlow ()Lio/github/golangsupport/semantic/flow/GoControlFlow;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoNilness$Companion {
+	public final fun isNilLiteral (Lcom/intellij/psi/PsiElement;Lio/github/golangsupport/semantic/api/GoSemanticService;)Z
+	public final fun isNilable (Lio/github/golangsupport/semantic/types/GoType;)Z
+	public final fun nilnessOf (Lio/github/golangsupport/lang/psi/GoExpression;Lio/github/golangsupport/semantic/api/GoSemanticService;)Lio/github/golangsupport/semantic/flow/GoNil;
+	public final fun of (Lio/github/golangsupport/semantic/flow/GoControlFlow;)Lio/github/golangsupport/semantic/flow/GoNilness;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoReachingDefinitions {
+	public static final field Companion Lio/github/golangsupport/semantic/flow/GoReachingDefinitions$Companion;
+	public synthetic fun <init> (Lio/github/golangsupport/semantic/flow/GoControlFlow;Lio/github/golangsupport/semantic/flow/GoDataflowResult;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun definitionsOf (Lio/github/golangsupport/semantic/flow/GoFlowAccess;)Ljava/util/List;
+	public final fun getFlow ()Lio/github/golangsupport/semantic/flow/GoControlFlow;
+	public final fun reaching (Lio/github/golangsupport/lang/psi/GoNamedElement;Lio/github/golangsupport/semantic/flow/GoFlowNode;)Ljava/util/List;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoReachingDefinitions$Companion {
+	public final fun of (Lio/github/golangsupport/semantic/flow/GoControlFlow;)Lio/github/golangsupport/semantic/flow/GoReachingDefinitions;
+}
+
+public final class io/github/golangsupport/semantic/flow/GoValueFate : java/lang/Enum {
+	public static final field OVERWRITTEN Lio/github/golangsupport/semantic/flow/GoValueFate;
+	public static final field READ Lio/github/golangsupport/semantic/flow/GoValueFate;
+	public static final field RETURNED Lio/github/golangsupport/semantic/flow/GoValueFate;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/semantic/flow/GoValueFate;
+	public static fun values ()[Lio/github/golangsupport/semantic/flow/GoValueFate;
+}
+
 public final class io/github/golangsupport/semantic/types/GoArrayType : io/github/golangsupport/semantic/types/GoType {
 	public fun <init> (Lio/github/golangsupport/semantic/types/GoType;Ljava/lang/Long;)V
 	public final fun component1 ()Lio/github/golangsupport/semantic/types/GoType;

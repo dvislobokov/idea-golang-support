@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports <code>defer x.Close()</code> or <code>defer x.Body.Close()</code> right after <code>x, err := f()</code>,
+before <code>err</code> is checked: when <code>f</code> fails, <code>x</code> is usually nil and the deferred call panics.
+<pre><code>resp, err := http.Get(url)
+defer resp.Body.Close()
+if err != nil {</code></pre>
+Quick fix: <b>Move defer after the error check</b> when an <code>if</code> testing <code>err</code> follows the <code>defer</code>.
+</body>
+</html>

@@ -314,6 +314,44 @@ implementations of a type switch's interface (stub indices, as Fill Switch). WAR
 | `GoBuildConstraint` | vet `buildtag`: `invalid //go:build expression: …`, `misplaced //go:build comment` (after the package clause, or no blank line before it), `multiple //go:build comments` (errors); `// +build is deprecated; use //go:build` and `unknown GOOS/GOARCH 'linx'` for a tag one edit from a known one (weak warnings; `cgo`, `unix`, `ignore`, `go1.*`, `goexperiment.*`, tags under 3 characters never) | Add //go:build line (converts `+build`, Go's printing: `(a && !b) \|\| c`); Replace with 'linux' |
 | `GoErrorsPackage` | vet `errorsas` (`second argument to errors.As must be a non-nil pointer …`, `… should not be *error`; `any` targets accepted); `err == ErrX` / `!=` with a package-level `error` variable (weak warning; not `nil`, not inside `Is` methods) | Take the address of target; Replace with errors.Is(err, ErrX) (imports `errors`) |
 
+### Data-flow inspections (wave 4 of FEATURES.md §11)
+
+`ide.inspections.flow` builds on `semantic.flow` (`GoControlFlow.of(body)`, liveness, reaching definitions, nilness; one graph per body, cached by
+`GoBodyCache`) through `GoFlowInspectionBase` (one `check(flow, holder)` per function or literal); `ide.inspections.lint` holds the checks that need
+types but no flow. All act only with Language features: Built-in. The noise gate is `FlowCorpusTest` (`:go-psi-ide:corpusTest`): every check over
+GOROOT/src, the first 20 reports of each in `go-psi-ide/build/flow-corpus/goroot-src-flow-reports.txt`, counts in `testData/metrics/goroot-src-flow.json`.
+WARNING and enabled by default unless the row says otherwise.
+
+| Short name | Rules | Quick fixes |
+|---|---|---|
+| `GoErrorOverwritten` | error result overwritten before it is read; `error(nil)` is a reset | |
+| `GoWrongErrorChecked` | `if err != nil` right after `v, err2 := f()` | Check 'err2' instead |
+| `GoNilErrorReturn` | nilerr: `return nil` inside `if err != nil` | |
+| `GoErrNilReturned` | weak: `return …, err` where `err` is known nil (`if err == nil` branch, `else` of `err != nil`) | Return nil |
+| `GoDeferBeforeErrorCheck` | `defer x.Close()` before the error of `x, err := …` is checked | Move defer after the error check |
+| `GoShadowedError` | `err :=` in an inner block shadows an outer err read after the block; the inner one is only nil-checked and the branch does not leave | |
+| `GoResultUsedBeforeErrorCheck` | weak: a pointer / interface result of `v, err := f()` used before err is read; io.Reader methods and nil-checked results exempt | |
+| `GoNilDereference` | nilness: field, method, index or `*p` on a value nil on every path; `unsafe.Sizeof` operands exempt | |
+| `GoImpossibleNilCheck` | weak: `x == nil` / `x != nil` known on every path | |
+| `GoNilValueNilError` | nilnil, weak, off by default: `return nil, nil` in `(T, error)` with nilable T unless the doc comment says so | |
+| `GoIneffectualAssignment` | ineffassign: a value overwritten or never read; generated files and swaps exempt | Remove assignment to 'x' |
+| `GoUnreachableCode` | vet unreachable: first statement of each unreachable run; not after `os.Exit` / `log.Fatal` | Delete unreachable code |
+| `GoLostCancel` | vet lostcancel: cancel of `WithCancel` / `WithTimeout` / `WithDeadline` not called on all paths | |
+| `GoBodyNotClosed` | `resp.Body` of `http.Get` / `Post` / `Do` not closed on a path | Add defer resp.Body.Close() |
+| `GoRowsNotClosed` | `*sql.Rows` not closed on a path | Add defer rows.Close() |
+| `GoLockNotReleased` | `Lock` / `RLock` without the matching unlock on a path; deferred unlock, flag-guarded unlock, hand-back and `…Locked` functions exempt | |
+| `GoSendAfterClose` | send after `close(ch)` on the same path | |
+| `GoWaitGroupAddInGoroutine` | `wg.Add` inside the `go func` | Move Add before the go statement |
+| `GoContextNotPropagated` | contextcheck: `context.Background()` / `TODO()` while a local context or an enclosing function's parameter is in scope (the innermost parameter is `GoContextPlacement`'s) | Use ctx |
+| `GoSelfAssignment` | `x = x` | Remove self-assignment |
+| `GoUnusedResult` | dropped result of a pure function; the unused `append` is the compiler's error, which carries the fix | Assign the result to x |
+| `GoDeferInLoop` | `defer` inside a loop body | |
+| `GoCopyLocks` | vet copylocks (`Lock()` + `Unlock()` without parameters) | Use a pointer receiver |
+| `GoLoopClosure` | loop variable captured by `go` / `defer` literal, `go` < 1.22 | Insert 'v := v' |
+| `GoTestingGoroutine` | `t.Fatal` / `FailNow` / `SkipNow` from a goroutine | |
+
+Tests: `GoControlFlowTest`, `GoFlowAnalysesTest` (semantic), `GoFlowInspectionsTest`, `GoFlowInspections2Test`, `GoResourceFlowInspectionsTest`, `GoLintInspectionsTest`.
+
 Struct tag parsing is pure (`GoStructTags`: vet's `validateStructTag`, reflect's `Lookup`, `strconv.Unquote`), tested by `GoStructTagsTest`;
 the inspections by `GoAnalysisInspectionsTest`.
 

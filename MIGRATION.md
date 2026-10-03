@@ -556,5 +556,16 @@ generics, missing return, init cycles — 0 ложных срабатывани�
   Гейты: `:go-psi-ide:test` и `:test` без падений, checkKotlinAbi зелёный, корпус go-psi-ide 4621/4621. Робот (8083, Built-in, `store/wave5.go`, `wave5_embed.go`):
   подсказки раскладок у пяти вызовов, три предупреждения и оба фикса; `//go:embed` — две ошибки, Ctrl+B открыл `assets/greeting.txt`, фикс дал `import _ "embed"`;
   `json:` → `json:""` со списком, `userId` первым рядом с `firstName`, опции после запятой; «Plugin to blame: Go» за день 0.
+- [x] Шаг 11, волна 4 — data flow (2026-10-03; версии 0.2.37–0.2.43). Каркас `semantic.flow` (CFG, liveness, reaching definitions, nilness) и первую партию
+  проверок делал оркестратор с агентом Opus, затем три агента в worktree: линт без потока (`ide.inspections.lint`, Opus), ресурсы и конкурентность (Opus),
+  остаток потока ошибок и nil (Sonnet). Новый гейт — `FlowCorpusTest` в `:go-psi-ide:corpusTest`: все 25 проверок по GOROOT/src, 0 падений; шум разобран
+  регрессионными тестами (`error(nil)`, `unsafe.Sizeof`, сгенерированные файлы, обмен значений, повторный `Lock` под `defer Unlock`, флаг, отдача замка,
+  `Unlock(bool)` не замок, `os.Exit` перед `return`, внутренний err с выходом, слайсы и nil-проверка результата); nilnil (195 на GOROOT) выключен по умолчанию.
+  Гейты: `:test` 366, go-psi-core 98, go-psi-semantic 176, go-psi-ide 638, checkKotlinAbi и buildPlugin зелёные. Робот (8083, Built-in, `store/wave6.go`,
+  `store/wave7.go`): все ожидаемые проблемы, фиксы Move defer / Remove assignment / Use a pointer receiver / Remove self-assignment / Assign the result /
+  Return nil / Delete unreachable code; «Plugin to blame: Go» 0. Уроки: предупреждение на том же диапазоне, что и ошибка компилятора, платформа скрывает вместе
+  с его фиксами (ShowIntentionsPass) — фикс к `append` повешен на ошибку чекера; новая проверка контекста дублировала `GoContextPlacement` на параметре —
+  перед брифом искать существующую проверку той же темы. `GoGotoContributorTest` проверяет локальные имена по элементам: `processNames` отдаёт и
+  устаревшие ключи постоянного тестового индекса (функция `local` из другого теста ломала его).
 - [ ] 12.1 gopls опционален, [ ] 12.2 gopls удалён.
-- [ ] 13 линтеры по запросу, [ ] 13A vet-класс, [ ] 13B data-flow, [ ] 13C движок правил.
+- [ ] 13 линтеры по запросу, [ ] 13A vet-класс, [x] 13B data-flow (волна 4), [ ] 13C движок правил.

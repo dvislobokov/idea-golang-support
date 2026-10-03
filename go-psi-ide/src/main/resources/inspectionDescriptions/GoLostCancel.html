@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports the cancel function returned by <code>context.WithCancel</code>, <code>WithTimeout</code>,
+<code>WithDeadline</code> or their <code>Cause</code> variants when it is discarded, or when some path from the assignment reaches a
+<code>return</code> without calling, deferring, passing or storing it: the context leaks until its parent is cancelled (vet
+<code>lostcancel</code>).
+<pre><code>ctx, cancel := context.WithTimeout(ctx, time.Second)
+if err := check(); err != nil {
+    return err // cancel is not called on this path
+}
+defer cancel()</code></pre>
+Paths that end in a panic or <code>os.Exit</code> do not count.
+</body>
+</html>

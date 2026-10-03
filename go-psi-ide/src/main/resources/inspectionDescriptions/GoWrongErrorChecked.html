@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports a new error that is ignored because the following condition tests another error variable that was
+already checked, while the new one is never read:
+<pre><code>a, err := f()
+if err != nil { ... }
+b, err2 := g()
+if err != nil { ... } // tests err, not err2</code></pre>
+Quick fix: <b>Check 'err2' instead</b>.
+</body>
+</html>

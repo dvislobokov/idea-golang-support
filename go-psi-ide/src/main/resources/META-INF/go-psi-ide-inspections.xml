@@ -59,11 +59,87 @@
     <localInspection language="Go" shortName="GoErrorsPackage" displayName="Misuse of errors.As and comparison with sentinel errors"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoErrorsPackageInspection"/>
+    <!-- data flow (semantic.flow) -->
+    <localInspection language="Go" shortName="GoErrorOverwritten" displayName="Error overwritten before it is checked"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoErrorOverwrittenInspection"/>
+    <localInspection language="Go" shortName="GoWrongErrorChecked" displayName="Another error variable is checked"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoWrongErrorCheckedInspection"/>
+    <localInspection language="Go" shortName="GoNilErrorReturn" displayName="Nil returned while the error is not nil"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoNilErrorReturnInspection"/>
+    <localInspection language="Go" shortName="GoDeferBeforeErrorCheck" displayName="Deferred call before the error check"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoDeferBeforeErrorCheckInspection"/>
+    <localInspection language="Go" shortName="GoNilDereference" displayName="Nil dereference"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoNilDereferenceInspection"/>
+    <localInspection language="Go" shortName="GoIneffectualAssignment" displayName="Ineffectual assignment"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoIneffectualAssignmentInspection"/>
+    <localInspection language="Go" shortName="GoLostCancel" displayName="Lost context cancel function"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoLostCancelInspection"/>
+    <localInspection language="Go" shortName="GoBodyNotClosed" displayName="HTTP response body is not closed"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoBodyNotClosedInspection"/>
+    <localInspection language="Go" shortName="GoRowsNotClosed" displayName="SQL rows are not closed"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoRowsNotClosedInspection"/>
+    <localInspection language="Go" shortName="GoLockNotReleased" displayName="Mutex is not unlocked on all paths"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoLockNotReleasedInspection"/>
+    <localInspection language="Go" shortName="GoSendAfterClose" displayName="Send on a closed channel"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoSendAfterCloseInspection"/>
+    <localInspection language="Go" shortName="GoWaitGroupAddInGoroutine" displayName="WaitGroup.Add inside the goroutine"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoWaitGroupAddInGoroutineInspection"/>
+    <localInspection language="Go" shortName="GoContextNotPropagated" displayName="Context is not propagated"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoContextNotPropagatedInspection"/>
     <localInspection language="Go" shortName="GoBuildConstraint" displayName="Build constraint comments"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoBuildConstraintInspection"/>
     <localInspection language="Go" shortName="GoTimeLayout" displayName="Time layout"
                      groupName="Go" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoTimeLayoutInspection"/>
+    <localInspection language="Go" shortName="GoSelfAssignment" displayName="Self-assignment"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.lint.GoSelfAssignmentInspection"/>
+    <localInspection language="Go" shortName="GoUnusedResult" displayName="Unused result"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.lint.GoUnusedResultInspection"/>
+    <localInspection language="Go" shortName="GoDeferInLoop" displayName="Defer in loop"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.lint.GoDeferInLoopInspection"/>
+    <localInspection language="Go" shortName="GoCopyLocks" displayName="Lock copied by value"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.lint.GoCopyLocksInspection"/>
+    <localInspection language="Go" shortName="GoLoopClosure" displayName="Loop variable captured by closure"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.lint.GoLoopClosureInspection"/>
+    <localInspection language="Go" shortName="GoTestingGoroutine" displayName="Test failure from a goroutine"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.lint.GoTestingGoroutineInspection"/>
+    <localInspection language="Go" shortName="GoErrNilReturned" displayName="Nil error returned where it is known to be nil"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoErrNilReturnedInspection"/>
+    <localInspection language="Go" shortName="GoShadowedError" displayName="Shadowed error"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoShadowedErrorInspection"/>
+    <localInspection language="Go" shortName="GoResultUsedBeforeErrorCheck" displayName="Result used before the error check"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoResultUsedBeforeErrorCheckInspection"/>
+    <localInspection language="Go" shortName="GoImpossibleNilCheck" displayName="Impossible nil check"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoImpossibleNilCheckInspection"/>
+    <localInspection language="Go" shortName="GoNilValueNilError" displayName="Nil value returned with a nil error"
+                     groupName="Go" enabledByDefault="false" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoNilValueNilErrorInspection"/>
+    <localInspection language="Go" shortName="GoUnreachableCode" displayName="Unreachable code"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoUnreachableCodeInspection"/>
   </extensions>
 </idea-plugin>

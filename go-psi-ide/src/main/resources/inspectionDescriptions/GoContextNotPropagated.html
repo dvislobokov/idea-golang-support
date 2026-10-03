@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports <code>context.Background()</code> or <code>context.TODO()</code> passed as an argument while a parameter or local variable
+of type <code>context.Context</code> is in scope: the callee loses the caller's cancellation and deadline (linter
+<code>contextcheck</code>).
+<pre><code>func (s *Server) Load(ctx context.Context, id string) error {
+    return s.db.Get(context.Background(), id) // use ctx
+}</code></pre>
+Not reported in <code>main</code>, <code>init</code>, test files, goroutine literals and deferred calls, where detaching from the
+caller's context is usually deliberate. The quick fix passes the variable instead.
+</body>
+</html>

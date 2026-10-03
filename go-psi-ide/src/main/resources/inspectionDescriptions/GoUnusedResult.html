@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports calls whose only purpose is the result when the result is dropped (vet <code>unusedresult</code>): <code>append</code>,
+<code>fmt.Sprintf</code> and friends, <code>errors.New</code>, the pure functions of <code>strings</code>, <code>bytes</code> and <code>strconv</code>,
+<code>sort.Reverse</code>, <code>context.With*</code> (the context and the cancel function are lost), <code>time.Since</code> and the
+arithmetic methods of <code>time.Time</code>. Quick fix: <b>Assign the result</b> to the first argument (<code>x = append(x, ...)</code>).
+</body>
+</html>

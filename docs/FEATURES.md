@@ -122,13 +122,15 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | Unresolved, unused import/variable/label, type mismatch, call arity, duplicates, generics, missing return | ✅ | | |
 | Exhaustive `switch` over `iota` enums and sealed interfaces | ✅ (wave 2, 0.2.14) | `GoExhaustiveSwitchInspection`, fix "Add missing cases" shares `GoSwitchCases` with Fill switch; interfaces of the project content stand in for sealed ones; bit-flag enums skipped; weak warning (2026-10-03) | |
 | `Printf` family: verb vs argument type, argument count, `%w` only in `Errorf`, completion of verbs; user wrappers detected like vet | ✅ (wave 2, 0.2.15, 0.2.22) | `ide.inspections.printf` (pure parser + vet tables), `GoPrintfInspection`, verb completion `GoFormatVerbCompletion`; wrappers within the call's package, depth 3 | |
-| Error flow: error assigned and not checked, overwritten unchecked, wrong `err` checked | ❌ | needs a per-function data-flow framework | M |
-| Nil flow: dereference after `x == nil` without exit, `defer resp.Body.Close()` before the error check | ❌ | same framework | M |
-| Concurrency: copying locks (`copylocks`), `wg.Add` inside the goroutine, loop variable capture for `go` < 1.22, send on a closed channel | ❌ | | M |
+| Per-function data-flow framework: CFG, liveness, reaching definitions, nilness | ✅ (wave 4, 0.2.37) | `semantic.flow` (`GoControlFlow`, `GoDataflowSolver`, `GoLiveness`, `GoReachingDefinitions`, `GoNilness`); corpus gate `goroot-src-flow.json` | |
+| Error flow: overwritten unchecked, wrong `err` checked, nilerr and its inverse, `defer` before the check, shadowed `err`, result used before the check | ✅ (wave 4, 0.2.38) | `ide.inspections.flow`; "error assigned and never checked" is `GoUnusedResult` / errcheck of golangci-lint | |
+| Nil flow: dereference of a nil value, impossible `nil` comparison, `return nil, nil` | ✅ (wave 4, 0.2.39) | `GoNilDereference`, `GoImpossibleNilCheck`, `GoNilValueNilError` (opt-in) | |
+| Resources: response body / `sql.Rows` not closed, lost cancel, context not propagated | ✅ (wave 4, 0.2.41) | `GoBodyNotClosed`, `GoRowsNotClosed`, `GoLostCancel`, `GoContextNotPropagated` | |
+| Concurrency: copying locks (`copylocks`), lock not released, `wg.Add` inside the goroutine, loop variable capture for `go` < 1.22, send on a closed channel, `t.Fatal` in a goroutine | ✅ (wave 4, 0.2.42) | `GoCopyLocks`, `GoLockNotReleased`, `GoWaitGroupAddInGoroutine`, `GoLoopClosure`, `GoSendAfterClose`, `GoTestingGoroutine` | |
 | `context.Context` not first, lost or replaced by `context.Background()` | ✅ (wave 2, 0.2.17) | `GoContextPlacementInspection`, fixes "Use ctx" | |
 | Struct tags: syntax, duplicate keys/names | ✅ (wave 2, 0.2.16) | `GoStructTagInspection` (vet `structtag` + repeated names, unexported fields with `json`), fixes "Fix quoting", "Remove duplicate key" | |
 | `errors.As` with a non-pointer target, `errors.Is` vs `==` | ✅ (wave 2, 0.2.18) | `GoErrorsPackageInspection` (vet `errorsas`; sentinel comparison is a weak warning) | |
-| Unreachable code, self-assignment, impossible `nil` comparison, shadowing (optional) | ❌ | vet passes | M |
+| Unreachable code, self-assignment, ineffectual assignment, unused pure results, `defer` in a loop | ✅ (wave 4, 0.2.40, 0.2.43) | `GoUnreachableCode`, `GoSelfAssignment`, `GoIneffectualAssignment`, `GoUnusedResult` (fix also on the compiler's unused `append`), `GoDeferInLoop` | |
 | Unused exported declarations across the project, import cycles, `internal/` violations | 🟡 | `internal/` is detected by the project model, not reported | M |
 | Doc comment lint (exported symbol without a comment, comment not starting with the name) | ✅ (0.2.32) | `GoDocCommentInspection`, opt-in weak warning, fixes Add doc comment / Start comment with 'Name' | |
 | Build constraints: `//go:build` expression syntax, unknown GOOS/GOARCH | ✅ (0.2.33) | `GoBuildConstraintInspection` (vet `buildtag`; parser `GoBuildConstraintEvaluator` of the project model), `+build` → `//go:build` fix | |
@@ -202,8 +204,8 @@ Each wave is measured with the benchmarks and the UI robot before and after, lik
    fill struct/returns and handle error came with step 9.
 3. **Wave 3 (code creation):** done 2026-10-03 (versions 0.2.23–0.2.30): create from usage, implement missing methods, Generate `String()` for enums
    and `Equal`, goimports grouping, smart and chain completion, completion of unimported project members.
-4. **Wave 4 (data flow):** per-function data-flow framework, error and nil flow, concurrency and
-   `context` checks.
+4. **Wave 4 (data flow):** done 2026-10-03 (versions 0.2.37–0.2.43): per-function data-flow framework (`semantic.flow`), 25 checks of error and nil flow,
+   resources, concurrency and dead code; noise reviewed on GOROOT/src by `:go-psi-ide:corpusTest`. Robot-checked (`store/wave6.go`, `store/wave7.go`).
 5. **Wave 5 (platform):** shared indexes for GOROOT, call and type hierarchy, headless
    inspections.
 6. **Wave 6:** done by the host (section 8); what remains is the PSI inputs of step 9 of MIGRATION.md.

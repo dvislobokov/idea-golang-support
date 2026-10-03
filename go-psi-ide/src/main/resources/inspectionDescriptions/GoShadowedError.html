@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports <code>err</code> declared with <code>:=</code> in an inner block (not an <code>if</code> initializer) that shadows an outer <code>err</code> read after the block, when the inner value is only compared with nil: the error is not propagated and the outer value is returned. Quiet when the inner <code>err</code> is returned, wrapped or otherwise used.
+<pre><code>var err error
+for _, p := range paths {
+    data, err := os.ReadFile(p)
+    if err != nil {
+        continue
+    }
+    use(data)
+}
+return err</code></pre>
+</body>
+</html>

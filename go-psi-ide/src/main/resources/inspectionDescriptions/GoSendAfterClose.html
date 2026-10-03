@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports a send <code>ch &lt;- v</code> or a second <code>close(ch)</code> that some path reaches after <code>close(ch)</code> in the same
+function, with <code>ch</code> not reassigned in between: both panic at run time.
+<pre><code>close(results)
+results &lt;- last // panic: send on closed channel</code></pre>
+Only the paths within one pass of the function are followed: the next iteration of a loop, which a <code>closed</code> flag usually
+guards, is not considered. Channels assigned inside a closure or whose address is taken are not checked.
+</body>
+</html>

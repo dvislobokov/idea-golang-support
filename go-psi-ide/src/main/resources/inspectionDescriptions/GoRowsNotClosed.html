@@ -1,0 +1,20 @@
+<html>
+<body>
+Reports <code>rows, err := db.Query(…)</code> (<code>QueryContext</code> too, on <code>*sql.DB</code>, <code>*sql.Tx</code>,
+<code>*sql.Conn</code> and <code>*sql.Stmt</code>) when some path on which <code>err</code> is nil reaches a <code>return</code>
+without <code>rows.Close()</code>, called or deferred: the connection stays busy (linter <code>sqlclosecheck</code>). Also reports
+a <code>for rows.Next()</code> loop when <code>rows.Err()</code> is never called: an error that ended the iteration is lost
+(linter <code>rowserrcheck</code>).
+<pre><code>rows, err := db.QueryContext(ctx, query)
+if err != nil {
+    return err
+}
+defer rows.Close()
+for rows.Next() {
+    …
+}
+return rows.Err()</code></pre>
+Not reported when <code>rows</code> is returned, passed to a function, stored or captured by a closure. The quick fix adds
+<code>defer rows.Close()</code> after the error check.
+</body>
+</html>

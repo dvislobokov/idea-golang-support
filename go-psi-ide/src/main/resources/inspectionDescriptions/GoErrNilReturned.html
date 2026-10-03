@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports a <code>return</code> that gives <code>err</code> as the error result inside <code>if err == nil { ... }</code> (or the <code>else</code> of <code>if err != nil</code>): the value is nil there, so nil is returned although another error was probably meant. Fix: write <code>nil</code> explicitly.
+<pre><code>if err == nil {
+    return nil, err
+}</code></pre>
+</body>
+</html>

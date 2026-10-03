@@ -1,0 +1,7 @@
+<html>
+<body>
+Reports <code>t.Fatal</code>, <code>Fatalf</code>, <code>FailNow</code>, <code>SkipNow</code>, <code>Skip</code> and <code>Skipf</code>
+of <code>testing.T</code> / <code>B</code> / <code>F</code> / <code>TB</code> called from a function literal started with <code>go</code> (vet
+<code>testinggoroutine</code>): they stop only the calling goroutine, not the test. Use <code>t.Error</code> and return.
+</body>
+</html>

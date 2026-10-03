@@ -8,12 +8,82 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.37–0.2.43 are wave 4 (data flow): the per-function control-flow graph and analyses, then the checks built on it; every check
+is gated by the false-positive corpus over GOROOT/src (`:go-psi-ide:corpusTest`, `testData/metrics/goroot-src-flow.json`). Like wave 2, they act only with
+Language features: Built-in.
 Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, directive comments, struct tag naming style).
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
 ### Changed
 - Exhaustive switch inspection (`GoExhaustiveSwitch`) is a weak warning: a plain warning was noise on `reflect.Kind`-like switches without `default`.
+
+## [0.2.43] - 2026-10-03
+
+### Added — Unused results and lint without data flow
+- `GoUnusedResult`: the result of a pure function or method dropped (`strings.ReplaceAll(s, …)`, `errors.New(…)`, `fmt.Sprintf(…)`, `context.WithCancel(…)`); fix "Assign the result to s"
+  when the first argument is a variable. The dropped `append(xs, 1)` stays the compiler's error, which now carries the same fix "Assign the result to xs":
+  a warning on the same range as an error is hidden by the platform together with its fixes (seen live).
+- `GoSelfAssignment` (`x = x`, `a, b = a, b`; fix "Remove self-assignment"), `GoDeferInLoop` (`defer` inside `for`: runs at function exit, not per iteration).
+
+## [0.2.42] - 2026-10-03
+
+### Added — Concurrency checks
+- `GoLockNotReleased`: `mu.Lock()` / `RLock()` of `sync.Mutex` / `RWMutex` with a path to `return` without the matching unlock. Quiet when a `defer mu.Unlock()`
+  exists anywhere (re-acquire after a temporary unlock, net/http `Server.Close`), when the unlock is under a bare flag (`if held`), when the function's first
+  lock operation is an Unlock (called with the lock held, x/term), in functions named like `lock…` / `…Locked`, and when the mutex is passed to a call.
+- `GoSendAfterClose` (send on a channel after `close` on the same path), `GoWaitGroupAddInGoroutine` (`wg.Add` inside the `go func`; fix "Move Add before go").
+- `GoCopyLocks` (vet `copylocks`): value receivers, parameters, assignments, returns, range values and call arguments that copy a lock; a lock is a type
+  with `Lock()` and `Unlock()` without parameters (vet's shape: `internal/gate`'s `Unlock(bool)` is not one). Fix "Use a pointer receiver".
+- `GoLoopClosure` (loop variable captured by `go` / `defer` literal, only for modules with `go` < 1.22) and `GoTestingGoroutine` (vet `testinggoroutine`: `t.Fatal` from a non-test goroutine).
+
+## [0.2.41] - 2026-10-03
+
+### Added — Resource checks
+- `GoBodyNotClosed`: `resp, err := http.Get/Post/Do(…)` with a path where `resp.Body` is neither closed nor handed over; fix "Add defer resp.Body.Close()".
+- `GoRowsNotClosed`: the same for `*sql.Rows` (`Query`, `QueryContext`); fix "Add defer rows.Close()".
+- `GoLostCancel` (vet `lostcancel`): the cancel function of `context.WithCancel` / `WithTimeout` / `WithDeadline` not called on all paths.
+- `GoContextNotPropagated` (contextcheck): `context.Background()` / `TODO()` passed while a local context or a parameter of an enclosing function is in
+  scope (fix "Use ctx"). A parameter of the innermost function stays `GoContextPlacement`'s report: both on one range were a duplicate (seen live).
+
+## [0.2.40] - 2026-10-03
+
+### Added — Dead stores and dead code
+- `GoIneffectualAssignment` (ineffassign): a value written and overwritten or never read on any path; fix "Remove assignment to 'x'". Quiet in generated
+  files and on swaps (`a, b = b, a`).
+- `GoUnreachableCode` (vet `unreachable`): the first statement of each run the control-flow graph cannot reach (after return, panic, goto, an endless `for`,
+  a switch whose clauses all end); fix "Delete unreachable code". After `os.Exit` / `log.Fatal` it stays quiet, like vet: the compiler still wants the `return` there.
+
+## [0.2.39] - 2026-10-03
+
+### Added — Nil flow
+- `GoNilDereference` (nilness): a field, method, index or `*p` on a value that is nil on every path (after `p == nil` without exit, after `var p *T`);
+  operands of `unsafe.Sizeof` / `Alignof` / `Offsetof` are not evaluated and stay quiet.
+- `GoImpossibleNilCheck` (weak warning): `x == nil` / `x != nil` whose answer is known on every path.
+- `GoNilValueNilError` (nilnil, weak warning, **off by default**): `return nil, nil` in a `(T, error)` function with a nilable T, unless the doc comment says so
+  (GOROOT has 195 such returns: an opt-in style rule).
+
+## [0.2.38] - 2026-10-03
+
+### Added — Error flow
+- `GoErrorOverwritten`: an error result overwritten before it is checked (`err = f(); err = g()`); `err = error(nil)` is a reset, not a result.
+- `GoWrongErrorChecked`: `if err != nil` right after `v, err2 := f()` checks the old error.
+- `GoNilErrorReturn` (nilerr): `return nil` inside `if err != nil`; `GoErrNilReturned` (weak warning, its inverse): `return …, err` where `err` is known nil
+  (fix "Return nil").
+- `GoDeferBeforeErrorCheck`: `defer f.Close()` before the error of `f, err := os.Open(…)` is checked; fix "Move defer after the error check".
+- `GoShadowedError`: `err :=` in an inner block shadows an outer `err` read after the block while the inner one is only compared with nil and the
+  branch does not leave the function.
+- `GoResultUsedBeforeErrorCheck` (weak warning): a pointer or interface result of `v, err := f()` used before `err` is read; quiet for slices / maps (partial
+  output is an idiom), for the io.Reader methods and when the result itself is nil-checked.
+
+## [0.2.37] - 2026-10-03
+
+### Added — Data-flow framework (`semantic.flow`, go-psi-semantic)
+- `GoControlFlow.of(function)`: a control-flow graph per function body or literal (statement, condition, range, case and comm nodes; `defer`, `panic`,
+  `os.Exit`-like terminators, `goto` and labels; true/false edges) with variable accesses (read, write, define, compound, zero value); null when it gives up.
+- Analyses on the generic worklist solver (`GoDataflowSolver`): liveness (`GoLiveness`: read / overwritten / returned after a write), reaching definitions,
+  nilness (`GoNilness`: nil / not nil / unknown per access, refined by `== nil` branches). Cached per body by `GoBodyCache`; public API in `api/go-psi-semantic.api`.
+- `:go-psi-ide:corpusTest` runs every flow inspection over GOROOT/src: 0 crashes, the counts in `testData/metrics/goroot-src-flow.json` may only go down.
 
 ## [0.2.36] - 2026-10-03
 

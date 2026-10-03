@@ -1,0 +1,7 @@
+<html>
+<body>
+Reports the first statement of a run of statements that can never execute: after <code>return</code>, <code>panic</code>, <code>os.Exit</code>, <code>log.Fatal</code>, <code>goto</code>, an endless <code>for {}</code> without <code>break</code>, or a <code>switch</code> whose clauses all end. A labeled statement ends the run. Fix: delete the unreachable statements.
+<pre><code>return x
+fmt.Println(x)</code></pre>
+</body>
+</html>

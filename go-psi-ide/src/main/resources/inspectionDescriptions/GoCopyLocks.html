@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports a value that contains a lock being copied (vet <code>copylocks</code>): a <code>sync.Mutex</code>, <code>RWMutex</code>,
+<code>WaitGroup</code>, <code>Once</code>, <code>Cond</code>, <code>Map</code>, <code>Pool</code>, a <code>sync/atomic</code> type, or any type
+with pointer methods <code>Lock</code> and <code>Unlock</code>, also inside struct fields and arrays. Reported: parameters and receivers declared
+by value, call arguments, returns, assignments from an existing value, and the value variable of <code>range</code>. Quick fix for a receiver:
+<b>Use a pointer receiver</b>.
+</body>
+</html>

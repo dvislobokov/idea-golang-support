@@ -83,7 +83,11 @@ class GoCheckerInspection : GoDiagnosticsInspectionBase() {
     override fun accepts(code: String) = code !in GoDiagnosticClasses.CLAIMED
 
     override fun fixes(d: GoDiagnostic, file: GoFile, element: PsiElement): List<LocalQuickFix> =
-        if (d.code == "type-assertion") listOfNotNull(GoImplementMissingMethodsFix.create(file, d, element)) else emptyList()
+        when (d.code) {
+            "type-assertion" -> listOfNotNull(GoImplementMissingMethodsFix.create(file, d, element))
+            "unused-value" -> listOfNotNull(io.github.golangsupport.ide.inspections.lint.GoAssignResultFix.forUnusedAppend(element))
+            else -> emptyList()
+        }
 }
 
 /** The inspection classes contributed by go-psi-ide (for tests and docs). */

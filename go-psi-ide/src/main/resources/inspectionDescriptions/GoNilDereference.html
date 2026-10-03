@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports a use of a variable that is nil on every path to it and panics (like vet <code>nilness</code>): a field
+selection or <code>*x</code> through a nil pointer, a value-receiver method called through a nil pointer, a method called on a nil
+interface, a write into a nil map, a call of a nil function.
+<pre><code>if p == nil {
+    log.Print(p.Name) // p is nil here
+}</code></pre>
+A variable is known nil after <code>x == nil</code> held, after <code>x = nil</code> and after <code>var x *T</code>, until it is
+reassigned. Calls of pointer-receiver methods are legal on nil and are not reported.
+</body>
+</html>
