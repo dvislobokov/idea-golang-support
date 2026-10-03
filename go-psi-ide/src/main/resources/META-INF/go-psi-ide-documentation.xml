@@ -9,5 +9,7 @@
     <!-- doc links ([Name], [pkg.Name], [Type.Method]) in Quick Documentation, and as references of comments: Ctrl+click, usages, rename -->
     <platform.backend.documentation.linkHandler implementation="io.github.golangsupport.ide.documentation.GoDocLinkHandler"/>
     <psi.referenceContributor language="Go" implementation="io.github.golangsupport.ide.documentation.GoDocLinkReferenceContributor"/>
+    <!-- //go:embed patterns, //go:linkname names and //go:generate paths as references of comments -->
+    <psi.referenceContributor language="Go" implementation="io.github.golangsupport.ide.directives.GoDirectiveReferenceContributor"/>
   </extensions>
 </idea-plugin>

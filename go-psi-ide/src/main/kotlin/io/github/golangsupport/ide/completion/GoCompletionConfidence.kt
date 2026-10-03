@@ -26,6 +26,8 @@ class GoCompletionConfidence : CompletionConfidence() {
         if (GoTokenSets.STRING_LITERALS.contains(type)) {
             val literal = contextElement.parent
             if (literal is GoStringLiteral && literal.parent is GoImportSpec) return ThreeState.NO
+            // a raw-string struct tag at a key, name or option position (the host's tag completion)
+            if (GoStructTagCompletion.positionAt(contextElement, offset) != null) return ThreeState.NO
             // `"%` in a call argument: Printf verbs (GoFormatVerbProvider); the provider checks that the call is printf-like.
             return if (GoFormatVerbCompletion.isDirectivePosition(contextElement, offset)) ThreeState.NO else ThreeState.YES
         }

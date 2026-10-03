@@ -471,4 +471,96 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
             GoStructTagInspection(),
         )
     }
+
+    // --- time layouts ---
+
+    fun testTimeLayoutProblems() = doHighlight(
+        """
+        package p
+
+        import "time"
+
+        func f(t time.Time, s string) {
+        	_ = t.Format(<weak_warning descr="Layout uses 'yyyy-MM-dd HH:mm:ss' notation; Go layouts use the reference time 2006-01-02 15:04:05">"yyyy-MM-dd HH:mm:ss"</weak_warning>)
+        	_, _ = time.Parse(<weak_warning descr="Layout uses 'YYYY-MM-DD' notation; Go layouts use the reference time 2006-01-02 15:04:05">"YYYY-MM-DD"</weak_warning>, s)
+        	_ = t.Format(<weak_warning descr="Layout contains no time elements">"date"</weak_warning>)
+        	_ = t.Format(<weak_warning descr="Day and month swapped? '2006-02-01' formats day 02 as month">"2006-02-01"</weak_warning>)
+        	_ = t.Format(<weak_warning descr="Day and month swapped? '2006-02-01' formats day 02 as month">"2006-02-01 15:04"</weak_warning>)
+        }
+        """,
+        GoTimeLayoutInspection(),
+    )
+
+    fun testTimeLayoutValidLayoutsAreQuiet() = doHighlight(
+        """
+        package p
+
+        import "time"
+
+        type T struct{}
+
+        func (T) Format(layout string) string { return layout }
+
+        const custom = "date"
+
+        func f(t time.Time, s string, o T) {
+        	_ = t.Format(time.RFC3339)
+        	_ = t.Format(time.Kitchen)
+        	_ = t.Format("2006-01-02")
+        	_ = t.Format("02/01/2006 15:04:05.000")
+        	_ = t.Format("")
+        	_ = t.Format(s)
+        	_ = t.Format(custom)
+        	_ = o.Format("yyyy-MM-dd")
+        	_, _ = time.Parse(time.DateTime, s)
+        }
+        """,
+        GoTimeLayoutInspection(),
+    )
+
+    fun testConvertToGoLayout() = doFix(
+        """
+        package p
+
+        import "time"
+
+        func f(t time.Time) {
+        	_ = t.Format(<caret>"dd/MM/yyyy HH:mm")
+        }
+        """,
+        "Convert to Go layout",
+        """
+        package p
+
+        import "time"
+
+        func f(t time.Time) {
+        	_ = t.Format("02/01/2006 15:04")
+        }
+        """,
+        GoTimeLayoutInspection(),
+    )
+
+    fun testSwapDayAndMonth() = doFix(
+        """
+        package p
+
+        import "time"
+
+        func f(t time.Time) {
+        	_ = t.Format(`<caret>2006-02-01 15:04`)
+        }
+        """,
+        "Swap to '2006-01-02'",
+        """
+        package p
+
+        import "time"
+
+        func f(t time.Time) {
+        	_ = t.Format(`2006-01-02 15:04`)
+        }
+        """,
+        GoTimeLayoutInspection(),
+    )
 }

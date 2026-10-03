@@ -1,0 +1,12 @@
+<html>
+<body>
+Checks <code>//go:embed</code> comments for what makes <code>go build</code> fail:
+<ul>
+  <li>a pattern that matches no file (<code>pattern x: no matching files found</code>) or a directory without embeddable files;</li>
+  <li>an invalid pattern: an empty element, <code>.</code> or <code>..</code>, a leading or trailing <code>/</code>, a backslash, a malformed <code>[class]</code>;</li>
+  <li>a directive that is not directly above a package-level <code>var</code> (blank lines and other comments may stand between);</li>
+  <li>a file that does not import <code>"embed"</code>. Quick fix: <b>Add import "embed"</b> &mdash; a blank import when only <code>string</code> /
+    <code>[]byte</code> variables are embedded, a plain one for <code>embed.FS</code>.</li>
+</ul>
+</body>
+</html>

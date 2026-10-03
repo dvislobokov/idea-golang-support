@@ -47,6 +47,9 @@
     <localInspection language="Go" shortName="GoDocComment" displayName="Missing or malformed doc comment of an exported declaration"
                      groupName="Go" enabledByDefault="false" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoDocCommentInspection"/>
+    <localInspection language="Go" shortName="GoEmbedDirective" displayName="Invalid //go:embed directive"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.directives.GoEmbedDirectiveInspection"/>
     <localInspection language="Go" shortName="GoStructTag" displayName="Malformed or duplicate struct tag"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoStructTagInspection"/>
@@ -59,5 +62,8 @@
     <localInspection language="Go" shortName="GoBuildConstraint" displayName="Build constraint comments"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoBuildConstraintInspection"/>
+    <localInspection language="Go" shortName="GoTimeLayout" displayName="Time layout"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoTimeLayoutInspection"/>
   </extensions>
 </idea-plugin>

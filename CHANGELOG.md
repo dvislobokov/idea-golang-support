@@ -8,11 +8,31 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, directive comments, struct tag naming style).
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
 ### Changed
 - Exhaustive switch inspection (`GoExhaustiveSwitch`) is a weak warning: a plain warning was noise on `reflect.Kind`-like switches without `default`.
+
+## [0.2.36] - 2026-10-03
+
+### Changed — Struct tag completion
+- The tag name offered first follows the naming style the struct's other fields use for that key (`userId` next to `firstName`, `user_id` next to `first_name`); the other spellings stay in the list.
+- Typing `:` after a known key in a raw-string tag writes `""` and opens the name list; typing `,` inside a value opens the options.
+
+## [0.2.35] - 2026-10-03
+
+### Added — Directive comments: go:embed, go:linkname, go:generate
+- `//go:embed` patterns (globs, `all:`, quoted, directories) are references to the matched files and directories: Ctrl+B goes to the file or offers a list. The new `GoEmbedDirective` inspection (error) reports go's messages: no matching files found, invalid pattern syntax, directory with no embeddable files, misplaced directive, missing `embed` import. Its fix "Add import "embed"" adds a blank import for string/[]byte vars and a plain one for `embed.FS`.
+- `//go:linkname local pkg.name`: `local` references the local declaration and follows its rename; `pkg.name`, `pkg.Type.method` and `pkg.(*Type).method` reference the target in the project, GOROOT or the module cache, resolved from stubs. An unresolved target is silent.
+- `//go:generate`: `go run ./cmd/x` and any other argument that is an existing relative file or directory is a reference. `go generate` is not run.
+
+## [0.2.34] - 2026-10-03
+
+### Added — time.Format layouts
+- Inlay hint after the layout argument of `Time.Format`, `AppendFormat`, `time.Parse` and `ParseInLocation` (a string literal or a string constant such as `time.RFC3339`): the layout rendered with a fixed sample time (`→ 2026-03-07 15:09`). The call is found by resolve; the hint has its own option "Time layout example" in Settings | Editor | Inlay Hints | Go.
+- Inspection `GoTimeLayout` (weak warning, on by default): a layout in the `yyyy-MM-dd HH:mm:ss` notation (fix "Convert to Go layout"), a layout with no time element, and the swapped ISO date `2006-02-01` (fix "Swap to '2006-01-02'"). Stdlib layout constants are never reported.
 
 ## [0.2.33] - 2026-10-03
 

@@ -549,5 +549,12 @@ generics, missing return, init cycles — 0 ложных срабатывани�
   новый `enable_inspection.js`): 4 предупреждения doc-комментариев и оба фикса; Ctrl+I `W4Square` → `W4Shape`: `Area`/`Describe` с получателем `self`, `Name`
   не продублирован; `// +build linx,!cgo darwin` → два предупреждения, Add //go:build line → `(linx && !cgo) || darwin`, Replace with 'linux', `darwin &&` → ошибка
   синтаксиса; «Plugin to blame: Go» 0. Замечено: анонимный интерфейс в заглушке пишется как `interface{Write(…)}` (вид go/types, gofmt поставил бы пробелы).
+- [x] Шаг 11, быстрые задачи, вторая партия (2026-10-03, три агента Sonnet в worktree от запушенного `556967b`; версии 0.2.34–0.2.36): `GoTimeLayout` и подсказка
+  `go.time.layout`, `ide.directives` (`GoEmbedDirective`, ссылки embed / linkname / generate), автопопап тегов. Агент тегов написал второй провайдер completion,
+  а у хоста уже был свой (`GoStructTagCompletionContributor`, `order="first"`, `stopHere`): робот показал только хостовые списки. Провайдер go-psi-ide удалён, его
+  определение стиля встроено в хост (имя в стиле соседних полей первым), typed handler оставлен. Урок: перед брифом искать фичу и в хосте, а не только в FEATURES.
+  Гейты: `:go-psi-ide:test` и `:test` без падений, checkKotlinAbi зелёный, корпус go-psi-ide 4621/4621. Робот (8083, Built-in, `store/wave5.go`, `wave5_embed.go`):
+  подсказки раскладок у пяти вызовов, три предупреждения и оба фикса; `//go:embed` — две ошибки, Ctrl+B открыл `assets/greeting.txt`, фикс дал `import _ "embed"`;
+  `json:` → `json:""` со списком, `userId` первым рядом с `firstName`, опции после запятой; «Plugin to blame: Go» за день 0.
 - [ ] 12.1 gopls опционален, [ ] 12.2 gopls удалён.
 - [ ] 13 линтеры по запросу, [ ] 13A vet-класс, [ ] 13B data-flow, [ ] 13C движок правил.

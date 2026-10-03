@@ -11,6 +11,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.lang.psi.GoFieldDeclaration
+import io.github.golangsupport.ide.completion.GoStructTagCompletion
 import io.github.golangsupport.lang.psi.GoFile
 
 /**
@@ -174,7 +175,10 @@ class GoStructTagCompletionContributor : CompletionContributor() {
             is GoStructTags.Context.AtValue -> {
                 val values = result.withPrefixMatcher(context.prefix)
                 val key = GoStructTags.key(context.key)
-                if (context.first && key != null) GoStructTags.names(key, field).forEachIndexed { i, name ->
+                // the style the struct's other fields use for this key comes first (`user_id` next to `first_name`)
+                val styled = parameters.originalFile.findElementAt(offset - 1)?.let { GoStructTagCompletion.tagAt(it, offset) }?.first
+                    ?.let { GoStructTagCompletion.namesFor(it, context.key) }.orEmpty().takeIf { key?.naming == GoStructTags.Naming.FIELD }.orEmpty()
+                if (context.first && key != null) (styled + GoStructTags.names(key, field)).distinct().forEachIndexed { i, name ->
                     values.addElement(com.intellij.codeInsight.completion.PrioritizedLookupElement.withPriority(
                         LookupElementBuilder.create(name).withTypeText("name of $field", true).withIcon(AllIcons.Nodes.Field), 100.0 - i,
                     ))

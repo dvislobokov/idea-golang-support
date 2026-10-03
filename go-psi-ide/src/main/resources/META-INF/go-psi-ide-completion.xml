@@ -13,6 +13,8 @@
              implementationClass="io.github.golangsupport.ide.completion.GoAlphabeticalWeigher"/>
     <!-- Printf verbs: `%` typed in a call's string argument opens the popup (GoFormatVerbProvider decides what it shows). -->
     <typedHandler implementation="io.github.golangsupport.ide.completion.GoFormatVerbTypedHandler" id="goFormatVerbTypedHandler"/>
+    <!-- Struct tags: `:` after a known key writes `""` and opens the names, `,` in a value opens the options. -->
+    <typedHandler implementation="io.github.golangsupport.ide.completion.GoStructTagTypedHandler" id="goStructTagTypedHandler"/>
 
   </extensions>
   <extensionPoints>

@@ -33,7 +33,7 @@ Legend:
 | codeAction (quick fix) | `LocalQuickFix` | 🟡 | fix kinds: add import, remove import, optimize imports, unused variable (remove, rename to `_`, replace with `_ =`), wrap in conversion; see section 3 | M |
 | codeAction (refactor / source) | intentions, refactorings | ❌ | see sections 3 and 4 | L |
 | codeLens | Code Vision (`codeInsight.daemonBoundCodeVisionProvider`) | ✅ | usages / implementations counts (`ide.codevision`); run test stays with the host's run line markers | |
-| documentLink | references in import paths, `//go:embed` | 🟡 | import paths navigate; embed patterns do not | S |
+| documentLink | references in import paths, `//go:embed` | ✅ | import paths and embed patterns navigate (0.2.35) | |
 | formatting / rangeFormatting | `lang.formatter` (gofmt-compatible) | ✅ | | |
 | onTypeFormatting | `typedHandler`, `enterHandler` | 🟡 | platform defaults only; no Go-specific handlers | S |
 | rename, prepareRename | `renamePsiElementProcessor`, `namesValidator` | 🟡 | package rename out of scope | M |
@@ -64,7 +64,7 @@ Legend:
 | Smart completion (Ctrl+Shift+Space) by expected type, second-level `x.F.M()` chains | ✅ (wave 3, 0.2.26–0.2.27) | `GoSmartProvider` + `GoSmartLiterals` (filter by `expectedTypeAt`, literals for the type), `GoChainCandidates` (one level, capped) | | |
 | Smart `return`: values by result type from the scope else zero values, `fmt.Errorf("…: %w", err)` when `err` is in scope; the same candidates behind "Fill return values" | ✅ (step 9) | `lang.GoReturnValues` on the PSI | | |
 | Type-aware idioms as inline grey text: `if err != nil {…}` after `x, err :=`, `defer f.Close()`, `defer mu.Unlock()` | ✅ (step 9) | `lang.GoIdioms` on the PSI | | |
-| Completion of map keys, struct tag keys and options, `go.mod` versions from GOMODCACHE | ❌ | | S | |
+| Completion of map keys, struct tag keys and options, `go.mod` versions from GOMODCACHE | 🟡 | struct tags: host `GoStructTagCompletionContributor` (25 keys, validator and gorm rules), naming style of the other fields and autopopup since 0.2.36; map keys and `go.mod` versions missing | S | |
 | Completion of members of unimported packages (`Println` → `fmt.Println` + import) | ✅ (wave 3, 0.2.28) | project packages typed from the stub index (`GoProjectMemberCandidates`); stdlib and dependencies by the host catalogue | | |
 | Smart Enter (complete statement) | ✅ (wave 1, 0.2.4) | `lang.GoSmartEnter` of the host, on the PSI | | |
 | Move statement / element up/down | ✅ (wave 1, 0.2.7) | `ide.editor.GoStatementMover` | | |
@@ -141,7 +141,7 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | RE2 regular expressions in `regexp.Compile`/`MustCompile` (highlighting, RE2-specific validation, Check RegExp) | ❌ | `languageInjector` + RE2 dialect | M | |
 | `text/template` / `html/template`: highlighting, navigation to fields of the data type | ❌ | own lexer/parser | L | |
 | SQL in `database/sql` calls | ❌ | | S | plugin (Database) |
-| `time.Format` layouts: validation, hint of the rendered example | ❌ | | S | |
+| `time.Format` layouts: validation, hint of the rendered example | ✅ (0.2.34) | `GoTimeLayoutInspection`, `GoTimeLayoutHintsProvider`; the inspection checks literals only | | |
 | JSON in raw strings | ❌ | | S | |
 
 ## 7. Go-specific files and directives
@@ -149,8 +149,8 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | Feature | Status | Effort |
 |---|---|---|
 | `go.mod` / `go.work` PSI, navigation | 🟡 (model; `go.work` multi-module editing support to check) | M |
-| `//go:embed`: pattern navigation and validation | ❌ | S |
-| `//go:linkname`, `//go:generate` navigation; run `go generate` | ❌ | S (run: needs `go`) |
+| `//go:embed`: pattern navigation and validation | ✅ (0.2.35) | `ide.directives`, inspection `GoEmbedDirective` |
+| `//go:linkname`, `//go:generate` navigation; run `go generate` | 🟡 | navigation since 0.2.35; running `go generate` from the directive missing (needs `go`) |
 | Assembly `.s`: `TEXT ·Func` ↔ Go declaration without body | ❌ | M |
 | cgo: `import "C"` preamble, `C.` symbols | ❌ | L |
 | Status-bar widget for GOOS / GOARCH / build tags, re-evaluating the analysis | ❌ | S |

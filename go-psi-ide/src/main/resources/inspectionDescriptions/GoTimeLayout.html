@@ -1,0 +1,12 @@
+<html>
+<body>
+Checks the layout string of <code>Time.Format</code>, <code>Time.AppendFormat</code>, <code>time.Parse</code> and <code>time.ParseInLocation</code>
+(weak warnings; only string literals are checked):
+<ul>
+  <li>a layout written in the notation of other languages, such as <code>yyyy-MM-dd HH:mm:ss</code>: Go layouts use the reference time
+    <code>Mon Jan 2 15:04:05 MST 2006</code>. Quick fix: <b>Convert to Go layout</b>;</li>
+  <li>a layout with no time element at all: it is formatted to itself;</li>
+  <li><code>2006-02-01</code>, the ISO date with the day before the month. Quick fix: <b>Swap to '2006-01-02'</b>.</li>
+</ul>
+</body>
+</html>

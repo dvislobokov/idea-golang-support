@@ -22,6 +22,9 @@
     <codeInsight.declarativeInlayProvider language="Go" providerId="go.constant.values" group="VALUES_GROUP" isEnabledByDefault="true"
                                           implementationClass="io.github.golangsupport.ide.hints.GoConstantValueHintsProvider"
                                           bundle="messages.GoInlayHintsBundle" nameKey="hints.constants.name" descriptionKey="hints.constants.description"/>
+    <codeInsight.declarativeInlayProvider language="Go" providerId="go.time.layout" group="VALUES_GROUP" isEnabledByDefault="true"
+                                          implementationClass="io.github.golangsupport.ide.hints.GoTimeLayoutHintsProvider"
+                                          bundle="messages.GoInlayHintsBundle" nameKey="hints.time.name" descriptionKey="hints.time.description"/>
     <codeInsight.declarativeInlayProvider language="Go" providerId="go.struct.size" group="OTHER_GROUP" isEnabledByDefault="true"
                                           implementationClass="io.github.golangsupport.ide.hints.GoStructSizeHintsProvider"
                                           bundle="messages.GoInlayHintsBundle" nameKey="hints.struct.name" descriptionKey="hints.struct.description"/>

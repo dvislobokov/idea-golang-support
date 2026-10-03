@@ -134,6 +134,15 @@ class GoStructPsiTest : BasePlatformTestCase() {
         assertEquals("ID", GoStructTags.tagAt(anonymousFile, anonymous.indexOf("`js") + 3)!!.second)
     }
 
+    fun testTagNamesFollowTheStyleOfTheOtherFields() {
+        val text = listOf("package p", "", "type User struct {", "\tFirstName string `json:\"firstName\"`", "\tUserID int `json:\"<caret>\"`", "}", "").joinToString("\n")
+        myFixture.configureByText("user.go", text)
+        val items = myFixture.completeBasic().map { it.lookupString }
+        // without the sibling the host's first name is snake_case
+        assertEquals("userId", items.first())
+        assertTrue(items.containsAll(listOf("userID", "UserID")))
+    }
+
     fun testTagEditsFromThePsi() {
         val text = server.replace("handler func() error", "handler func() error // the handler\n\tLegacy  string \"xml:\\\"legacy\\\"\"\n\tA, B    int")
         val file = myFixture.configureByText("server.go", text) as GoFile
