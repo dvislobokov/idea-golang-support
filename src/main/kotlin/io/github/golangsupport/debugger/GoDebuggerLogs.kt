@@ -38,7 +38,7 @@ object GoDebuggerLogs {
     fun outdated(names: List<String>, keep: Int = KEEP, prefix: String = "dlv-"): List<String> =
         names.filter { it.startsWith(prefix) && it.endsWith(".log") }.sortedDescending().drop(keep)
 
-    /** The file for a new session, or null when the log is switched off (Settings | Tools | Go) or the directory cannot be made. */
+    /** The file for a new session, or null when the log is switched off (Settings | Go | Debugger) or the directory cannot be made. */
     fun newAdapterLog(): File? {
         if (!GoSettings.getInstance().debugAdapterLog) return null
         return newFile(directory, "dlv-")

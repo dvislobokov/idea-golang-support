@@ -8,6 +8,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.67–0.2.76 are the sixth batch (native lint rule engine with 136 rules, project-wide problems, grey text from context in
+colours, Go settings at the root with a table of every check).
 Versions 0.2.60–0.2.66 are the fifth batch (Go assembly, project-wide checks, interface hierarchy refactorings, unchecked errors, optional
 golangci-lint and custom linters, Inspect Project from the Go menu, new demo and guide).
 Versions 0.2.55–0.2.59 are the refactoring batch (Extract Function / Method, Inline, Change Signature, Move) and inspections in CI (SARIF).
@@ -20,6 +22,101 @@ Language features: Built-in.
 Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, directive comments, struct tag naming style).
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
+
+## [0.2.76] - 2026-10-03
+
+### Added — staticcheck simplifications (native lint rules, batches B8 and B9)
+- 37 weak-warning rules of staticcheck S (former gosimple), each with a quick fix that keeps gofmt formatting and is withheld when it would
+  drop a comment or change meaning. Statements (B8): S1000 single-case select, S1001 copy loop, S1005 needless blank, S1006 `for true`, S1008
+  if-return-bool, S1011 append loop, S1016 struct conversion, S1017 TrimPrefix/TrimSuffix, S1018 sliding loop, S1021 merged var, S1023
+  redundant return/break, S1029 range over `[]rune(s)`, S1031 nil check around range, S1033 guarded delete, S1034 type-switch assertions,
+  S1036 guarded map update, S1037 `time.After` select. Calls and expressions (B9): S1003 Index → Contains, S1004 Compare → Equal, S1007 raw
+  regexp strings, S1009, S1010, S1012 time.Since, S1019, S1020, S1024 time.Until, S1025, S1028 Errorf, S1030, S1032, S1035, S1038 Printf,
+  S1039, S1040, SA6005 EqualFold, SA6006 Write.
+- S1002 follows staticcheck: any comparison with a bool constant, not only `if` conditions; not in `_test.go` files. `//nolint:gosimple` works.
+
+### Fixed
+- Debugging a test logged "[Split debugger] RunContentDescriptor should not be used in split mode": the session starts through
+  `XDebuggerManager.newSessionBuilder`, which hands out the descriptor in both modes.
+
+## [0.2.75] - 2026-10-03
+
+### Added — suspicious expressions and statements (native lint rules, batches B4 and B5)
+- 40 warnings of staticcheck SA and go vet. Expressions (B4): SA4000 identical operands, SA4001 `&*x`, SA4003 impossible comparisons, SA4012
+  NaN, SA4013 `!!b`, SA4016, SA4022 `&x == nil`, SA4024, SA4025, SA4026 `-0.0`, SA4028 `x % 1`, SA4032 GOOS ruled out by build constraints,
+  SA5010 impossible assertions, SA9006 shifts that clear the value; vet ifaceassert, nilfunc, shift, bools, stringintconv, unsafeptr.
+  Statements (B5): SA2001 empty critical section, SA2003 deferred Lock, SA3001 `b.N` assignment, SA4011 ineffective break, SA4014 repeated
+  condition, SA4020 unreachable type case, SA4021 / vet appends, SA4029, SA5002 spinning loop, SA5003 defer in an infinite loop, SA5004 busy
+  select, SA6000 regexp in a loop, SA6001, SA6003, SA9003 empty branch (off by default, as in staticcheck), SA9008, SA9010; vet atomic, defers.
+- Quick fixes where safe (math.IsNaN, math.Copysign, fmt.Sprint, defer Unlock, sort.Ints, remove empty default, `defer f()()`, …). A vet
+  rule stays quiet where its staticcheck twin reports.
+
+## [0.2.74] - 2026-10-03
+
+### Added — stdlib call contracts (native lint rules, batches B2 and B3)
+- 39 warnings of staticcheck SA on stdlib calls, callees resolved by types (aliased and dot imports): SA1000 invalid regexp (Go's own error
+  text), SA1001 invalid template, SA1003, SA1004 `time.Sleep(5)`, SA1005 shell line in exec.Command, SA1006 dynamic Printf format, SA1007
+  invalid URL, SA1008 non-canonical header key, SA1010, SA1011, SA1012 nil context, SA1013 Seek arguments, SA1014 / vet unmarshal non-pointer,
+  SA1015 time.Tick leak, SA1016 untrappable signals, SA1017 / vet sigchanyzer unbuffered signal channel, SA1018, SA1020 bad host:port, SA1021,
+  SA1024, SA1026 unsupported marshaling, SA1027 / vet atomicalign, SA1028 / vet sortslice, SA1029 context key type, SA1030 strconv arguments,
+  SA1032 errors.Is order, SA4015, SA4027 `u.Query().Set`, SA4030 `rand.Intn(1)`, SA5005, SA5012, SA6002 Pool.Put, SA9002 `644`, SA9005,
+  SA9007 RemoveAll of the home/temp directory. Quick fixes where safe. Attribution in `NOTICE.md`.
+
+## [0.2.73] - 2026-10-03
+
+### Added — every check in one table; Cgo and experiments
+- Settings | Go | Linters → Built-in: all inspections of the plugin and all lint rules in one table — search, on/off, level, a source note
+  (set by `.golangci.yml`, quiet with gopls), group enable / disable / reset, description and rule options. Inspections live in the project
+  profile (in sync with Settings | Editor | Inspections), rules in `.idea/goRules.xml`.
+- Settings | Go | Build Tags: Cgo support (Default from `go env` / Enabled / Disabled) and Experiments (GOEXPERIMENT). They decide the `cgo`
+  and `goexperiment.X` build constraints of the analysis and go to the go commands of the plugin and to delve; the status bar shows `· cgo off`.
+
+## [0.2.72] - 2026-10-03
+
+### Changed — Go settings at the root, as in GoLand
+- Settings | Go is a top-level node above Appearance & Behavior with pages GOROOT, GOPATH, Go Modules, Build Tags, Imports, Linters,
+  Formatting, Editor and Completion, Language Server (+ gopls), Debugger and Tools; the old Code Quality page is split into Linters and
+  Formatting. Stored values are kept. Page titles follow the plugin's language (Russian too) through `messages.GoSettingsTitles`.
+
+## [0.2.71] - 2026-10-03
+
+### Added — grey text in the colours of the code, second batch of templates
+- Grey-text suggestions (idioms and code from context) use the colours of the editor scheme faded halfway towards the background, like
+  GoLand's Full Line; Tab, word and line acceptance work as before. Editor and Completion → "Colour grey-text suggestions like code".
+- 60 more templates (P2 of `docs/INLINE-SUGGESTIONS.md`): maps and channels by their use below, ticker / timer / deadline, strconv, JSON
+  encoders, `db.QueryContext`, `regexp.MustCompile` with the caret inside, table tests and `t.Run` loops, benchmarks, httptest, `errors.Join`,
+  `Len()`, `Error()`, enum `String()` switches, `errors.Is(err, ErrX)`, sort comparators, `signal.NotifyContext`, `for range ch`, type switches,
+  `close(ch)`, `var _ I = (*T)(nil)`.
+
+## [0.2.70] - 2026-10-03
+
+### Added — grey text from context
+- Suggestions built from the variables in scope, their types, the function signature and how a name is used below: `make([]T, 0, len(xs))`,
+  sets and counters, `context.WithTimeout(ctx, timeout)`, `time.Now()`, constructors and struct literals from fields in scope, `return` with
+  zero values and the built value, call arguments by type and name, `for _, user := range users {`, `go func() { defer wg.Done() }()`,
+  constructor / getter / setter bodies, sentinel errors. Missing imports are added on accept. Editor and Completion → "Suggest code from context".
+
+## [0.2.69] - 2026-10-03
+
+### Fixed
+- Struct tags: `validate:"mi`, `binding:` and `gorm:` values complete their rules again (the autopopup was suppressed inside rule keys).
+- "Handle error" is offered once on a call that Unchecked error already reports.
+
+## [0.2.68] - 2026-10-03
+
+### Added — problems of the whole project
+- Problems | Project Errors lists the problems of every Go file of the project, not only the open ones: a background pass after indexing and
+  on changes, Go | Reanalyse Project Problems, settings "Analyse the whole project" and "Include warnings". vendor, testdata, generated files
+  and directories without Go files are skipped.
+
+## [0.2.67] - 2026-10-03
+
+### Added — native lint rule engine
+- One inspection (`GoRules`) runs lint rules by context (call, expression, statement, function, type, file, package) and by what they need
+  (syntax, types, flow, project index). Suppression by `//nolint`, `//lint:ignore`, `//noinspection`. The project's `.golangci.yml` decides
+  which rules run and their options (staticcheck `checks`, revive rules and arguments, govet / gocritic / gosec settings); `.idea/goRules.xml`
+  overrides it. First rules: errcheck, S1002, revive function-result-limit and package-comments, interfacebloat.
+- `docs/LINT-RULES.md`: the catalog of 526 golangci-lint and 123 GoLand checks with their status and batches.
 
 ## [0.2.66] - 2026-10-03
 

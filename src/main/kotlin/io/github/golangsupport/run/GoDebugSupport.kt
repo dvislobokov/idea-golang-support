@@ -66,7 +66,7 @@ object DelveGoVersion {
             val installed = goVersion?.let { ", and Go $it is installed" }.orEmpty()
             return when (kind) {
                 Kind.GO_TOO_OLD -> "This delve needs Go $limit or newer$installed: update Go, or install a delve of that time (go install github.com/go-delve/delve/cmd/dlv@vX.Y.Z)."
-                Kind.GO_TOO_NEW -> "This delve supports Go up to $limit$installed: update delve (Settings | Tools | Go, or go install github.com/go-delve/delve/cmd/dlv@latest)."
+                Kind.GO_TOO_NEW -> "This delve supports Go up to $limit$installed: update delve (Settings | Go | Tools, or go install github.com/go-delve/delve/cmd/dlv@latest)."
             }
         }
     }

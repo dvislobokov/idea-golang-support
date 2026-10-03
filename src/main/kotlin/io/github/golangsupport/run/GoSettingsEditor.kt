@@ -70,7 +70,7 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
             }.visibleIf(remote).comment("Started there with <code>dlv dap --listen=0.0.0.0:2345</code>; the requests act on that machine")
             row("Process id there:") { cell(remotePid.apply { columns = 10 }).comment("A process of the remote machine to attach to; empty or 0 launches the binary above there instead") }.visibleIf(remote)
             row("Path substitutions:") { cell(JBScrollPane(pathSubstitutions)).align(AlignX.FILL).comment("<code>local=remote</code>, a line each: the sources here and the paths the binary was built with (<code>substitutePath</code> of delve)") }.visibleIf(withBinary)
-            row("Go tool arguments:") { cell(goArguments).align(AlignX.FILL).comment("Flags of the go command: <code>-race</code>, <code>-count=1</code>, <code>-ldflags=...</code>. Build tags come from Settings | Tools | Go") }.visibleIf(goCommand)
+            row("Go tool arguments:") { cell(goArguments).align(AlignX.FILL).comment("Flags of the go command: <code>-race</code>, <code>-count=1</code>, <code>-ldflags=...</code>. Build tags come from Settings | Go | Build Tags") }.visibleIf(goCommand)
             row("Program arguments:") { cell(programArguments).align(AlignX.FILL).comment("For <code>go test</code> they follow <code>-args</code>") }.visibleIf(runsAProgram)
             row("Working directory:") { cell(workingDirectory).align(AlignX.FILL).comment("For <code>go run</code> and a binary; the package directory by default. Tests always run in the directory of their package") }.visibleIf(runsAProgram)
             row { cell(environment).align(AlignX.FILL) }.visibleIf(runsAProgram)

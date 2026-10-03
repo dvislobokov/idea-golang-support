@@ -53,6 +53,10 @@ class GoUncheckedErrorInspection : LocalInspectionTool() {
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         if (holder.file !is GoFile) return PsiElementVisitor.EMPTY_VISITOR
+        // the errcheck rule of the rule engine reports the same calls: one underline, not two
+        if (io.github.golangsupport.ide.rules.GoRuleSet.getInstance(holder.project).runs(holder.file, io.github.golangsupport.ide.rules.builtin.GoErrcheckRule.ID)) {
+            return PsiElementVisitor.EMPTY_VISITOR
+        }
         return object : PsiElementVisitor() {
             override fun visitElement(element: PsiElement) {
                 if (element !is GoCallExpr || !isUnchecked(element)) return

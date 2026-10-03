@@ -99,7 +99,7 @@ class GoplsIntegrationProvider : LspIntegrationProvider {
     override fun fileOpened(project: Project, file: VirtualFile, clientStarter: LspIntegrationProvider.LspClientStarter) {
         if (!isGoplsFile(file)) return
         if (!GoSettings.getInstance().languageServerEnabled) {
-            GoPluginLog.info(GoplsLogService.CATEGORY, "gopls is not started for ${file.name}: the language server is off in Settings | Tools | Go")
+            GoPluginLog.info(GoplsLogService.CATEGORY, "gopls is not started for ${file.name}: the language server is off in Settings | Go | Language Server")
             return
         }
         if (GoTool.GOPLS.find() == null) {
@@ -398,7 +398,7 @@ private class GoplsWorkspaceFailures(private val project: Project) {
     }
 }
 
-/** The settings of gopls (https://go.dev/gopls/settings) the page Settings | Tools | Go has switches for. */
+/** The settings of gopls (https://go.dev/gopls/settings) the page Settings | Go | Language Server has switches for. */
 object GoplsOptions {
     /** What the plugin sets by itself ([GoplsDefaults]), with what the user has set on the page of gopls settings on top of it. */
     fun build(settings: GoSettings): Map<String, Any> = GoplsCatalogue.merge(GoplsDefaults.of(settings), settings.goplsOverrides)

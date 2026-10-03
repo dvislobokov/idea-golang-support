@@ -1,0 +1,11 @@
+<html>
+<body>
+Runs the native lint rules (ports of golangci-lint linters, staticcheck checks and revive rules) in one pass over the file.
+Each problem starts with the id of its rule, such as <code>[errcheck]</code> or <code>[S1002]</code>.
+Rules are switched on and off, and given a level and options, by the project's rule settings and its <code>.golangci.yml</code>.
+<p>Suppression: <code>//nolint</code>, <code>//nolint:&lt;linter&gt;</code> or <code>//nolint:&lt;rule id&gt;</code> at the end of a line
+(the whole declaration when the line starts one) or on the line above a statement or declaration;
+staticcheck's <code>//lint:ignore &lt;id&gt; reason</code> and <code>//lint:file-ignore &lt;id&gt; reason</code>;
+<code>//noinspection GoRules</code> for every rule. Vendored, <code>testdata</code>, generated and library files are not analysed.</p>
+</body>
+</html>

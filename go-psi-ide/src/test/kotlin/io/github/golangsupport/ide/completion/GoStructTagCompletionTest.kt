@@ -15,7 +15,13 @@ class GoStructTagCompletionTest : GoCompletionTestBase() {
         assertNull(GoStructTagCompletion.position("json:\"a\"x"))
         val name = GoStructTagCompletion.position("json:\"na") as GoStructTagCompletion.Position.Name
         assertEquals("json" to "na", name.key to name.prefix)
-        assertNull(GoStructTagCompletion.position("validate:\"re"))
+        val rule = GoStructTagCompletion.position("validate:\"re") as GoStructTagCompletion.Position.Option
+        assertEquals("validate" to "re", rule.key to rule.prefix)
+        val next = GoStructTagCompletion.position("json:\"name\" validate:\"required,min=3|mi") as GoStructTagCompletion.Position.Option
+        assertEquals("mi" to setOf("required", "min"), next.prefix to next.used)
+        assertNull(GoStructTagCompletion.position("validate:\"min=3"))
+        assertEquals("aut", (GoStructTagCompletion.position("gorm:\"column:id;aut") as GoStructTagCompletion.Position.Option).prefix)
+        assertNull(GoStructTagCompletion.position("gorm:\"column:i"))
         val option = GoStructTagCompletion.position("json:\"a,omitempty,st") as GoStructTagCompletion.Position.Option
         assertEquals("st", option.prefix)
         assertEquals(setOf("omitempty"), option.used)
@@ -63,5 +69,12 @@ class GoStructTagCompletionTest : GoCompletionTestBase() {
         val offset = myFixture.caretOffset
         val confidence = GoCompletionConfidence()
         assertEquals(com.intellij.util.ThreeState.NO, confidence.shouldSkipAutopopup(myFixture.editor, myFixture.file.findElementAt(offset - 1)!!, myFixture.file, offset))
+    }
+
+    /** Seen live: `validate:"mi` showed nothing while typing — the autopopup was skipped for rule keys. */
+    fun testConfidenceInValidateRules() {
+        myFixture.configureByText("main.go", go(struct("Name string `json:\"name\" validate:\"mi<caret>\" yaml:\"name\" `")))
+        val offset = myFixture.caretOffset
+        assertEquals(com.intellij.util.ThreeState.NO, GoCompletionConfidence().shouldSkipAutopopup(myFixture.editor, myFixture.file.findElementAt(offset - 1)!!, myFixture.file, offset))
     }
 }

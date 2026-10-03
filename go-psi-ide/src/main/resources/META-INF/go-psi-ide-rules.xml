@@ -1,0 +1,144 @@
+<!-- go-psi-ide, rules: the lint rule engine (docs/RULES-ENGINE.md). One inspection, GoRules ("Go lint rules"), walks a file once and runs
+     the rules registered at io.github.golangsupport.goRule by the node kinds they subscribe to; their configuration comes from
+     io.github.golangsupport.goRuleConfigSource (a .golangci.yml reader in the host) under the user's GoRuleSettings.
+     Included by the host plugin; the tests of go-psi-ide include every go-psi-ide-*.xml. -->
+<idea-plugin>
+  <extensionPoints>
+    <extensionPoint qualifiedName="io.github.golangsupport.goRule" interface="io.github.golangsupport.ide.rules.GoRule" dynamic="true"/>
+    <extensionPoint qualifiedName="io.github.golangsupport.goRuleConfigSource" interface="io.github.golangsupport.ide.rules.GoRuleConfigSource" dynamic="true"/>
+  </extensionPoints>
+  <extensions defaultExtensionNs="com.intellij">
+    <localInspection language="Go" shortName="GoRules" displayName="Go lint rules"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.rules.GoRules"/>
+  </extensions>
+  <extensions defaultExtensionNs="io.github.golangsupport">
+    <goRuleConfigSource order="last" implementation="io.github.golangsupport.ide.rules.GoNoRuleConfigSource"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.GoErrcheckRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.GoBoolComparisonRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.GoFunctionResultLimitRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.GoInterfaceBloatRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.GoPackageCommentsRule"/>
+    <!-- B2 staticcheck call contracts -->
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoInvalidRegexpRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoSleepNanosecondsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoExecCommandRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoDynamicFormatRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoInvalidUrlRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoRegexpFindAllZeroRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoNilContextRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoSeekerArgumentsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoUnmarshalPointerRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetUnmarshalRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoUntrappableSignalRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoUnbufferedSignalChannelRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoSigchanyzerRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoReplaceZeroRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoInvalidListenAddressRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoBytesEqualIpRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoNonUniqueCutsetRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoContextKeyTypeRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoStrconvArgumentsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoErrorsIsOrderRule"/>
+    <!-- B8 staticcheck simple: statements -->
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoSingleCaseSelectRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoLoopCopyRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoUnnecessaryBlankRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoForTrueRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoIfReturnBoolRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoLoopAppendRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoStructConversionRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoTrimPrefixRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoLoopSlideRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoMergeVarAssignRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoRedundantControlFlowRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoRangeStringRunesRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoNilCheckAroundRangeRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoGuardedDeleteRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoTypeSwitchAssertRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoMapGuardRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoElaborateSleepRule"/>
+    <!-- B4 suspicious expressions -->
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoIdenticalOperandsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoIneffectiveCopyRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoExtremeComparisonRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoNaNComparisonRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoDoubleNegationRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoSillyBitwiseRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoAddressIsNilRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoBuiltinNegativeRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoIntegerDivisionZeroRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoNegativeZeroRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoModuloOneRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoImpossibleGoosRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoDubiousShiftRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoImpossibleAssertionRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetIfaceAssertRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetNilFuncRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetShiftRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetBoolsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetStringIntConvRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetUnsafePointerRule"/>
+    <!-- B3 staticcheck call contracts, part 2 -->
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoTemplateParseRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoBinaryWriteRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoHttpHeaderKeyRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoInvalidUtf8CutsetRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoTimeTickLeakRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoMarshalUnsupportedRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoAtomicAlignmentRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetAtomicAlignRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoSortSliceRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoVetSortSliceRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoCyclicFinalizerRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoEvenSliceLengthRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoPoolPutRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoOctalFileModeRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoNoopMarshalRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoRemoveUserDirRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoUrlQueryCopyRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoRandIntnOneRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.staticcheck.GoIntegerMathRule"/>
+    <!-- B5 suspicious statements -->
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoEmptyCriticalSectionRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoDeferLockRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoBenchmarkNRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoIneffectiveBreakRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoRepeatedConditionRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoUnreachableTypeCaseRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoSortTypeConversionRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoSingleArgAppendRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoVetAppendsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoSpinningLoopRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoDeferInInfiniteLoopRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoBusySelectLoopRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoRegexpInLoopRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoRangeRunesRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoEmptyBranchRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoShadowedAssertionElseRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoDeferredFuncNotCalledRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoVetAtomicRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoVetDefersRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoMapByteKeyRule"/>
+    <!-- B9 staticcheck simple: calls and expressions -->
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoStringsIndexRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoBytesCompareRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoRegexpRawStringRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoNilLenCheckRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoSliceLenRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoTimeSinceRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoMakeLenCapRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoAssertNotNilRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoTimeUntilRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoRedundantSprintfRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoErrorsNewSprintfRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoBufferConversionRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoSortHelperRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoCanonicalHeaderKeyRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoPrintSprintfRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoSprintLiteralRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoSameTypeAssertionRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoToLowerComparisonRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoWriteStringBytesRule"/>
+  </extensions>
+</idea-plugin>

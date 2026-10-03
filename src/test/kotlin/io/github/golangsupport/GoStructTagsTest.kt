@@ -30,6 +30,10 @@ class GoStructTagsTest {
         assertEquals("validate", rules.key)
         assertEquals("", rules.prefix)
         assertEquals(setOf("required", "min=1"), rules.chosen)
+        // seen live: the first rule of validate (`validate:"mi`) offers the rules, not field names
+        val first = GoStructTags.contextOf("json:\"name\" validate:\"mi") as GoStructTags.Context.AtValue
+        assertEquals("validate" to "mi", first.key to first.prefix)
+        assertTrue(GoStructTags.key("validate")!!.options.any { it.text == "min=" })
         val gorm = GoStructTags.contextOf("gorm:\"primaryKey;col") as GoStructTags.Context.AtValue
         assertEquals("col", gorm.prefix)
         // an argument of a rule is typed by hand

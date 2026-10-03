@@ -193,7 +193,7 @@ object GoSmartEnter {
 
 /**
  * `//` typed on an empty line right above a declaration becomes `// Name `: the doc comment Go wants to start with the name. On by
- * default, off in Settings | Tools | Go, Editor. By the text: the character is typed before the PSI sees it.
+ * default, off in Settings | Go | Editor and Completion. By the text: the character is typed before the PSI sees it.
  */
 class GoDocCommentTypedHandler : TypedHandlerDelegate() {
     override fun charTyped(c: Char, project: Project, editor: Editor, file: PsiFile): Result {

@@ -16,6 +16,7 @@
   <xi:include href="/META-INF/go-psi-ide-documentation.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-completion.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-inspections.xml" xpointer="xpointer(/idea-plugin/*)"/>
+  <xi:include href="/META-INF/go-psi-ide-rules.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-highlighting.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-codevision.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-intentions.xml" xpointer="xpointer(/idea-plugin/*)"/>

@@ -85,7 +85,7 @@ object GoInterfaceChooser {
         popup.setSearchInAnyPlace(true)
         popup.setAdText(
             when {
-                !GoSettings.getInstance().completionCatalogue -> "Non-project interfaces need the completion catalogue (Settings | Tools | Go)"
+                !GoSettings.getInstance().completionCatalogue -> "Non-project interfaces need the completion catalogue (Settings | Go | Imports)"
                 candidates.catalogue.isEmpty() -> "The catalogue of the standard library and the modules is still being read"
                 else -> "Non-project: the standard library and the modules go.mod requires"
             }

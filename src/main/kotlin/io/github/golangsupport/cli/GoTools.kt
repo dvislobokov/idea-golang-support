@@ -19,7 +19,8 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.EnvironmentUtil
 import io.github.golangsupport.settings.GoSettings
-import io.github.golangsupport.settings.GoSettingsConfigurable
+import io.github.golangsupport.settings.GoLintersConfigurable
+import io.github.golangsupport.settings.GoToolsConfigurable
 import java.io.File
 
 /**
@@ -125,12 +126,12 @@ class GoEnvironment(val values: Map<String, String>) {
 
 /**
  * The tools of the Go ecosystem the plugin drives, each installed by `go install <module>@latest`. Where one is looked for: the path
- * from Settings | Tools | Go, then PATH, then GOBIN / GOPATH/bin (a directory installers do not put on PATH by themselves).
+ * from Settings | Go | Tools, then PATH, then GOBIN / GOPATH/bin (a directory installers do not put on PATH by themselves).
  */
 enum class GoTool(val command: String, val module: String, val purpose: String, val documentation: String) {
     GOPLS("gopls", "golang.org/x/tools/gopls", "Language server: errors, completion, navigation, refactorings", "https://go.dev/gopls"),
     DELVE("dlv", "github.com/go-delve/delve/cmd/dlv", "Debugger behind the Debug button", "https://github.com/go-delve/delve"),
-    GOLANGCI_LINT("golangci-lint", "github.com/golangci/golangci-lint/v2/cmd/golangci-lint", "Optional linter: warnings in the editor once turned on in Code Quality", "https://golangci-lint.run"),
+    GOLANGCI_LINT("golangci-lint", "github.com/golangci/golangci-lint/v2/cmd/golangci-lint", "Optional linter: warnings in the editor once turned on on the Linters page", "https://golangci-lint.run"),
     GOIMPORTS("goimports", "golang.org/x/tools/cmd/goimports", "Reformat Code that also fixes the imports", "https://pkg.go.dev/golang.org/x/tools/cmd/goimports"),
     GOVULNCHECK("govulncheck", "golang.org/x/vuln/cmd/govulncheck", "Vulnerabilities: known issues reachable from the code, in the Go Dependencies window", "https://go.dev/blog/vuln");
 
@@ -204,7 +205,7 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
 
         /**
          * The tools the "Go tools are missing" notification at project open may ask for: govulncheck serves one button of the Go Dependencies
-         * window and is offered there; golangci-lint is optional (Code Quality, off by default) and asked for only while it is turned on.
+         * window and is offered there; golangci-lint is optional (Settings | Go | Linters, off by default) and asked for only while it is turned on.
          */
         fun offeredAtStart(golangciLint: Boolean): List<GoTool> = entries.filter { it != GOVULNCHECK && (it != GOLANGCI_LINT || golangciLint) }
 
@@ -225,7 +226,11 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
             .createNotification(title, "<code>$command</code> is not installed.", NotificationType.INFORMATION)
             .addAction(NotificationAction.createSimpleExpiring("Install") { install(project, onInstalled) })
             .addAction(NotificationAction.createSimple("About the Tool") { BrowserUtil.browse(documentation) })
-            .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoSettingsConfigurable::class.java) })
+            // golangci-lint is optional: its page has the switch that turns it off; the other tools have their paths on the Tools page
+            .addAction(NotificationAction.createSimple("Configure...") {
+                val settings = ShowSettingsUtil.getInstance()
+                if (this == GOLANGCI_LINT) settings.showSettingsDialog(project, GoLintersConfigurable::class.java) else settings.showSettingsDialog(project, GoToolsConfigurable::class.java)
+            })
             .notify(project)
     }
 }

@@ -201,7 +201,7 @@ footer a { color: var(--text-2); }
     <a href="#menu"><b>Меню Go</b><span>Все пункты</span></a>
     <a href="#windows"><b>Окна</b><span>Тесты, монитор, зависимости</span></a>
     <a href="#run"><b>Запуск и отладка</b><span>Конфигурация Go</span></a>
-    <a href="#settings"><b>Настройки</b><span>Settings, Tools, Go</span></a>
+    <a href="#settings"><b>Настройки</b><span>Settings, Go</span></a>
     <a href="#ci"><b>Инспекции в CI</b><span>Отчёт SARIF без окна IDE</span></a>
     <a href="#trouble"><b>Если не работает</b><span>Куда смотреть</span></a>
   </div>
@@ -276,6 +276,7 @@ footer a { color: var(--text-2); }
   <div class="wrap">
     <h2>Серый текст</h2>
     <p>Следующая строка, когда продолжение однозначно. Подсказка появляется после <kbd>Enter</kbd> или при наборе её начала. Работает по правилам и без gopls.</p>
+    <p>Подсказка раскрашена как код, только бледнее: ключевые слова, строки, вызовы и типы — цветами схемы редактора, приглушёнными к фону <span class="new">новое</span>. Принять целиком — <kbd>Tab</kbd>, по слову — <kbd data-action="InsertInlineCompletionWordAction">Ctrl+→</kbd>. Отключается галочкой Colour grey-text suggestions like code.</p>
 
     <h3>Ошибки</h3>
     <div class="table"><table>
@@ -317,6 +318,34 @@ footer a { color: var(--text-2); }
         <tr><td>После <code>bufio.NewScanner</code> <span class="new">новое</span></td><td><code>for scanner.Scan() { }</code></td><td></td></tr>
         <tr><td>После <code>defer rows.Close()</code></td><td><code>for rows.Next() { }</code></td><td></td></tr>
         <tr><td><code>//</code> над объявлением</td><td><code>// Name </code></td><td>Начало документирующего комментария.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>По контексту <span class="new">новое</span></h3>
+    <p>Код, который следует из переменных в области видимости, их типов, сигнатуры функции, объявляемого имени и того, как имя используется ниже. Одна подсказка и только когда она однозначна; при двух равных кандидатах подсказки нет. Нужные импорты добавляются при принятии. Включается галочкой Suggest code from context as grey text.</p>
+    <div class="table"><table>
+      <thead><tr><th>Ситуация</th><th>Подсказка</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td><code>arr := </code> при <code>keys ...string</code></td><td><code>make([]string, 0, len(keys))</code></td><td><code>make([]string, len(keys))</code>, если ниже <code>arr[i] = …</code>.</td></tr>
+        <tr><td><code>m := </code>, ниже <code>m[k] = v</code></td><td><code>make(map[K]V)</code></td><td>С <code>len(items)</code>, если мапа заполняется в цикле по срезу; <code>seen</code> — множество, <code>counts[k]++</code> — счётчик.</td></tr>
+        <tr><td><code>ctx := </code>, <code>ctx, cancel := </code></td><td><code>context.Background()</code>, <code>context.WithCancel(ctx)</code></td><td><code>WithTimeout(ctx, timeout)</code> при <code>time.Duration</code> в области.</td></tr>
+        <tr><td><code>start := </code>, <code>elapsed := </code>, <code>done := </code></td><td><code>time.Now()</code>, <code>time.Since(start)</code>, <code>make(chan struct{})</code></td><td></td></tr>
+        <tr><td><code>var wg</code>, <code>var mu</code>, <code>var sb</code></td><td><code>sync.WaitGroup</code>, <code>sync.Mutex</code>, <code>strings.Builder</code></td><td><code>sync.RWMutex</code>, если ниже <code>mu.RLock()</code>.</td></tr>
+        <tr><td><code>data, err := </code>, <code>resp, err := </code></td><td><code>os.ReadFile(path)</code>, <code>client.Do(req)</code></td><td>По переменным области: путь, запрос, ответ, URL.</td></tr>
+        <tr><td><code>return </code></td><td><code>u, nil</code>, <code>&amp;T{a: a}</code>, <code>ctx.Err()</code></td><td>Построенная выше переменная результата, литерал в конструкторе, ошибка контекста в <code>case &lt;-ctx.Done():</code>.</td></tr>
+        <tr><td><code>f(</code>, <code>T{Name: </code></td><td><code>ctx, user</code>, <code>req.Name</code></td><td>Переменная подходящего типа, при нескольких — по имени параметра или поля; аргументы <code>Printf</code> по глаголам.</td></tr>
+        <tr><td><code>for _, user := range </code>, <code>if </code> после <code>v, ok :=</code></td><td><code>users {</code>, <code>!ok {</code></td><td></td></tr>
+        <tr><td>Пустое тело</td><td><code>return &amp;T{…}</code>, <code>return u.name</code>, <code>t.Helper()</code></td><td>Конструктор, геттер, сеттер, <code>Unwrap</code>, помощник теста.</td></tr>
+        <tr><td><code>byID := </code>, <code>results := </code>, <code>ch := </code>, <code>keys := </code> <span class="new">новое</span></td><td><code>make(map[int]*User, len(users))</code>, <code>make(chan T, len(jobs))</code>, <code>make(chan T)</code></td><td>По полю элемента среза, по тому, что отправляется в канал ниже; <code>keys</code> мапы, <code>count := 0</code>, <code>n := len(items)</code>, <code>var arr []T</code> по <code>append</code> ниже.</td></tr>
+        <tr><td><code>deadline := </code>, <code>ticker := </code>, <code>var once</code> <span class="new">новое</span></td><td><code>time.Now().Add(timeout)</code>, <code>time.NewTicker(interval)</code>, <code>sync.Once</code></td><td>Длительность из области видимости; <code>timer</code> — <code>time.NewTimer(d)</code>.</td></tr>
+        <tr><td><code>id, err := </code>, <code>data, err := </code>, <code>rows, err := </code> <span class="new">новое</span></td><td><code>strconv.Atoi(idStr)</code>, <code>json.Marshal(v)</code>, <code>db.QueryContext(ctx, query)</code></td><td>По строке <code>idStr</code>, по записи <code>data</code> ниже, по базе и тексту запроса в области; <code>dec</code>/<code>enc</code> — <code>json.NewDecoder(r.Body)</code>/<code>json.NewEncoder(w)</code>.</td></tr>
+        <tr><td><code>var re = </code> <span class="new">новое</span></td><td><code>regexp.MustCompile(``)</code></td><td>Курсор встаёт внутрь кавычек.</td></tr>
+        <tr><td>В тесте: <code>tests := </code>, <code>want := </code>, <code>rec := </code>, <code>dir := </code> <span class="new">новое</span></td><td>таблица случаев, <code>tt.want</code>, <code>httptest.NewRecorder()</code>, <code>t.TempDir()</code></td><td>Таблица — по параметрам и результатам проверяемой функции; пустое тело <code>TestFoo</code> — таблица и цикл <code>t.Run</code>, <code>BenchmarkFoo</code> — цикл бенчмарка, <code>t.Parallel()</code>, если так начинаются остальные тесты файла.</td></tr>
+        <tr><td><code>return </code> <span class="new">новое</span></td><td><code>errors.Join(errs...)</code>, <code>len(s)</code>, <code>false</code></td><td>Собранные ошибки, <code>Len()</code> среза, противоположное уже написанному <code>return</code> в функции <code>bool</code>; <code>Error()</code> — сообщение из полей.</td></tr>
+        <tr><td><code>errors.Is(err, </code>, <code>sort.Slice(s, </code>, <code>slices.SortFunc(s, </code> <span class="new">новое</span></td><td><code>ErrNotFound</code>, <code>func(i, j int) bool { … }</code></td><td>Ошибка-маркер пакета; сравнение по <code>ID</code>/<code>Name</code>; <code>signal.NotifyContext(</code> — <code>ctx, os.Interrupt, syscall.SIGTERM</code>; <code>append(out, </code> — элемент цикла.</td></tr>
+        <tr><td><code>T{CreatedAt: </code>, <code>&amp;http.Server{</code> <span class="new">новое</span></td><td><code>time.Now()</code>, <code>Addr: addr, Handler: mux</code></td><td>Логгер, контекст, клиент — единственная переменная того же типа.</td></tr>
+        <tr><td><code>for </code>, <code>for i := </code>, <code>switch </code>, <code>if </code> <span class="new">новое</span></td><td><code>range ch {</code>, <code>0; i &lt; len(s); i++ {</code>, <code>x.(type) {</code>, <code>p == nil {</code></td><td>Канал, созданный выше; перечисление пакета; первой строкой функции — проверка указателя или пустого среза; <code>if errors.</code> — <code>Is(err, ErrX)</code>.</td></tr>
+        <tr><td>Следующая строка <span class="new">новое</span></td><td><code>close(ch)</code>, <code>return sb.String()</code>, <code>var _ I = (*T)(nil)</code></td><td>После цикла горутины-производителя; после цикла записи в <code>strings.Builder</code>; после структуры, реализующей интерфейс пакета; <code>String()</code> перечисления — <code>switch</code> по константам.</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -396,7 +425,7 @@ footer a { color: var(--text-2); }
 <section class="band" id="refactor">
   <div class="wrap">
     <h2>Рефакторинги</h2>
-    <p>Выполняются собственным анализом плагина при Language features: Built-in (Settings, Tools, Go, Language Server). Диалог появляется только там, где без него не обойтись; если рефакторинг изменил бы поведение программы, он не выполняется, а подсказка называет причину. Отмена — <kbd data-action="$Undo">Ctrl+Z</kbd>, одним шагом.</p>
+    <p>Выполняются собственным анализом плагина при Language features: Built-in (Settings, Go, Language Server). Диалог появляется только там, где без него не обойтись; если рефакторинг изменил бы поведение программы, он не выполняется, а подсказка называет причину. Отмена — <kbd data-action="$Undo">Ctrl+Z</kbd>, одним шагом.</p>
 
     <div class="demo3" aria-hidden="true">
       <figure>
@@ -663,7 +692,7 @@ n := <span class="fn">next</span>()
         <tr><td>Show Statistics</td><td>Файлы, пакеты и память сервера, в окне журнала.</td></tr>
         <tr><td>Show Log</td><td>Окно журнала gopls.</td></tr>
         <tr><td>Open Debug Pages</td><td>Служебные страницы gopls. Включаются в настройках.</td></tr>
-        <tr><td>Settings…</td><td>Settings, Tools, Go.</td></tr>
+        <tr><td>Settings…</td><td>Settings, Go, Language Server.</td></tr>
         <tr><td>Restart</td><td>Перезапускает сервер языка с текущими настройками.</td></tr>
       </tbody>
     </table></div>
@@ -759,17 +788,106 @@ n := <span class="fn">next</span>()
   <div class="wrap">
     <h2>Настройки</h2>
     <p>Страницы настроек переведены на русский: язык берётся из языка IDE (русский языковой пакет) или задаётся полем «Язык этих страниц» на странице Go — новый язык виден при следующем открытии окна настроек. Остальной интерфейс плагина — меню, окна, действия — английский, как и в самой IDE.</p>
-    <p>Settings, Tools, Go. Настройки действуют на все проекты. Каждый раздел ниже — своя страница под Go: Toolchain и Tools на самой странице Go, дальше Language Server (под ней — gopls со всеми параметрами установленной версии сервера), Debugger, Editor and Completion, Code Quality.</p>
+    <p>Settings, Go — свой узел в корне дерева настроек, первым, над Appearance &amp; Behavior (как в GoLand). Настройки действуют на все проекты. Под ним страницы: GOROOT, GOPATH, Go Modules, Build Tags, Imports, Linters, Formatting, Editor and Completion, Language Server (под ней — gopls со всеми параметрами установленной версии сервера), Debugger, Tools. На самой странице Go — какой <code>go</code> используется, источник возможностей языка (переключается на странице Language Server), общие настройки и ссылки на все страницы. Поиск в окне настроек находит каждую настройку.</p>
 
-    <h3>Toolchain</h3>
+    <h3>Go</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Create run configurations for the programs of the project</td><td>Создаёт конфигурацию для каждого каталога с <code>func main</code>. Удалённая вручную не создаётся снова.</td></tr>
+        <tr><td>Test arguments</td><td>Добавляются к каждому <code>go test</code>.</td></tr>
+        <tr><td>Language of these pages</td><td>Язык страниц настроек: как в IDE, English или Русский.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>GOROOT</h3>
     <div class="table"><table class="two">
       <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
       <tbody>
         <tr><td>Path to go</td><td>Путь к команде <code>go</code>. Пусто: поиск в PATH, GOROOT и стандартных каталогах.</td></tr>
-        <tr><td>Build tags</td><td>Теги сборки для анализа кода, сборки и тестов.</td></tr>
+        <tr><td>In use</td><td>Найденный <code>go</code>, его версия и GOROOT. Toolchain этого <code>go</code> — toolchain проекта: сборка, запуск, тесты, сервер языка, отладчик и стандартная библиотека, которую индексирует плагин.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>GOPATH</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Поле</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>GOPATH, GOBIN</td><td>Только чтение, по данным <code>go env</code>; меняются командой <code>go env -w</code>. Инструменты плагин ищет в PATH, в GOBIN и в GOPATH/bin.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Go Modules</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
         <tr><td>Index for navigation <span class="new">новое</span></td><td>Какие исходники Go вне проекта индексируются для навигации и поиска: только стандартная библиотека toolchain (<code>$GOROOT/src</code>) или ещё и модули из build list проекта. Зависимости при первом открытии индексируются дольше; смена значения переиндексирует без перезапуска.</td></tr>
-        <tr><td>Create run configurations for the programs of the project</td><td>Создаёт конфигурацию для каждого каталога с <code>func main</code>. Удалённая вручную не создаётся снова.</td></tr>
-        <tr><td>Test arguments</td><td>Добавляются к каждому <code>go test</code>.</td></tr>
+        <tr><td>GOMODCACHE, Modules of the Project</td><td>Только чтение: кэш модулей и модули проекта; у каждого — читаются ли пакеты из каталога vendor (режим vendor) или из кэша модулей.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Build Tags</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>GOOS, GOARCH</td><td>Платформа встроенного анализа: какие файлы входят в пакет и какие строки <code>//go:build</code> выполняются. Default — платформа машины, дальше — список <code>go tool dist list</code>. Тот же выбор, что у виджета GOOS/GOARCH в строке состояния; его пункт Edit build tags… открывает эту страницу.</td></tr>
+        <tr><td>Cgo support <span class="new">новое</span></td><td>Default (значение <code>CGO_ENABLED</code> из <code>go env</code>), Enabled или Disabled. Решает, выполняется ли тег <code>cgo</code> во встроенном анализе: файл с <code>//go:build cgo</code> при Disabled выпадает из пакета. Команды go плагина (Build, Vet, запуск, тесты, отладчик) получают <code>CGO_ENABLED</code>; переменные окружения конфигурации запуска важнее. При Disabled виджет в строке состояния дописывает <code>· cgo off</code>.</td></tr>
+        <tr><td>Experiments <span class="new">новое</span></td><td>GOEXPERIMENT через запятую (<code>rangefunc</code>, <code>noswissmap</code>): в анализе выполняются теги <code>goexperiment.X</code> этих имён, команды go плагина получают GOEXPERIMENT. Проверяется только запись (буквы, цифры, <code>_</code>), не список экспериментов toolchain. Пусто — решает окружение.</td></tr>
+        <tr><td>Custom tags</td><td>Теги сборки для анализа кода, сборки и тестов.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Imports</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Offer packages that are not imported <span class="new">новое</span></td><td>Имена пакетов в списке.</td></tr>
+        <tr><td>Offer functions and types of packages by their names <span class="new">новое</span></td><td>Подсказки по имени без указания пакета.</td></tr>
+        <tr><td>Импорты вставленного кода</td><td>Настройка платформы: Settings, Editor, General, Auto Import, «Insert imports on paste».</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Linters</h3>
+    <p>Три группы: Built-in (фоновый анализ проекта и таблица всех проверок плагина), golangci-lint и Custom linters.</p>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Analyse the whole project in the background <span class="new">новое</span></td><td>По умолчанию включено. Все замечания проверок Go и go.mod (и синтаксические ошибки) по всем Go-файлам проекта — во вкладке Project Errors окна Problems, с числом в заголовке; двойной щелчок ведёт к месту, исправления там — <kbd data-action="ShowIntentionActions">Alt+Enter</kbd>. Первый проход — после открытия проекта и индексации, дальше — через полторы секунды после правки: изменённый файл, а если поменялись объявления — остальные файлы пакета и импортирующие его. Работает и при Language features: gopls (редактор при этом показывает только gopls). Пропускаются vendor, testdata, каталоги на <code>.</code> и <code>_</code>, сгенерированные файлы и каталоги без Go-файлов; в Power Save Mode анализ стоит.</td></tr>
+        <tr><td>Include warnings <span class="new">новое</span></td><td>Выключено — в Project Errors только ошибки.</td></tr>
+        <tr><td>Таблица проверок (Built-in) <span class="new">новое</span></td><td>Все инспекции плагина (группы Go, Go · Data flow, Go · Lint, Go · Project, Go modules) и все правила движка линтеров (группы Lint rules · errcheck, Lint rules · revive, …) в одном списке с поиском по имени, ID и описанию. Столбцы: флажок, имя, ID (<code>GoUnusedLabel</code>, <code>SA4006</code>, <code>revive:var-naming</code>), Level (Default, Error, Warning, Weak warning, Info), Source: «set by .golangci.yml» — правило решает конфигурация проекта, «overrides .golangci.yml» — ваш выбор поверх неё, «quiet with gopls» — при Language features: gopls проверка молчит. Флажок заголовка группы и ссылки Enable Group, Disable Group, Reset Group, Reset All. Под таблицей — описание выбранной проверки и параметры правила; у инспекции — ссылка Edit in Inspections на её страницу в Settings, Editor, Inspections. Инспекции хранятся в профиле инспекций проекта (тот же, что в Settings, Editor, Inspections), правила — в <code>.idea/goRules.xml</code>.</td></tr>
+        <tr><td>Go lint rules <span class="new">новое</span></td><td>Строка группы Lint rules — инспекция, которая запускает все правила: выключите её, и молчат все правила (они остаются в таблице серыми с пометкой «off with Go lint rules»).</td></tr>
+        <tr><td>Use golangci-lint (optional)</td><td>По умолчанию выключено: анализ кода — встроенные инспекции. Включено: замечания golangci-lint после сохранения файла (конфигурация проекта), <code>golangci-lint fmt</code> среди форматтеров.</td></tr>
+        <tr><td>Custom linters</td><td>Свои линтеры: Name, Command line, Enabled, Run (On save / On the fly, saved files), Working directory (Module root / File directory), Output format (golangci JSON / SARIF 2.1.0). Макросы: <code>$FilePath$</code>, <code>$FileDir$</code>, <code>$ModuleDir$</code>, <code>$Package$</code> (<code>./store</code> или <code>.</code>), <code>$ImportPath$</code>. Замечание — <code>[имя] текст</code>, исправление Suppress with <code>//nolint:имя</code>. Только сохранённые файлы.</td></tr>
+        <tr><td>Linter timeout, seconds</td><td>Сколько ждать golangci-lint и свой линтер; сбой — в журнал плагина и один раз в уведомление.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Formatting</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Reformat Code with</td><td>gofmt, goimports, <code>golangci-lint fmt</code>, None или Built-in (gofmt-совместимый форматтер плагина: без внешнего процесса). goimports также правит импорты. <code>golangci-lint fmt</code> есть в списке, только когда включён golangci-lint (страница Linters).</td></tr>
+        <tr><td>Format Go files on save</td><td>Форматирование при сохранении. Файл с синтаксической ошибкой сохраняется как есть.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Editor and Completion</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Start a doc comment with the name of the declaration</td><td><code>//</code> над объявлением становится <code>// Name </code>.</td></tr>
+        <tr><td>Suggest the idiomatic next line as grey text</td><td>Серый текст, см. одноимённый раздел.</td></tr>
+        <tr><td>Suggest code from context as grey text <span class="new">новое</span></td><td>Серый текст по контексту: правая часть объявления, аргументы, <code>return</code>, поля литерала, см. раздел «Серый текст».</td></tr>
+        <tr><td>Colour grey-text suggestions like code <span class="new">новое</span></td><td>Подсказка раскрашена цветами схемы редактора (ключевые слова, строки, вызовы, типы, переменные), приглушёнными к фону. Без галочки — обычный серый.</td></tr>
+        <tr><td>Show the actions of gopls in the list of Alt+Enter <span class="new">новое</span></td><td>Действия сервера отдельными пунктами. Без галочки они остаются в пункте Refactorings and actions of gopls…</td></tr>
+        <tr><td>Type Latin characters in code when the keyboard layout is Russian <span class="new">новое</span></td><td>Русская буква в коде печатается латинским символом той же клавиши.</td></tr>
+        <tr><td>Offer the values of a return statement as one item <span class="new">новое</span></td><td>Пункт <code>nil, err</code> после <code>return</code>.</td></tr>
+        <tr><td>Names that begin with what is typed go first <span class="new">новое</span></td><td>Порядок списка. Без галочки действует порядок gopls.</td></tr>
+        <tr><td>Show the values of the expected type in bold <span class="new">новое</span></td><td>Выделение подходящих значений и список только из них по <kbd data-action="SmartTypeCompletion">Ctrl+Shift+Space</kbd>.</td></tr>
+        <tr><td>Write the braces of a literal after a struct type <span class="new">новое</span></td><td>Скобки <code>{}</code> после выбранного типа.</td></tr>
+        <tr><td>Offer HTTP status constants and time layouts <span class="new">новое</span></td><td>Константы <code>http.Status…</code> вместо чисел и раскладки времени в строках.</td></tr>
+        <tr><td>Offer what a keyword can begin <span class="new">новое</span></td><td>Заготовки <code>type Name struct {...}</code>, <code>for i, x := range xs</code> в списке.</td></tr>
+        <tr><td>Offer the arguments of a completed call <span class="new">новое</span></td><td>Список для аргументов открывается сам.</td></tr>
       </tbody>
     </table></div>
 
@@ -784,7 +902,7 @@ n := <span class="fn">next</span>()
         <tr><td>Inlay hints</td><td>Подсказки gopls: имена параметров, типы переменных и значения констант рядом с кодом. При Language features: Built-in подсказки показывает сама IDE — Settings, Editor, Inlay Hints, Go <span class="new">новое</span>: имена параметров, имена полей литерала, типы <code>:=</code> и переменных <code>range</code>, значения констант (включены), типы вложенных литералов и выведенные аргументы типа (выключены), а также размер структуры и её выравнивание — <code>24 bytes, 8 padding (16 if reordered)</code> после <code>struct {</code> на 64-битных GOARCH, в любом режиме; уменьшить её — Alt+Enter, Reorder fields.</td></tr>
         <tr><td>Log every message of the protocol</td><td>Полный обмен с сервером в окне журнала. Для разбора неполадок.</td></tr>
         <tr><td>Serve the debug pages of gopls</td><td>Служебные страницы сервера, открываются из меню gopls.</td></tr>
-        <tr><td>Source of features: Language features <span class="new">новое</span></td><td>Один переключатель на все возможности языка: gopls или собственный анализ плагина (Built-in). Источник у каждой возможности один, смена действует сразу, без перезапуска сервера. Охватывает: синтаксические ошибки (без сервера языка ошибки парсера показываются всегда); навигацию Go to Declaration / Type Declaration / Implementation / Super (стандартную библиотеку и зависимости Built-in видит настолько, насколько их индексирует «Index for navigation»); Find Usages, Show Usages и подсветку идентификатора под кареткой и точек выхода (число найденных мест у gopls и Built-in может немного различаться); автодополнение (области видимости, члены, ключевые слова, сниппеты, ключи литералов, пути импорта и неимпортированные пакеты; шаблоны ключевых слов, каталог символов, теги структур и значения плагина работают в обоих режимах); Quick Documentation, parameter info и Type Info; диагностики (Built-in: неразрешённые имена, неиспользуемые импорты и переменные, несовпадение типов, арность, дубликаты, пропущенный return — с быстрыми исправлениями; анализаторы gopls — staticcheck, vet — остаются и при Built-in, в редактор возвращаются сообщения последней сборки Go | Build); семантические цвета идентификаторов (лексическая подсветка всегда плагина); Rename (метод интерфейса — вместе с реализациями по запросу); счётчики «N usages» / «N implementations» и значки реализаций в gutter; inlay hints (Settings, Editor, Inlay Hints, Go); действия Alt+Enter по типам (Fill all fields, Fill return values, Fill switch, Handle error) — рефакторинги (Rename, Extract, Inline, Change Signature, Move, Safe Delete, Introduce Variable / Constant) и иерархии вызовов и типов; при gopls из них остаются Rename сервера и его действия в Alt+Enter. Пока IDE индексирует, встроенная возможность, которой нужны индексы, уступает gopls. Форматтер выбирается отдельно — «Reformat Code with» на странице Code Quality.</td></tr>
+        <tr><td>Source of features: Language features <span class="new">новое</span></td><td>Один переключатель на все возможности языка: gopls или собственный анализ плагина (Built-in). Источник у каждой возможности один, смена действует сразу, без перезапуска сервера. Охватывает: синтаксические ошибки (без сервера языка ошибки парсера показываются всегда); навигацию Go to Declaration / Type Declaration / Implementation / Super (стандартную библиотеку и зависимости Built-in видит настолько, насколько их индексирует «Index for navigation»); Find Usages, Show Usages и подсветку идентификатора под кареткой и точек выхода (число найденных мест у gopls и Built-in может немного различаться); автодополнение (области видимости, члены, ключевые слова, сниппеты, ключи литералов, пути импорта и неимпортированные пакеты; шаблоны ключевых слов, каталог символов, теги структур и значения плагина работают в обоих режимах); Quick Documentation, parameter info и Type Info; диагностики (Built-in: неразрешённые имена, неиспользуемые импорты и переменные, несовпадение типов, арность, дубликаты, пропущенный return — с быстрыми исправлениями; анализаторы gopls — staticcheck, vet — остаются и при Built-in, в редактор возвращаются сообщения последней сборки Go | Build); семантические цвета идентификаторов (лексическая подсветка всегда плагина); Rename (метод интерфейса — вместе с реализациями по запросу); счётчики «N usages» / «N implementations» и значки реализаций в gutter; inlay hints (Settings, Editor, Inlay Hints, Go); действия Alt+Enter по типам (Fill all fields, Fill return values, Fill switch, Handle error) — рефакторинги (Rename, Extract, Inline, Change Signature, Move, Safe Delete, Introduce Variable / Constant) и иерархии вызовов и типов; при gopls из них остаются Rename сервера и его действия в Alt+Enter. Пока IDE индексирует, встроенная возможность, которой нужны индексы, уступает gopls. Форматтер выбирается отдельно — «Reformat Code with» на странице Formatting.</td></tr>
         <tr><td>Проверки плагина при Built-in <span class="new">новое</span></td><td>Без gopls плагин сам подсвечивает: неполный <code>switch</code> по перечислению или интерфейсу проекта (Add missing cases), семейство <code>Printf</code> по правилам vet с обёртками пакета и подсказкой глаголов после <code>%</code>, теги структур (синтаксис, повторы ключей и имён, тег у неэкспортируемого поля), <code>context.Context</code> не первым параметром и подмена <code>ctx</code> на <code>context.Background()</code>, <code>errors.As</code> с не-указателем и <code>err == ErrX</code> вместо <code>errors.Is</code>. Отключаются и настраиваются в Settings | Editor | Inspections | Go.</td></tr>
       </tbody>
     </table></div>
@@ -802,52 +920,13 @@ n := <span class="fn">next</span>()
       </tbody>
     </table></div>
 
-    <h3>Editor</h3>
-    <div class="table"><table class="two">
-      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
-      <tbody>
-        <tr><td>Start a doc comment with the name of the declaration</td><td><code>//</code> над объявлением становится <code>// Name </code>.</td></tr>
-        <tr><td>Suggest the idiomatic next line as grey text</td><td>Серый текст, см. одноимённый раздел.</td></tr>
-        <tr><td>Show the actions of gopls in the list of Alt+Enter <span class="new">новое</span></td><td>Действия сервера отдельными пунктами. Без галочки они остаются в пункте Refactorings and actions of gopls…</td></tr>
-        <tr><td>Type Latin characters in code when the keyboard layout is Russian <span class="new">новое</span></td><td>Русская буква в коде печатается латинским символом той же клавиши.</td></tr>
-      </tbody>
-    </table></div>
-
-    <h3>Completion</h3>
-    <div class="table"><table class="two">
-      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
-      <tbody>
-        <tr><td>Offer the values of a return statement as one item <span class="new">новое</span></td><td>Пункт <code>nil, err</code> после <code>return</code>.</td></tr>
-        <tr><td>Names that begin with what is typed go first <span class="new">новое</span></td><td>Порядок списка. Без галочки действует порядок gopls.</td></tr>
-        <tr><td>Show the values of the expected type in bold <span class="new">новое</span></td><td>Выделение подходящих значений и список только из них по <kbd data-action="SmartTypeCompletion">Ctrl+Shift+Space</kbd>.</td></tr>
-        <tr><td>Offer functions and types of packages by their names <span class="new">новое</span></td><td>Подсказки по имени без указания пакета.</td></tr>
-        <tr><td>Offer packages that are not imported <span class="new">новое</span></td><td>Имена пакетов в списке.</td></tr>
-        <tr><td>Write the braces of a literal after a struct type <span class="new">новое</span></td><td>Скобки <code>{}</code> после выбранного типа.</td></tr>
-        <tr><td>Offer HTTP status constants and time layouts <span class="new">новое</span></td><td>Константы <code>http.Status…</code> вместо чисел и раскладки времени в строках.</td></tr>
-        <tr><td>Offer what a keyword can begin <span class="new">новое</span></td><td>Заготовки <code>type Name struct {...}</code>, <code>for i, x := range xs</code> в списке.</td></tr>
-        <tr><td>Offer the arguments of a completed call <span class="new">новое</span></td><td>Список для аргументов открывается сам.</td></tr>
-      </tbody>
-    </table></div>
-
-    <h3>Code Quality</h3>
-    <div class="table"><table class="two">
-      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
-      <tbody>
-        <tr><td>Reformat Code with</td><td>gofmt, goimports, <code>golangci-lint fmt</code>, None или Built-in (gofmt-совместимый форматтер плагина: без внешнего процесса). goimports также правит импорты.</td></tr>
-        <tr><td>Format Go files on save</td><td>Форматирование при сохранении. Файл с синтаксической ошибкой сохраняется как есть.</td></tr>
-        <tr><td>Use golangci-lint (optional)</td><td>По умолчанию выключено: анализ кода — встроенные инспекции. Включено: замечания golangci-lint после сохранения файла (конфигурация проекта), <code>golangci-lint fmt</code> среди форматтеров.</td></tr>
-        <tr><td>Custom linters</td><td>Свои линтеры: Name, Command line, Enabled, Run (On save / On the fly, saved files), Working directory (Module root / File directory), Output format (golangci JSON / SARIF 2.1.0). Макросы: <code>$FilePath$</code>, <code>$FileDir$</code>, <code>$ModuleDir$</code>, <code>$Package$</code> (<code>./store</code> или <code>.</code>), <code>$ImportPath$</code>. Замечание — <code>[имя] текст</code>, исправление Suppress with <code>//nolint:имя</code>. Только сохранённые файлы.</td></tr>
-        <tr><td>Linter timeout, seconds</td><td>Сколько ждать golangci-lint и свой линтер; сбой — в журнал плагина и один раз в уведомление.</td></tr>
-      </tbody>
-    </table></div>
-
     <h3>Tools</h3>
     <div class="table"><table class="two">
       <thead><tr><th>Инструмент</th><th>Для чего нужен</th></tr></thead>
       <tbody>
         <tr><td>gopls</td><td>Ошибки, подсказки, навигация, рефакторинги.</td></tr>
         <tr><td>dlv</td><td>Отладка.</td></tr>
-        <tr><td>golangci-lint</td><td>Необязательно: замечания линтера в редакторе, если в Code Quality включено «Use golangci-lint (optional)».</td></tr>
+        <tr><td>golangci-lint</td><td>Необязательно: замечания линтера в редакторе, если на странице Linters включено «Use golangci-lint (optional)».</td></tr>
         <tr><td>goimports</td><td>Форматирование с правкой импортов.</td></tr>
         <tr><td>govulncheck</td><td>Проверка зависимостей на известные уязвимости.</td></tr>
       </tbody>
@@ -865,6 +944,7 @@ n := <span class="fn">next</span>()
       <tbody>
         <tr><td>Go, Inspect Project <span class="new">новое</span></td><td>Все проверки Go и go.mod, включённые в профиле, по проекту. Результаты в окне Inspection Results: дерево по проверкам и файлам, переход к месту, исправления по одной находке и сразу для всех. В дереве проекта на каталоге — только по нему.</td></tr>
         <tr><td>Go, Export Inspections to SARIF… <span class="new">новое</span></td><td>Тот же набор в фоне, с прогрессом и отменой; отчёт пишется в файл из диалога сохранения, по умолчанию <code>go-inspect.sarif</code> в корне проекта. По окончании — уведомление «92 findings written to go-inspect.sarif» с кнопками Open File и Show in Explorer (Reveal in Finder на macOS).</td></tr>
+        <tr><td>Go, Reanalyse Project Problems <span class="new">новое</span></td><td>Полный проход фонового анализа сейчас (прогресс «Analysing Go project» в строке состояния) и вкладка Problems, Project Errors. Доступно, когда на странице Settings, Go, Linters включено «Analyse the whole project in the background» и Power Save Mode выключен.</td></tr>
       </tbody>
     </table></div>
     <p>В CI то же самое запускается без окна. <code>go-inspect</code> — режим запуска самой IDE, а не отдельная программа: команду получает лаунчер IDE, в которую установлен плагин (<code>idea64.exe</code> на Windows, <code>idea.sh</code> на Linux и macOS; подойдут и <code>pycharm64.exe</code>, <code>webstorm.sh</code> и другие). IDE с той же конфигурацией в это время не должна быть открыта; на машине разработчика проще задать отдельный каталог конфигурации. Подробности, код выхода на Windows и пример задания GitHub Actions — <code>docs/CI.md</code>.</p>
@@ -894,11 +974,11 @@ go-inspect: 48 inspections, 27 files, 92 findings (4 error, 61 warning, 27 note)
       <tbody>
         <tr><td>Нет подсказок, навигации и ошибок</td><td>Значок gopls в статус-баре; меню Go, gopls, Show Log</td><td>Go, gopls, Restart. Если сервера нет, установить его в настройках, раздел Tools.</td></tr>
         <tr><td>Уведомление Error loading workspace</td><td>Текст уведомления: это сообщение команды <code>go</code></td><td>Чаще всего помогает Go, Modules, Tidy или Download.</td></tr>
-        <tr><td>Нет подсказок по имени из других пакетов</td><td>Help, Show Log: строка Go catalogue</td><td>Go, Read Packages Again. Проверить галочку в настройках, раздел Completion.</td></tr>
+        <tr><td>Нет подсказок по имени из других пакетов</td><td>Help, Show Log: строка Go catalogue</td><td>Go, Read Packages Again. Проверить галочку в настройках, страница Imports.</td></tr>
         <tr><td>Отладка не начинается</td><td>Консоль сессии (команда delve, сборка, вывод компилятора), окно Build с ошибками по ссылкам, уведомление Debug has not started; Go, Debugger, Show Debugger Logs</td><td>Исправить ошибку сборки или обновить Delve под версию Go.</td></tr>
-        <tr><td>Нет замечаний линтера</td><td>Настройки, раздел Code Quality и Tools</td><td>Замечания появляются после сохранения файла. Проверить, что golangci-lint включён в Code Quality и установлен.</td></tr>
-        <tr><td>Команда <code>go</code> не найдена</td><td>Go, Go on This Machine…</td><td>Указать путь в настройках, раздел Toolchain.</td></tr>
-        <tr><td>В коде не набирается русская буква</td><td>Настройки, раздел Editor</td><td>Снять галочку о русской раскладке. В строках и комментариях русский текст набирается всегда.</td></tr>
+        <tr><td>Нет замечаний линтера</td><td>Settings, Go, страницы Linters и Tools</td><td>Замечания появляются после сохранения файла. Проверить, что golangci-lint включён на странице Linters и установлен.</td></tr>
+        <tr><td>Команда <code>go</code> не найдена</td><td>Go, Go on This Machine…</td><td>Указать путь в Settings, Go, GOROOT.</td></tr>
+        <tr><td>В коде не набирается русская буква</td><td>Settings, Go, Editor and Completion</td><td>Снять галочку о русской раскладке. В строках и комментариях русский текст набирается всегда.</td></tr>
         <tr><td>Серый текст или список мешают</td><td>Настройки, разделы Editor и Completion</td><td>Каждая возможность отключается своей галочкой.</td></tr>
         <tr><td>Команда или инструмент не сделали того, что ожидалось</td><td>Go, Plugin Logs: журнал плагина; кнопка Plugin Logs есть и на уведомлении об ошибке</td><td>Строки <code>[go]</code> говорят, что было запущено, где и с каким кодом выхода; полный вывод команды в <code>~/idea-golang-logs/commands</code> (Go, Open Logs Folder).</td></tr>
         <tr><td>Ошибка плагина</td><td>Go, Plugin Logs; Help, Show Log: строки с <code>golangsupport</code></td><td>Приложить файл <code>plugin-ДАТА.log</code> из <code>~/idea-golang-logs/plugin</code> и эти строки к сообщению об ошибке.</td></tr>

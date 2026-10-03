@@ -46,7 +46,7 @@ when the project has one, the defaults otherwise), at the level the profile give
 
 What is read: `*.go`, `go.mod` and `go.work` under `projectDir`, without `vendor`, `testdata`, `node_modules`, directories starting with
 `.` or `_`, files with the `// Code generated ... DO NOT EDIT.` header, and files the build constraints exclude for the host
-GOOS/GOARCH (or those of Settings, Tools, Go).
+GOOS/GOARCH (or those of Settings, Go, Build Tags).
 
 For the run the plugin switches Language features to Built-in and turns gopls off, then restores both settings.
 

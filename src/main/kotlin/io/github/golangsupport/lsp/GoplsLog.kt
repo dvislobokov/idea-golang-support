@@ -182,7 +182,7 @@ class OpenGoplsDebugPagesAction : AnAction(), DumbAware {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val url = GoplsLogService.getInstance(project).debugPagesUrl
-        if (url == null) GoCli.notifyInfo(project, "gopls", "The debug pages are switched on in Settings | Tools | Go, Language Server; the server is restarted with them")
+        if (url == null) GoCli.notifyInfo(project, "gopls", "The debug pages are switched on in Settings | Go | Language Server; the server is restarted with them")
         else BrowserUtil.browse(url)
     }
 }

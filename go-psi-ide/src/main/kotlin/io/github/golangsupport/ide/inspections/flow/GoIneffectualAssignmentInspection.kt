@@ -39,15 +39,7 @@ class GoIneffectualAssignmentInspection : GoFlowInspectionBase() {
         return left.size > 1 && left.size == right.size && left.sorted() == right.sorted() && left != right
     }
 
-    private fun isGenerated(file: com.intellij.psi.PsiFile): Boolean {
-        val text = file.viewProvider.contents
-        val end = text.indexOf("\npackage ").let { if (it < 0) minOf(text.length, 4096) else it }
-        return GENERATED.containsMatchIn(text.subSequence(0, end))
-    }
-
-    private companion object {
-        val GENERATED = Regex("""(?m)^// Code generated .* DO NOT EDIT\.$""")
-    }
+    private fun isGenerated(file: com.intellij.psi.PsiFile): Boolean = io.github.golangsupport.ide.inspections.GoAnalysisScope.isGenerated(file)
 
     override fun check(flow: GoControlFlow, holder: ProblemsHolder) {
         val liveness = GoLiveness.of(flow) ?: return

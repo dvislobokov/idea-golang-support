@@ -28,7 +28,7 @@ class GoFormattingService : AsyncDocumentFormattingService() {
 
     override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
         val executable = formatter() ?: run {
-            request.onError("Go", "The formatter is not found: ${GoSettings.getInstance().formatter.title}. See Settings | Tools | Go.")
+            request.onError("Go", "The formatter is not found: ${GoSettings.getInstance().formatter.title}. See Settings | Go | Formatting and Tools.")
             return null
         }
         val directory = request.context.virtualFile?.parent?.path

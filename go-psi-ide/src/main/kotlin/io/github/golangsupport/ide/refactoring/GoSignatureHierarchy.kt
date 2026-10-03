@@ -33,8 +33,6 @@ class GoSignatureHierarchy private constructor(val members: List<PsiElement>, va
     val all: List<PsiElement> get() = members + generated
 
     companion object {
-        private val GENERATED = Regex("""(?m)^// Code generated .* DO NOT EDIT\.$""")
-
         /** Whether Change Signature of [target] can follow a hierarchy: an interface method, or a method implementing a project interface method. */
         fun applies(target: PsiElement): Boolean = when (target) {
             is GoMethodSpec -> GoImplementations.interfaceSpecOf(target) != null
@@ -74,11 +72,7 @@ class GoSignatureHierarchy private constructor(val members: List<PsiElement>, va
         }
 
         /** `// Code generated ... DO NOT EDIT.` before the package clause (the convention of `go generate` tools). */
-        fun isGenerated(file: PsiFile?): Boolean {
-            val go = file as? GoFile ?: return false
-            val end = go.packageClause?.textRange?.endOffset ?: return false
-            return GENERATED.containsMatchIn(go.viewProvider.contents.subSequence(0, end))
-        }
+        fun isGenerated(file: PsiFile?): Boolean = io.github.golangsupport.ide.inspections.GoAnalysisScope.isGenerated(file)
 
         /**
          * Project types outside the hierarchy that have a method named [name] (with [arities] parameters) and are used as one of

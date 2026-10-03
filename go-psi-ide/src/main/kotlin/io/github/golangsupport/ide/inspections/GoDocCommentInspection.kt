@@ -92,15 +92,9 @@ class GoDocCommentInspection : GoAnalysisInspectionBase() {
     private fun docText(element: GoNamedElement): String? = element.docText?.takeIf { it.isNotBlank() }
 
     companion object {
-        private val GENERATED = Regex("""(?m)^// Code generated .* DO NOT EDIT\.$""")
-
         fun isExported(name: String): Boolean = name.firstOrNull()?.isUpperCase() == true
 
-        private fun skipFile(file: GoFile): Boolean {
-            if (file.isTestFile || file.packageName == "main") return true
-            val clause = file.packageClause ?: return false
-            return GENERATED.containsMatchIn(file.text.substring(0, clause.textRange.startOffset))
-        }
+        private fun skipFile(file: GoFile): Boolean = file.isTestFile || file.packageName == "main" || GoAnalysisScope.isGenerated(file)
 
         /** Whether [text] starts with [name], optionally after `A` / `An` / `The`; a `Deprecated:` first paragraph passes. */
         fun startsWithName(text: String, name: String): Boolean {

@@ -38,7 +38,7 @@ interface CommandOutput {
 object GoCli {
     private const val TIMEOUT_MS = 10 * 60 * 1000
 
-    /** The executable to run: the one from Settings | Tools | Go, otherwise the auto-detected one. */
+    /** The executable to run: the one from Settings | Go | GOROOT, otherwise the auto-detected one. */
     fun findExecutable(): String? {
         val configured = GoSettings.getInstance().goPath.takeIf { it.isNotEmpty() && File(it).isFile }
         val found = configured ?: detectExecutable()
@@ -73,8 +73,18 @@ object GoCli {
     @Throws(ExecutionException::class)
     fun commandLine(workDirectory: String?, vararg arguments: String): GeneralCommandLine {
         val executable = findExecutable()
-            ?: throw ExecutionException("The 'go' executable is not found. Install Go (https://go.dev/dl) and make sure it is on PATH, or set the path in Settings | Tools | Go.")
-        return toolCommandLine(executable, workDirectory, *arguments)
+            ?: throw ExecutionException("The 'go' executable is not found. Install Go (https://go.dev/dl) and make sure it is on PATH, or set the path in Settings | Go | GOROOT.")
+        return toolCommandLine(executable, workDirectory, *arguments).withEnvironment(buildEnvironment(arguments.firstOrNull()))
+    }
+
+    /**
+     * `CGO_ENABLED` / `GOEXPERIMENT` of Settings | Go | Build Tags for a `go` command: build, run, test, vet and the rest compile what the
+     * analysis assumed. Not for `go env`: its answer is the "Default" the page shows. The environment of a run configuration is applied
+     * after this and wins.
+     */
+    fun buildEnvironment(subcommand: String?): Map<String, String> {
+        if (subcommand == "env" || ApplicationManager.getApplication() == null) return emptyMap()
+        return GoSettings.getInstance().goCommandEnvironment()
     }
 
     /** A command line of `go` or of one of its tools: a tool started from the IDE must find the same `go` the plugin uses. */

@@ -8,7 +8,7 @@ import io.github.golangsupport.project.impl.GoRootsProvider
 import io.github.golangsupport.settings.GoSettings
 
 /**
- * The library roots of the native PSI follow Settings | Tools | Go, "Index for navigation" ([GoSettings.libraryRoots]). Replaces
+ * The library roots of the native PSI follow Settings | Go | Go Modules, "Index for navigation" ([GoSettings.libraryRoots]). Replaces
  * `DefaultGoLibraryRootsPolicy` of go-psi, which reads a registry key (the service is overridden in plugin.xml).
  */
 class GoIgsLibraryRootsPolicy : GoLibraryRootsPolicy {

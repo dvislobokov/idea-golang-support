@@ -6,7 +6,7 @@ import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
 
 /**
- * The feature groups of go-psi-ide follow the switches of Settings | Tools | Go | Language Server ([GoFeatures]): the navigation group the
+ * The feature groups of go-psi-ide follow the switches of Settings | Go | Language Server ([GoFeatures]): the navigation group the
  * Navigation switch, the usages group the Usages switch, the implementation gutter markers the Code vision switch, the documentation group
  * (quick documentation, parameter info, type info) the Documentation switch, the rename group the Rename switch (MIGRATION.md steps 8c, 8f, 8h, 8i).
  * Replaces `DefaultGoIdeFeatureGate` of go-psi (the service is overridden in plugin.xml). While the IDE indexes, a native group that needs

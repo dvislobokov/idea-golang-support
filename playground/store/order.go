@@ -12,7 +12,7 @@ var ErrEmpty = errors.New("store: empty order")
 type (
 	// Item is a line of an order.
 	Item struct {
-		Name     string `json:"name" validate:""`
+		Name     string `json:"name" validate:"min=1" yaml:"name"`
 		Price    int    `json:"price"`
 		Quantity int    `json:"quantity"`
 	}
@@ -56,6 +56,13 @@ func (o *Order) Total() int {
 	if err != nil {
 		return 0
 	}
+
+	f, err := os.Open("123")
+	if err != nil {
+		return 0
+	}
+	defer f.Close()
+
 	return total
 
 }

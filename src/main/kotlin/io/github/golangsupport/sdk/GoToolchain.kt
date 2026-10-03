@@ -10,11 +10,12 @@ import io.github.golangsupport.project.api.GoToolchainInfo
 import io.github.golangsupport.project.api.GoToolchainProvider
 import io.github.golangsupport.project.impl.DefaultGoToolchainProvider
 import io.github.golangsupport.project.impl.GoProjectModelTracker
+import io.github.golangsupport.settings.GoCgoMode
 import io.github.golangsupport.settings.GoSettings
 import java.nio.file.Path
 
 /**
- * The toolchain of the project model, from what the plugin already knows: the `go` of Settings | Tools | Go (or the one it found),
+ * The toolchain of the project model, from what the plugin already knows: the `go` of Settings | Go | GOROOT (or the one it found),
  * its `go env -json` ([GoEnvironment], read once in the background), the build tags of the settings and the GOOS / GOARCH the code is
  * analysed for. Replaces `DefaultGoToolchainProvider` of go-psi (the service is overridden in plugin.xml); its pure detection stays the
  * fallback while `go env` has not answered, and when there is no `go` at all. Never runs a process itself.
@@ -30,7 +31,7 @@ class GoIgsToolchainProvider : GoToolchainProvider {
      */
     @Volatile private var last: Answer? = null
 
-    private data class Key(val configuredGo: String, val envKnown: Boolean, val tags: List<String>, val goos: String, val goarch: String)
+    private data class Key(val configuredGo: String, val envKnown: Boolean, val tags: List<String>, val goos: String, val goarch: String, val cgo: GoCgoMode, val experiments: String)
 
     private class Answer(val key: Key, val info: GoToolchainInfo?)
 
@@ -38,7 +39,7 @@ class GoIgsToolchainProvider : GoToolchainProvider {
 
     override fun toolchainFor(project: Project?): GoToolchainInfo? {
         val settings = GoSettings.getInstance()
-        val key = Key(settings.goPath, GoEnvironment.isKnown(), settings.tagList(), settings.analysisGoos, settings.analysisGoarch)
+        val key = Key(settings.goPath, GoEnvironment.isKnown(), settings.tagList(), settings.analysisGoos, settings.analysisGoarch, settings.cgoMode, settings.goExperiments)
         last?.takeIf { it.key == key }?.let { return it.info }
         val info = compute(project, settings)
         last = Answer(key, info)
@@ -65,13 +66,22 @@ class GoIgsToolchainProvider : GoToolchainProvider {
 
     private fun pureFor(executable: String): GoToolchainInfo? = DefaultGoToolchainProvider.detectPure(System.getenv())?.copy(goBinary = Path.of(executable))
 
-    /** The tags of the settings on top of `GOFLAGS`, and the GOOS / GOARCH of the settings when they are set. */
+    /**
+     * The tags of the settings on top of `GOFLAGS`, the GOOS / GOARCH of the settings when they are set, Cgo support forced on or off,
+     * and the Experiments of the settings in place of `GOEXPERIMENT` of the environment (what [GoToolchainInfo.buildContext] turns into
+     * `goexperiment.X` tags): the build constraints of the analysis follow Settings | Go | Build Tags.
+     */
     private fun adjust(info: GoToolchainInfo?, settings: GoSettings): GoToolchainInfo? {
         info ?: return null
         val tags = settings.tagList()
         val goos = settings.analysisGoos
         val goarch = settings.analysisGoarch
-        if (tags.isEmpty() && goos.isEmpty() && goarch.isEmpty()) return info
-        return info.copy(buildTags = info.buildTags + tags, goos = goos.ifEmpty { info.goos }, goarch = goarch.ifEmpty { info.goarch })
+        val cgo = settings.cgoMode.forced
+        val experiments = settings.goExperiments
+        if (tags.isEmpty() && goos.isEmpty() && goarch.isEmpty() && cgo == null && experiments.isEmpty()) return info
+        return info.copy(
+            buildTags = info.buildTags + tags, goos = goos.ifEmpty { info.goos }, goarch = goarch.ifEmpty { info.goarch }, cgoEnabled = cgo ?: info.cgoEnabled,
+            env = if (experiments.isEmpty()) info.env else info.env + ("GOEXPERIMENT" to experiments),
+        )
     }
 }

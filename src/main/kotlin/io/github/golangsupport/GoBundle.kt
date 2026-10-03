@@ -8,7 +8,7 @@ import java.util.MissingResourceException
 import java.util.ResourceBundle
 import java.util.concurrent.ConcurrentHashMap
 
-/** The language of the settings pages: the one of the IDE (the Russian language pack switches it), or chosen on Settings | Tools | Go. */
+/** The language of the settings pages: the one of the IDE (the Russian language pack switches it), or chosen on Settings | Go. */
 enum class PluginLanguage {
     AUTO, ENGLISH, RUSSIAN;
 

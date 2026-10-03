@@ -51,6 +51,17 @@ enum class GoLibraryRoots(val mode: GoLibraryRootsMode, val title: String) {
     override fun toString(): String = title
 }
 
+/** Whether the `cgo` build tag holds for the analysis and `CGO_ENABLED` of the go commands: what `go env` says, or forced. */
+enum class GoCgoMode(val title: String, val forced: Boolean?) {
+    DEFAULT("Default", null),
+    ENABLED("Enabled", true),
+    DISABLED("Disabled", false);
+
+    val label: String get() = GoBundle.messageOr("buildTags.cgo.$name", title)
+
+    override fun toString(): String = title
+}
+
 enum class GoFormatter(val title: String) {
     GOFMT("gofmt"),
     GOIMPORTS("goimports"),
@@ -134,6 +145,11 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var analysisGoos by string("")
         var analysisGoarch by string("")
 
+        /** The `cgo` tag of the analysis and `CGO_ENABLED` of the go commands; DEFAULT: what `go env` says. */
+        var cgoMode by enum(GoCgoMode.DEFAULT)
+        /** GOEXPERIMENT of the analysis (`goexperiment.X` tags) and of the go commands; empty: the environment's. */
+        var goExperiments by string("")
+
         /** The library roots of the native PSI: `$GOROOT/src` alone, or also the module directories of the build list. */
         var libraryRoots by enum(GoLibraryRoots.STANDARD_LIBRARY_AND_DEPENDENCIES)
 
@@ -164,6 +180,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** `if err != nil { ... }` and the `defer` of what was just opened, as grey text to accept with Tab. */
         var inlineIdioms by property(true)
+        /** `make([]string, 0, len(keys))` after `arr := `, the arguments of a call, the values of `return`: grey text from the context. */
+        var inlineSuggestions by property(true)
+        /** The grey text of both in the colours of the code, muted towards the background; off: the plain grey of the platform. */
+        var inlineSuggestionColors by property(true)
         /** `nil, err` as one item of the completion list after `return`. */
         var completeReturnValues by property(true)
         /** Names that begin with what is typed go above the fuzzy matches of gopls. */
@@ -200,6 +220,11 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** How long golangci-lint and a custom linter may run for one file, in seconds. */
         var lintTimeoutSeconds by property(90)
+
+        /** Every Go and go.mod problem of the project in the Project Errors tab of Problems, kept up to date in the background. */
+        var projectAnalysis by property(true)
+        /** Off: only errors go to the Project Errors tab. */
+        var projectAnalysisWarnings by property(true)
 
         /** Added to every `go test`: `-race -count=1`. */
         var testArguments by string("")
@@ -277,6 +302,15 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         get() = state.analysisGoarch.orEmpty()
         set(value) { state.analysisGoarch = value.trim() }
 
+    var cgoMode: GoCgoMode
+        get() = state.cgoMode
+        set(value) { state.cgoMode = value }
+
+    /** As typed, without spaces: `rangefunc,noaliastypeparams`. */
+    var goExperiments: String
+        get() = state.goExperiments.orEmpty()
+        set(value) { state.goExperiments = normalizeExperiments(value) }
+
     var libraryRoots: GoLibraryRoots
         get() = state.libraryRoots
         set(value) { state.libraryRoots = value }
@@ -342,6 +376,14 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         get() = state.inlineIdioms
         set(value) { state.inlineIdioms = value }
 
+    var inlineSuggestions: Boolean
+        get() = state.inlineSuggestions
+        set(value) { state.inlineSuggestions = value }
+
+    var inlineSuggestionColors: Boolean
+        get() = state.inlineSuggestionColors
+        set(value) { state.inlineSuggestionColors = value }
+
     var completeReturnValues: Boolean
         get() = state.completeReturnValues
         set(value) { state.completeReturnValues = value }
@@ -403,6 +445,14 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         get() = state.lintTimeoutSeconds
         set(value) { state.lintTimeoutSeconds = value.coerceIn(5, 600) }
 
+    var projectAnalysis: Boolean
+        get() = state.projectAnalysis
+        set(value) { state.projectAnalysis = value }
+
+    var projectAnalysisWarnings: Boolean
+        get() = state.projectAnalysisWarnings
+        set(value) { state.projectAnalysisWarnings = value }
+
     var testArguments: String
         get() = state.testArguments.orEmpty()
         set(value) { state.testArguments = value.trim() }
@@ -421,7 +471,20 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
     fun testArgumentList(): List<String> = ParametersListUtil.parse(testArguments)
 
+    /** `CGO_ENABLED` / `GOEXPERIMENT` the go commands of the plugin get from Cgo support and Experiments; nothing for the defaults. */
+    fun goCommandEnvironment(): Map<String, String> = buildMap {
+        cgoMode.forced?.let { put("CGO_ENABLED", if (it) "1" else "0") }
+        goExperiments.takeIf { it.isNotEmpty() }?.let { put("GOEXPERIMENT", it) }
+    }
+
     companion object {
         fun getInstance(): GoSettings = service()
+
+        private val EXPERIMENT = Regex("[A-Za-z0-9_]+")
+
+        fun normalizeExperiments(text: String): String = text.split(',', ' ').map(String::trim).filter(String::isNotEmpty).joinToString(",")
+
+        /** The first malformed name of a GOEXPERIMENT list, or null: names only (letters, digits, `_`), `no` before one turns it off. Not checked against a toolchain. */
+        fun invalidExperiment(text: String): String? = text.split(',', ' ').map(String::trim).filter(String::isNotEmpty).firstOrNull { !EXPERIMENT.matches(it) }
     }
 }

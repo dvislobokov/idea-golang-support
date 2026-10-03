@@ -150,9 +150,9 @@
             <action id="Go.Gopls.ShowLog" class="io.github.golangsupport.lsp.ShowGoplsLogAction" text="Show Log" icon="/icons/goplsToolWindow.svg"
                     description="The log window of gopls: its own log, its messages, the commands sent to it"/>
             <action id="Go.Gopls.DebugPages" class="io.github.golangsupport.lsp.OpenGoplsDebugPagesAction" text="Open Debug Pages" icon="AllIcons.General.Web"
-                    description="The web pages of gopls about its sessions, memory and metrics; switched on in Settings | Tools | Go"/>
+                    description="The web pages of gopls about its sessions, memory and metrics; switched on in Settings | Go | Language Server"/>
             <action id="Go.Gopls.Settings" class="io.github.golangsupport.lsp.GoplsSettingsAction" text="Settings..." icon="AllIcons.General.Settings"
-                    description="Settings | Tools | Go"/>
+                    description="Settings | Go | Language Server"/>
             <action id="Go.RestartLanguageServer" class="io.github.golangsupport.lsp.RestartGoplsAction" text="Restart"
                     icon="AllIcons.Actions.Restart" description="Stop gopls and start it again with the current settings"/>
         </group>

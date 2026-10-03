@@ -43,7 +43,7 @@ data class GoLinterContext(val filePath: String, val fileDir: String, val module
 /** A finding of a custom linter as the editor shows it: [key] is the linter the finding is of, for `//nolint:` and for the duplicates table. */
 data class GoLinterFinding(val linterName: String, val key: String, val message: String, val issue: GoLintIssue)
 
-/** The pure part of Custom linters (Settings | Tools | Go | Code Quality): macros, reports, messages. Tested without a process. */
+/** The pure part of Custom linters (Settings | Go | Linters): macros, reports, messages. Tested without a process. */
 object GoCustomLinters {
     /** The macros of a command line, in the order the settings page lists them. */
     val MACROS = listOf("\$FilePath\$", "\$FileDir\$", "\$ModuleDir\$", "\$Package\$", "\$ImportPath\$")

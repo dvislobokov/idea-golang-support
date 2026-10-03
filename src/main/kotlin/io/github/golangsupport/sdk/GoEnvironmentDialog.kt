@@ -25,7 +25,8 @@ import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoLanguageServerControl
 import io.github.golangsupport.settings.GoSettings
-import io.github.golangsupport.settings.GoSettingsConfigurable
+import io.github.golangsupport.settings.GoGorootConfigurable
+import io.github.golangsupport.settings.GoToolsConfigurable
 import java.awt.Dimension
 import javax.swing.Action
 import javax.swing.JComponent
@@ -102,7 +103,7 @@ class GoToolchainCheckActivity : ProjectActivity {
         NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
             .createNotification("Go is not found", "The project has a go.mod, but there is no <code>go</code> on PATH. Build, run, tests and the language server need it.", NotificationType.WARNING)
             .addAction(NotificationAction.createSimple("Download Go") { BrowserUtil.browse("https://go.dev/dl/") })
-            .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoSettingsConfigurable::class.java) })
+            .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoGorootConfigurable::class.java) })
             .notify(project)
     }
 
@@ -116,7 +117,7 @@ class GoToolchainCheckActivity : ProjectActivity {
             .createNotification("Go tools are missing", "$names: ${missing.joinToString("; ") { it.purpose.substringBefore(':').lowercase() }}. Installed with <code>go install</code> into GOBIN.", NotificationType.INFORMATION)
             // the language server among them: started for the open files once it is there, not at the next opening of a file
             .addAction(NotificationAction.createSimpleExpiring("Install All") { GoTool.installAll(project, missing) { GoLanguageServerControl.restartAll(project) } })
-            .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoSettingsConfigurable::class.java) })
+            .addAction(NotificationAction.createSimple("Configure...") { ShowSettingsUtil.getInstance().showSettingsDialog(project, GoToolsConfigurable::class.java) })
             .addAction(NotificationAction.createSimpleExpiring("Don't Ask Again") { PropertiesComponent.getInstance().setValue(DISMISSED_KEY, true) })
             .notify(project)
     }

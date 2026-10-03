@@ -49,6 +49,9 @@ object GoStructTagCompletion {
     /** Keys whose value starts with a name taken from the field name (validate / gorm have other grammars). */
     val NAME_KEYS = setOf("json", "yaml", "xml", "toml", "db", "mapstructure", "bson", "env", "form")
 
+    /** Keys whose value is a list of rules, with the separators between them: go-playground/validator (`validate`, gin's `binding`), gorm. */
+    val RULE_KEYS: Map<String, String> = mapOf("validate" to ",|", "binding" to ",|", "gorm" to ";")
+
     /** Naming styles of a field name in a tag; the order breaks ties of [detectStyle]. */
     enum class Style(val label: String) {
         CAMEL("camelCase"), SNAKE("snake_case"), LOWER("lowercase"), LOWER_FIRST("lowerFirst"), AS_IS("as is"), UPPER_SNAKE("UPPER_SNAKE"), KEBAB("kebab-case");
@@ -144,6 +147,13 @@ object GoStructTagCompletion {
         val m = VALUE_OPEN.matchEntire(tail) ?: return null
         val key = m.groupValues[1]
         val value = m.groupValues[2]
+        RULE_KEYS[key]?.let { separators ->
+            val last = value.indexOfLast { it in separators }
+            val prefix = value.substring(last + 1)
+            // `min=3`, `column:name`: an argument is being typed, no rule to offer
+            if ('=' in prefix || ':' in prefix) return null
+            return Position.Option(key, prefix, value.split(*separators.toCharArray()).map { it.substringBefore('=') }.dropLast(1).toSet())
+        }
         val comma = value.lastIndexOf(',')
         if (comma < 0) return if (key in NAME_KEYS) Position.Name(key, value) else null
         if (key !in OPTIONS) return null
@@ -191,18 +201,20 @@ object GoStructTagCompletion {
 }
 
 /**
- * Struct tags: `:` typed after a known key writes `""` and opens the name list; `,` typed inside a value opens the options. Raw
+ * Struct tags: `:` typed after a known key writes `""` and opens the name list; `,` typed inside a value opens the options (`|` / `;`
+ * the next rule of validate / gorm). Raw
  * string tags only; the provider decides what the popup shows.
  */
 class GoStructTagTypedHandler : TypedHandlerDelegate() {
     override fun checkAutoPopup(charTyped: Char, project: Project, editor: Editor, file: PsiFile): Result {
-        if (charTyped != ',' || file !is GoFile) return Result.CONTINUE
+        // `,` opens the options of a key; `|` and `;` the next rule of validate / gorm
+        if (charTyped !in ",|;" || file !is GoFile) return Result.CONTINUE
         if (!GoIdeFeatureGate.enabled(GoIdeFeature.COMPLETION, project)) return Result.CONTINUE
         PsiDocumentManager.getInstance(project).commitDocument(editor.document)
         val offset = editor.caretModel.offset
         val leaf = file.findElementAt(offset - 1) ?: return Result.CONTINUE
         val (_, before) = GoStructTagCompletion.tagAt(leaf, offset) ?: return Result.CONTINUE
-        if (GoStructTagCompletion.position("$before,") !is GoStructTagCompletion.Position.Option) return Result.CONTINUE
+        if (GoStructTagCompletion.position("$before$charTyped") !is GoStructTagCompletion.Position.Option) return Result.CONTINUE
         AutoPopupController.getInstance(project).scheduleAutoPopup(editor)
         return Result.STOP
     }

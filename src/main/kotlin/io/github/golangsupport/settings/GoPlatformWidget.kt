@@ -5,7 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListSeparator
@@ -32,14 +32,23 @@ object GoPlatformChoices {
 
     val COMMON_PAIRS: List<String> = listOf("linux/amd64", "linux/arm64", "darwin/arm64", "windows/amd64", "js/wasm", "wasip1/wasm")
 
-    /** `linux/amd64`, with ` · tag1,tag2` when tags are set. */
-    fun text(goos: String, goarch: String, tags: List<String>): String = "$goos/$goarch" + if (tags.isEmpty()) "" else " · " + tags.joinToString(",")
+    /** `linux/amd64`, with ` · tag1,tag2` when tags are set and ` · cgo off` when Cgo support is disabled. */
+    fun text(goos: String, goarch: String, tags: List<String>, cgoOff: Boolean = false): String =
+        "$goos/$goarch" + (if (tags.isEmpty()) "" else " · " + tags.joinToString(",")) + if (cgoOff) " · cgo off" else ""
 
     /** The (GOOS, GOARCH) of a `os/arch` string; null when there is no slash. */
     fun split(pair: String): Pair<String, String>? = pair.substringBefore('/', "").takeIf { it.isNotEmpty() }?.let { it to pair.substringAfter('/') }
 
     /** Common pairs first, then the rest in the order of the platform list. */
     fun ordered(): List<String> = COMMON_PAIRS + (ALL_PAIRS - COMMON_PAIRS.toSet())
+
+    /** Every GOOS / GOARCH of [ALL_PAIRS], sorted: the choices of Settings | Go | Build Tags. */
+    fun operatingSystems(): List<String> = ALL_PAIRS.mapNotNull { split(it)?.first }.distinct().sorted()
+    fun architectures(): List<String> = ALL_PAIRS.mapNotNull { split(it)?.second }.distinct().sorted()
+
+    /** GOOS / GOARCH of this machine, what an empty setting means when the toolchain does not say otherwise. */
+    fun hostOs(): String = System.getProperty("os.name").lowercase().let { if ("win" in it) "windows" else if ("mac" in it) "darwin" else "linux" }
+    fun hostArch(): String = System.getProperty("os.arch").lowercase().let { if (it == "aarch64") "arm64" else if (it == "x86_64" || it == "amd64") "amd64" else it }
 }
 
 /** GOOS / GOARCH / build tags of the analysis in the status bar, for projects with Go code; a click changes them. Affects the built-in analysis (go-psi), not gopls. */
@@ -56,6 +65,19 @@ class GoPlatformWidgetFactory : StatusBarWidgetFactory {
         fun refresh(project: Project) = ApplicationManager.getApplication().invokeLater({
             if (!project.isDisposed) WindowManager.getInstance().getStatusBar(project)?.updateWidget(ID)
         }, ModalityState.any())
+
+        /**
+         * After GOOS / GOARCH / tags changed: the toolchain provider keys its answer on the settings, so asking it (off the UI thread, it
+         * may look at the disk) bumps the model trackers; then the highlighting restarts and the widgets show the new target.
+         */
+        fun reanalyze() {
+            ApplicationManager.getApplication().executeOnPooledThread {
+                for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) runCatching { GoToolchainProvider.getInstance().toolchainFor(p) }
+                ApplicationManager.getApplication().invokeLater({
+                    for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) { DaemonCodeAnalyzer.getInstance(p).restart(); refresh(p) }
+                }, ModalityState.any())
+            }
+        }
     }
 }
 
@@ -73,10 +95,10 @@ class GoPlatformWidget(private val project: Project) : StatusBarWidget, StatusBa
         return (settings.analysisGoos.ifEmpty { info?.goos ?: hostOs() }) to (settings.analysisGoarch.ifEmpty { info?.goarch ?: hostArch() })
     }
 
-    private fun hostOs(): String = System.getProperty("os.name").lowercase().let { if ("win" in it) "windows" else if ("mac" in it) "darwin" else "linux" }
-    private fun hostArch(): String = System.getProperty("os.arch").lowercase().let { if (it == "aarch64") "arm64" else if (it == "x86_64" || it == "amd64") "amd64" else it }
+    private fun hostOs(): String = GoPlatformChoices.hostOs()
+    private fun hostArch(): String = GoPlatformChoices.hostArch()
 
-    override fun getSelectedValue(): String = effective().let { GoPlatformChoices.text(it.first, it.second, settings.tagList()) }
+    override fun getSelectedValue(): String = effective().let { GoPlatformChoices.text(it.first, it.second, settings.tagList(), settings.cgoMode == GoCgoMode.DISABLED) }
     override fun getTooltipText(): String =
         "Go analysis target: GOOS/GOARCH" + (if (settings.analysisGoos.isEmpty() && settings.analysisGoarch.isEmpty()) " (host default)" else "") + ". Click to change"
 
@@ -99,11 +121,8 @@ class GoPlatformWidget(private val project: Project) : StatusBarWidget, StatusBa
         return JBPopupFactory.getInstance().createListPopup(step)
     }
 
-    private fun editTags() {
-        val input = Messages.showInputDialog(project, "Comma-separated build tags the analysis assumes (like -tags):", "Go Build Tags", null, settings.buildTags, null) ?: return
-        settings.buildTags = input.split(',', ' ').filter { it.isNotBlank() }.joinToString(",")
-        reanalyze()
-    }
+    /** The tags, and the target as combos, are on Settings | Go | Build Tags: one place to edit them. */
+    private fun editTags() = ShowSettingsUtil.getInstance().showSettingsDialog(project, GoBuildTagsConfigurable::class.java)
 
     private fun choose(pair: Pair<String, String>?) {
         settings.analysisGoos = pair?.first.orEmpty()
@@ -111,15 +130,7 @@ class GoPlatformWidget(private val project: Project) : StatusBarWidget, StatusBa
         reanalyze()
     }
 
-    /** The toolchain provider keys its answer on the settings: asking it (off the UI thread, it may look at the disk) bumps the model trackers; then the highlighting restarts. */
-    private fun reanalyze() {
-        ApplicationManager.getApplication().executeOnPooledThread {
-            runCatching { GoToolchainProvider.getInstance().toolchainFor(project) }
-            ApplicationManager.getApplication().invokeLater({
-                for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) { DaemonCodeAnalyzer.getInstance(p).restart(); GoPlatformWidgetFactory.refresh(p) }
-            }, ModalityState.any())
-        }
-    }
+    private fun reanalyze() = GoPlatformWidgetFactory.reanalyze()
 
     private companion object {
         const val HOST = "Host default"

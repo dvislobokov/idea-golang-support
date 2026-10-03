@@ -61,13 +61,13 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
                 val adapter = adapter(environment)
                 ApplicationManager.getApplication().invokeLater({
                     try {
-                        val session = XDebuggerManager.getInstance(project).startSession(environment, object : XDebugProcessStarter() {
+                        val starter = object : XDebugProcessStarter() {
                             override fun start(session: XDebugSession): XDebugProcess = GoDebugProcess(session, adapter, start, GoDebuggerLogs.newProtocolTrace(), environment)
-                        })
-                        // Hand the descriptor over always, as the .NET plugin does: a split-mode frontend that builds its own UI (vanilla
-                        // IDEA 2026.1) ignores it, but a fork whose split frontend does not (GIGA IDE) shows nothing on null. Returning it
-                        // may log a cosmetic error under vanilla split mode; a broken debugger UI on forks is the worse trade.
-                        result.setResult(session.runContentDescriptor)
+                        }
+                        // The session builder (2026.1) hands out the descriptor in both modes: XDebugSession.getRunContentDescriptor logs a
+                        // SEVERE under the split debugger (seen live), and a fork whose split frontend builds no UI still needs the descriptor.
+                        val started = XDebuggerManager.getInstance(project).newSessionBuilder(starter).environment(environment).startSession()
+                        result.setResult(started.runContentDescriptor)
                     } catch (e: Exception) {
                         adapter.stop(0)
                         result.setError(e)
@@ -96,6 +96,8 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
         val log = GoDebuggerLogs.newAdapterLog()
         GoPluginLog.info(GoDebuggerLogs.CATEGORY, "Starting $delve in $directory, log: ${log ?: "off"}")
         val commandLine = GoCli.toolCommandLine(delve.path, directory, *DlvDap.arguments(log != null, GoSettings.getInstance().debugAnyGoVersion).toTypedArray())
+            // delve builds the program itself: Cgo support and Experiments of Build Tags reach that build through its environment
+            .withEnvironment(GoCli.buildEnvironment("build"))
         return DelveProcess(commandLine, log)
     }
 

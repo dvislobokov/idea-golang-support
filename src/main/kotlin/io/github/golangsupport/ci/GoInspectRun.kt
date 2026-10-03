@@ -67,7 +67,8 @@ class GoInspectRun(
         val exitCode: Int get() = if (results.isNotEmpty()) 1 else if (notifications.isNotEmpty()) 2 else 0
     }
 
-    private class FileOutcome(val results: List<GoSarifResult>, val failures: List<String>)
+    /** What one file gave: its findings (every level) and the inspections that threw on it. */
+    class FileOutcome(val results: List<GoSarifResult>, val failures: List<String>)
 
     fun run(indicator: ProgressIndicator): Report = GoBatchInspections.during(project) { inspect(indicator) }
 
@@ -90,7 +91,7 @@ class GoInspectRun(
             // executeProcessUnderProgress, not runProcess: the indicator of a task is already running, runProcess would start it again
             var found: FileOutcome? = null
             ProgressManager.getInstance().executeProcessUnderProgress({
-                found = ReadAction.nonBlocking<FileOutcome?> { inspectFile(vf, uri, tools, profile, context) }.inSmartMode(project).wrapProgress(indicator).executeSynchronously()
+                found = ReadAction.nonBlocking<FileOutcome?> { inspectFile(project, vf, uri, tools, profile, context, inspections != null) }.inSmartMode(project).wrapProgress(indicator).executeSynchronously()
             }, indicator)
             val outcome = found ?: continue
             inspected++
@@ -100,50 +101,57 @@ class GoInspectRun(
         return Report(tools, results, notifications, inspected, System.currentTimeMillis() - started)
     }
 
-    private fun inspectFile(vf: VirtualFile, uri: String, tools: List<LocalInspectionToolWrapper>, profile: InspectionProfileImpl, context: GoBuildContext?): FileOutcome? {
-        if (!vf.isValid || ProjectFileIndex.getInstance(project).isExcluded(vf)) return null
-        val psi = PsiManager.getInstance(project).findFile(vf) ?: return null
-        if (!includedText(psi.name, psi.viewProvider.contents, context)) return null
-        val results = ArrayList<GoSarifResult>()
-        val failures = ArrayList<String>()
-        for (wrapper in tools) if (wrapper.language.equals(psi.language.id, ignoreCase = true)) inspectFile(psi, uri, wrapper, profile, results, failures)
-        return FileOutcome(results, failures)
-    }
-
-    private fun inspectFile(psi: PsiFile, uri: String, wrapper: LocalInspectionToolWrapper, profile: InspectionProfileImpl, results: MutableList<GoSarifResult>, failures: MutableList<String>) {
-        val key = HighlightDisplayKey.find(wrapper.shortName)
-        if (inspections == null && key != null && !profile.isToolEnabled(key, psi)) return
-        val tool = wrapper.tool as? LocalInspectionTool ?: return
-        val problems = try {
-            tool.processFile(psi, InspectionManager.getInstance(psi.project))
-        } catch (e: Throwable) {
-            if (e is ProcessCanceledException) throw e
-            failures += "${wrapper.shortName} on $uri: ${GoPluginLog.describe(e)}"
-            return
-        }
-        val severity = (key?.let { profile.getErrorLevel(it, psi) } ?: wrapper.defaultLevel).severity
-        val text = psi.viewProvider.contents
-        for (problem in problems) {
-            val element = problem.psiElement ?: continue
-            if (element.containingFile != psi || tool.isSuppressedFor(element)) continue
-            val level = GoSarifLevel.of(problem.highlightType, severity) ?: continue
-            val range = rangeOf(problem) ?: continue
-            results += GoSarifResult(wrapper.shortName, level, message(problem), uri, GoSarif.region(text, range.startOffset, range.endOffset))
-        }
-    }
-
-    private fun rangeOf(problem: ProblemDescriptor): TextRange? = (problem as? ProblemDescriptorBase)?.textRange
-        ?: problem.psiElement?.textRange?.let { r -> problem.textRangeInElement?.shiftRight(r.startOffset) ?: r }
-
-    /** `#ref` and `#loc` resolved as the Problems view does; HTML only when the message is HTML (`chan<- T` is not a tag). */
-    private fun message(problem: ProblemDescriptor): String {
-        val text = ProblemDescriptorUtil.renderDescriptionMessage(problem, problem.psiElement).trim()
-        return if (text.startsWith("<html>", ignoreCase = true)) GoSarif.plainText(text) else text
-    }
-
     companion object {
         const val CATEGORY = "ci"
         private val LANGUAGES = listOf("Go", "GoModule")
+
+        /**
+         * One file through [tools] under a read action: `null` when the file is gone, excluded, generated or out of the build ([includedText]).
+         * [explicit]: the tools were named, so they run whether the profile enables them for the file or not. The shared core of `go-inspect`,
+         * the SARIF export and the background analysis of the project ([io.github.golangsupport.problems.GoProjectProblems]).
+         */
+        fun inspectFile(project: Project, vf: VirtualFile, uri: String, tools: List<LocalInspectionToolWrapper>, profile: InspectionProfileImpl, context: GoBuildContext?,
+                        explicit: Boolean): FileOutcome? {
+            if (!vf.isValid || ProjectFileIndex.getInstance(project).isExcluded(vf)) return null
+            val psi = PsiManager.getInstance(project).findFile(vf) ?: return null
+            if (!includedText(psi.name, psi.viewProvider.contents, context)) return null
+            val results = ArrayList<GoSarifResult>()
+            val failures = ArrayList<String>()
+            for (wrapper in tools) if (wrapper.language.equals(psi.language.id, ignoreCase = true)) inspectFile(psi, uri, wrapper, profile, explicit, results, failures)
+            return FileOutcome(results, failures)
+        }
+
+        private fun inspectFile(psi: PsiFile, uri: String, wrapper: LocalInspectionToolWrapper, profile: InspectionProfileImpl, explicit: Boolean,
+                                results: MutableList<GoSarifResult>, failures: MutableList<String>) {
+            val key = HighlightDisplayKey.find(wrapper.shortName)
+            if (!explicit && key != null && !profile.isToolEnabled(key, psi)) return
+            val tool = wrapper.tool as? LocalInspectionTool ?: return
+            val problems = try {
+                tool.processFile(psi, InspectionManager.getInstance(psi.project))
+            } catch (e: Throwable) {
+                if (e is ProcessCanceledException) throw e
+                failures += "${wrapper.shortName} on $uri: ${GoPluginLog.describe(e)}"
+                return
+            }
+            val severity = (key?.let { profile.getErrorLevel(it, psi) } ?: wrapper.defaultLevel).severity
+            val text = psi.viewProvider.contents
+            for (problem in problems) {
+                val element = problem.psiElement ?: continue
+                if (element.containingFile != psi || tool.isSuppressedFor(element)) continue
+                val level = GoSarifLevel.of(problem.highlightType, severity) ?: continue
+                val range = rangeOf(problem) ?: continue
+                results += GoSarifResult(wrapper.shortName, level, message(problem), uri, GoSarif.region(text, range.startOffset, range.endOffset))
+            }
+        }
+
+        private fun rangeOf(problem: ProblemDescriptor): TextRange? = (problem as? ProblemDescriptorBase)?.textRange
+            ?: problem.psiElement?.textRange?.let { r -> problem.textRangeInElement?.shiftRight(r.startOffset) ?: r }
+
+        /** `#ref` and `#loc` resolved as the Problems view does; HTML only when the message is HTML (`chan<- T` is not a tag). */
+        private fun message(problem: ProblemDescriptor): String {
+            val text = ProblemDescriptorUtil.renderDescriptionMessage(problem, problem.psiElement).trim()
+            return if (text.startsWith("<html>", ignoreCase = true)) GoSarif.plainText(text) else text
+        }
 
         /** [inspections] by name (enabled in the profile or not), otherwise every Go / go.mod inspection [profile] enables; sorted by short name. */
         fun tools(project: Project, profile: InspectionProfileImpl, inspections: Set<String>?): List<LocalInspectionToolWrapper> {
@@ -199,7 +207,25 @@ class GoInspectRun(
 object GoBatchInspections {
     private val RUNS = Key.create<AtomicInteger>("go.batch.inspections")
 
-    fun isActive(project: Project): Boolean = (project.getUserData(RUNS)?.get() ?: 0) > 0
+    /** The gate opened on this thread alone ([onThisThread]); a project, not a flag: two projects may analyse at once. */
+    private val THREAD = ThreadLocal<Project?>()
+
+    fun isActive(project: Project): Boolean = (project.getUserData(RUNS)?.get() ?: 0) > 0 || THREAD.get() === project
+
+    /**
+     * The gate open for [block] on the calling thread only: the background analysis of the project runs all the time, and a project-wide gate
+     * would let the native diagnostics into the editors next to gopls' (and need a restart of the daemon at the end). The inspections run
+     * synchronously in `processFile` on this thread, so they see the gate; the highlighting passes, on their own threads, do not.
+     */
+    fun <T> onThisThread(project: Project, block: () -> T): T {
+        val previous = THREAD.get()
+        THREAD.set(project)
+        try {
+            return block()
+        } finally {
+            THREAD.set(previous)
+        }
+    }
 
     /** Opens the gate; the returned function closes it, once, however often it is called. */
     fun acquire(project: Project): () -> Unit {

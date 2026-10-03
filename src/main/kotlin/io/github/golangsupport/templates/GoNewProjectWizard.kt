@@ -91,7 +91,7 @@ class GoProjectGenerator : DirectoryProjectGeneratorBase<GoNewProjectSettings>()
     override fun createPeer(): ProjectGeneratorPeer<GoNewProjectSettings> = Peer()
 
     override fun validate(baseDirPath: String): ValidationResult =
-        if (GoCli.findExecutable() == null) ValidationResult("The 'go' executable is not found. Install Go, or set its path in Settings | Tools | Go.")
+        if (GoCli.findExecutable() == null) ValidationResult("The 'go' executable is not found. Install Go, or set its path in Settings | Go | GOROOT.")
         else ValidationResult.OK
 
     override fun generateProject(project: Project, baseDir: VirtualFile, settings: GoNewProjectSettings, module: Module) =

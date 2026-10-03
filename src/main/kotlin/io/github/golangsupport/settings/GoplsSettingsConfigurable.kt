@@ -32,7 +32,7 @@ import javax.swing.event.DocumentEvent
 import javax.swing.text.JTextComponent
 
 /**
- * Settings | Tools | Go | gopls: the settings of the installed gopls as a form. The form is made of the catalogue of the server
+ * Settings | Go | Language Server | gopls: the settings of the installed gopls as a form. The form is made of the catalogue of the server
  * ([GoplsCatalogue]): its groups, a control per type of setting, its words as the descriptions. A control shows the value in effect
  * (the default of gopls, or what the plugin sets by itself); only what is changed away from that is stored, and sent on top of it.
  * [Configurable.NoScroll]: the form scrolls under the search field, and the Settings dialog must not scroll the two together.
@@ -84,7 +84,7 @@ class GoplsSettingsConfigurable(private val project: Project) : Configurable, Co
             val loaded = GoplsCatalogue.load()
             ApplicationManager.getApplication().invokeLater({
                 options = loaded?.options.orEmpty()
-                status.text = if (loaded == null) "gopls is not found, or does not answer `gopls api-json`: see the Tools group of Settings | Tools | Go"
+                status.text = if (loaded == null) "gopls is not found, or does not answer `gopls api-json`: see Settings | Go | Tools"
                 else "gopls ${loaded.version}, ${options.size} settings. The controls show what is in effect; the server is restarted on Apply"
                 reset()
             }, ModalityState.any())
