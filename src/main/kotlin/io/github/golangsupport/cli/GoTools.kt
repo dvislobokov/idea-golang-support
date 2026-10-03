@@ -18,6 +18,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.EnvironmentUtil
+import io.github.golangsupport.debugger.GoBundledDelve
 import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.settings.GoLintersConfigurable
 import io.github.golangsupport.settings.GoToolsConfigurable
@@ -158,11 +159,12 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
     }
 
     fun find(): File? {
-        val found = configured() ?: detect()
+        // delve ships with the plugin as sources and is built in the background (GoBundledDelve); the path from the settings still wins
+        val found = configured() ?: (if (this == DELVE) GoBundledDelve.binary() else null) ?: detect()
         // on change only: find() is asked on every file opened, on every annotator run and before every command
         val previous = LAST_FOUND.put(this, found?.path ?: NOT_FOUND)
         if (previous != (found?.path ?: NOT_FOUND)) {
-            if (found != null) GoPluginLog.info(GoLog.CATEGORY_TOOLS, "$command: $found (${if (configured() != null) "the path from the settings" else "found by the plugin"})")
+            if (found != null) GoPluginLog.info(GoLog.CATEGORY_TOOLS, "$command: $found (${if (configured() != null) "the path from the settings" else if (this == DELVE && found == GoBundledDelve.binary()) "built from the sources of the plugin" else "found by the plugin"})")
             else {
                 GoPluginLog.info(GoLog.CATEGORY_TOOLS, "$command is not found: not on the PATH of the IDE and not in ${searchDirectories().joinToString(", ")}; `go env` read: ${GoEnvironment.isKnown()}")
                 GoLog.describeSearchOnce()
@@ -207,7 +209,8 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
          * The tools the "Go tools are missing" notification at project open may ask for: govulncheck serves one button of the Go Dependencies
          * window and is offered there; golangci-lint is optional (Settings | Go | Linters, off by default) and asked for only while it is turned on.
          */
-        fun offeredAtStart(golangciLint: Boolean): List<GoTool> = entries.filter { it != GOVULNCHECK && (it != GOLANGCI_LINT || golangciLint) }
+        fun offeredAtStart(golangciLint: Boolean, languageServer: Boolean = false): List<GoTool> =
+            entries.filter { it != GOVULNCHECK && (it != GOLANGCI_LINT || golangciLint) && (it != GOPLS || languageServer) }
 
         /** What [find] gave last for each tool, so that the log has a line when it changes and not on every call. */
         private val LAST_FOUND = java.util.concurrent.ConcurrentHashMap<GoTool, String>()

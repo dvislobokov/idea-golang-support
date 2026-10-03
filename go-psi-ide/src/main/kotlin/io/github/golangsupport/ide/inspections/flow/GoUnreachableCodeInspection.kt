@@ -2,6 +2,7 @@ package io.github.golangsupport.ide.inspections.flow
 
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
+import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
@@ -48,7 +49,9 @@ class GoUnreachableCodeInspection : GoFlowInspectionBase() {
             if (afterTerminatingCall(first)) continue
             // A dead statement inside a dead run is reported by the run it belongs to.
             if (insideReportedRun(first, firsts.values)) continue
-            holder.registerProblem(first, "unreachable code", DeleteRunFix())
+            // greyed out like unused code (as GoLand shows it), over the whole run the fix deletes
+            val last = run(first).last()
+            holder.registerProblem(holder.manager.createProblemDescriptor(first, last, "unreachable code", ProblemHighlightType.LIKE_UNUSED_SYMBOL, holder.isOnTheFly, DeleteRunFix()))
         }
     }
 
@@ -75,10 +78,9 @@ class GoUnreachableCodeInspection : GoFlowInspectionBase() {
         override fun getName(): String = "Delete unreachable code"
 
         override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-            val first = descriptor.psiElement as? GoStatement ?: return
-            val list = statements(first.parent)
-            val run = list.dropWhile { it !== first }.takeWhile { it is GoLabeledStatement == false }
-            val last = run.lastOrNull() ?: return
+            // a range descriptor gives the common parent as psiElement: the run starts at startElement
+            val first = descriptor.startElement as? GoStatement ?: return
+            val last = run(first).last()
             val file = first.containingFile
             val document = GoImportEdits.document(file) ?: return
             val start = GoFlowChecks.lineRange(document, first).startOffset
@@ -89,6 +91,9 @@ class GoUnreachableCodeInspection : GoFlowInspectionBase() {
     }
 
     private companion object {
+        /** [first] and the statements after it up to a label (a `goto` may jump there): what is reported and deleted together. */
+        fun run(first: GoStatement): List<GoStatement> = statements(first.parent).dropWhile { it !== first }.takeWhile { it !is GoLabeledStatement }.ifEmpty { listOf(first) }
+
         fun isListContainer(e: PsiElement?): Boolean = e is GoBlock || e is GoExprCaseClause || e is GoTypeCaseClause || e is GoCommClause
 
         fun statements(container: PsiElement?): List<GoStatement> = when (container) {

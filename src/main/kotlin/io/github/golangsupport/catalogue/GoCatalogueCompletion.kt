@@ -17,6 +17,7 @@ import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.GoIdioms
 import io.github.golangsupport.lang.GoImport
 import io.github.golangsupport.lang.GoImports
+import io.github.golangsupport.lang.GoNames
 import io.github.golangsupport.lang.GoPrefixMatcher
 import io.github.golangsupport.lang.GoStructLiterals
 import io.github.golangsupport.mod.GoModulesService
@@ -57,6 +58,9 @@ object GoCatalogueInsertion {
     fun offered(found: List<GoSymbolIndex.Entry>, nativeCompletion: Boolean, limit: Int): List<GoSymbolIndex.Entry> =
         found.asSequence().filter { !(nativeCompletion && it.project) }.take(limit).toList()
 
+    /** What can stand where a type is expected. */
+    fun isType(symbol: GoSymbol): Boolean = symbol.kind == GoDeclarationKind.STRUCT || symbol.kind == GoDeclarationKind.TYPE || symbol.kind == GoDeclarationKind.INTERFACE
+
     /** A struct, and a type that is a map, a slice or an array: `http.Header{}`. An interface and a number have no literal. */
     fun hasLiteral(symbol: GoSymbol): Boolean = symbol.kind == GoDeclarationKind.STRUCT ||
         symbol.kind == GoDeclarationKind.TYPE && symbol.signature?.trim()?.let { it.startsWith("map[") || it.startsWith("[") } == true
@@ -88,7 +92,16 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         val wanted = matcher.latin.substringAfterLast('.')
         val native = GoFeatures.native(GoFeature.COMPLETION, file.project)
         val candidates = index.find(wanted, if (native) Int.MAX_VALUE else LIMIT, imports.mapTo(HashSet()) { it.path }, qualifier) { it.importPath != own && GoCatalogueScanner.isVisible(it.importPath, own) }
-        val found = GoCatalogueInsertion.offered(candidates, native, LIMIT)
+        val typePlace = GoStructLiterals.isTypePlace(text, parameters.offset - typed.length)
+        val found = GoCatalogueInsertion.offered(if (typePlace) candidates.filter { GoCatalogueInsertion.isType(it.symbol) } else candidates, native, LIMIT)
+        // while the IDE indexes the built-in completion is off and gopls may not answer yet: the predeclared types are not lost then
+        if (typePlace && !native && GoFeatures.configuredNative(GoFeature.COMPLETION) && qualifier == null) {
+            for (name in GoNames.BUILTIN_TYPES + TYPE_KEYWORDS) {
+                if (!matcher.prefixMatches(name)) continue
+                val item = LookupElementBuilder.create(name).withIcon(if (name in TYPE_KEYWORDS) null else AllIcons.Nodes.Type).withBoldness(name in TYPE_KEYWORDS)
+                names.addElement(PrioritizedLookupElement.withPriority(item, GoCompletionOrder.priority(wanted, name)))
+            }
+        }
         found.forEachIndexed { rank, entry ->
             val insertion = GoCatalogueInsertion.of(entry, imports) ?: return@forEachIndexed
             val item = LookupElementBuilder.create(entry, entry.symbol.name)
@@ -119,6 +132,7 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
 
     private companion object {
         const val MIN_TYPED = 2
+        val TYPE_KEYWORDS = listOf("struct", "interface", "map", "chan", "func")
         const val LIMIT = 40
         const val BELOW = 0.4
         const val STEP = 0.001

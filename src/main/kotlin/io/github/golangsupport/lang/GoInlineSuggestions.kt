@@ -28,7 +28,7 @@ object GoInlineSuggestions {
     /** Where the caret goes in the text of a rule ([Suggestion.caretBack]); not shown. */
     const val CARET = "\u0001"
 
-    enum class Kind { DECLARATION, VAR_TYPE, RETURN, ARGUMENT, LITERAL, RANGE, IF, FOR, SWITCH, LINE }
+    enum class Kind { DECLARATION, VAR_TYPE, FIELD_TYPE, RETURN, ARGUMENT, LITERAL, RANGE, IF, FOR, SWITCH, LINE }
 
     /**
      * Where the caret is. [start]: where what is typed in the slot begins, [typed] is that text (the suggestion has to begin with it).
@@ -72,6 +72,7 @@ object GoInlineSuggestions {
     private fun rules(place: GoInlinePlace): String? = when (place.slot.kind) {
         Kind.DECLARATION -> GoInlineDeclarations.declaration(place)
         Kind.VAR_TYPE -> GoInlineDeclarations.varType(place)
+        Kind.FIELD_TYPE -> GoInlineTypes.byName(place, place.slot.names.single())
         Kind.RETURN -> GoInlineValues.returnValues(place)
         Kind.ARGUMENT -> GoInlineValues.argument(place)
         Kind.LITERAL -> GoInlineValues.literal(place)
@@ -95,6 +96,7 @@ object GoInlineSuggestions {
 
     // --- the slot, from the text of the line ---
 
+    private val FIELD = Regex("""^\s*([A-Za-z_]\w*)\s+([\w.\[\]*]*)$""")
     private val VAR_NAME = Regex("""^\s*var\s+(\w+)(\s*)$""")
     private val RETURN = Regex("""^return\s+$""")
     private val IF = Regex("""^if\s+$""")
@@ -118,6 +120,13 @@ object GoInlineSuggestions {
         VAR_NAME.matchEntire(before)?.let { match ->
             if (rest.isNotEmpty()) return null
             return Slot(Kind.VAR_TYPE, offset, "", rest, names = listOf(match.groupValues[1]), lead = if (match.groupValues[2].isEmpty()) " " else "")
+        }
+        // `Name |` or `Name str|` on a line of a struct: the type of the field (GoLand guesses it from the name too)
+        FIELD.matchEntire(before)?.let { match ->
+            if ((rest.isEmpty() || rest.startsWith("`")) && match.groupValues[1] !in GoNames.KEYWORDS && GoInlineTypes.insideStruct(text, lineStart)) {
+                val typed = match.groupValues[2]
+                return Slot(Kind.FIELD_TYPE, offset - typed.length, typed, rest, names = listOf(match.groupValues[1]))
+            }
         }
         var typedLength = 0
         while (typedLength < before.length && isTypedChar(before[before.length - 1 - typedLength])) typedLength++

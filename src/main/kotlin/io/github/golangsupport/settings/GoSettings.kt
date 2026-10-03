@@ -153,7 +153,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** The library roots of the native PSI: `$GOROOT/src` alone, or also the module directories of the build list. */
         var libraryRoots by enum(GoLibraryRoots.STANDARD_LIBRARY_AND_DEPENDENCIES)
 
-        var languageServerEnabled by property(true)
+        /** Off by default since 0.2.82: the built-in analysis serves every feature, and gopls is not even started; turning it on brings it back. */
+        var languageServerEnabled by property(false)
         /** On: the analyzers of staticcheck come with fixes, and fixes are what Alt+Enter is made of here. */
         var goplsStaticcheck by property(true)
         var goplsGofumpt by property(false)
@@ -165,7 +166,7 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var goplsOverrides by map<String, String>()
 
         // who answers in the editor while the plugin moves from gopls to its own PSI: one switch for every feature but formatting
-        var languageFeaturesSource by enum(GoFeatureSource.GOPLS)
+        var languageFeaturesSource by enum(GoFeatureSource.NATIVE)
 
         /** `-rpc.trace`: every message of the protocol in the log window of gopls. Big; for looking into what the server was asked. */
         var goplsTrace by property(false)

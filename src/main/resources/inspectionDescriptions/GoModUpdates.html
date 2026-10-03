@@ -1,0 +1,7 @@
+<html>
+<body>
+Reports a <code>require</code> of go.mod whose module has a newer version in the module proxy (<code>GOPROXY</code>), as
+<code>go list -m module@latest</code> answers (a downgrade is never offered). The check runs in the background when go.mod is opened and when its requires change, at most once an
+hour, and needs the network; turn this inspection off where the proxy must not be asked. The quick fix runs <code>go get module@version</code>.
+</body>
+</html>

@@ -122,7 +122,8 @@ class GoInlineSuggestionsP2Test : BasePlatformTestCase() {
         }
     """)
 
-    fun testA10NothingWithTwoSlices() = assertNothing("""
+    // with two slices A10 does not choose; the name leaves the skeleton (A70)
+    fun testA10NothingWithTwoSlices() = assertSuggests("make(map[])", """
         package a
 
         type User struct{ ID int }
@@ -246,7 +247,8 @@ class GoInlineSuggestionsP2Test : BasePlatformTestCase() {
         }
     """)
 
-    fun testA65NothingWithTwoMaps() = assertNothing("""
+    // with two maps A65 does not choose; the name leaves the skeleton (A70)
+    fun testA65NothingWithTwoMaps() = assertSuggests("make([], 0)", """
         package a
 
         func f(m map[string]int, other map[string]bool) {
@@ -1138,6 +1140,163 @@ class GoInlineSuggestionsP2Test : BasePlatformTestCase() {
             <caret>
         }
     """))
+
+    // --- A70: by the name alone ---
+
+    fun testA70SliceOfTheTypeNamedLikeTheVariable() = assertSuggests("ke([]Table, 0)", """
+        package a
+
+        type Table struct{ Name string }
+
+        func f() error {
+            tables := ma<caret>
+            return nil
+        }
+    """)
+
+    fun testA70SliceWithoutAType() = assertSuggests("make([], 0)", """
+        package a
+
+        func f() {
+            rows := <caret>
+        }
+    """)
+
+    fun testA70ChannelByItsSuffix() = assertSuggests("make(chan Job)", """
+        package a
+
+        type Job struct{}
+
+        func f() {
+            jobsCh := <caret>
+        }
+    """)
+
+    fun testA70ChannelWithoutAType() = assertSuggests("make(chan )", """
+        package a
+
+        func f() {
+            ch := <caret>
+        }
+    """)
+
+    fun testA70MapByItsSuffix() = assertSuggests("make(map[]User)", """
+        package a
+
+        type User struct{}
+
+        func f() {
+            usersByID := <caret>
+        }
+    """)
+
+    fun testA70SetByItsSuffix() = assertSuggests("make(map[]struct{})", """
+        package a
+
+        func f() {
+            idSet := <caret>
+        }
+    """)
+
+    fun testA70NotForAnAssignment() = assertNothing("""
+        package a
+
+        func f(rows []int) {
+            rows = <caret>
+        }
+    """)
+
+    // --- the type of a field or a var by its name (as GoLand) ---
+
+    fun testFieldTypeCompletesWhatIsTyped() = assertSuggests("ing", """
+        package a
+
+        type User struct {
+            Name str<caret>
+        }
+    """)
+
+    fun testFieldTypeAfterTheName() = assertSuggests("string", """
+        package a
+
+        type User struct {
+            Email <caret>
+        }
+    """)
+
+    fun testFieldTypeTimeImportsTime() {
+        val result = result("""
+            package a
+
+            type User struct {
+                CreatedAt <caret>
+            }
+        """)
+        assertEquals("time.Time", result?.text)
+        assertEquals(setOf("time"), result?.imports)
+    }
+
+    fun testFieldTypeDuration() = assertSuggests("time.Duration", """
+        package a
+
+        type Config struct {
+            Timeout <caret>
+        }
+    """)
+
+    fun testFieldTypeBool() = assertSuggests("bool", """
+        package a
+
+        type User struct {
+            IsAdmin <caret>
+        }
+    """)
+
+    fun testFieldTypeSliceOfThePackageType() = assertSuggests("[]User", """
+        package a
+
+        type User struct{ Name string }
+
+        type Team struct {
+            Users <caret>
+        }
+    """)
+
+    fun testFieldTypeFollowsTheSameFieldElsewhere() = assertSuggests("int64", """
+        package a
+
+        type Order struct {
+            ID int64
+        }
+
+        type User struct {
+            ID <caret>
+        }
+    """)
+
+    fun testFieldTypeNothingForAnUnknownID() = assertNothing("""
+        package a
+
+        type User struct {
+            ID <caret>
+        }
+    """)
+
+    fun testFieldTypeNotOutsideAStruct() = assertNothing("""
+        package a
+
+        func f() {
+            Name <caret>
+        }
+    """)
+
+    fun testVarTypeByName() = assertSuggests(" int", """
+        package a
+
+        func f() {
+            var count<caret>
+        }
+    """)
 
     private companion object {
         const val UNIT = "    "

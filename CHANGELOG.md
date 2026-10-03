@@ -8,6 +8,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Version 0.2.77 bundles delve as sources built on the user's machine.
+Versions 0.2.78–0.2.81: unreachable code greyed out; grey text by the name alone (values and field types) and next to the completion
+list; types only where a type stands.
+Versions 0.2.82–0.2.83: gopls is off by default and not started; go.mod shows newer versions of dependencies itself.
 Versions 0.2.67–0.2.76 are the sixth batch (native lint rule engine with 136 rules, project-wide problems, grey text from context in
 colours, Go settings at the root with a table of every check).
 Versions 0.2.60–0.2.66 are the fifth batch (Go assembly, project-wide checks, interface hierarchy refactorings, unchecked errors, optional
@@ -22,6 +26,60 @@ Language features: Built-in.
 Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, directive comments, struct tag naming style).
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
+
+## [0.2.83] - 2026-10-03
+
+### Added — newer versions in go.mod
+- A `require` whose module has a newer version in the module proxy is highlighted on its version ("Newer version is available: v1.7.0");
+  Alt+Enter → "Upgrade to v1.7.0" runs `go get`. Asked in the background with `go list -m -e -json module@latest` when go.mod is opened
+  and when its requires change, at most once an hour; it needs the network, and the inspection "Newer version of a dependency" (Go
+  modules) turns it off. Before, this came from gopls, which is now off by default.
+
+## [0.2.82] - 2026-10-03
+
+### Changed — gopls off by default
+- The language server is off by default and is not started: errors, completion, navigation, refactorings and formatting come from the
+  built-in analysis (Language features: Built-in is the default too). gopls is not offered for installation at start any more. Settings |
+  Go | Language Server → "Use gopls…" brings it back, with the Language features switch as before. A choice saved earlier is kept.
+
+## [0.2.81] - 2026-10-03
+
+### Fixed
+- Completion where only a type can stand (a struct field, `var x `, a parameter) offered functions and constants of the catalogue
+  (`flag.String`, `reflect.String`) and, while the IDE indexed, no `string`: the catalogue offers types there, and during indexing the
+  predeclared types and `struct` / `interface` / `map` / `chan` / `func` are offered too.
+
+## [0.2.80] - 2026-10-03
+
+### Added — the type of a field by its name, as grey text
+- `Name str|` shows `ing`, `CreatedAt ` → `time.Time` (the import is added on accept), `Timeout ` → `time.Duration`, `IsAdmin ` → `bool`,
+  `Price ` → `float64`, `Tags ` → `[]string`, `Users ` → `[]User` when the package has `User`, a field named like a type of the package
+  → that type. A field of the same name in another struct of the package wins (`ID` is what the code base says it is; an unknown `ID`
+  gets nothing). The same names complete `var count` when nothing below tells the type.
+
+## [0.2.79] - 2026-10-03
+
+### Added — grey text by the name alone, next to the completion list
+- `x :=` whose type nothing below tells gets its `make` from the name: `tables` → `make([]Table, 0)` when the package has a type `Table`
+  (else the caret waits in `make([]|, 0)`), `jobsCh` / `ch` → `make(chan Job)` / `make(chan |)`, `usersByID` / `userMap` →
+  `make(map[|]User)`, `idSet` / `seen` → `make(map[|]struct{})`. Not for names already used below (the rules by use decide there), not for
+  test tables (`tests`, `cases`).
+- Grey text is shown while the completion list is open too (`tables := ma` showed only the list), as in GoLand.
+
+## [0.2.78] - 2026-10-03
+
+### Changed
+- Unreachable code is greyed out like unused code, the whole dead run up to a label, instead of a warning on its first statement; "Delete
+  unreachable code" removes exactly what is grey.
+
+## [0.2.77] - 2026-10-03
+
+### Added — delve inside the plugin
+- The sources of delve v1.27.2 (`third_party/delve`, a git submodule at the release tag with its `vendor/`) ship inside the plugin and are
+  built with the user's `go` in a background task on project open (progress in the status bar; `-mod=vendor`, `GOTOOLCHAIN=local`: no
+  network) into the system directory of the IDE, one directory per hash of the sources. A plugin update with other delve sources builds
+  again; a lost binary is built again on the next start or on Debug. The `dlv` path from Settings | Go | Tools still wins; when the build
+  fails (no `go`, a toolchain older than delve needs), the plugin falls back to a `dlv` on PATH and the install offer as before.
 
 ## [0.2.76] - 2026-10-03
 

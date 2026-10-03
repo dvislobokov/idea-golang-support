@@ -37,9 +37,13 @@ class GoInlineIdiomsProvider : InlineCompletionProvider {
     @Volatile
     private var pending: GoInlineSuggestions.Suggestion? = null
 
-    /** A new line, or a character typed at the start of one (the beginning of the suggestion: `i`, `if`, `de`...), or in a slot. */
+    /**
+     * A new line, or a character typed at the start of one (the beginning of the suggestion: `i`, `if`, `de`...), or in a slot. Also when
+     * the completion list opens or moves: while it is shown the platform hides the grey text of a typing event, and GoLand shows both
+     * (seen live: `tables := ma` showed only the list).
+     */
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
-        if (event !is InlineCompletionEvent.DocumentChange) return false
+        if (event !is InlineCompletionEvent.DocumentChange && event !is InlineCompletionEvent.InlineLookupEvent) return false
         val settings = GoSettings.getInstance()
         if (!settings.inlineIdioms && !settings.inlineSuggestions) return false
         return event.toRequest()?.file is GoFile

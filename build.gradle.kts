@@ -1,4 +1,6 @@
+import java.security.MessageDigest
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
@@ -95,6 +97,35 @@ tasks.processResources {
     }
     from("docs/guide.html") {
         into("welcome")
+    }
+}
+
+// delve (third_party/delve: a git submodule at a release tag, vendor/ included) ships as sources in delve/ of the plugin and is built with
+// the user's go in the background (GoBundledDelve): no network, no `go install`. SOURCE-HASH names the build, so changed sources give a new
+// hash and a rebuild after the plugin is updated. Tests and fixtures stay out of the ZIP.
+val delveSources = fileTree("third_party/delve") {
+    include("go.mod", "go.sum", "LICENSE", "cmd/**", "pkg/**", "service/**", "vendor/**")
+    exclude("**/*_test.go", "**/testdata/**", "**/_fixtures/**")
+}
+val delveSourceHash = tasks.register("delveSourceHash") {
+    val output = layout.buildDirectory.file("delve/SOURCE-HASH")
+    val sources = delveSources
+    inputs.files(sources)
+    outputs.file(output)
+    doLast {
+        val files = sortedMapOf<String, File>()
+        sources.visit { if (!isDirectory) files[relativePath.pathString] = file }
+        check(files.isNotEmpty()) { "third_party/delve is empty: run `git submodule update --init`" }
+        val digest = MessageDigest.getInstance("SHA-256")
+        files.forEach { (path, file) -> digest.update(path.toByteArray()); digest.update(file.readBytes()) }
+        output.get().asFile.writeText(digest.digest().joinToString("") { "%02x".format(it) }.take(16))
+    }
+}
+// every sandbox the IDE runs from (runIde, runIdeForUiTests and the one buildPlugin zips), not the test sandboxes
+tasks.withType<PrepareSandboxTask>().configureEach {
+    if (!name.contains("Test")) {
+        from(delveSources) { into(pluginName.map { "$it/delve" }) }
+        from(delveSourceHash) { into(pluginName.map { "$it/delve" }) }
     }
 }
 

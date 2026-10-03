@@ -123,7 +123,7 @@ class GoCustomLintersTest {
         assertTrue(GoSettings.Settings().customLinters.isEmpty())
         assertFalse(GoTool.GOLANGCI_LINT in GoTool.offeredAtStart(golangciLint = false))
         assertTrue(GoTool.GOLANGCI_LINT in GoTool.offeredAtStart(golangciLint = true))
-        assertTrue(GoTool.GOPLS in GoTool.offeredAtStart(golangciLint = false) && GoTool.DELVE in GoTool.offeredAtStart(golangciLint = false))
+        assertTrue(GoTool.GOPLS !in GoTool.offeredAtStart(golangciLint = false) && GoTool.GOPLS in GoTool.offeredAtStart(golangciLint = false, languageServer = true) && GoTool.DELVE in GoTool.offeredAtStart(golangciLint = false))
         assertFalse(GoTool.GOVULNCHECK in GoTool.offeredAtStart(golangciLint = true))
     }
 

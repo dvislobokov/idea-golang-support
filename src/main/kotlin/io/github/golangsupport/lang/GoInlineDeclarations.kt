@@ -74,6 +74,7 @@ object GoInlineDeclarations {
             ?: a16Context(p, name) ?: a20Now(p, name, uses) ?: a21Since(p, name) ?: library(p, name) ?: tests(p, name)
             ?: a36Zero(p, name, uses) ?: a35Length(p, name, uses)
             ?: a55TestedCall(p, listOf(name)) ?: a34ParameterField(p, name) ?: a30Constructor(p, listOf(name)) ?: a32DefaultConfig(p, name) ?: a31Literal(p, name)
+            ?: a70ByName(p, name, uses)
     }
 
     private fun library(p: GoInlinePlace, name: String): String? =
@@ -253,6 +254,54 @@ object GoInlineDeclarations {
         val (slice, element, key) = candidates.singleOrNull() ?: return null
         if (!GoTypePredicates.comparable(key.type, strict = true)) return null
         return "make(map[${p.typeText(key.type) ?: return null}]${p.typeText(element) ?: return null}, len(${slice.name}))"
+    }
+
+    // --- by the name alone (when nothing below tells the type) ---
+
+    private val CHANNEL_NAMES = Regex("""^(ch|chn|chan\w*|channel|queue|q)$|^(\w+?)(Ch|Chn|Chan|Channel|Queue)$""")
+    private val MAP_SUFFIX = Regex("""^(\w+?)(Map|Index|ByID|ByName|ByKey|By[A-Z]\w*)$""")
+    private val TABLE_NAMES = setOf("tests", "cases", "testCases", "tcs", "tt", "tc")
+    private val SET_SUFFIX = Regex("""^(\w+?)Set$""")
+
+    /** `tables` → `table`, `entries` → `entry`, `boxes` → `box`. */
+    fun singular(name: String): String = when {
+        name.endsWith("ies") && name.length > 4 -> name.dropLast(3) + "y"
+        Regex("""(ss|x|ch|sh)es$""").containsMatchIn(name) -> name.dropLast(2)
+        name.endsWith("s") -> name.dropLast(1)
+        else -> name
+    }
+
+    /** A type of the package named like [stem] (`table` → `Table`, `jobs` → `Job`), as text; null when there is none. */
+    private fun typeNamed(p: GoInlinePlace, stem: String): String? {
+        if (stem.isEmpty()) return null
+        val wanted = singular(stem)
+        return p.packageTypes.keys.firstOrNull { it.equals(wanted, ignoreCase = true) } ?: p.packageTypes.keys.firstOrNull { it.equals(stem, ignoreCase = true) }
+    }
+
+    /**
+     * `x :=` whose type nothing below tells: the name decides what is made. `jobsCh` → `make(chan Job)`, `userMap` / `usersByID` →
+     * `make(map[|]User)`, `idSet` → `make(map[|]struct{})`, `tables` → `make([]Table, 0)`; the element is a type of the package named
+     * like the variable, else the caret waits where the type goes. Only for a name not used yet.
+     */
+    fun a70ByName(p: GoInlinePlace, name: String, uses: GoInlineUses): String? {
+        // uses below that the rules above could not read (two types appended, two collections) are not overridden by the name
+        if (!p.slot.define || uses.count > 0) return null
+        // a table of test cases is a slice literal of an anonymous struct, not something to make
+        if (name in TABLE_NAMES) return null
+        val caret = GoInlineSuggestions.CARET
+        CHANNEL_NAMES.matchEntire(name)?.let { m ->
+            val element = typeNamed(p, m.groupValues[2])
+            return if (element != null) "make(chan $element)" else "make(chan $caret)"
+        }
+        SET_SUFFIX.matchEntire(name)?.let { return "make(map[$caret]struct{})" }
+        if (isSetName(name)) return "make(map[$caret]struct{})"
+        MAP_SUFFIX.matchEntire(name)?.let { m -> return "make(map[$caret]${typeNamed(p, m.groupValues[1]) ?: ""})" }
+        if (isMapName(name)) return "make(map[$caret])"
+        if (isSliceName(name)) {
+            val element = typeNamed(p, name)
+            return if (element != null) "make([]$element, 0)" else "make([]$caret, 0)"
+        }
+        return null
     }
 
     // --- channels (A12, A13, A14, A15) ---
@@ -543,7 +592,7 @@ object GoInlineDeclarations {
         // a package-level `var` has no uses in a body to read
         val uses = if (definition != null && PsiTreeUtil.getParentOfType(p.leaf, GoVarDeclaration::class.java) != null && p.owner != null) p.usesOf(definition) else GoInlineUses()
         val result = a27WaitGroup(p, name) ?: a28Mutex(p, name, uses) ?: GoInlineLibrary.a29Once(p, name) ?: a25Builder(p, name, uses) ?: a26Buffer(p, name, uses)
-            ?: a4SliceType(p, uses) ?: return null
+            ?: a4SliceType(p, uses) ?: (if (uses.count == 0) GoInlineTypes.byName(p, name) else null) ?: return null
         return result
     }
 

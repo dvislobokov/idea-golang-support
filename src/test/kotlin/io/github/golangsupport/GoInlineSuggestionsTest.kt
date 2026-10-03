@@ -113,7 +113,8 @@ class GoInlineSuggestionsTest : BasePlatformTestCase() {
         }
     """)
 
-    fun testA2NothingWithTwoCollections() = assertNothing("""
+    // with two collections A2 does not choose a length; the name leaves the skeleton (A70)
+    fun testA2NothingWithTwoCollections() = assertSuggests("make([], 0)", """
         package a
 
         func f(keys []string, values []string) {

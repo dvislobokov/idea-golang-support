@@ -211,6 +211,9 @@
                          implementationClass="io.github.golangsupport.mod.GoModRequiresInspection"/>
         <localInspection language="GoModule" shortName="GoModUnused" displayName="Unused require" groupName="Go modules" enabledByDefault="true" level="WARNING"
                          implementationClass="io.github.golangsupport.mod.GoModUnusedInspection"/>
+        <!-- newer versions from the module proxy (go list -m -u), in the background: what gopls showed before it was turned off by default -->
+        <localInspection language="GoModule" shortName="GoModUpdates" displayName="Newer version of a dependency" groupName="Go modules" enabledByDefault="true" level="WEAK WARNING"
+                         implementationClass="io.github.golangsupport.mod.GoModUpdatesInspection"/>
         <localInspection language="GoModule" shortName="GoModVersions" displayName="Go and toolchain versions" groupName="Go modules" enabledByDefault="true" level="WARNING"
                          implementationClass="io.github.golangsupport.mod.GoModVersionsInspection"/>
         <!-- the requirements of a module with their updates and vulnerabilities -->
@@ -270,6 +273,8 @@
         <toolWindow id="Go Plugin Logs" anchor="bottom" icon="AllIcons.Debugger.Console" doNotActivateOnStart="true"
                     factoryClass="io.github.golangsupport.cli.GoPluginLogsToolWindowFactory"/>
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoToolchainCheckActivity"/>
+        <!-- delve from the sources inside the plugin: built in the background once per version of the sources, again when the binary is lost -->
+        <postStartupActivity implementation="io.github.golangsupport.debugger.GoBundledDelveActivity"/>
         <!-- a user/leftover association can shadow the declarative .go / go.mod one: tell the user in a dialog and offer to claim it back -->
         <postStartupActivity implementation="io.github.golangsupport.sdk.GoFileTypeCheckActivity"/>
         <!-- offer to switch off the bundled plugins a Go developer has no use for (Java, Maven, Python, Spring, GitHub, GitLab...) -->

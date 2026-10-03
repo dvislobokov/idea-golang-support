@@ -110,7 +110,7 @@ class GoToolchainCheckActivity : ProjectActivity {
     private fun offerMissingTools(project: Project) {
         if (PropertiesComponent.getInstance().getBoolean(DISMISSED_KEY)) return
         // govulncheck is offered in the Go Dependencies window, golangci-lint only once it is turned on: see GoTool.offeredAtStart
-        val missing = GoTool.offeredAtStart(GoSettings.getInstance().golangciLint).filter { it.find() == null }
+        val missing = GoTool.offeredAtStart(GoSettings.getInstance().golangciLint, GoSettings.getInstance().languageServerEnabled).filter { it.find() == null }
         if (missing.isEmpty()) return
         val names = missing.joinToString(", ") { "<code>${it.command}</code>" }
         NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)

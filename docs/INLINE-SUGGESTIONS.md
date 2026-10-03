@@ -87,6 +87,7 @@
 | A63 | `g, ctx :=` при импорте `errgroup` | `errgroup.WithContext(ctx)` | P3 |
 | A64 | `sem :=` | `make(chan struct{}, n)` (`n`/`limit`/`workers` из области) | P3 |
 | A65 | `keys :=` при мапе `m` в области | `slices.Collect(maps.Keys(m))` (Go ≥ 1.23), иначе `make([]K, 0, len(m))` | P2 |
+| A70 | `x :=`, имя ниже не используется | по имени: срез (`tables` → `make([]Table, 0)`), канал (`…Ch`, `ch`), мапа (`…ByID`, `…Map`), множество (`…Set`, `seen`); тип — тип пакета с тем же именем, иначе курсор на месте типа | сделано |
 | A66 | `sorted :=` при срезе `s` | `slices.Clone(s)` (+ ниже `slices.Sort(sorted)`) | P3 |
 
 ## B. `return |`

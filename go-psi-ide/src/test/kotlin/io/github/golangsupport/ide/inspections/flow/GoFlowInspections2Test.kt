@@ -432,8 +432,8 @@ func use(...any)                    {}
 
         func afterReturn() int {
         	return 1
-        	<warning descr="unreachable code">use(1)</warning>
-        	use(2)
+        	<warning descr="unreachable code">use(1)
+        	use(2)</warning>
         }
 
         func afterPanic() {

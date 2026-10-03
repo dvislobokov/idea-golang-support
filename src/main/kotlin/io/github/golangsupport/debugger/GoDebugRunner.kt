@@ -89,6 +89,11 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
             return RemoteDelve(options.remoteHost.orEmpty().ifBlank { "localhost" }, options.remotePort)
         }
         val delve = GoTool.DELVE.find() ?: run {
+            // lost (removed from the system directory) or never built: build it again; a missing go or a failed build falls through to the install offer
+            if (GoBundledDelve.sources() != null && !GoBundledDelve.failed()) {
+                GoBundledDelve.ensureBuilt(environment.project)
+                throw ExecutionException("The debugger is being built from the sources of the plugin (see the status bar). Start Debug again in a moment.")
+            }
             GoTool.DELVE.offerInstallation(environment.project, "Debug")
             throw ExecutionException("The debugger is not installed: dlv is not found. Install it with: go install ${GoTool.DELVE.module}@latest")
         }

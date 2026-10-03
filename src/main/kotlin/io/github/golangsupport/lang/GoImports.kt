@@ -238,6 +238,23 @@ object GoStructLiterals {
         }
     }
 
+    private val TYPE_AFTER_NAME = Regex("""^\s*(var\s+)?[A-Za-z_]\w*(\s*,\s*[A-Za-z_]\w*)*\s+(\*|\[\w*]|map\[[\w.*\[\]]*])*$""")
+    private val PARAMETER_TYPE = Regex("""[(,]\s*[A-Za-z_]\w*\s+(\*|\[\w*]|map\[[\w.*\[\]]*]|\.\.\.)*$""")
+
+    /**
+     * Whether a name that begins at [start] stands where only a type can: a struct field (`Name str|`), `var x str|`, a parameter of a
+     * `func` line. There a function or a constant of a package is noise (seen live: `flag.String` and `reflect.String` for a field).
+     */
+    fun isTypePlace(text: CharSequence, start: Int): Boolean {
+        val end = start.coerceIn(0, text.length)
+        var lineStart = end
+        while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--
+        val line = text.subSequence(lineStart, end).toString()
+        val code = line.trimStart()
+        if (TYPE_AFTER_NAME.matches(line)) return code.startsWith("var ") || GoInlineTypes.insideStruct(text, lineStart)
+        return code.startsWith("func") && PARAMETER_TYPE.containsMatchIn(line)
+    }
+
     /** The name with its qualifier around [offset], the caret inside of it or right after it. */
     private fun nameAt(text: CharSequence, offset: Int): Pair<Int, Int>? {
         fun part(c: Char) = isNameChar(c) || c == '.'

@@ -1,0 +1,3 @@
+[submodule "third_party/delve"]
+	path = third_party/delve
+	url = https://github.com/go-delve/delve.git
