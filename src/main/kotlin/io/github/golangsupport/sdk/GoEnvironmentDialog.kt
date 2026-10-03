@@ -24,6 +24,7 @@ import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.settings.GoLanguageServerControl
+import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.settings.GoSettingsConfigurable
 import java.awt.Dimension
 import javax.swing.Action
@@ -107,8 +108,8 @@ class GoToolchainCheckActivity : ProjectActivity {
 
     private fun offerMissingTools(project: Project) {
         if (PropertiesComponent.getInstance().getBoolean(DISMISSED_KEY)) return
-        // govulncheck serves one button of the Go Dependencies window: offered there, not at every start
-        val missing = GoTool.entries.filter { it != GoTool.GOVULNCHECK && it.find() == null }
+        // govulncheck is offered in the Go Dependencies window, golangci-lint only once it is turned on: see GoTool.offeredAtStart
+        val missing = GoTool.offeredAtStart(GoSettings.getInstance().golangciLint).filter { it.find() == null }
         if (missing.isEmpty()) return
         val names = missing.joinToString(", ") { "<code>${it.command}</code>" }
         NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)

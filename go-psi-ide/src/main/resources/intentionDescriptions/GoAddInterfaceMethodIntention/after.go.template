@@ -1,0 +1,12 @@
+type Store interface {
+	Get(id string) (Item, error)
+	Delete(id string) error
+}
+
+type memStore struct{}
+
+func (m *memStore) Get(id string) (Item, error) { return Item{}, nil }
+
+func (m *memStore) Delete(id string) error {
+	panic("not implemented")
+}

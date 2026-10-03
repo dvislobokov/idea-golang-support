@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports an import that closes a cycle among the packages of the project (the go command's <code>import cycle not allowed</code>).
+The message shows the shortest chain, for example <code>import cycle: example.com/app/a → example.com/app/b → example.com/app/a</code>.
+<p>The graph is built from the imports of non-test files (build constraints applied). An in-package <code>_test.go</code> file is
+compiled into its package, so its import is reported when the imported package leads back to it
+(<code>import cycle not allowed in test</code>); external test packages (<code>package a_test</code>) may import anything.
+Packages of the standard library, the module cache and <code>vendor/</code> are not part of the graph.</p>
+</body>
+</html>

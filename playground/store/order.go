@@ -1,7 +1,10 @@
 // Package store keeps orders.
 package store
 
-import "errors"
+import (
+	"errors"
+	"os"
+)
 
 // ErrEmpty is returned for an order without items.
 var ErrEmpty = errors.New("store: empty order")
@@ -48,9 +51,13 @@ func (o *Order) Total() int {
 	for _, item := range o.items {
 		total += item.Price * item.Quantity
 	}
+
+	_, err := os.Open("123")
+	if err != nil {
+		return 0
+	}
 	return total
 
-	Open
 }
 
 func (o *Order) Validate() error {

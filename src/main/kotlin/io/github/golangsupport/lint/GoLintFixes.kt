@@ -94,10 +94,10 @@ object GoErrcheckFixes {
         else List(results - 1) { "_" }.joinToString(", ") + ", err := $statement\n${indent}if err != nil {\n$indent${unit}return err\n$indent}"
 }
 
-/** `//nolint:errcheck` at the end of the line: the way to tell golangci-lint that this one is meant. Joins a directive that is already there. */
+/** `//nolint:errcheck` at the end of the line: the way to tell golangci-lint (or a custom linter that reads the directive) that this one is meant. Joins a directive that is already there. */
 class GoNolintFix(private val linter: String, private val line: Int) : IntentionAction {
     override fun getText(): String = "Suppress with //nolint:$linter"
-    override fun getFamilyName(): String = "Suppress golangci-lint finding"
+    override fun getFamilyName(): String = "Suppress linter finding"
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean = true
     override fun startInWriteAction(): Boolean = true
 

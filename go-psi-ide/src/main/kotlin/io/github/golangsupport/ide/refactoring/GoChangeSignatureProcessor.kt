@@ -27,9 +27,13 @@ import io.github.golangsupport.lang.psi.GoMethodSpec
 import io.github.golangsupport.lang.psi.GoNamedElement
 import io.github.golangsupport.lang.psi.GoParamDefinition
 import io.github.golangsupport.lang.psi.GoParenthesesExpr
+import io.github.golangsupport.lang.psi.GoReferenceExpression
 import io.github.golangsupport.lang.psi.GoSimpleStatement
 import io.github.golangsupport.lang.psi.GoTypes
+import io.github.golangsupport.semantic.api.GoSemanticService
 import io.github.golangsupport.semantic.psi.GoPsiUtil.arguments
+import io.github.golangsupport.semantic.types.GoNamedType
+import io.github.golangsupport.semantic.types.GoStructType
 
 /**
  * Change Signature of a function, method or interface method spec: the declaration's name, parameters and results are regenerated
@@ -38,8 +42,11 @@ import io.github.golangsupport.semantic.psi.GoPsiUtil.arguments
  * spread `f(xs...)` keeps its `...` on the variadic parameter, which stays last). Results are not followed into call sites nor
  * `return` statements: a changed result count is reported when calls use the results.
  *
- * Interface methods and the methods that implement them are changed alone (implementations, specs and calls through the interface
- * are left as they are): reported as a conflict.
+ * An interface method or a method implementing one changes with its whole [GoSignatureHierarchy] (the default): every spec and
+ * implementation gets the new list by position, keeping its own names of the unchanged parameters (a renamed one is renamed in each
+ * body), and the calls through any of them (the delegation `s.next.Get(…)` of a wrapper included) are mapped alike. Declarations in
+ * generated files and outside the project are left as they are and reported. With [GoChangeSignatureOptions.hierarchy] off the
+ * declaration changes alone, reported as a conflict.
  */
 class GoChangeSignatureProcessor(project: Project, private val target: PsiElement, private val options: GoChangeSignatureOptions) : BaseRefactoringProcessor(project) {
 
@@ -56,16 +63,31 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
     private val resultsChange get() = options.results != oldResults
     private val typeChanges get() = parametersChange || resultsChange
 
+    /** Computed on first use (in [findUsages], under a read action with progress), not in the constructor (the dialog's EDT). */
+    private val hierarchy: GoSignatureHierarchy by lazy { if (options.hierarchy) GoSignatureHierarchy.of(target) else GoSignatureHierarchy.single(target) }
+
     override fun createUsageViewDescriptor(usages: Array<out UsageInfo>): UsageViewDescriptor = object : UsageViewDescriptorAdapter() {
-        override fun getElements(): Array<PsiElement> = arrayOf(target)
+        override fun getElements(): Array<PsiElement> = hierarchy.members.toTypedArray()
 
         override fun getProcessedElementsHeader(): String = "Change signature of ${GoChangeSignature.displayName(target)}"
     }
 
     override fun getCommandName(): String = "Change Signature of ${GoChangeSignature.displayName(target)}"
 
-    override fun findUsages(): Array<UsageInfo> =
-        ReferencesSearch.search(target, target.useScope).findAll().filter { GoParameterRemoval.isCodeReference(it.element) }.map { UsageInfo(it) }.toTypedArray()
+    /** The references to every declaration of the hierarchy, each once; none inside generated files (regenerated, not edited). */
+    override fun findUsages(): Array<UsageInfo> {
+        val seen = HashSet<Pair<PsiElement, TextRange?>>()
+        val result = ArrayList<UsageInfo>()
+        for (decl in hierarchy.all) {
+            for (ref in ReferencesSearch.search(decl, decl.useScope).findAll()) {
+                val element = ref.element
+                if (!GoParameterRemoval.isCodeReference(element) || GoSignatureHierarchy.isGenerated(element.containingFile)) continue
+                val info = UsageInfo(ref)
+                if (seen.add(element to info.rangeInElement)) result += info
+            }
+        }
+        return result.toTypedArray()
+    }
 
     override fun preprocessUsages(refUsages: Ref<Array<UsageInfo>>): Boolean {
         GoChangeSignature.validate(oldParameters, options)?.let {
@@ -79,15 +101,17 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
     fun conflicts(usages: Array<out UsageInfo>): MultiMap<PsiElement, String> {
         val conflicts = MultiMap<PsiElement, String>()
         val fn = GoChangeSignature.displayName(target)
-        nameClash()?.let { (element, message) -> conflicts.putValue(element, message) }
+        for (member in hierarchy.members) nameClash(member)?.let { (element, message) -> conflicts.putValue(element, message) }
         if (!nameChanges && !typeChanges) return conflicts
-        when (target) {
+        if (!options.hierarchy) when (target) {
             is GoMethodSpec -> conflicts.putValue(target, "$fn is an interface method: its implementations and calls through other interfaces are not changed")
             is GoMethodDeclaration -> for (spec in GoImplementations.superMethods(target, GlobalSearchScope.projectScope(myProject))) {
                 conflicts.putValue(target, "Method $fn implements ${GoChangeSignature.displayName(spec)}; after the change it no longer does")
             }
         }
-        removedParametersUsedInBody().forEach { (def, count) ->
+        hierarchyConflicts(conflicts)
+        val dropped = droppedArguments(usages)
+        for (member in hierarchy.members) removedParametersUsedInBody(member, dropped).forEach { (def, count) ->
             val times = if (count == 1) "" else " ($count times)"
             conflicts.putValue(def, "Parameter ${def.name} is used in the body$times; the references stay and no longer resolve")
         }
@@ -123,38 +147,100 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
         return conflicts
     }
 
-    /** Another declaration that the new name collides with: a package-level one, a method of the receiver type, a method of the interface. */
-    private fun nameClash(): Pair<PsiElement, String>? {
+    /** Generated and outside declarations of the hierarchy, and project types used as its interfaces without implementing them. */
+    private fun hierarchyConflicts(conflicts: MultiMap<PsiElement, String>) {
+        if (!options.hierarchy) return
+        for (e in hierarchy.generated) {
+            conflicts.putValue(e, "${GoChangeSignature.displayName(e)} is in a generated file (${e.containingFile.name}); it is not changed: run go generate")
+        }
+        for (e in hierarchy.outside) {
+            conflicts.putValue(target, "${GoChangeSignature.displayName(e)} is outside the project and cannot be changed; it no longer matches after the change")
+        }
+        val interfaces = hierarchy.all.filterIsInstance<GoMethodSpec>().mapNotNull(GoImplementations::interfaceSpecOf).toSet()
+        if (interfaces.isEmpty() || !typeChanges) return
+        val newTypes = options.parameters.map { it.type.trim() } to options.results.map { it.type.trim() }
+        val keeps = { m: GoMethodDeclaration ->
+            m.name == options.name && (GoChangeSignature.parametersOf(m.signature).map { it.type.trim() } to GoChangeSignature.resultsOf(m.signature).map { it.type.trim() }) == newTypes
+        }
+        for ((element, message) in GoSignatureHierarchy.misfits(interfaces, oldName, 0..MAX_ARITY, hierarchy.all + hierarchy.outside, keeps)) {
+            conflicts.putValue(element, message)
+        }
+    }
+
+    /**
+     * Another declaration that the new name of [member] collides with: a package-level one, a method or field of the receiver type,
+     * a method of the interface.
+     */
+    private fun nameClash(member: PsiElement): Pair<PsiElement, String>? {
         if (!nameChanges) return null
         val name = options.name
-        val file = target.containingFile as? GoFile ?: return null
+        val file = member.containingFile as? GoFile ?: return null
         val files = file.containingDirectory?.files?.filterIsInstance<GoFile>()?.filter { it.packageName == file.packageName } ?: listOf(file)
-        when (target) {
+        when (member) {
             is GoFunctionDeclaration -> for (f in files) {
-                val clash = (f.functions + f.types + f.vars + f.consts).firstOrNull { it !== target && (it as GoNamedElement).name == name } ?: continue
+                val clash = (f.functions + f.types + f.vars + f.consts).firstOrNull { it !== member && (it as GoNamedElement).name == name } ?: continue
                 return clash to "Package ${file.packageName} already declares $name"
             }
-            is GoMethodDeclaration -> for (f in files) {
-                val clash = f.methods.firstOrNull { it !== target && it.receiverTypeName == target.receiverTypeName && it.name == name } ?: continue
-                return clash to "Type ${target.receiverTypeName} already has a method $name"
+            is GoMethodDeclaration -> {
+                for (f in files) {
+                    val clash = f.methods.firstOrNull { it !== member && it.receiverTypeName == member.receiverTypeName && it.name == name } ?: continue
+                    return clash to "Type ${member.receiverTypeName} already has a method $name"
+                }
+                val spec = GoImplementations.receiverTypeSpec(member) ?: return null
+                val struct = (GoSemanticService.getInstance(myProject).declarationType(spec) as? GoNamedType)?.underlying() as? GoStructType ?: return null
+                val field = struct.field(name) ?: return null
+                return (field.declaration ?: member) to "Type ${spec.name} already has a field $name"
             }
             is GoMethodSpec -> {
-                val clash = PsiTreeUtil.getChildrenOfTypeAsList(target.parent, GoMethodSpec::class.java).firstOrNull { it !== target && it.name == name } ?: return null
-                return clash to "Interface ${GoChangeSignature.displayName(target).substringBeforeLast('.')} already has a method $name"
+                val clash = PsiTreeUtil.getChildrenOfTypeAsList(member.parent, GoMethodSpec::class.java).firstOrNull { it !== member && it.name == name } ?: return null
+                return clash to "Interface ${GoChangeSignature.displayName(member).substringBeforeLast('.')} already has a method $name"
             }
         }
         return null
     }
 
-    /** The definitions of the removed parameters that the body still uses, with the number of uses. */
-    private fun removedParametersUsedInBody(): List<Pair<GoParamDefinition, Int>> {
-        val decl = target as? GoFunctionOrMethodDeclaration ?: return emptyList()
+    /**
+     * The definitions of the removed parameters that the body of [member] still uses, with the number of uses; a use inside an
+     * argument the change drops ([dropped], the delegation `s.next.Get(ctx, id)` losing `ctx`) goes with it and does not count.
+     */
+    private fun removedParametersUsedInBody(member: PsiElement, dropped: List<PsiElement>): List<Pair<GoParamDefinition, Int>> {
+        val decl = member as? GoFunctionOrMethodDeclaration ?: return emptyList()
+        val signature = decl.signature
         val kept = options.parameters.map { it.oldIndex }.toSet()
         return GoParameterRemoval.definitions(signature).mapNotNull { def ->
             if (GoParameterRemoval.slot(signature, def) in kept || def.name == "_") return@mapNotNull null
-            val uses = ReferencesSearch.search(def, LocalSearchScope(decl)).findAll().size
+            val uses = ReferencesSearch.search(def, LocalSearchScope(decl)).findAll().count { ref -> dropped.none { PsiTreeUtil.isAncestor(it, ref.element, false) } }
             if (uses > 0) def to uses else null
         }
+    }
+
+    /** The arguments of the calls among [usages] bound to removed parameters. */
+    private fun droppedArguments(usages: Array<out UsageInfo>): List<PsiElement> {
+        if (!argumentsChange) return emptyList()
+        val kept = options.parameters.map { it.oldIndex }.toSet()
+        return usages.flatMap { usage ->
+            val site = usage.element?.let { GoParameterRemoval.callSiteOf(it, target) } ?: return@flatMap emptyList()
+            val bound = boundArguments(site) ?: return@flatMap emptyList()
+            bound.withIndex().filter { it.index !in kept }.flatMap { it.value }
+        }
+    }
+
+    /**
+     * The new parameters' names in [site] when it is a delegation inside a declaration of the hierarchy (`s.next.Get(ctx, id)` in the
+     * wrapper's `Get`: every kept argument is the caller's own parameter of that slot): the caller's names, so a new parameter is
+     * passed on rather than replaced by its default. Null for any other call.
+     */
+    private fun delegation(site: GoParameterRemoval.CallSite, bound: List<List<PsiElement>>): List<GoChangeParameter>? {
+        if (!options.hierarchy || options.parameters.none { it.oldIndex < 0 }) return null
+        val caller = PsiTreeUtil.getParentOfType(site.call, GoFunctionOrMethodDeclaration::class.java) ?: return null
+        if (caller !in hierarchy.members) return null
+        val defs = GoParameterRemoval.definitions(caller.signature)
+        for ((slot, args) in bound.withIndex()) {
+            val def = defs.firstOrNull { GoParameterRemoval.slot(caller.signature, it) == slot } ?: return null
+            val arg = args.singleOrNull() as? GoReferenceExpression ?: return null
+            if (arg.text != def.name || arg.reference?.resolve() != def) return null
+        }
+        return parametersFor(caller).takeIf { ps -> ps.none { it.oldIndex < 0 && (it.name.isEmpty() || it.name == "_") } }
     }
 
     /** The arguments bound to every old slot of [site], or null when they do not map one to one (`f(g())` with a multi-value `g`). */
@@ -177,7 +263,15 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
     override fun performRefactoring(usages: Array<out UsageInfo>) {
         val edits = LinkedHashMap<PsiFile, Edits>()
         fun edits(file: PsiFile) = edits.getOrPut(file) { Edits(file.text) }
-        declarationEdits(edits(target.containingFile))
+        // The text each file gets that may name packages: the dialog completes them without importing (see GoMissingImports).
+        val written = LinkedHashMap<PsiFile, StringBuilder>()
+        fun written(file: PsiFile) = written.getOrPut(file) { StringBuilder() }
+        for (member in hierarchy.members) {
+            declarationEdits(member, edits(member.containingFile))
+            if (parametersChange) parametersFor(member).forEach { written(member.containingFile).append(it.type).append(' ') }
+            if (resultsChange) options.results.forEach { written(member.containingFile).append(it.type).append(' ') }
+        }
+        val defaults = options.parameters.filter { it.oldIndex < 0 }.joinToString(" ") { it.defaultValue }
         for (usage in usages) {
             val element = usage.element ?: continue
             val file = element.containingFile ?: continue
@@ -185,6 +279,7 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
             if (!argumentsChange) continue
             val site = GoParameterRemoval.callSiteOf(element, target) ?: continue
             callEdit(site, edits(file))
+            written(file).append(defaults).append(' ')
         }
         val documents = PsiDocumentManager.getInstance(myProject)
         val texts = edits.map { (file, e) -> file to e.result() }
@@ -194,14 +289,33 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
             for ((range, text) in replacements.sortedByDescending { it.first.startOffset }) document.replaceString(range.startOffset, range.endOffset, text)
             documents.commitDocument(document)
         }
+        for ((file, text) in written) if (file is GoFile && text.isNotBlank()) GoMissingImports.add(file, text.toString())
     }
 
-    /** The name, the signature, the renamed parameters' uses in the body and the doc comment's leading name. */
-    private fun declarationEdits(edits: Edits) {
-        val identifier = (target as? GoFunctionOrMethodDeclaration)?.identifier ?: (target as? GoMethodSpec)?.identifier
+    /**
+     * The new parameters as [member] writes them: by position, its own name and type spelling for a parameter whose name or type the
+     * options keep (implementations name parameters as they like; another package qualifies types its own way). A list that would
+     * mix named and unnamed parameters goes unnamed when the member's was, else names the new ones `_`.
+     */
+    private fun parametersFor(member: PsiElement): List<GoChangeParameter> {
+        if (member === target) return options.parameters
+        val own = GoChangeSignature.parametersOf(GoChangeSignature.signatureOf(member))
+        val mapped = options.parameters.map { p ->
+            val base = oldParameters.getOrNull(p.oldIndex)
+            val mine = own.getOrNull(p.oldIndex)
+            if (base == null || mine == null) p
+            else p.copy(name = if (p.name != base.name) p.name else mine.name, type = if (p.type.trim() != base.type.trim()) p.type else mine.type)
+        }
+        if (mapped.none { it.name.isEmpty() } || mapped.all { it.name.isEmpty() }) return mapped
+        return if (own.isNotEmpty() && own.all { it.name.isEmpty() }) mapped.map { it.copy(name = "") } else mapped.map { if (it.name.isEmpty()) it.copy(name = "_") else it }
+    }
+
+    /** The name, the signature, the renamed parameters' uses in the body and the doc comment's leading name of [member]. */
+    private fun declarationEdits(member: PsiElement, edits: Edits) {
+        val identifier = (member as? GoFunctionOrMethodDeclaration)?.identifier ?: (member as? GoMethodSpec)?.identifier
         if (nameChanges && identifier != null) {
             edits.add(identifier.textRange) { options.name }
-            (target as? GoNamedElement)?.docComment?.let { comment ->
+            (member as? GoNamedElement)?.docComment?.let { comment ->
                 val text = comment.text
                 val prefix = "// $oldName"
                 if (text.startsWith(prefix) && text.getOrNull(prefix.length)?.let { Character.isLetterOrDigit(it) || it == '_' } != true) {
@@ -209,17 +323,18 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
                 }
             }
         }
-        val signature = signature ?: return
-        val parameters = signature.parameters
+        val signature = GoChangeSignature.signatureOf(member) ?: return
+        val own = GoChangeSignature.parametersOf(signature)
+        val parameters = parametersFor(member)
         if (typeChanges) edits.addContainer(signature.textRange) { render ->
-            val params = if (parametersChange) GoChangeSignature.parametersText(options.parameters) else render(parameters.textRange)
+            val params = if (parametersChange) GoChangeSignature.parametersText(parameters) else render(signature.parameters.textRange)
             val results = if (resultsChange) GoChangeSignature.resultsText(options.results)
-            else render(TextRange(parameters.textRange.endOffset, signature.textRange.endOffset))
+            else render(TextRange(signature.parameters.textRange.endOffset, signature.textRange.endOffset))
             params + results
         }
-        val decl = target as? GoFunctionOrMethodDeclaration ?: return
-        for (p in options.parameters) {
-            val old = oldParameters.getOrNull(p.oldIndex) ?: continue
+        val decl = member as? GoFunctionOrMethodDeclaration ?: return
+        for (p in parameters) {
+            val old = own.getOrNull(p.oldIndex) ?: continue
             if (p.name.isEmpty() || p.name == "_" || old.name.isEmpty() || p.name == old.name) continue
             val def = GoParameterRemoval.definitions(signature).firstOrNull { GoParameterRemoval.slot(signature, it) == p.oldIndex } ?: continue
             val body = decl.block ?: continue
@@ -235,12 +350,14 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
         val close = list.rparen?.textRange?.startOffset ?: return
         val all = site.call.arguments
         val spread = list.node.findChildByType(GoTypes.ELLIPSIS) != null
+        val forwarded = delegation(site, bound)
         edits.addContainer(TextRange(open, close)) { render ->
             val parts = ArrayList<String>()
             if (site.methodExpression) parts += render(all[0].textRange)
-            for (p in options.parameters) {
+            for ((i, p) in options.parameters.withIndex()) {
                 if (p.oldIndex < 0) {
-                    if (p.defaultValue.isNotBlank()) parts += p.defaultValue.trim()
+                    val value = forwarded?.getOrNull(i)?.name ?: p.defaultValue.trim()
+                    if (value.isNotBlank()) parts += value + if (forwarded != null && p.isVariadic) "..." else ""
                     continue
                 }
                 val args = bound[p.oldIndex]
@@ -295,5 +412,10 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
         }
 
         fun result(): List<Pair<TextRange, String>> = outermost(edits).map { it.range to it.text() }
+    }
+
+    private companion object {
+        /** Methods of a same-named misfit are looked up by `name/arity` up to this many parameters. */
+        const val MAX_ARITY = 12
     }
 }

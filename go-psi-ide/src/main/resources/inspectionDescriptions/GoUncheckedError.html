@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports a call standing alone as a statement whose last result is an <code>error</code> that nobody looks at (errcheck, while typing):
+<code>os.Open("x")</code>, <code>f.Close()</code>, a method called through an interface such as <code>io.Closer</code>.
+Like errcheck by default, <code>go</code> and <code>defer</code> calls, <code>_ = f()</code> and the symbols of errcheck's exclude list
+(<code>fmt.Print*</code>, <code>fmt.Fprint*</code> to a <code>bytes.Buffer</code>, a <code>strings.Builder</code> or <code>os.Stderr</code>,
+the <code>Write*</code> methods of <code>bytes.Buffer</code> and <code>strings.Builder</code>, <code>hash.Hash.Write</code>,
+<code>math/rand</code> <code>Read</code>, <code>io.Pipe*.CloseWithError</code>) are not reported. A <code>//nolint</code> or
+<code>//nolint:errcheck</code> comment at the end of the line silences it, as it silences golangci-lint.
+<p>Quick fixes: <b>Handle error</b> (<code>if err := f(); err != nil { return ... }</code>, or <code>_, err := f()</code> with the check,
+returning the zero values of the enclosing function's results and the error) and <b>Assign to blank identifier</b> (<code>_ = f()</code>).</p>
+</body>
+</html>

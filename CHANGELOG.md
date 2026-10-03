@@ -8,6 +8,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.60–0.2.66 are the fifth batch (Go assembly, project-wide checks, interface hierarchy refactorings, unchecked errors, optional
+golangci-lint and custom linters, Inspect Project from the Go menu, new demo and guide).
 Versions 0.2.55–0.2.59 are the refactoring batch (Extract Function / Method, Inline, Change Signature, Move) and inspections in CI (SARIF).
 Versions 0.2.51–0.2.54 are the third batch (GOOS/GOARCH in the status bar, unused requires, SQL in strings, Safe Delete of parameters).
 Versions 0.2.48–0.2.50 are the second batch (rename package, unused parameters, regular expressions and JSON in strings).
@@ -19,8 +21,91 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.66] - 2026-10-03
+
+### Added — Inspect Project and SARIF export from the Go menu
+- **Go | Inspect Project** runs every Go and go.mod inspection the current profile enables over the project (from the Project view: over the selected
+  directory) through the platform's batch inspection: results in the standard Inspection Results window, grouped by inspection and file, with
+  navigation, quick fixes and batch apply.
+- **Go | Export Inspections to SARIF…** runs the same inspections as `go-inspect` in a cancellable background task, writes a SARIF 2.1.0 report to
+  the chosen file (default `<project>/go-inspect.sarif`) and shows "N findings written to …" with Open File and Show in Explorer.
+- Both skip vendor, testdata, `.x` / `_x` directories, generated files and files excluded by build constraints, and work with Language features =
+  gopls: the native inspections are let through for the duration of the run, open editors are re-highlighted afterwards.
+
 ### Changed
+- `go-inspect` and the SARIF export share one implementation (`ci.GoInspectRun`); files are walked through the VFS. The guide describes `go-inspect`
+  as a mode of the IDE launcher (`idea64.exe go-inspect …`), not a separate program.
+- Welcome page and Help Page: seven new animated scenes (Extract Function, Change Signature across an interface hierarchy, analysis while typing,
+  Inline, SQL and RE2 in strings, the GOOS/GOARCH widget, inspections from the Go menu and in CI); new guide sections Refactorings and Checks with
+  CSS animations; the static last frame under `prefers-reduced-motion` in the guide.
 - Exhaustive switch inspection (`GoExhaustiveSwitch`) is a weak warning: a plain warning was noise on `reflect.Kind`-like switches without `default`.
+
+## [0.2.65] - 2026-10-03
+
+### Changed — golangci-lint is optional, off by default
+- Settings | Tools | Go | Code Quality → "Use golangci-lint (optional)", off: the built-in inspections are the analysis of the plugin. While it is
+  off the editor annotator does not run, the "Go tools are missing" notification does not ask for golangci-lint, and the `golangci-lint fmt`
+  formatter is hidden (a stored choice falls back to gofmt). The old "Show golangci-lint warnings in the editor" switch is gone.
+- A saved Go file is linted again right after the save (golangci-lint and custom linters); before, the warnings waited for the next edit.
+- External linter findings that a native inspection already reports are dropped: errcheck → Unchecked error, ineffassign → Ineffectual
+  assignment, unused → Unused variable / parameter, govet printf → Printf.
+
+### Added — Custom linters
+- Code Quality → Custom linters: Name | Command line | Enabled | Run (On save / On the fly, saved files) | Working directory (Module root / File
+  directory) | Output format (golangci JSON / SARIF 2.1.0). Macros `$FilePath$`, `$FileDir$`, `$ModuleDir$`, `$Package$`, `$ImportPath$`. Findings
+  show as `[name] message` with Suppress with `//nolint:name`. Failures and timeouts go to the plugin log (category `lint`) and once per linter to a
+  balloon. Linter timeout, seconds (default 90) for golangci-lint and the custom linters.
+
+## [0.2.64] - 2026-10-03
+
+### Added — Unchecked errors while typing
+- Inspection **Unchecked error** (`GoUncheckedError`, warning, on by default): errcheck over the PSI, reported while typing in both Language
+  features modes (gopls has no errcheck; golangci-lint reported it only after a save). A call standing alone whose last result is `error`
+  (`os.Open("x")`, `f.Close()`, a method through `io.Closer`); errcheck's defaults: `defer` / `go`, `_ = f()` and its exclude list (`fmt.Print*`,
+  `fmt.Fprint*` to `bytes.Buffer` / `strings.Builder` / `os.Stderr`, `bytes.Buffer` / `strings.Builder` writes, `hash.Hash.Write`, …) stay quiet;
+  `//nolint:errcheck` silences it.
+- Fixes: **Handle error** (`if err := f(); err != nil { return … }`, or `_, err := f()` + check; zero values of the enclosing results, `err1` when
+  the block already declares `err`) and **Assign to blank identifier** (`_ = f()`). The "Handle error" intention steps aside on such calls, so
+  Alt+Enter offers it once.
+
+## [0.2.63] - 2026-10-03
+
+### Added — Add Method to Interface
+- Intention "Add method to interface" (on an interface of the project): a form with Name (checked as you type: Go identifier, a clash with the
+  interface's methods, a hint for an unexported method of an exported interface), Parameters and Results tables (Name | Type; add / remove / move
+  with Alt+Insert / Alt+Delete / Alt+Up / Alt+Down; variadic only last, names all-or-none), a live signature preview, "Delegate in wrappers" and the
+  list of implementations that get a stub (wrappers, generated and outside types marked). Refactor stays off until the method is valid.
+- The method is added to the interface spec and to every implementation in the project: wrappers that hold the interface in a field delegate
+  (`return s.next.Delete(ctx, id)`), other types (hand-written mocks) get a `panic("not implemented")` stub; generated files and code outside the
+  project are listed, not changed.
+- Go completion in the refactoring dialogs: type cells of Add Method to Interface and Change Signature, the Results field and the Default value
+  column (expressions) offer the types, packages and values of the declaration's package. A package chosen there is imported into every file the
+  refactoring changes (Change Signature used to leave new qualified types and default values without imports).
+
+## [0.2.62] - 2026-10-03
+
+### Changed — Change Signature across an interface hierarchy
+- Change Signature on an interface method, or on a method that implements a project interface, changes the whole hierarchy: the interface spec,
+  every implementing method (cache wrappers, business-logic types, hand-written mocks), the delegating calls inside wrappers
+  (`s.next.Get(ctx, id, opts)`) and every call site. Checkbox "Change the whole hierarchy" (on by default); generated files and types outside the
+  project are reported as conflicts instead of being edited.
+
+## [0.2.61] - 2026-10-03
+
+### Added — Project-wide checks
+- **Import cycle** (`GoImportCycle`, error): an import that closes a cycle among the packages of the project, with the shortest chain in the
+  message; in-package `_test.go` files count, external test packages do not.
+- **Internal import** (`GoInternalImport`, error): an import of an `internal/` package from outside its tree, for project packages, module cache
+  dependencies and the standard library.
+- **Unused exported declaration** (`GoUnusedExported`, off by default): an exported function, type, variable or constant nothing in the project
+  refers to, only in packages whose every importer is project code (under `internal/`, or a module with `package main`); fix Safe Delete.
+
+## [0.2.60] - 2026-10-03
+
+### Added — Go assembly
+- `.s` files next to Go code are "Go Assembly" (Plan 9 syntax of cmd/asm): highlighting with its own colour page, commenter, and navigation
+  `TEXT ·Name(SB)` ↔ the Go function declared without a body in the same directory (reference and gutter markers both ways). Other assemblers'
+  `.s` files (outside Go directories) keep their file type.
 
 ## [0.2.59] - 2026-10-03
 

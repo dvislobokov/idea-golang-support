@@ -130,7 +130,7 @@ class GoEnvironment(val values: Map<String, String>) {
 enum class GoTool(val command: String, val module: String, val purpose: String, val documentation: String) {
     GOPLS("gopls", "golang.org/x/tools/gopls", "Language server: errors, completion, navigation, refactorings", "https://go.dev/gopls"),
     DELVE("dlv", "github.com/go-delve/delve/cmd/dlv", "Debugger behind the Debug button", "https://github.com/go-delve/delve"),
-    GOLANGCI_LINT("golangci-lint", "github.com/golangci/golangci-lint/v2/cmd/golangci-lint", "Linter: warnings in the editor", "https://golangci-lint.run"),
+    GOLANGCI_LINT("golangci-lint", "github.com/golangci/golangci-lint/v2/cmd/golangci-lint", "Optional linter: warnings in the editor once turned on in Code Quality", "https://golangci-lint.run"),
     GOIMPORTS("goimports", "golang.org/x/tools/cmd/goimports", "Reformat Code that also fixes the imports", "https://pkg.go.dev/golang.org/x/tools/cmd/goimports"),
     GOVULNCHECK("govulncheck", "golang.org/x/vuln/cmd/govulncheck", "Vulnerabilities: known issues reachable from the code, in the Go Dependencies window", "https://go.dev/blog/vuln");
 
@@ -201,6 +201,12 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
 
     companion object {
         private const val NOT_FOUND = "-"
+
+        /**
+         * The tools the "Go tools are missing" notification at project open may ask for: govulncheck serves one button of the Go Dependencies
+         * window and is offered there; golangci-lint is optional (Code Quality, off by default) and asked for only while it is turned on.
+         */
+        fun offeredAtStart(golangciLint: Boolean): List<GoTool> = entries.filter { it != GOVULNCHECK && (it != GOLANGCI_LINT || golangciLint) }
 
         /** What [find] gave last for each tool, so that the log has a line when it changes and not on every call. */
         private val LAST_FOUND = java.util.concurrent.ConcurrentHashMap<GoTool, String>()

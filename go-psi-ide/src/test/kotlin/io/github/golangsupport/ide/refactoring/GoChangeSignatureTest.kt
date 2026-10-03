@@ -93,6 +93,27 @@ class GoChangeSignatureTest : GoSemanticIdeTestBase() {
         """,
     ) { it.copy(parameters = it.parameters + GoChangeParameter("verbose", "bool", -1, "false")) }
 
+    // The dialog completes package names without importing them: the declaration's and the calls' files get the imports.
+    fun testNewQualifiedTypeAndDefaultImportThePackage() = doTest(
+        """
+        package cs
+
+        func <caret>csWait(n int) {}
+
+        func csUse() { csWait(1) }
+        """,
+        """
+        package cs
+
+        import "time"
+
+        func csWait(n int, d time.Duration) {}
+
+        func csUse() { csWait(1, time.Second) }
+        """,
+        mapOf("cs4.go" to ("package cs\n\nfunc csOther() { csWait(2) }" to "package cs\n\nimport \"time\"\n\nfunc csOther() { csWait(2, time.Second) }")),
+    ) { it.copy(parameters = it.parameters + GoChangeParameter("d", "time.Duration", -1, "time.Second")) }
+
     fun testAddParameterToEmptyList() = doTest(
         """
         package cs
@@ -308,7 +329,7 @@ class GoChangeSignatureTest : GoSemanticIdeTestBase() {
 
             var _ CqRunner = CqJob{}
             """,
-        ) { it.copy(parameters = listOf(it.parameters[0].copy(type = "int64"))) }
+        ) { it.copy(parameters = listOf(it.parameters[0].copy(type = "int64")), hierarchy = false) }
         assertEquals("Method CqJob.CqRun implements CqRunner.CqRun; after the change it no longer does", message)
     }
 
@@ -321,7 +342,7 @@ class GoChangeSignatureTest : GoSemanticIdeTestBase() {
                 <caret>CqScale(k float64)
             }
             """,
-        ) { it.copy(name = "CqResize") }
+        ) { it.copy(name = "CqResize", hierarchy = false) }
         assertEquals("CqShape.CqScale is an interface method: its implementations and calls through other interfaces are not changed", message)
     }
 

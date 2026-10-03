@@ -107,7 +107,7 @@ Legend:
 | Introduce variable / constant | ✅ (0.2.46) | |
 | Extract function / method (free variables, results, `return` / `break` handling) | ✅ (0.2.55) | no dialog, `if err != nil` tails not special-cased |
 | Inline variable / function call | ✅ (0.2.56) | one-statement functions; multi-statement bodies 🗓️ |
-| Change signature (parameters, results, call sites, interface implementations) | ✅ (0.2.57) | interface implementations and results at call sites 🗓️ |
+| Change signature (parameters, results, call sites, interface implementations) | ✅ (0.2.57, hierarchy 0.2.62) | results at call sites 🗓️; Add Method to Interface (0.2.63) |
 | Move declaration to another file / package (imports, exportedness) | ✅ (0.2.58) | no automatic export |
 | Safe delete | ✅ (0.2.47, parameters 0.2.54) | |
 
@@ -131,7 +131,7 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | Struct tags: syntax, duplicate keys/names | ✅ (wave 2, 0.2.16) | `GoStructTagInspection` (vet `structtag` + repeated names, unexported fields with `json`), fixes "Fix quoting", "Remove duplicate key" | |
 | `errors.As` with a non-pointer target, `errors.Is` vs `==` | ✅ (wave 2, 0.2.18) | `GoErrorsPackageInspection` (vet `errorsas`; sentinel comparison is a weak warning) | |
 | Unreachable code, self-assignment, ineffectual assignment, unused pure results, `defer` in a loop | ✅ (wave 4, 0.2.40, 0.2.43) | `GoUnreachableCode`, `GoSelfAssignment`, `GoIneffectualAssignment`, `GoUnusedResult` (fix also on the compiler's unused `append`), `GoDeferInLoop` | |
-| Unused exported declarations across the project, import cycles, `internal/` violations | 🟡 | `internal/` is detected by the project model, not reported | M |
+| Unused exported declarations across the project, import cycles, `internal/` violations | ✅ (0.2.61) | `ide.inspections.project`: GoImportCycle, GoInternalImport, GoUnusedExported (opt-in) | |
 | Doc comment lint (exported symbol without a comment, comment not starting with the name) | ✅ (0.2.32) | `GoDocCommentInspection`, opt-in weak warning, fixes Add doc comment / Start comment with 'Name' | |
 | Build constraints: `//go:build` expression syntax, unknown GOOS/GOARCH | ✅ (0.2.33) | `GoBuildConstraintInspection` (vet `buildtag`; parser `GoBuildConstraintEvaluator` of the project model), `+build` → `//go:build` fix | |
 | `go.mod`: `replace` to a missing path, duplicate / self requires, `go` / `toolchain` versions, `vendor/` out of sync, go.work `use` | ✅ (0.2.44) | host `mod.GoModChecks` + four inspections; unused requires `GoModUnused` (0.2.52, build tags not considered) | |
@@ -153,7 +153,7 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | `go.mod` / `go.work` PSI, navigation | 🟡 (model; `go.work` multi-module editing support to check) | M |
 | `//go:embed`: pattern navigation and validation | ✅ (0.2.35) | `ide.directives`, inspection `GoEmbedDirective` |
 | `//go:linkname`, `//go:generate` navigation; run `go generate` | 🟡 | navigation since 0.2.35; running `go generate` from the directive missing (needs `go`) |
-| Assembly `.s`: `TEXT ·Func` ↔ Go declaration without body | ❌ | M |
+| Assembly `.s`: `TEXT ·Func` ↔ Go declaration without body | ✅ (0.2.60) | `ide.asm` |
 | cgo: `import "C"` preamble, `C.` symbols | ❌ | L |
 | Status-bar widget for GOOS / GOARCH / build tags, re-evaluating the analysis | ✅ (0.2.51) | |
 
@@ -180,8 +180,10 @@ Since the transplant (2026-10-02) the host plugin idea-golang-support provides a
 | One inference cache per function body | ✅ | CHANGELOG 2026-10-02 | |
 | Lazy reparse of function bodies | ✅ | `GoLazyBlockElementType`, CHANGELOG 2026-10-02 | |
 | Shared indexes for GOROOT per Go version | ❌ | first open spends 3-5 s indexing GOROOT (UI robot P7); platform shared-indexes mechanism | M |
-| Headless inspections (CLI, SARIF report for CI) | ✅ (0.2.59) | `go-inspect` app starter (`ci.GoInspectStarter`), SARIF 2.1.0, `tools/ci/go-inspect.sh|cmd`, `docs/CI.md` | |
+| Headless inspections (CLI, SARIF report for CI) | ✅ (0.2.59; Go menu Inspect Project / Export SARIF 0.2.66) | `go-inspect` app starter (`ci.GoInspectStarter`), SARIF 2.1.0, `tools/ci/go-inspect.sh|cmd`, `docs/CI.md` | |
 | ML completion ranking, name suggestions | 🗓️ | `docs/ML.md` | L |
+| errcheck while typing | ✅ (0.2.64) | `GoUncheckedError`; `defer` / `go` and `-blank` not checked, as errcheck by default | |
+| golangci-lint optional (off by default), custom linters (golangci JSON / SARIF) | ✅ (0.2.65) | host `lint` | |
 | Declarative lint rules, ruleguard importer | 🗓️ | `docs/RULES.md` | L |
 
 ## 10. Decisions needed

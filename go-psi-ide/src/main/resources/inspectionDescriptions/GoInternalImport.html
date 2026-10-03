@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports an import of a package whose path has an <code>internal</code> element from a package outside the tree rooted at the
+parent of that element (the go command's <code>use of internal package … not allowed</code>).
+<p><code>a/b/internal/c</code> may be imported by <code>a/b</code> and anything under it, not by <code>a/x</code>. The rule
+applies to project packages, to dependencies in the module cache (<code>example.com/dep/internal/x</code> from another module)
+and to the standard library (<code>internal/abi</code>, <code>crypto/internal/…</code>). The decision is the project model's,
+the same one that resolves the import.</p>
+</body>
+</html>

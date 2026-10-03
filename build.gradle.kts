@@ -98,39 +98,39 @@ tasks.processResources {
     }
 }
 
-// The change-notes shown in the Plugins dialog are the latest section of CHANGELOG.md (the single source), rendered to the small
-// subset of HTML the dialog accepts. No `org.jetbrains.changelog` plugin: adding one would need a fresh resolve from the plugin
+// The change-notes shown in the Plugins dialog are the latest released sections of CHANGELOG.md (the single source; [Unreleased] holds only
+// the batch overview), one heading per version, rendered to the small subset of HTML the dialog accepts. No `org.jetbrains.changelog` plugin: adding one would need a fresh resolve from the plugin
 // portal, which the proxy on this machine blocks (`--offline` builds).
 fun latestChangeNotes(): String {
+    val versions = 7
     val lines = file("CHANGELOG.md").readLines()
-    val start = lines.indexOfFirst { it.startsWith("## [") }
+    val start = lines.indexOfFirst { it.startsWith("## [") && !it.startsWith("## [Unreleased]") }
     if (start < 0) return ""
-    val body = lines.drop(start + 1).takeWhile { !it.startsWith("## [") }
+    var seen = 0
+    val body = lines.drop(start).takeWhile { !(it.startsWith("## [") && ++seen > versions) }
     fun inline(s: String) = s
         .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         .replace(Regex("`([^`]+)`"), "<code>$1</code>")
+        .replace(Regex("\\*\\*([^*]+)\\*\\*"), "<b>$1</b>")
         .replace(Regex("\\[([^\\]]+)]\\([^)]+\\)"), "$1")
     val html = StringBuilder()
     var inList = false
+    var item: StringBuilder? = null
+    fun flushItem() { item?.let { html.append("<li>").append(inline(it.toString())).append("</li>") }; item = null }
+    fun closeList() { flushItem(); if (inList) { html.append("</ul>"); inList = false } }
     for (raw in body) {
         val line = raw.trim()
         when {
             line.isEmpty() -> {}
-            line.startsWith("### ") -> {
-                if (inList) { html.append("</ul>"); inList = false }
-                html.append("<p><b>").append(inline(line.removePrefix("### "))).append("</b></p>")
-            }
-            line.startsWith("- ") -> {
-                if (!inList) { html.append("<ul>"); inList = true }
-                html.append("<li>").append(inline(line.removePrefix("- "))).append("</li>")
-            }
-            else -> {
-                if (inList) { html.append("</ul>"); inList = false }
-                html.append("<p>").append(inline(line)).append("</p>")
-            }
+            line.startsWith("## [") -> { closeList(); html.append("<h3>").append(inline(line.removePrefix("## ").replace("[", "").replace("]", ""))).append("</h3>") }
+            line.startsWith("### ") -> { closeList(); html.append("<p><b>").append(inline(line.removePrefix("### "))).append("</b></p>") }
+            line.startsWith("- ") -> { flushItem(); if (!inList) { html.append("<ul>"); inList = true }; item = StringBuilder(line.removePrefix("- ")) }
+            // a wrapped line of a list item continues it
+            item != null && raw.startsWith(" ") -> item!!.append(' ').append(line)
+            else -> { closeList(); html.append("<p>").append(inline(line)).append("</p>") }
         }
     }
-    if (inList) html.append("</ul>")
+    closeList()
     return html.toString()
 }
 

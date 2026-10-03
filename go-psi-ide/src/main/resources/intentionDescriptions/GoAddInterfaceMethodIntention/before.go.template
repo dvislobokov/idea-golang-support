@@ -1,0 +1,7 @@
+type <spot>Store</spot> interface {
+	Get(id string) (Item, error)
+}
+
+type memStore struct{}
+
+func (m *memStore) Get(id string) (Item, error) { return Item{}, nil }

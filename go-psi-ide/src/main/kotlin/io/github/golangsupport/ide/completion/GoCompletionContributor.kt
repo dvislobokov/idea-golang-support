@@ -63,10 +63,17 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
         if (context.file is GoFile) context.dummyIdentifier = CompletionUtil.DUMMY_IDENTIFIER_TRIMMED
     }
 
-    /** Nothing when the host serves completion from another source ([GoIdeFeature.COMPLETION] off) or in a code fragment. */
+    /**
+     * Nothing when the host serves completion from another source ([GoIdeFeature.COMPLETION] off) or in a code fragment of the host;
+     * a fragment of a refactoring dialog ([GoCodeFragments]) is completed in a copy of its context file.
+     */
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
         if (!GoIdeFeatureGate.enabled(GoIdeFeature.COMPLETION, parameters.position.project)) return
-        if (isCodeFragment(parameters.originalFile)) return
+        if (isCodeFragment(parameters.originalFile)) {
+            val moved = GoCodeFragments.completionParameters(parameters) ?: return
+            GoCompletionContext.of(moved)?.let { GoBasicCompletion.fill(it, result) }
+            return
+        }
         super.fillCompletionVariants(parameters, result)
     }
 

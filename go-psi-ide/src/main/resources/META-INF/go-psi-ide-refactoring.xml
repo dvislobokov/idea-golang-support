@@ -19,5 +19,11 @@
     <refactoring.safeDeleteProcessor implementation="io.github.golangsupport.ide.refactoring.GoSafeDeleteProcessor"/>
     <inlineActionHandler implementation="io.github.golangsupport.ide.refactoring.GoInlineActionHandler"/>
     <refactoring.moveHandler implementation="io.github.golangsupport.ide.refactoring.GoMoveHandler" id="goMoveDeclarations" order="before moveFileOrDir"/>
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.refactoring.GoAddInterfaceMethodIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoAddInterfaceMethodIntention</descriptionDirectoryName>
+    </intentionAction>
   </extensions>
 </idea-plugin>

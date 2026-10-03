@@ -1,6 +1,7 @@
 package io.github.golangsupport.lang
 
 import com.intellij.openapi.project.Project
+import io.github.golangsupport.ci.GoBatchInspections
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
 
@@ -12,7 +13,9 @@ import io.github.golangsupport.ide.GoIdeFeatureGate
  * the indexes is off and gopls answers.
  */
 class GoIgsIdeFeatureGate : GoIdeFeatureGate {
-    override fun enabled(feature: GoIdeFeature, project: Project): Boolean = GoFeatures.native(featureOf(feature), project)
+    /** An explicit batch run (Inspect Project, SARIF export, `go-inspect`) wants the native inspections whatever the editor shows: [GoBatchInspections]. */
+    override fun enabled(feature: GoIdeFeature, project: Project): Boolean =
+        GoFeatures.native(featureOf(feature), project) || feature == GoIdeFeature.DIAGNOSTICS && GoBatchInspections.isActive(project)
 
     companion object {
         fun featureOf(feature: GoIdeFeature): GoFeature = when (feature) {

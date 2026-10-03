@@ -4,6 +4,17 @@ The plugin's Go and `go.mod` inspections can run without the IDE UI and write a 
 report: GitHub code scanning, GitLab, Azure DevOps and most SARIF viewers read it. It is the same analysis as in the editor with
 Language features = Built-in: no gopls, no `go vet`, no golangci-lint.
 
+## From the IDE
+
+The same run is in the **Go** menu, no command line needed. **Go | Inspect Project** runs every Go and go.mod inspection the current
+profile enables over the project (on a directory in the Project view: over that directory) through the platform's batch inspection, so the
+results land in the standard Inspection Results tool window, grouped by inspection and file, with navigation, quick fixes and
+batch apply. **Go | Export Inspections to SARIF…** asks where to save (default `<project>/go-inspect.sarif`), runs the same code as
+`go-inspect` (`io.github.golangsupport.ci.GoInspectRun`) in a cancellable background task, writes the report and shows a notification
+"N findings written to go-inspect.sarif" with Open File and Show in Explorer / Reveal in Finder. Both read the same files as the command
+below (vendor, testdata, generated code and files excluded by build constraints are skipped) and work with Language features = gopls too:
+for the duration of the run the native inspections are let through, and the open editors are re-highlighted afterwards.
+
 ## Why a command of our own
 
 The platform's `inspect` command (`bin/inspect.sh`, `InspectionApplication`) runs our inspections too, but writes only its XML

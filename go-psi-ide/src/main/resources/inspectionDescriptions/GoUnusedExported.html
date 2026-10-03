@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports an exported package-level function, type, variable or constant that nothing in the project refers to.
+<p>An exported name of a library may be used by modules outside the project, so only packages whose every importer is project
+code are checked: packages under an <code>internal/</code> path element, and packages of a project module that has a
+<code>package main</code> (an application). Methods (interfaces call them implicitly), <code>package main</code>,
+<code>_test.go</code> files, <code>Test</code>/<code>Benchmark</code>/<code>Example</code>/<code>Fuzz</code> functions and
+functions marked <code>//export</code> or <code>//go:linkname</code> are skipped. A use in a test file counts.
+Uses through reflection, <code>//go:linkname</code> from another package or code generation are not seen.</p>
+<p>Off by default: it runs a project-wide reference search for every exported name of the file.</p>
+<p>Quick fix: <b>Safe delete</b> (the platform refactoring with its usage search and conflicts).</p>
+</body>
+</html>

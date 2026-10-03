@@ -33,18 +33,22 @@
   --sans: "Inter", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --mono: "JetBrains Mono", "Cascadia Code", Consolas, "SF Mono", monospace;
   --nav-h: 56px;
+  /* the selection and the problem marks of the editor */
+  --selbg: #214283; --sq-warn: #e5b53b; --sq-err: #ff6b6b; --inj: rgba(87, 199, 138, .08);
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #ffffff; --bg-raised: #f5f5f7; --panel: #ffffff; --panel-2: #f7f8fa; --line: #d9dbe1;
     --text: #19191c; --text-2: #45474f; --text-3: #70737d;
     --kw: #0033b3; --type: #007e8a; --fn: #00627a; --pkg: #6b7a1f; --str: #067d17; --num: #1750eb; --member: #871094; --com: #8c8c8c; --ghost: #a0a3aa;
+    --selbg: #a6d2ff; --sq-warn: #be8a00; --sq-err: #e0372f; --inj: rgba(6, 125, 23, .07);
   }
 }
 :root[data-theme="light"] {
   --bg: #ffffff; --bg-raised: #f5f5f7; --panel: #ffffff; --panel-2: #f7f8fa; --line: #d9dbe1;
   --text: #19191c; --text-2: #45474f; --text-3: #70737d;
   --kw: #0033b3; --type: #007e8a; --fn: #00627a; --pkg: #6b7a1f; --str: #067d17; --num: #1750eb; --member: #871094; --com: #8c8c8c; --ghost: #a0a3aa;
+  --selbg: #a6d2ff; --sq-warn: #be8a00; --sq-err: #e0372f; --inj: rgba(6, 125, 23, .07);
 }
 
 * { box-sizing: border-box; }
@@ -61,8 +65,8 @@ code { font-size: .88em; color: var(--text); background: color-mix(in srgb, var(
 kbd { font-size: .8em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: .08em .45em; background: var(--bg-raised); white-space: nowrap; }
 .wrap { width: min(1200px, 100% - 40px); margin-inline: auto; }
 :focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 6px; }
-.skip { position: absolute; left: -999px; top: 8px; background: var(--violet); color: #fff; padding: 8px 12px; border-radius: 8px; z-index: 100; }
-.skip:focus { left: 8px; }
+a.skip { position: absolute; left: -999px; top: 8px; background: var(--violet); color: #fff; padding: 8px 12px; border-radius: 8px; z-index: 100; }
+a.skip:focus { left: 8px; }
 :root[data-host="ide"] .repo { display: none; }
 
 /* nav */
@@ -75,7 +79,7 @@ kbd { font-size: .8em; border: 1px solid var(--line); border-bottom-width: 2px; 
 .nav li a:hover, .nav li a.active { color: var(--text); background: color-mix(in srgb, var(--text) 10%, transparent); }
 .icon-btn { background: none; border: 1px solid var(--line); color: var(--text); border-radius: 999px; width: 36px; height: 36px; cursor: pointer; display: grid; place-items: center; }
 .icon-btn svg { width: 16px; height: 16px; }
-@media (max-width: 1000px) { .nav ul { display: none; } .icon-btn { margin-left: auto; } }
+@media (max-width: 1180px) { .nav ul { display: none; } .icon-btn { margin-left: auto; } }
 
 /* hero */
 .hero { position: relative; overflow: hidden; padding: clamp(56px, 9vw, 112px) 0 clamp(56px, 8vw, 96px); }
@@ -127,7 +131,7 @@ pre .l.flash { animation: flash 1.4s ease-out; }
 /* popup mock: over the code, right under the line that is typed, so that the window keeps its height */
 .code { position: relative; }
 .popup { background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 5px; box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .6); font-family: var(--sans); font-size: 13px; transition: opacity .2s; }
-.popup.float { position: absolute; z-index: 2; margin: 0; left: 62px; width: min(400px, calc(100% - 80px)); top: calc(16px + var(--at) * 1.75 * 13.5px + 3px); }
+.popup.float { position: absolute; z-index: 2; margin: 0; left: var(--gut, 62px); width: min(400px, calc(100% - 80px)); top: calc(16px + var(--at) * 1.75 * var(--fs, 13.5px) + 3px); }
 .popup.off { pointer-events: none; }
 .popup div { display: flex; align-items: center; gap: 9px; padding: 5px 9px; border-radius: 6px; color: var(--text-2); white-space: nowrap; overflow: hidden; }
 .popup div.sel { background: color-mix(in srgb, var(--violet) 38%, transparent); color: var(--text); }
@@ -208,6 +212,101 @@ footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--t
 footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; }
 footer a { color: var(--text-2); }
 
+/* lines that come and go: a line folds to nothing, so the window keeps its height (the pre has a min-height) and the rest moves up */
+pre .l.slot { overflow: hidden; max-height: 1.75em; transition: max-height .4s ease, opacity .3s, background-color .25s, transform .4s ease; }
+pre .l.slot.gone { max-height: 0; opacity: 0; transform: translateY(-6px); }
+pre .l.sel, .sel-t { background: var(--selbg); }
+.sel-t { border-radius: 2px; }
+/* problems, as the editor underlines them */
+.sq-w.on, .sq-e.on { text-decoration: underline wavy; text-underline-offset: 4px; text-decoration-skip-ink: none; }
+.sq-w.on { text-decoration-color: var(--sq-warn); }
+.sq-e.on { text-decoration-color: var(--sq-err); }
+.probs { color: var(--sq-warn); font-family: var(--mono); } .probs.ok { color: var(--ok); }
+.tip { position: absolute; z-index: 2; left: var(--gut, 62px); max-width: calc(100% - var(--gut, 62px) - 12px); top: calc(16px + var(--at) * 1.75 * var(--fs, 13.5px) + 3px); display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .6); font: 12.5px/1.4 var(--sans); color: var(--text-2); transition: opacity .2s; }
+.tip.off { pointer-events: none; }
+.tip b { flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%; background: var(--sq-warn); } .tip b.e { background: var(--sq-err); }
+.tip code { background: none; padding: 0; font-size: 12px; }
+.popup i.bulb { background: var(--warn); border-radius: 50%; width: 11px; height: 11px; margin: 0 2px; }
+/* the name of what was just made, edited in place */
+.ren { outline: 1px solid var(--fn); outline-offset: 1px; border-radius: 2px; }
+/* text a refactoring has inserted */
+.ins { border-radius: 3px; transition: background-color .8s; }
+.ins.lit { background: color-mix(in srgb, var(--ok) 32%, transparent); }
+.drop-v { display: inline-block; transition: transform .5s ease-in, opacity .5s ease-in; }
+.drop-v.drop { transform: translateY(1.75em); opacity: .25; }
+
+/* several files of one change, one under the other */
+.panes { position: relative; padding: 4px 0 10px; --fs: 12.5px; }
+.pane { transition: background-color .3s; }
+.pane.flash { animation: flash 1.4s ease-out; }
+.pane h5 { margin: 0; padding: 9px 16px 1px; display: flex; align-items: center; gap: 8px; font: 600 11.5px/1.4 var(--sans); color: var(--text-3); }
+.pane h5::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--type); }
+.pane pre { padding: 1px 0; font-size: 12.5px; }
+.pane pre .l { padding-left: 16px; }
+.pane pre .l::before { display: none; }
+/* a dialog of the IDE over the files */
+.dlg { position: absolute; z-index: 3; left: 50%; top: 14px; width: min(430px, calc(100% - 28px)); transform: translateX(-50%); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 24px 60px -18px rgba(0, 0, 0, .65); font: 12.5px/1.45 var(--sans); color: var(--text-2); transition: opacity .25s, transform .25s; }
+.dlg.off { transform: translate(-50%, 8px); pointer-events: none; }
+.dlg h5 { margin: 0; padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--line); }
+.dlg .name { margin: 10px 12px 0; }
+.dlg .grid { margin: 8px 12px 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.dlg .grid > div { display: grid; grid-template-columns: .7fr 1.5fr 1fr; gap: 8px; padding: 4px 8px; font: 12px/1.5 var(--mono); white-space: nowrap; overflow: hidden; transition: background-color .25s; }
+.dlg .grid > div > span { overflow: hidden; text-overflow: ellipsis; }
+.dlg .grid .hd { font-family: var(--sans); color: var(--text-3); background: var(--panel-2); }
+.dlg .grid .sel { background: var(--selbg); color: var(--text); }
+.dlg .tools { display: flex; gap: 4px; margin: 6px 12px 0; }
+.dlg .tools span { width: 22px; height: 20px; display: grid; place-items: center; border-radius: 5px; color: var(--text-3); font-weight: 700; transition: background-color .15s, color .15s; }
+.dlg .tools span.press, .dlg .btn2.press { background: var(--violet); color: #fff; }
+.dlg .pv { margin: 8px 12px 0; padding: 5px 8px; border-radius: 6px; background: var(--panel-2); font: 11.5px/1.5 var(--mono); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlg .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; padding: 8px 12px; border-top: 1px solid var(--line); }
+.dlg .btn2 { padding: 2px 12px; border-radius: 6px; border: 1px solid var(--line); transition: background-color .15s; }
+.dlg .btn2.def { border-color: var(--violet); color: var(--text); }
+
+/* three small windows in a row */
+.trio { margin-top: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 28px; align-items: start; }
+.trio figure { margin: 0; }
+.trio figcaption { margin-top: 18px; }
+.trio figcaption h3 { margin-bottom: 6px; }
+.trio figcaption p { color: var(--text-2); font-size: .97rem; }
+@media (max-width: 1100px) { .trio { grid-template-columns: minmax(0, 560px); } }
+.win.mini { height: 268px; display: flex; flex-direction: column; }
+.win.mini .code { flex: 1 1 auto; --fs: 12.5px; --gut: 40px; }
+.win.mini pre { font-size: 12.5px; }
+.win.mini pre .l::before { width: 28px; padding-right: 12px; }
+.win.mini .tabkey { margin-left: 40px; }
+.panes + .tabkey { margin-left: 16px; }
+.inj { background: var(--inj); color: var(--text-2); transition: color .5s, background-color .5s; }
+.q { transition: color .5s; }
+.win.plain .inj, .win.plain .q { color: var(--str); background: transparent; }
+/* the status bar of the IDE, with a widget and its list */
+.sbar { position: relative; display: flex; justify-content: flex-end; align-items: center; gap: 14px; padding: 5px 10px; border-top: 1px solid var(--line); background: var(--panel); color: var(--text-3); font-size: 12px; }
+.sbar .w { color: var(--text); padding: 1px 8px; border-radius: 5px; font-family: var(--mono); transition: background-color .15s; }
+.sbar .w.press { background: var(--selbg); }
+.sbar .popup { position: absolute; right: 6px; bottom: calc(100% + 4px); width: 170px; z-index: 2; font-family: var(--mono); font-size: 12px; }
+.sbar .popup div { padding: 3px 9px; }
+
+/* a terminal and a report */
+.term { padding: 14px 18px; min-height: 166px; font: 12.5px/1.65 var(--mono); font-variant-ligatures: none; color: var(--text-2); }
+.term > div { white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity .25s; }
+.term .pr { color: var(--ok); }
+.term b { color: var(--text); font-weight: 600; }
+.term .exit { color: var(--sq-warn); }
+.sarif { border-top: 1px solid var(--line); }
+.sarif h4 { margin: 0; padding: 8px 16px; font-size: 12px; font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--line); }
+.sarif .rows .end { min-width: 64px; text-align: right; }
+/* the main menu bar of the IDE with the Go menu, and a notification balloon */
+.mbar { position: relative; display: flex; align-items: center; gap: 4px; padding: 6px 10px; background: var(--panel); border-bottom: 1px solid var(--line); color: var(--text-2); font-size: 12.5px; }
+.mbar > span { padding: 2px 8px; border-radius: 5px; transition: background-color .15s; }
+.mbar .m.press { background: var(--selbg); color: var(--text); }
+.mbar .right { margin-left: auto; color: var(--text-3); }
+.mbar .popup { position: absolute; left: 130px; top: calc(100% - 2px); width: 230px; z-index: 2; }
+.mbar .popup div { padding: 4px 9px; }
+.win[data-scene="ci"] { position: relative; }
+.balloon { position: absolute; right: 12px; top: 46px; z-index: 2; display: flex; flex-direction: column; gap: 3px; width: min(300px, calc(100% - 24px)); padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .6); font-family: var(--sans); font-size: 12.5px; color: var(--text-2); transition: opacity .25s; }
+.balloon b { color: var(--text); font-weight: 600; }
+.balloon .links { display: flex; gap: 14px; margin-top: 3px; color: var(--violet); }
+.balloon .links u { text-decoration: none; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
@@ -221,10 +320,12 @@ footer a { color: var(--text-2); }
     <a class="brand" href="#top"><span class="mark" aria-hidden="true">Go</span>Go Project Support</a>
     <ul id="navLinks">
       <li><a href="#editor">Редактор</a></li>
-      <li><a href="#debug">Отладчик</a></li>
+      <li><a href="#refactor">Рефакторинг</a></li>
+      <li><a href="#analysis">Анализ</a></li>
+      <li><a href="#ci">CI</a></li>
+      <li><a href="#debug">Отладка</a></li>
       <li><a href="#tests">Тесты</a></li>
       <li><a href="#monitor">Наблюдение</a></li>
-      <li><a href="#deps">Зависимости</a></li>
       <li><a href="#more">Ещё</a></li>
       <li><a href="#start">С чего начать</a></li>
     </ul>
@@ -239,7 +340,7 @@ footer a { color: var(--text-2); }
   <div class="wrap">
     <div>
       <h1>Go в той IDE, которая у вас уже открыта</h1>
-      <p class="lead">Пишите, отлаживайте и тестируйте сервисы на Go там же, где живёт остальной код команды. Без второй IDE и без смены привычек.</p>
+      <p class="lead">Пишите, рефакторьте, отлаживайте и тестируйте сервисы на Go там же, где живёт остальной код команды. Без второй IDE и без смены привычек.</p>
       <div class="actions">
         <a class="btn primary" href="#start">Начать работу</a>
         <a class="btn" href="#editor">Посмотреть возможности</a>
@@ -266,7 +367,7 @@ footer a { color: var(--text-2); }
 <section class="values" aria-label="Коротко о главном">
   <div class="wrap">
     <div class="rise"><h3>Одна IDE на весь стек</h3><p>Сервисы на Go рядом с Java, Python и фронтендом. Одни настройки, одни горячие клавиши, одно окно.</p></div>
-    <div class="rise"><h3>Инструменты команды Go внутри</h3><p>Код анализирует gopls, сервер языка от разработчиков Go. Отладку выполняет Delve.</p></div>
+    <div class="rise"><h3>Свой анализ кода или gopls</h3><p>Встроенный анализатор понимает Go сам: проверки потока данных, рефакторинги, иерархии. gopls остаётся на выбор одной настройкой, отладку выполняет Delve.</p></div>
     <div class="rise"><h3>Код остаётся у вас</h3><p>Подсказки работают на вашей машине. Исходный код не отправляется во внешние сервисы.</p></div>
   </div>
 </section>
@@ -305,6 +406,227 @@ footer a { color: var(--text-2); }
           <div><i></i><code>ToUpperSpecial</code><span>func(c unicode.SpecialCase, s string) string</span></div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="feature flip" id="refactor">
+  <div class="wrap">
+    <div class="copy rise">
+      <h2>Рефакторинги, которые понимают Go</h2>
+      <p>Извлечь, встроить, перенести и удалить код без ручной правки вызовов. Изменение проверяется по потоку данных функции, поэтому смысл программы остаётся прежним.</p>
+      <ul>
+        <li><b>Извлечение функции.</b> <kbd data-action="ExtractMethod">Ctrl+Alt+M</kbd> выносит строки в новую функцию. Параметры и результаты определяются сами, имя правится на месте.</li>
+        <li><b>Встраивание.</b> <kbd data-action="Inline">Ctrl+Alt+N</kbd> подставляет значение переменной, константы или короткой функции. Если подстановка изменит поведение, редактор скажет почему.</li>
+        <li><b>Перенос и удаление.</b> <kbd data-action="Move">F6</kbd> переносит объявление в другой файл или пакет вместе с импортами. <kbd data-action="SafeDelete">Alt+Delete</kbd> удаляет то, на что никто не ссылается, а у параметра убирает и аргументы в вызовах.</li>
+      </ul>
+    </div>
+    <div class="win rise" data-scene="extract" role="img" aria-label="Строки цикла выделены, Ctrl+Alt+M выносит их в новую функцию subtotal: на их месте остаётся вызов, имя правится сразу в двух местах">
+      <div class="win-bar"><span class="tab">checkout.go</span><span class="right">shop</span></div>
+      <div class="code">
+        <pre aria-hidden="true" style="min-height: calc(32px + 13 * 1.75 * 13.5px)">
+          <span class="l" data-n="1"><span class="kw">func</span> <span class="fn">Checkout</span>(o *<span class="ty">Order</span>, rate <span class="kw">int</span>) <span class="kw">error</span> {</span>
+          <span class="l slot cur" data-n="2" data-part="call">    total, tax := <span class="fn" data-part="name">subtotal</span>(o, rate)</span>
+          <span class="l slot gone" data-x="orig">    total := <span class="nu">0</span></span>
+          <span class="l slot gone" data-x="orig">    <span class="kw">for</span> _, it := <span class="kw">range</span> o.<span class="me">items</span> {</span>
+          <span class="l slot gone" data-x="orig">        total += it.<span class="me">Price</span> * it.<span class="me">Qty</span></span>
+          <span class="l slot gone" data-x="orig">    }</span>
+          <span class="l slot gone" data-x="orig">    tax := total * rate / <span class="nu">100</span></span>
+          <span class="l" data-n="3">    <span class="kw">return</span> <span class="fn">charge</span>(o, total+tax)</span>
+          <span class="l" data-n="4">}</span>
+          <span class="l slot" data-n="5" data-x="new"></span>
+          <span class="l slot" data-n="6" data-x="new"><span class="kw">func</span> <span class="fn" data-part="name">subtotal</span>(o *<span class="ty">Order</span>, rate <span class="kw">int</span>) (<span class="kw">int</span>, <span class="kw">int</span>) {</span>
+          <span class="l slot" data-n="7" data-x="new">    total := <span class="nu">0</span></span>
+          <span class="l slot" data-n="8" data-x="new">    <span class="kw">for</span> _, it := <span class="kw">range</span> o.<span class="me">items</span> {</span>
+          <span class="l slot" data-n="9" data-x="new">        total += it.<span class="me">Price</span> * it.<span class="me">Qty</span></span>
+          <span class="l slot" data-n="10" data-x="new">    }</span>
+          <span class="l slot" data-n="11" data-x="new">    tax := total * rate / <span class="nu">100</span></span>
+          <span class="l slot" data-n="12" data-x="new">    <span class="kw">return</span> total, tax</span>
+          <span class="l slot" data-n="13" data-x="new">}</span>
+        </pre>
+      </div>
+      <div class="tabkey" data-part="key"><kbd data-action="ExtractMethod">Ctrl+Alt+M</kbd> Extract Function</div>
+    </div>
+  </div>
+</section>
+
+<section class="feature" id="signature">
+  <div class="wrap">
+    <div class="copy rise">
+      <h2>Сигнатура меняется во всех реализациях сразу</h2>
+      <p>Параметр добавляется один раз. Интерфейс, его реализации, обёртки и моки получают его вместе, а вызовы переписываются под новый порядок аргументов.</p>
+      <ul>
+        <li><b>Один диалог.</b> <kbd data-action="ChangeSignature">Ctrl+F6</kbd>: имя, параметры, их порядок и значение по умолчанию для новых.</li>
+        <li><b>Вся иерархия.</b> Метод интерфейса меняется вместе с реализациями. Обёртка, которая делегирует вызов дальше, передаёт и новый параметр.</li>
+        <li><b>Конфликты заранее.</b> Аргумент с побочным эффектом или функция, переданная как значение, показываются до того, как код изменится.</li>
+      </ul>
+    </div>
+    <div class="win rise" data-scene="signature" role="img" aria-label="Диалог Change Signature добавляет параметр ctx в метод Get интерфейса Users: сигнатуры интерфейса, реализации, кэша и мока, вызов в сервисе и делегирующий вызов в кэше меняются по очереди">
+      <div class="win-bar"><span class="tab">users.go</span><span class="right" data-part="count">5 файлов изменено</span></div>
+      <div class="panes" aria-hidden="true">
+        <div class="pane"><h5>users.go</h5><pre>
+          <span class="l"><span class="kw">type</span> <span class="ty">Users</span> <span class="kw">interface</span> {</span>
+          <span class="l">    <span class="fn">Get</span>(<span class="ins">ctx <span class="pk">context</span>.<span class="ty">Context</span>, </span>id <span class="kw">int</span>) (*<span class="ty">User</span>, <span class="kw">error</span>)</span>
+        </pre></div>
+        <div class="pane"><h5>postgres.go</h5><pre>
+          <span class="l"><span class="kw">func</span> (p *<span class="ty">Pg</span>) <span class="fn">Get</span>(<span class="ins">ctx <span class="pk">context</span>.<span class="ty">Context</span>, </span>id <span class="kw">int</span>) (*<span class="ty">User</span>, <span class="kw">error</span>) {</span>
+        </pre></div>
+        <div class="pane"><h5>cache.go</h5><pre>
+          <span class="l"><span class="kw">func</span> (c *<span class="ty">Cache</span>) <span class="fn">Get</span>(<span class="ins">ctx <span class="pk">context</span>.<span class="ty">Context</span>, </span>id <span class="kw">int</span>) (*<span class="ty">User</span>, <span class="kw">error</span>) {</span>
+          <span class="l">    <span class="kw">return</span> c.<span class="me">next</span>.<span class="fn">Get</span>(<span class="ins">ctx, </span>id)</span>
+        </pre></div>
+        <div class="pane"><h5>service.go</h5><pre>
+          <span class="l"><span class="kw">func</span> (s *<span class="ty">Service</span>) <span class="fn">Profile</span>(ctx <span class="pk">context</span>.<span class="ty">Context</span>, id <span class="kw">int</span>) <span class="kw">error</span> {</span>
+          <span class="l">    u, err := s.<span class="me">users</span>.<span class="fn">Get</span>(<span class="ins">ctx, </span>id)</span>
+        </pre></div>
+        <div class="pane"><h5>users_mock.go</h5><pre>
+          <span class="l"><span class="kw">func</span> (m *<span class="ty">Mock</span>) <span class="fn">Get</span>(<span class="ins">ctx <span class="pk">context</span>.<span class="ty">Context</span>, </span>id <span class="kw">int</span>) (*<span class="ty">User</span>, <span class="kw">error</span>) {</span>
+        </pre></div>
+        <div class="dlg off" data-part="dialog">
+          <h5>Change Signature</h5>
+          <div class="name">Name: <code>Get</code></div>
+          <div class="grid">
+            <div class="hd"><span>Name</span><span>Type</span><span>Default value</span></div>
+            <div class="sel" data-part="added"><span>ctx</span><span>context.Context</span><span>ctx</span></div>
+            <div data-part="idRow"><span>id</span><span>int</span><span></span></div>
+          </div>
+          <div class="tools"><span data-part="plus">+</span><span>−</span><span data-part="up">↑</span><span>↓</span></div>
+          <div class="pv" data-part="preview">Get(ctx context.Context, id int) (*User, error)</div>
+          <div class="btns"><span class="btn2">Cancel</span><span class="btn2 def" data-part="refactor">Refactor</span></div>
+        </div>
+      </div>
+      <div class="tabkey" data-part="key"><kbd data-action="ChangeSignature">Ctrl+F6</kbd> Change Signature</div>
+    </div>
+  </div>
+</section>
+
+<section class="feature flip" id="analysis">
+  <div class="wrap">
+    <div class="copy rise">
+      <h2>Ошибки видны, пока вы печатаете</h2>
+      <p>Плагин строит граф потока данных каждой функции и проверяет его на ходу. Мьютекс без разблокировки или непроверенная ошибка подчёркиваются раньше, чем до них дойдут тесты.</p>
+      <ul>
+        <li><b>Поток данных.</b> Блокировка без разблокировки, недостижимый код, разыменование nil, ошибка, затёртая до проверки, потерянный контекст и незакрытый ответ HTTP.</li>
+        <li><b>Исправление рядом.</b> <kbd data-action="ShowIntentionActions">Alt+Enter</kbd> добавляет проверку ошибки и <code>defer</code> закрытия, убирает неиспользуемый параметр вместе с аргументами вызовов.</li>
+        <li><b>Проект и go.mod.</b> Циклы импортов, чужие <code>internal</code>-пакеты, лишние и повторённые <code>require</code>, <code>replace</code> на несуществующий каталог.</li>
+      </ul>
+    </div>
+    <div class="win rise" data-scene="analysis" role="img" aria-label="Набирается ранний return под захваченным мьютексом: Lock подчёркивается предупреждением. Затем вызов os.Remove без проверки ошибки получает исправление Handle error">
+      <div class="win-bar"><span class="tab">store.go</span><span class="right"><span class="probs" data-part="problems">▲ 1</span></span></div>
+      <div class="code">
+        <pre aria-hidden="true" style="min-height: calc(32px + 12 * 1.75 * 13.5px)">
+          <span class="l" data-n="1"><span class="kw">func</span> (s *<span class="ty">Store</span>) <span class="fn">Reset</span>(dir <span class="kw">string</span>) <span class="kw">error</span> {</span>
+          <span class="l" data-n="2">    <span class="sq-w on" data-part="lock">s.<span class="me">mu</span>.<span class="fn">Lock</span>()</span></span>
+          <span class="l slot" data-n="3" data-x="type"><span class="t">    <span class="kw">if</span> s.<span class="me">closed</span> {</span></span>
+          <span class="l slot" data-n="4" data-x="type"><span class="t">        <span class="kw">return</span> errClosed</span></span>
+          <span class="l slot" data-n="5" data-x="type"><span class="t">    }</span></span>
+          <span class="l slot cur" data-n="6" data-part="stmtLine"><span class="hid" data-part="stmt"><span class="t">    <span class="sq-w" data-part="sq"><span class="pk">os</span>.<span class="fn">Remove</span>(dir)</span></span></span><span data-part="fixed">    <span class="kw">if</span> err := <span class="pk">os</span>.<span class="fn">Remove</span>(dir); err != <span class="kw">nil</span> {</span><span class="caret on"></span></span>
+          <span class="l slot" data-n="7" data-x="fix">        <span class="kw">return</span> err</span>
+          <span class="l slot" data-n="8" data-x="fix">    }</span>
+          <span class="l" data-n="9">    s.<span class="me">items</span> = <span class="kw">nil</span></span>
+          <span class="l" data-n="10">    s.<span class="me">mu</span>.<span class="fn">Unlock</span>()</span>
+          <span class="l" data-n="11">    <span class="kw">return</span> <span class="kw">nil</span></span>
+          <span class="l" data-n="12">}</span>
+        </pre>
+        <div class="tip off" style="--at: 2" data-part="tip1" aria-hidden="true"><b></b><span><code>s.mu.Lock()</code> is not released on all paths</span></div>
+        <div class="tip off" style="--at: 6" data-part="tip2" aria-hidden="true"><b></b><span>Error return value of <code>os.Remove</code> is not checked</span></div>
+        <div class="popup float off" style="--at: 6" data-part="popup" aria-hidden="true">
+          <div class="sel"><i class="bulb"></i>Handle error</div>
+          <div><i class="bulb"></i>Assign to blank identifier</div>
+        </div>
+      </div>
+      <div class="tabkey" data-part="key"><kbd data-action="ShowIntentionActions">Alt+Enter</kbd> исправления</div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="small">
+  <div class="wrap">
+    <h2>Мелочи, которые экономят минуты</h2>
+    <p>Встраивание одним нажатием, языки внутри строк и проверка кода под другую платформу.</p>
+    <div class="trio">
+      <figure class="rise">
+        <div class="win mini" data-scene="inline" role="img" aria-label="Переменная sum встраивается: её значение встаёт на место использования, объявление исчезает">
+          <div class="win-bar"><span class="tab">total.go</span><span class="right">Inline Variable</span></div>
+          <div class="code">
+            <pre aria-hidden="true">
+              <span class="l" data-n="1"><span class="kw">func</span> <span class="fn">total</span>(it <span class="ty">Item</span>) <span class="kw">int</span> {</span>
+              <span class="l slot gone" data-part="decl">    sum := <span class="drop-v" data-part="value">it.<span class="me">Price</span> * it.<span class="me">Qty</span></span></span>
+              <span class="l cur" data-n="2" data-part="use">    <span class="kw">return</span> <span class="hid" data-part="before">sum</span><span data-part="after">it.<span class="me">Price</span>*it.<span class="me">Qty</span></span> + shipping</span>
+              <span class="l" data-n="3">}</span>
+            </pre>
+          </div>
+          <div class="tabkey" data-part="key"><kbd data-action="Inline">Ctrl+Alt+N</kbd> Inline</div>
+        </div>
+        <figcaption><h3>Встроить переменную</h3><p>Значение встаёт на место использования, объявление уходит. Скобки по приоритету операций расставляются сами.</p></figcaption>
+      </figure>
+      <figure class="rise">
+        <div class="win mini" data-scene="strings" role="img" aria-label="Строки с SQL и регулярным выражением получают подсветку своего языка; опережающая проверка в регулярном выражении подчёркнута как ошибка RE2">
+          <div class="win-bar"><span class="tab">users.go</span><span class="right">SQL, RegExp</span></div>
+          <div class="code">
+            <pre aria-hidden="true">
+              <span class="l" data-n="1">row := db.<span class="fn">QueryRow</span>(<span class="st">`</span><span class="inj"><span class="q kw">SELECT</span> <span class="q me">name</span></span></span>
+              <span class="l" data-n="2"><span class="inj">    <span class="q kw">FROM</span> <span class="q ty">users</span> <span class="q kw">WHERE</span> <span class="q me">id</span> = <span class="q nu">$1</span></span><span class="st">`</span>, id)</span>
+              <span class="l" data-n="3"></span>
+              <span class="l" data-n="4">re := <span class="pk">regexp</span>.<span class="fn">MustCompile</span>(</span>
+              <span class="l" data-n="5">    <span class="st">`</span><span class="inj"><span class="q kw">^</span><span class="q fn">(?P&lt;id&gt;</span><span class="q nu">\d</span><span class="q kw">+</span><span class="q fn">)</span><span class="q sq-e on" data-part="sq">(?=-)</span></span><span class="st">`</span>)</span>
+            </pre>
+            <div class="tip" style="--at: 5" data-part="tip" aria-hidden="true"><b class="e"></b><span>RE2 (Go regexp) does not support lookahead</span></div>
+          </div>
+        </div>
+        <figcaption><h3>SQL и регулярные выражения в строках</h3><p>Запрос в вызовах <code>database/sql</code>, sqlx и pgx подсвечен и проверен. В <code>regexp</code> ошибкой отмечено то, чего нет в RE2. JSON в <code>json.Unmarshal</code> тоже.</p></figcaption>
+      </figure>
+      <figure class="rise">
+        <div class="win mini" data-scene="goos" role="img" aria-label="В статус-баре выбирается платформа js/wasm: ошибки в коде для браузера пропадают">
+          <div class="win-bar"><span class="tab">canvas.go</span><span class="right">wasm</span></div>
+          <div class="code">
+            <pre aria-hidden="true">
+              <span class="l" data-n="1"><span class="kw">import</span> <span class="st sq-e">"syscall/js"</span></span>
+              <span class="l" data-n="2"></span>
+              <span class="l" data-n="3"><span class="kw">func</span> <span class="fn">draw</span>() {</span>
+              <span class="l" data-n="4">    doc := <span class="sq-e"><span class="pk">js</span>.<span class="fn">Global</span></span>().<span class="fn">Get</span>(<span class="st">"document"</span>)</span>
+              <span class="l" data-n="5">    doc.<span class="fn">Call</span>(<span class="st">"write"</span>, <span class="st">"hi"</span>)</span>
+              <span class="l" data-n="6">}</span>
+            </pre>
+          </div>
+          <div class="sbar" aria-hidden="true"><span>UTF-8</span><span>LF</span><span class="w" data-part="widget">js/wasm</span>
+            <div class="popup off" data-part="menu"><div>linux/amd64</div><div>darwin/arm64</div><div>windows/amd64</div><div>js/wasm</div><div>Host default</div></div>
+          </div>
+        </div>
+        <figcaption><h3>Код под другую платформу</h3><p>GOOS, GOARCH и теги сборки в статус-баре. Код для <code>js/wasm</code> или <code>linux/arm64</code> проверяется так, будто вы собираете под них.</p></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="feature" id="ci">
+  <div class="wrap">
+    <div class="copy rise">
+      <h2>Те же проверки в CI</h2>
+      <p>Go | Inspect Project прогоняет проверки плагина по всему проекту и показывает находки в окне Inspection Results, с исправлениями. Go | Export Inspections to SARIF… пишет их в отчёт SARIF, а в CI то же самое делает сама IDE без окна: <code>idea64.exe go-inspect</code>. GitHub code scanning и GitLab показывают отчёт прямо в пулл-реквесте.</p>
+      <ul>
+        <li><b>Как в редакторе.</b> Профиль инспекций проекта, подавления <code>//noinspection</code>, файлы под текущие условия сборки. gopls не нужен.</li>
+        <li><b>Код выхода для пайплайна.</b> 0 означает «чисто», 1 «есть замечания», 2 «запуск не удался».</li>
+        <li><b>Свой набор.</b> <code>--inspections</code> выбирает проверки, <code>--min-severity</code> отсекает слабые.</li>
+      </ul>
+    </div>
+    <div class="win rise" data-scene="ci" role="img" aria-label="В меню Go выбирается Export Inspections to SARIF, уведомление: 92 findings written to go-inspect.sarif, ниже первые находки отчёта; затем то же в терминале: idea64.exe go-inspect, сводка и код выхода 1">
+      <div class="mbar" aria-hidden="true"><span>File</span><span>Edit</span><span>Code</span><span class="m" data-part="go">Go</span><span>Tools</span><span class="right">shop</span>
+        <div class="popup off" data-part="menu"><div>Build</div><div>Vet</div><div>Inspect Project</div><div>Export Inspections to SARIF…</div><div>Generate</div></div>
+      </div>
+      <div class="term" aria-hidden="true">
+        <div data-out><span class="pr">&gt;</span> <span data-part="cmd">idea64.exe go-inspect . report.sarif</span></div>
+        <div data-out><b>go-inspect:</b> 48 inspections, 27 files, 92 findings (4 error, 61 warning, 27 note), 0 inspection failures, 8412 ms -&gt; report.sarif</div>
+        <div data-out><span class="pr">&gt;</span> echo %ERRORLEVEL%</div>
+        <div data-out class="exit">1</div>
+      </div>
+      <div class="balloon off" data-part="note" aria-hidden="true"><b>Export Inspections to SARIF</b><span>92 findings written to go-inspect.sarif</span><span class="links"><u>Open File</u><u>Show in Explorer</u></span></div>
+      <div class="sarif" aria-hidden="true"><h4>go-inspect.sarif, code scanning</h4><div class="rows">
+        <div><span class="dot no"></span><span class="name">GoNilDereference</span><small>store/cache.go:42</small><span class="end">error</span></div>
+        <div><span class="dot skip"></span><span class="name">GoLockNotReleased</span><small>store/store.go:18</small><span class="end">warning</span></div>
+        <div><span class="dot skip"></span><span class="name">GoBodyNotClosed</span><small>client/fetch.go:23</small><span class="end">warning</span></div>
+        <div><span class="dot"></span><span class="name">GoUnusedParameter</span><small>api/handler.go:77</small><span class="end">note</span></div>
+      </div></div>
     </div>
   </div>
 </section>
@@ -432,8 +754,8 @@ footer a { color: var(--text-2); }
     <div class="more">
       <div class="rise"><h3>Единый стиль кода</h3><p>gofmt или goimports приводят файл в порядок при каждом сохранении.</p></div>
       <div class="rise"><h3>Линтер в редакторе</h3><p>Замечания golangci-lint рядом с кодом и исправления к ним по <kbd data-action="ShowIntentionActions">Alt+Enter</kbd>.</p></div>
-      <div class="rise"><h3>Навигация</h3><p>Использования и реализации показаны над объявлениями, переход выполняется в один клик.</p></div>
-      <div class="rise"><h3>Шаблоны</h3><p>Заготовки типовых конструкций вместо однотипного кода вручную.</p></div>
+      <div class="rise"><h3>Навигация</h3><p>Использования и реализации над объявлениями, иерархии вызовов и типов, переход из ассемблера <code>.s</code> к функции Go.</p></div>
+      <div class="rise"><h3>Генерация кода</h3><p>Конструктор, методы доступа, <code>String()</code>, тест, недостающие методы интерфейса и функция по её вызову.</p></div>
       <div class="rise"><h3>Профили</h3><p>Профиль процессора или памяти для тестов включается в конфигурации запуска.</p></div>
       <div class="rise"><h3>Запуск без настройки</h3><p>Для каждой программы проекта конфигурация запуска создаётся сама.</p></div>
     </div>
@@ -444,13 +766,14 @@ footer a { color: var(--text-2); }
         <table>
           <thead><tr><th>Область</th><th>GoLand</th><th>Go Project Support</th></tr></thead>
           <tbody>
-            <tr><td>Анализ кода</td><td>Собственный анализатор</td><td><span class="s part"></span>gopls и его проверки</td></tr>
-            <tr><td>Рефакторинги</td><td>Полный набор</td><td><span class="s part"></span>Переименование, извлечение и встраивание</td></tr>
-            <tr><td>Навигация</td><td>Полная</td><td><span class="s part"></span>Объявления, использования, реализации; без иерархий</td></tr>
+            <tr><td>Анализ кода</td><td>Собственный анализатор</td><td><span class="s part"></span>Встроенный анализатор с проверками потока данных или gopls на выбор</td></tr>
+            <tr><td>Рефакторинги</td><td>Полный набор</td><td><span class="s part"></span>Переименование, извлечение, встраивание, изменение сигнатуры, перенос, безопасное удаление</td></tr>
+            <tr><td>Навигация</td><td>Полная</td><td><span class="s ok"></span>Объявления, использования, реализации, иерархии вызовов и типов</td></tr>
             <tr><td>Отладчик</td><td>Delve</td><td><span class="s part"></span>Delve; без Smart Step Into и точек на данные</td></tr>
             <tr><td>Тесты и покрытие</td><td>Есть</td><td><span class="s ok"></span>Есть</td></tr>
             <tr><td>Наблюдение за процессом</td><td>Профилировщик</td><td><span class="s part"></span>Показатели процесса и рантайма; без графа вызовов</td></tr>
             <tr><td>Зависимости</td><td>Есть</td><td><span class="s ok"></span>Версии и обновления</td></tr>
+            <tr><td>Инспекции в CI</td><td>Qodana</td><td><span class="s ok"></span><code>go-inspect</code>, отчёт SARIF</td></tr>
             <tr><td>Шаблоны Go, cgo</td><td>Есть</td><td><span class="s no"></span>Нет</td></tr>
             <tr><td>Где работает</td><td>Только GoLand</td><td><span class="s ok"></span>IDEA, PyCharm, WebStorm, Rider</td></tr>
           </tbody>
@@ -460,8 +783,7 @@ footer a { color: var(--text-2); }
     <details>
       <summary>Что пока не поддерживается</summary>
       <ul>
-        <li><b>Шаблоны <code>html/template</code> и <code>text/template</code>, cgo и ассемблер.</b></li>
-        <li><b>Иерархии типов и вызовов.</b></li>
+        <li><b>Шаблоны <code>html/template</code> и <code>text/template</code>, cgo.</b> Ассемблер: только подсветка и переход к функции Go.</li>
         <li><b>Запуск в Docker, по SSH и в WSL.</b></li>
         <li><b>Smart Step Into, Set Next Statement и точки останова на данные.</b></li>
         <li><b>Установка Go из IDE.</b> Путь к установленному Go задаётся в настройках.</li>
@@ -474,6 +796,8 @@ footer a { color: var(--text-2); }
         <li><b>Открыть папку с <code>go.mod</code>.</b> Конфигурации запуска созданы, сервер языка работает.</li>
         <li><b>Набрать код.</b> <code>f, err := os.Open(name)</code>, <kbd>Enter</kbd>, <kbd>Tab</kbd>; затем <code>strings.ToUp</code> и выбор из списка.</li>
         <li><b>Alt+Enter.</b> Handle error на вызове, Create function по несуществующему вызову.</li>
+        <li><b>Рефакторинги.</b> Ctrl+Alt+M на строках цикла, Ctrl+Alt+N на переменной, Ctrl+F6 на методе интерфейса, F6 в другой пакет.</li>
+        <li><b>Анализ.</b> <code>s.mu.Lock()</code> и ранний <code>return</code>; GOOS/GOARCH в статус-баре на js/wasm.</li>
         <li><b>Отладка.</b> Точка с условием в цикле, вкладка Goroutines, Evaluate с вызовом метода.</li>
         <li><b>Тесты.</b> Окно Go Tests, Run with Coverage, Rerun Failed.</li>
         <li><b>Бенчмарк.</b> Запуск из gutter, таблица результатов.</li>
@@ -500,8 +824,8 @@ footer a { color: var(--text-2); }
 
 <footer>
   <div class="wrap">
-    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.1.0</span>
-    <span>Редакция страницы 2026-09-29.2</span>
+    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.2.59</span>
+    <span>Редакция страницы 2026-10-03.1</span>
     <a class="repo" href="guide.html">Справочник</a>
     <a class="repo" href="../COMPARE.md">Полное сравнение с GoLand</a>
     <a class="repo" href="../ROADMAP.md">Roadmap</a>
@@ -596,6 +920,7 @@ footer a { color: var(--text-2); }
     }
 
     var stage = {
+      win: win,
       part: function (name) { return win.querySelector('[data-part="' + name + '"]'); },
       all: function (selector) { return Array.prototype.slice.call(win.querySelectorAll(selector)); },
       /** Waits while the window is in sight: out of sight the time stands still, nothing is played for nobody. */
@@ -628,6 +953,26 @@ footer a { color: var(--text-2); }
       var state = scene(stage);
       while (true) await state();
     })().catch(function (error) { if (window.console) console.error(error); });
+  }
+
+  /** Line numbers as the editor shows them: the lines that are there, counted from one. */
+  function renumber(stage) {
+    var n = 0;
+    stage.all('pre .l[data-n], pre .l.slot').forEach(function (line) {
+      if (!line.classList.contains('gone')) line.setAttribute('data-n', ++n);
+    });
+  }
+  /** A key badge pressed and let go. */
+  async function press(stage, key, ms) {
+    key.classList.add('press');
+    await stage.sleep(ms || 220);
+    key.classList.remove('press');
+  }
+  /** Plays the green flash of a line again: the animation restarts only when its class comes back after a frame without it. */
+  function flash(element) {
+    element.classList.remove('flash');
+    void element.offsetWidth;
+    element.classList.add('flash');
   }
 
   var scenes = {
@@ -806,6 +1151,280 @@ footer a { color: var(--text-2); }
         }
         await stage.sleep(900);
         rows.forEach(function (row) { row.classList.remove('new'); });
+        await stage.sleep(5200);
+      };
+    },
+
+    /** Lines are selected, Ctrl+Alt+M: a call takes their place, the new function comes below, its name is edited in place. */
+    extract: function (stage) {
+      var orig = stage.all('[data-x="orig"]'), made = stage.all('[data-x="new"]'), call = stage.part('call');
+      var names = stage.all('[data-part="name"]'), key = stage.part('key'), word = 'subtotal';
+      return async function () {
+        made.concat([call]).forEach(function (line) { line.classList.add('gone'); });
+        orig.forEach(function (line) { line.classList.remove('gone', 'sel'); });
+        names.forEach(function (name) { name.textContent = 'extracted'; name.classList.remove('ren', 'sel-t'); });
+        stage.current(orig[0]);
+        renumber(stage);
+        await stage.sleep(1100);
+
+        for (var i = 0; i < orig.length; i++) {
+          orig[i].classList.add('sel');
+          await stage.sleep(140);
+        }
+        await stage.sleep(700);
+        await press(stage, key);
+        orig.forEach(function (line) { line.classList.add('gone'); });
+        call.classList.remove('gone');
+        names.forEach(function (name) { name.classList.add('ren', 'sel-t'); });
+        stage.current(call);
+        renumber(stage);
+        await stage.sleep(380);
+        for (var j = 0; j < made.length; j++) {
+          made[j].classList.remove('gone');
+          renumber(stage);
+          await stage.sleep(70);
+        }
+        await stage.sleep(1200);
+
+        // the name is typed over the selected one, in both places at once
+        names.forEach(function (name) { name.classList.remove('sel-t'); });
+        for (var k = 1; k <= word.length; k++) {
+          names.forEach(function (name) { name.textContent = word.slice(0, k); });
+          await stage.sleep(90);
+        }
+        await stage.sleep(700);
+        names.forEach(function (name) { name.classList.remove('ren'); });
+        await stage.sleep(4200);
+      };
+    },
+
+    /** Ctrl+F6, a parameter is added and moved up, Refactor: the interface, its implementations and the calls change one by one. */
+    signature: function (stage) {
+      var dialog = stage.part('dialog'), added = stage.part('added'), idRow = stage.part('idRow'), grid = added.parentNode;
+      var cells = Array.prototype.map.call(added.children, typer);
+      var preview = stage.part('preview'), plus = stage.part('plus'), up = stage.part('up'), refactor = stage.part('refactor');
+      var key = stage.part('key'), count = stage.part('count'), panes = stage.all('.pane');
+      var inserted = panes.map(function (pane) { return Array.prototype.slice.call(pane.querySelectorAll('.ins')); });
+      return async function () {
+        dialog.classList.add('off');
+        grid.appendChild(added);
+        added.classList.add('hid');
+        cells.forEach(function (cell) { cell.show(0); });
+        preview.textContent = 'Get(id int) (*User, error)';
+        inserted.forEach(function (list) { list.forEach(function (ins) { ins.classList.add('hid'); ins.classList.remove('lit'); }); });
+        panes.forEach(function (pane) { pane.classList.remove('flash'); });
+        count.textContent = 'Users.Get';
+        await stage.sleep(1200);
+
+        await press(stage, key);
+        dialog.classList.remove('off');
+        await stage.sleep(900);
+        await press(stage, plus);
+        added.classList.remove('hid');
+        await stage.sleep(250);
+        for (var c = 0; c < cells.length; c++) {
+          await stage.type(cells[c], c === 1 ? 45 : 90);
+          await stage.sleep(220);
+        }
+        preview.textContent = 'Get(id int, ctx context.Context) (*User, error)';
+        await stage.sleep(700);
+        await press(stage, up);
+        grid.insertBefore(added, idRow);
+        preview.textContent = 'Get(ctx context.Context, id int) (*User, error)';
+        await stage.sleep(1000);
+        await press(stage, refactor, 260);
+        dialog.classList.add('off');
+        await stage.sleep(350);
+
+        // the change goes over the hierarchy: one file after another
+        for (var p = 0; p < panes.length; p++) {
+          inserted[p].forEach(function (ins) { ins.classList.remove('hid'); ins.classList.add('lit'); });
+          flash(panes[p]);
+          count.textContent = (p + 1) + ' из ' + panes.length;
+          await stage.sleep(300);
+        }
+        count.textContent = '5 файлов изменено';
+        await stage.sleep(1200);
+        inserted.forEach(function (list) { list.forEach(function (ins) { ins.classList.remove('lit'); }); });
+        await stage.sleep(4200);
+      };
+    },
+
+    /** An early return under a lock is typed: the lock is underlined. A call that drops its error gets Handle error. */
+    analysis: function (stage) {
+      var typed = stage.all('[data-x="type"]'), typers = typed.map(function (line) { return typer(line.querySelector('.t')); });
+      var lock = stage.part('lock'), stmtLine = stage.part('stmtLine'), stmt = stage.part('stmt'), fixed = stage.part('fixed');
+      var stmtTyper = typer(stmt.querySelector('.t')), sq = stage.part('sq'), fix = stage.all('[data-x="fix"]');
+      var tip1 = stage.part('tip1'), tip2 = stage.part('tip2'), popup = stage.part('popup'), key = stage.part('key');
+      var problems = stage.part('problems'), caret = stmtLine.querySelector('.caret');
+      function count(n) { problems.textContent = n ? '▲ ' + n : '✓'; problems.classList.toggle('ok', !n); }
+      return async function () {
+        typed.concat([stmtLine], fix).forEach(function (line) { line.classList.add('gone'); line.classList.remove('flash'); });
+        typers.forEach(function (t) { t.show(0); });
+        stmt.classList.remove('hid');
+        fixed.classList.add('hid');
+        stmtTyper.show(0);
+        lock.classList.remove('on');
+        sq.classList.remove('on');
+        [tip1, tip2, popup].forEach(function (e) { e.classList.add('off'); });
+        count(0);
+        stage.current(typed[0]);
+        renumber(stage);
+        await stage.sleep(1000);
+
+        for (var i = 0; i < typed.length; i++) {
+          typed[i].classList.remove('gone');
+          renumber(stage);
+          stage.current(typed[i]);
+          stage.caretAfter(caret, typed[i].querySelector('.t'));
+          await stage.sleep(200);
+          await stage.type(typers[i], 60);
+          await stage.sleep(260);
+        }
+        lock.classList.add('on');
+        count(1);
+        await stage.sleep(500);
+        tip1.classList.remove('off');
+        await stage.sleep(2600);
+        tip1.classList.add('off');
+
+        stmtLine.classList.remove('gone');
+        renumber(stage);
+        stage.current(stmtLine);
+        stage.caretAfter(caret, stmt.querySelector('.t'));
+        await stage.sleep(300);
+        await stage.type(stmtTyper, 75);
+        await stage.sleep(500);
+        sq.classList.add('on');
+        count(2);
+        tip2.classList.remove('off');
+        await stage.sleep(1900);
+        tip2.classList.add('off');
+        await press(stage, key);
+        popup.classList.remove('off');
+        await stage.sleep(1400);
+        popup.classList.add('off');
+        stmt.classList.add('hid');
+        fixed.classList.remove('hid');
+        stage.caretAfter(caret, fixed);
+        fix.forEach(function (line) { line.classList.remove('gone'); });
+        renumber(stage);
+        [stmtLine].concat(fix).forEach(flash);
+        count(1);
+        await stage.sleep(4600);
+      };
+    },
+
+    /** Ctrl+Alt+N on a variable: its value goes down into its use, the declaration folds away. */
+    inline: function (stage) {
+      var decl = stage.part('decl'), value = stage.part('value'), use = stage.part('use');
+      var before = stage.part('before'), after = stage.part('after'), key = stage.part('key');
+      return async function () {
+        decl.classList.remove('gone');
+        value.classList.remove('drop', 'sel-t');
+        before.classList.remove('hid', 'sel-t');
+        after.classList.add('hid');
+        use.classList.remove('flash');
+        renumber(stage);
+        await stage.sleep(1500);
+
+        before.classList.add('sel-t');
+        await press(stage, key);
+        value.classList.add('sel-t');
+        await stage.sleep(500);
+        value.classList.add('drop');
+        await stage.sleep(500);
+        before.classList.add('hid');
+        after.classList.remove('hid');
+        decl.classList.add('gone');
+        flash(use);
+        renumber(stage);
+        await stage.sleep(4600);
+      };
+    },
+
+    /** Plain green strings take the colors of their languages; then RE2 says what it cannot do. */
+    strings: function (stage) {
+      var sq = stage.part('sq'), tip = stage.part('tip');
+      return async function () {
+        stage.win.classList.add('plain');
+        sq.classList.remove('on');
+        tip.classList.add('off');
+        await stage.sleep(1600);
+        stage.win.classList.remove('plain');
+        await stage.sleep(1500);
+        sq.classList.add('on');
+        await stage.sleep(400);
+        tip.classList.remove('off');
+        await stage.sleep(3600);
+      };
+    },
+
+    /** The widget of the status bar: another platform is picked, and the code written for it is no longer an error. */
+    goos: function (stage) {
+      var widget = stage.part('widget'), menu = stage.part('menu'), items = Array.prototype.slice.call(menu.children);
+      var marks = stage.all('.sq-e');
+      return async function () {
+        widget.textContent = 'windows/amd64';
+        marks.forEach(function (mark) { mark.classList.add('on'); });
+        menu.classList.add('off');
+        items.forEach(function (item) { item.classList.remove('sel'); });
+        await stage.sleep(2200);
+
+        widget.classList.add('press');
+        menu.classList.remove('off');
+        for (var i = 0; i <= 3; i++) {
+          items.forEach(function (item, at) { item.classList.toggle('sel', at === i); });
+          await stage.sleep(i ? 260 : 600);
+        }
+        await stage.sleep(500);
+        menu.classList.add('off');
+        widget.classList.remove('press');
+        widget.textContent = 'js/wasm';
+        await stage.sleep(450);
+        marks.forEach(function (mark) { mark.classList.remove('on'); });
+        await stage.sleep(4800);
+      };
+    },
+
+    /** Go | Export Inspections to SARIF from the menu, the notification and the findings of the report; then the same from a terminal for CI. */
+    ci: function (stage) {
+      var go = stage.part('go'), menu = stage.part('menu'), items = Array.prototype.slice.call(menu.children), note = stage.part('note');
+      var cmd = typer(stage.part('cmd')), out = stage.all('[data-out]'), rows = stage.all('.rows > div');
+      return async function () {
+        cmd.show(0);
+        out.concat(rows).forEach(function (e) { e.classList.add('off'); });
+        menu.classList.add('off');
+        note.classList.add('off');
+        items.forEach(function (item) { item.classList.remove('sel'); });
+        await stage.sleep(1200);
+
+        go.classList.add('press');
+        menu.classList.remove('off');
+        for (var i = 0; i <= 3; i++) {
+          items.forEach(function (item, at) { item.classList.toggle('sel', at === i); });
+          await stage.sleep(i ? 300 : 650);
+        }
+        await stage.sleep(500);
+        menu.classList.add('off');
+        go.classList.remove('press');
+        await stage.sleep(1300);
+        note.classList.remove('off');
+        for (var j = 0; j < rows.length; j++) {
+          rows[j].classList.remove('off');
+          await stage.sleep(200);
+        }
+        await stage.sleep(3200);
+        note.classList.add('off');
+
+        out[0].classList.remove('off');
+        await stage.sleep(400);
+        await stage.type(cmd, 45);
+        await stage.sleep(1500);
+        for (var k = 1; k < out.length; k++) {
+          out[k].classList.remove('off');
+          await stage.sleep(k > 1 ? 350 : 700);
+        }
         await stage.sleep(5200);
       };
     }

@@ -4,23 +4,16 @@ import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.lang.annotation.HighlightSeverity
 import io.github.golangsupport.ci.GoInspectFiles
 import io.github.golangsupport.ci.GoInspectOptions
-import io.github.golangsupport.ci.GoInspectRun
 import io.github.golangsupport.ci.GoSarifLevel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
-import java.nio.file.Files
 import java.nio.file.Path
 
 class GoInspectOptionsTest {
-
-    @get:Rule
-    val temp = TemporaryFolder()
 
     @Test
     fun positionalArgumentsAndDefaults() {
@@ -76,13 +69,12 @@ class GoInspectOptionsTest {
     }
 
     @Test
-    fun walkSkipsWhatGoSkips() {
-        val root = temp.root.toPath()
-        for (rel in listOf("go.mod", "main.go", "main_test.go", "README.md", "pkg/a b.go", "vendor/x/x.go", "testdata/t.go", ".git/h.go", "_old/o.go", "sub/go.work", "sub/data.txt")) {
-            Files.createDirectories(root.resolve(rel).parent)
-            Files.writeString(root.resolve(rel), "package x\n")
-        }
-        val found = GoInspectRun.candidates(root).map { GoInspectFiles.relativeUri(root, it) }
-        assertEquals(listOf("go.mod", "main.go", "main_test.go", "pkg/a%20b.go", "sub/go.work"), found)
+    fun whatTheWalkSkips() {
+        // the walk itself (VFS) is covered by GoInspectRunTest
+        assertTrue(listOf("vendor", "testdata", "node_modules", ".git", "_old").all(GoInspectFiles::skipDirectory))
+        assertFalse(listOf("pkg", "sub", "internal").any(GoInspectFiles::skipDirectory))
+        assertEquals(listOf(true, true, true, false, false), listOf("main.go", "go.mod", "go.work", "README.md", "data.txt").map(GoInspectFiles::isCandidate))
+        assertEquals("pkg/a%20b.go", GoInspectFiles.relativeUri("pkg/a b.go"))
+        assertEquals("pkg/a%20b.go", GoInspectFiles.relativeUri(Path.of("root"), Path.of("root", "pkg", "a b.go")))
     }
 }

@@ -32,16 +32,20 @@
   --sans: "Inter", "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --mono: "JetBrains Mono", "Cascadia Code", Consolas, "SF Mono", monospace;
   --nav-h: 56px;
+  /* editor colors, as on the page about the plugin */
+  --kw: #cf8e6d; --type: #6fafbd; --fn: #56a8f5; --pkg: #afbf7e; --str: #6aab73; --num: #2aacb8; --member: #c77dbb; --com: #7a7e85; --selbg: #214283;
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --bg: #ffffff; --bg-raised: #f5f5f7; --panel: #ffffff; --panel-2: #f7f8fa; --line: #d9dbe1;
     --text: #19191c; --text-2: #45474f; --text-3: #70737d;
+    --kw: #0033b3; --type: #007e8a; --fn: #00627a; --pkg: #6b7a1f; --str: #067d17; --num: #1750eb; --member: #871094; --com: #8c8c8c; --selbg: #a6d2ff;
   }
 }
 :root[data-theme="light"] {
   --bg: #ffffff; --bg-raised: #f5f5f7; --panel: #ffffff; --panel-2: #f7f8fa; --line: #d9dbe1;
   --text: #19191c; --text-2: #45474f; --text-3: #70737d;
+  --kw: #0033b3; --type: #007e8a; --fn: #00627a; --pkg: #6b7a1f; --str: #067d17; --num: #1750eb; --member: #871094; --com: #8c8c8c; --selbg: #a6d2ff;
 }
 
 * { box-sizing: border-box; }
@@ -116,6 +120,23 @@ table.two td:nth-child(2) { width: auto; }
 }
 tr.gone, section.gone, h3.gone, .table.gone { display: none; }
 .new { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; font-size: .72rem; font-weight: 600; line-height: 1.7; color: #fff; background: var(--violet); vertical-align: 2px; white-space: nowrap; }
+.new.soon { background: var(--text-3); }
+/* before and after, three frames in a loop: CSS only; with reduced motion the last frame stands */
+.demo3 { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.demo3 figure { margin: 0; min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); overflow: hidden; }
+.demo3 figcaption { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 7px 12px; font-size: .84rem; color: var(--text-2); background: var(--panel); border-bottom: 1px solid var(--line); }
+.demo3 figcaption kbd { font-size: .78rem; }
+.demo3 .frames { display: grid; }
+.demo3 pre { grid-area: 1 / 1; margin: 0; padding: 10px 14px; font-size: 12.5px; line-height: 1.6; color: var(--text-2); white-space: pre; overflow-x: auto; opacity: 0; animation: frame3 9s infinite; }
+.demo3 pre:nth-child(2) { animation-delay: 3s; }
+.demo3 pre:nth-child(3) { animation-delay: 6s; }
+@keyframes frame3 { 0%, 31% { opacity: 1; } 36%, 100% { opacity: 0; } }
+.demo3 .kw { color: var(--kw); } .demo3 .ty { color: var(--type); } .demo3 .fn { color: var(--fn); } .demo3 .pk { color: var(--pkg); }
+.demo3 .nu { color: var(--num); } .demo3 .me { color: var(--member); } .demo3 .co { color: var(--com); font-style: italic; }
+.demo3 .sl { background: var(--selbg); border-radius: 2px; }
+.demo3 .nw { background: color-mix(in srgb, var(--ok) 28%, transparent); border-radius: 2px; }
+.term { margin-top: 20px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); font: 13px/1.6 var(--mono); font-variant-ligatures: none; color: var(--text-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.term .pr { color: var(--ok); }
 .empty { display: none; margin-top: 28px; color: var(--text-2); }
 .empty.on { display: block; }
 footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--text-3); font-size: .9rem; }
@@ -124,6 +145,8 @@ footer a { color: var(--text-2); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .demo3 pre { animation: none; }
+  .demo3 pre:last-child { opacity: 1; }
 }
 </style>
 </head>
@@ -135,10 +158,10 @@ footer a { color: var(--text-2); }
     <a class="brand" href="#top"><span class="mark" aria-hidden="true">Go</span>Справочник</a>
     <ul id="navLinks">
       <li><a href="#keys">Клавиши</a></li>
-      <li><a href="#ghost">Серый текст</a></li>
       <li><a href="#completion">Подсказки</a></li>
       <li><a href="#actions">Действия</a></li>
-      <li><a href="#templates">Шаблоны</a></li>
+      <li><a href="#refactor">Рефакторинги</a></li>
+      <li><a href="#analysis">Проверки</a></li>
       <li><a href="#menu">Меню Go</a></li>
       <li><a href="#windows">Окна</a></li>
       <li><a href="#run">Запуск</a></li>
@@ -162,7 +185,7 @@ footer a { color: var(--text-2); }
     </div>
     <p class="note ide">Клавиши показаны по раскладке клавиатуры этой IDE.</p>
     <p class="note repo">Клавиши показаны по стандартной раскладке Windows и Linux. Внутри IDE страница показывает клавиши её раскладки: меню Go, пункт Help Page.</p>
-    <p class="note">Пометка <span class="new">новое</span> стоит у возможностей, добавленных в версии 0.1.0 последними: они ещё проверяются в работе.</p>
+    <p class="note">Пометка <span class="new">новое</span> стоит у возможностей, добавленных в последних версиях: они ещё проверяются в работе. Пометка <span class="new soon">в работе</span> — у того, что появится в ближайших версиях.</p>
   </div>
 </section>
 
@@ -172,6 +195,8 @@ footer a { color: var(--text-2); }
     <a href="#ghost"><b>Серый текст</b><span>Следующая строка по Tab</span></a>
     <a href="#completion"><b>Подсказки</b><span>Список по Ctrl+Space</span></a>
     <a href="#actions"><b>Действия</b><span>Alt+Enter и Generate</span></a>
+    <a href="#refactor"><b>Рефакторинги</b><span>Extract, Inline, Change Signature, Move</span></a>
+    <a href="#analysis"><b>Проверки</b><span>Поток данных, проект, go.mod, строки</span></a>
     <a href="#templates"><b>Шаблоны</b><span>Сокращения и постфиксы</span></a>
     <a href="#menu"><b>Меню Go</b><span>Все пункты</span></a>
     <a href="#windows"><b>Окна</b><span>Тесты, монитор, зависимости</span></a>
@@ -204,7 +229,7 @@ footer a { color: var(--text-2); }
         <tr><td>Ссылки в doc-комментариях <span class="new">новое</span></td><td><kbd data-action="GotoDeclaration">Ctrl+B</kbd></td><td><code>[Name]</code>, <code>[Type.Method]</code>, <code>[pkg.Name]</code> в комментариях — ссылки: переход, Find Usages, Rename; в Quick Documentation кликабельны. При Language features: Built-in.</td></tr>
         <tr><td>Действия и исправления</td><td><kbd data-action="ShowIntentionActions">Alt+Enter</kbd></td><td>Список зависит от места: см. раздел «Действия».</td></tr>
         <tr><td>Generate</td><td><kbd data-action="Generate">Alt+Insert</kbd></td><td>Конструктор, методы доступа, <code>String()</code>, теги, методы интерфейса, тест.</td></tr>
-        <tr><td>Переименовать</td><td><kbd data-action="RenameElement">Shift+F6</kbd></td><td>По всему модулю. Нужен gopls.</td></tr>
+        <tr><td>Переименовать</td><td><kbd data-action="RenameElement">Shift+F6</kbd></td><td>По всему модулю: силами gopls или собственного анализа (Language features: Built-in), в том числе пакет. Остальные рефакторинги — в разделе «Рефакторинги».</td></tr>
         <tr><td>Переформатировать</td><td><kbd data-action="ReformatCode">Ctrl+Alt+L</kbd></td><td>Выбранным в настройках инструментом. По умолчанию выполняется и при сохранении.</td></tr>
         <tr><td>Упорядочить импорты</td><td><kbd data-action="OptimizeImports">Ctrl+Alt+O</kbd></td><td>Убирает неиспользуемые, добавляет недостающие. Нужен gopls.</td></tr>
         <tr><td>Закомментировать</td><td><kbd data-action="CommentByLineComment">Ctrl+/</kbd>, <kbd data-action="CommentByBlockComment">Ctrl+Shift+/</kbd></td><td>Строку и выделенный блок.</td></tr>
@@ -219,8 +244,9 @@ footer a { color: var(--text-2); }
         <tr><td>К тесту и обратно</td><td><kbd data-action="GotoTest">Ctrl+Shift+T</kbd></td><td>Из <code>x.go</code> в <code>x_test.go</code> и назад; из функции <code>F</code> к <code>TestF</code>, <code>TestT_F</code>, <code>BenchmarkF</code>, из теста к тому, что он проверяет. Теста нет — предложение создать его (Generate test).</td></tr>
         <tr><td>К методу интерфейса</td><td><kbd data-action="GotoSuperMethod">Ctrl+U</kbd></td><td>От метода к методу интерфейса, который он реализует, от типа к его интерфейсам (gopls); несколько — список.</td></tr>
         <tr><td>К реализации</td><td><kbd data-action="GotoImplementation">Ctrl+Alt+B</kbd></td><td>Реализации интерфейса и его методов. Те же переходы дают значки на полях редактора.</td></tr>
-        <tr><td>Иерархия вызовов <span class="new">новое</span></td><td><kbd data-action="CallHierarchy">Ctrl+Alt+H</kbd></td><td>Кто вызывает функцию под курсором и кого вызывает она, на любую глубину; с объявления и с места вызова. Дерево строит gopls.</td></tr>
-        <tr><td>Иерархия типов <span class="new">новое</span></td><td><kbd data-action="TypeHierarchy">Ctrl+H</kbd></td><td>Реализации интерфейса, интерфейсы типа, вложенные интерфейсы.</td></tr>
+        <tr><td>Иерархия вызовов <span class="new">новое</span></td><td><kbd data-action="CallHierarchy">Ctrl+Alt+H</kbd></td><td>Кто вызывает функцию под курсором и кого вызывает она, на любую глубину; с объявления и с места вызова. Вызывающие сгруппированы по функциям, с числом вызовов; вызовы через метод интерфейса помечены «via Iface». Рекурсия показана один раз. При Language features: gopls дерево строит сервер.</td></tr>
+        <tr><td>Иерархия типов <span class="new">новое</span></td><td><kbd data-action="TypeHierarchy">Ctrl+H</kbd></td><td>Для интерфейса — реализации и встраивающие интерфейсы (открывается на Subtypes), для типа — встроенные типы и интерфейсы, которые он реализует (Supertypes).</td></tr>
+        <tr><td>Ассемблер Go <span class="new">новое</span></td><td><kbd data-action="GotoDeclaration">Ctrl+B</kbd></td><td>Файлы <code>.s</code>: подсветка инструкций, регистров и директив; <code>TEXT ·Sum(SB)</code> ведёт к объявлению <code>func Sum</code> без тела, а от объявления значок на полях ведёт к реализации на ассемблере.</td></tr>
         <tr><td>Подсветка использований <span class="new">новое</span></td><td><kbd data-action="HighlightUsagesInFile">Ctrl+Shift+F7</kbd></td><td>Использования имени под курсором в файле, чтение и запись разными цветами; на <code>func</code> или <code>return</code> — все выходы из функции. Подсвечивается и само, при остановке курсора.</td></tr>
         <tr><td>К объявлению типа</td><td><kbd data-action="GotoTypeDeclaration">Ctrl+Shift+B</kbd></td><td>Тип переменной, поля или результата под курсором.</td></tr>
         <tr><td>Тип выражения</td><td><kbd data-action="ExpressionTypeInfo">Ctrl+Shift+P</kbd></td><td>Объявление имени под курсором.</td></tr>
@@ -342,7 +368,7 @@ footer a { color: var(--text-2); }
         <tr><td>Generate test</td><td>Функция или метод</td><td>Табличный тест в файле <code>_test.go</code>.</td></tr>
         <tr><td>Fill all fields <span class="new">новое</span></td><td>Литерал структуры или имя типа</td><td>Заполняет поля нулевыми значениями и добавляет импорты. На имени типа без скобок сначала дописывает <code>{}</code>.</td></tr>
         <tr><td>Optimize imports <span class="new">новое</span></td><td>Строки импортов</td><td>Убирает неиспользуемые, добавляет недостающие, сортирует и раскладывает по группам, как goimports: стандартная библиотека, сторонние модули, модуль проекта — через пустую строку.</td></tr>
-        <tr><td>Действия gopls <span class="new">новое</span></td><td>Курсор или выделение</td><td>Extract variable, Extract function, Inline call, Invert if, Add test и другие, под своими именами. Извлечение доступно при выделении.</td></tr>
+        <tr><td>Действия gopls <span class="new">новое</span></td><td>Курсор или выделение</td><td>Extract variable, Extract function, Inline call, Invert if, Add test и другие, под своими именами. Извлечение доступно при выделении. При Language features: Built-in вместо них работают рефакторинги плагина.</td></tr>
         <tr><td>Refactorings and actions of gopls…</td><td>Любое место</td><td>Те же действия отдельным списком. Стоит внизу.</td></tr>
         <tr><td>Исправления линтера</td><td>Замечание golangci-lint</td><td>Handle error, Ignore error explicitly, Suppress with <code>//nolint</code>.</td></tr>
         <tr><td>Исправления gopls</td><td>Ошибка или предупреждение</td><td>Исправления, которые сервер языка предлагает к своим замечаниям.</td></tr>
@@ -362,6 +388,167 @@ footer a { color: var(--text-2); }
         <tr><td>Implement Interface…</td><td>Методы выбранного интерфейса (проект, stdlib, зависимости), которых у типа ещё нет: типы чужого пакета получают его имя, пакет импортируется, встроенные интерфейсы раскрываются. Также <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
         <tr><td>Type from JSON… <span class="new">новое</span></td><td>Структуры с тегами <code>json</code> по документу из буфера обмена или из диалога.</td></tr>
         <tr><td>Test</td><td>Тест для функции под курсором.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="refactor">
+  <div class="wrap">
+    <h2>Рефакторинги</h2>
+    <p>Выполняются собственным анализом плагина при Language features: Built-in (Settings, Tools, Go, Language Server). Диалог появляется только там, где без него не обойтись; если рефакторинг изменил бы поведение программы, он не выполняется, а подсказка называет причину. Отмена — <kbd data-action="$Undo">Ctrl+Z</kbd>, одним шагом.</p>
+
+    <div class="demo3" aria-hidden="true">
+      <figure>
+        <figcaption><span>Извлечь функцию</span><kbd data-action="ExtractMethod">Ctrl+Alt+M</kbd></figcaption>
+        <div class="frames">
+<pre><span class="co">// 1. выделены строки цикла</span>
+<span class="kw">func</span> <span class="fn">Checkout</span>(o *<span class="ty">Order</span>) <span class="kw">error</span> {
+<span class="sl">    total := <span class="nu">0</span>
+    <span class="kw">for</span> _, it := <span class="kw">range</span> o.<span class="me">items</span> {
+        total += it.<span class="me">Price</span>
+    }</span>
+    <span class="kw">return</span> <span class="fn">charge</span>(o, total)
+}
+</pre>
+<pre><span class="co">// 2. Ctrl+Alt+M: вызов и новая функция</span>
+<span class="kw">func</span> <span class="fn">Checkout</span>(o *<span class="ty">Order</span>) <span class="kw">error</span> {
+    total := <span class="nw"><span class="fn">extracted</span>(o)</span>
+    <span class="kw">return</span> <span class="fn">charge</span>(o, total)
+}
+
+<span class="nw"><span class="kw">func</span> <span class="fn">extracted</span>(o *<span class="ty">Order</span>) <span class="kw">int</span> {</span>
+    total := <span class="nu">0</span>
+    <span class="kw">for</span> _, it := <span class="kw">range</span> o.<span class="me">items</span> { … }
+    <span class="kw">return</span> total
+}</pre>
+<pre><span class="co">// 3. имя правится сразу в обоих местах</span>
+<span class="kw">func</span> <span class="fn">Checkout</span>(o *<span class="ty">Order</span>) <span class="kw">error</span> {
+    total := <span class="fn sl">subtotal</span>(o)
+    <span class="kw">return</span> <span class="fn">charge</span>(o, total)
+}
+
+<span class="kw">func</span> <span class="fn sl">subtotal</span>(o *<span class="ty">Order</span>) <span class="kw">int</span> {
+    total := <span class="nu">0</span>
+    <span class="kw">for</span> _, it := <span class="kw">range</span> o.<span class="me">items</span> { … }
+    <span class="kw">return</span> total
+}</pre>
+        </div>
+      </figure>
+      <figure>
+        <figcaption><span>Встроить</span><kbd data-action="Inline">Ctrl+Alt+N</kbd></figcaption>
+        <div class="frames">
+<pre><span class="co">// 1. курсор на sum</span>
+<span class="kw">func</span> <span class="fn">total</span>(it <span class="ty">Item</span>) <span class="kw">int</span> {
+    sum := it.<span class="me">Price</span> * it.<span class="me">Qty</span>
+    <span class="kw">return</span> <span class="sl">sum</span> + shipping
+}</pre>
+<pre><span class="co">// 2. Ctrl+Alt+N: значение на месте имени</span>
+<span class="kw">func</span> <span class="fn">total</span>(it <span class="ty">Item</span>) <span class="kw">int</span> {
+    <span class="kw">return</span> <span class="nw">it.<span class="me">Price</span>*it.<span class="me">Qty</span></span> + shipping
+}</pre>
+<pre><span class="co">// 3. здесь Inline откажет: вызов next()</span>
+<span class="co">//    нельзя повторить дважды</span>
+n := <span class="fn">next</span>()
+<span class="fn">use</span>(<span class="sl">n</span>, n)</pre>
+        </div>
+      </figure>
+      <figure>
+        <figcaption><span>Изменить сигнатуру</span><kbd data-action="ChangeSignature">Ctrl+F6</kbd></figcaption>
+        <div class="frames">
+<pre><span class="co">// 1. метод интерфейса и обёртка</span>
+<span class="kw">type</span> <span class="ty">Users</span> <span class="kw">interface</span> {
+    <span class="fn">Get</span>(id <span class="kw">int</span>) (*<span class="ty">User</span>, <span class="kw">error</span>)
+}
+<span class="kw">func</span> (c *<span class="ty">Cache</span>) <span class="fn">Get</span>(id <span class="kw">int</span>) (*<span class="ty">User</span>, <span class="kw">error</span>) {
+    <span class="kw">return</span> c.<span class="me">next</span>.<span class="fn">Get</span>(id)
+}</pre>
+<pre><span class="co">// 2. Ctrl+F6: + ctx context.Context,</span>
+<span class="co">//    по умолчанию ctx, кнопка вверх</span>
+<span class="sl">  ctx   context.Context   ctx  </span>
+  id    int
+</pre>
+<pre><span class="co">// 3. интерфейс, реализации и вызовы</span>
+<span class="kw">type</span> <span class="ty">Users</span> <span class="kw">interface</span> {
+    <span class="fn">Get</span>(<span class="nw">ctx <span class="pk">context</span>.<span class="ty">Context</span>,</span>
+        id <span class="kw">int</span>) (*<span class="ty">User</span>, <span class="kw">error</span>)
+}
+<span class="kw">func</span> (c *<span class="ty">Cache</span>) <span class="fn">Get</span>(<span class="nw">ctx <span class="pk">context</span>.<span class="ty">Context</span>,</span>
+    id <span class="kw">int</span>) (*<span class="ty">User</span>, <span class="kw">error</span>) {
+    <span class="kw">return</span> c.<span class="me">next</span>.<span class="fn">Get</span>(<span class="nw">ctx, </span>id)
+}</pre>
+        </div>
+      </figure>
+    </div>
+
+    <div class="table"><table>
+      <thead><tr><th>Что</th><th>Как</th><th>Пояснение</th></tr></thead>
+      <tbody>
+        <tr><td>Переименовать</td><td><kbd data-action="RenameElement">Shift+F6</kbd></td><td>Локальные имена, параметры, получатели и метки — на месте; имена уровня пакета — диалогом, по всему проекту. Метод интерфейса — вместе с реализациями, по запросу.</td></tr>
+        <tr><td>Переименовать пакет <span class="new">новое</span></td><td><kbd data-action="RenameElement">Shift+F6</kbd></td><td>На <code>package</code>, на квалификаторе импорта без псевдонима (<code>store.Load</code>), на пути импорта или на каталоге в дереве проекта. Все файлы каталога получают новое имя (<code>_test</code> тоже), квалификаторы и пути импорта в проекте переписываются, каталог переименовывается, если назван по пакету. Конфликты имён показываются в диалоге.</td></tr>
+        <tr><td>Извлечь функцию или метод <span class="new">новое</span></td><td><kbd data-action="ExtractMethod">Ctrl+Alt+M</kbd></td><td>Целые операторы одного блока или одно выражение становятся новой функцией после текущего объявления; имя <code>extracted</code> сразу правится на месте. Параметры — переменные снаружи в порядке первого использования; результаты определяются по потоку данных (<code>a, b := extracted(x)</code>, <code>x = extracted(…)</code>). Выделение с получателем становится методом того же получателя; generic-функция переносит нужные параметры типа. Не выполняется: часть оператора, <code>return</code> не на всех путях, <code>break</code> / <code>continue</code> / <code>goto</code> за пределы выделения, <code>defer</code>, локальные типы и константы внутри.</td></tr>
+        <tr><td>Встроить <span class="new">новое</span></td><td><kbd data-action="Inline">Ctrl+Alt+N</kbd></td><td>Без диалога. Переменная <code>x := v</code>: каждое чтение заменяется на <code>v</code> (в скобках по приоритету, <code>T(v)</code> при другом явном типе), если до каждого чтения доходит только это значение; значение с вызовом или чтением памяти — только в одно использование. Константа: все использования в пакете, не <code>iota</code>. Функция из одного оператора: на вызове — этот вызов, на имени в объявлении — все вызовы и само объявление. Не выполняется для рекурсивных, generic и variadic функций, нескольких операторов, аргументов с побочными эффектами и вызовов из другого пакета.</td></tr>
+        <tr><td>Изменить сигнатуру <span class="new">новое</span></td><td><kbd data-action="ChangeSignature">Ctrl+F6</kbd></td><td>Диалог: имя, таблица параметров (имя, тип, значение по умолчанию для новых; добавить, удалить, вверх, вниз), результаты и предпросмотр. Объявление пересобирается (получатель, параметры типа и doc-комментарий остаются), ссылки получают новое имя, вызовы — аргументы на новых местах и значение по умолчанию на месте нового параметра; переименованный параметр переименовывается в теле. Конфликты показываются заранее: переставленный аргумент с побочным эффектом, <code>f(g())</code>, функция, переданная как значение, удалённый параметр, который используется в теле. Результаты в местах вызова не переписываются.</td></tr>
+        <tr><td>Сигнатура метода интерфейса <span class="new">новое</span></td><td><kbd data-action="ChangeSignature">Ctrl+F6</kbd></td><td>Интерфейс, все его реализации, обёртки и моки меняются вместе; делегирующий вызов в обёртке (<code>c.next.Get(ctx, id)</code>) передаёт новый параметр дальше. Добавленный в интерфейс метод получает заглушки во всех реализациях.</td></tr>
+        <tr><td>Перенести <span class="new">новое</span></td><td><kbd data-action="Move">F6</kbd></td><td>Функции, типы (с их методами), переменные и константы уровня пакета — по курсору, по ссылке под курсором, по выделению или из дерева проекта и Structure. Диалог: каталог, имя файла, «Move methods of the types too». В другой файл того же пакета — текст с doc-комментариями, нужные импорты добавляются, лишние убираются. В другой пакет проекта (существующий или новый каталог) — ссылки получают или теряют квалификатор, импорты правятся. Конфликты: неэкспортированные имена через границу пакета, цикл импортов, занятые имена, пакет <code>main</code>.</td></tr>
+        <tr><td>Безопасно удалить <span class="new">новое</span></td><td><kbd data-action="SafeDelete">Alt+Delete</kbd></td><td>Функции, методы, типы, переменные, константы, поля структур, методы интерфейсов — если на них никто больше не ссылается; иначе список использований в диалоге. Объявление уходит с doc-комментарием и пустой строкой. На параметре: параметр уходит из сигнатуры, его аргумент — из каждого вызова, в том числе через <code>T.M(recv, …)</code>.</td></tr>
+        <tr><td>Ввести переменную <span class="new">новое</span></td><td><kbd data-action="IntroduceVariable">Ctrl+Alt+V</kbd></td><td>Выражение становится <code>name := expr</code> перед оператором, который его вычисляет; «Replace all» заменяет одинаковые выражения функции. Имя — <code>err</code>, <code>ctx</code>, последнее слово вызова (<code>GetName()</code> → <code>name</code>) или по типу, правится на месте. Недоступно там, где перенос изменил бы порядок вычислений: правый операнд <code>&amp;&amp;</code> / <code>||</code>, условие <code>for</code>, <code>case</code>, вызов в <code>go</code> / <code>defer</code>.</td></tr>
+        <tr><td>Ввести константу <span class="new">новое</span></td><td><kbd data-action="IntroduceConstant">Ctrl+Alt+C</kbd></td><td>Константное выражение становится <code>const name = expr</code> после импортов, для одного вхождения или всех в файле. Имя — из слов строки (<code>"r8 failed"</code> → <code>r8Failed</code>) или по типу.</td></tr>
+        <tr><td>Убрать неиспользуемый параметр <span class="new">новое</span></td><td><kbd data-action="ShowIntentionActions">Alt+Enter</kbd></td><td>На подчёркнутом параметре: Remove unused parameter убирает его из сигнатуры и аргумент из каждого вызова, Rename to _ оставляет сигнатуру.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="band" id="analysis">
+  <div class="wrap">
+    <h2>Проверки</h2>
+    <p>При Language features: Built-in плагин проверяет код сам, пока вы печатаете: по типам и по графу потока данных каждой функции. Каждая проверка выключается или меняет уровень в Settings, Editor, Inspections, группы Go и Go modules; подавить на месте — <code>//noinspection</code> из списка <kbd data-action="ShowIntentionActions">Alt+Enter</kbd>. Все включённые проверки по всему проекту — Go, Inspect Project (на каталоге в дереве проекта — только по нему): результаты в окне Inspection Results с деревом по проверкам и файлам, переходом к месту и исправлениями, в том числе для всех находок сразу. Go, Export Inspections to SARIF… пишет те же находки в файл SARIF. Без окна IDE, в CI, — раздел <a href="#ci">Инспекции в CI</a>.</p>
+
+    <h3>Поток данных</h3>
+    <div class="table"><table>
+      <thead><tr><th>Проверка</th><th>Что находит</th><th>Исправление</th></tr></thead>
+      <tbody>
+        <tr><td>Ошибки <span class="new">новое</span></td><td>Ошибка затёрта до проверки (<code>err = f(); err = g()</code>); после <code>v, err2 := f()</code> проверяется старая <code>err</code>; <code>return nil</code> внутри <code>if err != nil</code>; <code>return …, err</code>, где <code>err</code> заведомо nil; <code>defer f.Close()</code> до проверки ошибки открытия; <code>err :=</code> во вложенном блоке затеняет внешнюю; указатель из <code>v, err := f()</code> использован до проверки <code>err</code>.</td><td>Check 'err2' instead, Return nil, Move defer after the error check</td></tr>
+        <tr><td>Непроверенная ошибка <span class="new">новое</span></td><td>Вызов, возвращающий ошибку, стоит отдельной строкой: <code>os.Remove(dir)</code>.</td><td>Handle error: <code>if err := os.Remove(dir); err != nil { return err }</code></td></tr>
+        <tr><td>nil <span class="new">новое</span></td><td>Поле, метод, индекс или <code>*p</code> у значения, которое nil на любом пути; <code>x == nil</code> с заранее известным ответом; <code>return nil, nil</code> в функции <code>(T, error)</code> (выключена по умолчанию).</td><td></td></tr>
+        <tr><td>Мёртвый код <span class="new">новое</span></td><td>Значение записано и не прочитано; недостижимый код после <code>return</code>, <code>panic</code>, бесконечного <code>for</code>; <code>x = x</code>; отброшен результат чистой функции (<code>strings.ReplaceAll(s, …)</code>, <code>errors.New(…)</code>).</td><td>Remove assignment, Delete unreachable code, Remove self-assignment, Assign the result to s</td></tr>
+        <tr><td>Ресурсы и контекст <span class="new">новое</span></td><td><code>resp.Body</code> или <code>*sql.Rows</code> не закрыт на одном из путей; <code>cancel</code> от <code>context.WithTimeout</code> вызывается не всегда; <code>context.Background()</code> при доступном <code>ctx</code>.</td><td>Add defer resp.Body.Close(), Add defer rows.Close(), Use ctx</td></tr>
+        <tr><td>Конкурентность <span class="new">новое</span></td><td><code>mu.Lock()</code> без разблокировки на одном из путей к <code>return</code>; отправка в закрытый канал; <code>wg.Add</code> внутри горутины; копирование мьютекса; переменная цикла в замыкании <code>go</code> / <code>defer</code> (модули с <code>go</code> старше 1.22); <code>t.Fatal</code> из горутины; <code>defer</code> в цикле.</td><td>Move Add before the go statement, Use a pointer receiver, Insert 'v := v'</td></tr>
+        <tr><td>Неиспользуемый параметр <span class="new">новое</span></td><td>Параметр неэкспортированной функции, который тело не читает. Молчит для экспортированных функций, обработчиков HTTP, методов, реализующих интерфейс, функций, переданных как значение, и <code>_</code>.</td><td>Remove unused parameter, Rename to _</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Проект и go.mod</h3>
+    <div class="table"><table>
+      <thead><tr><th>Проверка</th><th>Что находит</th><th>Исправление</th></tr></thead>
+      <tbody>
+        <tr><td>Цикл импортов <span class="new">новое</span></td><td>Пакеты проекта импортируют друг друга по кругу; ошибка на строке импорта, которая замыкает цикл.</td><td></td></tr>
+        <tr><td>Импорт internal <span class="new">новое</span></td><td>Пакет из каталога <code>internal</code> импортирован снаружи дерева, которому он принадлежит.</td><td></td></tr>
+        <tr><td>Неиспользуемый require <span class="new">новое</span></td><td>Прямой <code>require</code>, из модуля которого не импортирован ни один пакет (<code>tool</code> считается импортом; строки <code>// indirect</code> не проверяются).</td><td>Remove unused require (без <code>go mod tidy</code>)</td></tr>
+        <tr><td>Повтор и сам себя <span class="new">новое</span></td><td>Один модуль в <code>require</code> дважды; модуль требует или подменяет сам себя.</td><td>Remove duplicate require</td></tr>
+        <tr><td>Пути <code>replace</code> и <code>use</code> <span class="new">новое</span></td><td><code>replace</code> на отсутствующий каталог или каталог без <code>go.mod</code>; <code>use</code> в <code>go.work</code> на каталог без <code>go.mod</code>.</td><td></td></tr>
+        <tr><td>vendor <span class="new">новое</span></td><td><code>vendor/modules.txt</code> не совпадает с требованиями: модуля нет, другая версия, нет <code>## explicit</code>.</td><td>Копирует <code>go mod vendor</code> в буфер обмена</td></tr>
+        <tr><td>Версии <span class="new">новое</span></td><td>Неверная запись версии в <code>go</code>; <code>toolchain</code> старше <code>go</code>.</td><td></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Языки в строках</h3>
+    <div class="table"><table>
+      <thead><tr><th>Язык</th><th>Где</th><th>Что даёт</th></tr></thead>
+      <tbody>
+        <tr><td>SQL <span class="new">новое</span></td><td>Запрос в <code>database/sql</code> (<code>Query</code>, <code>QueryRow</code>, <code>Exec</code>, <code>Prepare</code> и варианты <code>Context</code>), sqlx, pgx v5 и pgxpool; сырая строка, начинающаяся с ключевого слова SQL, в константе или переменной <code>…Query</code> / <code>…SQL</code>.</td><td>Подсветка, автодополнение и проверки SQL. Нужен плагин Database Tools and SQL; диалект — по настройке SQL Dialects (Generic по умолчанию). Плейсхолдеры <code>$1</code>, <code>?</code>, <code>:name</code>, <code>@name</code> — не ошибки.</td></tr>
+        <tr><td>Регулярные выражения <span class="new">новое</span></td><td>Шаблон в <code>regexp.Compile</code>, <code>MustCompile</code>, <code>MatchString</code> и других функциях <code>regexp</code>.</td><td>Подсветка и проверки в диалекте RE2: именованные группы, <code>\pL</code>, <code>[[:alpha:]]</code> допустимы; опережающая и ретроспективная проверка, обратные ссылки, атомарные группы — ошибки («RE2 (Go regexp) does not support lookahead»). Проверка выражения — <kbd data-action="ShowIntentionActions">Alt+Enter</kbd>, Check RegExp.</td></tr>
+        <tr><td>JSON <span class="new">новое</span></td><td><code>json.Unmarshal([]byte("…"), …)</code>, <code>json.Valid</code>, <code>json.NewDecoder(strings.NewReader("…"))</code>; сырая строка, похожая на JSON, в константе или переменной с <code>json</code> в имени.</td><td>Подсветка и проверка синтаксиса. Нужен плагин JSON.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Языки в строках подключаются при Language features: Built-in.</p>
+
+    <h3>Платформа анализа</h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Где</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>GOOS/GOARCH в статус-баре <span class="new">новое</span></td><td>Под какую платформу и с какими тегами сборки плагин разбирает код: <code>windows/amd64</code>, <code>linux/amd64 · tags</code>. Клик: частые пары (linux/amd64, linux/arm64, darwin/arm64, windows/amd64, js/wasm, wasip1/wasm), все пары <code>go tool dist list</code>, Host default, Edit build tags…. Файлы и пакеты с условиями сборки под выбранную платформу проверяются так, будто вы собираете под неё; подсветка пересчитывается сразу. На gopls не действует.</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -597,7 +784,7 @@ footer a { color: var(--text-2); }
         <tr><td>Inlay hints</td><td>Подсказки gopls: имена параметров, типы переменных и значения констант рядом с кодом. При Language features: Built-in подсказки показывает сама IDE — Settings, Editor, Inlay Hints, Go <span class="new">новое</span>: имена параметров, имена полей литерала, типы <code>:=</code> и переменных <code>range</code>, значения констант (включены), типы вложенных литералов и выведенные аргументы типа (выключены), а также размер структуры и её выравнивание — <code>24 bytes, 8 padding (16 if reordered)</code> после <code>struct {</code> на 64-битных GOARCH, в любом режиме; уменьшить её — Alt+Enter, Reorder fields.</td></tr>
         <tr><td>Log every message of the protocol</td><td>Полный обмен с сервером в окне журнала. Для разбора неполадок.</td></tr>
         <tr><td>Serve the debug pages of gopls</td><td>Служебные страницы сервера, открываются из меню gopls.</td></tr>
-        <tr><td>Source of features: Language features <span class="new">новое</span></td><td>Один переключатель на все возможности языка: gopls или собственный анализ плагина (Built-in). Источник у каждой возможности один, смена действует сразу, без перезапуска сервера. Охватывает: синтаксические ошибки (без сервера языка ошибки парсера показываются всегда); навигацию Go to Declaration / Type Declaration / Implementation / Super (стандартную библиотеку и зависимости Built-in видит настолько, насколько их индексирует «Index for navigation»); Find Usages, Show Usages и подсветку идентификатора под кареткой и точек выхода (число найденных мест у gopls и Built-in может немного различаться); автодополнение (области видимости, члены, ключевые слова, сниппеты, ключи литералов, пути импорта и неимпортированные пакеты; шаблоны ключевых слов, каталог символов, теги структур и значения плагина работают в обоих режимах); Quick Documentation, parameter info и Type Info; диагностики (Built-in: неразрешённые имена, неиспользуемые импорты и переменные, несовпадение типов, арность, дубликаты, пропущенный return — с быстрыми исправлениями; анализаторы gopls — staticcheck, vet — остаются и при Built-in, в редактор возвращаются сообщения последней сборки Go | Build); семантические цвета идентификаторов (лексическая подсветка всегда плагина); Rename (метод интерфейса — вместе с реализациями по запросу); счётчики «N usages» / «N implementations» и значки реализаций в gutter; inlay hints (Settings, Editor, Inlay Hints, Go); действия Alt+Enter по типам (Fill all fields, Fill return values, Fill switch, Handle error) — рефакторинги gopls (extract, inline, change signature) остаются у сервера. Пока IDE индексирует, встроенная возможность, которой нужны индексы, уступает gopls. Форматтер выбирается отдельно — «Reformat Code with» на странице Code Quality.</td></tr>
+        <tr><td>Source of features: Language features <span class="new">новое</span></td><td>Один переключатель на все возможности языка: gopls или собственный анализ плагина (Built-in). Источник у каждой возможности один, смена действует сразу, без перезапуска сервера. Охватывает: синтаксические ошибки (без сервера языка ошибки парсера показываются всегда); навигацию Go to Declaration / Type Declaration / Implementation / Super (стандартную библиотеку и зависимости Built-in видит настолько, насколько их индексирует «Index for navigation»); Find Usages, Show Usages и подсветку идентификатора под кареткой и точек выхода (число найденных мест у gopls и Built-in может немного различаться); автодополнение (области видимости, члены, ключевые слова, сниппеты, ключи литералов, пути импорта и неимпортированные пакеты; шаблоны ключевых слов, каталог символов, теги структур и значения плагина работают в обоих режимах); Quick Documentation, parameter info и Type Info; диагностики (Built-in: неразрешённые имена, неиспользуемые импорты и переменные, несовпадение типов, арность, дубликаты, пропущенный return — с быстрыми исправлениями; анализаторы gopls — staticcheck, vet — остаются и при Built-in, в редактор возвращаются сообщения последней сборки Go | Build); семантические цвета идентификаторов (лексическая подсветка всегда плагина); Rename (метод интерфейса — вместе с реализациями по запросу); счётчики «N usages» / «N implementations» и значки реализаций в gutter; inlay hints (Settings, Editor, Inlay Hints, Go); действия Alt+Enter по типам (Fill all fields, Fill return values, Fill switch, Handle error) — рефакторинги (Rename, Extract, Inline, Change Signature, Move, Safe Delete, Introduce Variable / Constant) и иерархии вызовов и типов; при gopls из них остаются Rename сервера и его действия в Alt+Enter. Пока IDE индексирует, встроенная возможность, которой нужны индексы, уступает gopls. Форматтер выбирается отдельно — «Reformat Code with» на странице Code Quality.</td></tr>
         <tr><td>Проверки плагина при Built-in <span class="new">новое</span></td><td>Без gopls плагин сам подсвечивает: неполный <code>switch</code> по перечислению или интерфейсу проекта (Add missing cases), семейство <code>Printf</code> по правилам vet с обёртками пакета и подсказкой глаголов после <code>%</code>, теги структур (синтаксис, повторы ключей и имён, тег у неэкспортируемого поля), <code>context.Context</code> не первым параметром и подмена <code>ctx</code> на <code>context.Background()</code>, <code>errors.As</code> с не-указателем и <code>err == ErrX</code> вместо <code>errors.Is</code>. Отключаются и настраиваются в Settings | Editor | Inspections | Go.</td></tr>
       </tbody>
     </table></div>
@@ -648,7 +835,9 @@ footer a { color: var(--text-2); }
       <tbody>
         <tr><td>Reformat Code with</td><td>gofmt, goimports, <code>golangci-lint fmt</code>, None или Built-in (gofmt-совместимый форматтер плагина: без внешнего процесса). goimports также правит импорты.</td></tr>
         <tr><td>Format Go files on save</td><td>Форматирование при сохранении. Файл с синтаксической ошибкой сохраняется как есть.</td></tr>
-        <tr><td>Show golangci-lint warnings in the editor</td><td>Замечания линтера после сохранения файла. Используется конфигурация проекта.</td></tr>
+        <tr><td>Use golangci-lint (optional)</td><td>По умолчанию выключено: анализ кода — встроенные инспекции. Включено: замечания golangci-lint после сохранения файла (конфигурация проекта), <code>golangci-lint fmt</code> среди форматтеров.</td></tr>
+        <tr><td>Custom linters</td><td>Свои линтеры: Name, Command line, Enabled, Run (On save / On the fly, saved files), Working directory (Module root / File directory), Output format (golangci JSON / SARIF 2.1.0). Макросы: <code>$FilePath$</code>, <code>$FileDir$</code>, <code>$ModuleDir$</code>, <code>$Package$</code> (<code>./store</code> или <code>.</code>), <code>$ImportPath$</code>. Замечание — <code>[имя] текст</code>, исправление Suppress with <code>//nolint:имя</code>. Только сохранённые файлы.</td></tr>
+        <tr><td>Linter timeout, seconds</td><td>Сколько ждать golangci-lint и свой линтер; сбой — в журнал плагина и один раз в уведомление.</td></tr>
       </tbody>
     </table></div>
 
@@ -658,7 +847,7 @@ footer a { color: var(--text-2); }
       <tbody>
         <tr><td>gopls</td><td>Ошибки, подсказки, навигация, рефакторинги.</td></tr>
         <tr><td>dlv</td><td>Отладка.</td></tr>
-        <tr><td>golangci-lint</td><td>Замечания линтера в редакторе.</td></tr>
+        <tr><td>golangci-lint</td><td>Необязательно: замечания линтера в редакторе, если в Code Quality включено «Use golangci-lint (optional)».</td></tr>
         <tr><td>goimports</td><td>Форматирование с правкой импортов.</td></tr>
         <tr><td>govulncheck</td><td>Проверка зависимостей на известные уязвимости.</td></tr>
       </tbody>
@@ -670,7 +859,20 @@ footer a { color: var(--text-2); }
 <section class="band" id="ci">
   <div class="wrap">
     <h2>Инспекции в CI</h2>
-    <p>Те же проверки Go и <code>go.mod</code>, что в редакторе в режиме Built-in, запускаются без окна IDE и пишут отчёт SARIF 2.1.0: его читают GitHub code scanning, GitLab и другие. gopls для этого не нужен. Команда — <code>bin/idea.sh go-inspect</code>; на Windows и в CI удобнее обёртки <code>tools/ci/go-inspect.sh</code> и <code>go-inspect.cmd</code>: они ставят плагин в отдельную конфигурацию и не мешают открытой IDE. Подробности и пример задания GitHub Actions — <code>docs/CI.md</code>.</p>
+    <p>Те же проверки Go и <code>go.mod</code>, что в редакторе в режиме Built-in, прогоняются по всему проекту из меню Go и пишут отчёт SARIF 2.1.0: его читают GitHub code scanning, GitLab и другие. gopls для этого не нужен, и режим Language features переключать не надо: на время прогона включаются встроенные проверки.</p>
+    <div class="table"><table class="two">
+      <thead><tr><th>Действие</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Go, Inspect Project <span class="new">новое</span></td><td>Все проверки Go и go.mod, включённые в профиле, по проекту. Результаты в окне Inspection Results: дерево по проверкам и файлам, переход к месту, исправления по одной находке и сразу для всех. В дереве проекта на каталоге — только по нему.</td></tr>
+        <tr><td>Go, Export Inspections to SARIF… <span class="new">новое</span></td><td>Тот же набор в фоне, с прогрессом и отменой; отчёт пишется в файл из диалога сохранения, по умолчанию <code>go-inspect.sarif</code> в корне проекта. По окончании — уведомление «92 findings written to go-inspect.sarif» с кнопками Open File и Show in Explorer (Reveal in Finder на macOS).</td></tr>
+      </tbody>
+    </table></div>
+    <p>В CI то же самое запускается без окна. <code>go-inspect</code> — режим запуска самой IDE, а не отдельная программа: команду получает лаунчер IDE, в которую установлен плагин (<code>idea64.exe</code> на Windows, <code>idea.sh</code> на Linux и macOS; подойдут и <code>pycharm64.exe</code>, <code>webstorm.sh</code> и другие). IDE с той же конфигурацией в это время не должна быть открыта; на машине разработчика проще задать отдельный каталог конфигурации. Подробности, код выхода на Windows и пример задания GitHub Actions — <code>docs/CI.md</code>.</p>
+    <div class="term" role="img" aria-label="Пример запуска go-inspect"><span class="pr">&gt;</span> idea64.exe go-inspect . report.sarif --min-severity warning
+go-inspect: 48 inspections, 27 files, 65 findings (4 error, 61 warning, 0 note), 0 inspection failures, 8412 ms -&gt; report.sarif
+<span class="pr">$</span> idea.sh go-inspect . report.sarif; echo $?
+go-inspect: 48 inspections, 27 files, 92 findings (4 error, 61 warning, 27 note), 0 inspection failures, 8530 ms -&gt; report.sarif
+1</div>
     <div class="table"><table class="two">
       <thead><tr><th>Аргумент</th><th>Что задаёт</th></tr></thead>
       <tbody>
@@ -694,7 +896,7 @@ footer a { color: var(--text-2); }
         <tr><td>Уведомление Error loading workspace</td><td>Текст уведомления: это сообщение команды <code>go</code></td><td>Чаще всего помогает Go, Modules, Tidy или Download.</td></tr>
         <tr><td>Нет подсказок по имени из других пакетов</td><td>Help, Show Log: строка Go catalogue</td><td>Go, Read Packages Again. Проверить галочку в настройках, раздел Completion.</td></tr>
         <tr><td>Отладка не начинается</td><td>Консоль сессии (команда delve, сборка, вывод компилятора), окно Build с ошибками по ссылкам, уведомление Debug has not started; Go, Debugger, Show Debugger Logs</td><td>Исправить ошибку сборки или обновить Delve под версию Go.</td></tr>
-        <tr><td>Нет замечаний линтера</td><td>Настройки, раздел Code Quality и Tools</td><td>Замечания появляются после сохранения файла. Проверить, что golangci-lint установлен.</td></tr>
+        <tr><td>Нет замечаний линтера</td><td>Настройки, раздел Code Quality и Tools</td><td>Замечания появляются после сохранения файла. Проверить, что golangci-lint включён в Code Quality и установлен.</td></tr>
         <tr><td>Команда <code>go</code> не найдена</td><td>Go, Go on This Machine…</td><td>Указать путь в настройках, раздел Toolchain.</td></tr>
         <tr><td>В коде не набирается русская буква</td><td>Настройки, раздел Editor</td><td>Снять галочку о русской раскладке. В строках и комментариях русский текст набирается всегда.</td></tr>
         <tr><td>Серый текст или список мешают</td><td>Настройки, разделы Editor и Completion</td><td>Каждая возможность отключается своей галочкой.</td></tr>
@@ -709,8 +911,8 @@ footer a { color: var(--text-2); }
 
 <footer>
   <div class="wrap">
-    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.1.0</span>
-    <span>Редакция страницы 2026-09-29.1</span>
+    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.2.59</span>
+    <span>Редакция страницы 2026-10-03.1</span>
     <a class="repo" href="demo.html">О плагине</a>
     <a class="repo" href="../COMPARE.md">Сравнение с GoLand</a>
     <a class="repo" href="../ROADMAP.md">Roadmap</a>

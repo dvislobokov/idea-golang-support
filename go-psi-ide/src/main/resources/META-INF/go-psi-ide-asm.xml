@@ -1,0 +1,17 @@
+<!-- go-psi-ide, Go assembly (.s, Plan 9 syntax of cmd/asm): file type, lexer highlighter and colour page, commenter, flat PSI;
+     navigation TEXT ·Name(SB) <-> the Go function declared without a body in the same directory (reference + gutter markers).
+     The file type has no extensions: GoAsmFileTypeOverrider claims *.s only in directories with .go files, so other assemblers
+     (CLion, Rider, GNU as) keep their .s. Highlighting is always on; the reference and the markers ask
+     io.github.golangsupport.ide.GoIdeFeatureGate (group NAVIGATION). Included by the host plugin; the tests list it in their descriptor. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType name="Go Assembly" language="GoAsm" implementationClass="io.github.golangsupport.ide.asm.GoAsmFileType" fieldName="INSTANCE"/>
+    <fileTypeOverrider implementation="io.github.golangsupport.ide.asm.GoAsmFileTypeOverrider"/>
+    <lang.parserDefinition language="GoAsm" implementationClass="io.github.golangsupport.ide.asm.GoAsmParserDefinition"/>
+    <lang.syntaxHighlighterFactory language="GoAsm" implementationClass="io.github.golangsupport.ide.asm.GoAsmSyntaxHighlighterFactory"/>
+    <colorSettingsPage implementation="io.github.golangsupport.ide.asm.GoAsmColorSettingsPage"/>
+    <lang.commenter language="GoAsm" implementationClass="io.github.golangsupport.ide.asm.GoAsmCommenter"/>
+    <codeInsight.lineMarkerProvider language="Go" implementationClass="io.github.golangsupport.ide.asm.GoAsmLineMarkerProvider"/>
+    <codeInsight.lineMarkerProvider language="GoAsm" implementationClass="io.github.golangsupport.ide.asm.GoAsmLineMarkerProvider"/>
+  </extensions>
+</idea-plugin>

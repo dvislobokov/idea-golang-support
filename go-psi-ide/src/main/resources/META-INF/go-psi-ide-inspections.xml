@@ -111,6 +111,10 @@
     <localInspection language="Go" shortName="GoUnusedResult" displayName="Unused result"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.lint.GoUnusedResultInspection"/>
+    <!-- errcheck while typing; not gated by DIAGNOSTICS: gopls does not report unchecked errors (GoUncheckedErrorInspection) -->
+    <localInspection language="Go" shortName="GoUncheckedError" displayName="Unchecked error"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.lint.GoUncheckedErrorInspection"/>
     <localInspection language="Go" shortName="GoDeferInLoop" displayName="Defer in loop"
                      groupName="Go" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.lint.GoDeferInLoopInspection"/>
@@ -144,5 +148,15 @@
     <localInspection language="Go" shortName="GoUnreachableCode" displayName="Unreachable code"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.flow.GoUnreachableCodeInspection"/>
+    <!-- Project-wide checks (docs/FEATURES.md section 5): internal/ visibility, import cycles, unused exported declarations. -->
+    <localInspection language="Go" shortName="GoInternalImport" displayName="Use of an internal package"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.project.GoInternalImportInspection"/>
+    <localInspection language="Go" shortName="GoImportCycle" displayName="Import cycle"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.project.GoImportCycleInspection"/>
+    <localInspection language="Go" shortName="GoUnusedExported" displayName="Unused exported declaration"
+                     groupName="Go" enabledByDefault="false" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.project.GoUnusedExportedInspection"/>
   </extensions>
 </idea-plugin>

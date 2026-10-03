@@ -54,7 +54,8 @@ class GoCompletionContext private constructor(val parameters: CompletionParamete
 
     val leaf: PsiElement = parameters.position
     val file: GoFile = leaf.containingFile as GoFile
-    val originalFile: GoFile = (parameters.originalFile as? GoFile) ?: file
+    /** The file being completed; for a dialog's code fragment the file it resolves in ([GoCodeFragments]). */
+    val originalFile: GoFile = GoCodeFragments.contextOf(parameters.originalFile) ?: (parameters.originalFile as? GoFile) ?: file
     val offset: Int = parameters.offset
 
     var kind: Kind = Kind.NONE

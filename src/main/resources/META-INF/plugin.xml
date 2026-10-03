@@ -48,6 +48,8 @@
     <xi:include href="/META-INF/go-psi-ide-hierarchy.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- RE2 regular expressions in regexp calls (go-psi-ide-injection.xml; the gate follows Semantic colors) -->
     <xi:include href="/META-INF/go-psi-ide-injection.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- Go assembly (.s next to .go files): file type, highlighting, TEXT ·Name ↔ Go declaration without a body (go-psi-ide-asm.xml; navigation follows the NAVIGATION gate) -->
+    <xi:include href="/META-INF/go-psi-ide-asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- code completion over that PSI: contributor, confidence, weighers (MIGRATION.md step 8e; the gate follows GoFeature.COMPLETION) -->
     <xi:include href="/META-INF/go-psi-ide-completion.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- quick documentation, parameter info, expression type over the PSI (MIGRATION.md step 8f; the gate follows GoFeature.HOVER) -->
@@ -265,8 +267,9 @@
         <newProjectWizard.generator implementation="io.github.golangsupport.templates.GoNewProjectWizard"/>
         <!-- file.go:12 of the compiler, of tests and of panics, in every console of the project -->
         <consoleFilterProvider implementation="io.github.golangsupport.run.GoConsoleFilterProvider"/>
-        <!-- golangci-lint on saved files -->
+        <!-- golangci-lint on saved files, while it is turned on (Code Quality, off by default); then the custom linters of the same page -->
         <externalAnnotator language="Go" implementationClass="io.github.golangsupport.lint.GoLintAnnotator"/>
+        <externalAnnotator language="Go" implementationClass="io.github.golangsupport.lint.GoCustomLintAnnotator"/>
         <!-- the errors of the last Go | Build / Vet in the editor, where there is no language server to show them -->
         <externalAnnotator language="Go" implementationClass="io.github.golangsupport.build.GoBuildProblemsAnnotator"/>
     </extensions>
@@ -281,6 +284,10 @@
             <action id="Go.Build" class="io.github.golangsupport.build.GoBuildAction" text="Build" icon="AllIcons.Actions.Compile"
                     description="go build ./... in every module of the project"/>
             <action id="Go.Vet" class="io.github.golangsupport.build.GoVetAction" text="Vet" description="go vet ./..."/>
+            <action id="Go.InspectProject" class="io.github.golangsupport.ci.GoInspectProjectAction" text="Inspect Project" icon="AllIcons.Actions.Find"
+                    description="Run the enabled Go and go.mod inspections over the project (or the selected directory) and show the results in Inspection Results"/>
+            <action id="Go.ExportSarif" class="io.github.golangsupport.ci.GoExportSarifAction" text="Export Inspections to SARIF..."
+                    description="Run the enabled Go and go.mod inspections and write a SARIF 2.1.0 report, as go-inspect does for CI"/>
             <action id="Go.Generate" class="io.github.golangsupport.build.GoGenerateAction" text="Generate" description="go generate ./..."/>
             <action id="Go.RebuildCatalogue" class="io.github.golangsupport.catalogue.GoRebuildCatalogueAction" text="Read Packages Again"
                     description="Read the exported names of the standard library and of the modules of go.mod from their sources again: what completion offers by a name"/>
@@ -362,6 +369,7 @@
             <separator/>
             <reference ref="Go.Build"/>
             <reference ref="Go.Vet"/>
+            <reference ref="Go.InspectProject"/>
             <reference ref="Go.ModTidy"/>
             <separator/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="WeighingNewGroup"/>
@@ -373,6 +381,8 @@
         <listener class="io.github.golangsupport.sdk.GoPluginAdvisorListener" topic="com.intellij.ide.plugins.DynamicPluginListener"/>
         <!-- go.mod is being saved with other requirements: the banner with `go mod tidy` -->
         <listener class="io.github.golangsupport.mod.GoModSaveListener" topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
+        <!-- a saved Go file is linted again by golangci-lint / custom linters: a save does not change the document, so nothing else restarts the pass -->
+        <listener class="io.github.golangsupport.lint.GoLintSaveListener" topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
     </applicationListeners>
 
     <projectListeners>

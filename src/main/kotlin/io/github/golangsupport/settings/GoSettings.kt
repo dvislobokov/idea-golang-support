@@ -70,6 +70,51 @@ enum class GoFormatter(val title: String) {
     override fun toString(): String = title
 }
 
+/** When a custom linter runs: at a save made in this session only, or at every highlighting pass of a saved file (opening it too). */
+enum class GoLinterTrigger(val title: String) {
+    ON_SAVE("On save"),
+    AFTER_SAVE("On the fly, saved files");
+
+    /** What the table shows; [toString] is what the settings file keeps, so it stays English. */
+    val label: String get() = GoBundle.messageOr("lint.trigger.$name", title)
+
+    override fun toString(): String = title
+}
+
+/** The working directory of a custom linter: the root of the module of the file (`.golangci.yml` and go.mod are found from there) or the file's own directory. */
+enum class GoLinterDirectory(val title: String) {
+    MODULE_ROOT("Module root"),
+    FILE_DIRECTORY("File directory");
+
+    val label: String get() = GoBundle.messageOr("lint.directory.$name", title)
+
+    override fun toString(): String = title
+}
+
+/** The report a custom linter prints on stdout. */
+enum class GoLinterFormat(val title: String) {
+    /** `{"Issues":[{"FromLinter":…,"Text":…,"Pos":{"Filename":…,"Line":…,"Column":…}}]}`, v1 and v2 alike. */
+    GOLANGCI_JSON("golangci JSON"),
+    SARIF("SARIF 2.1.0");
+
+    val label: String get() = GoBundle.messageOr("lint.format.$name", title)
+
+    override fun toString(): String = title
+}
+
+/** One row of Custom linters; a bean with a no-argument constructor and mutable fields, as the settings serializer and the table want it. */
+@com.intellij.util.xmlb.annotations.Tag("linter")
+data class GoCustomLinter(
+    var name: String = "",
+    var commandLine: String = "",
+    var enabled: Boolean = true,
+    var trigger: GoLinterTrigger = GoLinterTrigger.AFTER_SAVE,
+    var directory: GoLinterDirectory = GoLinterDirectory.MODULE_ROOT,
+    var format: GoLinterFormat = GoLinterFormat.GOLANGCI_JSON,
+) {
+    val isRunnable: Boolean get() = enabled && name.isNotBlank() && commandLine.isNotBlank()
+}
+
 /** Machine-wide settings of the plugin: where the Go toolchain and its tools are, and what the plugin does on its own. */
 @Service(Service.Level.APP)
 @State(name = "GoSupportSettings", storages = [Storage("golang-support.xml")])
@@ -143,7 +188,18 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var latinInCode by property(true)
         /** Extract variable, Inline call, Add test... of gopls as items of Alt+Enter. */
         var goplsActionsInMenu by property(true)
-        var lintOnTheFly by property(true)
+        /**
+         * golangci-lint in the editor and as a formatter. Off by default since 2026-10-03: the native inspections are the analysis of the
+         * plugin, and nothing in the default setup runs golangci-lint or asks to install it. The old `lintOnTheFly` was on by default and
+         * so never written down: nobody has an explicit "on" to carry over, and the new switch starts off for everyone.
+         */
+        var golangciLint by property(false)
+
+        /** Linters of the user whose report is the JSON of golangci-lint or SARIF ([io.github.golangsupport.lint.GoCustomLinters]). */
+        var customLinters by list<GoCustomLinter>()
+
+        /** How long golangci-lint and a custom linter may run for one file, in seconds. */
+        var lintTimeoutSeconds by property(90)
 
         /** Added to every `go test`: `-race -count=1`. */
         var testArguments by string("")
@@ -269,8 +325,9 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         else -> languageFeaturesSource
     }
 
+    /** `golangci-lint fmt` only while golangci-lint is on: with it off nothing may start golangci-lint, so the choice falls back to gofmt. */
     var formatter: GoFormatter
-        get() = state.formatter
+        get() = state.formatter.let { if (it == GoFormatter.GOLANGCI_LINT_FMT && !golangciLint) GoFormatter.GOFMT else it }
         set(value) { state.formatter = value }
 
     var docCommentNames: Boolean
@@ -333,9 +390,18 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         get() = state.createRunConfigurations
         set(value) { state.createRunConfigurations = value }
 
-    var lintOnTheFly: Boolean
-        get() = state.lintOnTheFly
-        set(value) { state.lintOnTheFly = value }
+    var golangciLint: Boolean
+        get() = state.golangciLint
+        set(value) { state.golangciLint = value }
+
+    /** Copies: the table of the settings page edits its own rows, and BaseState notices only a new list. */
+    var customLinters: List<GoCustomLinter>
+        get() = state.customLinters.map { it.copy() }
+        set(value) { state.customLinters = value.map { it.copy() }.toMutableList() }
+
+    var lintTimeoutSeconds: Int
+        get() = state.lintTimeoutSeconds
+        set(value) { state.lintTimeoutSeconds = value.coerceIn(5, 600) }
 
     var testArguments: String
         get() = state.testArguments.orEmpty()

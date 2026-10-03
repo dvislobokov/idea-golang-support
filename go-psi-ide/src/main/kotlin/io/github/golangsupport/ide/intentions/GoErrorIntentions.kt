@@ -1,6 +1,9 @@
 package io.github.golangsupport.ide.intentions
 
+import com.intellij.codeInsight.daemon.HighlightDisplayKey
+import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.ide.inspections.lint.GoUncheckedErrorInspection
 import io.github.golangsupport.lang.psi.GoAssignmentStatement
 import io.github.golangsupport.lang.psi.GoCallExpr
 import io.github.golangsupport.lang.psi.GoFile
@@ -56,6 +59,8 @@ class GoHandleErrorIntention : GoCodeActionIntention() {
             is GoSimpleStatement -> {
                 if (statement.statement != null) return null
                 val call = statement.leftHandExprList?.expressionList?.singleOrNull() as? GoCallExpr ?: return null
+                // the Unchecked error inspection offers the same fix on this call: one "Handle error" in Alt+Enter, not two
+                if (uncheckedReported(file, call)) return null
                 val results = service.calleeSignature(call)?.results ?: return null
                 if (results.isEmpty() || !GoZeroValues.isError(results.last().type)) return null
                 val targets = (List(results.size - 1) { "_" } + "err").joinToString(", ")
@@ -64,6 +69,11 @@ class GoHandleErrorIntention : GoCodeActionIntention() {
             }
             else -> return null
         }
+    }
+
+    private fun uncheckedReported(file: GoFile, call: GoCallExpr): Boolean {
+        val key = HighlightDisplayKey.find(GoUncheckedErrorInspection.SHORT_NAME) ?: return false
+        return InspectionProjectProfileManager.getInstance(file.project).currentProfile.isToolEnabled(key, file) && GoUncheckedErrorInspection.isUnchecked(call)
     }
 
     /** The statement after [statement] is an `if` whose condition mentions [error]. */

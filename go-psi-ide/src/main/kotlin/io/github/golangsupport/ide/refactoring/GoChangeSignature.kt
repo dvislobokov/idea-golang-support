@@ -20,8 +20,14 @@ data class GoChangeParameter(val name: String, val type: String, val oldIndex: I
 /** A result of the new signature; an empty [name] is an unnamed result. */
 data class GoChangeResult(val name: String, val type: String)
 
-/** What Change Signature makes of a function, method or interface method: its [name], [parameters] in the new order and [results]. */
-data class GoChangeSignatureOptions(val name: String, val parameters: List<GoChangeParameter>, val results: List<GoChangeResult>)
+/**
+ * What Change Signature makes of a function, method or interface method: its [name], [parameters] in the new order and [results].
+ * [hierarchy]: an interface method or a method implementing one changes with its whole hierarchy ([GoSignatureHierarchy]); off, it
+ * changes alone (reported as a conflict).
+ */
+data class GoChangeSignatureOptions(
+    val name: String, val parameters: List<GoChangeParameter>, val results: List<GoChangeResult>, val hierarchy: Boolean = true,
+)
 
 /** The pure part of Change Signature: the model read from a declaration, its validation and the text of the new signature. */
 object GoChangeSignature {

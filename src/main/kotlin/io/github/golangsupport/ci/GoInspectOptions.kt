@@ -60,8 +60,11 @@ object GoInspectFiles {
     }
 
     /** Forward slashes and no leading `./`: SARIF wants URI references relative to the source root. */
-    fun relativeUri(root: Path, file: Path): String =
-        root.relativize(file).joinToString("/") { java.net.URLEncoder.encode(it.toString(), Charsets.UTF_8).replace("+", "%20") }
+    fun relativeUri(root: Path, file: Path): String = relativeUri(root.relativize(file).joinToString("/"))
+
+    /** [relativePath] with `/` between the segments, each segment percent-encoded. */
+    fun relativeUri(relativePath: String): String =
+        relativePath.split('/').joinToString("/") { java.net.URLEncoder.encode(it, Charsets.UTF_8).replace("+", "%20") }
 }
 
 /** SARIF `level` values the report uses; [rank] orders them for `--min-severity`. */

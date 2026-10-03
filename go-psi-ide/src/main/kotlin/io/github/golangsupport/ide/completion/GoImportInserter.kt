@@ -19,7 +19,9 @@ import io.github.golangsupport.lang.psi.GoImportSpec
  */
 object GoImportInserter {
 
+    /** Into the file being completed; not into a dialog's code fragment ([GoCodeFragments]): the refactoring adds it to the files it changes. */
     fun addImport(ctx: InsertionContext, path: String) {
+        if (GoCodeFragments.isFragment(ctx.file)) return
         val document = ctx.document
         PsiDocumentManager.getInstance(ctx.project).commitDocument(document)
         val file = PsiDocumentManager.getInstance(ctx.project).getPsiFile(document) as? GoFile ?: return
