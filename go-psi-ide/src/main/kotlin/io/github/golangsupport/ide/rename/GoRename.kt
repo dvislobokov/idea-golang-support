@@ -7,10 +7,15 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.LocalSearchScope
+import com.intellij.refactoring.RefactoringActionHandler
 import com.intellij.refactoring.rename.RenameInputValidatorEx
 import com.intellij.util.ProcessingContext
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
+import io.github.golangsupport.ide.refactoring.GoIntroduceConstantHandler
+import io.github.golangsupport.ide.refactoring.GoIntroduceVariableHandler
+import io.github.golangsupport.ide.refactoring.GoSafeDeleteProcessor
+import io.github.golangsupport.lang.GoLanguage
 import io.github.golangsupport.lang.psi.GoNamedElement
 import io.github.golangsupport.lang.psi.GoPackageClause
 
@@ -68,11 +73,24 @@ class GoRenameInputValidator : RenameInputValidatorEx {
  * handler (a language server's) and the registry would ask the user to choose between them.
  */
 class GoRefactoringSupportProvider : RefactoringSupportProvider() {
-    override fun isAvailable(context: PsiElement): Boolean = context is GoNamedElement
+    // Any Go element while RENAME is on: Introduce Variable / Constant ask with the leaf at the caret.
+    override fun isAvailable(context: PsiElement): Boolean =
+        context is GoNamedElement || (context.language == GoLanguage && GoIdeFeatureGate.enabled(GoIdeFeature.RENAME, context.project))
 
     override fun isInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean =
         element is GoNamedElement && element !is GoPackageClause && element.useScope is LocalSearchScope &&
             GoIdeFeatureGate.enabled(GoIdeFeature.RENAME, element.project)
 
     override fun isMemberInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean = false
+
+    // Introduce Variable / Constant and Safe Delete answer only while the host gives the refactorings to the PSI (RENAME is on).
+    override fun getIntroduceVariableHandler(): RefactoringActionHandler = GoIntroduceVariableHandler()
+
+    override fun getIntroduceVariableHandler(element: PsiElement?): RefactoringActionHandler? = getIntroduceVariableHandler().takeIf { enabled(element) }
+
+    override fun getIntroduceConstantHandler(): RefactoringActionHandler = GoIntroduceConstantHandler()
+
+    override fun isSafeDeleteAvailable(element: PsiElement): Boolean = GoSafeDeleteProcessor.isSupported(element) && enabled(element)
+
+    private fun enabled(element: PsiElement?): Boolean = element == null || GoIdeFeatureGate.enabled(GoIdeFeature.RENAME, element.project)
 }

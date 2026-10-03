@@ -103,6 +103,10 @@
   ресурсы (Body, Rows, lostcancel, контекст), конкурентность (замки, copylocks, wg.Add, send после close, захват переменной цикла, t.Fatal в горутине),
   мёртвый код и присваивания; шум выверен корпусом GOROOT.
 
+- [x] (2026-10-03, робот) **Иерархии, рефакторинги, go.mod** (версии 0.2.44–0.2.47): проверки go.mod / go.work (пути `replace` / `use`, дубли и
+  самоссылки `require`, версии `go` / `toolchain`, рассинхрон `vendor/`); Call Hierarchy и Type Hierarchy на своём PSI; Introduce Variable / Constant;
+  Safe Delete.
+
 - [x] (2026-10-03, робот) **Быстрые задачи после волны 3** (версии 0.2.31–0.2.33): Implement Interface хоста (Ctrl+I, Alt+Insert, Alt+Enter) на типизированных заглушках
   `GoImplementStubs` (получатель как у методов типа, импорты по файлу); инспекция doc-комментариев экспортируемых имён (opt-in, правила golint, фиксы Add doc comment /
   Start comment with 'Name'); проверка `//go:build` (синтаксис, место, повтор, опечатки GOOS/GOARCH, перевод `// +build`).

@@ -14,5 +14,6 @@
     <lang.namesValidator language="Go" implementationClass="io.github.golangsupport.ide.rename.GoNamesValidator"/>
     <renameInputValidator implementation="io.github.golangsupport.ide.rename.GoRenameInputValidator"/>
     <renamePsiElementProcessor implementation="io.github.golangsupport.ide.rename.GoRenameMethodProcessor"/>
+    <refactoring.safeDeleteProcessor implementation="io.github.golangsupport.ide.refactoring.GoSafeDeleteProcessor"/>
   </extensions>
 </idea-plugin>

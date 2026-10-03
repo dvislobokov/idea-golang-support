@@ -40,6 +40,8 @@
          read/write access, Find Usages handler, exit points (MIGRATION.md step 8c; the gate GoIgsIdeFeatureGate follows the switches
          Navigation / Usages / Code vision) -->
     <xi:include href="/META-INF/go-psi-ide-navigation.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- call and type hierarchy over that PSI (wave 5; the gate follows Navigation) -->
+    <xi:include href="/META-INF/go-psi-ide-hierarchy.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- code completion over that PSI: contributor, confidence, weighers (MIGRATION.md step 8e; the gate follows GoFeature.COMPLETION) -->
     <xi:include href="/META-INF/go-psi-ide-completion.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- quick documentation, parameter info, expression type over the PSI (MIGRATION.md step 8f; the gate follows GoFeature.HOVER) -->
@@ -186,6 +188,13 @@
         <lang.foldingBuilder language="GoModule" implementationClass="io.github.golangsupport.mod.GoModFoldingBuilder"/>
         <!-- directives, the module paths of the cache, versions from the cache and the proxy -->
         <completion.contributor language="GoModule" implementationClass="io.github.golangsupport.mod.GoModCompletionContributor"/>
+        <!-- go.mod / go.work checks over the plugin's own parser: independent of the gopls / Built-in switch -->
+        <localInspection language="GoModule" shortName="GoModPaths" displayName="Missing replace or use directory" groupName="Go modules" enabledByDefault="true" level="ERROR"
+                         implementationClass="io.github.golangsupport.mod.GoModPathsInspection"/>
+        <localInspection language="GoModule" shortName="GoModRequires" displayName="Duplicate, self or unvendored require" groupName="Go modules" enabledByDefault="true" level="WARNING"
+                         implementationClass="io.github.golangsupport.mod.GoModRequiresInspection"/>
+        <localInspection language="GoModule" shortName="GoModVersions" displayName="Go and toolchain versions" groupName="Go modules" enabledByDefault="true" level="WARNING"
+                         implementationClass="io.github.golangsupport.mod.GoModVersionsInspection"/>
         <!-- the requirements of a module with their updates and vulnerabilities -->
         <toolWindow id="Go Dependencies" anchor="bottom" icon="/icons/goDependenciesToolWindow.svg" factoryClass="io.github.golangsupport.mod.GoDependenciesToolWindowFactory" doNotActivateOnStart="true"/>
         <!-- go.mod saved with other requirements than before: the banner with `go mod tidy` -->

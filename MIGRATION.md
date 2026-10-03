@@ -567,5 +567,13 @@ generics, missing return, init cycles — 0 ложных срабатывани�
   с его фиксами (ShowIntentionsPass) — фикс к `append` повешен на ошибку чекера; новая проверка контекста дублировала `GoContextPlacement` на параметре —
   перед брифом искать существующую проверку той же темы. `GoGotoContributorTest` проверяет локальные имена по элементам: `processNames` отдаёт и
   устаревшие ключи постоянного тестового индекса (функция `local` из другого теста ломала его).
+- [x] Шаг 11, после волны 4, первая партия (2026-10-03; три агента в worktree: Opus — иерархии, Opus — Introduce / Safe Delete, Sonnet — go.mod;
+  версии 0.2.44–0.2.47). Гейты: `:test` 384, go-psi-core 98, go-psi-semantic 176, go-psi-ide 690, checkKotlinAbi и buildPlugin зелёные. Робот (8083,
+  Built-in): go.mod — все 8 проблем; Ctrl+Alt+V `a + b` → `n`, `w*h` с выбором «Replace all 2 occurrences»; Ctrl+Alt+C → `const r8Failed`; Safe Delete
+  функции с doc-комментарием, поля, конфликт на используемом поле; Call Hierarchy (вызывающие, «via H8Shape»), Type Hierarchy (подтипы, супертипы).
+  Находки робота: `dialog_ok.js` закрывает диалог кодом OK и не вызывает `doOKAction` — Safe Delete так не выполняется, нужен клик по кнопке; нажатие из
+  `ModalityState.any()` даёт SEVERE «Write-unsafe context» с нашим кодом в стеке (артефакт робота, у пользователя клик идёт в обычном контексте — вживую
+  не проверено); битый `go 1.x` в go.mod gopls отвергает исключением в LSP-клиенте платформы. Тестовые дескрипторы go-psi-ide перечислены вручную в
+  `go-psi-ide/src/test/resources/META-INF/plugin.xml` — новый `go-psi-ide-*.xml` добавлять и туда.
 - [ ] 12.1 gopls опционален, [ ] 12.2 gopls удалён.
 - [ ] 13 линтеры по запросу, [ ] 13A vet-класс, [x] 13B data-flow (волна 4), [ ] 13C движок правил.

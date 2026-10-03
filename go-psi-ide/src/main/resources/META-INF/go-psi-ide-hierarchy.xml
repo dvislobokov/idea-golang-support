@@ -1,0 +1,10 @@
+<!-- go-psi-ide, hierarchies: Call Hierarchy (callers / callees of functions and methods) and Type Hierarchy (interfaces implemented and
+     embedded types / implementations and embedders). Included by the host plugin when the feature moves to the PSI; the tests of go-psi-ide
+     list it in their test descriptor. Both providers ask io.github.golangsupport.ide.GoIdeFeatureGate (group NAVIGATION, registered in
+     go-psi-ide-editor.xml) and return no target when it is off, so the platform asks the next provider registered for Go. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <callHierarchyProvider language="Go" implementationClass="io.github.golangsupport.ide.hierarchy.GoCallHierarchyProvider"/>
+    <typeHierarchyProvider language="Go" implementationClass="io.github.golangsupport.ide.hierarchy.GoTypeHierarchyProvider"/>
+  </extensions>
+</idea-plugin>

@@ -8,6 +8,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.44–0.2.47 are the first batch after wave 4 (go.mod checks, call and type hierarchy, Introduce Variable / Constant, Safe Delete).
 Versions 0.2.37–0.2.43 are wave 4 (data flow): the per-function control-flow graph and analyses, then the checks built on it; every check
 is gated by the false-positive corpus over GOROOT/src (`:go-psi-ide:corpusTest`, `testData/metrics/goroot-src-flow.json`). Like wave 2, they act only with
 Language features: Built-in.
@@ -17,6 +18,47 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
 
 ### Changed
 - Exhaustive switch inspection (`GoExhaustiveSwitch`) is a weak warning: a plain warning was noise on `reflect.Kind`-like switches without `default`.
+
+## [0.2.47] - 2026-10-03
+
+### Added — Safe Delete
+- Safe Delete (Alt+Delete) on the native PSI for package-level functions, methods, types, variables and constants, struct fields and interface methods;
+  usages come from reference search and any usage outside the deleted element is a conflict in the platform dialog.
+- Extra conflicts: a method implementing a project interface method that is called through the interface; a field listed in an unkeyed literal (`T{1, 2}`);
+  constants of a group that repeat the deleted one's expression or shift `iota`; one name of `var a, b = f()`.
+- The declaration goes with its doc comment, trailing comment and one blank line; a single spec takes its `type` / `var` / `const` along; from `a, b T`
+  only the name (and its value) is removed. Parameters and locals are not handled. Acts with the Rename switch on Built-in.
+
+## [0.2.46] - 2026-10-03
+
+### Added — Introduce Variable / Introduce Constant
+- Introduce Variable (Ctrl+Alt+V): the selected expression (or one picked from the platform chooser) becomes `name := expr` before the statement that
+  evaluates it; an `if` / `switch` header, init statement or range expression puts it before the statement. "Replace all" covers equal expressions in the
+  function and declares the variable in their innermost common block; a call with several results becomes `a, b := f()` named after the results.
+- Names: `err`, `ctx`, the last word of the call or selector (`GetName()` → `name`), then by type; clashes get `name1`; the name is then edited in place.
+- Unavailable where moving the evaluation changes meaning: right operand of `&&` / `||`, `for` condition and post statement, `else if` header, `case`
+  expressions, `go` / `defer` calls, names declared in the same header, assignment targets, `&` operands, callees, types, package qualifiers, `nil`.
+- Introduce Constant (Ctrl+Alt+C): a constant expression (value from the checker, no `iota`) becomes `const name = expr` after the imports, for this
+  occurrence or all in the file; the name comes from the string's words (`"r8 failed"` → `r8Failed`) or the type. Both act with the Rename switch on Built-in.
+
+## [0.2.45] - 2026-10-03
+
+### Added — Call and type hierarchy
+- Call Hierarchy (Ctrl+Alt+H) on the native PSI for functions, methods and interface methods: callers grouped by the enclosing declaration (a call in a
+  function literal counts for the function around it, one in a package-level `var` for the variable), with the usage count; callers of a method include
+  the calls through the interface methods it implements, marked "via Iface". Callees: calls in the body, through interfaces too; builtins, conversions
+  and calls of function-typed variables are left out. Recursion is shown once.
+- Type Hierarchy (Ctrl+H) for named types: supertypes are the embedded types and the interfaces a concrete type implements; subtypes are an interface's
+  implementations and embedding interfaces, a struct's embedding structs. An interface opens on Subtypes, other types on Supertypes.
+- Both answer with the Navigation switch on Built-in; otherwise the platform asks the next provider.
+
+## [0.2.44] - 2026-10-03
+
+### Added — go.mod checks
+- Inspections for go.mod / go.work (group "Go modules", always on, independent of the gopls / Built-in switch): a `replace` to a missing local directory
+  or one without go.mod and a go.work `use` of a directory without go.mod (errors); a duplicate `require` (fix "Remove duplicate require"); a module that
+  requires or replaces itself; `vendor/modules.txt` out of sync with the requirements (missing, other version, not `## explicit`; the fix copies
+  `go mod vendor` to the clipboard, nothing is run); a malformed `go` version (error) and a `toolchain` older than `go`.
 
 ## [0.2.43] - 2026-10-03
 

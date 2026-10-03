@@ -39,8 +39,8 @@ Legend:
 | rename, prepareRename | `renamePsiElementProcessor`, `namesValidator` | 🟡 | package rename out of scope | M |
 | foldingRange | `lang.foldingBuilder` | ✅ | | |
 | selectionRange | `extendWordSelectionHandler` | 🟡 | platform PSI defaults; no Go-specific handlers (call args, struct literal fields) | S |
-| callHierarchy | `callHierarchyProvider` | ❌ | | M |
-| typeHierarchy | `typeHierarchyProvider` | ❌ | interface ↔ implementations, embedding | M |
+| callHierarchy | `callHierarchyProvider` | ✅ (0.2.45) | `ide.hierarchy`: callers (through interfaces, "via Iface") and callees | |
+| typeHierarchy | `typeHierarchyProvider` | ✅ (0.2.45) | interface ↔ implementations, embedding; implicit interface-to-interface satisfaction not linked | |
 | semanticTokens | annotator (`GoSemanticHighlightingAnnotator`) | ✅ | | |
 | linkedEditingRange | not applicable to Go | — | | |
 | inlayHint | `codeInsight.declarativeInlayProvider` | ✅ (wave 1, 0.2.9) | `ide.hints`, see section 2 | |
@@ -104,12 +104,12 @@ Legend:
 |---|---|---|
 | Rename (locals, package-level, fields, methods with interface propagation) | ✅ | |
 | Rename package (directory, package clause, import paths in the module) | ❌ | M |
-| Introduce variable / constant | ❌ | M |
+| Introduce variable / constant | ✅ (0.2.46) | |
 | Extract function / method (free variables, results, `return` / `break` handling) | ❌ | L |
 | Inline variable / function call | ❌ | L |
 | Change signature (parameters, results, call sites, interface implementations) | ❌ | L |
 | Move declaration to another file / package (imports, exportedness) | ❌ | L |
-| Safe delete | ❌ | M |
+| Safe delete | ✅ (0.2.47, parameters 🗓️) | |
 
 ## 5. Analysis
 
@@ -134,7 +134,7 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | Unused exported declarations across the project, import cycles, `internal/` violations | 🟡 | `internal/` is detected by the project model, not reported | M |
 | Doc comment lint (exported symbol without a comment, comment not starting with the name) | ✅ (0.2.32) | `GoDocCommentInspection`, opt-in weak warning, fixes Add doc comment / Start comment with 'Name' | |
 | Build constraints: `//go:build` expression syntax, unknown GOOS/GOARCH | ✅ (0.2.33) | `GoBuildConstraintInspection` (vet `buildtag`; parser `GoBuildConstraintEvaluator` of the project model), `+build` → `//go:build` fix | |
-| `go.mod`: `replace` to a missing path, unused requires (`go mod tidy` without the tool), `vendor/` out of sync | ❌ | | M |
+| `go.mod`: `replace` to a missing path, duplicate / self requires, `go` / `toolchain` versions, `vendor/` out of sync, go.work `use` | ✅ (0.2.44) | host `mod.GoModChecks` + three inspections; unused requires (`go mod tidy` without the tool) 🗓️ | |
 
 ## 6. Languages inside Go strings
 
@@ -206,10 +206,9 @@ Each wave is measured with the benchmarks and the UI robot before and after, lik
    and `Equal`, goimports grouping, smart and chain completion, completion of unimported project members.
 4. **Wave 4 (data flow):** done 2026-10-03 (versions 0.2.37–0.2.43): per-function data-flow framework (`semantic.flow`), 25 checks of error and nil flow,
    resources, concurrency and dead code; noise reviewed on GOROOT/src by `:go-psi-ide:corpusTest`. Robot-checked (`store/wave6.go`, `store/wave7.go`).
-5. **Wave 5 (platform):** shared indexes for GOROOT, call and type hierarchy, headless
-   inspections.
+5. **Wave 5 (platform):** call and type hierarchy done 2026-10-03 (0.2.45); shared indexes for GOROOT and headless inspections remain.
 6. **Wave 6:** done by the host (section 8); what remains is the PSI inputs of step 9 of MIGRATION.md.
-7. **Wave 7 (refactorings):** introduce variable, rename package, safe delete, then extract,
+7. **Wave 7 (refactorings):** introduce variable / constant (0.2.46) and safe delete (0.2.47) done 2026-10-03; rename package, then extract,
    inline, change signature, move.
 8. **Later:** string languages (RE2, templates, SQL), assembly and cgo, Delve (after D2).
 

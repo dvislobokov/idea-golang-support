@@ -521,6 +521,34 @@ Editing features over the PSI; none of them talks to gopls, and only inlay hints
 - `GoInlayHintsBenchmark` (`net/http/server.go`, 688 hints): cold ≈ 139 ms, warm ≈ 15 ms, after a body edit ≈ 24 ms (`testData/benchmark/thresholds.json`).
 - Tests dump the hints of a real `DeclarativeInlayHintsPass` in the `/*<# … #>*/` format; `testHintsDoNotLoadOtherFiles` keeps the AST of the callee's file unloaded.
 
+### Hierarchies (`ide.hierarchy`, `go-psi-ide-hierarchy.xml`; gate `NAVIGATION`; 0.2.45)
+
+- Call Hierarchy: `GoCallHierarchyProvider` → `GoCallHierarchyBrowser` (`CallHierarchyBrowserBase`). Callers via `ReferencesSearch`, grouped by
+  `GoCalls.callerOf` (function or method; literals go to the outer declaration; package-level `var`); for a method also the callers of
+  `GoImplementations.superMethods` ("via Iface"). Callees: `GoCallExpr` in the body → `GoSemanticService.resolve` (builtin package skipped).
+- Type Hierarchy: `GoTypeHierarchyProvider` → `GoTypeHierarchyBrowser` (`TypeHierarchyBrowserBase`). `GoTypeRelations`: supertypes = embedded types +
+  `GoImplementations.implementedInterfaces`; subtypes = `implementingTypes` (interfaces) + embedders. The "Type" view equals Subtypes.
+- Nodes: `GoHierarchyNodeDescriptor` ("Recv.Method [(N usages)] [via I]  pkg (file.go)"); a node already on the path is not expanded. Tests: `GoHierarchyTest`.
+
+### Refactorings (`ide.refactoring`, `go-psi-ide-refactoring.xml`; gate `RENAME`; 0.2.46–0.2.47)
+
+| Refactoring | Classes | Registration | Tests |
+|---|---|---|---|
+| Introduce Variable | `GoIntroduceVariableHandler`, `GoExtraction` (availability, anchor, occurrences, names) | `GoRefactoringSupportProvider.getIntroduceVariableHandler` | `GoIntroduceTest` |
+| Introduce Constant | `GoIntroduceConstantHandler` | `getIntroduceConstantHandler` | `GoIntroduceTest` |
+| Safe Delete | `GoSafeDeleteProcessor` (`SafeDeleteProcessorDelegateBase`; companions removed in `prepareForDeletion`) | `refactoring.safeDeleteProcessor`, `isSafeDeleteAvailable` | `GoSafeDeleteTest` |
+
+The platform has no language-neutral Introduce Variable base: the handler is our own over `IntroduceTargetChooser`, `OccurrencesChooser.simpleChooser`
+and `VariableInplaceRenamer` / `MemberInplaceRenamer`. `GoRefactoringSupportProvider.isAvailable` accepts any Go element while Rename is Built-in:
+the platform looks the provider up by the leaf at the caret.
+
+### go.mod checks (host `mod`; 0.2.44)
+
+`mod/GoModChecks.kt` (pure, over `GoModFileParser.directives` and a `GoModEnvironment` for directories and `vendor/modules.txt`) and
+`mod/GoModInspections.kt`: `GoModPaths` (error: `replace` / `use` directory missing or without go.mod), `GoModRequires` (duplicate and self requires,
+vendor sync; fixes "Remove duplicate require", "Copy 'go mod vendor' to the clipboard"), `GoModVersions` (`go` syntax, `toolchain` older than `go`).
+Tests: `GoModInspectionsTest` (`GoModChecksTest`, `GoModInspectionsFixtureTest`).
+
 ### Wave 3: code creation (2026-10-03, versions 0.2.23–0.2.30)
 
 Completion parts are in "Smart, chain and project-member completion" above, import grouping in "Quick fixes". Create intentions:
