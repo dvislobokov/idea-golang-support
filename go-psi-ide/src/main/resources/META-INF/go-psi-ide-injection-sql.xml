@@ -1,0 +1,7 @@
+<!-- go-psi-ide, language injection: SQL into Go strings (database/sql, sqlx, pgx, named query constants). The host loads this file through an
+     optional dependency on com.intellij.database (Database Tools and SQL), so IDEs without that plugin simply have no SQL injection. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <multiHostInjector implementation="io.github.golangsupport.ide.injection.sql.GoSqlInjector"/>
+  </extensions>
+</idea-plugin>

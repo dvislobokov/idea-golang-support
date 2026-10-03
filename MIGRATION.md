@@ -585,5 +585,12 @@ generics, missing return, init cycles — 0 ложных срабатывани�
   Built-in): три предупреждения параметров и три фикса (`u9Wait(4)`, `import "time"` удалён); ошибки lookahead / backreference / висячая запятая JSON и
   подсветка инъекций; переименование пакета с квалификатора — каталог, `package`, оба импорта (с алиасом и без), квалификатор. Переименование роботом
   запускается `RenameProcessor` в `ModalityState.nonModal()` (без диалога): нажатие кнопок диалога из `any()` давало SEVERE «Write-unsafe context».
+- [x] Шаг 11, третья партия (2026-10-03; Sonnet — виджет GOOS/GOARCH и неиспользуемые `require`, Sonnet — SQL, Opus — Safe Delete параметров;
+  версии 0.2.51–0.2.54). Удаление параметров вынесено в общий `GoParameterRemoval` (фикс инспекции и Safe Delete). Database — optional-зависимость
+  (`bundledPlugin("com.intellij.database")` в хосте и go-psi-ide). Гейты: `:test` 400, go-psi-core 98, go-psi-semantic 176, go-psi-ide 747;
+  checkKotlinAbi и buildPlugin зелёные. Робот (8083, Built-in): предупреждение `example.com/unused` и фикс (строка ушла, пустых строк нет); SQL-подсветка
+  в `db.Query`, `tx.ExecContext` и `const …Query`, `"SELECT 1"` без инъекции (без источника данных Database показывает своё «No data sources are
+  configured» — не наше); Safe Delete `y` в методе (вызов и method expression) и `b` с аргументом-вызовом; виджет `windows/amd64` → `js/wasm · integration`
+  → обратно. Ошибок плагина в логе нет.
 - [ ] 12.1 gopls опционален, [ ] 12.2 gopls удалён.
 - [ ] 13 линтеры по запросу, [ ] 13A vet-класс, [x] 13B data-flow (волна 4), [ ] 13C движок правил.

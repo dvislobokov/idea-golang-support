@@ -44,7 +44,7 @@ object GoInjectionTargets {
     /** The conversion `T(e)` whose operand is [e] (looking through parentheses), or null. */
     fun conversionOf(e: PsiElement): GoConversionExpr? = outer(e).parent as? GoConversionExpr
 
-    private fun calleeReference(call: GoCallExpr): GoReferenceExpression? {
+    fun calleeReference(call: GoCallExpr): GoReferenceExpression? {
         var e: GoExpression? = call.expression
         while (e is GoParenthesesExpr) e = e.inner as? GoExpression
         return e as? GoReferenceExpression

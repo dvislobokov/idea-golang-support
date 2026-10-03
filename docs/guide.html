@@ -436,6 +436,7 @@ footer a { color: var(--text-2); }
         <tr><td>Modules, New Go Module…</td><td><code>go mod init</code> в выбранном каталоге.</td></tr>
         <tr><td>Read Packages Again <span class="new">новое</span></td><td>Заново читает имена пакетов, по которым работают подсказки по имени.</td></tr>
         <tr><td>Reanalyze Project <span class="new">новое</span></td><td>Всё, что плагин знает о проекте, заново и без перезапуска IDE: индексы Go-файлов и go.mod, каталог пакетов, перезапуск gopls, результаты сборки, подсветка открытых файлов. Индексы остальной IDE — File, Invalidate Caches.</td></tr>
+        <tr><td>GOOS/GOARCH в статус-баре <span class="new">новое</span></td><td>Платформа и теги сборки, под которые плагин разбирает код (<code>linux/amd64 · tag</code>). Клик: выбрать пару, «Host default» или «Edit build tags…»; подсветка пересчитывается сразу. Действует на встроенный анализ, не на gopls.</td></tr>
       </tbody>
     </table></div>
 

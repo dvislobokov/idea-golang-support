@@ -8,6 +8,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
+Versions 0.2.51–0.2.54 are the third batch (GOOS/GOARCH in the status bar, unused requires, SQL in strings, Safe Delete of parameters).
 Versions 0.2.48–0.2.50 are the second batch (rename package, unused parameters, regular expressions and JSON in strings).
 Versions 0.2.44–0.2.47 are the first batch after wave 4 (go.mod checks, call and type hierarchy, Introduce Variable / Constant, Safe Delete).
 Versions 0.2.37–0.2.43 are wave 4 (data flow): the per-function control-flow graph and analyses, then the checks built on it; every check
@@ -19,6 +20,40 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
 
 ### Changed
 - Exhaustive switch inspection (`GoExhaustiveSwitch`) is a weak warning: a plain warning was noise on `reflect.Kind`-like switches without `default`.
+
+## [0.2.54] - 2026-10-03
+
+### Added — Safe Delete of parameters
+- Safe Delete (Alt+Delete) on a parameter of a function or method declaration (Rename: Built-in): the parameter goes from the signature (`a, b int`
+  keeps `a int`; variadic too) and its argument from every call in the project, method expressions `T.M(recv, …)` / `(*T).M(&v, …)` included.
+- Conflicts in the Safe Delete dialog: the parameter is used in the body; the function is used as a value; the method implements a project interface
+  method; an argument has side effects (removed on Refactor Anyway); arguments do not map one to one (`f(g())`, that call is left as is). A parameter of
+  an interface method spec is a conflict ("delete in implementations first").
+- "Remove unused parameter" and Safe Delete share one implementation (`ide.refactoring.GoParameterRemoval`).
+
+## [0.2.53] - 2026-10-03
+
+### Added — SQL in strings
+- SQL injected into Go strings when the IDE has the Database plugin (optional dependency `com.intellij.database`): the query argument of `database/sql`
+  (`DB` / `Tx` / `Conn`: `Query`, `QueryRow`, `Exec`, `Prepare` and the `Context` variants), sqlx (`Select`, `Get`, `Queryx`, `NamedExec`, … and `Context`
+  variants) and pgx v5 / pgxpool (`Query`, `QueryRow`, `Exec`), plus a raw string starting with a SQL keyword assigned to a const / var named `*Query`,
+  `*SQL` or `*Sql`. Generic dialect (the platform's SQL dialect mapping applies); placeholders `$1`, `?`, `:name`, `@name` are not errors. Acts with the
+  Semantic colors switch on Built-in.
+
+## [0.2.52] - 2026-10-03
+
+### Added — Unused requires
+- go.mod inspection "Unused require" (warning, group Go modules): a direct `require` that no .go file of the module imports a package of (the longest
+  required module path that equals the import or is its parent; `tool` directives count as imports; `// indirect` lines, `vendor`, `testdata` and nested
+  modules are skipped; build tags are not considered). Quiet while indexing. Fix "Remove unused require" deletes the line, and the `require ( )` block
+  when it becomes empty; `go mod tidy` is not run.
+
+## [0.2.51] - 2026-10-03
+
+### Added — GOOS/GOARCH in the status bar
+- Status-bar widget "Go Build Target" with the platform of the analysis (`windows/amd64`, `· tags` when build tags are set). Click: common pairs
+  (linux/amd64, linux/arm64, darwin/arm64, windows/amd64, js/wasm, wasip1/wasm), all `go tool dist list` pairs, "Host default", "Edit build tags…". The
+  choice is saved in the settings and highlighting is recomputed. Shown in projects with go.mod / go.work. Affects the built-in analysis, not gopls.
 
 ## [0.2.50] - 2026-10-03
 

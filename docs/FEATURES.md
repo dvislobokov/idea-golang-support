@@ -109,7 +109,7 @@ Legend:
 | Inline variable / function call | ❌ | L |
 | Change signature (parameters, results, call sites, interface implementations) | ❌ | L |
 | Move declaration to another file / package (imports, exportedness) | ❌ | L |
-| Safe delete | ✅ (0.2.47, parameters 🗓️) | |
+| Safe delete | ✅ (0.2.47, parameters 0.2.54) | |
 
 ## 5. Analysis
 
@@ -134,7 +134,7 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | Unused exported declarations across the project, import cycles, `internal/` violations | 🟡 | `internal/` is detected by the project model, not reported | M |
 | Doc comment lint (exported symbol without a comment, comment not starting with the name) | ✅ (0.2.32) | `GoDocCommentInspection`, opt-in weak warning, fixes Add doc comment / Start comment with 'Name' | |
 | Build constraints: `//go:build` expression syntax, unknown GOOS/GOARCH | ✅ (0.2.33) | `GoBuildConstraintInspection` (vet `buildtag`; parser `GoBuildConstraintEvaluator` of the project model), `+build` → `//go:build` fix | |
-| `go.mod`: `replace` to a missing path, duplicate / self requires, `go` / `toolchain` versions, `vendor/` out of sync, go.work `use` | ✅ (0.2.44) | host `mod.GoModChecks` + three inspections; unused requires (`go mod tidy` without the tool) 🗓️ | |
+| `go.mod`: `replace` to a missing path, duplicate / self requires, `go` / `toolchain` versions, `vendor/` out of sync, go.work `use` | ✅ (0.2.44) | host `mod.GoModChecks` + four inspections; unused requires `GoModUnused` (0.2.52, build tags not considered) | |
 
 ## 6. Languages inside Go strings
 
@@ -142,7 +142,7 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 |---|---|---|---|---|
 | RE2 regular expressions in `regexp.Compile`/`MustCompile` (highlighting, RE2-specific validation, Check RegExp) | ✅ (0.2.50) | `ide.injection`: `GoRegExpInjector`, `GoRegExpLanguageHost`, `GoRegExpAnnotator`; literal first argument only | | |
 | `text/template` / `html/template`: highlighting, navigation to fields of the data type | ❌ | own lexer/parser | L | |
-| SQL in `database/sql` calls | ❌ | | S | plugin (Database) |
+| SQL in `database/sql` calls | ✅ (0.2.53) | `ide.injection.sql.GoSqlInjector` (optional Database plugin): database/sql, sqlx, pgx v5, `*Query`/`*SQL` consts | | plugin (Database) |
 | `time.Format` layouts: validation, hint of the rendered example | ✅ (0.2.34) | `GoTimeLayoutInspection`, `GoTimeLayoutHintsProvider`; the inspection checks literals only | | |
 | JSON in raw strings | ✅ (0.2.50) | `GoJsonInjector` (optional JSON plugin): Unmarshal / Valid / NewDecoder arguments, `…json…`-named raw literals | | |
 
@@ -155,7 +155,7 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | `//go:linkname`, `//go:generate` navigation; run `go generate` | 🟡 | navigation since 0.2.35; running `go generate` from the directive missing (needs `go`) |
 | Assembly `.s`: `TEXT ·Func` ↔ Go declaration without body | ❌ | M |
 | cgo: `import "C"` preamble, `C.` symbols | ❌ | L |
-| Status-bar widget for GOOS / GOARCH / build tags, re-evaluating the analysis | ❌ | S |
+| Status-bar widget for GOOS / GOARCH / build tags, re-evaluating the analysis | ✅ (0.2.51) | |
 
 ## 8. Run, test, debug (outside PSI)
 
@@ -209,7 +209,7 @@ Each wave is measured with the benchmarks and the UI robot before and after, lik
 5. **Wave 5 (platform):** call and type hierarchy done 2026-10-03 (0.2.45); shared indexes for GOROOT and headless inspections remain.
 6. **Wave 6:** done by the host (section 8); what remains is the PSI inputs of step 9 of MIGRATION.md.
 7. **Wave 7 (refactorings):** introduce variable / constant (0.2.46), safe delete (0.2.47), rename package (0.2.48) and remove unused parameter
-   (0.2.49) done 2026-10-03; then extract, inline, change signature, move.
+   (0.2.49), safe delete of parameters (0.2.54) done 2026-10-03; then extract, inline, change signature, move.
 8. **Later:** string languages (RE2, templates, SQL), assembly and cgo, Delve (after D2).
 
 ## 12. Beyond GoLand (host plugin, after the migration)
@@ -226,7 +226,7 @@ What GoLand does not have and what the base of this plugin makes cheap. Not go-p
 | Benchmarks as first-class: history of results per function, benchstat-style comparison with a base, regression marker in the gutter | host `testing` (`go test -json`), stubs for the function list | M |
 | Goroutine tree with states and GC / scheduler timeline in Go Monitor; pprof flame graph of a test or benchmark in an editor tab | host `monitor` (`GoRuntimeTrace`, `GoSnapshot`, `GoProfiles`) | M |
 | Test failure diff: expected / actual of `go test` output side by side, navigable | host `testing` console | S |
-| Analysis for another GOOS / GOARCH without changing the environment: a switch in the status bar over the toolchain of the project model | `GoToolchainProvider` (host override), `GoSettings.analysisGoos/analysisGoarch` | S |
+| Analysis for another GOOS / GOARCH without changing the environment: a switch in the status bar over the toolchain of the project model | `GoToolchainProvider` (host override), `GoSettings.analysisGoos/analysisGoarch` | ✅ (0.2.51) `GoPlatformWidget`; gopls not switched |
 | Format on type (gofmt-compatible, no process) and instant Reformat (step 8j) | `lang.formatter` of go-psi-ide | S |
 | Go next to other languages in IDEs that have them: Protobuf / gRPC stubs ↔ Go navigation, SQL in strings (section 6), `html/template` fields | optional plugin dependencies (D3) | M |
 | Full function without gopls and without the network (MIGRATION.md step 12) on large monorepositories: indexes by build list only | library roots policy (step 7) | — |

@@ -532,6 +532,12 @@ a function used as a value (`ReferencesSearch` in the package's directory). Fixe
 site, unused imports dropped; not with side-effect arguments, method expressions, multi-value arguments). The flow corpus cannot judge it (references
 and implementations of GOROOT files are not searched there): its count is recorded, its noise is reviewed by the regression tests.
 
+### SQL injection (`ide.injection.sql.GoSqlInjector`, `go-psi-ide-injection-sql.xml`, optional `com.intellij.database`; gate `SEMANTIC_COLORS`; 0.2.53)
+
+Methods of `database/sql` `DB` / `Tx` / `Conn`, sqlx and pgx v5 / pgxpool, resolved through `GoSemanticService.resolve` to the receiver type and its
+package (embedded methods resolve to the embedded type: `sqlx.DB.Query` → `database/sql`); `GoSqlDetect` for `*Query` / `*SQL` / `*Sql` raw literals.
+Injected language is the SQL dialect of the platform mapping (`GenericSQL` by default). Tests: `GoSqlInjectionTest`.
+
 ### String injections (`ide.injection`, `go-psi-ide-injection.xml`, `go-psi-ide-injection-json.xml`; gate `SEMANTIC_COLORS`; 0.2.50)
 
 `GoStringLiteral` is a `PsiLanguageInjectionHost` (`GoStringLiteralMixin`: raw strings verbatim, interpreted strings through `GoInterpretedStringEscaper`).
@@ -555,7 +561,7 @@ arguments and JSON-looking raw literals named `…json…` (`GoJsonDetect`). Tes
 |---|---|---|---|
 | Introduce Variable | `GoIntroduceVariableHandler`, `GoExtraction` (availability, anchor, occurrences, names) | `GoRefactoringSupportProvider.getIntroduceVariableHandler` | `GoIntroduceTest` |
 | Introduce Constant | `GoIntroduceConstantHandler` | `getIntroduceConstantHandler` | `GoIntroduceTest` |
-| Safe Delete | `GoSafeDeleteProcessor` (`SafeDeleteProcessorDelegateBase`; companions removed in `prepareForDeletion`) | `refactoring.safeDeleteProcessor`, `isSafeDeleteAvailable` | `GoSafeDeleteTest` |
+| Safe Delete | `GoSafeDeleteProcessor` (`SafeDeleteProcessorDelegateBase`; companions removed in `prepareForDeletion`); parameters (0.2.54) through `GoParameterRemoval` (signature + argument at every call, method expressions; conflicts: used in body, function value, implements interface, side-effect / multi-value argument, interface spec) | `refactoring.safeDeleteProcessor`, `isSafeDeleteAvailable` | `GoSafeDeleteTest`, `GoSafeDeleteParameterTest` |
 
 The platform has no language-neutral Introduce Variable base: the handler is our own over `IntroduceTargetChooser`, `OccurrencesChooser.simpleChooser`
 and `VariableInplaceRenamer` / `MemberInplaceRenamer`. `GoRefactoringSupportProvider.isAvailable` accepts any Go element while Rename is Built-in:
@@ -567,6 +573,10 @@ the platform looks the provider up by the leaf at the caret.
 `mod/GoModInspections.kt`: `GoModPaths` (error: `replace` / `use` directory missing or without go.mod), `GoModRequires` (duplicate and self requires,
 vendor sync; fixes "Remove duplicate require", "Copy 'go mod vendor' to the clipboard"), `GoModVersions` (`go` syntax, `toolchain` older than `go`).
 Tests: `GoModInspectionsTest` (`GoModChecksTest`, `GoModInspectionsFixtureTest`).
+0.2.52: `GoModUnusedInspection` — a direct require no file of the module imports from (`GoFileImportsIndex`, longest module-path prefix, `tool` lines count;
+pure `GoModChecks.unusedRequires`), fix "Remove unused require" (no `go mod tidy`). Tests: `GoModUnusedTest`.
+0.2.51: `settings/GoPlatformWidget.kt` — status-bar widget `Go.Platform.Status` over `GoSettings.analysisGoos/analysisGoarch` and build tags; the
+toolchain provider (`GoIgsToolchainProvider`) keys on them, the widget restarts the daemon. gopls is not given the same env.
 
 ### Wave 3: code creation (2026-10-03, versions 0.2.23–0.2.30)
 

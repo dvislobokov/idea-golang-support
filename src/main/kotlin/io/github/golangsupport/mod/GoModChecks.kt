@@ -8,6 +8,7 @@ enum class GoModRule(val group: String) {
     REPLACE_PATH("GoModPaths"), USE_DIRECTORY("GoModPaths"),
     DUPLICATE_REQUIRE("GoModRequires"), SELF_REFERENCE("GoModRequires"), VENDOR_SYNC("GoModRequires"),
     GO_VERSION("GoModVersions"), TOOLCHAIN("GoModVersions"),
+    UNUSED_REQUIRE("GoModUnused"),
 }
 
 /** What a path of a directive points at; the checks ask, the wrapper answers from the file system (tests answer from a map). */
@@ -17,7 +18,8 @@ enum class GoDirState { MISSING, NO_GO_MOD, OK }
 data class GoModProblem(val rule: GoModRule, val line: Int, val needle: String?, val message: String, val error: Boolean, val duplicateOf: String? = null)
 
 /** What the checks may ask of the world: directories relative to the file, and `vendor/modules.txt` next to it (null when there is none). */
-class GoModEnvironment(val dirState: (String) -> GoDirState, val vendorModulesTxt: String?)
+/** [imports]: import paths of the module's .go files; null while the index is not ready (then nothing is reported). */
+class GoModEnvironment(val dirState: (String) -> GoDirState, val vendorModulesTxt: String?, val imports: Set<String>? = null)
 
 /** Pure checks over the text of a go.mod / go.work: no platform, no `go` binary, so they are tested in seconds. */
 object GoModChecks {
@@ -33,6 +35,7 @@ object GoModChecks {
             duplicates(file, result)
             selfReferences(file, result)
             file.vendorProblems(env.vendorModulesTxt, result)
+            env.imports?.let { unused(file, it, result) }
         }
         versions(directives, result)
         return result.sortedBy { it.line }
@@ -61,6 +64,29 @@ object GoModChecks {
             if (state == GoDirState.OK) continue
             out += GoModProblem(GoModRule.USE_DIRECTORY, d.line - 1, dir, if (state == GoDirState.MISSING) "Directory '$dir' does not exist" else "Directory '$dir' has no go.mod", true)
         }
+    }
+
+    private fun unused(file: GoModFile, imports: Set<String>, out: MutableList<GoModProblem>) {
+        for (r in unusedRequires(file.requires, imports, file.tools)) out += GoModProblem(GoModRule.UNUSED_REQUIRE, r.line, r.path, "'${r.path}' is required but no package of it is imported", false)
+    }
+
+    /**
+     * Direct requires that no import is served by. An import belongs to the longest required module path that is the import or its parent
+     * (`a.com/x/y` goes to `a.com/x/y` before `a.com/x`); `tool` packages count as imports. Build tags are not looked at: every file counts.
+     */
+    fun unusedRequires(requires: List<GoRequire>, imports: Set<String>, tools: List<String> = emptyList()): List<GoRequire> {
+        val paths = requires.map { it.path }.toSet()
+        val used = HashSet<String>()
+        for (imp in imports + tools) {
+            var candidate = imp
+            while (true) {
+                if (candidate in paths) { used += candidate; break }
+                val slash = candidate.lastIndexOf('/')
+                if (slash < 0) break
+                candidate = candidate.substring(0, slash)
+            }
+        }
+        return requires.filter { !it.indirect && it.path !in used }
     }
 
     /** The second and later requires of a path: `go mod tidy` would keep one, and Go picks the highest version anyway. */

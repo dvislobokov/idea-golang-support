@@ -29,6 +29,8 @@ dependencies {
         bundledModule("intellij.spellchecker")
         // injection: the JSON language injected into Go strings (go-psi-ide-injection-json.xml; an optional dependency of the host)
         bundledPlugin("com.intellij.modules.json")
+        // injection: SQL into Go strings (go-psi-ide-injection-sql.xml; an optional dependency of the host on the Database plugin)
+        bundledPlugin("com.intellij.database")
         testFramework(TestFrameworkType.Platform)
     }
     testImplementation(libs.junit)

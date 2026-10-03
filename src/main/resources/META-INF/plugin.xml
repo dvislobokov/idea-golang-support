@@ -21,6 +21,8 @@
     <depends optional="true" config-file="go-psi-ide-spelling.xml">com.intellij.modules.spellchecker</depends>
     <!-- JSON injected into Go strings (go-psi-ide-injection-json.xml): only where the IDE has the JSON plugin -->
     <depends optional="true" config-file="go-psi-ide-injection-json.xml">com.intellij.modules.json</depends>
+    <!-- SQL injected into Go strings (go-psi-ide-injection-sql.xml): only where the IDE has the Database plugin -->
+    <depends optional="true" config-file="go-psi-ide-injection-sql.xml">com.intellij.database</depends>
 
     <!-- optional parts: a module is loaded only where its dependencies are (see the descriptor of the module next to META-INF) -->
     <content>
@@ -95,6 +97,7 @@
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
+        <statusBarWidgetFactory id="Go.Platform.Status" implementation="io.github.golangsupport.settings.GoPlatformWidgetFactory"/>
         <fileType name="Go" implementationClass="io.github.golangsupport.lang.GoFileType" fieldName="INSTANCE" language="Go" extensions="go"/>
         <fileType name="Go Module" implementationClass="io.github.golangsupport.mod.GoModFileType" fieldName="INSTANCE" language="GoModule"
                   fileNames="go.mod;go.work"/>
@@ -197,6 +200,8 @@
                          implementationClass="io.github.golangsupport.mod.GoModPathsInspection"/>
         <localInspection language="GoModule" shortName="GoModRequires" displayName="Duplicate, self or unvendored require" groupName="Go modules" enabledByDefault="true" level="WARNING"
                          implementationClass="io.github.golangsupport.mod.GoModRequiresInspection"/>
+        <localInspection language="GoModule" shortName="GoModUnused" displayName="Unused require" groupName="Go modules" enabledByDefault="true" level="WARNING"
+                         implementationClass="io.github.golangsupport.mod.GoModUnusedInspection"/>
         <localInspection language="GoModule" shortName="GoModVersions" displayName="Go and toolchain versions" groupName="Go modules" enabledByDefault="true" level="WARNING"
                          implementationClass="io.github.golangsupport.mod.GoModVersionsInspection"/>
         <!-- the requirements of a module with their updates and vulnerabilities -->

@@ -1,0 +1,7 @@
+<html>
+<body>
+Reports a direct <code>require</code> of go.mod when no .go file of the module imports a package of that module.
+Build tags are not taken into account: every file counts. Modules run by <code>tool</code> directives are not reported.
+The quick fix removes the line (and an emptied <code>require ( )</code> block); it does not run <code>go mod tidy</code>.
+</body>
+</html>

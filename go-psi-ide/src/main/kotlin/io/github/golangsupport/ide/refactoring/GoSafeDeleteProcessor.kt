@@ -25,8 +25,10 @@ import io.github.golangsupport.lang.psi.GoConstSpec
 import io.github.golangsupport.lang.psi.GoFieldDeclaration
 import io.github.golangsupport.lang.psi.GoFieldDefinition
 import io.github.golangsupport.lang.psi.GoFunctionDeclaration
+import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoMethodSpec
+import io.github.golangsupport.lang.psi.GoParamDefinition
 import io.github.golangsupport.lang.psi.GoStructType
 import io.github.golangsupport.lang.psi.GoTypeDeclaration
 import io.github.golangsupport.lang.psi.GoTypeSpec
@@ -42,6 +44,9 @@ import io.github.golangsupport.semantic.psi.GoPsiUtil.elements
  * conflicts dialog. More conflicts: a method that implements a project interface method called through the interface, a field
  * listed by an unkeyed composite literal, a constant whose expression the next constants of its group repeat (`iota`). The text
  * goes with its doc comment and its lines; a name of `a, b T` / `var a, b = 1, 2` goes alone, with its value.
+ *
+ * A parameter of a function or method declaration goes from the signature and, with its argument, from every call (method
+ * expressions `T.M(recv, …)` included); [parameterConflicts] lists what is reported instead of rewritten.
  */
 class GoSafeDeleteProcessor : SafeDeleteProcessorDelegateBase() {
 
@@ -50,7 +55,8 @@ class GoSafeDeleteProcessor : SafeDeleteProcessorDelegateBase() {
     override fun getElementsToSearch(element: PsiElement, module: Module?, allElementsToDelete: Collection<PsiElement>): Collection<PsiElement> = listOf(element)
 
     override fun findUsages(element: PsiElement, allElementsToDelete: Array<out PsiElement>, result: MutableList<in UsageInfo>): NonCodeUsageSearchInfo {
-        ReferencesSearch.search(element).forEach { ref ->
+        // a parameter's references are in its own body: reported once as a conflict by [parameterConflicts], not usage by usage
+        if (element !is GoParamDefinition) ReferencesSearch.search(element).forEach { ref ->
             val e = ref.element
             if (!inside(e, allElementsToDelete)) result.add(SafeDeleteReferenceSimpleDeleteUsageInfo(e, element, false))
             true
@@ -63,6 +69,7 @@ class GoSafeDeleteProcessor : SafeDeleteProcessorDelegateBase() {
     override fun findConflicts(element: PsiElement, allElementsToDelete: Array<out PsiElement>, usages: Array<out UsageInfo>, conflicts: MultiMap<PsiElement, String>) {
         when (element) {
             is GoMethodDeclaration -> interfaceCalls(element, allElementsToDelete, conflicts)
+            is GoParamDefinition -> parameterConflicts(element, allElementsToDelete, conflicts)
             is GoFieldDefinition -> unkeyedLiterals(element, conflicts)
             is GoConstDefinition -> repeatedByNext(element, conflicts)
             is GoVarDefinition -> (element.parent as? GoVarSpec)?.let { spec ->
@@ -85,6 +92,51 @@ class GoSafeDeleteProcessor : SafeDeleteProcessorDelegateBase() {
                     conflicts.putValue(ref.element, "Method $owner.${method.name} implements $iface.${spec.name}, which is called through the interface here")
                 }
                 true
+            }
+        }
+    }
+
+    /**
+     * What deleting a parameter cannot do cleanly: uses in the body (they stay and no longer resolve), the function used as a value
+     * (its type changes), a method that implements a project interface method (it would no longer), an interface method spec (only the
+     * interface signature changes: implementations and calls through the interface are left to the user), a call whose arguments do not
+     * map one to one onto the parameters (`f(g())` with a multi-value `g`: left as is), and an argument with side effects (removed on
+     * Refactor Anyway).
+     */
+    private fun parameterConflicts(def: GoParamDefinition, all: Array<out PsiElement>, conflicts: MultiMap<PsiElement, String>) {
+        val owner = GoParameterRemoval.ownerOf(def) ?: return
+        val name = def.name ?: "_"
+        val bodyUses = ReferencesSearch.search(def).findAll().map { it.element }.filter { !inside(it, all) }
+        if (bodyUses.isNotEmpty()) {
+            val times = if (bodyUses.size == 1) "" else " (${bodyUses.size} times)"
+            conflicts.putValue(bodyUses.first(), "Parameter $name is used in the body$times; the references stay and no longer resolve")
+        }
+        if (owner is GoMethodSpec) {
+            val iface = GoImplementations.interfaceSpecOf(owner)?.name ?: "interface"
+            conflicts.putValue(owner, "$iface.${owner.name} is an interface method: delete the parameter in its implementations first; only the interface signature changes")
+            return
+        }
+        val decl = owner as? GoFunctionOrMethodDeclaration ?: return
+        val fn = (decl as? GoMethodDeclaration)?.let { (GoImplementations.receiverTypeSpec(it)?.name ?: it.receiverTypeName ?: "?") + "." + it.name } ?: decl.name
+        if (decl is GoMethodDeclaration) {
+            for (spec in GoImplementations.superMethods(decl, GlobalSearchScope.projectScope(decl.project))) {
+                if (inside(spec, all)) continue
+                val iface = GoImplementations.interfaceSpecOf(spec)?.name ?: "interface"
+                conflicts.putValue(decl, "Method $fn implements $iface.${spec.name}; without parameter $name it no longer does")
+            }
+        }
+        val signature = decl.signature
+        val slot = GoParameterRemoval.slot(signature, def)
+        val arity = GoParameterRemoval.arity(signature)
+        val variadic = GoParameterRemoval.isVariadic(signature)
+        val refs = GoParameterRemoval.references(decl, decl.useScope, stopAtValue = false)
+        for (value in refs.values) if (!inside(value, all)) conflicts.putValue(value, "Function $fn is used as a value here; its type changes")
+        for (site in refs.calls) {
+            if (inside(site.call, all)) continue
+            val args = GoParameterRemoval.argumentsAt(site, slot, arity, variadic)
+            when {
+                args == null -> conflicts.putValue(site.call, "The arguments of this call of $fn do not map one to one onto its parameters; the call is left as is")
+                !args.all(GoParameterRemoval::isPure) -> conflicts.putValue(site.call, "The argument for $name in this call of $fn has side effects; it will be removed")
             }
         }
     }
@@ -126,12 +178,41 @@ class GoSafeDeleteProcessor : SafeDeleteProcessorDelegateBase() {
      * `var a, b`) and delete that.
      */
     override fun prepareForDeletion(element: PsiElement) {
+        if (element is GoParamDefinition) return prepareParameter(element)
         val file = element.containingFile ?: return
         val own = element.textRange
         val extras = deletionRanges(element, file.viewProvider.contents).flatMap { r ->
             if (!r.contains(own)) listOf(r) else listOf(TextRange(r.startOffset, own.startOffset), TextRange(own.endOffset, r.endOffset))
         }.filter { !it.isEmpty }
         for (r in extras.sortedByDescending { it.startOffset }) removeText(file, r)
+    }
+
+    /**
+     * The parameter's part of the signature (the comma of `a, b T`, or its type and comma) and its argument at every call that maps
+     * one to one; calls reported as conflicts for that are left alone. All ranges are taken before any edit; an argument range that
+     * holds another (`f(1, f(2, 3))`) takes the inner one with it.
+     */
+    private fun prepareParameter(def: GoParamDefinition) {
+        val owner = GoParameterRemoval.ownerOf(def) ?: return
+        val signature = (owner as? GoFunctionOrMethodDeclaration)?.signature ?: (owner as? GoMethodSpec)?.signature ?: return
+        val own = def.textRange
+        val byFile = LinkedHashMap<PsiFile, MutableList<TextRange>>()
+        GoParameterRemoval.signatureRange(signature, def)?.let { r ->
+            byFile.getOrPut(def.containingFile) { ArrayList() } += listOf(TextRange(r.startOffset, own.startOffset), TextRange(own.endOffset, r.endOffset))
+        }
+        if (owner is GoFunctionOrMethodDeclaration) {
+            val slot = GoParameterRemoval.slot(signature, def)
+            val arity = GoParameterRemoval.arity(signature)
+            val variadic = GoParameterRemoval.isVariadic(signature)
+            for (site in GoParameterRemoval.references(owner, owner.useScope, stopAtValue = false).calls) {
+                val removed = GoParameterRemoval.argumentsAt(site, slot, arity, variadic)?.takeIf { it.isNotEmpty() } ?: continue
+                byFile.getOrPut(site.call.containingFile) { ArrayList() } += GoParameterRemoval.argumentRange(site, removed) ?: continue
+            }
+        }
+        for ((file, ranges) in byFile) {
+            val outer = ranges.filter { !it.isEmpty }.distinct().let { rs -> rs.filter { r -> rs.none { o -> o != r && o.contains(r) } } }
+            for (r in outer.sortedByDescending { it.startOffset }) removeText(file, r)
+        }
     }
 
     /** Removes [range] of [file] leaf by leaf; a whitespace or comment leaf it cuts keeps the rest of its text. */
@@ -168,9 +249,13 @@ class GoSafeDeleteProcessor : SafeDeleteProcessorDelegateBase() {
     }
 
     companion object {
-        /** The declarations Safe Delete serves: package-level ones, struct fields and interface methods (not locals nor parameters). */
+        /**
+         * The declarations Safe Delete serves: package-level ones, struct fields, interface methods and the parameters of function and
+         * method declarations and interface method specs (not locals, receivers, results nor parameters of function literals and types).
+         */
         fun isSupported(element: PsiElement): Boolean = when (element) {
             is GoFunctionDeclaration, is GoMethodDeclaration, is GoFieldDefinition, is GoMethodSpec -> true
+            is GoParamDefinition -> GoParameterRemoval.ownerOf(element) != null
             is GoTypeSpec, is GoVarDefinition, is GoConstDefinition -> GoPsiUtil.functionOwner(element) == null
             else -> false
         }
