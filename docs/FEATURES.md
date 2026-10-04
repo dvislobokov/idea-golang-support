@@ -31,7 +31,7 @@ Legend:
 | documentSymbol | structure view, breadcrumbs | ✅ | | |
 | workspaceSymbol | `gotoSymbolContributor` / `gotoClassContributor` | ✅ | | |
 | codeAction (quick fix) | `LocalQuickFix` | 🟡 | fix kinds: add import, remove import, optimize imports, unused variable (remove, rename to `_`, replace with `_ =`), wrap in conversion; see section 3 | M |
-| codeAction (refactor / source) | intentions, refactorings | ❌ | see sections 3 and 4 | L |
+| codeAction (refactor / source) | intentions, refactorings | ✅ | intentions and generators (section 3), refactorings (section 4) | |
 | codeLens | Code Vision (`codeInsight.daemonBoundCodeVisionProvider`) | ✅ | usages / implementations counts (`ide.codevision`); run test stays with the host's run line markers | |
 | documentLink | references in import paths, `//go:embed` | ✅ | import paths and embed patterns navigate (0.2.35) | |
 | formatting / rangeFormatting | `lang.formatter` (gofmt-compatible) | ✅ | | |
@@ -44,8 +44,8 @@ Legend:
 | semanticTokens | annotator (`GoSemanticHighlightingAnnotator`) | ✅ | | |
 | linkedEditingRange | not applicable to Go | — | | |
 | inlayHint | `codeInsight.declarativeInlayProvider` | ✅ (wave 1, 0.2.9) | `ide.hints`, see section 2 | |
-| inlineValue | debugger | ❌ | needs `dlv` | L |
-| diagnostics (push/pull) | inspections + annotator | 🟡 | 17 inspections (checker, Printf, struct tags, exhaustive switch, context, errors, doc comments, build constraints, …); data-flow and the rest of vet missing (section 5) | L |
+| inlineValue | debugger | ✅ | host: `run/GoInlineValues` (variables by resolve on the lines up to the stop) shown through `GoDebugValues.computeInlineDebuggerData`, values from `dlv` | |
+| diagnostics (push/pull) | inspections + annotator | 🟡 | inspections, data flow (wave 4, 0.2.37–0.2.43) and the native rule engine, 136 rules (0.2.67–0.2.76: staticcheck SA / S, go vet); gap: the rest of the vet / staticcheck / revive / gocritic / gosec rules (`docs/LINT-RULES.md`, plan B6+) | L |
 | workspace/willRenameFiles, file events | VFS / PSI listeners | ✅ | | |
 | documentColor, moniker | not relevant to Go | — | | |
 

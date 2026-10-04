@@ -418,6 +418,7 @@ footer a { color: var(--text-2); }
         <tr><td>Struct Tags…</td><td>Теги полей: ключи, стиль имён, <code>omitempty</code>.</td></tr>
         <tr><td>Implement Interface…</td><td>Методы выбранного интерфейса (проект, stdlib, зависимости), которых у типа ещё нет: типы чужого пакета получают его имя, пакет импортируется, встроенные интерфейсы раскрываются. Также <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
         <tr><td>Type from JSON… <span class="new">новое</span></td><td>Структуры с тегами <code>json</code> по документу из буфера обмена или из диалога.</td></tr>
+        <tr><td>Copy JSON sample to clipboard <span class="new">новое</span></td><td>Alt+Enter на структуре: JSON-документ по её полям (теги <code>json</code>, встроенные структуры, примеры значений по типам) в буфер обмена.</td></tr>
         <tr><td>Test</td><td>Тест для функции под курсором.</td></tr>
       </tbody>
     </table></div>
@@ -534,7 +535,7 @@ n := <span class="fn">next</span>()
 <section class="band" id="analysis">
   <div class="wrap">
     <h2>Проверки</h2>
-    <p>При Language features: Built-in плагин проверяет код сам, пока вы печатаете: по типам и по графу потока данных каждой функции. Каждая проверка выключается или меняет уровень в Settings, Editor, Inspections, группы Go и Go modules; подавить на месте — <code>//noinspection</code> из списка <kbd data-action="ShowIntentionActions">Alt+Enter</kbd>. Все включённые проверки по всему проекту — Go, Inspect Project (на каталоге в дереве проекта — только по нему): результаты в окне Inspection Results с деревом по проверкам и файлам, переходом к месту и исправлениями, в том числе для всех находок сразу. Go, Export Inspections to SARIF… пишет те же находки в файл SARIF. Без окна IDE, в CI, — раздел <a href="#ci">Инспекции в CI</a>.</p>
+    <p>При Language features: Built-in плагин проверяет код сам, пока вы печатаете: по типам и по графу потока данных каждой функции. Каждая проверка выключается или меняет уровень в Settings, Editor, Inspections, группы Go и Go modules; подавить на месте — <code>//noinspection</code> из списка <kbd data-action="ShowIntentionActions">Alt+Enter</kbd>. Все включённые проверки по всему проекту — Go, Inspect Project (на каталоге в дереве проекта — только по нему): результаты в окне Inspection Results с деревом по проверкам и файлам, переходом к месту и исправлениями, в том числе для всех находок сразу. Go, Export Inspections to SARIF… пишет те же находки в файл SARIF. Перед коммитом — флажок Check Go code в параметрах окна Commit (только в проектах с Go, запоминается для проекта): те же проверки по изменённым файлам <code>.go</code>; при предупреждениях и ошибках коммит останавливается — Review Go problems открывает их в Inspection Results, Commit Anyway коммитит. Внешние линтеры здесь не запускаются. Без окна IDE, в CI, — раздел <a href="#ci">Инспекции в CI</a>.</p>
 
     <h3>Поток данных</h3>
     <div class="table"><table>
@@ -650,6 +651,7 @@ n := <span class="fn">next</span>()
         <tr><td>Build</td><td><code>go build ./...</code>. Ошибки показаны в окне Build со ссылками на код.</td></tr>
         <tr><td>Vet</td><td><code>go vet ./...</code></td></tr>
         <tr><td>Generate</td><td><code>go generate ./...</code></td></tr>
+        <tr><td>Generate File <span class="new">новое</span></td><td><code>go generate файл.go</code> для файла в редакторе: все директивы <code>//go:generate</code> этого файла. На каждой строке <code>//go:generate</code> в редакторе значок ▶: Run go:generate выполняет только эту директиву (<code>go generate -run '^…$' файл.go</code>), go generate файл.go — все директивы файла. Вывод — в окне Build, документы сохраняются перед запуском.</td></tr>
         <tr><td>Modules, Tidy</td><td><code>go mod tidy</code></td></tr>
         <tr><td>Modules, Download</td><td><code>go mod download</code>. Исходники зависимостей появляются в дереве проекта.</td></tr>
         <tr><td>Modules, Vendor</td><td><code>go mod vendor</code></td></tr>

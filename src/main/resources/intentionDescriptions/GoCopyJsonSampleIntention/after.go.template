@@ -1,0 +1,9 @@
+// clipboard:
+// {
+//   "user_id": 0,
+//   "Tags": [""]
+// }
+type User struct {
+	UserID int `json:"user_id"`
+	Tags   []string
+}

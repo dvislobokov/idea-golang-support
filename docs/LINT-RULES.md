@@ -42,18 +42,18 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 
 | Rule id | Linter | What | Scope | Needs | Status | Size | Default | Options | License |
 |---|---|---|---|---|---|---|---|---|---|
-| `govet:appends` | govet | `append(s)` with no values to add | CALL | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:appends` | govet | `append(s)` with no values to add | CALL | TYPES | native: GoVetAppendsRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:asmdecl` | govet | Go declaration does not match the assembly (`.s`) frame | FILE | TYPES | skip: assembly files, low value in an editor | L | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:assign` | govet | `x = x` | STATEMENT | SYNTAX | native: `GoSelfAssignment` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:atomic` | govet | `x = atomic.AddInt64(&x, 1)` | STATEMENT | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:atomicalign` | govet | 64-bit atomic field not 64-bit aligned on 32-bit platforms | CALL | TYPES | port | M | — | — | BSD-3-Clause (x/tools) |
-| `govet:bools` | govet | redundant / suspect `a == x \|\| a == x`, `a != 1 \|\| a != 2` | EXPRESSION | TYPES | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:atomic` | govet | `x = atomic.AddInt64(&x, 1)` | STATEMENT | TYPES | native: GoVetAtomicRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:atomicalign` | govet | 64-bit atomic field not 64-bit aligned on 32-bit platforms | CALL | TYPES | native: GoVetAtomicAlignRule | M | — | — | BSD-3-Clause (x/tools) |
+| `govet:bools` | govet | redundant / suspect `a == x \|\| a == x`, `a != 1 \|\| a != 2` | EXPRESSION | TYPES | native: GoVetBoolsRule | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:buildtag` | govet | malformed or misplaced `//go:build` / `+build` | FILE | SYNTAX | native: `GoBuildConstraint` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:cgocall` | govet | Go pointers passed to C violating cgo rules | CALL | TYPES | skip: cgo-only, needs cgo type info | L | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:composites` | govet | unkeyed fields in a composite literal of an imported struct type | EXPRESSION | TYPES | port | S | v1+v2 | `composites.whitelist` | BSD-3-Clause (x/tools) |
 | `govet:copylocks` | govet | lock value copied (assignment, call, range, return) | EXPRESSION | TYPES | native: `GoCopyLocks` | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:deepequalerrors` | govet | `reflect.DeepEqual` on errors | CALL | TYPES | port | S | — | — | BSD-3-Clause (x/tools) |
-| `govet:defers` | govet | `defer log.Println(time.Since(start))` evaluates args early | STATEMENT | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:defers` | govet | `defer log.Println(time.Since(start))` evaluates args early | STATEMENT | TYPES | native: GoVetDefersRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:directive` | govet | misplaced or unknown `//go:debug` directive | FILE | SYNTAX | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:errorsas` | govet | `errors.As` second argument not a non-nil pointer | CALL | TYPES | native: `GoErrorsPackage` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:fieldalignment` | govet | struct fields ordered wastefully | TYPE_SPEC | TYPES | skip: noisy; host has Reorder Fields intention (`GoReorderFieldsIntention`) | M | — | — | BSD-3-Clause (x/tools) |
@@ -62,28 +62,28 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `govet:hostport` | govet | `fmt.Sprintf("%s:%d", host, port)` not IPv6-safe | CALL | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:httpmux` | govet | `http.ServeMux` pattern with Go 1.22 syntax under older go version | CALL | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:httpresponse` | govet | `resp.Body` used/deferred before the error check | STATEMENT | TYPES + FLOW | native: `GoDeferBeforeErrorCheck` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:ifaceassert` | govet | impossible interface-to-interface assertion | EXPRESSION | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:ifaceassert` | govet | impossible interface-to-interface assertion | EXPRESSION | TYPES | native: GoVetIfaceAssertRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:loopclosure` | govet | loop variable captured by `go`/`defer` closure (go < 1.22) | STATEMENT | TYPES | native: `GoLoopClosure` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:lostcancel` | govet | cancel of `context.WithCancel` not called on all paths | FUNCTION | TYPES + FLOW | native: `GoLostCancel` | M | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:nilfunc` | govet | comparison of a function with nil | EXPRESSION | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:nilfunc` | govet | comparison of a function with nil | EXPRESSION | TYPES | native: GoVetNilFuncRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:nilness` | govet | nil dereference / impossible nil comparison | FUNCTION | TYPES + FLOW | native: `GoNilDereference`, `GoImpossibleNilCheck` | L | — | — | BSD-3-Clause (x/tools) |
 | `govet:printf` | govet | printf format/argument mismatch, non-constant format | CALL | TYPES | native: `GoPrintf` | L | v1+v2 | `printf.funcs` | BSD-3-Clause (x/tools) |
 | `govet:reflectvaluecompare` | govet | `reflect.Value` compared with `==` | EXPRESSION | TYPES | port | S | — | — | BSD-3-Clause (x/tools) |
 | `govet:shadow` | govet | variable shadows an outer one that is used after | FUNCTION | TYPES + FLOW | native (partial): GoShadowedError (errors only; generalize behind `strict`) | M | — | `shadow.strict` | BSD-3-Clause (x/tools) |
-| `govet:shift` | govet | shift count >= width of the operand | EXPRESSION | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:sigchanyzer` | govet | unbuffered channel passed to `signal.Notify` | CALL | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:shift` | govet | shift count >= width of the operand | EXPRESSION | TYPES | native: GoVetShiftRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:sigchanyzer` | govet | unbuffered channel passed to `signal.Notify` | CALL | TYPES | native: GoSigchanyzerRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:slog` | govet | `slog` key/value pairs mismatched | CALL | TYPES | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:sortslice` | govet | `sort.Slice` called on a non-slice | CALL | TYPES | port | S | — | — | BSD-3-Clause (x/tools) |
+| `govet:sortslice` | govet | `sort.Slice` called on a non-slice | CALL | TYPES | native: GoVetSortSliceRule | S | — | — | BSD-3-Clause (x/tools) |
 | `govet:stdmethods` | govet | well-known method (`String`, `ReadFrom`, `MarshalJSON`…) with wrong signature | FUNCTION | TYPES | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:stdversion` | govet | std symbol newer than the module's `go` version | EXPRESSION | TYPES + PROJECT_INDEX | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:stringintconv` | govet | `string(int)` conversion | EXPRESSION | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:stringintconv` | govet | `string(int)` conversion | EXPRESSION | TYPES | native: GoVetStringIntConvRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:structtag` | govet | malformed or duplicate struct tag | TYPE_SPEC | SYNTAX | native: `GoStructTag` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:testinggoroutine` | govet | `t.Fatal` from a goroutine started by the test | CALL | TYPES | native: `GoTestingGoroutine` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:tests` | govet | malformed `Test`/`Example`/`Benchmark`/`Fuzz` names and signatures | FUNCTION | TYPES | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:timeformat` | govet | layout `2006-02-01` | CALL | TYPES | native: `GoTimeLayout` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:unmarshal` | govet | non-pointer passed to `json.Unmarshal` & co. | CALL | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:unmarshal` | govet | non-pointer passed to `json.Unmarshal` & co. | CALL | TYPES | native: GoVetUnmarshalRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:unreachable` | govet | unreachable code | FUNCTION | FLOW | native: `GoUnreachableCode` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:unsafeptr` | govet | invalid `uintptr` -> `unsafe.Pointer` conversion | EXPRESSION | TYPES | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:unsafeptr` | govet | invalid `uintptr` -> `unsafe.Pointer` conversion | EXPRESSION | TYPES | native: GoVetUnsafePointerRule | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:unusedresult` | govet | result of pure function (`fmt.Sprintf`, `errors.New`…) dropped | CALL | TYPES | native: `GoUnusedResult` | S | v1+v2 | `unusedresult.funcs`, `stringmethods` | BSD-3-Clause (x/tools) |
 | `govet:unusedwrite` | govet | write to a struct field/array element never read | FUNCTION | SSA-heavy | port-approx | L | — | — | BSD-3-Clause (x/tools) |
 | `govet:waitgroup` | govet | `wg.Add` inside the goroutine | STATEMENT | TYPES | native: `GoWaitGroupAddInGoroutine` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
@@ -92,142 +92,142 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 
 | Rule id | Linter | What | Scope | Needs | Status | Size | Default | Options | License |
 |---|---|---|---|---|---|---|---|---|---|
-| `SA1000` | staticcheck | invalid regexp in a constant argument | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1001` | staticcheck | invalid `text/template` / `html/template` | CALL | TYPES | port | M | v1+v2 | — | MIT |
+| `SA1000` | staticcheck | invalid regexp in a constant argument | CALL | TYPES | native: GoInvalidRegexpRule | S | v1+v2 | — | MIT |
+| `SA1001` | staticcheck | invalid `text/template` / `html/template` | CALL | TYPES | native: GoTemplateParseRule | M | v1+v2 | — | MIT |
 | `SA1002` | staticcheck | impossible `time.Parse` layout | CALL | TYPES | native (partial): GoTimeLayout (notation checks; full layout validation to port) | M | v1+v2 | — | MIT |
-| `SA1003` | staticcheck | `encoding/binary` with a type of undefined size | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1004` | staticcheck | `time.Sleep(1)` with a small untyped constant (nanoseconds) | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1005` | staticcheck | `exec.Command("ls -l")`: arguments inside the program name | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1006` | staticcheck | `Printf(dynamic)` without arguments | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1007` | staticcheck | constant URL that does not parse | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1008` | staticcheck | non-canonical key in direct `http.Header` map access | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1010` | staticcheck | `FindAll(…, 0)` returns nothing | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1011` | staticcheck | invalid UTF-8 constant passed to `strings` API | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1012` | staticcheck | nil `context.Context` passed | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1013` | staticcheck | `Seek(io.SeekStart, 0)`: offset and whence swapped | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1014` | staticcheck | non-pointer passed to `Unmarshal`/`Decode` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1015` | staticcheck | `time.Tick` leaking a ticker (go < 1.23) | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1016` | staticcheck | trapping `SIGKILL`/`SIGSTOP` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1017` | staticcheck | unbuffered channel for `signal.Notify` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1018` | staticcheck | `strings.Replace(…, 0)` replaces nothing | CALL | TYPES | port | S | v1+v2 | — | MIT |
+| `SA1003` | staticcheck | `encoding/binary` with a type of undefined size | CALL | TYPES | native: GoBinaryWriteRule | S | v1+v2 | — | MIT |
+| `SA1004` | staticcheck | `time.Sleep(1)` with a small untyped constant (nanoseconds) | CALL | TYPES | native: GoSleepNanosecondsRule | S | v1+v2 | — | MIT |
+| `SA1005` | staticcheck | `exec.Command("ls -l")`: arguments inside the program name | CALL | TYPES | native: GoExecCommandRule | S | v1+v2 | — | MIT |
+| `SA1006` | staticcheck | `Printf(dynamic)` without arguments | CALL | TYPES | native: GoDynamicFormatRule | S | v1+v2 | — | MIT |
+| `SA1007` | staticcheck | constant URL that does not parse | CALL | TYPES | native: GoInvalidUrlRule | S | v1+v2 | — | MIT |
+| `SA1008` | staticcheck | non-canonical key in direct `http.Header` map access | EXPRESSION | TYPES | native: GoHttpHeaderKeyRule | S | v1+v2 | — | MIT |
+| `SA1010` | staticcheck | `FindAll(…, 0)` returns nothing | CALL | TYPES | native: GoRegexpFindAllZeroRule | S | v1+v2 | — | MIT |
+| `SA1011` | staticcheck | invalid UTF-8 constant passed to `strings` API | CALL | TYPES | native: GoInvalidUtf8CutsetRule | S | v1+v2 | — | MIT |
+| `SA1012` | staticcheck | nil `context.Context` passed | CALL | TYPES | native: GoNilContextRule | S | v1+v2 | — | MIT |
+| `SA1013` | staticcheck | `Seek(io.SeekStart, 0)`: offset and whence swapped | CALL | TYPES | native: GoSeekerArgumentsRule | S | v1+v2 | — | MIT |
+| `SA1014` | staticcheck | non-pointer passed to `Unmarshal`/`Decode` | CALL | TYPES | native: GoUnmarshalPointerRule | S | v1+v2 | — | MIT |
+| `SA1015` | staticcheck | `time.Tick` leaking a ticker (go < 1.23) | CALL | TYPES | native: GoTimeTickLeakRule | S | v1+v2 | — | MIT |
+| `SA1016` | staticcheck | trapping `SIGKILL`/`SIGSTOP` | CALL | TYPES | native: GoUntrappableSignalRule | S | v1+v2 | — | MIT |
+| `SA1017` | staticcheck | unbuffered channel for `signal.Notify` | CALL | TYPES | native: GoUnbufferedSignalChannelRule | S | v1+v2 | — | MIT |
+| `SA1018` | staticcheck | `strings.Replace(…, 0)` replaces nothing | CALL | TYPES | native: GoReplaceZeroRule | S | v1+v2 | — | MIT |
 | `SA1019` | staticcheck | use of a deprecated identifier (`Deprecated:` paragraph) | EXPRESSION | TYPES + PROJECT_INDEX | port | M | v1+v2 | — | MIT |
-| `SA1020` | staticcheck | invalid `host:port` constant | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1021` | staticcheck | `bytes.Equal` on `net.IP` | CALL | TYPES | port | S | v1+v2 | — | MIT |
+| `SA1020` | staticcheck | invalid `host:port` constant | CALL | TYPES | native: GoInvalidListenAddressRule | S | v1+v2 | — | MIT |
+| `SA1021` | staticcheck | `bytes.Equal` on `net.IP` | CALL | TYPES | native: GoBytesEqualIpRule | S | v1+v2 | — | MIT |
 | `SA1023` | staticcheck | `io.Writer` implementation modifies its buffer | FUNCTION | SSA-heavy | port-approx | M | v1+v2 | — | MIT |
-| `SA1024` | staticcheck | duplicate characters in a `Trim` cutset | CALL | TYPES | port | S | v1+v2 | — | MIT |
+| `SA1024` | staticcheck | duplicate characters in a `Trim` cutset | CALL | TYPES | native: GoNonUniqueCutsetRule | S | v1+v2 | — | MIT |
 | `SA1025` | staticcheck | `Timer.Reset` return value used incorrectly | CALL | TYPES + FLOW | port-approx | M | v1+v2 | — | MIT |
-| `SA1026` | staticcheck | marshaling channels or functions | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1027` | staticcheck | misaligned 64-bit atomic access | CALL | TYPES | port | M | v1+v2 | — | MIT |
-| `SA1028` | staticcheck | `sort.Slice` on a non-slice | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1029` | staticcheck | built-in type as `context.WithValue` key | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA1030` | staticcheck | invalid `strconv` base / bitSize | CALL | TYPES | port | S | v1+v2 | — | MIT |
+| `SA1026` | staticcheck | marshaling channels or functions | CALL | TYPES | native: GoMarshalUnsupportedRule | S | v1+v2 | — | MIT |
+| `SA1027` | staticcheck | misaligned 64-bit atomic access | CALL | TYPES | native: GoAtomicAlignmentRule | M | v1+v2 | — | MIT |
+| `SA1028` | staticcheck | `sort.Slice` on a non-slice | CALL | TYPES | native: GoSortSliceRule | S | v1+v2 | — | MIT |
+| `SA1029` | staticcheck | built-in type as `context.WithValue` key | CALL | TYPES | native: GoContextKeyTypeRule | S | v1+v2 | — | MIT |
+| `SA1030` | staticcheck | invalid `strconv` base / bitSize | CALL | TYPES | native: GoStrconvArgumentsRule | S | v1+v2 | — | MIT |
 | `SA1031` | staticcheck | overlapping src/dst for an encoder | CALL | TYPES | port-approx | M | v1+v2 | — | MIT |
-| `SA1032` | staticcheck | `errors.Is(target, err)` arguments swapped | CALL | TYPES | port | S | v1+v2 | — | MIT |
+| `SA1032` | staticcheck | `errors.Is(target, err)` arguments swapped | CALL | TYPES | native: GoErrorsIsOrderRule | S | v1+v2 | — | MIT |
 | `SA2000` | staticcheck | `wg.Add` inside the goroutine | STATEMENT | TYPES | native: `GoWaitGroupAddInGoroutine` | S | v1+v2 | — | MIT |
-| `SA2001` | staticcheck | empty critical section `mu.Lock(); mu.Unlock()` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
+| `SA2001` | staticcheck | empty critical section `mu.Lock(); mu.Unlock()` | STATEMENT | TYPES | native: GoEmptyCriticalSectionRule | S | v1+v2 | — | MIT |
 | `SA2002` | staticcheck | `t.FailNow` from a goroutine | CALL | TYPES | native: `GoTestingGoroutine` | S | v1+v2 | — | MIT |
-| `SA2003` | staticcheck | `defer mu.Lock()` right after `Lock` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
+| `SA2003` | staticcheck | `defer mu.Lock()` right after `Lock` | STATEMENT | TYPES | native: GoDeferLockRule | S | v1+v2 | — | MIT |
 | `SA3000` | staticcheck | `TestMain` without `os.Exit` (go < 1.15) | FUNCTION | TYPES | skip: obsolete since Go 1.15 | S | v1+v2 | — | MIT |
-| `SA3001` | staticcheck | assignment to `b.N` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4000` | staticcheck | identical operands of a binary expression (`x == x`) | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4001` | staticcheck | `&*x` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4003` | staticcheck | unsigned compared `< 0` / `>= 0` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
+| `SA3001` | staticcheck | assignment to `b.N` | STATEMENT | TYPES | native: GoBenchmarkNRule | S | v1+v2 | — | MIT |
+| `SA4000` | staticcheck | identical operands of a binary expression (`x == x`) | EXPRESSION | TYPES | native: GoIdenticalOperandsRule | S | v1+v2 | — | MIT |
+| `SA4001` | staticcheck | `&*x` | EXPRESSION | TYPES | native: GoIneffectiveCopyRule | S | v1+v2 | — | MIT |
+| `SA4003` | staticcheck | unsigned compared `< 0` / `>= 0` | EXPRESSION | TYPES | native: GoExtremeComparisonRule | S | v1+v2 | — | MIT |
 | `SA4004` | staticcheck | loop exits unconditionally after one iteration | STATEMENT | FLOW | port | M | v1+v2 | — | MIT |
 | `SA4005` | staticcheck | field assignment to a value receiver never observed | FUNCTION | TYPES + FLOW | port-approx | M | v1+v2 | — | MIT |
 | `SA4006` | staticcheck | value assigned and never read | FUNCTION | FLOW | native: `GoIneffectualAssignment` | M | v1+v2 | — | MIT |
 | `SA4008` | staticcheck | loop condition variable never changes | STATEMENT | FLOW | port-approx | M | v1+v2 | — | MIT |
 | `SA4009` | staticcheck | argument overwritten before first use | FUNCTION | FLOW | port | M | v1+v2 | — | MIT |
 | `SA4010` | staticcheck | `append` result never observed | FUNCTION | FLOW | port-approx | M | v1+v2 | — | MIT |
-| `SA4011` | staticcheck | `break` in a `switch`/`select` inside a loop | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `SA4012` | staticcheck | comparison with `NaN` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4013` | staticcheck | `!!b` | EXPRESSION | SYNTAX | port | S | v1+v2 | — | MIT |
-| `SA4014` | staticcheck | duplicate condition in an `if`/`else if` chain | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4015` | staticcheck | `math.Ceil(float64(i))` of an integer | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4016` | staticcheck | `x ^ 0`, `x & 0`, `x << 0` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
+| `SA4011` | staticcheck | `break` in a `switch`/`select` inside a loop | STATEMENT | SYNTAX | native: GoIneffectiveBreakRule | S | v1+v2 | — | MIT |
+| `SA4012` | staticcheck | comparison with `NaN` | EXPRESSION | TYPES | native: GoNaNComparisonRule | S | v1+v2 | — | MIT |
+| `SA4013` | staticcheck | `!!b` | EXPRESSION | SYNTAX | native: GoDoubleNegationRule | S | v1+v2 | — | MIT |
+| `SA4014` | staticcheck | duplicate condition in an `if`/`else if` chain | STATEMENT | TYPES | native: GoRepeatedConditionRule | S | v1+v2 | — | MIT |
+| `SA4015` | staticcheck | `math.Ceil(float64(i))` of an integer | CALL | TYPES | native: GoIntegerMathRule | S | v1+v2 | — | MIT |
+| `SA4016` | staticcheck | `x ^ 0`, `x & 0`, `x << 0` | EXPRESSION | TYPES | native: GoSillyBitwiseRule | S | v1+v2 | — | MIT |
 | `SA4017` | staticcheck | result of a pure function discarded | CALL | TYPES | native: `GoUnusedResult` | S | v1+v2 | — | MIT |
 | `SA4018` | staticcheck | self-assignment | STATEMENT | SYNTAX | native: `GoSelfAssignment` | S | v1+v2 | — | MIT |
 | `SA4019` | staticcheck | duplicate build constraints | FILE | SYNTAX | port | S | v1+v2 | — | MIT |
-| `SA4020` | staticcheck | unreachable case in a type switch | STATEMENT | TYPES | port | M | v1+v2 | — | MIT |
-| `SA4021` | staticcheck | `x = append(y)` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4022` | staticcheck | `&x == nil` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
+| `SA4020` | staticcheck | unreachable case in a type switch | STATEMENT | TYPES | native: GoUnreachableTypeCaseRule | M | v1+v2 | — | MIT |
+| `SA4021` | staticcheck | `x = append(y)` | CALL | TYPES | native: GoSingleArgAppendRule | S | v1+v2 | — | MIT |
+| `SA4022` | staticcheck | `&x == nil` | EXPRESSION | TYPES | native: GoAddressIsNilRule | S | v1+v2 | — | MIT |
 | `SA4023` | staticcheck | impossible comparison of an interface with nil (typed nil) | EXPRESSION | TYPES + FLOW | port-approx | L | v1+v2 | — | MIT |
-| `SA4024` | staticcheck | `len(x) < 0` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4025` | staticcheck | integer division of constants yields 0 | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4026` | staticcheck | `-0.0` constant | EXPRESSION | SYNTAX | port | S | v1+v2 | — | MIT |
-| `SA4027` | staticcheck | `u.Query().Set(...)` on a copy | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4028` | staticcheck | `x % 1` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4029` | staticcheck | `sort.IntSlice(x)` as a statement | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `SA4030` | staticcheck | `rand.New(...)` result discarded | CALL | TYPES | port | S | v1+v2 | — | MIT |
+| `SA4024` | staticcheck | `len(x) < 0` | EXPRESSION | TYPES | native: GoBuiltinNegativeRule | S | v1+v2 | — | MIT |
+| `SA4025` | staticcheck | integer division of constants yields 0 | EXPRESSION | TYPES | native: GoIntegerDivisionZeroRule | S | v1+v2 | — | MIT |
+| `SA4026` | staticcheck | `-0.0` constant | EXPRESSION | SYNTAX | native: GoNegativeZeroRule | S | v1+v2 | — | MIT |
+| `SA4027` | staticcheck | `u.Query().Set(...)` on a copy | CALL | TYPES | native: GoUrlQueryCopyRule | S | v1+v2 | — | MIT |
+| `SA4028` | staticcheck | `x % 1` | EXPRESSION | TYPES | native: GoModuloOneRule | S | v1+v2 | — | MIT |
+| `SA4029` | staticcheck | `sort.IntSlice(x)` as a statement | STATEMENT | TYPES | native: GoSortTypeConversionRule | S | v1+v2 | — | MIT |
+| `SA4030` | staticcheck | `rand.New(...)` result discarded | CALL | TYPES | native: GoRandIntnOneRule | S | v1+v2 | — | MIT |
 | `SA4031` | staticcheck | nil check of a never-nil value | EXPRESSION | TYPES + FLOW | native: `GoImpossibleNilCheck` | S | v1+v2 | — | MIT |
-| `SA4032` | staticcheck | `runtime.GOOS == "linx"` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
+| `SA4032` | staticcheck | `runtime.GOOS == "linx"` | EXPRESSION | TYPES | native: GoImpossibleGoosRule | S | v1+v2 | — | MIT |
 | `SA5000` | staticcheck | assignment to a nil map | STATEMENT | TYPES + FLOW | port | M | v1+v2 | — | MIT |
 | `SA5001` | staticcheck | `defer f.Close()` before the error check | STATEMENT | TYPES + FLOW | native: `GoDeferBeforeErrorCheck` | S | v1+v2 | — | MIT |
-| `SA5002` | staticcheck | empty `for {}` spins | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `SA5003` | staticcheck | `defer` in an infinite loop | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `SA5004` | staticcheck | `for { select { … default: } }` busy loop | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `SA5005` | staticcheck | finalizer references the finalized object | CALL | TYPES | port | M | v1+v2 | — | MIT |
+| `SA5002` | staticcheck | empty `for {}` spins | STATEMENT | SYNTAX | native: GoSpinningLoopRule | S | v1+v2 | — | MIT |
+| `SA5003` | staticcheck | `defer` in an infinite loop | STATEMENT | SYNTAX | native: GoDeferInInfiniteLoopRule | S | v1+v2 | — | MIT |
+| `SA5004` | staticcheck | `for { select { … default: } }` busy loop | STATEMENT | SYNTAX | native: GoBusySelectLoopRule | S | v1+v2 | — | MIT |
+| `SA5005` | staticcheck | finalizer references the finalized object | CALL | TYPES | native: GoCyclicFinalizerRule | M | v1+v2 | — | MIT |
 | `SA5007` | staticcheck | infinite recursion | FUNCTION | TYPES + FLOW | port | M | v1+v2 | — | MIT |
 | `SA5008` | staticcheck | invalid struct tag | TYPE_SPEC | SYNTAX | native: `GoStructTag` | S | v1+v2 | — | MIT |
 | `SA5009` | staticcheck | printf format mismatch | CALL | TYPES | native: `GoPrintf` | S | v1+v2 | — | MIT |
-| `SA5010` | staticcheck | impossible type assertion | EXPRESSION | TYPES | port | M | v1+v2 | — | MIT |
+| `SA5010` | staticcheck | impossible type assertion | EXPRESSION | TYPES | native: GoImpossibleAssertionRule | M | v1+v2 | — | MIT |
 | `SA5011` | staticcheck | nil pointer dereference after a nil check | FUNCTION | TYPES + FLOW | native: `GoNilDereference` | L | v1+v2 | — | MIT |
-| `SA5012` | staticcheck | odd-length slice to a pairs function | CALL | TYPES | port | M | v1+v2 | — | MIT |
-| `SA6000` | staticcheck | `regexp.MustCompile` in a loop | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `SA6001` | staticcheck | `m[string(b)]` hoisted out of the index | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA6002` | staticcheck | non-pointer value put into `sync.Pool` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA6003` | staticcheck | `range []rune(s)` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `SA6005` | staticcheck | `strings.ToLower(a) == strings.ToLower(b)` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA6006` | staticcheck | `io.WriteString(w, string(b))` | CALL | TYPES | port | S | v1+v2 | — | MIT |
+| `SA5012` | staticcheck | odd-length slice to a pairs function | CALL | TYPES | native: GoEvenSliceLengthRule | M | v1+v2 | — | MIT |
+| `SA6000` | staticcheck | `regexp.MustCompile` in a loop | STATEMENT | TYPES | native: GoRegexpInLoopRule | S | v1+v2 | — | MIT |
+| `SA6001` | staticcheck | `m[string(b)]` hoisted out of the index | EXPRESSION | TYPES | native: GoMapByteKeyRule | S | v1+v2 | — | MIT |
+| `SA6002` | staticcheck | non-pointer value put into `sync.Pool` | CALL | TYPES | native: GoPoolPutRule | S | v1+v2 | — | MIT |
+| `SA6003` | staticcheck | `range []rune(s)` | STATEMENT | TYPES | native: GoRangeRunesRule | S | v1+v2 | — | MIT |
+| `SA6005` | staticcheck | `strings.ToLower(a) == strings.ToLower(b)` | EXPRESSION | TYPES | native: GoToLowerComparisonRule | S | v1+v2 | — | MIT |
+| `SA6006` | staticcheck | `io.WriteString(w, string(b))` | CALL | TYPES | native: GoWriteStringBytesRule | S | v1+v2 | — | MIT |
 | `SA9001` | staticcheck | `defer` in a `range` loop | STATEMENT | SYNTAX | native: `GoDeferInLoop` | S | v1+v2 | — | MIT |
-| `SA9002` | staticcheck | file mode looks like a forgotten octal (`644`) | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA9003` | staticcheck | empty branch | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
+| `SA9002` | staticcheck | file mode looks like a forgotten octal (`644`) | CALL | TYPES | native: GoOctalFileModeRule | S | v1+v2 | — | MIT |
+| `SA9003` | staticcheck | empty branch | STATEMENT | SYNTAX | native: GoEmptyBranchRule | S | v1+v2 | — | MIT |
 | `SA9004` | staticcheck | only the first constant of a group has an explicit type | TYPE_SPEC | TYPES | port | S | v1+v2 | — | MIT |
-| `SA9005` | staticcheck | marshaling a struct with no exported fields | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA9006` | staticcheck | shift in a too-narrow type before widening | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `SA9007` | staticcheck | `os.RemoveAll` of a directory that should not be deleted | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `SA9008` | staticcheck | `else` branch of a type assertion reads the shadowed zero value | STATEMENT | TYPES | port | M | v1+v2 | — | MIT |
+| `SA9005` | staticcheck | marshaling a struct with no exported fields | CALL | TYPES | native: GoNoopMarshalRule | S | v1+v2 | — | MIT |
+| `SA9006` | staticcheck | shift in a too-narrow type before widening | EXPRESSION | TYPES | native: GoDubiousShiftRule | S | v1+v2 | — | MIT |
+| `SA9007` | staticcheck | `os.RemoveAll` of a directory that should not be deleted | CALL | TYPES | native: GoRemoveUserDirRule | S | v1+v2 | — | MIT |
+| `SA9008` | staticcheck | `else` branch of a type assertion reads the shadowed zero value | STATEMENT | TYPES | native: GoShadowedAssertionElseRule | M | v1+v2 | — | MIT |
 | `SA9009` | staticcheck | `// go:generate` with a space is not a directive | FILE | SYNTAX | port | S | v1+v2 | — | MIT |
-| `SA9010` | staticcheck | `defer setup()` instead of `defer setup()()` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
+| `SA9010` | staticcheck | `defer setup()` instead of `defer setup()()` | STATEMENT | TYPES | native: GoDeferredFuncNotCalledRule | S | v1+v2 | — | MIT |
 
 ## staticcheck S (simple, former gosimple)
 
 | Rule id | Linter | What | Scope | Needs | Status | Size | Default | Options | License |
 |---|---|---|---|---|---|---|---|---|---|
-| `S1000` | staticcheck (gosimple) | single-case `select` | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `S1001` | staticcheck (gosimple) | element copy loop -> `copy` | STATEMENT | TYPES | port | M | v1+v2 | — | MIT |
-| `S1002` | staticcheck (gosimple) | `if x == true` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `S1003` | staticcheck (gosimple) | `strings.Index(…) != -1` -> `Contains` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `S1004` | staticcheck (gosimple) | `bytes.Compare(a, b) == 0` -> `bytes.Equal` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `S1005` | staticcheck (gosimple) | `for x, _ = range` / `x, _ = <-ch` | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `S1006` | staticcheck (gosimple) | `for true {}` | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `S1007` | staticcheck (gosimple) | regexp in an interpreted string -> raw string | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1008` | staticcheck (gosimple) | `if c { return true }; return false` | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `S1009` | staticcheck (gosimple) | `x != nil && len(x) != 0` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `S1010` | staticcheck (gosimple) | `s[a:len(s)]` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `S1011` | staticcheck (gosimple) | append loop -> `append(a, b...)` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `S1012` | staticcheck (gosimple) | `time.Now().Sub(t)` -> `time.Since` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1016` | staticcheck (gosimple) | field-by-field copy -> conversion | EXPRESSION | TYPES | port | M | v1+v2 | — | MIT |
-| `S1017` | staticcheck (gosimple) | `if HasPrefix { s = s[n:] }` -> `TrimPrefix` | STATEMENT | TYPES | port | M | v1+v2 | — | MIT |
-| `S1018` | staticcheck (gosimple) | shifting loop -> `copy` | STATEMENT | TYPES | port | M | v1+v2 | — | MIT |
-| `S1019` | staticcheck (gosimple) | redundant `make` length/capacity | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1020` | staticcheck (gosimple) | `if _, ok := x.(T); ok && x != nil` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `S1021` | staticcheck (gosimple) | `var x T; x = v` -> one statement | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `S1023` | staticcheck (gosimple) | redundant trailing `return`/`break` | STATEMENT | SYNTAX | port | S | v1+v2 | — | MIT |
-| `S1024` | staticcheck (gosimple) | `t.Sub(time.Now())` -> `time.Until` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1025` | staticcheck (gosimple) | `fmt.Sprintf("%s", s)` of a string | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1028` | staticcheck (gosimple) | `errors.New(fmt.Sprintf(…))` -> `fmt.Errorf` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1029` | staticcheck (gosimple) | `range []rune(s)` -> `range s` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `S1030` | staticcheck (gosimple) | `string(buf.Bytes())` -> `buf.String()` | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
-| `S1031` | staticcheck (gosimple) | nil check around `range` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `S1032` | staticcheck (gosimple) | `sort.Sort(sort.IntSlice(x))` -> `sort.Ints` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1033` | staticcheck (gosimple) | `if _, ok := m[k]; ok { delete(m, k) }` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `S1034` | staticcheck (gosimple) | repeated assertions in a type switch -> bind the variable | STATEMENT | TYPES | port | M | v1+v2 | — | MIT |
-| `S1035` | staticcheck (gosimple) | `CanonicalHeaderKey` inside `Header.Add/Set/Get/Del` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1036` | staticcheck (gosimple) | guard before map increment / append | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `S1037` | staticcheck (gosimple) | `select { case <-time.After(d): }` -> `time.Sleep` | STATEMENT | TYPES | port | S | v1+v2 | — | MIT |
-| `S1038` | staticcheck (gosimple) | `Print(Sprintf(…))` -> `Printf` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1039` | staticcheck (gosimple) | `fmt.Sprint("literal")` | CALL | TYPES | port | S | v1+v2 | — | MIT |
-| `S1040` | staticcheck (gosimple) | assertion to the current interface type | EXPRESSION | TYPES | port | S | v1+v2 | — | MIT |
+| `S1000` | staticcheck (gosimple) | single-case `select` | STATEMENT | SYNTAX | native: GoSingleCaseSelectRule | S | v1+v2 | — | MIT |
+| `S1001` | staticcheck (gosimple) | element copy loop -> `copy` | STATEMENT | TYPES | native: GoLoopCopyRule | M | v1+v2 | — | MIT |
+| `S1002` | staticcheck (gosimple) | `if x == true` | EXPRESSION | TYPES | native: GoBoolComparisonRule | S | v1+v2 | — | MIT |
+| `S1003` | staticcheck (gosimple) | `strings.Index(…) != -1` -> `Contains` | EXPRESSION | TYPES | native: GoStringsIndexRule | S | v1+v2 | — | MIT |
+| `S1004` | staticcheck (gosimple) | `bytes.Compare(a, b) == 0` -> `bytes.Equal` | EXPRESSION | TYPES | native: GoBytesCompareRule | S | v1+v2 | — | MIT |
+| `S1005` | staticcheck (gosimple) | `for x, _ = range` / `x, _ = <-ch` | STATEMENT | SYNTAX | native: GoUnnecessaryBlankRule | S | v1+v2 | — | MIT |
+| `S1006` | staticcheck (gosimple) | `for true {}` | STATEMENT | SYNTAX | native: GoForTrueRule | S | v1+v2 | — | MIT |
+| `S1007` | staticcheck (gosimple) | regexp in an interpreted string -> raw string | CALL | TYPES | native: GoRegexpRawStringRule | S | v1+v2 | — | MIT |
+| `S1008` | staticcheck (gosimple) | `if c { return true }; return false` | STATEMENT | SYNTAX | native: GoIfReturnBoolRule | S | v1+v2 | — | MIT |
+| `S1009` | staticcheck (gosimple) | `x != nil && len(x) != 0` | EXPRESSION | TYPES | native: GoNilLenCheckRule | S | v1+v2 | — | MIT |
+| `S1010` | staticcheck (gosimple) | `s[a:len(s)]` | EXPRESSION | TYPES | native: GoSliceLenRule | S | v1+v2 | — | MIT |
+| `S1011` | staticcheck (gosimple) | append loop -> `append(a, b...)` | STATEMENT | TYPES | native: GoLoopAppendRule | S | v1+v2 | — | MIT |
+| `S1012` | staticcheck (gosimple) | `time.Now().Sub(t)` -> `time.Since` | CALL | TYPES | native: GoTimeSinceRule | S | v1+v2 | — | MIT |
+| `S1016` | staticcheck (gosimple) | field-by-field copy -> conversion | EXPRESSION | TYPES | native: GoStructConversionRule | M | v1+v2 | — | MIT |
+| `S1017` | staticcheck (gosimple) | `if HasPrefix { s = s[n:] }` -> `TrimPrefix` | STATEMENT | TYPES | native: GoTrimPrefixRule | M | v1+v2 | — | MIT |
+| `S1018` | staticcheck (gosimple) | shifting loop -> `copy` | STATEMENT | TYPES | native: GoLoopSlideRule | M | v1+v2 | — | MIT |
+| `S1019` | staticcheck (gosimple) | redundant `make` length/capacity | CALL | TYPES | native: GoMakeLenCapRule | S | v1+v2 | — | MIT |
+| `S1020` | staticcheck (gosimple) | `if _, ok := x.(T); ok && x != nil` | EXPRESSION | TYPES | native: GoAssertNotNilRule | S | v1+v2 | — | MIT |
+| `S1021` | staticcheck (gosimple) | `var x T; x = v` -> one statement | STATEMENT | SYNTAX | native: GoMergeVarAssignRule | S | v1+v2 | — | MIT |
+| `S1023` | staticcheck (gosimple) | redundant trailing `return`/`break` | STATEMENT | SYNTAX | native: GoRedundantControlFlowRule | S | v1+v2 | — | MIT |
+| `S1024` | staticcheck (gosimple) | `t.Sub(time.Now())` -> `time.Until` | CALL | TYPES | native: GoTimeUntilRule | S | v1+v2 | — | MIT |
+| `S1025` | staticcheck (gosimple) | `fmt.Sprintf("%s", s)` of a string | CALL | TYPES | native: GoRedundantSprintfRule | S | v1+v2 | — | MIT |
+| `S1028` | staticcheck (gosimple) | `errors.New(fmt.Sprintf(…))` -> `fmt.Errorf` | CALL | TYPES | native: GoErrorsNewSprintfRule | S | v1+v2 | — | MIT |
+| `S1029` | staticcheck (gosimple) | `range []rune(s)` -> `range s` | STATEMENT | TYPES | native: GoRangeStringRunesRule | S | v1+v2 | — | MIT |
+| `S1030` | staticcheck (gosimple) | `string(buf.Bytes())` -> `buf.String()` | EXPRESSION | TYPES | native: GoBufferConversionRule | S | v1+v2 | — | MIT |
+| `S1031` | staticcheck (gosimple) | nil check around `range` | STATEMENT | TYPES | native: GoNilCheckAroundRangeRule | S | v1+v2 | — | MIT |
+| `S1032` | staticcheck (gosimple) | `sort.Sort(sort.IntSlice(x))` -> `sort.Ints` | CALL | TYPES | native: GoSortHelperRule | S | v1+v2 | — | MIT |
+| `S1033` | staticcheck (gosimple) | `if _, ok := m[k]; ok { delete(m, k) }` | STATEMENT | TYPES | native: GoGuardedDeleteRule | S | v1+v2 | — | MIT |
+| `S1034` | staticcheck (gosimple) | repeated assertions in a type switch -> bind the variable | STATEMENT | TYPES | native: GoTypeSwitchAssertRule | M | v1+v2 | — | MIT |
+| `S1035` | staticcheck (gosimple) | `CanonicalHeaderKey` inside `Header.Add/Set/Get/Del` | CALL | TYPES | native: GoCanonicalHeaderKeyRule | S | v1+v2 | — | MIT |
+| `S1036` | staticcheck (gosimple) | guard before map increment / append | STATEMENT | TYPES | native: GoMapGuardRule | S | v1+v2 | — | MIT |
+| `S1037` | staticcheck (gosimple) | `select { case <-time.After(d): }` -> `time.Sleep` | STATEMENT | TYPES | native: GoElaborateSleepRule | S | v1+v2 | — | MIT |
+| `S1038` | staticcheck (gosimple) | `Print(Sprintf(…))` -> `Printf` | CALL | TYPES | native: GoPrintSprintfRule | S | v1+v2 | — | MIT |
+| `S1039` | staticcheck (gosimple) | `fmt.Sprint("literal")` | CALL | TYPES | native: GoSprintLiteralRule | S | v1+v2 | — | MIT |
+| `S1040` | staticcheck (gosimple) | assertion to the current interface type | EXPRESSION | TYPES | native: GoSameTypeAssertionRule | S | v1+v2 | — | MIT |
 
 ## staticcheck ST (stylecheck)
 
@@ -749,9 +749,9 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | Section | native | native (partial) | same-as | port | port-approx | skip | formatter | total |
 |---|---|---|---|---|---|---|---|---|
 | errcheck, ineffassign, unused | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 3 |
-| govet analyzers | 15 | 1 | 0 | 23 | 1 | 5 | 0 | 45 |
-| staticcheck SA (bugs) | 11 | 1 | 0 | 76 | 7 | 1 | 0 | 96 |
-| staticcheck S (simple, former gosimple) | 0 | 0 | 0 | 35 | 0 | 0 | 0 | 35 |
+| govet analyzers | 28 | 1 | 0 | 10 | 1 | 5 | 0 | 45 |
+| staticcheck SA (bugs) | 79 | 1 | 0 | 8 | 7 | 1 | 0 | 96 |
+| staticcheck S (simple, former gosimple) | 35 | 0 | 0 | 0 | 0 | 0 | 0 | 35 |
 | staticcheck ST (stylecheck) | 3 | 0 | 0 | 15 | 0 | 0 | 0 | 18 |
 | staticcheck QF (quickfix) | 0 | 0 | 0 | 12 | 0 | 0 | 0 | 12 |
 | revive rules | 6 | 4 | 0 | 91 | 2 | 2 | 0 | 105 |
@@ -761,12 +761,12 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | Popular linters (one rule each, or a few sub-checks) | 6 | 2 | 0 | 26 | 1 | 1 | 0 | 36 |
 | Formatters | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 5 |
 | GoLand inspections | 23 | 7 | 47 | 37 | 3 | 6 | 0 | 123 |
-| **All** | **68** | **17** | **47** | **477** | **18** | **17** | **5** | **649** |
+| **All** | **184** | **17** | **47** | **361** | **18** | **17** | **5** | **649** |
 
-golangci default set (v1+v2 and v2 rows, 194 rules): native 27, native (partial) 2, port 154, port-approx 7, skip 4.
+golangci default set (v1+v2 and v2 rows, 194 rules): native 141, native (partial) 2, port 40, port-approx 7, skip 4.
 
 GoLand inspections (123): native 23, native (partial) 7, same-as 47, port 37, port-approx 3, skip 6.
-GoLand coverage: 23 of 123 inspections are covered today by a native inspection (native, or same-as a rule that is native); 7 more are partial.
+GoLand coverage: 34 of 123 inspections are covered today by a native inspection (native, or same-as a rule that is native); 7 more are partial.
 Estimate after batches B1-B7: 54 of 123 (44%), 6 skipped by design; the rest is GoLand-only or sits in later batches.
 After all batches (B1-B30): 117 of 123; the 6 skipped rows are IDE mechanics or covered elsewhere (reason in the Status column).
 ## Porting plan
@@ -833,19 +833,19 @@ GoLand-parity widenings of the same inspections: `goland:GoContextTodo` (every `
 (other proven-constant conditions next to `GoImpossibleNilCheck`), `goland:GoDfaNilDereference` (may-be-nil on some path in `GoNilDereference`),
 `goland:GoDivisionByZero`, `goland:GoNilness` (nil channels, nil-map reads), `goland:GoResourceLeak` (`os.Open` & co. next to `GoBodyNotClosed`).
 
-### B2. staticcheck SA: stdlib call contracts, part 1 (20) — CALL, TYPES
+### B2. staticcheck SA: stdlib call contracts, part 1 (20) — CALL, TYPES — done (versions 0.2.74)
 `SA1000`, `SA1004`, `SA1005`, `SA1006`, `SA1007`, `SA1010`, `SA1012`, `SA1013`, `SA1014`, `govet:unmarshal`, `SA1016`, `SA1017`, `govet:sigchanyzer`,
 `SA1018`, `SA1020`, `SA1021`, `SA1024`, `SA1029`, `SA1030`, `SA1032`.
 
-### B3. staticcheck SA: stdlib call contracts, part 2 (19) — CALL, TYPES
+### B3. staticcheck SA: stdlib call contracts, part 2 (19) — CALL, TYPES — done (versions 0.2.74)
 `SA1001`, `SA1003`, `SA1008`, `SA1011`, `SA1015`, `SA1026`, `SA1027`, `govet:atomicalign`, `SA1028`, `govet:sortslice`, `SA5005`, `SA5012`, `SA6002`,
 `SA9002`, `SA9005`, `SA9007`, `SA4027`, `SA4030`, `SA4015`.
 
-### B4. staticcheck SA + govet: suspicious expressions (20) — EXPRESSION, TYPES
+### B4. staticcheck SA + govet: suspicious expressions (20) — EXPRESSION, TYPES — done (versions 0.2.75)
 `SA4000`, `SA4001`, `SA4003`, `SA4012`, `SA4013`, `SA4016`, `SA4022`, `SA4024`, `SA4025`, `SA4026`, `SA4028`, `SA4032`, `SA9006`, `SA5010`,
 `govet:ifaceassert`, `govet:nilfunc`, `govet:shift`, `govet:bools`, `govet:stringintconv`, `govet:unsafeptr`.
 
-### B5. staticcheck SA + govet: suspicious statements (20) — STATEMENT, SYNTAX/TYPES
+### B5. staticcheck SA + govet: suspicious statements (20) — STATEMENT, SYNTAX/TYPES — done (versions 0.2.75)
 `SA2001`, `SA2003`, `SA3001`, `SA4011`, `SA4014`, `SA4020`, `SA4029`, `SA4021`, `govet:appends`, `SA5002`, `SA5003`, `SA5004`, `SA6000`, `SA6003`,
 `SA9003`, `SA9008`, `SA9010`, `govet:atomic`, `govet:defers`, `SA6001`.
 
@@ -858,10 +858,10 @@ GoLand-parity widenings of the same inspections: `goland:GoContextTodo` (every `
 `SA4004`, `SA4009`, `SA5000`, `SA5007`, `revive:unconditional-recursion`, `SA4005`, `SA4008`, `SA4010`, `SA4023`, `SA1025`, `SA1023`, `SA1031`,
 `govet:unusedwrite`, `makezero`, `rowserrcheck`, `goland:GoMaybeNil` (interprocedural nil summaries, an approximation).
 
-### B8. staticcheck S (simple): statement rewrites (17) — STATEMENT, SYNTAX/TYPES, each with a quick fix
+### B8. staticcheck S (simple): statement rewrites (17) — STATEMENT, SYNTAX/TYPES, each with a quick fix — done (versions 0.2.76)
 `S1000`, `S1001`, `S1005`, `S1006`, `S1008`, `S1011`, `S1016`, `S1017`, `S1018`, `S1021`, `S1023`, `S1029`, `S1031`, `S1033`, `S1034`, `S1036`, `S1037`.
 
-### B9. staticcheck S (simple): call and expression rewrites (20) — CALL / EXPRESSION, TYPES, each with a quick fix
+### B9. staticcheck S (simple): call and expression rewrites (20) — CALL / EXPRESSION, TYPES, each with a quick fix — done (versions 0.2.76)
 `S1002`, `S1003`, `S1004`, `S1007`, `S1009`, `S1010`, `S1012`, `S1019`, `S1020`, `S1024`, `S1025`, `S1028`, `S1030`, `S1032`, `S1035`, `S1038`,
 `S1039`, `S1040`, `SA6005`, `SA6006`.
 

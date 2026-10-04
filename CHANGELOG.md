@@ -30,6 +30,30 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.96] - 2026-10-04
+
+### Added — go:generate from the directive
+- ▶ in the gutter of each `//go:generate` line: "Run go:generate" runs this directive alone (`go generate -run '^<the line, regexp-quoted>$' file.go`),
+  "go generate file.go" every directive of the file; output in the Build tool window as Go | Generate, documents saved first, the module re-read after.
+- Go | Generate File: `go generate` for the Go file of the editor (disabled when the file has no directive).
+
+## [0.2.95] - 2026-10-04
+
+### Added — Check Go code before a commit
+- The Commit dialog of a Go project has the option "Check Go code" (on by default, kept per project in the workspace, like "Analyze code").
+  Before the commit it runs the plugin's own Go inspections — the ones of Go | Inspect Project, by the current inspection profile — over
+  the changed `.go` files only (not vendor / testdata / `.x` / `_x`). Warnings and errors stop the commit: "Review Go problems" opens them
+  in Inspection Results with their fixes, "Commit Anyway" goes on; weak warnings do not stop it. No external linter runs here.
+
+## [0.2.94] - 2026-10-04
+
+### Added — Copy JSON sample
+- Alt+Enter on a struct type: "Copy JSON sample to clipboard", the reverse of Type from JSON. Keys from `json` tags (`name,omitempty`, `-`),
+  unexported fields skipped, embedded structs flattened as encoding/json does, sample values by type (`""`, `0`, `false`, an RFC 3339
+  `time.Time`, `[sample]` for slices, `{}` for maps, the pointee for pointers, nested structs of the same package with a cycle guard, `null`
+  for the rest).
+- Docs: `docs/LINT-RULES.md` statuses of batches B2–B5, B8, B9 and its summary brought up to date; stale rows of `docs/FEATURES.md` fixed.
+
 ## [0.2.93] - 2026-10-04
 
 ### Changed

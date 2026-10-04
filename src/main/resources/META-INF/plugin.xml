@@ -192,6 +192,11 @@
             <className>io.github.golangsupport.lang.GoGenerateTestIntention</className>
             <category>Go</category>
         </intentionAction>
+        <intentionAction>
+            <language>Go</language>
+            <className>io.github.golangsupport.lang.GoCopyJsonSampleIntention</className>
+            <category>Go</category>
+        </intentionAction>
         <liveTemplateContext contextId="GO" implementation="io.github.golangsupport.lang.GoTemplateContext"/>
         <liveTemplateContext contextId="GO_STATEMENT" baseContextId="GO" implementation="io.github.golangsupport.lang.GoStatementTemplateContext"/>
         <liveTemplateContext contextId="GO_TOP_LEVEL" baseContextId="GO" implementation="io.github.golangsupport.lang.GoTopLevelTemplateContext"/>
@@ -294,6 +299,10 @@
         <configurationType implementation="io.github.golangsupport.run.GoLandTestConfigurationType"/>
         <runConfigurationProducer implementation="io.github.golangsupport.run.GoRunConfigurationProducer"/>
         <runLineMarkerContributor language="Go" implementationClass="io.github.golangsupport.run.GoRunLineMarkerContributor"/>
+        <!-- ▶ on //go:generate lines: this directive (go generate -run) or the whole file -->
+        <runLineMarkerContributor language="Go" implementationClass="io.github.golangsupport.build.GoGenerateLineMarkerContributor"/>
+        <!-- "Check Go code" in the commit options: the native inspections over the changed Go files before a commit -->
+        <checkinHandlerFactory implementation="io.github.golangsupport.ci.GoCheckinHandlerFactory"/>
         <formattingService implementation="io.github.golangsupport.format.GoFormattingService"/>
         <actionOnSave implementation="io.github.golangsupport.format.GoFormatOnSave"/>
         <postStartupActivity implementation="io.github.golangsupport.run.GoRunConfigurationStartupActivity"/>
@@ -330,6 +339,8 @@
             <action id="Go.ReanalyseProject" class="io.github.golangsupport.problems.GoReanalyseProjectAction" text="Reanalyse Project Problems"
                     description="Run the background analysis over every Go file of the project now: all problems in the Project Errors tab of the Problems tool window"/>
             <action id="Go.Generate" class="io.github.golangsupport.build.GoGenerateAction" text="Generate" description="go generate ./..."/>
+            <action id="Go.GenerateFile" class="io.github.golangsupport.build.GoGenerateFileAction" text="Generate File"
+                    description="go generate for the Go file of the editor: every //go:generate directive of it"/>
             <action id="Go.RebuildCatalogue" class="io.github.golangsupport.catalogue.GoRebuildCatalogueAction" text="Read Packages Again"
                     description="Read the exported names of the standard library and of the modules of go.mod from their sources again: what completion offers by a name"/>
             <action id="Go.Reanalyze" class="io.github.golangsupport.build.GoReanalyzeAction" text="Reanalyze Project"

@@ -191,7 +191,7 @@ class GoInspectScope private constructor(private val project: Project, base: Glo
  * The platform's batch context that opens the gate of the native diagnostics ([GoBatchInspections]) for each run, Rerun of the view included,
  * and closes it when the run ends, is cancelled or its view is closed.
  */
-private class GoInspectContext(project: Project, contentManager: NotNullLazyValue<out ContentManager>) : GlobalInspectionContextImpl(project, contentManager) {
+internal class GoInspectContext(project: Project, contentManager: NotNullLazyValue<out ContentManager>) : GlobalInspectionContextImpl(project, contentManager) {
     @Volatile private var release: (() -> Unit)? = null
 
     override fun doInspections(scope: AnalysisScope) {

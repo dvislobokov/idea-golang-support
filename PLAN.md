@@ -107,8 +107,10 @@
 - [x] (2026-09-29, робот) **Remote debug и режимы delve.** Конфигурация «Go Remote»: host:port уже запущенного `dlv dap --listen` (пропустить `DelveProcess`, только сокет; `launch`/`attach`
   как сейчас) — день; «Go Exec» (`mode: exec`, путь к бинарнику, без сборки) — полдня; core dump (`mode: core`, `coreFilePath`) — полдня. Как: `GoRunConfigurationOptions.kind`,
   `GoDebugRunner`, `GoLaunchArguments`.
-- [ ] **Watchpoints.** Точки на функцию сделаны (2026-09-30, ROADMAP). Осталось `setDataBreakpoints` через `dataBreakpointInfo` на переменной в Variables; сначала
-  зондом (`tools/dlv-dap/probe.py`) проверить, объявляет ли `dlv dap` `supportsDataBreakpoints`. Как: новый `XBreakpointType` в `GoDebugBreakpoints`. День.
+- [ ] **Watchpoints.** Точки на функцию сделаны (2026-09-30, ROADMAP). Осталось `setDataBreakpoints` через `dataBreakpointInfo` на переменной в Variables.
+  Проверено 2026-10-04 по исходникам delve v1.27.2 (`service/dap/server.go`, `onInitializeRequest`): `supportsDataBreakpoints` объявляется только на
+  linux/darwin amd64/arm64, на Windows — нет. Делать вместе с Run Targets (WSL), где это можно проверить вживую; действие показывать только при
+  capability. Как: новый `XBreakpointType` в `GoDebugBreakpoints`. День.
 - [ ] **Endpoints.** Сканер по токенам: `http.HandleFunc("/path"`, `mux.Handle`, `r.Get/Post/…("/path"` (chi, gin, echo, fiber, gorilla) → tool window Endpoints
   (метод, путь, обработчик, переход) и Search Everywhere по URL. Без резолва: по строковым литералам и имени метода. 2–3 дня.
 - [ ] **Extract Interface** на PSI: интерфейс по выбранным методам типа (Change Signature, Safe Delete и Move уже свои — 0.2.47–0.2.58). День.
