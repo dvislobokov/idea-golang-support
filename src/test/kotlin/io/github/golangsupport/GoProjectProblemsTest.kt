@@ -116,15 +116,59 @@ class GoProjectProblemsTest : BasePlatformTestCase() {
         assertEquals("no pass is due", emptyList<String>(), drain())
     }
 
-    fun testAChangedProjectIsAnalysedAgain() {
+    fun testAChangedFileIsAnalysedAloneOverTheSnapshot() {
         fixture()
         full()
         assertTrue(background { service.saveSnapshot() })
+        val before = shown()
         edit("pp/other/o.go", "oo := 1", "oo := 2")
         assertFalse("an unsaved Go file: no snapshot", background { service.saveSnapshot() })
         FileDocumentManager.getInstance().saveAllDocuments()
         service.clearForTests()
-        assertFalse("a file changed since the snapshot", background { service.restoreSnapshot() })
+        assertTrue("only a file changed: restored", background { service.restoreSnapshot() })
+        assertEquals(before, shown())
+        // the file, its package and its importers (none), not the project
+        assertEquals(listOf("other/o.go"), drain())
+    }
+
+    fun testAFileChangedSinceTheSnapshotTakesItsDependentsAlong() {
+        fixture()
+        full()
+        assertTrue(background { service.saveSnapshot() })
+        edit("pp/lib/lib.go", "func F()", "func G()")
+        FileDocumentManager.getInstance().saveAllDocuments()
+        service.clearForTests()
+        assertTrue(background { service.restoreSnapshot() })
+        // whether its declarations changed is not known after a restart: the package and its importers go too
+        assertEquals(listOf("lib/lib.go", "app/app.go", "lib/gen.go", "lib/use.go"), drain())
+        assertTrue(shown().toString(), "lib/use.go:4: GoUnresolvedReference" in shown())
+    }
+
+    fun testAFileDeletedSinceTheSnapshotLeavesAndItsPackageIsAnalysed() {
+        fixture()
+        full()
+        assertTrue(background { service.saveSnapshot() })
+        service.clearForTests()
+        WriteCommandAction.runWriteCommandAction(project) { myFixture.findFileInTempDir("pp/lib/lib.go").delete(this) }
+        assertTrue(background { service.restoreSnapshot() })
+        assertFalse(shown().toString(), shown().any { it.startsWith("lib/lib.go") })
+        val analysed = drain()
+        assertTrue(analysed.toString(), "lib/use.go" in analysed && "app/app.go" in analysed && "other/o.go" !in analysed)
+        assertTrue(shown().toString(), "lib/use.go:4: GoUnresolvedReference" in shown())
+    }
+
+    fun testAChangedBuildSettingRunsTheFullPass() {
+        fixture()
+        full()
+        assertTrue(background { service.saveSnapshot() })
+        service.clearForTests()
+        val goos = settings.analysisGoos
+        try {
+            settings.analysisGoos = "plan9"
+            assertFalse("every file may report differently", background { service.restoreSnapshot() })
+        } finally {
+            settings.analysisGoos = goos
+        }
     }
 
     fun testTheFilesOfTheProject() {

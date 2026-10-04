@@ -10,11 +10,31 @@ import java.security.MessageDigest
 /**
  * The findings of the last complete analysis, kept on disk with a fingerprint of everything they depend on: the analysed files (path,
  * size, time), go.mod / go.sum / go.work / vendor/modules.txt, the toolchain and build settings, the inspection profile, the plugin
- * version. A project opened again with the same fingerprint shows them at once and runs no full pass; any difference runs the pass as
- * before. Whole-project on purpose: a file's findings depend on other files, and partial reuse would risk showing stale ones. Pure.
+ * version. A project opened again with the same fingerprint shows them at once and runs no full pass. When only files differ
+ * ([fileChanges]) the findings are shown too and the changed, new and deleted files go to the incremental queue, which takes their packages
+ * and importers along as during a session; any other difference (the plugin, the profile, the toolchain, the build settings) changes what
+ * every file reports, and runs the full pass. Pure.
  */
 object GoProblemsSnapshot {
     const val FORMAT = 1
+
+    /** Paths of files changed or new since the snapshot, and of files gone (deleted, excluded). */
+    class FileChanges(val changed: List<String>, val removed: List<String>)
+
+    /** What differs between [then] and [now] when only `file` lines do; null when anything else does (a full pass), or [then] is empty (an old snapshot). */
+    fun fileChanges(then: List<String>, now: List<String>): FileChanges? {
+        if (then.isEmpty()) return null
+        val (filesThen, otherThen) = then.partition { it.startsWith(FILE) }
+        val (filesNow, otherNow) = now.partition { it.startsWith(FILE) }
+        if (otherThen.toSet() != otherNow.toSet()) return null
+        val before = filesThen.toSet()
+        val pathsNow = filesNow.mapTo(HashSet(), ::pathOf)
+        return FileChanges(filesNow.filter { it !in before }.map(::pathOf).distinct(), filesThen.map(::pathOf).filter { it !in pathsNow }.distinct())
+    }
+
+    private const val FILE = "file\t"
+
+    private fun pathOf(line: String): String = line.removePrefix(FILE).substringBeforeLast('\t').substringBeforeLast('\t')
 
     /** [inputs]: the lines of the fingerprint, so that a mismatch can say what changed. */
     class Snapshot(val format: Int, val fingerprint: String, val files: Map<String, List<GoFinding>>, val inputs: List<String> = emptyList())
@@ -34,7 +54,7 @@ object GoProblemsSnapshot {
     }
 
     /** The line of a file in the fingerprint. */
-    fun fileLine(path: String, size: Long, modified: Long): String = "file\t$path\t$size\t$modified"
+    fun fileLine(path: String, size: Long, modified: Long): String = "$FILE$path\t$size\t$modified"
 
     private val gson = GsonBuilder().disableHtmlEscaping().create()
     private val type = object : TypeToken<Snapshot>() {}.type

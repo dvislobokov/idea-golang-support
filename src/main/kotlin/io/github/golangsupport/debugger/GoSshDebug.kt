@@ -40,7 +40,7 @@ object GoSshDebug {
         val probe = run(GoSsh.commandLine(ssh, host, GoSsh.PROBE_SCRIPT), null, 30_000)
         if (probe.exit != 0) throw ExecutionException("Cannot run commands on $host over ssh: ${GoSsh.failure(probe.output)}")
         val target = GoSsh.probe(probe.output) ?: throw ExecutionException("$host is not a platform delve debugs: ${GoSsh.failure(probe.output)}")
-        val directory = GoSsh.directory(options.sshDirectory, target.home)
+        val directory = GoSsh.directory(options.sshDirectory, target.home, configuration.project.name)
         val runDirectory = GoSsh.runDirectory(directory, configuration.packageDirectory(), test)
         GoPluginLog.info(GoDebuggerLogs.CATEGORY, "SSH debug on $host: ${target.goos}/${target.goarch}, directory $directory")
 

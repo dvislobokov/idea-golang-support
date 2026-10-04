@@ -135,7 +135,7 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
      */
     var sshHost by string()
 
-    /** Where the program and delve go on [sshHost]: relative to the home directory there unless absolute; empty is [GoSsh.DEFAULT_DIRECTORY]. */
+    /** Where the program and delve go on [sshHost]: relative to the home directory there unless absolute; empty is [GoSsh.defaultDirectory] of the project. */
     var sshDirectory by string()
 
     /**

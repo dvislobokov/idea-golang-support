@@ -18,6 +18,18 @@ class GoProblemsSnapshotTest {
         assertNotEquals(GoProblemsSnapshot.fingerprint(listOf(a, b)), GoProblemsSnapshot.fingerprint(listOf(a)))
     }
 
+    @Test fun onlyFileChangesAreTakenOneByOne() {
+        val a = GoProblemsSnapshot.fileLine("/p/a b.go", 10, 100)
+        val b = GoProblemsSnapshot.fileLine("/p/b.go", 20, 200)
+        val then = listOf(a, b, "plugin\t1.0\t1")
+        val changes = GoProblemsSnapshot.fileChanges(then, listOf(GoProblemsSnapshot.fileLine("/p/a b.go", 11, 101), GoProblemsSnapshot.fileLine("/p/c.go", 1, 1), "plugin\t1.0\t1"))!!
+        assertEquals(listOf("/p/a b.go", "/p/c.go"), changes.changed)
+        assertEquals(listOf("/p/b.go"), changes.removed)
+        assertNull("the plugin changed", GoProblemsSnapshot.fileChanges(then, listOf(a, b, "plugin\t1.1\t1")))
+        assertNull("an old snapshot without inputs", GoProblemsSnapshot.fileChanges(emptyList(), listOf(a)))
+        assertEquals(0, GoProblemsSnapshot.fileChanges(then, then.reversed())!!.changed.size)
+    }
+
     @Test fun theSnapshotGoesThroughTheDisk() {
         val file = Files.createTempDirectory("go-problems").resolve("p.json")
         val finding = GoFinding(3, 1, GoSarifLevel.WARNING, "GoUnusedVariable", "Unused variable", "unused variable 'x' <\"quoted\">")

@@ -30,6 +30,35 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.102] - 2026-10-04
+
+### Changed — the form of a Go configuration
+- Package is a list of the packages of the project, by import path: programs (`package main` with `func main`) for `go run`, packages
+  with tests for `go test`; the button next to it picks another directory, or a single `.go` file for `go run`. A new configuration
+  starts on the first one; a stored target stays in the list whatever it is.
+- Files to copy (debug on an SSH host) is a table: + picks files and directories in the project, written relative to the package
+  directory; the second column is where each goes there, empty for the same relative path. Stored as before.
+- The directory there is `~/.cache/<project name>` by default (shown in the empty field). The plugin makes it private (`chmod 700`)
+  only when it made it itself (a `.go-project-support` marker in it): a `.cache/<name>` that was there before may be another tool's.
+
+## [0.2.101] - 2026-10-04
+
+### Changed — project problems at open: the changed files only
+- The snapshot of the Project Errors tab no longer goes to waste when a file changed while the IDE was closed (a pull, a branch switch,
+  an edit elsewhere): its findings are shown at once, and the changed and new files go to the incremental queue with their packages and
+  importers, the deleted ones take their package's dependents along. The full pass runs only when what every file reports may differ:
+  the plugin version, the inspection profile, the toolchain or the build settings (or a deleted directory, whose importers are known
+  only while it exists). Seen live: one file edited between two sessions, 9 of 18 files analysed instead of all.
+
+## [0.2.100] - 2026-10-04
+
+### Fixed — debug on an SSH host, two more guards
+- The SSH host may contain letters, digits and `. _ - @ : / [ ] %` only, and neither the user nor the host name may start with `-`
+  (`ssh://-oProxyCommand=…`, `me@-o…` passed the first check): a `ProxyCommand` with `%h` in `~/.ssh/config` hands the name to a shell
+  (CVE-2023-51385).
+- The directory there must be owned by the user, and each of its parents by the user or root, writable by others only when sticky
+  (`/tmp`): a parent others can write lets them rename the directory away and put their own delve in its place.
+
 ## [0.2.99] - 2026-10-04
 
 ### Added — Files to copy for debug on an SSH host

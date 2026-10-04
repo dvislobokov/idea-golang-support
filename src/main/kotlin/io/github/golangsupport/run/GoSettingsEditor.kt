@@ -1,12 +1,19 @@
 package io.github.golangsupport.run
 
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.openapi.ui.ComponentWithBrowseButton
+import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.RawCommandLineEditor
+import com.intellij.ui.SimpleListCellRenderer
+import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.ui.components.JBCheckBox
 import io.github.golangsupport.monitor.GoProfile
 import com.intellij.ui.components.JBScrollPane
@@ -19,7 +26,16 @@ import javax.swing.JComponent
 
 class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfiguration>() {
     private val commandCombo = ComboBox(GoCommand.entries.toTypedArray())
-    private val target = TextFieldWithBrowseButton()
+    /** The packages of the project ([GoPackageChoices]), filled in the background; Browse adds a directory or a file of one's own. */
+    private val targetModel = CollectionComboBoxModel<GoPackageChoices.Choice>()
+    private val targetCombo = ComboBox(targetModel).apply {
+        renderer = SimpleListCellRenderer.create("") { choice ->
+            if (choice.label == choice.directory) choice.directory else choice.label + if (choice.program && choice.tests) "  (main, tests)" else if (choice.program) "  (main)" else ""
+        }
+    }
+    private val target = ComponentWithBrowseButton(targetCombo) { browseTarget() }
+    private var choices: List<GoPackageChoices.Choice> = emptyList()
+    private var targetPath: String? = null
     private val recursive = JBCheckBox("Packages below the directory as well (./...)")
     private val testPattern = JBTextField()
     private val benchmark = JBCheckBox("Run benchmarks instead of tests")
@@ -45,11 +61,16 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
     private val pathSubstitutions = JBTextArea(3, 40)
     private val sshHost = JBTextField()
     private val sshDirectory = JBTextField()
-    private val sshFiles = JBTextArea(3, 40)
+    private val sshFiles = GoSshFilesTable(project) { selectedTarget() }
     private val sshCopyTestdata = JBCheckBox("Copy the testdata directory of the package")
 
     override fun createEditor(): JComponent {
-        target.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor().withTitle("Package Directory or Go File"))
+        commandCombo.addActionListener { fillTargets() }
+        targetCombo.addActionListener { targetPath = (targetCombo.selectedItem as? GoPackageChoices.Choice)?.directory ?: targetPath }
+        ReadAction.nonBlocking<List<GoPackageChoices.Choice>> { GoPackageChoices.collect(project) }
+            .inSmartMode(project).expireWith(this)
+            .finishOnUiThread(ModalityState.any()) { choices = it; fillTargets() }
+            .submit(AppExecutorUtil.getAppExecutorService())
         workingDirectory.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Working Directory"))
         environment.labelLocation = java.awt.BorderLayout.WEST
 
@@ -64,7 +85,7 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
 
         return panel {
             row("Kind:") { cell(commandCombo).comment("<code>go run</code> and <code>go test</code> build and run; Binary runs or debugs what is built; Core dump and Remote are for Debug only") }
-            row("Package:") { cell(target).align(AlignX.FILL).comment("The directory of the package; for <code>go run</code> a single <code>.go</code> file will do") }.visibleIf(goCommand)
+            row("Package:") { cell(target).align(AlignX.FILL).comment("The packages of the project: programs for <code>go run</code>, packages with tests for <code>go test</code>. Browse picks another directory, or a single <code>.go</code> file for <code>go run</code>") }.visibleIf(goCommand)
             row("Binary:") { cell(binary).align(AlignX.FILL).comment("Built already, with <code>-gcflags=all=-N -l</code> for a debugging that shows every variable; for Remote, the path on that machine") }.visibleIf(withBinary)
             row("Core dump:") { cell(coreFile).align(AlignX.FILL).comment("<code>GOTRACEBACK=crash</code> writes one on Linux; a minidump on Windows") }.visibleIf(core)
             row("dlv dap at:") {
@@ -90,18 +111,42 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
             row { cell(failFast) }.visibleIf(test)
             row("Timeout:") { cell(timeout.apply { columns = 10 }).comment("<code>-timeout</code>: <code>30s</code>, <code>5m</code>; empty is the default of go test, 10 minutes. The output is always verbose: <code>-json</code> implies <code>-v</code>") }.visibleIf(test)
             row("SSH host:") { cell(sshHost.apply { columns = 30; emptyText.text = "this machine" }).comment("Debug only: <code>user@host</code>, <code>ssh://user@host:port</code> or a host of <code>~/.ssh/config</code>, with a key (no password prompts). The program and delve are built here for that machine and copied there; delve listens there on a socket only you can open, reached through ssh") }.visibleIf(goCommand)
-            row("Directory there:") { cell(sshDirectory.apply { columns = 30; emptyText.text = GoSsh.DEFAULT_DIRECTORY }).comment("Where the program and delve go on the SSH host, under the home directory unless absolute; it must not be writable by others") }.visibleIf(goCommand)
-            row("Files to copy:") { cell(JBScrollPane(sshFiles)).align(AlignX.FILL).comment("<code>local</code> or <code>local=there</code>, a line each: files and directories of the project (relative to the package directory) sent with the program into the directory it runs in, readable by you alone there. There: by default the same name, or a relative path. Sent again only when they change") }.visibleIf(goCommand)
+            row("Directory there:") { cell(sshDirectory.apply { columns = 30; emptyText.text = GoSsh.defaultDirectory(project.name) }).comment("Where the program and delve go on the SSH host, under the home directory unless absolute; it must not be writable by others. By default <code>~/.cache/</code> and the name of the project") }.visibleIf(goCommand)
+            row("Files to copy:") { cell(sshFiles.component).align(AlignX.FILL).comment("Files and directories of the project sent with the program into the directory it runs in, readable by you alone there; sent again only when they change") }.visibleIf(goCommand)
             row { cell(sshCopyTestdata) }.visibleIf(test)
             row { cell(runtimeTelemetry).comment("For <code>go run</code>: the program is built and started with <code>GODEBUG=gctrace=1,schedtrace=1000</code>; the heap, the collections and the scheduler show in the Go Monitor tool window, not in the console") }.visibleIf(goCommand)
             row("Profile:") { cell(profile).comment("For <code>go test</code>: <code>-cpuprofile</code>, <code>-memprofile</code>, <code>-blockprofile</code>, <code>-mutexprofile</code> or <code>-trace</code>; after the run a notification opens it in <code>go tool pprof</code> / <code>go tool trace</code>") }.visibleIf(test)
         }
     }
 
+    private fun selectedTarget(): String? = targetPath?.trim()?.ifEmpty { null }
+
+    /** The list for the kind chosen, the stored target kept in it and selected. */
+    private fun fillTargets() {
+        val command = commandCombo.selectedItem as? GoCommand ?: return
+        val current = targetPath
+        val items = GoPackageChoices.forCommand(choices, command, current)
+        targetModel.replaceAll(items)
+        // a new configuration starts on the first program (or tested package) rather than on nothing
+        val selected = if (current == null) items.firstOrNull() else items.firstOrNull { GoPackageChoices.sameDirectory(it.directory, current) }
+        targetCombo.selectedItem = selected
+        targetPath = selected?.directory ?: current
+    }
+
+    private fun browseTarget() {
+        val descriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor().withTitle("Package Directory or Go File")
+        val start = targetPath?.let { com.intellij.openapi.vfs.LocalFileSystem.getInstance().findFileByPath(it) }
+        FileChooser.chooseFile(descriptor, project, target, start) { file ->
+            targetPath = file.path
+            fillTargets()
+        }
+    }
+
     override fun resetEditorFrom(configuration: GoRunConfiguration) {
         val options = configuration.options
         commandCombo.selectedItem = options.command
-        target.text = options.target.orEmpty()
+        targetPath = options.target
+        fillTargets()
         recursive.isSelected = options.recursive
         testPattern.text = options.testPattern.orEmpty()
         benchmark.isSelected = options.benchmark
@@ -128,14 +173,14 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         pathSubstitutions.text = options.pathSubstitutions.orEmpty()
         sshHost.text = options.sshHost.orEmpty()
         sshDirectory.text = options.sshDirectory.orEmpty()
-        sshFiles.text = options.sshFiles.orEmpty()
+        sshFiles.text = options.sshFiles
         sshCopyTestdata.isSelected = options.sshCopyTestdata
     }
 
     override fun applyEditorTo(configuration: GoRunConfiguration) {
         val options = configuration.options
         options.command = commandCombo.selectedItem as GoCommand
-        options.target = target.text.trim().ifEmpty { null }
+        options.target = selectedTarget()
         options.recursive = recursive.isSelected
         options.testPattern = testPattern.text.trim().ifEmpty { null }
         options.benchmark = benchmark.isSelected
@@ -162,7 +207,7 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         options.pathSubstitutions = pathSubstitutions.text.ifBlank { null }
         options.sshHost = sshHost.text.trim().ifEmpty { null }
         options.sshDirectory = sshDirectory.text.trim().ifEmpty { null }
-        options.sshFiles = sshFiles.text.ifBlank { null }
+        options.sshFiles = sshFiles.text
         options.sshCopyTestdata = sshCopyTestdata.isSelected
     }
 }

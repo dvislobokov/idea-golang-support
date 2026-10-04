@@ -35,11 +35,13 @@ class GoSshTest {
 
     @Test
     fun directoryIsUnderHomeUnlessAbsolute() {
-        assertEquals("/home/me/.cache/go-project-support", GoSsh.directory(null, "/home/me"))
-        assertEquals("/home/me/debug", GoSsh.directory("~/debug/", "/home/me/"))
-        assertEquals("/home/me/debug", GoSsh.directory("debug", "/home/me"))
-        assertEquals("/opt/app", GoSsh.directory("/opt/app/", "/home/me"))
-        assertEquals("/home/me", GoSsh.directory("~", "/home/me"))
+        assertEquals("/home/me/.cache/shop", GoSsh.directory(null, "/home/me", "shop"))
+        assertEquals("/home/me/.cache/my-shop-v2", GoSsh.directory(" ", "/home/me", "My shop/v2".replace("M", "m")))
+        assertEquals(".cache/go-project", GoSsh.defaultDirectory("..."))
+        assertEquals("/home/me/debug", GoSsh.directory("~/debug/", "/home/me/", "shop"))
+        assertEquals("/home/me/debug", GoSsh.directory("debug", "/home/me", "shop"))
+        assertEquals("/opt/app", GoSsh.directory("/opt/app/", "/home/me", "shop"))
+        assertEquals("/home/me", GoSsh.directory("~", "/home/me", "shop"))
     }
 
     @Test
@@ -55,6 +57,17 @@ class GoSshTest {
         assertNotNull(GoSsh.invalidHost("-oProxyCommand=calc.exe"))
         assertNotNull(GoSsh.invalidHost("host -oProxyCommand=x"))
         assertNotNull(GoSsh.invalidHost(" "))
+        assertNull(GoSsh.invalidHost("build.example.com"))
+        assertNull(GoSsh.invalidHost("me@[fe80::1%eth0]"))
+        assertNull(GoSsh.invalidHost("ssh://deploy_user@10.0.0.5:22/"))
+        assertNotNull(GoSsh.invalidHost("ssh://-oProxyCommand=calc"))
+        assertNotNull(GoSsh.invalidHost("me@-oProxyCommand=calc"))
+        assertNotNull(GoSsh.invalidHost("-me@host"))
+        assertNotNull(GoSsh.invalidHost("host;touch\$IFS/tmp/x"))
+        assertNotNull(GoSsh.invalidHost("h`id`"))
+        assertNotNull(GoSsh.invalidHost("me@"))
+        assertEquals("me" to "host", GoSsh.hostParts("ssh://me@host:2222"))
+        assertEquals(null to "fe80::1", GoSsh.hostParts("fe80::1"))
         assertThrows(IllegalArgumentException::class.java) { GoSsh.commandLine("ssh", "-oProxyCommand=x", "true") }
         val command = GoSsh.commandLine("ssh", "me@host", "true").parametersList.list
         assertEquals("--", command[command.indexOf("me@host") - 1])
@@ -72,8 +85,12 @@ class GoSshTest {
     @Test
     fun setupMakesThePluginDirectoryPrivateAndRefusesOthersWritable() {
         val own = GoSsh.setupScript("/home/me/.cache/g", "/home/me/.cache/g/runs/run-1", own = true)
-        assertTrue(own, own.startsWith("umask 077; mkdir -p '/home/me/.cache/g' || exit 1; chmod 700 '/home/me/.cache/g'; "))
-        assertTrue(own, "?????w*|????????w*) echo ${GoSsh.UNSAFE_MARK}; exit 3" in own)
+        // made private only when the plugin made it: .cache/<project> may be another tool's
+        assertTrue(own, own.startsWith("umask 077; [ -d '/home/me/.cache/g' ] || { mkdir -p '/home/me/.cache/g' && : > '/home/me/.cache/g/.go-project-support'; } || exit 1; " +
+            "[ -f '/home/me/.cache/g/.go-project-support' ] && chmod 700 '/home/me/.cache/g'; "))
+        assertTrue(own, "bad() { echo ${GoSsh.UNSAFE_MARK}; exit 3; }" in own)
+        assertTrue(own, "[ \"\$3\" = \"\$u\" ] || bad; case \"\$1\" in d????w*|d???????w*) bad;;" in own)
+        assertTrue(own, "case \"\$1\" in d????????[tT]*) ;; d????w*|d???????w*) bad;; esac; done" in own)
         assertTrue(own, own.endsWith("chmod 700 '/home/me/.cache/g/bin' '/home/me/.cache/g/runs' '/home/me/.cache/g/runs/run-1'"))
         assertFalse(GoSsh.setupScript("/srv/debug", "/srv/debug/runs/run-1", own = false).contains("chmod 700 '/srv/debug';"))
         assertEquals("/d/bin/dlv-linux-amd64-0123456789ab", GoSsh.delvePath("/d", "dlv-linux-amd64", "0123456789abcdef"))

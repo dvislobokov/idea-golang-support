@@ -509,6 +509,7 @@ pre .l.sel, .sel-t { background: var(--selbg); }
         <li><b>Поток данных.</b> Блокировка без разблокировки, недостижимый код, разыменование nil, ошибка, затёртая до проверки, потерянный контекст и незакрытый ответ HTTP.</li>
         <li><b>Исправление рядом.</b> <kbd data-action="ShowIntentionActions">Alt+Enter</kbd> добавляет проверку ошибки и <code>defer</code> закрытия, убирает неиспользуемый параметр вместе с аргументами вызовов.</li>
         <li><b>Проект и go.mod.</b> Циклы импортов, чужие <code>internal</code>-пакеты, лишние и повторённые <code>require</code>, <code>replace</code> на несуществующий каталог.</li>
+        <li><b>Весь проект в фоне.</b> Вкладка Project Errors окна Problems собирает замечания по всем файлам. После перезапуска IDE они видны сразу, а заново проверяются только файлы, изменённые с прошлого раза.</li>
       </ul>
     </div>
     <div class="win rise" data-scene="analysis" role="img" aria-label="Набирается ранний return под захваченным мьютексом: Lock подчёркивается предупреждением. Затем вызов os.Remove без проверки ошибки получает исправление Handle error">
@@ -640,6 +641,7 @@ pre .l.sel, .sel-t { background: var(--selbg); }
         <li><b>Остановка там, где нужно.</b> Условия, счётчики попаданий и остановка на панике.</li>
         <li><b>Горутины на виду.</b> Отдельная вкладка показывает, чем занята каждая горутина.</li>
         <li><b>Любой сценарий.</b> Программа, отдельный тест или уже работающий процесс.</li>
+        <li><b>На сервере по SSH.</b> Программа и Delve копируются туда вместе с конфигами и <code>testdata</code>. Ставить на сервер ничего не нужно.</li>
       </ul>
     </div>
     <div class="win rise" data-scene="debug" role="img" aria-label="Отладчик останавливается на строке цикла: значения переменных меняются от остановки к остановке">
@@ -753,11 +755,11 @@ pre .l.sel, .sel-t { background: var(--selbg); }
     <p>Повседневные задачи решаются из IDE, без терминала и сторонних утилит.</p>
     <div class="more">
       <div class="rise"><h3>Единый стиль кода</h3><p>gofmt или goimports приводят файл в порядок при каждом сохранении.</p></div>
-      <div class="rise"><h3>Линтер в редакторе</h3><p>Замечания golangci-lint рядом с кодом и исправления к ним по <kbd data-action="ShowIntentionActions">Alt+Enter</kbd>.</p></div>
+      <div class="rise"><h3>Проверки go vet и staticcheck</h3><p>Встроены в плагин и работают на ходу, исправления — по <kbd data-action="ShowIntentionActions">Alt+Enter</kbd>. golangci-lint можно подключить в настройках.</p></div>
       <div class="rise"><h3>Навигация</h3><p>Использования и реализации над объявлениями, иерархии вызовов и типов, переход из ассемблера <code>.s</code> к функции Go.</p></div>
       <div class="rise"><h3>Генерация кода</h3><p>Конструктор, методы доступа, <code>String()</code>, тест, недостающие методы интерфейса и функция по её вызову.</p></div>
       <div class="rise"><h3>Профили</h3><p>Профиль процессора или памяти для тестов включается в конфигурации запуска.</p></div>
-      <div class="rise"><h3>Запуск без настройки</h3><p>Для каждой программы проекта конфигурация запуска создаётся сама.</p></div>
+      <div class="rise"><h3>Запуск без настройки</h3><p>Для каждой программы проекта конфигурация запуска создаётся сама. В новой конфигурации пакет выбирается из списка программ и пакетов с тестами.</p></div>
     </div>
 
     <details>
@@ -770,6 +772,7 @@ pre .l.sel, .sel-t { background: var(--selbg); }
             <tr><td>Рефакторинги</td><td>Полный набор</td><td><span class="s part"></span>Переименование, извлечение, встраивание, изменение сигнатуры, перенос, безопасное удаление</td></tr>
             <tr><td>Навигация</td><td>Полная</td><td><span class="s ok"></span>Объявления, использования, реализации, иерархии вызовов и типов</td></tr>
             <tr><td>Отладчик</td><td>Delve</td><td><span class="s part"></span>Delve; без Smart Step Into и точек на данные</td></tr>
+            <tr><td>Удалённая машина</td><td>SSH, Docker, WSL</td><td><span class="s part"></span>Отладка по SSH; без Docker и WSL</td></tr>
             <tr><td>Тесты и покрытие</td><td>Есть</td><td><span class="s ok"></span>Есть</td></tr>
             <tr><td>Наблюдение за процессом</td><td>Профилировщик</td><td><span class="s part"></span>Показатели процесса и рантайма; без графа вызовов</td></tr>
             <tr><td>Зависимости</td><td>Есть</td><td><span class="s ok"></span>Версии и обновления</td></tr>
@@ -784,7 +787,7 @@ pre .l.sel, .sel-t { background: var(--selbg); }
       <summary>Что пока не поддерживается</summary>
       <ul>
         <li><b>Шаблоны <code>html/template</code> и <code>text/template</code>, cgo.</b> Ассемблер: только подсветка и переход к функции Go.</li>
-        <li><b>Запуск в Docker, по SSH и в WSL.</b></li>
+        <li><b>Запуск в Docker и WSL.</b> На SSH-сервере пока только отладка, обычный запуск — нет.</li>
         <li><b>Smart Step Into, Set Next Statement и точки останова на данные.</b></li>
         <li><b>Установка Go из IDE.</b> Путь к установленному Go задаётся в настройках.</li>
         <li><b>Список HTTP-маршрутов приложения.</b></li>
@@ -793,12 +796,12 @@ pre .l.sel, .sel-t { background: var(--selbg); }
     <details class="repo">
       <summary>Сценарий демонстрации на 10 минут</summary>
       <ol>
-        <li><b>Открыть папку с <code>go.mod</code>.</b> Конфигурации запуска созданы, сервер языка работает.</li>
+        <li><b>Открыть папку с <code>go.mod</code>.</b> Конфигурации запуска созданы, проект проиндексирован, вкладка Project Errors заполнена.</li>
         <li><b>Набрать код.</b> <code>f, err := os.Open(name)</code>, <kbd>Enter</kbd>, <kbd>Tab</kbd>; затем <code>strings.ToUp</code> и выбор из списка.</li>
         <li><b>Alt+Enter.</b> Handle error на вызове, Create function по несуществующему вызову.</li>
         <li><b>Рефакторинги.</b> Ctrl+Alt+M на строках цикла, Ctrl+Alt+N на переменной, Ctrl+F6 на методе интерфейса, F6 в другой пакет.</li>
         <li><b>Анализ.</b> <code>s.mu.Lock()</code> и ранний <code>return</code>; GOOS/GOARCH в статус-баре на js/wasm.</li>
-        <li><b>Отладка.</b> Точка с условием в цикле, вкладка Goroutines, Evaluate с вызовом метода.</li>
+        <li><b>Отладка.</b> Точка с условием в цикле, вкладка Goroutines, Evaluate с вызовом метода; та же конфигурация с полем SSH host — отладка на сервере.</li>
         <li><b>Тесты.</b> Окно Go Tests, Run with Coverage, Rerun Failed.</li>
         <li><b>Бенчмарк.</b> Запуск из gutter, таблица результатов.</li>
         <li><b>Go Monitor.</b> Запуск со сбором показателей рантайма, снимок горутин.</li>
@@ -813,9 +816,9 @@ pre .l.sel, .sel-t { background: var(--selbg); }
   <div class="wrap">
     <h2>Три шага до первой строки кода</h2>
     <ol class="start">
-      <li class="rise"><h3>Проверьте инструменты</h3><p>Нужны Go, сервер языка gopls и отладчик Delve. Что найдено и каких версий, показано в Settings, Go — на страницах GOROOT и Tools.</p></li>
-      <li class="rise"><h3>Откройте папку с проектом</h3><p>Достаточно каталога с <code>go.mod</code>. Сервер языка запустится сам, конфигурации запуска появятся в списке.</p></li>
-      <li class="rise"><h3>Работайте</h3><p>Подсветка и шаблоны доступны сразу, подсказки и навигация включаются после загрузки пакетов. Состояние сервера видно в статус-баре.</p></li>
+      <li class="rise"><h3>Проверьте инструменты</h3><p>Нужен только Go. Отладчик Delve плагин собирает сам из своих исходников, gopls подключается по желанию. Что найдено и каких версий, показано в Settings, Tools, Go.</p></li>
+      <li class="rise"><h3>Откройте папку с проектом</h3><p>Достаточно каталога с <code>go.mod</code>. Конфигурации запуска появятся в списке сами.</p></li>
+      <li class="rise"><h3>Работайте</h3><p>Подсветка и шаблоны доступны сразу, подсказки, навигация и проверки — после индексации проекта.</p></li>
     </ol>
     <p style="margin-top:40px; color:var(--text-3); font-size:.95rem">Эта страница всегда под рукой: меню Go, пункт Welcome to Go Project Support. Клавиши, действия и настройки собраны в справочнике: меню Go, пункт Help Page.</p>
   </div>
@@ -824,8 +827,8 @@ pre .l.sel, .sel-t { background: var(--selbg); }
 
 <footer>
   <div class="wrap">
-    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.2.59</span>
-    <span>Редакция страницы 2026-10-03.1</span>
+    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.2.102</span>
+    <span>Редакция страницы 2026-10-04.1</span>
     <a class="repo" href="guide.html">Справочник</a>
     <a class="repo" href="../COMPARE.md">Полное сравнение с GoLand</a>
     <a class="repo" href="../ROADMAP.md">Roadmap</a>

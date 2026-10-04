@@ -248,14 +248,32 @@ class GoProjectProblems(private val project: Project) : Disposable {
         val inputs = runCatching {
             ReadAction.nonBlocking<List<String>> { fingerprintLines() }.inSmartMode(project).expireWith(this).executeSynchronously()
         }.getOrNull() ?: return false
+        val then = (snapshot.inputs as List<String>?).orEmpty()
+        var changes: GoProblemsSnapshot.FileChanges? = null
         if (GoProblemsSnapshot.fingerprint(inputs) != snapshot.fingerprint) {
-            val changed = GoProblemsSnapshot.difference((snapshot.inputs as List<String>?).orEmpty(), inputs).joinToString("; ") { it.replace('\t', ' ') }
-            GoPluginLog.info(CATEGORY, "project problems snapshot: the project changed since ($changed), analysing")
-            return false
+            val difference = GoProblemsSnapshot.difference(then, inputs).joinToString("; ") { it.replace('\t', ' ') }
+            changes = GoProblemsSnapshot.fileChanges(then, inputs)
+            // a deleted directory: its import path, which finds its importers, is known only while it exists
+            if (changes == null || changes.removed.any { findByPath(it.substringBeforeLast('/')) == null }) {
+                GoPluginLog.info(CATEGORY, "project problems snapshot: the project changed since ($difference), analysing")
+                return false
+            }
+            GoPluginLog.info(CATEGORY, "project problems snapshot: ${changes.changed.size} files changed, ${changes.removed.size} gone since ($difference), analysing these")
         }
-        val restored = snapshot.files.mapNotNull { (path, found) -> findByPath(path)?.let { it to found } }
+        val removed = changes?.removed.orEmpty().toSet()
+        val restored = snapshot.files.filterKeys { it !in removed }.mapNotNull { (path, found) -> findByPath(path)?.let { it to found } }
         for ((file, found) in restored) publish(file, found)
         fullDone = true
+        if (changes != null) {
+            // as if they had changed during a session: the file first, then its package and its importers (no declaration stamp yet)
+            synchronized(lock) { changes.removed.mapNotNullTo(packages) { findByPath(it.substringBeforeLast('/')) } }
+            for (file in changes.changed.mapNotNull(::findByPath)) {
+                // go.sum, go.work, vendor/modules.txt: how the imports under them resolve
+                if (GoInspectFiles.isCandidate(file.name)) changed(file)
+                else (if (file.name == "modules.txt") file.parent?.parent else file.parent)?.let { synchronized(lock) { directories += it } }
+            }
+            schedule()
+        }
         GoPluginLog.info(CATEGORY, "project problems restored from the snapshot: ${restored.size} files with problems, ${restored.sumOf { it.second.size }} problems, " +
             "${System.currentTimeMillis() - started} ms")
         return true

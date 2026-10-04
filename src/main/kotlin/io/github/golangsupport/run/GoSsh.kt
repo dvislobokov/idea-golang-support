@@ -18,8 +18,15 @@ import java.nio.charset.StandardCharsets
  * `<directory>/bin/dlv-<os>-<arch>-<hash>`, `<directory>/runs/<run|test>-<package hash>/` with the program and the files copied with it.
  */
 object GoSsh {
-    /** Under the home directory there; programs do not run from /tmp on hosts that mount it noexec. */
-    const val DEFAULT_DIRECTORY = ".cache/go-project-support"
+    /**
+     * The directory there when the configuration names none: `.cache/<project>` under the home directory (programs do not run from /tmp on
+     * hosts that mount it noexec), the project name reduced to characters safe in a path.
+     */
+    fun defaultDirectory(projectName: String): String =
+        ".cache/" + projectName.replace(Regex("[^A-Za-z0-9._-]+"), "-").trim('-', '.').ifEmpty { "go-project" }
+
+    /** In a directory the plugin made: only such a one is made private (`chmod 700`); `.cache/<project>` may be another tool's (pip, go-build). */
+    const val MARKER = ".go-project-support"
 
     /** The printed start of the probe, so that a login banner or a motd before it is skipped. */
     private const val PROBE_MARK = "go-project-support-probe"
@@ -37,11 +44,29 @@ object GoSsh {
      * Why [host] cannot be given to ssh, or null. A host starting with `-` would be read as an option (`-oProxyCommand=...` runs a command
      * here), and run configurations come with projects (the `.run` directory); `--` before the host is the second guard.
      */
-    fun invalidHost(host: String): String? = when {
-        host.isBlank() -> "The SSH host is empty"
-        host.startsWith("-") -> "The SSH host cannot start with '-': $host"
-        host.any { it.isWhitespace() || it.isISOControl() } -> "The SSH host cannot contain spaces or control characters: $host"
-        else -> null
+    fun invalidHost(host: String): String? {
+        if (host.isBlank()) return "The SSH host is empty"
+        // `%h` of a ProxyCommand in ~/.ssh/config goes to a shell (CVE-2023-51385): no shell characters at all
+        if (!HOST_CHARACTERS.matches(host)) return "The SSH host can contain letters, digits and . _ - @ : / [ ] % only: $host"
+        val (user, name) = hostParts(host)
+        return when {
+            host.startsWith("-") || user?.startsWith("-") == true || name.startsWith("-") -> "The SSH host and user cannot start with '-': $host"
+            name.isEmpty() -> "The SSH host has no host name: $host"
+            else -> null
+        }
+    }
+
+    private val HOST_CHARACTERS = Regex("""[A-Za-z0-9._@:/\[\]%-]+""")
+
+    /** `ssh://user@host:port` or `user@host` -> user (or null) and host name, without the port. */
+    fun hostParts(host: String): Pair<String?, String> {
+        val rest = host.removePrefix("ssh://").trimEnd('/')
+        val at = rest.lastIndexOf('@')
+        val user = if (at >= 0) rest.substring(0, at) else null
+        val address = rest.substring(at + 1)
+        val name = if (address.startsWith("[")) address.substringBefore(']').removePrefix("[")
+            else if (host.startsWith("ssh://") || address.count { it == ':' } == 1) address.substringBefore(':') else address
+        return user to name
     }
 
     /** `ssh host 'command'`; the command is run by `sh` there whatever the login shell is (fish, csh). */
@@ -91,9 +116,9 @@ object GoSsh {
         return goos to goarch
     }
 
-    /** [directory] of the configuration as an absolute path there: relative ones are under [home]. */
-    fun directory(directory: String?, home: String): String {
-        val dir = directory?.trim()?.takeIf { it.isNotEmpty() } ?: DEFAULT_DIRECTORY
+    /** [directory] of the configuration as an absolute path there: relative ones are under [home]; none is [defaultDirectory] of [projectName]. */
+    fun directory(directory: String?, home: String, projectName: String): String {
+        val dir = directory?.trim()?.takeIf { it.isNotEmpty() } ?: defaultDirectory(projectName)
         return when {
             dir.startsWith("/") -> dir.trimEnd('/')
             dir == "~" -> home
@@ -117,13 +142,20 @@ object GoSsh {
 
     /**
      * The directories of a debug, private to the user: created with `umask 077`, and the base [directory] refused when its mode lets the
-     * group or others write (`ls -ld`: the 6th and the 9th character; a sticky /tmp is refused too). [own]: the default directory, which is
-     * the plugin's and is made private (`chmod 700`) rather than refused; a directory the user named is not changed behind them.
+     * group or others write (`ls -ld`: the 6th and the 9th character; a sticky /tmp is refused too). [own]: the default directory, made
+     * private (`chmod 700`) rather than refused when the plugin made it ([MARKER]); a directory the user named, or one that was there
+     * before, is not changed behind them.
      */
     fun setupScript(directory: String, runDirectory: String, own: Boolean): String {
         val dir = quote(directory)
-        return "umask 077; mkdir -p $dir || exit 1; " + (if (own) "chmod 700 $dir; " else "") +
-            "case \"\$(ls -ld $dir)\" in ?????w*|????????w*) echo $UNSAFE_MARK; exit 3;; esac; " +
+        // the directory: owned by the user, writable by nobody else; each parent: owned by the user or root, and writable by others only
+        // when sticky (/tmp), or the directory could be renamed away and replaced (`ls -ldn`: mode, links, uid; busybox has it too)
+        val marker = quote("$directory/$MARKER")
+        return "umask 077; " + (if (own) "[ -d $dir ] || { mkdir -p $dir && : > $marker; } || exit 1; [ -f $marker ] && chmod 700 $dir; " else "mkdir -p $dir || exit 1; ") +
+            "u=\$(id -u); bad() { echo $UNSAFE_MARK; exit 3; }; " +
+            "set -- \$(ls -ldn $dir); [ \"\$3\" = \"\$u\" ] || bad; case \"\$1\" in d????w*|d???????w*) bad;; d*) ;; *) bad;; esac; " +
+            "p=$dir; while [ \"\$p\" != / ] && [ \"\$p\" != . ]; do p=\$(dirname \"\$p\"); set -- \$(ls -ldn \"\$p\"); " +
+            "[ \"\$3\" = \"\$u\" ] || [ \"\$3\" = 0 ] || bad; case \"\$1\" in d????????[tT]*) ;; d????w*|d???????w*) bad;; esac; done; " +
             "mkdir -p ${quote("$directory/bin")} ${quote("$directory/runs")} ${quote(runDirectory)} && chmod 700 ${quote("$directory/bin")} ${quote("$directory/runs")} ${quote(runDirectory)}"
     }
 
