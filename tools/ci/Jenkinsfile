@@ -1,0 +1,75 @@
+// Build of the plugin without internet: everything comes from Nexus (docs/BUILD-OFFLINE.md).
+// Agent: Linux with git, curl, tar, unzip. Adjust the environment block to the names of your Nexus.
+pipeline {
+    agent { label 'linux' }
+    options { timestamps(); skipDefaultCheckout() }
+    environment {
+        NEXUS_URL      = 'https://nexus.example.local'
+        // raw repositories: distributions of Gradle, IntelliJ IDEA Community, JDK 21
+        NEXUS_RAW      = "${NEXUS_URL}/repository/raw-tools"
+        GIT_MIRROR     = 'https://git.example.local/mirrors/'          // mirror of https://github.com/go-delve/
+        IDE_ARCHIVE    = 'idea/ideaIC-2026.1.4.tar.gz'
+        JDK_ARCHIVE    = 'jdk/OpenJDK21U-jdk_x64_linux.tar.gz'
+        GRADLE_VERSION = '9.7.1'
+        CORP_CA        = '/etc/pki/ca-trust/source/anchors'            // corporate root certificates on the agent
+        TOOLS          = "${WORKSPACE}/.ci"
+        GRADLE_USER_HOME = "/var/cache/jenkins/gradle-golang-support"  // kept between builds: dependencies are downloaded once
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                sh '''
+                    git config --global http.sslCAInfo /etc/pki/tls/certs/ca-bundle.crt
+                    git config --global url."${GIT_MIRROR}".insteadOf https://github.com/go-delve/
+                    git submodule sync && git submodule update --init --depth 1
+                '''
+            }
+        }
+        stage('Tools') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus-read', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                    sh '''
+                        set -e
+                        mkdir -p "$TOOLS/ide" "$TOOLS/jdk"
+                        get() { curl -fsSL --cacert /etc/pki/tls/certs/ca-bundle.crt -u "$NEXUS_USER:$NEXUS_PASSWORD" "$NEXUS_RAW/$1" -o "$2"; }
+                        [ -f "$TOOLS/ide/product-info.json" ] || { get "$IDE_ARCHIVE" ide.tgz && tar -xzf ide.tgz -C "$TOOLS/ide" --strip-components=1 && rm ide.tgz; }
+                        [ -x "$TOOLS/jdk/bin/java" ] || { get "$JDK_ARCHIVE" jdk.tgz && tar -xzf jdk.tgz -C "$TOOLS/jdk" --strip-components=1 && rm jdk.tgz; }
+                        tools/ci/truststore.sh "$TOOLS/jdk" "$CORP_CA" "$TOOLS/truststore.jks"
+                        # the wrapper takes Gradle from Nexus instead of services.gradle.org
+                        sed -i "s#^distributionUrl=.*#distributionUrl=${NEXUS_RAW}/gradle/gradle-${GRADLE_VERSION}-bin.zip#" gradle/wrapper/gradle-wrapper.properties
+                        mkdir -p "$GRADLE_USER_HOME"
+                        cat > "$GRADLE_USER_HOME/gradle.properties" <<EOF
+systemProp.javax.net.ssl.trustStore=$TOOLS/truststore.jks
+systemProp.javax.net.ssl.trustStorePassword=changeit
+systemProp.gradle.wrapperUser=$NEXUS_USER
+systemProp.gradle.wrapperPassword=$NEXUS_PASSWORD
+org.gradle.java.installations.paths=$TOOLS/jdk
+org.gradle.java.installations.auto-download=false
+org.gradle.java.installations.auto-detect=false
+EOF
+                    '''
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'nexus-read', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                    sh '''
+                        export JAVA_HOME="$TOOLS/jdk"
+                        export GRADLE_OPTS="-Djavax.net.ssl.trustStore=$TOOLS/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
+                        ./gradlew --no-daemon --no-configuration-cache --init-script tools/ci/nexus.init.gradle \
+                            -PlocalIdePath="$TOOLS/ide" \
+                            :test :go-psi-core:test :go-psi-semantic:test :go-psi-ide:test buildPlugin --continue
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+            archiveArtifacts allowEmptyArchive: true, artifacts: 'build/distributions/*.zip'
+        }
+    }
+}

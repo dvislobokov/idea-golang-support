@@ -7,18 +7,20 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess
 import com.intellij.testFramework.IndexingTestUtil
 import com.intellij.testFramework.PsiTestUtil
-import com.intellij.sql.psi.SqlLanguage
+import com.intellij.lang.Language
 import io.github.golangsupport.ide.GoSemanticIdeTestBase
 import io.github.golangsupport.ide.injection.sql.GoSqlDetect
 import java.io.File
 
 /** SQL injection (Database plugin) into database/sql, sqlx and pgx query arguments and into named query constants. */
 class GoSqlInjectionTest : GoSemanticIdeTestBase() {
+    // an IDE without the Database plugin (IntelliJ IDEA Community) has no SQL to inject
+    override fun shouldRunTest(): Boolean = super.shouldRunTest() && Language.findLanguageByID("SQL") != null
 
     private fun injectedAt(body: String, imports: String = "\"database/sql\""): List<String> {
         myFixture.configureByText("a.go", "package p\n\nimport (\n\t$imports\n)\n\n${body.trimIndent()}\n")
         val file = myFixture.file
-        return if (InjectedLanguageManager.getInstance(project).isInjectedFragment(file) && file.language.isKindOf(SqlLanguage.INSTANCE)) listOf("SQL") else emptyList()
+        return if (InjectedLanguageManager.getInstance(project).isInjectedFragment(file) && file.language.isKindOf(Language.findLanguageByID("SQL"))) listOf("SQL") else emptyList()
     }
 
     private val none = emptyList<String>()
@@ -66,7 +68,7 @@ class GoSqlInjectionTest : GoSemanticIdeTestBase() {
                 myFixture.configureFromExistingVirtualFile(file)
                 val offset = myFixture.file.text.indexOf(needle) + 3
                 val injected = InjectedLanguageManager.getInstance(project).findInjectedElementAt(myFixture.file, offset)
-                assertEquals(needle, expected, injected?.language?.isKindOf(SqlLanguage.INSTANCE) == true)
+                assertEquals(needle, expected, injected?.language?.isKindOf(Language.findLanguageByID("SQL")) == true)
             }
         } finally {
             PsiTestUtil.removeContentEntry(myFixture.module, dir)

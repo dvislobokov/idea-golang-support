@@ -30,6 +30,14 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.93] - 2026-10-04
+
+### Changed
+- The plugin builds against IntelliJ IDEA Community: the Database plugin is no longer needed at compile time (SQL is injected by
+  language id where the Database plugin is installed, and the build adds it only when the IDE bundles it).
+- Build without internet: `tools/ci/nexus.init.gradle` redirects every repository of the build to Nexus proxies, `tools/ci/truststore.sh`
+  adds corporate root certificates, `tools/ci/Jenkinsfile` is an example pipeline; instructions in `docs/BUILD-OFFLINE.md`.
+
 ## [0.2.92] - 2026-10-03
 
 ### Changed

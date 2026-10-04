@@ -1,0 +1,93 @@
+// Gradle init script for a build without internet: every repository of the build (plugins, Maven Central, the IntelliJ Platform
+// repositories of the IntelliJ Platform Gradle Plugin) is redirected to Nexus proxies. Nothing in the project changes.
+//
+//   ./gradlew --init-script tools/ci/nexus.init.gradle buildPlugin
+//
+// Environment (or -P properties of the same name in lower camel case is NOT read: environment only, so Jenkins credentials stay out of logs):
+//   NEXUS_URL            https://nexus.example.local           base address, without /repository
+//   NEXUS_USER           optional, Nexus account with read access
+//   NEXUS_PASSWORD       optional
+//   NEXUS_REPORT_ONLY    true: print the repositories the build uses and how they would be mapped, change nothing (for setting up)
+//   NEXUS_REPO_<KEY>     optional: another Nexus repository name for a key below (e.g. NEXUS_REPO_MAVEN_CENTRAL=maven-proxy)
+//
+// A repository the table does not know fails the build with its address: add a Nexus proxy for it and a line to SOURCES.
+
+def env = System.getenv()
+def reportOnly = env['NEXUS_REPORT_ONLY'] == 'true'
+def nexus = env['NEXUS_URL']?.replaceAll('/+$', '')
+if (!nexus && !reportOnly) throw new GradleException('nexus.init.gradle: NEXUS_URL is not set')
+
+// key -> [default Nexus repository name, the addresses it proxies (the first is what the proxy should point to)]
+def SOURCES = [
+    MAVEN_CENTRAL         : ['maven-central', [
+        'https://repo.maven.apache.org/maven2', 'https://repo1.maven.org/maven2',
+        'https://cache-redirector.jetbrains.com/repo1.maven.org/maven2', 'https://cache-redirector.jetbrains.com/maven-central']],
+    GRADLE_PLUGINS        : ['gradle-plugins', ['https://plugins.gradle.org/m2']],
+    INTELLIJ_RELEASES     : ['intellij-releases', [
+        'https://www.jetbrains.com/intellij-repository/releases',
+        'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/releases',
+        'https://cache-redirector.jetbrains.com/intellij-repository/releases']],
+    INTELLIJ_SNAPSHOTS    : ['intellij-snapshots', [
+        'https://www.jetbrains.com/intellij-repository/snapshots',
+        'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/snapshots',
+        'https://cache-redirector.jetbrains.com/intellij-repository/snapshots']],
+    INTELLIJ_DEPENDENCIES : ['intellij-dependencies', [
+        'https://cache-redirector.jetbrains.com/intellij-dependencies',
+        'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies']],
+    JETBRAINS_MARKETPLACE : ['jetbrains-marketplace', [
+        'https://plugins.jetbrains.com/maven', 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven']],
+]
+
+def target = { String url ->
+    def u = url.replaceAll('/+$', '')
+    for (entry in SOURCES) {
+        for (String source in entry.value[1]) {
+            if (u == source || u.startsWith(source + '/')) {
+                def name = env['NEXUS_REPO_' + entry.key] ?: entry.value[0]
+                return "${nexus}/repository/${name}" + u.substring(source.length())
+            }
+        }
+    }
+    return null
+}
+
+def isRemote = { repo -> repo.hasProperty('url') && repo.url != null && repo.url.scheme in ['http', 'https'] }
+def isNexus = { repo -> nexus && repo.url.toString().startsWith(nexus) }
+
+def redirect = { RepositoryHandler repositories, String where ->
+    repositories.withType(MavenArtifactRepository).configureEach { MavenArtifactRepository repo ->
+        if (!isRemote(repo) || isNexus(repo)) return
+        def to = target(repo.url.toString())
+        if (reportOnly) { println "[nexus] ${where}: ${repo.name} ${repo.url} -> ${to ?: 'UNKNOWN'}"; return }
+        if (to == null) return // reported (and failed) after evaluation, with every unknown address at once
+        repo.url = new URI(to)
+        if (env['NEXUS_USER']) repo.credentials { username = env['NEXUS_USER']; password = env['NEXUS_PASSWORD'] }
+    }
+}
+
+beforeSettings { settings ->
+    redirect(settings.pluginManagement.repositories, 'plugins')
+    redirect(settings.buildscript.repositories, 'settings buildscript')
+    redirect(settings.dependencyResolutionManagement.repositories, 'settings')
+}
+
+allprojects { project ->
+    redirect(project.buildscript.repositories, "${project.path} buildscript")
+    redirect(project.repositories, project.path)
+}
+
+gradle.projectsEvaluated {
+    def unknown = []
+    rootProject.allprojects { project ->
+        [project.repositories, project.buildscript.repositories].each { RepositoryHandler repositories ->
+            def remote = repositories.findAll { isRemote(it) && !isNexus(it) }
+            remote.findAll { it instanceof IvyArtifactRepository }.each { repo ->
+                // Ivy repositories of the IntelliJ Platform Gradle Plugin download IDEs and JetBrains Runtime; with localIdePath nothing needs them
+                if (reportOnly) println "[nexus] ${project.path}: ${repo.name} ${repo.url} (ivy) -> removed"
+                else repositories.remove(repo)
+            }
+            remote.findAll { it instanceof MavenArtifactRepository && target(it.url.toString()) == null }.each { unknown << "${project.path}: ${it.name} ${it.url}" }
+        }
+    }
+    if (unknown && !reportOnly) throw new GradleException("nexus.init.gradle: no Nexus proxy for these repositories (add them to SOURCES):\n  " + unknown.join('\n  '))
+}

@@ -24,6 +24,10 @@ repositories {
     }
 }
 
+/** Whether the IDE at [ide] bundles the plugin [id] (its product-info.json lists it); true when unknown. IntelliJ IDEA Community has no Database plugin. */
+fun ideBundles(ide: String?, id: String): Boolean =
+    ide?.let { file("$it/product-info.json") }?.takeIf { it.exists() }?.readText()?.contains("\"$id\"") ?: true
+
 dependencies {
     intellijPlatform {
         val localIde = providers.gradleProperty("localIdePath").orNull
@@ -36,8 +40,9 @@ dependencies {
         bundledModule("intellij.platform.lsp")
         // JSON in Go strings (go-psi-ide-injection-json.xml, optional dependency of plugin.xml)
         bundledPlugin("com.intellij.modules.json")
-        // SQL in Go strings (go-psi-ide-injection-sql.xml, optional dependency of plugin.xml)
-        bundledPlugin("com.intellij.database")
+        // SQL in Go strings (go-psi-ide-injection-sql.xml, optional dependency of plugin.xml): only for the tests, the code finds SQL by id;
+        // IntelliJ IDEA Community has no Database plugin
+        if (ideBundles(localIde?.takeIf { file(it).exists() }, "com.intellij.database")) bundledPlugin("com.intellij.database")
         testFramework(TestFrameworkType.Platform)
         // The native Go PSI (go-psi-core, go-psi-semantic, go-psi-ide; MIGRATION.md): composed, so the classes go into the main jar, which
         // a v1 descriptor loads (lib/modules only serves declared content modules). What of their META-INF/go-psi-*.xml plugin.xml

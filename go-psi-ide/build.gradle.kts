@@ -12,6 +12,10 @@ repositories {
     }
 }
 
+/** Whether the IDE at [ide] bundles the plugin [id] (its product-info.json lists it); true when unknown. IntelliJ IDEA Community has no Database plugin. */
+fun ideBundles(ide: String?, id: String): Boolean =
+    ide?.let { file("$it/product-info.json") }?.takeIf { it.exists() }?.readText()?.contains("\"$id\"") ?: true
+
 dependencies {
     implementation(project(":go-psi-core"))
     implementation(project(":go-psi-semantic"))
@@ -29,8 +33,9 @@ dependencies {
         bundledModule("intellij.spellchecker")
         // injection: the JSON language injected into Go strings (go-psi-ide-injection-json.xml; an optional dependency of the host)
         bundledPlugin("com.intellij.modules.json")
-        // injection: SQL into Go strings (go-psi-ide-injection-sql.xml; an optional dependency of the host on the Database plugin)
-        bundledPlugin("com.intellij.database")
+        // injection: SQL into Go strings (go-psi-ide-injection-sql.xml; an optional dependency of the host on the Database plugin). Only
+        // for the tests: the code finds SQL by id, and IntelliJ IDEA Community has no Database plugin.
+        if (ideBundles(localIde?.takeIf { file(it).exists() }, "com.intellij.database")) bundledPlugin("com.intellij.database")
         testFramework(TestFrameworkType.Platform)
     }
     testImplementation(libs.junit)

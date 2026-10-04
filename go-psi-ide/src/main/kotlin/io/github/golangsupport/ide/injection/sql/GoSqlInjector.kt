@@ -1,11 +1,11 @@
 package io.github.golangsupport.ide.injection.sql
 
+import com.intellij.lang.Language
 import com.intellij.lang.injection.MultiHostInjector
 import com.intellij.lang.injection.MultiHostRegistrar
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.sql.psi.SqlLanguage
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.injection.GoInjectionTargets
@@ -33,8 +33,10 @@ class GoSqlInjector : MultiHostInjector {
         val literal = context as? GoStringLiteral ?: return
         val host = literal as? PsiLanguageInjectionHost ?: return
         if (!host.isValidHost || !GoIdeFeatureGate.enabled(GoIdeFeature.SEMANTIC_COLORS, literal.project)) return
+        // by id, not SqlLanguage.INSTANCE: the plugin compiles without the Database plugin (IntelliJ IDEA Community has none)
+        val sql = Language.findLanguageByID("SQL") ?: return
         if (!isSql(literal)) return
-        registrar.startInjecting(SqlLanguage.INSTANCE).addPlace(null, null, host, GoInjectionTargets.contentRange(host)).doneInjecting()
+        registrar.startInjecting(sql).addPlace(null, null, host, GoInjectionTargets.contentRange(host)).doneInjecting()
     }
 
     private fun isSql(literal: GoStringLiteral): Boolean = isQueryArgument(literal) || isNamedQueryLiteral(literal)
