@@ -1,7 +1,8 @@
 # Third-party notices
 
-Go Project Support re-implements checks of other tools from their documented behaviour. Where message texts, lists or tables are
-taken verbatim, the source and its license are listed here. No code of these projects is copied.
+Go Project Support is licensed under the MIT License (`LICENSE`). It re-implements checks of other tools from their documented
+behaviour. Where message texts, lists or tables are taken verbatim, where an algorithm is ported from a Go package, or where test data
+is copied, the source and its license are listed here.
 
 ## staticcheck
 
@@ -39,6 +40,13 @@ MIT License, Copyright (c) 2013 Kamil Kisiel. <https://github.com/kisielk/errche
 ## Go and golang.org/x/tools
 
 BSD 3-Clause License, Copyright (c) 2009 The Go Authors. <https://go.dev/LICENSE>
+
+- The parser of `go-psi-core` (`Go.bnf`, `GoParserUtil`) ports the disambiguation rules of `go/parser`; each rule names the function it
+  follows (`docs/GRAMMAR.md`).
+- The formatter of `go-psi-ide` (package `io.github.golangsupport.ide.formatter.printer`: `GoPrinter`, `GoLayout`, `GoAlignmentStrategy`)
+  is a port of `go/printer` (printer.go, nodes.go of Go 1.27) and `text/tabwriter`.
+- Test data copied byte-for-byte from GOROOT (Go 1.27.1): `testData/parser/goroot` (`src/go/parser/testdata`) and `testData/types/goroot`
+  (`src/internal/types/testdata`); the file lists are in their `SOURCES.txt`. Used by tests only, not shipped in the plugin.
 
 - Error texts of `regexp/syntax` (`GoRegexpSyntax`), `net/url.Parse` and `net.SplitHostPort` (`GoNetSyntax`), reproduced so that SA1000,
   SA1007 and SA1020 report what the Go compiler / runtime would; `strconv.Quote` formatting.
