@@ -1,6 +1,7 @@
 package io.github.golangsupport.debugger
 
 import io.github.golangsupport.lang.GoProjectPresence
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.extensions.PluginId
@@ -57,6 +58,35 @@ object GoBundledDelve {
 
     /** Offline and independent of the user's workspace: the vendored modules, the installed toolchain (no auto-download of the one go.mod names). */
     val BUILD_ENVIRONMENT: Map<String, String> = mapOf("GOFLAGS" to "-mod=vendor", "GOWORK" to "off", "GOTOOLCHAIN" to "local")
+
+    /** The delve of the shipped sources for another machine ([goos]/[goarch]), next to the one of this machine: same hash, same lifetime. */
+    fun crossBinaryPath(directory: Path, hash: String, goos: String, goarch: String): Path = directory.resolve(hash).resolve("dlv-$goos-$goarch")
+
+    /**
+     * The shipped delve built for [goos]/[goarch] (an SSH host), building it now when missing: `CGO_ENABLED=0`, which delve on linux
+     * needs no cgo for (checked on 1.27.2, linux/amd64 and arm64, ~15 s). Blocking: the caller is a background task with [indicator].
+     */
+    @Throws(ExecutionException::class)
+    fun crossBuilt(goos: String, goarch: String, indicator: ProgressIndicator): File {
+        val sources = sources() ?: throw ExecutionException("The plugin has no delve sources to build a debugger for $goos/$goarch")
+        val hash = hash(sources) ?: throw ExecutionException("The delve sources of the plugin have no SOURCE-HASH")
+        val target = crossBinaryPath(GoPluginData.delve(), hash, goos, goarch)
+        if (Files.isRegularFile(target)) return target.toFile()
+        val go = GoCli.findExecutable() ?: throw ExecutionException("The 'go' executable is not found: it builds delve for $goos/$goarch")
+        indicator.text = "Building delve for $goos/$goarch"
+        Files.createDirectories(target.parent)
+        val temporary = target.resolveSibling(target.fileName.toString() + ".tmp")
+        val environment = BUILD_ENVIRONMENT + mapOf("GOOS" to goos, "GOARCH" to goarch, "CGO_ENABLED" to "0")
+        val command = GoCli.toolCommandLine(go, sources.toString(), *buildArguments(temporary.toString()).toTypedArray()).withEnvironment(environment)
+        val output = CapturingProcessHandler(command).runProcessWithProgressIndicator(indicator, 600_000)
+        indicator.checkCanceled()
+        if (output.exitCode != 0 || !Files.isRegularFile(temporary)) {
+            throw ExecutionException("delve is not built for $goos/$goarch (exit ${output.exitCode}): " + (output.stderr + output.stdout).trim().lines().take(5).joinToString(" / "))
+        }
+        Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING)
+        GoPluginLog.info(GoDebuggerLogs.CATEGORY, "The bundled delve is built for $goos/$goarch: $target")
+        return target.toFile()
+    }
 
     /** The built binary of the shipped sources, when it is there. */
     fun binary(): File? {

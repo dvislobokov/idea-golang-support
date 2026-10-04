@@ -50,17 +50,17 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `govet:bools` | govet | redundant / suspect `a == x \|\| a == x`, `a != 1 \|\| a != 2` | EXPRESSION | TYPES | native: GoVetBoolsRule | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:buildtag` | govet | malformed or misplaced `//go:build` / `+build` | FILE | SYNTAX | native: `GoBuildConstraint` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:cgocall` | govet | Go pointers passed to C violating cgo rules | CALL | TYPES | skip: cgo-only, needs cgo type info | L | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:composites` | govet | unkeyed fields in a composite literal of an imported struct type | EXPRESSION | TYPES | port | S | v1+v2 | `composites.whitelist` | BSD-3-Clause (x/tools) |
+| `govet:composites` | govet | unkeyed fields in a composite literal of an imported struct type | EXPRESSION | TYPES | native: GoVetCompositesRule | S | v1+v2 | `composites.whitelist` | BSD-3-Clause (x/tools) |
 | `govet:copylocks` | govet | lock value copied (assignment, call, range, return) | EXPRESSION | TYPES | native: `GoCopyLocks` | M | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:deepequalerrors` | govet | `reflect.DeepEqual` on errors | CALL | TYPES | port | S | — | — | BSD-3-Clause (x/tools) |
+| `govet:deepequalerrors` | govet | `reflect.DeepEqual` on errors | CALL | TYPES | native: GoVetDeepEqualErrorsRule | S | — | — | BSD-3-Clause (x/tools) |
 | `govet:defers` | govet | `defer log.Println(time.Since(start))` evaluates args early | STATEMENT | TYPES | native: GoVetDefersRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:directive` | govet | misplaced or unknown `//go:debug` directive | FILE | SYNTAX | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:directive` | govet | misplaced or unknown `//go:debug` directive | FILE | SYNTAX | native: GoVetDirectiveRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:errorsas` | govet | `errors.As` second argument not a non-nil pointer | CALL | TYPES | native: `GoErrorsPackage` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:fieldalignment` | govet | struct fields ordered wastefully | TYPE_SPEC | TYPES | skip: noisy; host has Reorder Fields intention (`GoReorderFieldsIntention`) | M | — | — | BSD-3-Clause (x/tools) |
 | `govet:findcall` | govet | demo analyzer | CALL | SYNTAX | skip: test analyzer | S | — | — | BSD-3-Clause (x/tools) |
 | `govet:framepointer` | govet | assembly clobbers frame pointer | FILE | SYNTAX | skip: assembly | M | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:hostport` | govet | `fmt.Sprintf("%s:%d", host, port)` not IPv6-safe | CALL | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:httpmux` | govet | `http.ServeMux` pattern with Go 1.22 syntax under older go version | CALL | TYPES | port | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:hostport` | govet | `fmt.Sprintf("%s:%d", host, port)` not IPv6-safe | CALL | TYPES | native (partial): GoVetHostPortRule — `fmt.Sprintf` in the Dial argument or a local variable of the file; `host + ":" + port` not caught | S | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:httpmux` | govet | `http.ServeMux` pattern with Go 1.22 syntax under older go version | CALL | TYPES | native: GoVetHttpMuxRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:httpresponse` | govet | `resp.Body` used/deferred before the error check | STATEMENT | TYPES + FLOW | native: `GoDeferBeforeErrorCheck` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:ifaceassert` | govet | impossible interface-to-interface assertion | EXPRESSION | TYPES | native: GoVetIfaceAssertRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:loopclosure` | govet | loop variable captured by `go`/`defer` closure (go < 1.22) | STATEMENT | TYPES | native: `GoLoopClosure` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
@@ -68,18 +68,18 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `govet:nilfunc` | govet | comparison of a function with nil | EXPRESSION | TYPES | native: GoVetNilFuncRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:nilness` | govet | nil dereference / impossible nil comparison | FUNCTION | TYPES + FLOW | native: `GoNilDereference`, `GoImpossibleNilCheck` | L | — | — | BSD-3-Clause (x/tools) |
 | `govet:printf` | govet | printf format/argument mismatch, non-constant format | CALL | TYPES | native: `GoPrintf` | L | v1+v2 | `printf.funcs` | BSD-3-Clause (x/tools) |
-| `govet:reflectvaluecompare` | govet | `reflect.Value` compared with `==` | EXPRESSION | TYPES | port | S | — | — | BSD-3-Clause (x/tools) |
+| `govet:reflectvaluecompare` | govet | `reflect.Value` compared with `==` | EXPRESSION | TYPES | native: GoVetReflectValueCompareRule | S | — | — | BSD-3-Clause (x/tools) |
 | `govet:shadow` | govet | variable shadows an outer one that is used after | FUNCTION | TYPES + FLOW | native (partial): GoShadowedError (errors only; generalize behind `strict`) | M | — | `shadow.strict` | BSD-3-Clause (x/tools) |
 | `govet:shift` | govet | shift count >= width of the operand | EXPRESSION | TYPES | native: GoVetShiftRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:sigchanyzer` | govet | unbuffered channel passed to `signal.Notify` | CALL | TYPES | native: GoSigchanyzerRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:slog` | govet | `slog` key/value pairs mismatched | CALL | TYPES | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:slog` | govet | `slog` key/value pairs mismatched | CALL | TYPES | native: GoVetSlogRule | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:sortslice` | govet | `sort.Slice` called on a non-slice | CALL | TYPES | native: GoVetSortSliceRule | S | — | — | BSD-3-Clause (x/tools) |
-| `govet:stdmethods` | govet | well-known method (`String`, `ReadFrom`, `MarshalJSON`…) with wrong signature | FUNCTION | TYPES | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:stdversion` | govet | std symbol newer than the module's `go` version | EXPRESSION | TYPES + PROJECT_INDEX | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:stdmethods` | govet | well-known method (`String`, `ReadFrom`, `MarshalJSON`…) with wrong signature | FUNCTION | TYPES | native: GoVetStdMethodsRule | M | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:stdversion` | govet | std symbol newer than the module's `go` version | EXPRESSION | TYPES + PROJECT_INDEX | native: GoVetStdVersionRule | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:stringintconv` | govet | `string(int)` conversion | EXPRESSION | TYPES | native: GoVetStringIntConvRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:structtag` | govet | malformed or duplicate struct tag | TYPE_SPEC | SYNTAX | native: `GoStructTag` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:testinggoroutine` | govet | `t.Fatal` from a goroutine started by the test | CALL | TYPES | native: `GoTestingGoroutine` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
-| `govet:tests` | govet | malformed `Test`/`Example`/`Benchmark`/`Fuzz` names and signatures | FUNCTION | TYPES | port | M | v1+v2 | — | BSD-3-Clause (x/tools) |
+| `govet:tests` | govet | malformed `Test`/`Example`/`Benchmark`/`Fuzz` names and signatures | FUNCTION | TYPES | native: GoVetTestsRule | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:timeformat` | govet | layout `2006-02-01` | CALL | TYPES | native: `GoTimeLayout` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:unmarshal` | govet | non-pointer passed to `json.Unmarshal` & co. | CALL | TYPES | native: GoVetUnmarshalRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:unreachable` | govet | unreachable code | FUNCTION | FLOW | native: `GoUnreachableCode` | S | v1+v2 | — | BSD-3-Clause (x/tools) |
@@ -110,7 +110,7 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `SA1016` | staticcheck | trapping `SIGKILL`/`SIGSTOP` | CALL | TYPES | native: GoUntrappableSignalRule | S | v1+v2 | — | MIT |
 | `SA1017` | staticcheck | unbuffered channel for `signal.Notify` | CALL | TYPES | native: GoUnbufferedSignalChannelRule | S | v1+v2 | — | MIT |
 | `SA1018` | staticcheck | `strings.Replace(…, 0)` replaces nothing | CALL | TYPES | native: GoReplaceZeroRule | S | v1+v2 | — | MIT |
-| `SA1019` | staticcheck | use of a deprecated identifier (`Deprecated:` paragraph) | EXPRESSION | TYPES + PROJECT_INDEX | port | M | v1+v2 | — | MIT |
+| `SA1019` | staticcheck | use of a deprecated identifier (`Deprecated:` paragraph) | EXPRESSION | TYPES + PROJECT_INDEX | native: GoDeprecatedRule | M | v1+v2 | — | MIT |
 | `SA1020` | staticcheck | invalid `host:port` constant | CALL | TYPES | native: GoInvalidListenAddressRule | S | v1+v2 | — | MIT |
 | `SA1021` | staticcheck | `bytes.Equal` on `net.IP` | CALL | TYPES | native: GoBytesEqualIpRule | S | v1+v2 | — | MIT |
 | `SA1023` | staticcheck | `io.Writer` implementation modifies its buffer | FUNCTION | SSA-heavy | port-approx | M | v1+v2 | — | MIT |
@@ -146,7 +146,7 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `SA4016` | staticcheck | `x ^ 0`, `x & 0`, `x << 0` | EXPRESSION | TYPES | native: GoSillyBitwiseRule | S | v1+v2 | — | MIT |
 | `SA4017` | staticcheck | result of a pure function discarded | CALL | TYPES | native: `GoUnusedResult` | S | v1+v2 | — | MIT |
 | `SA4018` | staticcheck | self-assignment | STATEMENT | SYNTAX | native: `GoSelfAssignment` | S | v1+v2 | — | MIT |
-| `SA4019` | staticcheck | duplicate build constraints | FILE | SYNTAX | port | S | v1+v2 | — | MIT |
+| `SA4019` | staticcheck | duplicate build constraints | FILE | SYNTAX | native: GoDuplicateBuildConstraintsRule | S | v1+v2 | — | MIT |
 | `SA4020` | staticcheck | unreachable case in a type switch | STATEMENT | TYPES | native: GoUnreachableTypeCaseRule | M | v1+v2 | — | MIT |
 | `SA4021` | staticcheck | `x = append(y)` | CALL | TYPES | native: GoSingleArgAppendRule | S | v1+v2 | — | MIT |
 | `SA4022` | staticcheck | `&x == nil` | EXPRESSION | TYPES | native: GoAddressIsNilRule | S | v1+v2 | — | MIT |
@@ -181,12 +181,12 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `SA9001` | staticcheck | `defer` in a `range` loop | STATEMENT | SYNTAX | native: `GoDeferInLoop` | S | v1+v2 | — | MIT |
 | `SA9002` | staticcheck | file mode looks like a forgotten octal (`644`) | CALL | TYPES | native: GoOctalFileModeRule | S | v1+v2 | — | MIT |
 | `SA9003` | staticcheck | empty branch | STATEMENT | SYNTAX | native: GoEmptyBranchRule | S | v1+v2 | — | MIT |
-| `SA9004` | staticcheck | only the first constant of a group has an explicit type | TYPE_SPEC | TYPES | port | S | v1+v2 | — | MIT |
+| `SA9004` | staticcheck | only the first constant of a group has an explicit type | TYPE_SPEC | TYPES | native: GoConstGroupTypeRule | S | v1+v2 | — | MIT |
 | `SA9005` | staticcheck | marshaling a struct with no exported fields | CALL | TYPES | native: GoNoopMarshalRule | S | v1+v2 | — | MIT |
 | `SA9006` | staticcheck | shift in a too-narrow type before widening | EXPRESSION | TYPES | native: GoDubiousShiftRule | S | v1+v2 | — | MIT |
 | `SA9007` | staticcheck | `os.RemoveAll` of a directory that should not be deleted | CALL | TYPES | native: GoRemoveUserDirRule | S | v1+v2 | — | MIT |
 | `SA9008` | staticcheck | `else` branch of a type assertion reads the shadowed zero value | STATEMENT | TYPES | native: GoShadowedAssertionElseRule | M | v1+v2 | — | MIT |
-| `SA9009` | staticcheck | `// go:generate` with a space is not a directive | FILE | SYNTAX | port | S | v1+v2 | — | MIT |
+| `SA9009` | staticcheck | `// go:generate` with a space is not a directive | FILE | SYNTAX | native: GoIneffectualDirectiveRule | S | v1+v2 | — | MIT |
 | `SA9010` | staticcheck | `defer setup()` instead of `defer setup()()` | STATEMENT | TYPES | native: GoDeferredFuncNotCalledRule | S | v1+v2 | — | MIT |
 
 ## staticcheck S (simple, former gosimple)
@@ -749,8 +749,8 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | Section | native | native (partial) | same-as | port | port-approx | skip | formatter | total |
 |---|---|---|---|---|---|---|---|---|
 | errcheck, ineffassign, unused | 2 | 1 | 0 | 0 | 0 | 0 | 0 | 3 |
-| govet analyzers | 28 | 1 | 0 | 10 | 1 | 5 | 0 | 45 |
-| staticcheck SA (bugs) | 79 | 1 | 0 | 8 | 7 | 1 | 0 | 96 |
+| govet analyzers | 37 | 2 | 0 | 0 | 1 | 5 | 0 | 45 |
+| staticcheck SA (bugs) | 83 | 1 | 0 | 4 | 7 | 1 | 0 | 96 |
 | staticcheck S (simple, former gosimple) | 35 | 0 | 0 | 0 | 0 | 0 | 0 | 35 |
 | staticcheck ST (stylecheck) | 3 | 0 | 0 | 15 | 0 | 0 | 0 | 18 |
 | staticcheck QF (quickfix) | 0 | 0 | 0 | 12 | 0 | 0 | 0 | 12 |
@@ -761,12 +761,12 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | Popular linters (one rule each, or a few sub-checks) | 6 | 2 | 0 | 26 | 1 | 1 | 0 | 36 |
 | Formatters | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 5 |
 | GoLand inspections | 23 | 7 | 47 | 37 | 3 | 6 | 0 | 123 |
-| **All** | **184** | **17** | **47** | **361** | **18** | **17** | **5** | **649** |
+| **All** | **197** | **18** | **47** | **347** | **18** | **17** | **5** | **649** |
 
-golangci default set (v1+v2 and v2 rows, 194 rules): native 141, native (partial) 2, port 40, port-approx 7, skip 4.
+golangci default set (v1+v2 and v2 rows, 194 rules): native 152, native (partial) 3, port 28, port-approx 7, skip 4.
 
 GoLand inspections (123): native 23, native (partial) 7, same-as 47, port 37, port-approx 3, skip 6.
-GoLand coverage: 34 of 123 inspections are covered today by a native inspection (native, or same-as a rule that is native); 7 more are partial.
+GoLand coverage: 42 of 123 inspections are covered today by a native inspection (native, or same-as a rule that is native); 7 more are partial.
 Estimate after batches B1-B7: 54 of 123 (44%), 6 skipped by design; the rest is GoLand-only or sits in later batches.
 After all batches (B1-B30): 117 of 123; the 6 skipped rows are IDE mechanics or covered elsewhere (reason in the Status column).
 ## Porting plan
@@ -849,7 +849,7 @@ GoLand-parity widenings of the same inspections: `goland:GoContextTodo` (every `
 `SA2001`, `SA2003`, `SA3001`, `SA4011`, `SA4014`, `SA4020`, `SA4029`, `SA4021`, `govet:appends`, `SA5002`, `SA5003`, `SA5004`, `SA6000`, `SA6003`,
 `SA9003`, `SA9008`, `SA9010`, `govet:atomic`, `govet:defers`, `SA6001`.
 
-### B6. govet remainder and deprecation (14) — FUNCTION / FILE / CALL, TYPES + PROJECT_INDEX
+### B6. govet remainder and deprecation (14) — FUNCTION / FILE / CALL, TYPES + PROJECT_INDEX — done (versions 0.2.97)
 `SA1019` (Deprecated: paragraphs through stubs; also strikethrough highlighting), `govet:stdversion`, `govet:stdmethods`, `govet:tests`,
 `govet:directive`, `govet:hostport`, `govet:httpmux`, `govet:slog`, `govet:composites`, `govet:deepequalerrors`, `govet:reflectvaluecompare`, `SA4019`,
 `SA9009`, `SA9004`.

@@ -173,13 +173,13 @@ object GolangciLinters {
     /** go vet's default analyzers (golangci govet default: these unless `enable-all` / `disable-all`). */
     val GOVET_DEFAULTS: Set<String> = linkedSetOf(
         "appends", "asmdecl", "assign", "atomic", "bools", "buildtag", "cgocall", "composites", "copylocks", "defers", "directive", "errorsas",
-        "framepointer", "httpresponse", "ifaceassert", "loopclosure", "lostcancel", "nilfunc", "printf", "shift", "sigchanyzer", "slog",
+        "framepointer", "hostport", "httpresponse", "ifaceassert", "loopclosure", "lostcancel", "nilfunc", "printf", "shift", "sigchanyzer", "slog",
         "stdmethods", "stdversion", "stringintconv", "structtag", "testinggoroutine", "tests", "timeformat", "unmarshal", "unreachable",
         "unsafeptr", "unusedresult", "waitgroup",
     )
 
     /** govet analyzers off by default in golangci. */
-    val GOVET_EXTRA: Set<String> = linkedSetOf("atomicalign", "deepequalerrors", "fieldalignment", "findcall", "nilness", "reflectvaluecompare", "shadow", "sortslice", "unusedwrite")
+    val GOVET_EXTRA: Set<String> = linkedSetOf("atomicalign", "deepequalerrors", "fieldalignment", "findcall", "httpmux", "nilness", "reflectvaluecompare", "shadow", "sortslice", "unusedwrite")
 
     /** Whether govet [analyzer] runs (govet itself must be on): `enable-all`/`disable-all`, then `enable`, then `disable`; v1 `check-shadowing` too. */
     fun isGovetAnalyzerEnabled(config: GolangciConfig, analyzer: String): Boolean {

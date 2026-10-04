@@ -15,6 +15,9 @@ import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.progress.ProcessCanceledException
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.xdebugger.XDebugProcess
@@ -54,30 +57,49 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
 
     override fun execute(environment: ExecutionEnvironment, state: RunProfileState): Promise<RunContentDescriptor?> {
         val result = AsyncPromise<RunContentDescriptor?>()
-        val project = environment.project
-        ApplicationManager.getApplication().executeOnPooledThread {
-            try {
-                val start = debugStart(environment)
-                val adapter = adapter(environment)
-                ApplicationManager.getApplication().invokeLater({
+        val configuration = environment.runProfile as? GoRunConfiguration
+        if (configuration != null && configuration.runsOverSsh()) {
+            // builds, copies and connects: seconds to minutes, so a task with progress the user can cancel
+            object : Task.Backgroundable(environment.project, "Debug on ${configuration.options.sshHost}", true) {
+                override fun run(indicator: ProgressIndicator) {
                     try {
-                        val starter = object : XDebugProcessStarter() {
-                            override fun start(session: XDebugSession): XDebugProcess = GoDebugProcess(session, adapter, start, GoDebuggerLogs.newProtocolTrace(), environment)
-                        }
-                        // The session builder (2026.1) hands out the descriptor in both modes: XDebugSession.getRunContentDescriptor logs a
-                        // SEVERE under the split debugger (seen live), and a fork whose split frontend builds no UI still needs the descriptor.
-                        val started = XDebuggerManager.getInstance(project).newSessionBuilder(starter).environment(environment).startSession()
-                        result.setResult(started.runContentDescriptor)
+                        val (adapter, start) = GoSshDebug.prepare(configuration, indicator)
+                        startSession(environment, adapter, start, result)
+                    } catch (e: ProcessCanceledException) {
+                        result.setResult(null)
                     } catch (e: Exception) {
-                        adapter.stop(0)
+                        GoPluginLog.warn(GoDebuggerLogs.CATEGORY, "SSH debug on ${configuration.options.sshHost} has not started: ${e.message?.lineSequence()?.firstOrNull()}")
                         result.setError(e)
                     }
-                }, ModalityState.nonModal())
+                }
+            }.queue()
+            return result
+        }
+        ApplicationManager.getApplication().executeOnPooledThread {
+            try {
+                startSession(environment, adapter(environment), debugStart(environment), result)
             } catch (e: Exception) {
                 result.setError(e)
             }
         }
         return result
+    }
+
+    private fun startSession(environment: ExecutionEnvironment, adapter: DelveAdapter, start: DebugStart, result: AsyncPromise<RunContentDescriptor?>) {
+        ApplicationManager.getApplication().invokeLater({
+            try {
+                val starter = object : XDebugProcessStarter() {
+                    override fun start(session: XDebugSession): XDebugProcess = GoDebugProcess(session, adapter, start, GoDebuggerLogs.newProtocolTrace(), environment)
+                }
+                // The session builder (2026.1) hands out the descriptor in both modes: XDebugSession.getRunContentDescriptor logs a
+                // SEVERE under the split debugger (seen live), and a fork whose split frontend builds no UI still needs the descriptor.
+                val started = XDebuggerManager.getInstance(environment.project).newSessionBuilder(starter).environment(environment).startSession()
+                result.setResult(started.runContentDescriptor)
+            } catch (e: Exception) {
+                adapter.stop(0)
+                result.setError(e)
+            }
+        }, ModalityState.nonModal())
     }
 
     /** A `dlv dap` of our own for everything but a remote configuration, which connects to one that runs elsewhere. */

@@ -33,6 +33,9 @@ interface DelveAdapter {
     /** The directory the adapter runs in: where the paths of the compiler are relative to; null for a remote one. */
     val workDirectory: String? get() = null
 
+    /** Whether the program runs on this machine: its process id means a process here (the Go Monitor samples it) only then. */
+    val isLocal: Boolean get() = true
+
     /** [graceMs]: a moment for the server to exit by itself after `disconnect`, before it is killed (nothing to kill for a remote one). */
     fun stop(graceMs: Long = 1500)
 }
@@ -44,6 +47,7 @@ interface DelveAdapter {
  */
 class RemoteDelve(host: String, port: Int) : DelveAdapter {
     override val description: String = "dlv dap at $host:$port"
+    override val isLocal: Boolean get() = false
     private val socket: Socket = try {
         Socket(host, port).apply { tcpNoDelay = true }
     } catch (e: Exception) {

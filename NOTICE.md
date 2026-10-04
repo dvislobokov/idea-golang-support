@@ -30,6 +30,11 @@ MIT License, Copyright (c) 2016 Dominik Honnef. <https://github.com/dominikh/go-
   SA5004, SA6000, SA6001, SA6003, SA9003, SA9008, SA9010; the lists of functions and types they cover (`regexp.Match*`,
   `sort.*Slice`, `sync.Mutex.Lock` / `sync.RWMutex.RLock`) and the side-effect rules of `code.MayHaveSideEffects`; the quick-fix names
   "Replace with call to sort.…" and "Remove empty default branch".
+- Message texts, rule titles and descriptions of the batch-B6 checks SA1019, SA4019, SA9004 and SA9009 (`go-psi-ide`, package
+  `io.github.golangsupport.ide.rules.builtin.vet`), the quick-fix name "Add type to all constants in group", and the rules of
+  `fact_deprecated` / `code.SelectorName` / `code.StdlibVersion` that SA1019 follows. The table `knowledge.StdlibDeprecations`
+  (knowledge/deprecated.go of v0.8.1) is copied as `go-psi-ide/src/main/resources/lint/stdlib-deprecations.txt` by
+  `tools/lint-rules/stdlib_data.py`.
 
 ## errcheck
 
@@ -60,6 +65,12 @@ BSD 3-Clause License, Copyright (c) 2009 The Go Authors. <https://go.dev/LICENSE
   and the fixes of `sortslice`.
 - Message texts of the vet analyzers `appends`, `atomic` and `defers` (`GoVetAppendsRule`, `GoVetAtomicRule`, `GoVetDefersRule`) and the
   list of `sync/atomic.Add*` functions of `atomic`.
+- Message texts of the vet analyzers `stdversion`, `stdmethods`, `tests`, `directive`, `hostport`, `httpmux`, `slog`, `composites`,
+  `deepequalerrors` and `reflectvaluecompare` (`go-psi-ide`, package `io.github.golangsupport.ide.rules.builtin.vet`), the names of the
+  fixes of `hostport` and `composites`, and their tables: `canonicalMethods` (stdmethods), the accepted fuzz argument types (tests),
+  `kvFuncs` (slog), `unkeyedLiteral` (composites), the wildcard pattern of `httpmux`. `tools/lint-rules/stdlib_data.py` ports the
+  GOROOT/api parsing of `x/tools/internal/stdlib/generate.go`; its output `go-psi-ide/src/main/resources/lint/stdlib-since.txt` is
+  derived from GOROOT/api/go1.*.txt (Go 1.27.1).
 
 ## Delve
 

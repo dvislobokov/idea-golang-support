@@ -124,7 +124,7 @@ class GoDebugProcess(
                 refreshBinary()
                 // delve sends no `process` event for an attach (seen live): the process is known from the request, when it is on this machine
                 val pid = (start.arguments["processId"] as? Number)?.toLong()
-                if (start.attach && pid != null && adapter !is RemoteDelve) RunningGoProcesses.getInstance(session.project).started("Debug: ${session.sessionName}", pid, handler)
+                if (start.attach && pid != null && adapter.isLocal) RunningGoProcesses.getInstance(session.project).started("Debug: ${session.sessionName}", pid, handler)
             } else if (!shutdown.get()) startFailed(errorText(error))
         }
     }
@@ -217,7 +217,7 @@ class GoDebugProcess(
             "breakpoint" -> body.getAsJsonObject("breakpoint")?.let(lineBreakpoints::update)
             "exited" -> exitCode = body.int("exitCode")
             // the program delve has started or attached to: CPU and memory of it in the Go Monitor, next to the runs
-            "process" -> body.int("systemProcessId")?.let { pid -> RunningGoProcesses.getInstance(session.project).started("Debug: ${session.sessionName}", pid.toLong(), handler) }
+            "process" -> body.int("systemProcessId")?.takeIf { adapter.isLocal }?.let { pid -> RunningGoProcesses.getInstance(session.project).started("Debug: ${session.sessionName}", pid.toLong(), handler) }
             "terminated" -> AppExecutorUtil.getAppExecutorService().execute { shutdown(detach = false, programGone = true) }
         }
     }

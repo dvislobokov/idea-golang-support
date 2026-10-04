@@ -30,6 +30,41 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.98] - 2026-10-04
+
+### Added — Debug on an SSH host
+- A "Go" configuration (`go run` / `go test`) has the field SSH host (`user@host`, `ssh://user@host:port` or a host of `~/.ssh/config`,
+  key login): Debug then runs the program there. The plugin asks the host for its platform (`uname -sm`), builds the bundled delve for it
+  (once per delve version, `CGO_ENABLED=0`) and the program (`go build` / `go test -c` with `-gcflags=all=-N -l`), copies both through
+  `ssh 'cat > file'` (delve only when that version is not there yet) into Directory there (default `~/.cache/go-project-support`) and
+  starts `dlv dap` on 127.0.0.1 there; the DAP connection is `ssh -W`, so no port is opened here and none to the network there.
+  dlv port there: 0 is a free port delve picks; a fixed port in use stops the start with a message. delve and the program end with the
+  session or when the connection breaks. The paths in the binary stay the paths here, so breakpoints, frames and the standard library
+  open the local sources (seen live: linux delve takes a `C:/...` path).
+- Errors of ssh say the way out: a host not in known_hosts yet, no key (prompts are off), TCP forwarding refused by the server.
+
+### Fixed
+- The sandbox of `runIdeForUiTests` had no bundled delve (its prepare task was excluded with the test sandboxes): the UI robot
+  debugged with a `dlv` from PATH.
+- The Go Monitor no longer samples a local process for the process id of a program delve runs on another machine (Remote dlv dap).
+
+## [0.2.97] - 2026-10-04
+
+### Added — govet remainder and deprecation (native lint rules, batch B6)
+- 14 warnings of go vet and staticcheck. SA1019 strikes through uses of deprecated functions, types, fields, methods, constants and
+  imports of deprecated packages (a `Deprecated: ` paragraph in their doc); for the standard library only once the module's `go` directive
+  (or the file's `//go:build go1.N`) reaches the version that deprecated them, with staticcheck's "deprecated since Go X / alternative
+  available since Go Y" wording. go vet: stdversion (a stdlib symbol newer than the module's Go version, from a table generated out of
+  GOROOT/api), stdmethods (`WriteTo`, `Format`, `MarshalJSON`, error `Is`/`As`/`Unwrap` … with a non-standard signature), tests (malformed
+  Test/Benchmark/Fuzz/Example names, generic tests, misplaced `// Output:`, fuzz targets and `f.Add` types), directive (misplaced
+  `//go:debug`), hostport, httpmux (enhanced ServeMux patterns before Go 1.22), slog (key/value pairs), composites (unkeyed fields of
+  imported structs), deepequalerrors, reflectvaluecompare and httpmux (off with golangci's default vet set). staticcheck: SA4019 identical
+  `+build` lines, SA9004 a const group where only the first constant has a type, SA9009 `// go:directive` with a space.
+- Quick fixes: Replace fmt.Sprintf with net.JoinHostPort, Add field names to struct literal, Add type to all constants in group, Remove
+  the space before the directive.
+- golangci-lint's govet defaults include `hostport` (go vet since Go 1.25); `httpmux` is among the analyzers it leaves off.
+- `tools/lint-rules/stdlib_data.py` regenerates the two stdlib tables (symbols since go1.22, staticcheck's deprecations).
+
 ## [0.2.96] - 2026-10-04
 
 ### Added — go:generate from the directive

@@ -128,6 +128,18 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
 
     /** `local=remote`, a line each: where the sources of the program are here and where they were when it was built (`substitutePath` of delve). */
     var pathSubstitutions by string()
+
+    /**
+     * [GoCommand.RUN] and [GoCommand.TEST] under Debug: the SSH host the program is debugged on (`user@host`, `ssh://user@host:port`, an alias
+     * of ~/.ssh/config); empty is this machine. The program and delve are built here for that machine and copied there.
+     */
+    var sshHost by string()
+
+    /** Where the program and delve go on [sshHost]: relative to the home directory there unless absolute; empty is [GoSsh.DEFAULT_DIRECTORY]. */
+    var sshDirectory by string()
+
+    /** The port of `dlv dap` on [sshHost], on 127.0.0.1 only (reached through ssh, never opened to the network); 0: a free one delve picks. */
+    var sshDelvePort by property(0)
 }
 
 open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
@@ -144,6 +156,11 @@ open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, n
                 if (target.isNullOrBlank()) throw RuntimeConfigurationError("Package directory is not specified")
                 if (!File(target).exists()) throw RuntimeConfigurationError("Not found: $target")
                 if (GoCli.findExecutable() == null) throw RuntimeConfigurationError("The 'go' executable is not found on PATH")
+                if (runsOverSsh()) {
+                    if (GoSsh.executable() == null) throw RuntimeConfigurationError("ssh is not found: install the OpenSSH client")
+                    if (options.command == GoCommand.TEST && options.recursive) throw RuntimeConfigurationError("On an SSH host the tests of one package are debugged: go test -c builds one package, ./... is not")
+                    if (options.sshDelvePort !in 0..65535) throw RuntimeConfigurationError("The port of dlv dap on the SSH host is not a port: ${options.sshDelvePort}")
+                }
             }
             GoCommand.EXEC -> if (!File(options.binary.orEmpty()).isFile) throw RuntimeConfigurationError("The binary is not found: ${options.binary.orEmpty()}")
             GoCommand.CORE -> {
@@ -161,6 +178,7 @@ open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, n
         // A debugger starts the program itself (see debugLaunchArguments), and the runner of the platform still executes the state first.
         executor.id == DefaultDebugExecutor.EXECUTOR_ID -> RunProfileState { _, _ -> null }
         options.command.isDebugOnly -> throw com.intellij.execution.ExecutionException("${options.command.title}: only Debug makes sense here")
+        runsOverSsh() -> throw com.intellij.execution.ExecutionException("On an SSH host (${options.sshHost}) the program is debugged only for now: start it with Debug")
         options.command == GoCommand.TEST -> GoTestRunState(this, environment)
         options.command == GoCommand.EXEC -> object : CommandLineState(environment) {
             override fun startProcess(): ProcessHandler = KillableColoredProcessHandler(withEnvironment(GeneralCommandLine(listOf(options.binary.orEmpty()) + ParametersListUtil.parse(options.programArguments.orEmpty())).withWorkDirectory(execDirectory()))).also { ProcessTerminatedListener.attach(it) }
@@ -236,6 +254,27 @@ open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, n
         }
     }
 
+    /** `go run` / `go test` debugged on an SSH host rather than here. */
+    fun runsOverSsh(): Boolean = (options.command == GoCommand.RUN || options.command == GoCommand.TEST) && !options.sshHost.isNullOrBlank()
+
+    /**
+     * The program for the SSH host: `go build` (or `go test -c`) of the package for [goos]/[goarch] into [output], without optimisations
+     * (what delve builds with), without cgo (no C cross compiler here). The paths in the binary stay the paths here: delve there takes
+     * breakpoints by them and the frames point at the sources here (seen live: a `C:/...` path on linux delve).
+     */
+    fun sshBuildCommandLine(output: File, goos: String, goarch: String): GeneralCommandLine {
+        val tool = if (options.command == GoCommand.TEST) listOf("test", "-c") else listOf("build")
+        val arguments = tool + listOf("-gcflags=all=-N -l", "-o", output.path) + goArgumentList() + packageArgument()
+        return GoCli.commandLine(goDirectory(), *arguments.toTypedArray()).withEnvironment(mapOf("GOOS" to goos, "GOARCH" to goarch, "CGO_ENABLED" to "0"))
+    }
+
+    /** The `launch` of the copied [program] on the SSH host, in [directory] there unless the configuration names a working directory. */
+    fun sshLaunchArguments(program: String, directory: String): Map<String, Any> {
+        val programArguments = ParametersListUtil.parse(options.programArguments.orEmpty())
+        val arguments = if (options.command == GoCommand.TEST) GoTestFlags.forBinary(testFlags()) + GoLaunchArguments.testArguments(options.benchmark, options.testPattern) + programArguments else programArguments
+        return GoLaunchArguments.exec(program, arguments, directory, options.environment, emptyList(), GoSettings.getInstance())
+    }
+
     /** A remote configuration with a process id attaches; everything else is a `launch`. */
     fun debugIsAttach(): Boolean = options.command == GoCommand.REMOTE && options.remotePid > 0
 
@@ -295,17 +334,21 @@ object GoLaunchArguments {
             put("stackTraceDepth", settings.debugStackTraceDepth)
         }
         put("program", program)
-        val pattern = testPattern?.takeIf { it.isNotBlank() }
-        val testArguments = when {
-            !test -> emptyList()
-            benchmark -> listOf("-test.run", "^$", "-test.bench", pattern ?: ".")
-            pattern != null -> listOf("-test.v", "-test.run", pattern)
-            else -> listOf("-test.v")
-        }
+        val testArguments = if (test) testArguments(benchmark, testPattern) else emptyList()
         ((if (test) testFlags else emptyList()) + testArguments + programArguments).takeIf { it.isNotEmpty() }?.let { put("args", it) }
         workingDirectory?.takeIf { it.isNotBlank() }?.let { put("cwd", it) }
         if (environment.isNotEmpty()) put("env", environment)
         if (buildFlags.isNotEmpty()) put("buildFlags", buildFlags.joinToString(" "))
+    }
+
+    /** The selection of a test binary: `-test.v -test.run pattern`, or the benchmarks alone. */
+    fun testArguments(benchmark: Boolean, testPattern: String?): List<String> {
+        val pattern = testPattern?.takeIf { it.isNotBlank() }
+        return when {
+            benchmark -> listOf("-test.run", "^$", "-test.bench", pattern ?: ".")
+            pattern != null -> listOf("-test.v", "-test.run", pattern)
+            else -> listOf("-test.v")
+        }
     }
 
     fun attach(processId: Int, substitutions: List<Map<String, String>> = emptyList()): Map<String, Any> = buildMap {

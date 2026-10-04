@@ -128,7 +128,8 @@ val delveSourceHash = tasks.register("delveSourceHash") {
 }
 // every sandbox the IDE runs from (runIde, runIdeForUiTests and the one buildPlugin zips), not the test sandboxes
 tasks.withType<PrepareSandboxTask>().configureEach {
-    if (!name.contains("Test")) {
+    // "Test" alone also matched prepareSandbox_runIdeForUiTests: the robot's IDE ran without the bundled delve
+    if (!name.contains("Test") || name.endsWith("runIdeForUiTests")) {
         from(delveSources) { into(pluginName.map { "$it/delve" }) }
         from(delveSourceHash) { into(pluginName.map { "$it/delve" }) }
     }

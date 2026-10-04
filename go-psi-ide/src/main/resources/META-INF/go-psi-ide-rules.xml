@@ -120,6 +120,21 @@
     <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoVetAtomicRule"/>
     <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoVetDefersRule"/>
     <goRule implementation="io.github.golangsupport.ide.rules.builtin.statements.GoMapByteKeyRule"/>
+    <!-- B6 govet remainder and deprecation -->
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoDeprecatedRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetStdVersionRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetStdMethodsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetTestsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetDirectiveRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetHostPortRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetHttpMuxRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetSlogRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetCompositesRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetDeepEqualErrorsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoVetReflectValueCompareRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoDuplicateBuildConstraintsRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoIneffectualDirectiveRule"/>
+    <goRule implementation="io.github.golangsupport.ide.rules.builtin.vet.GoConstGroupTypeRule"/>
     <!-- B9 staticcheck simple: calls and expressions -->
     <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoStringsIndexRule"/>
     <goRule implementation="io.github.golangsupport.ide.rules.builtin.simple.GoBytesCompareRule"/>

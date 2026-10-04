@@ -43,6 +43,9 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
     private val remotePort = JBTextField()
     private val remotePid = JBTextField()
     private val pathSubstitutions = JBTextArea(3, 40)
+    private val sshHost = JBTextField()
+    private val sshDirectory = JBTextField()
+    private val sshDelvePort = JBTextField()
 
     override fun createEditor(): JComponent {
         target.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor().withTitle("Package Directory or Go File"))
@@ -85,6 +88,9 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
             row { cell(short) }.visibleIf(test)
             row { cell(failFast) }.visibleIf(test)
             row("Timeout:") { cell(timeout.apply { columns = 10 }).comment("<code>-timeout</code>: <code>30s</code>, <code>5m</code>; empty is the default of go test, 10 minutes. The output is always verbose: <code>-json</code> implies <code>-v</code>") }.visibleIf(test)
+            row("SSH host:") { cell(sshHost.apply { columns = 30; emptyText.text = "this machine" }).comment("Debug only: <code>user@host</code>, <code>ssh://user@host:port</code> or a host of <code>~/.ssh/config</code>, with a key (no password prompts). The program and delve are built here for that machine and copied there; delve listens on 127.0.0.1 there and is reached through ssh") }.visibleIf(goCommand)
+            row("Directory there:") { cell(sshDirectory.apply { columns = 30; emptyText.text = GoSsh.DEFAULT_DIRECTORY }).comment("Where the program and delve go on the SSH host, under the home directory unless absolute; the program runs in it") }.visibleIf(goCommand)
+            row("dlv port there:") { cell(sshDelvePort.apply { columns = 6; emptyText.text = "0" }).comment("0: a free port delve picks itself. A fixed port is checked when delve binds it: a taken one stops the start with a message") }.visibleIf(goCommand)
             row { cell(runtimeTelemetry).comment("For <code>go run</code>: the program is built and started with <code>GODEBUG=gctrace=1,schedtrace=1000</code>; the heap, the collections and the scheduler show in the Go Monitor tool window, not in the console") }.visibleIf(goCommand)
             row("Profile:") { cell(profile).comment("For <code>go test</code>: <code>-cpuprofile</code>, <code>-memprofile</code>, <code>-blockprofile</code>, <code>-mutexprofile</code> or <code>-trace</code>; after the run a notification opens it in <code>go tool pprof</code> / <code>go tool trace</code>") }.visibleIf(test)
         }
@@ -118,6 +124,9 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         remotePort.text = options.remotePort.toString()
         remotePid.text = if (options.remotePid > 0) options.remotePid.toString() else ""
         pathSubstitutions.text = options.pathSubstitutions.orEmpty()
+        sshHost.text = options.sshHost.orEmpty()
+        sshDirectory.text = options.sshDirectory.orEmpty()
+        sshDelvePort.text = if (options.sshDelvePort > 0) options.sshDelvePort.toString() else ""
     }
 
     override fun applyEditorTo(configuration: GoRunConfiguration) {
@@ -148,5 +157,8 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
         options.remotePort = remotePort.text.trim().toIntOrNull() ?: 0
         options.remotePid = remotePid.text.trim().toIntOrNull() ?: 0
         options.pathSubstitutions = pathSubstitutions.text.ifBlank { null }
+        options.sshHost = sshHost.text.trim().ifEmpty { null }
+        options.sshDirectory = sshDirectory.text.trim().ifEmpty { null }
+        options.sshDelvePort = sshDelvePort.text.trim().ifEmpty { "0" }.toIntOrNull() ?: -1
     }
 }

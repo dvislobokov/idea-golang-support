@@ -1,6 +1,7 @@
 package io.github.golangsupport.ide.rules
 
 import com.intellij.codeInspection.LocalQuickFix
+import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
@@ -88,13 +89,19 @@ class GoRuleContext internal constructor(val file: GoFile, private val holder: P
     /** Reports [message] on [element] (or [range] inside it) with [fixes]. Fixes must not keep PSI of other files. */
     fun report(element: PsiElement, message: String, vararg fixes: LocalQuickFix) = report(element, null, message, *fixes)
 
-    fun report(element: PsiElement, range: TextRange?, message: String, vararg fixes: LocalQuickFix) {
+    fun report(element: PsiElement, range: TextRange?, message: String, vararg fixes: LocalQuickFix) = report(element, range, message, false, *fixes)
+
+    /** Like [report], shown struck through (a use of a deprecated symbol) unless the rule's level is INFO. */
+    fun reportDeprecated(element: PsiElement, range: TextRange?, message: String, vararg fixes: LocalQuickFix) = report(element, range, message, true, *fixes)
+
+    private fun report(element: PsiElement, range: TextRange?, message: String, deprecated: Boolean, vararg fixes: LocalQuickFix) {
         val holder = holder ?: return
         val start = element.textRange.startOffset + (range?.startOffset ?: 0)
         if (isSuppressed(element, start)) return
         val active = current
         val text = "[${active.rule.id}] $message"
-        val descriptor = holder.manager.createProblemDescriptor(element, range, text, active.level.highlightType, isOnTheFly, *fixes)
+        val type = if (deprecated && active.level != GoRuleLevel.INFO) ProblemHighlightType.LIKE_DEPRECATED else active.level.highlightType
+        val descriptor = holder.manager.createProblemDescriptor(element, range, text, type, isOnTheFly, *fixes)
         holder.registerProblem(descriptor)
         GoRules.reportListener?.invoke(active.rule, text)
     }
