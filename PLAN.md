@@ -133,8 +133,8 @@
 - [ ] **Go SDK из IDE.** Список версий с go.dev/dl, загрузка и распаковка в `~/sdk/goX`, запись в Path to go; переключение между установленными. 2 дня.
 - [~] **Run Targets (Docker / WSL / SSH).** Сделано (0.2.98, 2026-10-04, робот на sshd в WSL): Debug `go run` / `go test` на SSH-хосте — программа и
   встроенный delve кросс-собираются здесь, копируются через `ssh 'cat > file'`, `dlv dap` на 127.0.0.1 там через `ssh -W` (`run/GoSsh`, `debugger/GoSshDebug`).
-  Осталось: копирование файлов к программе (конфиги, сертификаты, testdata: поле «Files to copy», `tar | ssh`, права 600, без повтора при неизменном наборе);
-  Run (не Debug) на хосте; attach к процессу там; Docker (`docker cp` / `docker exec`) и WSL без sshd (`wsl.exe`: EOF stdin через interop не доходит — seen live).
+  0.2.99: «Files to copy» и testdata (`tar | ssh`, права 600, без повтора при неизменном наборе), delve на unix-сокете вместо TCP-порта.
+  Осталось: Run (не Debug) на хосте; attach к процессу там; Docker (`docker cp` / `docker exec`) и WSL без sshd (`wsl.exe`: EOF stdin через interop не доходит — seen live).
 
 ## Уровень 4. Неделя и больше
 

@@ -138,8 +138,14 @@ class GoRunConfigurationOptions : LocatableRunConfigurationOptions() {
     /** Where the program and delve go on [sshHost]: relative to the home directory there unless absolute; empty is [GoSsh.DEFAULT_DIRECTORY]. */
     var sshDirectory by string()
 
-    /** The port of `dlv dap` on [sshHost], on 127.0.0.1 only (reached through ssh, never opened to the network); 0: a free one delve picks. */
-    var sshDelvePort by property(0)
+    /**
+     * What goes to [sshHost] with the program, `local[=there]` a line each: a file or a directory, relative to the package directory here;
+     * there by default its own name in the directory the program runs in, or a relative path under it ([GoSsh.remotePath]).
+     */
+    var sshFiles by string()
+
+    /** `go test` on [sshHost]: the `testdata` directory of the package goes with the test binary, where the tests look for it. */
+    var sshCopyTestdata by property(true)
 }
 
 open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
@@ -158,8 +164,9 @@ open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, n
                 if (GoCli.findExecutable() == null) throw RuntimeConfigurationError("The 'go' executable is not found on PATH")
                 if (runsOverSsh()) {
                     if (GoSsh.executable() == null) throw RuntimeConfigurationError("ssh is not found: install the OpenSSH client")
+                    GoSsh.invalidHost(options.sshHost.orEmpty().trim())?.let { throw RuntimeConfigurationError(it) }
                     if (options.command == GoCommand.TEST && options.recursive) throw RuntimeConfigurationError("On an SSH host the tests of one package are debugged: go test -c builds one package, ./... is not")
-                    if (options.sshDelvePort !in 0..65535) throw RuntimeConfigurationError("The port of dlv dap on the SSH host is not a port: ${options.sshDelvePort}")
+                    GoSsh.fileEntries(options.sshFiles).firstNotNullOfOrNull(::sshFileProblem)?.let { throw RuntimeConfigurationError(it) }
                 }
             }
             GoCommand.EXEC -> if (!File(options.binary.orEmpty()).isFile) throw RuntimeConfigurationError("The binary is not found: ${options.binary.orEmpty()}")
@@ -268,7 +275,28 @@ open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, n
         return GoCli.commandLine(goDirectory(), *arguments.toTypedArray()).withEnvironment(mapOf("GOOS" to goos, "GOARCH" to goarch, "CGO_ENABLED" to "0"))
     }
 
-    /** The `launch` of the copied [program] on the SSH host, in [directory] there unless the configuration names a working directory. */
+    /** A local path of "Files to copy": absolute, or relative to the package directory. */
+    fun sshLocalFile(path: String): File = File(path).takeIf { it.isAbsolute } ?: File(packageDirectory(), path)
+
+    /** The project directory, links resolved: files to copy come from inside it. */
+    fun sshProjectRoot(): java.nio.file.Path? = project.basePath?.let { runCatching { java.nio.file.Path.of(it).toRealPath() }.getOrNull() }
+
+    /**
+     * Why a line of "Files to copy" is refused, or null. Both ends stay inside: here the project (a configuration shared with a project must
+     * not send `~/.ssh/id_rsa` to a host it names), there the run directory ([GoSsh.remotePath]).
+     */
+    fun sshFileProblem(entry: GoSsh.FileEntry): String? {
+        val file = sshLocalFile(entry.local)
+        val root = sshProjectRoot()
+        return when {
+            !file.exists() -> "A file to copy is not found: ${file.path}"
+            root == null || !GoSsh.isInside(file.toPath(), root) -> "A file to copy must be inside the project: ${file.path}"
+            GoSsh.remotePath(entry.remote, GoSsh.defaultRemote(entry.local, file.name)) == null -> "A file to copy goes into the directory the program runs in: '${entry.remote}' is outside it (use a relative path)"
+            else -> null
+        }
+    }
+
+    /** The `launch` of the copied [program] on the SSH host, in [directory] there (its run directory, with the copied files). */
     fun sshLaunchArguments(program: String, directory: String): Map<String, Any> {
         val programArguments = ParametersListUtil.parse(options.programArguments.orEmpty())
         val arguments = if (options.command == GoCommand.TEST) GoTestFlags.forBinary(testFlags()) + GoLaunchArguments.testArguments(options.benchmark, options.testPattern) + programArguments else programArguments

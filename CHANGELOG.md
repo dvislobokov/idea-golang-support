@@ -30,6 +30,27 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.99] - 2026-10-04
+
+### Added — Files to copy for debug on an SSH host
+- Files to copy: `local` or `local=there` a line each, files and directories of the project relative to the package directory. They go
+  in one tar stream through ssh into the directory the program runs in, readable by the user alone (files `0600`, directories `0700`),
+  and are sent again only when the set or a file changes (size, time). There a file keeps its relative path (`certs/ca.pem`), or takes
+  the relative path after `=`. `go test` takes the package's `testdata` along (a checkbox, on by default).
+- Both ends stay inside: a file outside the project (links resolved) and a place outside the run directory (absolute, `~`, `..`) are
+  refused. Run configurations come with projects, and one shared with a cloned repository must not send `~/.ssh/id_rsa` to a host it
+  names, or write `~/.ssh/authorized_keys` there.
+- Each package has its own run directory there (`runs/run-…`, `runs/test-…`), so two packages never share a `testdata`; the program is
+  named after its package (`shop`, `store.test`).
+
+### Changed — debug on an SSH host is private to the user
+- delve there listens on a unix socket in a fresh `mktemp -d` directory (`0700`), not on a port of 127.0.0.1: any user of the host could
+  connect to that port and run code as you through delve. `ssh -W` connects to the socket; the field dlv port there is gone. A server with
+  `AllowStreamLocalForwarding no` is named in the error.
+- The directory there is `0700`; a directory the user chose that others can write to is refused (they could replace delve).
+- An SSH host starting with `-` is refused, and ssh gets `--` before the host: a run configuration shared with a project could otherwise
+  pass ssh an option such as `-oProxyCommand`.
+
 ## [0.2.98] - 2026-10-04
 
 ### Added — Debug on an SSH host
