@@ -107,20 +107,15 @@
 - [x] (2026-09-29, робот) **Remote debug и режимы delve.** Конфигурация «Go Remote»: host:port уже запущенного `dlv dap --listen` (пропустить `DelveProcess`, только сокет; `launch`/`attach`
   как сейчас) — день; «Go Exec» (`mode: exec`, путь к бинарнику, без сборки) — полдня; core dump (`mode: core`, `coreFilePath`) — полдня. Как: `GoRunConfigurationOptions.kind`,
   `GoDebugRunner`, `GoLaunchArguments`.
-- [ ] **Точки на функцию и watchpoints.** `setFunctionBreakpoints` (тип точки без строки, диалог «имя функции»), `setDataBreakpoints` через `dataBreakpointInfo` на переменной
-  в Variables (delve поддерживает с 1.21). Как: новые `XBreakpointType` в `GoDebugBreakpoints`. 1–2 дня.
+- [ ] **Watchpoints.** Точки на функцию сделаны (2026-09-30, ROADMAP). Осталось `setDataBreakpoints` через `dataBreakpointInfo` на переменной в Variables; сначала
+  зондом (`tools/dlv-dap/probe.py`) проверить, объявляет ли `dlv dap` `supportsDataBreakpoints`. Как: новый `XBreakpointType` в `GoDebugBreakpoints`. День.
 - [ ] **Endpoints.** Сканер по токенам: `http.HandleFunc("/path"`, `mux.Handle`, `r.Get/Post/…("/path"` (chi, gin, echo, fiber, gorilla) → tool window Endpoints
   (метод, путь, обработчик, переход) и Search Everywhere по URL. Без резолва: по строковым литералам и имени метода. 2–3 дня.
-- [ ] **Change Signature / Extract Interface / Safe Delete на gopls.** Полного Change Signature у gopls нет; есть code actions `refactor.rewrite.removeUnusedParam`
-  и `moveParamLeft` / `moveParamRight` (v0.17+) — они уже попадают в попап «Refactorings and actions of gopls…», нужно лишь проверить и упомянуть на Help Page.
-  Extract Interface — свой генератор по методам типа (сканер знает сигнатуры) — день; Safe Delete — `references` перед удалением объявления с диалогом — день.
-- [ ] (2026-10-02, после волны 1 §11 FEATURES) **go.mod как в GoLand: подсветка и действия в файле.** Сейчас в go.mod своё — подсветка, folding, completion, баннер tidy;
-  диагностики и линзы (Tidy, Upgrade, Check for upgrades, govulncheck) даёт только gopls. Свой слой без сервера: аннотатор над `GoModPsiFile` по кэшу результатов
-  `go list -m -u -json all` и `govulncheck` (тот же кэш, что у окна Go Dependencies; `go` зовётся только по действию пользователя — после Check for upgrades / открытия
-  окна): неиспользуемый require (по импортам проекта из `GoExportsIndex`), есть новее, уязвим, `replace` на несуществующий каталог, дубликат, `go` старше toolchain;
-  intentions на строке: Upgrade to latest / to version…, Remove requirement (`go get path@none`), Make direct / indirect, Add replace, Exclude; `psi.referenceContributor`:
-  путь модуля → каталог в module cache, Find Usages пути в импортах; inlay «последняя версия, дата» у require. Правки go.mod — только через `go get` / `go mod tidy`
-  (иначе разойдётся go.sum). Как: `mod/GoModAnnotator`, `mod/GoModIntentions`, `mod/GoModReferences`, кэш `mod/GoModuleStates` (чистый, с тестами). 2 дня.
+- [ ] **Extract Interface** на PSI: интерфейс по выбранным методам типа (Change Signature, Safe Delete и Move уже свои — 0.2.47–0.2.58). День.
+- [ ] **go.mod: остаток.** Уже есть (0.2.44–0.2.84): `replace`/`use` в никуда, дубли, неиспользуемый require, версии go/toolchain, новее с Upgrade to и линзами.
+  Осталось: уязвимые версии в файле (по кэшу `govulncheck` окна Go Dependencies), intentions Upgrade to version…, Remove requirement (`go get path@none`),
+  Make direct / indirect, Add replace, Exclude; `psi.referenceContributor`: путь модуля → каталог в module cache, Find Usages пути в импортах. Правки — только
+  через `go get` / `go mod tidy` (иначе разойдётся go.sum). День.
 - [ ] (2026-10-02) **Менеджер пакетов через GOPROXY: окно Go Packages.** Расширение окна Go Dependencies. Чистый клиент `mod/GoProxyClient` по протоколу прокси
   (`/@v/list`, `/@latest`, `/@v/<v>.info`, `.mod`, `.zip`; GOPROXY из `go env` с `,`/`|` и `direct`, GOPRIVATE/GONOSUMDB уважать; разбор ответов — без сети, тесты):
   ввод пути модуля с подсказкой из `index.golang.org/index` (кэш ленты, поиск по подстроке локально — у GOPROXY поиска нет) и из GOMODCACHE, кнопка «Open on pkg.go.dev»;
@@ -138,17 +133,13 @@
 
 ## Уровень 4. Неделя и больше
 
-- [ ] **Профили в IDE.** Первый шаг (день): `go tool pprof -top -nodecount=200` → таблица Top в tool window, клик — к функции. Второй (неделя): flame graph
-  (`go tool pprof -raw` или `-proto` + разбор protobuf профиля своим кодом, `TimeSeriesChart`-подобный компонент), горячие строки в gutter. Третий: профиль обычной программы
-  через `runtime/pprof` требует кода в программе — предлагать `net/http/pprof` по импорту («Open pprof» по адресу из кода), как в PLAN 5.
+- [ ] **Профили в IDE: свой просмотрщик.** Страница `go tool pprof -http` во вкладке редактора уже есть (2026-09-30, ROADMAP), но из неё нет перехода к коду.
+  Осталось: разбор профиля (`-proto`) своим кодом, таблица Top и flame graph с переходом к функции, горячие строки в gutter; для обычной программы —
+  «Open pprof» по адресу `net/http/pprof` из кода. Неделя.
 - [ ] **Go templates** (`html/template`, `text/template`): свой язык для `{{ … }}` внутри HTML/текста (`TemplateLanguage` платформы), подсветка actions, completion
   функций (`if range with template block define end`, builtin funcs), переход к `define`. 1–2 недели.
-- [x] (2026-10-02) Закрыто: свой парсер и PSI — go-psi (Grammar-Kit, стабы, типы, resolve), подключён шагами 1–10 `MIGRATION.md`; дальше — его волны
-  (`docs/FEATURES.md`, шаг 11 `MIGRATION.md`). Исходная формулировка:
-  **Свой парсер и PSI Go** (недели): локальные инспекции, surround/unwrap, Find Usages и Go to Implementation с места использования без gopls, Change Signature,
-  Move, Type/Call Hierarchy. Кандидат — грамматика заброшенного go-lang-idea-plugin (Apache 2.0; проверить лицензию, generics и модулей там нет). Отдельное решение:
-  не начинать, пока gopls-путь не упрётся в потолок.
-- [ ] **cgo и Plan9 assembly** — подсветка `.s` файлов и `import "C"`: только если появится запрос.
+- [x] (2026-10-02) Свой парсер и PSI — go-psi, подключён шагами 1–10 `MIGRATION.md`.
+- [ ] **cgo** — навигация и подсветка вокруг `import "C"`: только если появится запрос (ассемблер `.s` сделан в 0.2.60–0.2.66).
 
 ## Не делать (по замыслу плагина)
 
@@ -166,25 +157,5 @@
 
 - [x] (2026-09-29) Пакеты самого проекта: отдельный индекс платформы `GoExportsIndex`, см. ROADMAP.
 - [ ] Косвенные зависимости: по настройке, их сотни; сначала замерить время и размер на большом go.mod.
-- [ ] Smart completion: функции каталога, возвращающие ожидаемый тип (`GoExpectedTypes`). Типы сканер видит текстом, точность за gopls.
+- [ ] Smart completion: функции каталога, возвращающие ожидаемый тип (`GoExpectedTypes`); типы каталога сейчас — текст сканера.
 - [ ] Методы типов каталога: сейчас только объявления верхнего уровня без получателя.
-- [ ] Go to Symbol по зависимостям без gopls.
-
----
-
-## Приложение. Кэширование ответов gopls
-
-Кэшировать completion смысла нет: ответ LSP привязан к версии документа и позиции, любое нажатие клавиши меняет версию, и кэш попадал бы только при повторном
-вызове в том же месте. gopls и так держит у себя типы и пакеты — это основная стоимость запроса.
-
-Что реально можно ускорить на стороне плагина:
-- [ ] **Документация к пунктам списка** (`completionItem/resolve`): дока символа меняется редко, ключ «символ + пакет». Самый заметный эффект при листании списка.
-- [ ] **Hover** по ключу «файл + версия + позиция»: повторное наведение и быстрая дока без обращения к серверу.
-- [ ] **Completion с `isIncomplete=false`**: клиент фильтрует первый ответ локально, без новых запросов. Сначала посмотреть, что gopls отдаёт сейчас.
-- [ ] Настройки самого gopls: `completionBudget`, отключение ненужных анализаторов.
-
-Запросы шлёт платформа, а не плагин, поэтому кэш придётся встраивать прокси-слоем вокруг процесса gopls — тем же приёмом с потоками, что в отладчике
-(`DapMessageRewritingStream` / `DapMessageWatchingStream`).
-
-- [ ] **Сначала замер:** включить трассу LSP (`-rpc.trace`, окно gopls) и посмотреть, какие запросы медленные и как часто повторяются, чтобы не кэшировать то, что и так
-  отвечает за миллисекунды.
