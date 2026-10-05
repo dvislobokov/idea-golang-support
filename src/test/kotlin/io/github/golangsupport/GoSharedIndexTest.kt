@@ -92,6 +92,10 @@ class GoSharedIndexTest {
         assertEquals("file:///srv/a.ijx", GoSharedIndexLayout.resolve("https://cdn.example/go/index.json", "file:///srv/a.ijx"))
         assertEquals("a.ijx", GoSharedIndexLayout.fileName("https://cdn.example/go/a.ijx?token=1"))
         assertEquals("chunk.ijx", GoSharedIndexLayout.fileName("https://cdn.example/go/chunk"))
+        // the index is a remote document: no separators or drive letters may reach the file system
+        assertEquals("x.ijx", GoSharedIndexLayout.fileName("https://cdn.example/go/..\\..\\x.ijx"))
+        assertEquals("c_evil.ijx", GoSharedIndexLayout.fileName("https://cdn.example/go/c:evil"))
+        assertEquals("chunk.ijx", GoSharedIndexLayout.fileName("https://cdn.example/go/.."))
     }
 
     @Test

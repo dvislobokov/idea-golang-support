@@ -54,8 +54,13 @@ object GoSharedIndexLayout {
     fun resolve(indexUrl: String, url: String): String =
         if (Regex("^[a-zA-Z][a-zA-Z0-9+.-]*:").containsMatchIn(url)) url else indexUrl.substringBeforeLast('/') + "/" + url.trimStart('/')
 
-    /** The file name a downloaded chunk is stored under. */
-    fun fileName(url: String): String = url.substringBefore('?').substringAfterLast('/').let { if (it.endsWith(CHUNK_SUFFIX)) it else "$it$CHUNK_SUFFIX" }
+    /** The file name a downloaded chunk is stored under: the last segment of the url, reduced to name characters (the index is a
+     *  remote document; `..\..\x` or `:` must not reach `Path.resolve`), `chunk` when nothing is left. */
+    fun fileName(url: String): String {
+        val last = url.substringBefore('?').substringAfterLast('/').replace(Regex("[^A-Za-z0-9._-]"), "_").trim('.', '_')
+        val name = last.ifEmpty { "chunk" }
+        return if (name.endsWith(CHUNK_SUFFIX)) name else "$name$CHUNK_SUFFIX"
+    }
 
     private fun buildNumber(build: String): String = build.substringAfter('-')
 
