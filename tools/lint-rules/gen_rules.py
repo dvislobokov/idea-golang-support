@@ -73,7 +73,7 @@ govet:loopclosure | loop variable captured by `go`/`defer` closure (go < 1.22) |
 govet:lostcancel | cancel of `context.WithCancel` not called on all paths | F | T+F | n:GoLostCancel | M | 12 | —
 govet:nilfunc | comparison of a function with nil | E | T | p | S | 12 | —
 govet:nilness | nil dereference / impossible nil comparison | F | T+F | n:GoNilDereference, GoImpossibleNilCheck | L | - | —
-govet:printf | printf format/argument mismatch, non-constant format | C | T | n:GoPrintf | L | 12 | `printf.funcs`
+govet:printf | printf format/argument mismatch, non-constant format | C | T | n:GoPrintFunctions | L | 12 | `printf.funcs`
 govet:reflectvaluecompare | `reflect.Value` compared with `==` | E | T | p | S | - | —
 govet:shadow | variable shadows an outer one that is used after | F | T+F | n~:GoShadowedError (errors only; generalize behind `strict`) | M | - | `shadow.strict`
 govet:shift | shift count >= width of the operand | E | T | p | S | 12 | —
@@ -173,7 +173,7 @@ SA5004 | `for { select { … default: } }` busy loop | S | Y | p | S | 12 | —
 SA5005 | finalizer references the finalized object | C | T | p | M | 12 | —
 SA5007 | infinite recursion | F | T+F | p | M | 12 | —
 SA5008 | invalid struct tag | T | Y | n:GoStructTag | S | 12 | —
-SA5009 | printf format mismatch | C | T | n:GoPrintf | S | 12 | —
+SA5009 | printf format mismatch | C | T | n:GoPrintFunctions | S | 12 | —
 SA5010 | impossible type assertion | E | T | p | M | 12 | —
 SA5011 | nil pointer dereference after a nil check | F | T+F | n:GoNilDereference | L | 12 | —
 SA5012 | odd-length slice to a pairs function | C | T | p | M | 12 | —
@@ -584,7 +584,7 @@ SECTIONS["Popular linters (one rule each, or a few sub-checks)"] = [
     ("nestif", "nestif", "deeply nested `if` complexity", "F", "Y", "p", "S", "-", "`min-complexity` (5)"),
     ("wastedassign", "wastedassign", "assignment never used / reassigned before use", "F", "F", "n~:GoIneffectualAssignment (same analysis; wastedassign also flags assignments before `return`)", "S", "-", "—"),
     ("makezero", "makezero", "`append` to a slice created with non-zero length", "F", "T+F", "p", "S", "-", "`always`"),
-    ("exhaustive", "exhaustive", "`switch` over an enum misses members", "S", "T+X", "n:GoExhaustiveSwitch", "M", "-", "`default-signifies-exhaustive`, `check: [switch, map]`, `ignore-enum-members`"),
+    ("exhaustive", "exhaustive", "`switch` over an enum misses members", "S", "T+X", "n~:GoSwitchMissingCasesForIotaConsts (iota blocks only; the Fill switch intention for the rest)", "M", "-", "`default-signifies-exhaustive`, `check: [switch, map]`, `ignore-enum-members`"),
     ("forcetypeassert", "forcetypeassert", "`x.(T)` without `ok`", "E", "T", "p", "S", "-", "—"),
     ("contextcheck", "contextcheck", "function uses a non-inherited context", "F", "T+F", "n:GoContextNotPropagated", "M", "-", "—"),
     ("containedctx", "containedctx", "struct field of type `context.Context`", "T", "T", "p", "S", "-", "—"),
@@ -652,7 +652,7 @@ goland:GoMixedReceiverTypes | value and pointer receivers mixed on one type | P 
 goland:GoNameStartsWithPackageName | exported name repeats the package name (`http.HTTPServer`) | Fi | Y | p | S | - | the stutter part of `revive:exported` (not covered by `GoDocComment`)
 goland:GoNilness | nil misuse: interfaces, maps, pointers, channels, calls | F | T+F | n~:GoNilDereference, GoImpossibleNilCheck (verify nil channel send/close/receive and nil-map reads) | M | - | —
 goland:GoPreferNilSlice | empty slice literal can be a nil slice | E | T | p | S | - | `[]T{}` -> `nil` is unsafe for JSON and reflect: weak warning
-goland:GoPrintFunctions | printf format does not match the arguments | C | T | n:GoPrintf | - | - | —
+goland:GoPrintFunctions | printf format does not match the arguments | C | T | n:GoPrintFunctions | - | - | —
 goland:GoReceiverNames | receiver named `self`/`this`/`me` or inconsistent | T | T | s:ST1006 | - | - | alias also `ST1016`, `revive:receiver-naming`
 goland:GoRedundantBlankArgInRange | `for i, _ := range` | S | Y | s:revive:range | - | - | alias also `S1005`
 goland:GoRedundantComma | redundant comma where none is needed or allowed | E | Y | p | S | - | exact scope: verify against GoLand's resource and the parser's recovery
@@ -674,7 +674,7 @@ goland:GoStandardMethods | well-known method with a non-standard signature | T |
 goland:GoStringsReplaceCount | `strings.Replace` with a zero count | C | T | s:SA1018 | - | - | —
 goland:GoStructInitializationWithoutFieldNames | unkeyed composite literal of a foreign struct | E | T | s:govet:composites | - | - | —
 goland:GoStructLayout | field order creates padding or a pointer prefix | T | T | k: noisy; see `govet:fieldalignment` (skipped), the host has the Reorder Fields intention | - | - | —
-goland:GoSwitchMissingCasesForIotaConsts | switch over an enum misses constants | S | T+X | n:GoExhaustiveSwitch | - | - | alias of `exhaustive`
+goland:GoSwitchMissingCasesForIotaConsts | switch over an enum misses constants | S | T+X | n:GoSwitchMissingCasesForIotaConsts | - | - | alias of `exhaustive`
 goland:GoTestName | test name or signature breaks the testing convention | F | T | s:govet:tests | - | - | —
 goland:GoTypeAssertionOnErrors | type assertion on an error ignores wrapping | E | T | s:errorlint:asserts | - | - | —
 goland:GoTypeParameterInLowerCase | type parameter name does not match the chosen style | T | Y | p | S | - | style option; off by default

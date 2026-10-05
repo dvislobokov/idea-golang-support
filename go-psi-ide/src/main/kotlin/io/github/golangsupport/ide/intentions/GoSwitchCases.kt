@@ -5,6 +5,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import io.github.golangsupport.ide.completion.GoImportInserter
 import io.github.golangsupport.ide.inspections.GoImportEdits
 import io.github.golangsupport.ide.navigation.GoImplementations
+import io.github.golangsupport.lang.psi.GoConstDefinition
 import io.github.golangsupport.lang.psi.GoExprSwitchStatement
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoReferenceExpression
@@ -21,7 +22,7 @@ import io.github.golangsupport.semantic.types.GoPointerType
 
 /**
  * The cases a switch lacks, shared by Fill Switch ([GoFillSwitchIntention]) and the exhaustiveness inspection
- * (`ide.inspections.GoExhaustiveSwitchInspection`), so the quick fix inserts exactly what the warning names.
+ * (`ide.inspections.GoSwitchMissingCasesForIotaConstsInspection`, members of `iota` const blocks only), so the quick fix inserts exactly what the warning names.
  *
  * - Expression switch over a named non-interface type: its constants in its package (unexported ones only in the own package), in
  *   declaration order. A value counts as present when a case has the same constant value (`exhaustive` rules: constants with equal
@@ -46,20 +47,36 @@ object GoSwitchCases {
 
     /**
      * The missing cases of [switch] (a [GoExprSwitchStatement] or a [GoTypeSwitchStatement]), or null when its type is no enum or
-     * interface; [interfaceFilter] decides, before the (index) search for implementations, whether a type switch is looked at.
+     * interface; [interfaceFilter] decides, before the (index) search for implementations, whether a type switch is looked at;
+     * [constantFilter] narrows the members of an enum (the inspection takes only those of `iota` const blocks).
      */
-    fun of(switch: PsiElement, file: GoFile, interfaceFilter: (GoTypeSpec) -> Boolean = { true }): Missing? = when (switch) {
-        is GoExprSwitchStatement -> constantCases(switch, GoSourceText(file))
+    fun of(
+        switch: PsiElement, file: GoFile, interfaceFilter: (GoTypeSpec) -> Boolean = { true }, constantFilter: (GoConstDefinition) -> Boolean = { true },
+    ): Missing? = when (switch) {
+        is GoExprSwitchStatement -> constantCases(switch, GoSourceText(file), constantFilter)
         is GoTypeSwitchStatement -> typeCases(switch, GoSourceText(file), interfaceFilter)
         else -> null
     }
 
-    /** The edit inserting [missing] as `case X:` lines at the indentation of [switch]. */
-    fun plan(file: GoFile, switch: PsiElement, missing: Missing): GoEditPlan? {
+    /** The edit inserting [missing] as `case X:` lines (or one `case X, Y:` clause with [oneClause]) at the indentation of [switch]. */
+    fun plan(file: GoFile, switch: PsiElement, missing: Missing, oneClause: Boolean = false): GoEditPlan? {
         if (missing.cases.isEmpty()) return null
         val text = file.viewProvider.contents
         val indent = GoIntentionText.indentAt(text, switch.textRange.startOffset)
-        return GoEditPlan(listOf(GoIntentionText.insertBefore(text, missing.anchor, indent, missing.cases.map { "case $it:" })), missing.imports)
+        val lines = if (oneClause) listOf("case ${missing.cases.joinToString(", ")}:") else missing.cases.map { "case $it:" }
+        return GoEditPlan(listOf(GoIntentionText.insertBefore(text, missing.anchor, indent, lines)), missing.imports)
+    }
+
+    /** The edit adding an empty `default:` before the closing brace of [switch]; null when it has one. */
+    fun defaultPlan(file: GoFile, switch: PsiElement): GoEditPlan? {
+        val rbrace = when (switch) {
+            is GoExprSwitchStatement -> switch.rbrace.takeIf { switch.exprCaseClauseList.none { it.default != null } }
+            is GoTypeSwitchStatement -> switch.rbrace.takeIf { switch.typeCaseClauseList.none { it.isDefault } }
+            else -> null
+        } ?: return null
+        val text = file.viewProvider.contents
+        val indent = GoIntentionText.indentAt(text, switch.textRange.startOffset)
+        return GoEditPlan(listOf(GoIntentionText.insertBefore(text, rbrace.textRange.startOffset, indent, listOf("default:"))), emptyList())
     }
 
     /** Applies [plan] to [file] in the current write action, then adds its imports (as the intentions do). */
@@ -72,14 +89,14 @@ object GoSwitchCases {
         GoImportEdits.commit(file, document)
     }
 
-    private fun constantCases(switch: GoExprSwitchStatement, source: GoSourceText): Missing? {
+    private fun constantCases(switch: GoExprSwitchStatement, source: GoSourceText, constantFilter: (GoConstDefinition) -> Boolean): Missing? {
         val tag = switch.tag ?: return null
         val project = switch.project
         val service = GoSemanticService.getInstance(project)
         val type = service.typeOf(tag) as? GoNamedType ?: return null
         val declarationFile = type.declaration.containingFile as? GoFile ?: return null
         val own = source.isOwnPackage(declarationFile)
-        val members = GoEnumConstants.of(type, own) ?: return null
+        val members = GoEnumConstants.of(type, own)?.filter { constantFilter(it.constant) }?.ifEmpty { null } ?: return null
         val present = HashSet<PsiElement>()
         val presentNames = HashSet<String>()
         val covered = HashSet<GoConstant>()

@@ -67,7 +67,7 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `govet:lostcancel` | govet | cancel of `context.WithCancel` not called on all paths | FUNCTION | TYPES + FLOW | native: `GoLostCancel` | M | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:nilfunc` | govet | comparison of a function with nil | EXPRESSION | TYPES | native: GoVetNilFuncRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
 | `govet:nilness` | govet | nil dereference / impossible nil comparison | FUNCTION | TYPES + FLOW | native: `GoNilDereference`, `GoImpossibleNilCheck` | L | — | — | BSD-3-Clause (x/tools) |
-| `govet:printf` | govet | printf format/argument mismatch, non-constant format | CALL | TYPES | native: `GoPrintf` | L | v1+v2 | `printf.funcs` | BSD-3-Clause (x/tools) |
+| `govet:printf` | govet | printf format/argument mismatch, non-constant format | CALL | TYPES | native: `GoPrintFunctions` | L | v1+v2 | `printf.funcs` | BSD-3-Clause (x/tools) |
 | `govet:reflectvaluecompare` | govet | `reflect.Value` compared with `==` | EXPRESSION | TYPES | native: GoVetReflectValueCompareRule | S | — | — | BSD-3-Clause (x/tools) |
 | `govet:shadow` | govet | variable shadows an outer one that is used after | FUNCTION | TYPES + FLOW | native (partial): GoShadowedError (errors only; generalize behind `strict`) | M | — | `shadow.strict` | BSD-3-Clause (x/tools) |
 | `govet:shift` | govet | shift count >= width of the operand | EXPRESSION | TYPES | native: GoVetShiftRule | S | v1+v2 | — | BSD-3-Clause (x/tools) |
@@ -168,7 +168,7 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `SA5005` | staticcheck | finalizer references the finalized object | CALL | TYPES | native: GoCyclicFinalizerRule | M | v1+v2 | — | MIT |
 | `SA5007` | staticcheck | infinite recursion | FUNCTION | TYPES + FLOW | port | M | v1+v2 | — | MIT |
 | `SA5008` | staticcheck | invalid struct tag | TYPE_SPEC | SYNTAX | native: `GoStructTag` | S | v1+v2 | — | MIT |
-| `SA5009` | staticcheck | printf format mismatch | CALL | TYPES | native: `GoPrintf` | S | v1+v2 | — | MIT |
+| `SA5009` | staticcheck | printf format mismatch | CALL | TYPES | native: `GoPrintFunctions` | S | v1+v2 | — | MIT |
 | `SA5010` | staticcheck | impossible type assertion | EXPRESSION | TYPES | native: GoImpossibleAssertionRule | M | v1+v2 | — | MIT |
 | `SA5011` | staticcheck | nil pointer dereference after a nil check | FUNCTION | TYPES + FLOW | native: `GoNilDereference` | L | v1+v2 | — | MIT |
 | `SA5012` | staticcheck | odd-length slice to a pairs function | CALL | TYPES | native: GoEvenSliceLengthRule | M | v1+v2 | — | MIT |
@@ -590,7 +590,7 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `nestif` | nestif | deeply nested `if` complexity | FUNCTION | SYNTAX | port | S | — | `min-complexity` (5) | BSD-2-Clause† |
 | `wastedassign` | wastedassign | assignment never used / reassigned before use | FUNCTION | FLOW | native (partial): GoIneffectualAssignment (same analysis; wastedassign also flags assignments before `return`) | S | — | — | MIT† |
 | `makezero` | makezero | `append` to a slice created with non-zero length | FUNCTION | TYPES + FLOW | port | S | — | `always` | MIT† |
-| `exhaustive` | exhaustive | `switch` over an enum misses members | STATEMENT | TYPES + PROJECT_INDEX | native: `GoExhaustiveSwitch` | M | — | `default-signifies-exhaustive`, `check: [switch, map]`, `ignore-enum-members` | BSD-2-Clause† |
+| `exhaustive` | exhaustive | `switch` over an enum misses members | STATEMENT | TYPES + PROJECT_INDEX | native (partial): GoSwitchMissingCasesForIotaConsts (iota blocks only; the Fill switch intention for the rest) | M | — | `default-signifies-exhaustive`, `check: [switch, map]`, `ignore-enum-members` | BSD-2-Clause† |
 | `forcetypeassert` | forcetypeassert | `x.(T)` without `ok` | EXPRESSION | TYPES | port | S | — | — | MIT† |
 | `contextcheck` | contextcheck | function uses a non-inherited context | FUNCTION | TYPES + FLOW | native: `GoContextNotPropagated` | M | — | — | Apache-2.0† |
 | `containedctx` | containedctx | struct field of type `context.Context` | TYPE_SPEC | TYPES | port | S | — | — | MIT† |
@@ -660,7 +660,7 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `goland:GoNameStartsWithPackageName` | goland | exported name repeats the package name (`http.HTTPServer`) | FILE | SYNTAX | port | S | — | the stutter part of `revive:exported` (not covered by `GoDocComment`) | — (behavior only; closed-source product) |
 | `goland:GoNilness` | goland | nil misuse: interfaces, maps, pointers, channels, calls | FUNCTION | TYPES + FLOW | native (partial): GoNilDereference, GoImpossibleNilCheck (verify nil channel send/close/receive and nil-map reads) | M | — | — | — (behavior only; closed-source product) |
 | `goland:GoPreferNilSlice` | goland | empty slice literal can be a nil slice | EXPRESSION | TYPES | port | S | — | `[]T{}` -> `nil` is unsafe for JSON and reflect: weak warning | — (behavior only; closed-source product) |
-| `goland:GoPrintFunctions` | goland | printf format does not match the arguments | CALL | TYPES | native: `GoPrintf` | — | — | — | — (behavior only; closed-source product) |
+| `goland:GoPrintFunctions` | goland | printf format does not match the arguments | CALL | TYPES | native: `GoPrintFunctions` | — | — | — | — (behavior only; closed-source product) |
 | `goland:GoReceiverNames` | goland | receiver named `self`/`this`/`me` or inconsistent | TYPE_SPEC | TYPES | same-as: `ST1006` | — | — | alias also `ST1016`, `revive:receiver-naming` | — (behavior only; closed-source product) |
 | `goland:GoRedundantBlankArgInRange` | goland | `for i, _ := range` | STATEMENT | SYNTAX | same-as: `revive:range` | — | — | alias also `S1005` | — (behavior only; closed-source product) |
 | `goland:GoRedundantComma` | goland | redundant comma where none is needed or allowed | EXPRESSION | SYNTAX | port | S | — | exact scope: verify against GoLand's resource and the parser's recovery | — (behavior only; closed-source product) |
@@ -682,7 +682,7 @@ already have, which are the same check as a rule above, and which are GoLand-onl
 | `goland:GoStringsReplaceCount` | goland | `strings.Replace` with a zero count | CALL | TYPES | same-as: `SA1018` | — | — | — | — (behavior only; closed-source product) |
 | `goland:GoStructInitializationWithoutFieldNames` | goland | unkeyed composite literal of a foreign struct | EXPRESSION | TYPES | same-as: `govet:composites` | — | — | — | — (behavior only; closed-source product) |
 | `goland:GoStructLayout` | goland | field order creates padding or a pointer prefix | TYPE_SPEC | TYPES | skip: noisy; see `govet:fieldalignment` (skipped), the host has the Reorder Fields intention | — | — | — | — (behavior only; closed-source product) |
-| `goland:GoSwitchMissingCasesForIotaConsts` | goland | switch over an enum misses constants | STATEMENT | TYPES + PROJECT_INDEX | native: `GoExhaustiveSwitch` | — | — | alias of `exhaustive` | — (behavior only; closed-source product) |
+| `goland:GoSwitchMissingCasesForIotaConsts` | goland | switch over an enum misses constants | STATEMENT | TYPES + PROJECT_INDEX | native: `GoSwitchMissingCasesForIotaConsts` | — | — | alias of `exhaustive` | — (behavior only; closed-source product) |
 | `goland:GoTestName` | goland | test name or signature breaks the testing convention | FUNCTION | TYPES | same-as: `govet:tests` | — | — | — | — (behavior only; closed-source product) |
 | `goland:GoTypeAssertionOnErrors` | goland | type assertion on an error ignores wrapping | EXPRESSION | TYPES | same-as: `errorlint:asserts` | — | — | — | — (behavior only; closed-source product) |
 | `goland:GoTypeParameterInLowerCase` | goland | type parameter name does not match the chosen style | TYPE_SPEC | SYNTAX | port | S | — | style option; off by default | — (behavior only; closed-source product) |

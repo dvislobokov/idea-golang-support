@@ -2,7 +2,8 @@
 <body>
 Reports calls of printf-like functions whose format does not match the arguments, as <code>go vet</code>'s <code>printf</code> check does:
 a verb that does not fit the argument's type (<code>%d</code> of a string, <code>%s</code> of an <code>int</code> without a <code>String</code> method),
-too few or too many arguments (<code>%[n]d</code> indexes and <code>*</code> width and precision are counted), unknown verbs and flags,
+too few or too many arguments (<code>%[n]d</code> indexes and <code>*</code> width and precision are counted; a verb without an argument is
+reported as <i>No argument for verb: argument index = 2, arguments count = 1 (%s)</i>), unknown verbs and flags,
 <code>%w</code> outside <code>fmt.Errorf</code> or with an argument that is not an <code>error</code>, a Printf directive in a <code>Println</code>
 argument and a redundant newline at the end of a <code>Println</code>.
 <p>Checked: <code>fmt</code>, <code>log</code>, <code>*log.Logger</code>, <code>testing.T/B/F/TB</code>, and the functions and methods of the

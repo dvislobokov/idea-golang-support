@@ -112,7 +112,7 @@ class GoCustomLintersTest {
         assertEquals(listOf("GoUncheckedError"), GoLintDuplicates.nativeInspections("errcheck", "Error return value is not checked"))
         assertEquals(listOf("GoIneffectualAssignment"), GoLintDuplicates.nativeInspections("ineffassign", "ineffectual assignment to err"))
         assertEquals(listOf("GoUnusedVariable", "GoUnusedParameter"), GoLintDuplicates.nativeInspections("unused", "var x is unused"))
-        assertEquals(listOf("GoPrintf"), GoLintDuplicates.nativeInspections("govet", "printf: fmt.Sprintf format %d has arg s of wrong type string"))
+        assertEquals(listOf("GoPrintFunctions"), GoLintDuplicates.nativeInspections("govet", "printf: fmt.Sprintf format %d has arg s of wrong type string"))
         // the rest of govet, and linters the table does not know, are never dropped
         assertEquals(emptyList<String>(), GoLintDuplicates.nativeInspections("govet", "fieldalignment: struct of size 24 could be 16"))
         assertEquals(emptyList<String>(), GoLintDuplicates.nativeInspections("mylinter", "anything"))

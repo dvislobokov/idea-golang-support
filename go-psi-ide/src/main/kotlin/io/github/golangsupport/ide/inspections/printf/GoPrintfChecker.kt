@@ -183,13 +183,14 @@ class GoPrintfChecker(private val service: GoSemanticService) {
         return Outcome.Ok
     }
 
-    /** Null when value argument [argNum] exists; [Outcome.Stop] when `args...` may hold it; a "reads arg" problem when it is missing. */
+    /** Null when value argument [argNum] exists; [Outcome.Stop] when `args...` may hold it; a "No argument for verb" problem when it is missing. */
     private fun argOutcome(call: GoPrintfCall, format: StringArg, argNum: Int, d: GoFormatString.Directive): Outcome? {
         val values = call.values
         if (argNum < values.size - 1) return null
         if (call.spread) return Outcome.Stop
         if (argNum < values.size) return null
-        val message = "${call.name} format ${d.text} reads arg #${argNum + 1}, but call has ${GoPrintfVerbs.count(values.size, "arg")}"
+        // GoLand's text (GoPrintFunctions), not vet's "reads arg #2, but call has 1 arg"
+        val message = "No argument for verb: argument index = ${argNum + 1}, arguments count = ${values.size} (${d.text})"
         return Outcome.Report(GoPrintfProblem(format.anchor, format.range(d.start, d.end), message))
     }
 

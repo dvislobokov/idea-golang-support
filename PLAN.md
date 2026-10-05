@@ -297,6 +297,7 @@
 - [x] (2026-10-05, 0.2.175–0.2.176) **Подсветка**: `GO_COMMENT_REFERENCE` на каждом имени в doc-комментарии, которое резолвится (`Probe2Config`, `Exported`, `Generic`, `time`+`Duration`, `os`+`PathError`,
   не только первое слово и `[Name]`); использования затеняющей переменной — `GO_SHADOWING_VARIABLE` (и объявление, и `_ = x` внутри блока); `case n := <-ch` — `GO_LOCAL_VARIABLE`.
   `GoBoolExpressions` WARNING `Condition 'x > 0' is always 'true'` после `x := 1` (у нас `GoDfaConstantCondition`).
+  Закрыто 0.2.178: switch по iota, Printf, уровень GoShadowedVar, пробел при Reformat Code, Add key / Update key value и виджет сняты (ROADMAP).
   Осталось после G10: `for true` → `Condition is redundant` (у нас это правило линта S1006 `GoForTrueRule` с текстом staticcheck); `GoIrregularIota`
   сделана уже описания — только голый `iota` в повторённом списке (GoLand молчал на `D0 = iota * 2; D1; D2 = iota * 2`); текст
   `GoAssignmentToReceiver` для pointer receiver взят из описания, не снят; значок SYNTAX_UPDATE в виджете и Ctrl+Alt+G у Go Generate File вживую не

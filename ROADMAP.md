@@ -180,6 +180,12 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.178) Остаток G10 закрыт: `GoSwitchMissingCasesForIotaConsts` и `GoPrintFunctions` с id, текстами и уровнями GoLand; `GoShadowedVar` на уровне
+  TEXT ATTRIBUTES; опция «Add a leading space to comments» работает и при Reformat Code (`GoCommentSpacePostFormatProcessor`). Доснято на GoLand
+  (`analysis/intention_run.js`, `widget_status.js`, дамп `inspections-widget-fixprobe.txt`): виджет инспекций показывает «6 syntax updates» своим значком — у нас на
+  песочнице тот же пункт и значок (`HighlightInfoType.Iconable`); Update key value на совпадающем теге у GoLand доступен и ничего не меняет (как у нас); Add key to tags у
+  GoLand без выбора вписывает `:"snake_case"` во все поля с шаблоном для ключа — у нас оставлен список ключей (сознательно). Не снято: как GoLand вставляет clause
+  в Create 'case' clause for values и куда ставит `default`; битовые флаги `1 << iota` у нас пропускаются.
 - [x] (2026-10-05, 0.2.177) G10 проверен вживую на песочнике теми же пробами (`infos.js`, `highlights.js`, попапы): `style.go`, `other.go`, `iota3.go`, цвета строк
   120–136 и списки Alt+Enter (`Sprintf`, `//go:generate`, теги) совпали с GoLand построчно; `Plugin to blame: Go` за прогон — 0. Найдено и исправлено: CutPrefix на
   `name = strings.TrimPrefix(name, "go")`. Осталось расхождений: `for true` — текст S1006 вместо `Condition is redundant`; `GoShadowedVar` у GoLand TEXT ATTRIBUTES(11)

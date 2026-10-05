@@ -36,16 +36,16 @@
                      groupName="Go" enabledByDefault="true" level="ERROR"
                      implementationClass="io.github.golangsupport.ide.inspections.GoMissingReturnInspection"/>
     <!-- vet printf over the PSI (docs/FEATURES.md section 5): format against arguments of fmt/log/testing calls and package wrappers. -->
-    <localInspection language="Go" shortName="GoPrintf" displayName="Printf format and arguments"
-                     groupName="Go" enabledByDefault="true" level="WARNING"
+    <localInspection language="Go" shortName="GoPrintFunctions" displayName="Incorrect usage of &apos;fmt.Printf&apos; and &apos;fmt.Println&apos; functions"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoPrintfInspection"/>
     <localInspection language="Go" shortName="GoChecker" displayName="Other type-checker errors"
                      groupName="Go" enabledByDefault="true" level="ERROR"
                      implementationClass="io.github.golangsupport.ide.inspections.GoCheckerInspection"/>
     <!-- Wave 2 (docs/FEATURES.md §11), part E: analysis inspections over the PSI (GoAnalysisInspectionBase, gate DIAGNOSTICS). -->
-    <localInspection language="Go" shortName="GoExhaustiveSwitch" displayName="Non-exhaustive switch over an enum or interface"
-                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
-                     implementationClass="io.github.golangsupport.ide.inspections.GoExhaustiveSwitchInspection"/>
+    <localInspection language="Go" shortName="GoSwitchMissingCasesForIotaConsts" displayName="Missing &apos;case&apos; statements for &apos;iota&apos; consts in &apos;switch&apos;"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoSwitchMissingCasesForIotaConstsInspection"/>
     <localInspection language="Go" shortName="GoDocComment" displayName="Missing or malformed doc comment of an exported declaration"
                      groupName="Go" enabledByDefault="false" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoDocCommentInspection"/>
@@ -139,7 +139,7 @@
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.flow.GoShadowedErrorInspection"/>
     <localInspection language="Go" shortName="GoShadowedVar" displayName="Shadowing variable"
-                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     groupName="Go" enabledByDefault="true" level="TEXT ATTRIBUTES"
                      implementationClass="io.github.golangsupport.ide.inspections.GoShadowingVariableInspection"/>
     <localInspection language="Go" shortName="GoResultUsedBeforeErrorCheck" displayName="Result used before the error check"
                      groupName="Go" enabledByDefault="true" level="WEAK WARNING"

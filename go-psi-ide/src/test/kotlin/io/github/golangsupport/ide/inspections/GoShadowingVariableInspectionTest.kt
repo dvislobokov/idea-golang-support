@@ -26,7 +26,7 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
         		return "", err
         	}
         	if value != "" {
-        		<weak_warning descr="${shadows("value")}">value</weak_warning>, <weak_warning descr="${shadows("err")}">err</weak_warning> := load(value + "x")
+        		<text_attr descr="${shadows("value")}">value</text_attr>, <text_attr descr="${shadows("err")}">err</text_attr> := load(value + "x")
         		if err != nil {
         			return "", err
         		}
@@ -43,21 +43,21 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
 
         func f(ch chan int) {
         	i, n := 0, 1
-        	for <weak_warning descr="${shadows("i")}">i</weak_warning> := range 3 {
+        	for <text_attr descr="${shadows("i")}">i</text_attr> := range 3 {
         		_ = i
         	}
-        	for <weak_warning descr="${shadows("n")}">n</weak_warning> := 0; n < 2; n++ {
+        	for <text_attr descr="${shadows("n")}">n</text_attr> := 0; n < 2; n++ {
         	}
-        	if <weak_warning descr="${shadows("i")}">i</weak_warning> := 2; i > 0 {
+        	if <text_attr descr="${shadows("i")}">i</text_attr> := 2; i > 0 {
         	}
-        	switch <weak_warning descr="${shadows("n")}">n</weak_warning> := 3; n {
+        	switch <text_attr descr="${shadows("n")}">n</text_attr> := 3; n {
         	}
         	select {
-        	case <weak_warning descr="${shadows("i")}">i</weak_warning> := <-ch:
+        	case <text_attr descr="${shadows("i")}">i</text_attr> := <-ch:
         		_ = i
         	}
         	var x any = i + n
-        	switch <weak_warning descr="${shadows("n")}">n</weak_warning> := x.(type) {
+        	switch <text_attr descr="${shadows("n")}">n</text_attr> := x.(type) {
         	default:
         		_ = n
         	}
@@ -75,7 +75,7 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
         	x, err := load()
         	if x > 0 {
         		var y int
-        		y, <weak_warning descr="${shadows("err")}">err</weak_warning> := load()
+        		y, <text_attr descr="${shadows("err")}">err</text_attr> := load()
         		_ = y
         		return err
         	}
@@ -124,8 +124,8 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
         const limit = 10
 
         func f() int {
-        	<weak_warning descr="${shadows("counter")}">counter</weak_warning> := 1
-        	var <weak_warning descr="${shadows("limit")}">limit</weak_warning> = 2
+        	<text_attr descr="${shadows("counter")}">counter</text_attr> := 1
+        	var <text_attr descr="${shadows("limit")}">limit</text_attr> = 2
         	return counter + limit
         }
         """
@@ -138,7 +138,7 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
             package p
 
             func f() int {
-            	<weak_warning descr="Declaration of 'shared' shadows declaration at b.go">shared</weak_warning> := 2
+            	<text_attr descr="Declaration of 'shared' shadows declaration at b.go">shared</text_attr> := 2
             	return shared
             }
             """
@@ -153,9 +153,9 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
 
         func (t T) m(a int) (r int) {
         	if a > 0 {
-        		<weak_warning descr="${shadows("a")}">a</weak_warning> := 1
-        		<weak_warning descr="${shadows("r")}">r</weak_warning> := a
-        		<weak_warning descr="${shadows("t")}">t</weak_warning> := T{}
+        		<text_attr descr="${shadows("a")}">a</text_attr> := 1
+        		<text_attr descr="${shadows("r")}">r</text_attr> := a
+        		<text_attr descr="${shadows("t")}">t</text_attr> := T{}
         		_, _ = r, t
         	}
         	return a
@@ -170,7 +170,7 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
         func f() {
         	v := 1
         	g := func() {
-        		<weak_warning descr="${shadows("v")}">v</weak_warning> := 2
+        		<text_attr descr="${shadows("v")}">v</text_attr> := 2
         		_ = v
         	}
         	g()
@@ -218,9 +218,9 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
         package p
 
         func f() {
-        	<weak_warning descr="${shadows("new", "builtin.go")}">new</weak_warning> := 2
+        	<text_attr descr="${shadows("new", "builtin.go")}">new</text_attr> := 2
         	_ = new
-        	<weak_warning descr="${shadows("nil", "builtin.go")}">nil</weak_warning> := 0
+        	<text_attr descr="${shadows("nil", "builtin.go")}">nil</text_attr> := 0
         	_ = nil
         }
         """
@@ -235,7 +235,7 @@ class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
         func TestX(t *testing.T) {
         	got := 1
         	t.Run("sub", func(t *testing.T) {
-        		<weak_warning descr="${shadows("got", "a_test.go")}">got</weak_warning> := 2
+        		<text_attr descr="${shadows("got", "a_test.go")}">got</text_attr> := 2
         		_ = got
         	})
         	_ = got

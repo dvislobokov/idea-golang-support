@@ -39,7 +39,7 @@ class GoCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSetting
     /** The same for the parameters of a function declaration. */
     @JvmField var CHOP_DOWN_PARAMETERS: Boolean = false
 
-    /** Other tab, GoLand's "Add a leading space to comments": the inspection "Comment has no leading space" reports `//text` only when on. */
+    /** Other tab, GoLand's "Add a leading space to comments": Reformat Code adds the space (`GoCommentSpacePostFormatProcessor`) and the inspection "Comment has no leading space" reports `//text` only when on. */
     @JvmField var ADD_LEADING_SPACE_TO_COMMENTS: Boolean = false
 
     /** The local prefixes typed by the user, or empty. */

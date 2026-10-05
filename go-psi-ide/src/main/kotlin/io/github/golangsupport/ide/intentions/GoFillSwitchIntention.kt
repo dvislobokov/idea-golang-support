@@ -8,7 +8,7 @@ import io.github.golangsupport.semantic.psi.GoPsiUtil
 
 /**
  * Fill switch: the missing `case`s of a switch, added after the existing ones and before `default` (which stays last).
- * What is missing comes from [GoSwitchCases] (shared with the exhaustiveness inspection and its "Add missing cases" fix):
+ * What is missing comes from [GoSwitchCases] (shared with the `iota` switch inspection and its "Create 'case' clause for values" fix):
  *
  * - An expression switch over a value of a named type with constants of that type in its package (an `iota` enum): a
  *   `case C:` for every constant whose value is not in a case yet (unexported ones only in their own package), in declaration order.

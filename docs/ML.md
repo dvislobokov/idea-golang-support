@@ -130,6 +130,10 @@ can be computed by the implementation from `element` and `context.file`.
   sandbox IDE and in `runIde --split-mode`; record size, startup cost, classloader issues.
 
 ### ML-1: completion ranking
+
+Status 2026-10-05 (0.2.178): the shared engine lives in `ml/` (subtree of idea-ml-completion), the Go feature adapter
+`io.github.golangsupport.ml.GoMlFeatures` and the headless dataset export `:go-psi-ide:mlDataset` exist; the IDE-side
+`GoMlCompletionRanker` and model loading are next, after a model is trained on the server corpus (`ml/README.md`).
 - Offline dataset from GOROOT + golang.org/x: for each identifier/selector position, the
   candidate list our completion would produce (headless, via a `*CorpusTest`-style exporter)
   and the actual token; export as a feature table.

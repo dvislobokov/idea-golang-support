@@ -43,11 +43,11 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         )
     """.trimIndent()
 
-    fun testExhaustiveSwitchReportsMissingConstants() = doHighlight(
+    fun testIotaSwitchReportsMissingConstants() = doHighlight(
         withColors("""
 
         func f(c Color) {
-        	<weak_warning descr="Missing cases in switch of type Color: Green, Blue, Cyan and 1 more">switch</weak_warning> c {
+        	<warning descr="Missing 'case' statements for 'iota' consts in 'switch'">switch</warning> c {
         	case Red:
         	}
         	switch c {
@@ -68,23 +68,69 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         	}
         }
         """),
-        GoExhaustiveSwitchInspection(),
+        GoSwitchMissingCasesForIotaConstsInspection(),
     )
 
-    fun testExhaustiveSwitchWithDefaultOption() = doHighlight(
-        withColors("""
+    /** Probe `iota3.go` of the GoLand recon (2026-10-05): one finding on `switch` for `j, k, l` with only `j` handled. */
+    fun testIotaSwitchGoLandProbe() = doHighlight(
+        """
+        package p
 
-        func f(c Color) {
-        	<weak_warning descr="Missing cases in switch of type Color: Red, Blue, Cyan and 1 more">switch</weak_warning> c {
-        	case Green:
-        	default:
+        const (
+        	j Weekday = iota
+        	k
+        	l Weekday = iota
+        )
+
+        type Weekday int
+
+        func sw(w Weekday) {
+        	<warning descr="Missing 'case' statements for 'iota' consts in 'switch'">switch</warning> w {
+        	case j:
         	}
         }
-        """),
-        GoExhaustiveSwitchInspection().apply { reportWithDefault = true },
+        """,
+        GoSwitchMissingCasesForIotaConstsInspection(),
     )
 
-    fun testExhaustiveSwitchSkipsFlags() = doHighlight(
+    /** GoLand's description: a constant of the block counts even when its own spec does not use `iota`; constants outside such blocks never do. */
+    fun testIotaSwitchMembersAreTheWholeIotaBlock() = doHighlight(
+        """
+        package p
+
+        type W int
+
+        const (
+        	A W = iota
+        	B
+        	C W = 7
+        )
+
+        const Other W = 9
+
+        type Plain int
+
+        const (
+        	P1 Plain = 1
+        	P2 Plain = 2
+        )
+
+        func f(w W, p Plain) {
+        	<warning descr="Missing 'case' statements for 'iota' consts in 'switch'">switch</warning> w {
+        	case A, B:
+        	}
+        	switch w {
+        	case A, B, C:
+        	}
+        	switch p {
+        	case P1:
+        	}
+        }
+        """,
+        GoSwitchMissingCasesForIotaConstsInspection(),
+    )
+
+    fun testIotaSwitchSkipsFlags() = doHighlight(
         """
         package p
 
@@ -102,25 +148,25 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         	}
         }
         """,
-        GoExhaustiveSwitchInspection(),
+        GoSwitchMissingCasesForIotaConstsInspection(),
     )
 
-    fun testExhaustiveSwitchOverAnotherPackage() = doHighlight(
+    fun testIotaSwitchOverAnotherPackage() = doHighlight(
         """
         package p
 
         import "reflect"
 
         func f(d reflect.ChanDir) {
-        	<weak_warning descr="Missing cases in switch of type reflect.ChanDir: reflect.BothDir">switch</weak_warning> d {
+        	<warning descr="Missing 'case' statements for 'iota' consts in 'switch'">switch</warning> d {
         	case reflect.RecvDir, reflect.SendDir:
         	}
         }
         """,
-        GoExhaustiveSwitchInspection(),
+        GoSwitchMissingCasesForIotaConstsInspection(),
     )
 
-    fun testExhaustiveTypeSwitch() = doHighlight(
+    fun testTypeSwitchIsNotReported() = doHighlight(
         """
         package p
 
@@ -141,7 +187,7 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         func (s Square) Sides() int     { return 4 }
 
         func f(s Shape, err error) {
-        	<weak_warning descr="Missing cases in switch of type Shape: Square">switch</weak_warning> s.(type) {
+        	switch s.(type) {
         	case *Circle:
         	}
         	switch s.(type) {
@@ -156,10 +202,10 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         	}
         }
         """,
-        GoExhaustiveSwitchInspection(),
+        GoSwitchMissingCasesForIotaConstsInspection(),
     )
 
-    fun testAddMissingCasesFix() = doFix(
+    fun testCreateCaseClauseFix() = doFix(
         withColors("""
 
         func f(c Color) {
@@ -168,20 +214,39 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         	}
         }
         """),
-        "Add missing cases",
+        "Create 'case' clause for values",
         withColors("""
 
         func f(c Color) {
         	switch c {
         	case Green:
-        	case Red:
-        	case Blue:
-        	case Cyan:
-        	case Magenta:
+        	case Red, Blue, Cyan, Magenta:
         	}
         }
         """),
-        GoExhaustiveSwitchInspection(),
+        GoSwitchMissingCasesForIotaConstsInspection(),
+    )
+
+    fun testCreateDefaultClauseFix() = doFix(
+        withColors("""
+
+        func f(c Color) {
+        	switch<caret> c {
+        	case Green:
+        	}
+        }
+        """),
+        "Create 'default' clause",
+        withColors("""
+
+        func f(c Color) {
+        	switch c {
+        	case Green:
+        	default:
+        	}
+        }
+        """),
+        GoSwitchMissingCasesForIotaConstsInspection(),
     )
 
     // --- struct tags ---

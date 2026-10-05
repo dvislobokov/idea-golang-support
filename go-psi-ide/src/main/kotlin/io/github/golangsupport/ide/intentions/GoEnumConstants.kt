@@ -1,7 +1,10 @@
 package io.github.golangsupport.ide.intentions
 
+import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.lang.psi.GoConstDeclaration
 import io.github.golangsupport.lang.psi.GoConstDefinition
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoReferenceExpression
 import io.github.golangsupport.semantic.api.GoSemanticService
 import io.github.golangsupport.semantic.infer.GoExpressionTyper
 import io.github.golangsupport.semantic.scope.GoPackageModel
@@ -42,6 +45,21 @@ object GoEnumConstants {
         val seen = HashSet<GoConstant>()
         return members.filter { it.value == null || seen.add(it.value) }
     }
+
+    /**
+     * [constant] is declared in a const block that uses `iota` in any of its specs (GoLand's `GoSwitchMissingCasesForIotaConsts`: a spec
+     * without `iota` in such a block counts too). A bare `iota` reference, not resolved: a shadowed `iota` is not worth a resolve per spec.
+     */
+    fun inIotaBlock(constant: GoConstDefinition): Boolean {
+        val declaration = PsiTreeUtil.getParentOfType(constant, GoConstDeclaration::class.java) ?: return false
+        return declaration.constSpecList.any { spec ->
+            spec.expressionList.any { e ->
+                (e as? GoReferenceExpression)?.let(::isIota) == true || PsiTreeUtil.findChildrenOfType(e, GoReferenceExpression::class.java).any(::isIota)
+            }
+        }
+    }
+
+    private fun isIota(e: GoReferenceExpression): Boolean = e.expression == null && e.identifier?.text == "iota"
 
     /** At least three non-zero values, every one a distinct power of two (`1 << iota`): bit flags, not an enum. */
     fun isFlags(values: List<GoConstant?>): Boolean {

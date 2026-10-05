@@ -1,0 +1,10 @@
+# GoLand 2026.2.3, inspections widget (TrafficLightRenderer.getStatus) on internal/fixprobe/fix.go — analysis/widget_status.js, 2026-10-05
+renderer com.intellij.go.linter.GoLinterTrafficLightRendererContributor$createRenderer$1
+  expanded: text=«2» details=«2 warnings» icon=HighlightDisplayLevelColorizedIcon
+  expanded: text=«1» details=«1 weak warning» icon=HighlightDisplayLevelColorizedIcon
+  expanded: text=«6» details=«6 syntax updates» icon=LazyIcon (own icon of the SYNTAX_UPDATE severity)
+  expanded: text=«1» details=«1 typo» icon=LazyIcon
+# Tag intentions (analysis/intention_run.js on probe2/tags.go):
+# Add key to tags on `Email string` (struct with json:"user_name" and xml:"age"): no chooser; every field of the struct gets a new tag entry
+#   `:"<snake_case field name>"` with the key left to type in a live template (captured mid-template): json:"user_name" :"user_name", `:"email"`, xml:"age" :"age"
+# Update key value in tags on a matching tag `json:"value"`: available, invoked, document unchanged, no popup

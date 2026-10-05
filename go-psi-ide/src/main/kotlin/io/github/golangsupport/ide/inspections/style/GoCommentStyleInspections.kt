@@ -4,6 +4,8 @@ import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import io.github.golangsupport.ide.formatter.GoCodeStyleSettings
+import io.github.golangsupport.ide.formatter.GoCommentSpacePostFormatProcessor
+import io.github.golangsupport.ide.formatter.GoLineComments
 import io.github.golangsupport.ide.inspections.GoAnalysisInspectionBase
 import io.github.golangsupport.ide.inspections.GoAnalysisScope
 import io.github.golangsupport.ide.inspections.GoDocCommentInspection
@@ -27,13 +29,8 @@ class GoCommentLeadingSpaceInspection : GoAnalysisInspectionBase() {
     }
 
     companion object {
-        private val DIRECTIVE = Regex("^//([a-z0-9]+:[a-z0-9]|line[ :]|export |extern |nolint|noinspection|region|endregion|#|\\+build)")
-
-        fun needsSpace(text: String): Boolean {
-            if (!text.startsWith("//") || text.length < 3) return false
-            val c = text[2]
-            return !c.isWhitespace() && c != '/' && !DIRECTIVE.containsMatchIn(text)
-        }
+        /** The predicate Reformat Code uses too ([GoCommentSpacePostFormatProcessor]). */
+        fun needsSpace(text: String): Boolean = GoLineComments.needsLeadingSpace(text)
 
         private val FIX = GoEditFix("Add a space after '//'") { listOf(GoEditPlan.Edit(it.textRange.startOffset + 2, it.textRange.startOffset + 2, " ")) }
     }

@@ -1,0 +1,21 @@
+<html>
+<body>
+Reports a <code>switch</code> over a value of a named type that has no <code>default</code> case and does not handle every constant of
+that type declared in a <code>const</code> block that uses <code>iota</code>.
+<p>All constants of the block count, even those whose spec does not use <code>iota</code> itself. Constants with equal values are one
+member; unexported constants of another package are not members; bit flags (<code>1 &lt;&lt; iota</code>) are skipped. A switch with a
+<code>default</code> case is not reported.</p>
+<pre><code>const (
+    a Weekday = iota
+    b
+    c Weekday = 5 // c is in the same const block even if it does not use iota
+)
+
+switch w { // Missing 'case' statements for 'iota' consts in 'switch'
+case a:
+}</code></pre>
+<p>Quick fixes: <b>Create 'case' clause for values</b> adds one <code>case b, c:</code> clause with the missing constants;
+<b>Create 'default' clause</b> adds an empty <code>default:</code>. The <b>Fill switch</b> intention adds one case per constant, also for
+enums without <code>iota</code> and for type switches over interfaces of the project.</p>
+</body>
+</html>

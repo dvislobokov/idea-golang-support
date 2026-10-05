@@ -19,6 +19,8 @@ fun ideBundles(ide: String?, id: String): Boolean =
 dependencies {
     implementation(project(":go-psi-core"))
     implementation(project(":go-psi-semantic"))
+    // ML completion ranking (package io.github.golangsupport.ml): the shared engine, ml/docs/ADAPTER.md
+    implementation(project(":ml-core"))
     intellijPlatform {
         // Like the root project: the installed IDE from localIdePath when it exists (nothing is downloaded),
         // otherwise IntelliJ IDEA of platformVersion.
@@ -57,11 +59,14 @@ sourceSets {
 }
 
 val corpusTestPattern = "*CorpusTest"
+/** Offline ML dataset export (package io.github.golangsupport.ml, ml/docs/ADAPTER.md): runs only through `mlDataset`. */
+val mlDatasetPattern = "*MlDatasetExport"
 
 tasks.test {
     filter {
         excludeTestsMatching(corpusTestPattern)
         excludeTestsMatching(benchmarkPattern)
+        excludeTestsMatching(mlDatasetPattern)
     }
 }
 
@@ -133,6 +138,48 @@ intellijPlatformTesting {
                 jvmArgumentProviders.add(
                     CommandLineArgumentProvider {
                         listOf("-Dgopsi.goroot=${goroot.get()}") + formatterCorpusOptions.get()
+                    },
+                )
+                testLogging {
+                    showStandardStreams = true
+                }
+            }
+        }
+
+        register("mlDataset") {
+            // The installed IDE from localIdePath when it exists (nothing is downloaded), like the compile platform.
+            val localIde = providers.gradleProperty("localIdePath").orNull?.takeIf { file(it).exists() }
+            if (localIde != null) {
+                localPath = file(localIde)
+            } else {
+                type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea
+                version = libs.versions.intellijPlatform
+            }
+
+            task {
+                description = "Exports ML ranker training examples (*MlDatasetExport) from Go repositories: -Pml.repos=<list> -Pml.lm=<lm.cml> [-Pml.data -Pml.out -Pml.perFile -Pml.maxFiles -Pml.cache -Pml.names]."
+                group = "verification"
+                val testSourceSet = sourceSets.test.get()
+                testClassesDirs = testSourceSet.output.classesDirs
+                classpath += tasks.test.get().classpath
+                useJUnit()
+                isScanForTestClasses = false
+                include("**/*MlDatasetExport.class")
+                filter {
+                    includeTestsMatching(mlDatasetPattern)
+                }
+                outputs.upToDateWhen { false }
+                maxHeapSize = providers.gradleProperty("ml.heap").orNull ?: "6g"
+                val mlProps = listOf("repos", "lm", "data", "out", "perFile", "maxFiles", "cache", "names", "seed")
+                    .mapNotNull { k -> providers.gradleProperty("ml.$k").orNull?.let { "-Dml.$k=$it" } }
+                jvmArgumentProviders.add(
+                    CommandLineArgumentProvider {
+                        listOf(
+                            "-Dgopsi.goroot=${goroot.get()}",
+                            "-Dgopsi.gomodcache=${gomodcache.get()}",
+                            // corpora contain generated files above the platform's default 2.5 MB PSI limit
+                            "-Didea.max.intellisense.filesize=20000",
+                        ) + mlProps
                     },
                 )
                 testLogging {

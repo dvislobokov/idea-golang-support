@@ -10,6 +10,8 @@
     <postFormatProcessor implementation="io.github.golangsupport.ide.formatter.GoFileEdgesPostFormatProcessor"/>
     <!-- Code Style | Go | Wrapping and Braces: chop down long call arguments / composite literals / parameters (GoCodeStyleSettings, off by default) -->
     <postFormatProcessor implementation="io.github.golangsupport.ide.formatter.GoChopDownPostFormatProcessor"/>
+    <!-- Code Style | Go | Other "Add a leading space to comments": `//text` -> `// text` (off by default) -->
+    <postFormatProcessor implementation="io.github.golangsupport.ide.formatter.GoCommentSpacePostFormatProcessor"/>
 
   </extensions>
 </idea-plugin>

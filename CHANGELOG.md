@@ -30,6 +30,37 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.178] - 2026-10-05
+
+### Added — ML completion ranking, step 1: the shared engine and the offline dataset export (docs/ML.md ML-1)
+- The shared ML completion engine (https://github.com/dvislobokov/idea-ml-completion) is a git subtree under `ml/`; only its pure-Kotlin
+  `ml-core` (lexer, vocabulary, n-gram LM, linear ranker, feature extraction, model and shard formats) is part of the build, as `:ml-core`
+  of `go-psi-ide`. Contract for the adapter: `ml/docs/ADAPTER.md`.
+- Package `io.github.golangsupport.ml` (internal): `GoMlLanguage` and `GoMlFeatures` — the Go block of ranker features computed from what
+  the `completionRanker` extension point receives (candidate kind, scope level, expected-type match, declaration in the file and its
+  distance, the plugin's own deterministic order as `rule_rank_log`); the same code will serve the IDE ranker and the training export.
+- `./gradlew.bat :go-psi-ide:mlDataset --offline --no-configuration-cache -Pml.repos=<list> -Pml.lm=<lm.cml> [-Pml.data -Pml.out -Pml.perFile
+  -Pml.maxFiles]` runs the real completion headlessly over Go repositories (`GoMlDatasetExport`, copies of the sources in a temporary content
+  root) and writes one example shard per repository for `ml-train`; ~30 ms per position. `GoMlFeatureParityTest` checks that the export and
+  the extension-point path compute identical features.
+
+## [0.2.178] - 2026-10-05
+
+### Changed — GoLand parity: iota switch, Printf, shadowing level, comment spacing on reformat
+- The exhaustive-switch inspection is now GoLand's "Missing 'case' statements for 'iota' consts in 'switch'" (`GoSwitchMissingCasesForIotaConsts`,
+  Go | Probable bugs, warning; was `GoExhaustiveSwitch`, weak warning): an expression `switch` without `default` that leaves out constants of its type
+  declared in a const block using `iota` (every constant of the block counts, even a spec without `iota`). Enums without `iota` and type switches over
+  interfaces are no longer reported (GoLand does not; Fill switch still covers them). Fixes: Create 'case' clause for values (one `case B, C:` clause)
+  and Create 'default' clause.
+- The Printf inspection is GoLand's `GoPrintFunctions` ("Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions", Go | Probable bugs, weak
+  warning; was `GoPrintf`, warning). A verb without an argument reads `No argument for verb: argument index = 2, arguments count = 1 (%s)`; the other
+  messages stay as vet's. Profiles that configured the old short names start from the defaults again.
+- "Shadowing variable" is at GoLand's TEXT ATTRIBUTES level: the name keeps its colour and the tooltip, without a weak-warning underline.
+- Code Style | Go | Other "Add a leading space to comments" also applies on Reformat Code with the Built-in formatter: `//text` becomes `// text`,
+  with the inspection's exclusions (directives, `//line`, `//export`, `//extern`, `//nolint`, regions, `//#`, `//+build`, `////`, bare `//`) and
+  generated files untouched.
+- Add key to tags keeps its chooser of tag keys (GoLand writes an empty-key entry into every field and lets the key be typed in a template; seen live).
+
 ## [0.2.177] - 2026-10-05
 
 ### Fixed

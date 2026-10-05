@@ -104,7 +104,7 @@ object GoLintDuplicates {
         "errcheck" to listOf(GoUncheckedErrorInspection.SHORT_NAME),
         "ineffassign" to listOf("GoIneffectualAssignment"),
         "unused" to listOf("GoUnusedVariable", "GoUnusedParameter"),
-        "printf" to listOf("GoPrintf"),
+        "printf" to listOf("GoPrintFunctions"),
     )
 
     /** The native inspections that cover a finding of [linter] with [text]; `govet` is many analyzers, its printf findings begin with `printf:`. */

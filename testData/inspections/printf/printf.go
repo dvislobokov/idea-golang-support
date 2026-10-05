@@ -18,42 +18,42 @@ func (c code) Error() string { return "code" }
 type point struct{ X, Y int }
 
 func wrongTypes(s string, i int, f float64, err error, fn func()) {
-	fmt.Printf("<warning descr="fmt.Printf format %d has arg s of wrong type string">%d</warning>\n", s)
-	fmt.Printf("<warning descr="fmt.Printf format %s has arg i of wrong type int">%s</warning>\n", i)
-	_ = fmt.Sprintf("<warning descr="fmt.Sprintf format %t has arg f of wrong type float64">%t</warning>", f)
-	fmt.Printf("<warning descr="fmt.Printf format %-5q has arg f of wrong type float64">%-5q</warning>|\n", f)
-	_ = fmt.Errorf("bad: <warning descr="fmt.Errorf format %w has arg i of wrong type int">%w</warning>", i)
-	fmt.Printf("<warning descr="fmt.Printf format %v arg fn is a func value, not called">%v</warning>\n", fn)
-	fmt.Fprintf(os.Stderr, "<warning descr="fmt.Fprintf format %d has arg s of wrong type string">%d</warning>", s)
-	log.Printf("<warning descr="log.Printf format %d has arg s of wrong type string">%d</warning>", s)
+	fmt.Printf("<weak_warning descr="fmt.Printf format %d has arg s of wrong type string">%d</weak_warning>\n", s)
+	fmt.Printf("<weak_warning descr="fmt.Printf format %s has arg i of wrong type int">%s</weak_warning>\n", i)
+	_ = fmt.Sprintf("<weak_warning descr="fmt.Sprintf format %t has arg f of wrong type float64">%t</weak_warning>", f)
+	fmt.Printf("<weak_warning descr="fmt.Printf format %-5q has arg f of wrong type float64">%-5q</weak_warning>|\n", f)
+	_ = fmt.Errorf("bad: <weak_warning descr="fmt.Errorf format %w has arg i of wrong type int">%w</weak_warning>", i)
+	fmt.Printf("<weak_warning descr="fmt.Printf format %v arg fn is a func value, not called">%v</weak_warning>\n", fn)
+	fmt.Fprintf(os.Stderr, "<weak_warning descr="fmt.Fprintf format %d has arg s of wrong type string">%d</weak_warning>", s)
+	log.Printf("<weak_warning descr="log.Printf format %d has arg s of wrong type string">%d</weak_warning>", s)
 	_ = err
 }
 
 func counts(s string, i int) {
-	fmt.Printf("%d <warning descr="fmt.Printf format %d reads arg #2, but call has 1 arg">%d</warning>\n", i)
-	fmt.Printf("%d\n", i, <warning descr="fmt.Printf call needs 1 arg but has 2 args">s</warning>)
-	fmt.Printf("hello\n", <warning descr="fmt.Printf call has arguments but no formatting directives">i</warning>)
-	fmt.Printf("<warning descr="fmt.Printf format has invalid argument index [3]">%[3]d</warning>\n", i)
-	fmt.Printf("<warning descr="fmt.Printf format %*d uses non-int s as argument of *">%*d</warning>\n", s, i)
+	fmt.Printf("%d <weak_warning descr="No argument for verb: argument index = 2, arguments count = 1 (%d)">%d</weak_warning>\n", i)
+	fmt.Printf("%d\n", i, <weak_warning descr="fmt.Printf call needs 1 arg but has 2 args">s</weak_warning>)
+	fmt.Printf("hello\n", <weak_warning descr="fmt.Printf call has arguments but no formatting directives">i</weak_warning>)
+	fmt.Printf("<weak_warning descr="fmt.Printf format has invalid argument index [3]">%[3]d</weak_warning>\n", i)
+	fmt.Printf("<weak_warning descr="fmt.Printf format %*d uses non-int s as argument of *">%*d</weak_warning>\n", s, i)
 }
 
 func malformed(s string, i int, err error) {
-	fmt.Printf("<warning descr="fmt.Printf format %z has unknown verb z">%z</warning>\n", i)
-	fmt.Printf("<warning descr="fmt.Printf format %#s has unrecognized flag #">%#s</warning>\n", s)
-	fmt.Printf("%d <warning descr="fmt.Printf format % is missing verb at end of string">%</warning>", i)
-	fmt.Printf("<warning descr="fmt.Printf does not support error-wrapping directive %w">%w</warning>\n", err)
+	fmt.Printf("<weak_warning descr="fmt.Printf format %z has unknown verb z">%z</weak_warning>\n", i)
+	fmt.Printf("<weak_warning descr="fmt.Printf format %#s has unrecognized flag #">%#s</weak_warning>\n", s)
+	fmt.Printf("%d <weak_warning descr="fmt.Printf format % is missing verb at end of string">%</weak_warning>", i)
+	fmt.Printf("<weak_warning descr="fmt.Printf does not support error-wrapping directive %w">%w</weak_warning>\n", err)
 }
 
 func printLike(i int) {
-	fmt.Println("<warning descr="fmt.Println call has possible Printf formatting directive %d">%d</warning> items", i)
-	fmt.Println("done<warning descr="fmt.Println arg list ends with redundant newline">\n</warning>")
+	fmt.Println("<weak_warning descr="fmt.Println call has possible Printf formatting directive %d">%d</weak_warning> items", i)
+	fmt.Println("done<weak_warning descr="fmt.Println arg list ends with redundant newline">\n</weak_warning>")
 	fmt.Println("100%", "a%20b", i)
 }
 
 func methods(t *testing.T, l *log.Logger, tb testing.TB, s string, i int) {
-	t.Errorf("<warning descr="(*testing.common).Errorf format %d has arg s of wrong type string">%d</warning>", s)
-	l.Printf("<warning descr="(*log.Logger).Printf format %s has arg i of wrong type int">%s</warning>", i)
-	tb.Logf("<warning descr="(testing.TB).Logf format %d has arg s of wrong type string">%d</warning>", s)
+	t.Errorf("<weak_warning descr="(*testing.common).Errorf format %d has arg s of wrong type string">%d</weak_warning>", s)
+	l.Printf("<weak_warning descr="(*log.Logger).Printf format %s has arg i of wrong type int">%s</weak_warning>", i)
+	tb.Logf("<weak_warning descr="(testing.TB).Logf format %d has arg s of wrong type string">%d</weak_warning>", s)
 }
 
 func logf(format string, args ...any) {
@@ -79,8 +79,8 @@ func sink(format string, args ...any) {
 }
 
 func wrappers(l *logger, s string) {
-	logf("<warning descr="printf.logf format %d has arg s of wrong type string">%d</warning>", s)
-	l.Infof("<warning descr="(*printf.logger).Infof format %d has arg s of wrong type string">%d</warning>", s)
+	logf("<weak_warning descr="printf.logf format %d has arg s of wrong type string">%d</weak_warning>", s)
+	l.Infof("<weak_warning descr="(*printf.logger).Infof format %d has arg s of wrong type string">%d</weak_warning>", s)
 	l.Debugf("%d", s)
 	sink("%d", s)
 }
@@ -88,7 +88,7 @@ func wrappers(l *logger, s string) {
 type rec struct{ v int }
 
 func (r rec) String() string {
-	return fmt.Sprintf("<warning descr="fmt.Sprintf format %v with arg r causes recursive String method call">%v</warning>", r)
+	return fmt.Sprintf("<weak_warning descr="fmt.Sprintf format %v with arg r causes recursive String method call">%v</weak_warning>", r)
 }
 
 func (r rec) Values() string {
