@@ -20,10 +20,15 @@ public final class io/github/golangsupport/ide/completion/api/GoCompletionCandid
 public abstract interface class io/github/golangsupport/ide/completion/api/GoCompletionRanker {
 	public static final field Companion Lio/github/golangsupport/ide/completion/api/GoCompletionRanker$Companion;
 	public static final field EP_NAME Lcom/intellij/openapi/extensions/ExtensionPointName;
+	public fun getMarker ()Ljava/lang/String;
 	public abstract fun rank (Lio/github/golangsupport/ide/completion/api/GoCompletionRankingContext;Ljava/util/List;)Ljava/util/List;
 }
 
 public final class io/github/golangsupport/ide/completion/api/GoCompletionRanker$Companion {
+}
+
+public final class io/github/golangsupport/ide/completion/api/GoCompletionRanker$DefaultImpls {
+	public static fun getMarker (Lio/github/golangsupport/ide/completion/api/GoCompletionRanker;)Ljava/lang/String;
 }
 
 public final class io/github/golangsupport/ide/completion/api/GoCompletionRankingContext {
