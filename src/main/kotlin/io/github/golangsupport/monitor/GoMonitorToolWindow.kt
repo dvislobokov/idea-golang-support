@@ -97,12 +97,17 @@ class GoMonitorPanel(private val project: Project, parent: Disposable) : JPanel(
             toolTipText = "All goroutines and where they wait (delve attaches for a moment): leaks and deadlocks"
             addActionListener { session?.let { GoSnapshot.goroutines(project, it.applicationPid, it.target.title) } }
         }
+        val dump = JButton("Dump").apply {
+            toolTipText = "Dump Goroutines: every goroutine with its stack, in a console tab of the Run window"
+            addActionListener { session?.let { GoGoroutineDumps.fromProcess(project, MonitorTarget(it.applicationPid, it.target.title, withChildren = false)) } }
+        }
         val attach = JButton("Debug").apply {
             toolTipText = "Attach the debugger to the process"
             addActionListener { session?.let { attach(it.applicationPid, it.target.title) } }
         }
         val snapshots = JPanel(FlowLayout(FlowLayout.LEFT, JBUI.scale(6), 0)).apply {
             add(goroutines)
+            add(dump)
             add(attach)
             add(allProcesses)
         }

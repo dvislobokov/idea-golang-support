@@ -180,6 +180,11 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.160–0.2.162) G9, пункты 1–3: Coverage через `CoverageEngine` (`coverage.GoCoverageEngine`, `go-coverage.xml`, optional depends
+  `com.intellij.modules.coverage`, `bundledModule("intellij.platform.coverage")`; пути профиля → файлы по самому длинному пути модуля; свой gutter оставлен), Run with Profiler
+  (`run.GoProfiler`: executor + группа `Go.RunWithProfiler`, профиль открывается через `GoProfiles.openWhenReady`), Dump Goroutines (`monitor.GoGoroutineDump`, `GoSnapshot.attachAndDump`,
+  DAP у остановленной отладки, вкладка через `AnalyzeStacktraceUtil`, настройка `debugDumpViaDelve`). Открыто: загрузка optional-дескриптора coverage в установленной IDE не
+  проверена, coverage / profiler для `go run`, SIGQUIT проверить нечем, вживую не проверено.
 - [x] (2026-10-05, 0.2.158–0.2.159) G7, go.mod и уязвимости: `VgoRequireDirectivesMerge` / `VgoMigrateFromReplacesToWorkspace` / `VgoUnresolvedIgnorePath` (`GoModLayout`,
   `GoModLayoutInspections`, правки через `GoModDirectiveEdits.mergeRequires` / `removeEntries`), govulncheck как инспекции над результатом сервиса `GoVulnService`
   (`GoVulnOutput` — разбор потокового JSON v1.0.0, кэш по go.mod + go.sum, фон при открытии / через 10 с после изменения / раз в час), `GoVulnerablePackageImport`,

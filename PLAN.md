@@ -248,9 +248,10 @@
   doc-комментария по Enter после `//` над объявлением (`GoDocCommentEnterHandler`).
 
 ### G9. Запуск, инструменты, меню (≈5 дней)
-- [ ] **Coverage через платформенный `CoverageEngine`**: окно Coverage, отчёт, Run with Coverage как executor (сейчас свой gutter). 2 дня (это «второй шаг» из уровня 2).
-- [ ] **Run with Profiler** executor (CPU / Memory / Block / Mutex) поверх поля Profile + наш просмотрщик (уровень 4). 0,5 дня без просмотрщика.
-- [ ] **Dump Goroutines** работающего процесса (SIGQUIT / `debug.SetTraceback`, на Windows — через delve attach, `GoSnapshot`). 0,5 дня.
+- [x] (2026-10-05, 0.2.160) **Coverage через платформенный `CoverageEngine`**: окно Coverage, отчёт, Run with Coverage как executor (свой gutter оставлен как запасной).
+  Не сделано: coverage для `go run` (`GOCOVERDIR` + `go tool covdata`).
+- [x] (2026-10-05, 0.2.161) **Run with Profiler** executor (CPU / Memory / Block / Mutex) поверх поля Profile + наш просмотрщик (только `go test`).
+- [x] (2026-10-05, 0.2.162) **Dump Goroutines** работающего процесса (delve attach через `GoSnapshot`, на Unix — SIGQUIT по подтверждению) и остановленной отладки (DAP).
 - [ ] Tools \| Go Tools: **Go Fmt Project**, **Go Vet File**, **Goimports File**; **Share in Playground** / Run in Playground (с подтверждением, как у GoLand). 0,5 дня.
 - [ ] Project view: **Sync Go Module**, GOPATH — Add Directory to Current Project / Detach. 0,5 дня.
 - [ ] Окно **Go Optimization** нативно: `go build -gcflags=-m=2` → инлайнинг, escape, bounds checks в дереве и в редакторе (сейчас только переключатель gopls). 1 день.

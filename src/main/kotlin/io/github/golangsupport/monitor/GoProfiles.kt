@@ -85,6 +85,13 @@ class GoProfileServers(private val project: Project) : Disposable {
         notification.notify(project)
     }
 
+    /** After a run of the Profile executor: the profile straight in a tab of the editor (the browser without JCEF), or why there is none. */
+    fun openWhenReady(profile: GoProfile, directory: File) {
+        val file = File(directory, profile.fileName)
+        if (!file.isFile || file.length() == 0L) return notifyReady(profile, directory)
+        open(profile, file, inIde = profile != GoProfile.TRACE && JBCefApp.isSupported(), title = profile.title)
+    }
+
     /**
      * The web UI of the tool for [file]: in a tab of the editor ([inIde], pprof only: `go tool trace` opens the browser by itself and
      * cannot be told not to), or in the browser. The server lives as long as the tab, or the project.

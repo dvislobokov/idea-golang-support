@@ -27,6 +27,9 @@
     <depends optional="true" config-file="go-psi-ide-injection-sh.xml">com.jetbrains.sh</depends>
     <!-- Go files for the Copyright plugin (go-copyright.xml): Generate | Copyright, Code | Update Copyright -->
     <depends optional="true" config-file="go-copyright.xml">com.intellij.copyright</depends>
+    <!-- "Run with Coverage", the Coverage window and the editor bars of the platform for go test (go-coverage.xml); without the module the box
+         "Collect coverage" of the configuration keeps the plugin's own gutter -->
+    <depends optional="true" config-file="go-coverage.xml">com.intellij.modules.coverage</depends>
 
     <!-- optional parts: a module is loaded only where its dependencies are (see the descriptor of the module next to META-INF) -->
     <content>
@@ -303,6 +306,9 @@
         <!-- the debugger: the plugin's own DAP client to `dlv dap` on the XDebugger API, which every IDE has (the DAP module of the platform,
              2026.1+, is absent from a number of IDEs and forks) -->
         <programRunner implementation="io.github.golangsupport.debugger.GoDebugRunner"/>
+        <!-- Run | Run with Profiler: "Profile 'x'" for go test configurations (the coverage executor is in go-coverage.xml) -->
+        <executor implementation="io.github.golangsupport.run.GoProfilerExecutor" order="last"/>
+        <programRunner implementation="io.github.golangsupport.run.GoProfilerRunner"/>
         <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoLineBreakpointType"/>
         <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoPanicBreakpointType"/>
         <xdebugger.breakpointType implementation="io.github.golangsupport.debugger.GoFunctionBreakpointType"/>
@@ -458,6 +464,15 @@
         <action id="Go.Monitor" class="io.github.golangsupport.monitor.ShowGoMonitorAction" text="Monitor Go Process" icon="/icons/goMonitorToolWindow.svg"
                 description="CPU, memory, heap, garbage collections and goroutines of a running Go program">
             <add-to-group group-id="Go.MainMenu" anchor="last"/>
+        </action>
+        <!-- Run | Run with Profiler (GoLand's group): the selected go test configuration under the Profile executor with a kind of profile -->
+        <group id="Go.RunWithProfiler" class="io.github.golangsupport.run.GoRunWithProfilerGroup" text="Run with Profiler" popup="true" icon="AllIcons.Actions.Profile"
+               description="go test with -cpuprofile, -memprofile, -blockprofile or -mutexprofile; the profile opens in the IDE when the tests end">
+            <add-to-group group-id="RunnerActions" anchor="last"/>
+        </group>
+        <action id="Go.DumpGoroutines" class="io.github.golangsupport.monitor.GoDumpGoroutinesAction" text="Dump Goroutines" icon="AllIcons.Actions.Dump"
+                description="Every goroutine of the running Go program (or of the paused debug session) with its stack, in a console tab">
+            <add-to-group group-id="RunMenu" anchor="after" relative-to-action="Stop"/>
         </action>
         <group id="Go.GenerateGroup">
             <separator/>

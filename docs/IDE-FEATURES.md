@@ -882,6 +882,28 @@ gopls `Create …`, `Implement …` and `Declare missing methods …` actions th
   (`LocalInspectionTool.processFile`, stopped at 100), cached on the file by document stamp and the set of enabled tools; the daemon's highlights would be
   cheaper, but code vision and the inspection pass run in no fixed order. Tests: `inspections.gofix.GoSyntaxUpdateTest` (10, with a test-only `GoFixTestInspection`).
 
+### Coverage, profiler, goroutine dump (host `coverage`, `run`, `monitor`; PLAN.md G9 items 1–3)
+- Coverage through the platform (`coverage` package, `META-INF/go-coverage.xml`, `<depends optional="true">com.intellij.modules.coverage</depends>`; the module is the
+  product module `intellij.platform.coverage`, `bundledModule` in Gradle): `GoCoverageEngine` (applies to `go test` configurations not over SSH; counts `.go`
+  files except `_test.go`; the "class" of a file is its VFS path; untouched files are not included), `GoCoverageRunner` (id `GoCoverage`, `.out`: cover profile →
+  `ProjectData` through `GoCoverageProjectData`, import paths mapped to files by the longest module path of `GoModulesService.modules()`,
+  `GoCoverageFiles.resolve`), `GoCoverageSuite` (`BaseCoverageSuite`), `GoCoverageAnnotator` (`SimpleCoverageAnnotator`, project service),
+  `DirectoryCoverageViewExtension` for the Coverage window, `GoCoverageEnabledConfiguration` (file in the IDE's `system/coverage`),
+  `GoCoverageProgramRunner` (executor `Coverage`: puts the file into `GoRunKeys.COVERAGE_FILE`, `GoTestRunState` adds `-coverprofile=… -covermode=atomic`,
+  `CoverageHelper.attachToProcess` loads it when the process ends). The box "Collect coverage" keeps the plugin's own gutter (`GoCoverageService`), the fallback
+  for IDEs without the module and the source of the Go Tests percentages. `go run` coverage (`-cover` + `GOCOVERDIR` + `go tool covdata`) is not done.
+- Profiler: `GoProfilerExecutor` (id `GoProfiler`, "Profile 'x'", Run tool window) + `GoProfilerRunner` (`go test` only; `GoProfiler.unsupported` says why not),
+  group `Go.RunWithProfiler` in `RunnerActions` (`GoRunWithProfilerGroup`: "Profile 'x' with 'CPU / Memory / Blocking / Mutex Profiler'" for the selected
+  configuration, the kind in `GoRunKeys.PROFILE`; the executor alone takes the Profile field, else CPU). The flags: `GoTestRecording.arguments`; at the end
+  `GoProfileServers.openWhenReady` opens the profile in an editor tab (pprof flame graph) instead of the notification of the Profile field.
+- Dump Goroutines (`Go.DumpGoroutines`, Run menu after Stop; button Dump in the Go Monitor): `GoDumpGoroutines.availability` (paused Go debug session →
+  its DAP connection; else the selected Run tab's process, the single running one, or a chooser among `RunningGoProcesses` run targets, which now carry
+  their handler), `GoGoroutineDump.collect` (`threads` + `stackTrace` per goroutine, no wait states over DAP), `GoSnapshot.attachAndDump` (delve attach,
+  `stopOnEntry`, disconnect without terminating), SIGQUIT through `UnixProcessManager` when `GoSettings.debugDumpViaDelve` is off (Unix only; the runtime prints
+  all user goroutines at the default GOTRACEBACK and exits). The program pid behind `go run` / `go test` is `GoMonitorSession.pickApplication`. The dump is
+  formatted in the runtime's format (`GoGoroutineDump.format`, parsed back by `parse`, summary by state) into an `AnalyzeStacktraceUtil` console tab.
+- Tests: `GoCoverageProfileTest`, `GoCoveragePlatformTest` (EP registration, filters, suite serialization), `GoProfilerTest`, `GoGoroutineDumpTest`.
+
 ### go.mod layout, workspaces, ignore paths; govulncheck (host `mod/GoModLayout*.kt`, `lint/GoVuln*.kt`; PLAN.md G7 lines 4-5)
 - `VgoRequireDirectivesMerge` (`GoModRequireDirectivesMergeInspection`, INFORMATION): more `require` directives than `go mod tidy` lays out (one direct block +
   one `// indirect` block; `GoModDirectiveEdits.requiresAreGrouped`). Fix "Merge 'require' directives" = `GoModDirectiveEdits.mergeRequires` (direct block where

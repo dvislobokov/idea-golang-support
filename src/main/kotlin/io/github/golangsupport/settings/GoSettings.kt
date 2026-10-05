@@ -251,6 +251,9 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** [GoDebugBinaryLocation.CUSTOM]: the directory, a relative path is from the package directory. */
         var debugBinaryDirectory by string("")
 
+        /** Dump Goroutines through a delve attach (the program runs on) rather than SIGQUIT (the program prints the dump and exits); Windows has no SIGQUIT. */
+        var debugDumpViaDelve by property(com.intellij.openapi.util.SystemInfo.isWindows)
+
         /** Optimize Imports over the Go files being saved, apart from Reformat; Settings | Tools | Actions on Save shows it too. Off, as in GoLand. */
         var optimizeImportsOnSave by property(false)
         /** `-mod=vendor` / `-mod=mod` (through GOFLAGS) of the go commands of a module that has `vendor/modules.txt`; AUTO: what go decides. */
@@ -491,6 +494,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var projectAnalysisWarnings: Boolean
         get() = state.projectAnalysisWarnings
         set(value) { state.projectAnalysisWarnings = value }
+
+    var debugDumpViaDelve: Boolean
+        get() = state.debugDumpViaDelve
+        set(value) { state.debugDumpViaDelve = value }
 
     var testArguments: String
         get() = state.testArguments.orEmpty()

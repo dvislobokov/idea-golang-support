@@ -38,6 +38,9 @@ dependencies {
         }
         // for the content module io.github.golangsupport.lsp only: the rest of the plugin must not touch these classes
         bundledModule("intellij.platform.lsp")
+        // the coverage of the platform (go-coverage.xml, optional dependency on com.intellij.modules.coverage): package io.github.golangsupport.coverage only
+        bundledModule("intellij.platform.coverage")
+        bundledModule("intellij.platform.coverage.agent")
         // JSON in Go strings (go-psi-ide-injection-json.xml, optional dependency of plugin.xml)
         bundledPlugin("com.intellij.modules.json")
         // the copyright updater of Go files (go-copyright.xml, optional dependency of plugin.xml)

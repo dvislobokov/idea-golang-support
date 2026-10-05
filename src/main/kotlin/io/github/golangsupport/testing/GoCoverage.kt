@@ -60,6 +60,26 @@ class GoCoverageData(val mode: String, val blocks: List<GoCoverageBlock>) {
         }
         return covered.mapValues { (line, hit) -> if (line in partial) GoLineCoverage.PARTIAL else if (hit) GoLineCoverage.COVERED else GoLineCoverage.UNCOVERED }
     }
+
+    /** One-based line -> its status and the highest count of a block on it: what the coverage engine of the platform is given per line. */
+    fun lineHits(file: String): Map<Int, Pair<GoLineCoverage, Int>> {
+        val counts = HashMap<Int, Int>()
+        for (block in byFile[file].orEmpty()) for (line in block.startLine..block.endLine) counts.merge(line, block.count, ::maxOf)
+        return lines(file).entries.associate { (line, status) -> line + 1 to (status to (counts[line + 1] ?: 0)) }
+    }
+}
+
+/** Where a file of a coverage profile is on disk. Pure. */
+object GoCoverageFiles {
+    /**
+     * `example.com/app/store/order.go` -> `/work/app/store/order.go` by the module whose path is the longest prefix ([modules]: module path to
+     * its root directory, `/`-separated); an absolute path (a file outside any module) is kept; null when no module of the project has it.
+     */
+    fun resolve(key: String, modules: List<Pair<String, String>>): String? {
+        if (key.startsWith("/") || Regex("""^[A-Za-z]:[/\\]""").containsMatchIn(key)) return key.replace('\\', '/')
+        val (path, root) = modules.filter { (path, _) -> key.startsWith("$path/") }.maxByOrNull { it.first.length } ?: return null
+        return root.trimEnd('/') + "/" + key.removePrefix("$path/")
+    }
 }
 
 /** `mode: set` and then `example.com/app/store/order.go:12.34,15.2 3 1` per block: the profile `go test -coverprofile` writes. */

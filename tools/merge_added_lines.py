@@ -44,6 +44,8 @@ def merge(worktree: str, path: str) -> None:
                 anchor = lines[a][1:] if a >= 0 else None
                 if add in text: skipped += 1
                 elif anchor and text.count(anchor) == 1: text = text.replace(anchor, anchor + '\n' + add, 1); inserted += 1
+                elif not path.endswith(('.xml', '.md')):
+                    print(f'  no anchor, not appended (place by hand): {add[:90]!r}'); fallback += 1
                 else:
                     for marker in ('</extensions>', '## Known gaps'):
                         p = text.rfind(marker)
@@ -56,7 +58,7 @@ def merge(worktree: str, path: str) -> None:
                 i = j
             else: i += 1
     io.open(path, 'w', encoding='utf-8', newline='\n').write(text)
-    print(f'{path}: inserted {inserted}, already present {skipped}, appended without anchor {fallback}')
+    print(f'{path}: inserted {inserted}, already present {skipped}, without anchor {fallback}')
 
 
 if __name__ == '__main__':

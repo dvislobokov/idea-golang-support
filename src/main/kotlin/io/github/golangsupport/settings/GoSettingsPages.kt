@@ -24,6 +24,7 @@ import com.intellij.ui.dsl.builder.selected
 import com.intellij.ui.dsl.builder.toNullableProperty
 import com.intellij.ui.layout.selectedValueMatches
 import com.intellij.ui.table.TableView
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.ui.ColumnInfo
 import com.intellij.util.ui.ListTableModel
 import javax.swing.DefaultComboBoxModel
@@ -90,6 +91,11 @@ class GoDebuggerConfigurable(project: Project) : GoSettingsPage(project, "page.d
                 .comment(GoBundle.message("debugger.anyGoVersion.comment"))
         }
         row { checkBox(GoBundle.message("debugger.log")).bindSelected(settings::debugAdapterLog).comment(GoBundle.message("debugger.log.comment")) }
+        row {
+            // Windows has no SIGQUIT: delve is the only way there, the box stays on and cannot be changed
+            checkBox(GoBundle.message("debugger.dumpViaDelve")).bindSelected({ settings.debugDumpViaDelve || SystemInfo.isWindows }, { settings.debugDumpViaDelve = it })
+                .enabled(!SystemInfo.isWindows).comment(GoBundle.message("debugger.dumpViaDelve.comment"))
+        }
         lateinit var location: ComboBox<GoDebugBinaryLocation>
         row(GoBundle.message("debugger.binaryIn")) {
             // the renderer, not toString(): what the settings file keeps has to stay English whatever the language of the page

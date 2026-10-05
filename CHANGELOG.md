@@ -30,6 +30,30 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.162] - 2026-10-05
+
+### Added — Dump Goroutines (GoLand parity G9)
+- Run | Dump Goroutines (and a Dump button in the Go Monitor): every goroutine with its stack in a console tab with clickable frames and a summary by state,
+  from a paused Go debug session (through its DAP connection) or from a running program of a Go configuration (delve attach, the program keeps running; on
+  Linux / macOS optionally SIGQUIT after a confirmation, since the program exits after printing). New setting Settings | Tools | Go | Debugger "Dump goroutines
+  via delve attach" (on and fixed on Windows). The delve dump has no goroutine states: DAP threads do not carry them.
+
+## [0.2.161] - 2026-10-05
+
+### Added — Run with Profiler (GoLand parity G9)
+- Run | Run with Profiler: "Profile 'x' with 'CPU Profiler' / 'Memory Profiler' / 'Blocking Profiler' / 'Mutex Profiler'" for go test configurations, plus a
+  Profile executor that takes the kind from the configuration's Profile field (CPU by default); the profile opens in an editor tab (pprof flame graph, in the
+  browser without JCEF) as soon as the tests end. `go run` configurations are not profiled (the program has to write the profile itself), as in GoLand.
+
+## [0.2.160] - 2026-10-05
+
+### Added — Coverage through the IDE's coverage engine (GoLand parity G9)
+- "Run 'x' with Coverage" for go test configurations through the platform's coverage module (`com.intellij.modules.coverage`, optional): the Coverage tool
+  window with packages, files and percentages, covered / partially covered / uncovered bars in the editor, percentages in the Project view, Hide Coverage and
+  Manage Coverage Reports (`go test -coverprofile -covermode=atomic`, the profile kept under the IDE's system/coverage). Files no test reached are not listed.
+  The "Collect coverage" box keeps the plugin's own gutter and the Go Tests percentages for IDEs without the coverage module. `go run` is not covered
+  (needs `GOCOVERDIR` + `go tool covdata`).
+
 ## [0.2.159] - 2026-10-05
 
 ### Added — vulnerabilities with govulncheck (GoLand parity G7)

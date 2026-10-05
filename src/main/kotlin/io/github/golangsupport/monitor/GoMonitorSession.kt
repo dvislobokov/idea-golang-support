@@ -22,7 +22,11 @@ import java.util.concurrent.TimeUnit
  * What can be monitored: a program started from the IDE (measured with its children, and with the telemetry of its runtime when the
  * configuration collects it) or any Go program of the machine (CPU and memory only, until a snapshot is taken with delve).
  */
-class MonitorTarget(val pid: Long, val title: String, val withChildren: Boolean, val runtime: GoRuntimeState? = null, val process: GoProcess? = null) {
+class MonitorTarget(
+    val pid: Long, val title: String, val withChildren: Boolean, val runtime: GoRuntimeState? = null, val process: GoProcess? = null,
+    /** The handler of a process of our run configurations: what Dump Goroutines matches the selected Run tab with. */
+    val handler: ProcessHandler? = null,
+) {
     override fun toString(): String = title
     override fun equals(other: Any?): Boolean = other is MonitorTarget && other.pid == pid
     override fun hashCode(): Int = pid.hashCode()
@@ -123,7 +127,7 @@ class RunningGoProcesses {
     fun started(name: String, pid: Long, handler: ProcessHandler) = add(name, pid, handler, null, withChildren = false)
 
     private fun add(name: String, pid: Long, handler: ProcessHandler, runtime: GoRuntimeState?, withChildren: Boolean = true) {
-        val target = MonitorTarget(pid, "$name ($pid)", withChildren = withChildren, runtime = runtime)
+        val target = MonitorTarget(pid, "$name ($pid)", withChildren = withChildren, runtime = runtime, handler = handler)
         if (handler.isProcessTerminated) return
         targets.add(0, target)
         handler.addProcessListener(object : ProcessListener {

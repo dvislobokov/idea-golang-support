@@ -55,7 +55,18 @@ object GoSnapshot {
     }
 
     /** `dlv dap`, `attach` to [pid], `threads`, `disconnect` without ending the process. */
-    fun attachAndList(delve: String, pid: Long): List<GoroutineInfo> {
+    fun attachAndList(delve: String, pid: Long): List<GoroutineInfo> = attached(delve, pid) { connection ->
+        val threads = connection.request("threads").get(15, TimeUnit.SECONDS).objects("threads")
+        threads.mapNotNull { thread -> GoroutineInfo(thread.get("id")?.asInt ?: return@mapNotNull null, thread.string("name").orEmpty()) }
+    }
+
+    /** The same attach, with the stack of every goroutine: Dump Goroutines where there is no SIGQUIT (Windows). */
+    fun attachAndDump(delve: String, pid: Long, depth: Int): List<GoGoroutine> = attached(delve, pid) { connection ->
+        GoGoroutineDump.collect(depth) { command, arguments -> connection.request(command, arguments).get(15, TimeUnit.SECONDS) }
+    }
+
+    /** `dlv dap` attached to [pid] and stopped, [body] with the connection, then `disconnect` without ending the process. */
+    private fun <T> attached(delve: String, pid: Long, body: (DapConnection) -> T): T {
         val process = DelveProcess(GoCli.toolCommandLine(delve, null, *DlvDap.arguments(log = false, GoSettings.getInstance().debugAnyGoVersion).toTypedArray()), null)
         val events = LinkedBlockingQueue<Pair<String, JsonObject>>()
         val connection = DapConnection(process.input, process.output, object : DapConnection.Listener {
@@ -70,8 +81,7 @@ object GoSnapshot {
             connection.request("configurationDone").get(10, TimeUnit.SECONDS)
             attached.get(15, TimeUnit.SECONDS)
             waitFor(events, "stopped", "the program has not stopped for the snapshot")
-            val threads = connection.request("threads").get(15, TimeUnit.SECONDS).objects("threads")
-            return threads.mapNotNull { thread -> GoroutineInfo(thread.get("id")?.asInt ?: return@mapNotNull null, thread.string("name").orEmpty()) }
+            return body(connection)
         } finally {
             runCatching { connection.request("disconnect", json("terminateDebuggee" to false), 5_000).get() }
             connection.close()

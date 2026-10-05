@@ -38,6 +38,7 @@ import io.github.golangsupport.monitor.GoProfile
 import io.github.golangsupport.monitor.GoProfileServers
 import io.github.golangsupport.monitor.GoProfiles
 import io.github.golangsupport.run.GoRunConfiguration
+import io.github.golangsupport.run.GoRunKeys
 import io.github.golangsupport.run.GoTestOutputFilter
 import jetbrains.buildServer.messages.serviceMessages.ServiceMessageVisitor
 
@@ -47,14 +48,22 @@ private const val LOCATION_PROTOCOL = "gotest"
 /** `go test -json` with the test tree instead of a plain console; the tree grows while the tests run. */
 class GoTestRunState(private val configuration: GoRunConfiguration, environment: ExecutionEnvironment) : CommandLineState(environment) {
     override fun startProcess(): ProcessHandler {
-        val profile = configuration.options.profile
+        // the Profile executor asks for a kind, and the profile is opened as soon as it is written; the field of the configuration notifies
+        val requested = environment.getUserData(GoRunKeys.PROFILE)
+        val profile = requested ?: configuration.options.profile
         val directory = if (profile == GoProfile.NONE) null else GoProfiles.newDirectory()
-        val coverageFile = if (configuration.options.coverage) GoCoverage.newFile() else null
-        val handler = KillableColoredProcessHandler(configuration.buildCommandLine(directory, coverageFile)).also { ProcessTerminatedListener.attach(it) }
+        // the Coverage executor of the platform names the file it reads itself; the box of the configuration feeds the plugin's own gutter
+        val platformCoverage = environment.getUserData(GoRunKeys.COVERAGE_FILE)
+        val coverageFile = platformCoverage ?: if (configuration.options.coverage) GoCoverage.newFile() else null
+        val commandLine = configuration.buildCommandLine(directory, coverageFile, profile, coverMode = if (platformCoverage != null) "atomic" else null)
+        val handler = KillableColoredProcessHandler(commandLine).also { ProcessTerminatedListener.attach(it) }
         if (directory != null) handler.addProcessListener(object : ProcessListener {
-            override fun processTerminated(event: ProcessEvent) = GoProfileServers.getInstance(environment.project).notifyReady(profile, directory)
+            override fun processTerminated(event: ProcessEvent) {
+                val servers = GoProfileServers.getInstance(environment.project)
+                if (requested != null) servers.openWhenReady(profile, directory) else servers.notifyReady(profile, directory)
+            }
         })
-        if (coverageFile != null) handler.addProcessListener(object : ProcessListener {
+        if (coverageFile != null && platformCoverage == null) handler.addProcessListener(object : ProcessListener {
             override fun processTerminated(event: ProcessEvent) = GoCoverageService.getInstance(environment.project).load(coverageFile, configuration.packageDirectory())
         })
         return handler

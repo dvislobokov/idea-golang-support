@@ -26,7 +26,6 @@ import java.util.UUID
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.monitor.GoProfile
-import io.github.golangsupport.monitor.GoProfiles
 import io.github.golangsupport.monitor.GoRuntimeTrace
 import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.testing.GoTestRunState
@@ -219,15 +218,15 @@ open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, n
 
     /**
      * [profileDirectory]: where `go test` writes the profile of [GoRunConfigurationOptions.profile], when the run records one;
-     * [coverageFile]: where it writes the coverage profile, when the run collects one.
+     * [coverageFile]: where it writes the coverage profile, when the run collects one, in [coverMode] (`-covermode`) when given;
+     * [profile]: what is recorded, the field of the configuration unless the Profile executor asked for another kind.
      */
-    fun buildCommandLine(profileDirectory: File? = null, coverageFile: File? = null): GeneralCommandLine {
+    fun buildCommandLine(profileDirectory: File? = null, coverageFile: File? = null, profile: GoProfile = options.profile, coverMode: String? = null): GeneralCommandLine {
         val programArguments = ParametersListUtil.parse(options.programArguments.orEmpty())
-        val profile = profileDirectory?.let { GoProfiles.arguments(options.profile, it) }.orEmpty()
-        val coverage = coverageFile?.let { listOf("-coverprofile=${it.path}") }.orEmpty()
+        val recording = GoTestRecording.arguments(profile, profileDirectory, coverageFile, coverMode)
         val arguments = when (options.command) {
             GoCommand.RUN -> listOf("run") + goArgumentList() + packageArgument() + programArguments
-            GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + testFlags() + GoSettings.getInstance().testArgumentList() + testSelection() + profile + coverage + packageArgument() +
+            GoCommand.TEST -> listOf("test", "-json") + goArgumentList() + testFlags() + GoSettings.getInstance().testArgumentList() + testSelection() + recording + packageArgument() +
                 (if (programArguments.isEmpty()) emptyList() else listOf("-args") + programArguments)
             // a binary and the debug-only kinds have no go command to run (see getState)
             GoCommand.EXEC, GoCommand.CORE, GoCommand.REMOTE -> throw com.intellij.execution.ExecutionException("${options.command.title} is not run with the go command")

@@ -1,0 +1,9 @@
+<!-- The Coverage subsystem of the platform for go test (an optional dependency of plugin.xml on com.intellij.modules.coverage): the classes are
+     in the package io.github.golangsupport.coverage, which nothing else refers to -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <coverageEngine implementation="io.github.golangsupport.coverage.GoCoverageEngine"/>
+    <coverageRunner implementation="io.github.golangsupport.coverage.GoCoverageRunner"/>
+    <programRunner implementation="io.github.golangsupport.coverage.GoCoverageProgramRunner"/>
+  </extensions>
+</idea-plugin>
