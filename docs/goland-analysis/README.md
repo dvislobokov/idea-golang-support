@@ -56,6 +56,16 @@
     проходом (`completions2.sh`, раздел «SECOND PASS» в `completion.txt`) с закрытым текстом и кареткой на `@@`.
 11. Первый запуск GoLand закрылся через ~5 минут без участия робота (робот был заблокирован, п. 5) — окно закрыли вручную; второй запуск отработал до конца.
 
+## Вторая разведка 2026-10-05: спорное из G1–G9
+
+Переснято на том же GoLand 2026.2.3 пробами `tools/ui-robot/goland/probe/probe2/` (`style.go`, `other.go`, `iota.go`, `iota2.go`, `iota3.go`) и `probe/fixprobe/fix.go`,
+положенными в `internal/` копии площадки. Новые скрипты: `analysis/infos.js` (подсветки daemon'а с id инспекции, серьёзностью и её числом, панели уведомлений
+редактора) и `analysis/describe.js` (описание инспекции `loadDescription`, включена ли, уровень, и прямой прогон `InspectionEngine.runInspectionOnFile` — так
+«не предлагает» отличается от «не показывает»: INFORMATION-инспекции в подсветке не видны). Дампы: `highlight-internal-probe2-*.txt`, `highlight-internal-fixprobe-fix.txt`,
+`inspections-go-run-probe2-style.txt`. Итоги и что менять — `PLAN.md`, блок G10. Коротко: тексты 20 инспекций, семантика `GoIrregularIota` (из описания: одинаковые
+выражения с `iota` через спецификации без выражений), `GoReceiverNames` по всем файлам пакета, `GoCommentLeadingSpace` только с опцией Code Style, уровень
+`SYNTAX_UPDATE` = 20 и счётчик в виджете инспекций вместо линзы, три пункта `go:generate`, `GO_COMMENT_REFERENCE` на всех именах doc-комментария.
+
 ## Файлы
 
 | Файл | Что внутри |

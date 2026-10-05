@@ -1,0 +1,134 @@
+##### document markup: 75 highlighters
+  1:9-1:15  [GO_PACKAGE] layer 3000  «probe2»
+  4:2-4:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «I0»
+  4:7-4:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  5:2-5:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «I1»
+  5:2-5:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «I1»  TIP: Unused constant 'I1'
+  5:11-5:13  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «I0»
+  9:2-9:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «J0»
+  9:2-9:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «J0»  TIP: Unused constant 'J0'
+  9:6-9:8  [INFO_ATTRIBUTES] layer 3750  «J1»  TIP: Exported constant 'J1' should have its own declaration
+  9:6-9:8  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «J1»  TIP: Unused constant 'J1'
+  9:6-9:8  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «J1»
+  9:11-9:15  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  9:17-9:21  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  13:2-13:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «K0»  TIP: Unused constant 'K0'
+  13:2-13:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «K0»
+  13:7-13:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  14:2-14:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «K1»  TIP: Unused constant 'K1'
+  14:2-14:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «K1»
+  14:7-14:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  15:2-15:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «K2»
+  15:2-15:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «K2»  TIP: Unused constant 'K2'
+  15:2-15:4  [STICKY_LINE_MARKER] layer 0  «K2»
+  19:2-19:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «L0»
+  19:2-19:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «L0»  TIP: Unused constant 'L0'
+  20:2-20:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «L1»  TIP: Unused constant 'L1'
+  20:2-20:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «L1»
+  20:7-20:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  21:2-21:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «L2»
+  21:2-21:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «L2»  TIP: Unused constant 'L2'
+  21:7-21:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  25:2-25:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «M0»  TIP: Unused constant 'M0'
+  25:2-25:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «M0»
+  25:7-25:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  26:2-26:3  [STICKY_LINE_MARKER] layer 0  «_»
+  26:2-26:3  [GO_PACKAGE_LOCAL_CONSTANT] layer 3000  «_»
+  27:2-27:4  [STICKY_LINE_MARKER] layer 0  «M2»
+  27:2-27:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «M2»  TIP: Unused constant 'M2'
+  27:2-27:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «M2»
+  31:2-31:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «N0»
+  31:7-31:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  32:2-32:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «N1»
+  32:2-32:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «N1»  TIP: Unused constant 'N1'
+  32:7-32:9  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «N0»
+  33:2-33:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «N2»
+  33:2-33:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «N2»  TIP: Unused constant 'N2'
+  33:7-33:9  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «N0»
+  37:2-37:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «O0»  TIP: Unused constant 'O0'
+  37:2-37:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «O0»
+  37:7-37:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  38:2-38:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «O1»
+  38:2-38:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «O1»  TIP: Unused constant 'O1'
+  39:2-39:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «O2»  TIP: Unused constant 'O2'
+  39:2-39:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «O2»
+  43:2-43:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «P0»
+  43:2-43:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «P0»  TIP: Unused constant 'P0'
+  43:11-43:15  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  44:2-44:4  [STICKY_LINE_MARKER] layer 0  «P1»
+  44:2-44:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «P1»
+  44:2-44:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «P1»  TIP: Unused constant 'P1'
+  45:2-45:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «P2»
+  45:2-45:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «P2»  TIP: Unused constant 'P2'
+  48:6-52:2  [STICKY_LINE_MARKER] layer 0  «body() {⏎	x := 1 //no space trailing⏎	//no space s»
+  48:6-48:10  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «body»  TIP: Unused function 'body'
+  48:6-48:10  [GO_LOCAL_FUNCTION] layer 3000  «body»
+  49:2-49:3  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  51:6-51:7  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  54:6-54:72  [STICKY_LINE_MARKER] layer 0  «TypeParamsLong[item any, keyType comparable](x ite»
+  54:6-54:20  [GO_EXPORTED_FUNCTION] layer 3000  «TypeParamsLong»
+  54:6-54:20  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «TypeParamsLong»  TIP: Unused function 'TypeParamsLong'
+  54:26-54:29  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «any»
+  54:39-54:49  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «comparable»
+  54:51-54:57  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «x item»  TIP: Unused parameter 'x item'
+  54:51-54:52  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  54:59-54:68  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «k keyType»  TIP: Unused parameter 'k keyType'
+  54:59-54:60  [GO_FUNCTION_PARAMETER] layer 3000  «k»
+##### editor markup: 0 highlighters
+##### keys: count
+  GO_BUILTIN_CONSTANT: 11
+  GO_BUILTIN_TYPE_REFERENCE: 2
+  GO_EXPORTED_FUNCTION: 1
+  GO_FUNCTION_PARAMETER: 2
+  GO_LOCAL_FUNCTION: 1
+  GO_LOCAL_VARIABLE: 2
+  GO_PACKAGE: 1
+  GO_PACKAGE_EXPORTED_CONSTANT: 24
+  GO_PACKAGE_LOCAL_CONSTANT: 1
+  INFO_ATTRIBUTES: 1
+  NOT_USED_ELEMENT_ATTRIBUTES: 23
+  STICKY_LINE_MARKER: 6
+##### inline inlays: 18
+  4:4  InlineInlayRenderer «= 0»
+  5:4  InlineInlayRenderer «= 0»
+  9:4  InlineInlayRenderer «= 0»
+  9:8  InlineInlayRenderer «= 0»
+  13:4  InlineInlayRenderer «= 0»
+  14:4  InlineInlayRenderer «= 11»
+  15:4  InlineInlayRenderer «= 12»
+  20:4  InlineInlayRenderer «= 1»
+  21:4  InlineInlayRenderer «= 2»
+  25:4  InlineInlayRenderer «= 0»
+  26:3  InlineInlayRenderer «= 1»
+  27:4  InlineInlayRenderer «= 2»
+  31:4  InlineInlayRenderer «= 0»
+  32:4  InlineInlayRenderer «= 1»
+  33:4  InlineInlayRenderer «= 2»
+  37:4  InlineInlayRenderer «= 0»
+  43:4  InlineInlayRenderer «= 1»
+  44:4  InlineInlayRenderer «= 2»
+##### after-line-end inlays: 22
+  4:11  InlineCodeVisionInlayRenderer
+  5:13  InlineCodeVisionInlayRenderer
+  13:11  InlineCodeVisionInlayRenderer
+  14:16  InlineCodeVisionInlayRenderer
+  15:4  InlineCodeVisionInlayRenderer
+  19:9  InlineCodeVisionInlayRenderer
+  20:11  InlineCodeVisionInlayRenderer
+  21:11  InlineCodeVisionInlayRenderer
+  25:11  InlineCodeVisionInlayRenderer
+  26:3  InlineCodeVisionInlayRenderer
+  27:4  InlineCodeVisionInlayRenderer
+  31:11  InlineCodeVisionInlayRenderer
+  32:13  InlineCodeVisionInlayRenderer
+  33:13  InlineCodeVisionInlayRenderer
+  37:11  InlineCodeVisionInlayRenderer
+  38:8  InlineCodeVisionInlayRenderer
+  39:8  InlineCodeVisionInlayRenderer
+  43:15  InlineCodeVisionInlayRenderer
+  44:4  InlineCodeVisionInlayRenderer
+  45:8  InlineCodeVisionInlayRenderer
+  48:14  InlineCodeVisionInlayRenderer
+  54:72  InlineCodeVisionInlayRenderer
+##### block inlays: 0
+

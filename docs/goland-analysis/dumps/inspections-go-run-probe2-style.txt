@@ -1,0 +1,166 @@
+## GoCommentLeadingSpace [Comment has no leading space] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoCommentLeadingSpaceInspection
+   Reports comments without a leading space. Note that the inspection works only if you select the Add a leading space to comments in Editor | Code Style | Go on the Other tab. Comments with a leading space can be easier to read since the first word is separated from the comment by a space. Example: //Prints JSON received from the createJSON function func printJSON(output []byte) { fmt.Println(string(output)) } Inspection ID: GoCommentLeadingSpace
+   problems on file: 0
+## GoCommentStart [Comment of exported element starts with the incorrect name] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoCommentStartInspection
+   Reports comments that do not start with the name of the exported element. According to Comment Sentences at github.com/golang , this is a convention to begin a comment with the name of the exported element. Example: // represents a request to run a command. type Request struct {} The comment starts with the struct description, not with the struct name. To stick to the convention rules, you can apply the Add prefix to comment quick-fix. After the quick-fix is applied, the comment looks as follows: // Request represents a request to run a command. type Request struct {} // better Inspection ID: GoCommentStart
+   problems on file: 3
+     - Comment should have the following format 'Snake_case_var ...' (with an optional leading article) «//no leading space here» line 12
+     - Comment should have the following format 'Exported ...' (with an optional leading article) «// Wrong name in the comment of an exported function.» line 15
+     - Comment should have the following format 'Doc ...' (with an optional leading article) «// Probe2Config is used by Exported with [Generic] and time.» line 135
+## GoErrorStringFormat [Error string should not be capitalized or end with punctuation] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoErrorStringFormatInspection
+   Reports format issues in error strings. Example: err := fmt.Errorf("Cannot read the file!") log.Printf("Reading %s: %v", file, err) According to Error Strings at github.com/golang , error strings should not be capitalized or end with punctuation because they might appear among other context. To fix the format, you can apply the Fix error string format quick-fix. After the quick-fix is applied, the error string will look like this: err := fmt.Errorf("cannot read the file") log.Printf("Reading %s: %v", file, err) Inspection ID: GoErrorStringFormat
+   problems on file: 1
+     - Error string should not be capitalized or end with punctuation mark «"Capitalized error."» line 84
+## GoExportedOwnDeclaration [Exported element should have its own declaration] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoExportedOwnDeclarationInspection
+   Reports exported variables or constants in comma-separated lists of declarations. Example: const C1, C3, C2, C44, C9, C11, C6 = 1, 2, 3, 1, 3, 2, 1 This declaration makes it hard to understand what value each constant has. You can apply the Extract to own declaration quick-fix to make this declaration more readable. After the quick-fix is applied to each constant, the declaration looks as follows: const ( C3 = 2 C2 = 3 C44 = 1 C9 = 3 C11 = 2 C6 = 1 C1 = 1 ) Inspection ID: GoExportedOwnDeclaration
+   problems on file: 1
+     - Exported variable B should have its own declaration «B» line 20
+## GoNameStartsWithPackageName [Name starts with a package name] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoNameStartsWithPackageNameInspection
+   Reports exported names that start with a package name. This inspection does not report such names in the main package. Example: package myPackage func MyPackageGetIP() { } The MyPackageGetIP name will be highlighted as it starts with the package name. According to Package Names at github.com/golang , all references to names in a package will be done using the package name, so one can omit that name from the identifiers. For example, if you are in a package foo , you do not need a type FooFile , which clients will write as foo.FooFile . Instead, we name the type File , which clients will write as foo.File . Inspection ID: GoNameStartsWithPackageName
+   problems on file: 1
+     - Name starts with the package name «Probe2Config» line 22
+## GoReceiverNames [Receiver has a generic name] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoReceiverNamesInspection
+   Reports receiver names like me , this , self , or names that differ from other receiver names for this type. Example: func (self *MeterSnapshot) Rate5() float64 { return math.Float64frombits(self.rate5) } According to Receiver Names at github.com/golang , you should not use generic names such as "me", "this", or "self". These identifiers are typical for object-oriented languages and might give the method a special meaning. Inspection ID: GoReceiverNames
+   problems on file: 8
+     - Receiver names are different «this» line 28
+     - Receiver names are different «self» line 29
+     - Receiver names are different «_» line 30
+     - Receiver names are different «c» line 31
+     - Receiver names are different «x» line 32
+     - Receiver names are different «c» line 34
+     - Receiver has a generic name «this» line 28
+     - Receiver has a generic name «self» line 29
+## GoRedundantElseInIf [Redundant 'else' in 'if'] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoRedundantElseInIfInspection
+   Reports redundant else clauses in if statements that contain a return . Example: if someCode() { fmt.Println("branch A") return nil } else { fmt.Println("branch B") } After the quick-fix is applied: if someCode() { fmt.Println("branch A") return nil } fmt.Println("branch B") Inspection ID: GoRedundantElseInIf
+   problems on file: 1
+     - Redundant 'else' in 'if' «else { return -x }» line 48
+## GoRedundantTrueInForCondition [Redundant 'true' in for loop condition] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoRedundantTrueInForConditionInspection
+   Reports the redundant true literal in the for loop condition. In Go, the for loop has a form with an implicit condition. It means that you can create an infinite loop by writing for { } . Therefore, in cases with the true condition ( for true { } ), true is considered redundant and might be omitted. For more information about the for loop in Go, refer to For at go.dev . Example: for true { println("ping") } Inspection ID: GoRedundantTrueInForCondition
+   problems on file: 1
+     - Condition is redundant «true» line 54
+## GoStructInitializationWithoutFieldNames [Struct initialization without field names] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoStructInitializationWithoutFieldNamesInspection
+   Reports structures that are initialized without specifying their field names. By default, the inspection is available only when you use the type that is defined in a different package. When initializing a structure, it is better to explicitly state field names in order to ensure that in case of changes in order of these fields or in names of the fields, they will correctly continue to be addressed. Example: _ = io.LimitedReader{nil, 10} The LimitedReader initialization will be highlighted because explicit names for struct fields are missing. You can apply the Add keys and delete zero values quick-fix to the struct initialization. After the quick-fix is applied, the code looks as follows: _ = io.LimitedReader{N: 10} The inspection has the following options: Report types defined in current package : reports situations when you declare and initialize struct in the same package. Consider the following example. d := struct { c string }{ "dsd "} Report struct literals without types : reports fields without names when the type (struct or interface) is omitted. Consider the following example when the type is omitted. _ = []io.LimitedReader{ {nil, 10}, {nil, 20}, } In the following example, the type is present but is redundant. _ = []io.LimitedReader{ io.LimitedReader{nil, 10}, io.LimitedReader{nil, 20}, } Inspection ID: GoStructInitializationWithoutFieldNames
+   problems on file: 0
+## GoTypeParameterInLowerCase [Type parameter is declared in lowercase] enabled=true level=INFORMATION(10) class=com.goide.inspections.GoTypeParameterInLowerCaseInspection
+   Reports type parameters that are declared in lowercase. Examples in the official Go documentation use type parameters in uppercase. This inspection follows this uppercase rule for type parameters. func PrintSlice[t any](s []t) { for _, v := range s{ print(v) } } The type parameter t is declared in lowercase and thus will be reported. Inspection ID: GoTypeParameterInLowerCase
+   problems on file: 1
+     - Type parameter 't' is declared in lowercase «t» line 39
+## GoUnitSpecificDurationSuffix [Unit-specific suffix for 'time.Duration'] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoUnitSpecificDurationSuffixInspection
+   Reports unit-specific suffixes in constant and variable names of time.Duration type. The inspection comes from go lint . A list of suffixes that imply a time unit is available in the golang repository at github.com . time.Duration represents a value in nanoseconds, so adding a time unit suffix might make the meaning of the variable confusing, or even indicate a misuse of the time.Duration API. Example: var timeoutSeconds = 5 * time.Second Inspection ID: GoUnitSpecificDurationSuffix
+   problems on file: 1
+     - Unit-specific suffix Seconds «waitSeconds» line 75
+## GoUnsortedImport [Unsorted imports] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoUnsortedImportInspection
+   Reports unsorted imports. All Go programs should be formatted in the same way, the formatting rules are fixed by the gofmt tool. Those rules require imports to be sorted. Example of a wrong sorting: import ( "net" "errors" "fmt" ) You can apply the Sort imports quick-fix to fix the sorting. After the quick-fix is applied, the sorting looks as follows: import ( "errors" "fmt" "net" ) Inspection ID: GoUnsortedImport
+   problems on file: 5
+     - Imports are not sorted «"os"» line 5
+     - Imports are not sorted «"errors"» line 6
+     - Imports are not sorted «fmt "fmt"» line 7
+     - Imports are not sorted «"strings"» line 8
+     - Imports are not sorted «"time"» line 9
+## GoSnakeCaseUsage [Usage of Snake_Case] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoSnakeCaseUsageInspection
+   Reports usage of snake case instead of camelcase for naming variables, constants and functions. According to MixedCaps at go.dev , camelcase is a convention in Go. Example: func get_external_IP() (string, error) {} The get_external_IP is in snake case but should be in camelcase. You can apply a quick-fix to convert the function name to getExternalIp . Inspection ID: GoSnakeCaseUsage
+   problems on file: 3
+     - Use camel case instead of snake case «Snake_case_var» line 13
+     - Use camel case instead of snake case «count_total» line 43
+     - Use camel case instead of snake case «do_thing» line 43
+## GoEmptyDeclaration [Empty declaration] enabled=true level=WARNING(300) class=com.goide.inspections.GoEmptyDeclarationInspection
+   Reports empty declarations. Empty declarations have no effect. If you remove them, you might improve code readability. Example: func main() { const () // empty declaration } You can apply the Delete empty declaration quick-fix to remove this declaration. Inspection ID: GoEmptyDeclaration
+   problems on file: 2
+     - Empty declaration var () «var ()» line 79
+     - Empty declaration const () «const ()» line 81
+## GoPreferNilSlice [Empty slice declared using a literal] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoPreferNilSliceInspection
+   Reports slice declarations with empty literal initializers used instead of nil . An empty slice can be represented by nil or an empty slice literal. They are functionally equivalent — their len and cap are both zero — but the nil slice is the preferred style. For more information about empty slices, refer to Declaring Empty Slices at github.com/golang . Example: s := []string{} To change the declaration, use the Replace with nil slice declaration (changes semantics) quick-fix. After the quick-fix is applied: var s []string Inspection ID: GoPreferNilSlice
+   problems on file: 1
+     - Empty slice declaration using a literal «[]int{}» line 61
+## GoRedundantComma [Redundant comma] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoRedundantCommaInspection
+   Reports commas that may be omitted in the end of argument lists and composite literals. The IDE suggests removing commas that are considered optional. Removing these commas might improve code readability. Example: s := []int{1, 2,} // the last comma may be omitted Inspection ID: GoRedundantComma
+   problems on file: 2
+     - Redundant comma «,» line 63
+     - Redundant comma «,» line 65
+## GoRedundantSemicolon [Redundant semicolon] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoRedundantSemicolonInspection
+   Reports redundant semicolons. Idiomatic Go programs have semicolons only in places such as for loop clauses, to separate the initializer, condition, and continuation elements. They are also necessary to separate multiple statements on a line. In other cases, you can omit them. For more information about semicolons in Go, refer to Semicolons at go.dev . Example: i := 1; Inspection ID: GoRedundantSemicolon
+   problems on file: 1
+     - Redundant semicolon «;» line 57
+## GoRedundantParens [Redundant parentheses] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoRedundantParensInspection
+   Reports redundant parentheses in expressions and types. Example: func _(x (int), y ((string))) { } func _() { _ = (1 + 1) _ = (((1 + 1))) _ = (((1 + 1))) + (((2 + 2))) } After the Unwrap parentheses quick-fix is applied: func _(x int, y string) { } func _() { _ = 1 + 1 _ = 1 + 1 _ = (1 + 1) + (2 + 2) } Inspection ID: GoRedundantParens
+   problems on file: 2
+     - Redundant parentheses «(x > 0)» line 46
+     - Redundant parentheses «(x)» line 47
+## GoRedundantImportAlias [Redundant import alias] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoRedundantImportAliasInspection
+   Reports aliases of imported packages that may be omitted. Usually, such aliases equal to the names of the imported packages, so aliases have no effect and one can use package names directly. Example: import fmt "fmt" The fmt alias duplicates the package name that is also named "fmt" . To delete the alias, use the Delete import alias quick-fix. After the quick-fix is applied: import "fmt" Inspection ID: GoRedundantImportAlias
+   problems on file: 1
+     - Redundant alias «fmt» line 7
+## GoRedundantTypeDeclInCompositeLit [Redundant types in composite literals] enabled=true level=WARNING(300) class=com.goide.inspections.GoRedundantTypeDeclInCompositeLit
+   Reports redundant type declarations in composite literals. Example: nums := [][]int{[]int{1}, []int{2}} We have a slice of slices of the int type. In this case, you can use a shorter definition. You can fix this code manually or use the Delete redundant type quick-fix. After the quick-fix is applied, the code looks as follows: nums := [][]int{{1},{2}} For more information about composite literals, refer to Go Language Specification: Composite Literals at go.dev . Inspection ID: GoRedundantTypeDeclInCompositeLit
+   problems on file: 1
+     - Redundant type «point» line 67
+## GoVarAndConstTypeMayBeOmitted [Type can be omitted] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoVarAndConstTypeMayBeOmittedInspection
+   Reports types in variable and constant declarations that can be omitted since they can be inferred by the compiler. Such types are redundant, omitting them may improve readability of the code. Example: var s string = fmt.Sprintln("hi") The string type in the variable declaration may be omitted. To remove the type, use the Delete type quick-fix. After the quick-fix is applied: var s = fmt.Sprintln("hi") Inspection ID: GoVarAndConstTypeMayBeOmitted
+   problems on file: 1
+     - Type can be omitted «int» line 59
+## GoUnusedTypeParameter [Unused type parameter] enabled=true level=WARNING(300) class=com.goide.inspections.unresolved.GoUnusedTypeParameterInspection
+   Reports unused type parameters. func main() { printAll( 42, "bird", ) } func printAll[I int, S string]( i I, s string, ) { fmt.Println(i) fmt.Println(s) } The printAll function has two type parameters I and S but uses only the first of them. Therefore, the S string is grayed out. Inspection ID: GoUnusedTypeParameter
+   problems on file: 1
+     - Unused type parameter T any «T any» line 41
+## GoDeferGo [Defer/go statement calls 'recover' or 'panic' directly] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoDeferGoInspection
+   Reports defer and go statements that call panic() or recover() directly. Such statements are rarely useful and might indicate a misuse of the panic() and recover() mechanism. In particular: go panic() : a newly-started goroutine will panic immediately. defer panic() : a function with this statement will always panic on exit. go recover() : has no effect as newly-started goroutine cannot panic. defer recover() : function with this statement will silently stop panicking. This could be a valid usage, but an idiomatic way is to inspect the value returned by recover() : defer func() { if r := recover(); r != nil { fmt.Println("Recovered from: ", r) } }() For more information about go statements and panics handling, refer to Handling panics and Go statements in the Go Language Specification. Inspection ID: GoDeferGo
+   problems on file: 2
+     - defer should not call recover() directly «defer recover()» line 92
+     - go should not call panic() directly «go panic("x")» line 93
+## GoImportUsedAsName [Imported package name as a name identifier] enabled=true level=WARNING(300) class=com.goide.inspections.GoImportUsedAsNameInspection
+   Reports declarations of variables, arguments or functions that overlap with the used import. While legal, such declarations will make using the package exported identifiers impossible after the declaration or create confusion when reading the code. Example: import "fmt" import _ "fmt" import iio "io" func _() { fmt.Println("demo") demo := true _, _ = iio.EOF, demo } func demo() (int, int) { return 1, 2 } func _() { _, _ = iio.EOF, demo fmt := "demo" iio := 1 _, _ = iio, fmt a, _ := demo() _ = a } Variable names fmt and iio clash with names of import packages. Not to confuse them later in code, it is better to rename these variables. Inspection ID: GoImportUsedAsName
+   problems on file: 1
+     - Variable strings collides with imported package name «strings» line 71
+## GoReservedWordUsedAsName [Reserved word used as name] enabled=true level=WARNING(300) class=com.goide.inspections.GoReservedWordUsedAsNameInspection
+   Reports declarations of variables, arguments or functions that overlap with the built-in or reserved keyword. If you receive this error then your code might not be as explicit as possible and might confuse other users. Example: type byte struct{} type string interface{} Types byte and string collide with the built-in type aliases. Therefore, they will be highlighted. Consider renaming such declarations. Inspection ID: GoReservedWordUsedAsName
+   problems on file: 1
+     - Variable new collides with the 'builtin' function «new» line 73
+## GoIrregularIota [Irregular usage of 'iota'] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoIrregularIotaInspection
+   Reports irregular usage of iota within a constant declaration. The iota identifier is reset for every constant declaration and automatically incremented for every constant specification. Within one constant specification, the identifier keeps its value. Explicitly referring to iota does not reset the counter. For more information, refer to Iota in the Go specification. This inspection is triggered if two constant specifications have a textually identical expression list containing at least one reference to iota and there are exclusively constant specifications without an expression list in between them. Consider omitting the redundant expression list or writing out the expression list every time. Example: const ( a = iota // 0 b // 1 c = iota // 2 ) Triggers the inspection as the iota in the definition of c is redundant. Example: const ( a, aa = iota, iota // 0, 0 b, bb // 1, 1 c, cc = iota + 40, iota // 42, 2 ) Does not trigger the inspection as none of the expression lists is redundant. Inspection ID: GoIrregularIota
+   problems on file: 0
+## GoMixedReceiverTypes [Mixed value and pointer receivers] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoMixedReceiverTypesInspection
+   Reports structures with methods that use a mixture of types: value and pointer receivers. Such usage is not recommended by the Go Documentation. For more information, refer to Should I define methods on values or pointers? in the Go FAQ. Example: type S struct{ } func (s *S) fun() {} func (s S) fun2() {} Inspection ID: GoMixedReceiverTypes
+   problems on file: 6
+     - Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation. «func (this *Probe2Config) M1() {}» line 28
+     - Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation. «func (self Probe2Config) M2() {}» line 29
+     - Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation. «func (_ Probe2Config) M3() {}» line 30
+     - Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation. «func (c Probe2Config) M4() {}» line 31
+     - Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation. «func (x Probe2Config) M5() {}» line 32
+     - Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation. «func (c Probe2Config) SetName(v string) { c.name = v c = Pro» line 34
+## GoTypeAssertionOnErrors [Type assertion on errors fails on wrapped errors] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoTypeAssertionOnErrorsInspection
+   Reports type assertion or type switch on errors, for example, err.(*MyErr) or switch err.(type) , and suggests using errors.As instead. Since Go 1.13, errors can be wrapped using the fmt.Errorf function with the %w verb. Therefore, type assertion or type switch on errors fails on wrapped errors. The preferred way for checking for a specific error type is to use the errors.As function from the standard library as this function traverses the chain of the wrapped errors while checking for a specific error type. For more information about errors.As , refer to working with Errors in Go 1.13 . The quick-fix replaces type assertion and type switch on errors with a call to errors.As . Example errFoo, ok := err.(*ErrFoo) switch err.(type) { case *ErrBar: } After the quick fix is applied: var errFoo *ErrFoo ok := errors.As(err, &errFoo) var errBar *ErrBar switch { case errors.As(err, &errBar): } Inspection ID: GoTypeAssertionOnErrors
+   problems on file: 1
+     - Type assertion on errors fails on wrapped errors «err.(*os.PathError)» line 85
+## GoAssignmentToReceiver [Assignment to a receiver] enabled=true level=WEAK WARNING(200) class=com.goide.inspections.GoAssignmentToReceiverInspection
+   Reports assignments to method receivers. When you assign a value to the method receiver, the value will not be reflected outside of the method itself. Values will be reflected in subsequent calls from the same method. Example: package main import "fmt" type demo struct { Val int } func (d *demo) change() { d = nil // Assignment to the method receiver propagates only to callees but not to callers d.myVal() } func (d *demo) myVal() { fmt.Printf("my val: %#v\n", d) } func (d demo) change2() { d = demo{} // Assignment to the method receiver doesn't propagate to other calls d.myVal() } func (d *demo) change3() { d.Val = 3 d.myVal() } func main() { d := &demo{} d.myVal() d.change() d.myVal() d.Val = 2 d.change2() d.myVal() d.change3() d.myVal() } Inspection ID: GoAssignmentToReceiver
+   problems on file: 1
+     - Assignment to the method receiver doesn't propagate to other calls «c» line 36
+## GoExportedElementShouldHaveComment [Exported element should have a comment] enabled=true level=INFORMATION(10) class=com.goide.inspections.GoExportedElementShouldHaveCommentInspection
+   Reports exported declarations without a documentation comment. According to Doc Comments at github.com/golang , all top-level exported names should have doc comments. Also, for more information about comment sentences, refer to Comment Sentences at github.com/golang . To add a comment, you can apply the Add comment quick-fix. Inspection ID: GoExportedElementShouldHaveComment
+   problems on file: 22
+     - Exported function NoDocExported should have a comment or be unexported «NoDocExported» line 18
+     - Exported type Probe2Config should have a comment or be unexported «Probe2Config» line 22
+     - Exported method M1 should have a comment or be unexported «M1» line 28
+     - Exported method M2 should have a comment or be unexported «M2» line 29
+     - Exported method M3 should have a comment or be unexported «M3» line 30
+     - Exported method M4 should have a comment or be unexported «M4» line 31
+     - Exported method M5 should have a comment or be unexported «M5» line 32
+     - Exported method SetName should have a comment or be unexported «SetName» line 34
+     - Exported function Generic should have a comment or be unexported «Generic» line 39
+     - Exported function Unused should have a comment or be unexported «Unused» line 41
+     - Exported constant A0 should have a comment or be unexported «A0» line 97
+     - Exported constant A1 should have a comment or be unexported «A1» line 98
+     - Exported constant A2 should have a comment or be unexported «A2» line 99
+     - Exported constant B0 should have a comment or be unexported «B0» line 103
+     - Exported constant B1 should have a comment or be unexported «B1» line 104
+     - Exported constant B2 should have a comment or be unexported «B2» line 105
+     - Exported constant C0 should have a comment or be unexported «C0» line 109
+     - Exported constant C1 should have a comment or be unexported «C1» line 110
+     - Exported constant C2 should have a comment or be unexported «C2» line 111
+     - Exported constant D0 should have a comment or be unexported «D0» line 115
+     - Exported constant D1 should have a comment or be unexported «D1» line 116
+     - Exported constant D2 should have a comment or be unexported «D2» line 117
+## provider Go modernizer whats new name=What's New group=go.modernizer class=com.intellij.codeInsight.hints.codeVision.CodeVisionProviderAdapter
+## provider go.syntax.update name=Batch syntax update group=go.syntax.update class=com.intellij.codeInsight.hints.codeVision.CodeVisionProviderAdapter
+codeVision enabled=true go.syntax.update enabled=true
+

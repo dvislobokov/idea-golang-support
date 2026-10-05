@@ -86,6 +86,12 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
   только перезапуском задачи; перед перезапуском закрыть IDE (`robot.py action Exit`, затем клик по `Exit` в диалоге). После проверки песочницу закрыть:
   порт даёт выполнять код внутри IDE. Логи песочницы — `.intellijPlatform/sandbox/idea-golang-support/IU-*/log_runIdeForUiTests/idea.log`; журнал плагина и логи delve — `~/idea-golang-logs` (общая папка с установленной IDE).
   Чего так не видно (подсказки по наведению, ощущение скорости), просить пользователя посмотреть вживую и прямо говорить, что не проверено.
+- **Песочница в WSL (`tools/ui-robot/wsl/`, по образцу dotnet-плагина)**: та же IDEA для Linux (`~/ide/idea-IU-261.26222.65` в Ubuntu) на невидимом экране Xvfb :98
+  с робот-сервером на 8597 — там можно настоящую мышь (наведение → документация), набор с клавиатуры, видео, не мешая человеку. Go в WSL — `~/sdk/go` (1.27.1, без sudo).
+  `export MSYS_NO_PATHCONV=1 ROBOT_WSL=1`; `wsl -d Ubuntu -- bash tools/ui-robot/wsl/start-ide.sh build/distributions/idea-golang-support-<версия>.zip` (робот-сервер берётся
+  из песочницы `runIdeForUiTests` на Windows — запустить её хоть раз); `copy-playground.sh` → `~/robot/go-playground` (с пробами GoLand в `internal/probe`); `. tools/ui-robot/scripts/session.sh`
+  — `$ROBOT`, `robot_js`, `openfile` идут через `wsl/robot.sh` (с Windows порт WSL не виден: NAT); `S="wsl -d Ubuntu -- bash tools/ui-robot/wsl/screen.sh"; $S move X Y; $S shot C:/tmp/a.png; $S type "fmt.Pr"; $S key ctrl+space; $S record out.mp4 8`;
+  закрыть — `robot_js exit_ide.js` (или `$ROBOT action Exit`) и `stop-ide.sh`. Одна IDE на машину: dotnet-песочница WSL (экран :99, порт 8596) и Gradle-прогоны делят ту же память — перед стартом смотреть `pgrep -fa idea` в WSL.
 - Python-скрипты с обратными слэшами не передавать через heredoc в Bash: слэши теряются и кавычки ломаются. Правки — инструментом Edit, скрипты — файлом в scratchpad.
 
 ## Устройство

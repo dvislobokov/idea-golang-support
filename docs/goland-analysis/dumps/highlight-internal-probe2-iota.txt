@@ -1,0 +1,101 @@
+##### document markup: 56 highlighters
+  1:9-1:15  [GO_PACKAGE] layer 3000  «probe2»
+  3:1-3:19  [INFO_ATTRIBUTES] layer 3750  «//no leading space»  TIP: Comment should have the following format 'Single ...' (with an optional leading article)
+  4:7-4:13  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «Single»
+  4:7-4:13  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Single»  TIP: Unused constant 'Single'
+  4:16-4:20  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  7:2-7:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «E0»
+  7:2-7:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «E0»  TIP: Unused constant 'E0'
+  8:2-8:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «E1»
+  8:2-8:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «E1»  TIP: Unused constant 'E1'
+  8:7-8:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  12:2-12:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «F0»  TIP: Unused constant 'F0'
+  12:2-12:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «F0»
+  12:7-12:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  13:2-13:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «F1»
+  13:2-13:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «F1»  TIP: Unused constant 'F1'
+  13:7-13:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  14:2-14:4  [STICKY_LINE_MARKER] layer 0  «F2»
+  14:2-14:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «F2»
+  14:2-14:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «F2»  TIP: Unused constant 'F2'
+  18:2-18:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «G0»
+  18:2-18:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «G0»  TIP: Unused constant 'G0'
+  18:5-18:8  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  18:11-18:15  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  19:2-19:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «G1»
+  19:2-19:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «G1»  TIP: Unused constant 'G1'
+  19:5-19:8  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  19:11-19:15  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  23:2-23:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «H0»
+  23:2-23:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «H0»  TIP: Unused constant 'H0'
+  23:7-23:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  24:2-24:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «H1»
+  24:2-24:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «H1»  TIP: Unused constant 'H1'
+  25:2-25:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «H2»
+  25:2-25:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «H2»  TIP: Unused constant 'H2'
+  25:2-25:4  [STICKY_LINE_MARKER] layer 0  «H2»
+  28:5-28:6  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «V»
+  28:5-28:6  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «V»  TIP: Unused variable 'V'
+  28:9-28:13  [WRONG_REFERENCES_ATTRIBUTES] layer 5000  «iota»  TIP: Unresolved reference 'iota' STRIPE
+  30:6-30:16  [GO_EXPORTED_FUNCTION] layer 3000  «TypeParams»
+  30:6-30:16  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «TypeParams»  TIP: Unused function 'TypeParams'
+  30:6-30:54  [STICKY_LINE_MARKER] layer 0  «TypeParams[t any, Key comparable](x t, k Key) {}»
+  30:19-30:22  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «any»
+  30:28-30:38  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «comparable»
+  30:40-30:43  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «x t»  TIP: Unused parameter 'x t'
+  30:40-30:41  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  30:45-30:50  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «k Key»  TIP: Unused parameter 'k Key'
+  30:45-30:46  [GO_FUNCTION_PARAMETER] layer 3000  «k»
+  32:6-32:32  [STICKY_LINE_MARKER] layer 0  «lower[k any] struct{ v k }»
+  32:6-32:11  [GO_PACKAGE_LOCAL_STRUCT] layer 3000  «lower»
+  32:6-32:11  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «lower»  TIP: Unused type 'lower'
+  32:14-32:17  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «any»
+  32:27-32:28  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «v»
+  34:1-34:18  [INFO_ATTRIBUTES] layer 3750  «/*block comment*/»  TIP: Comment should have the following format 'BlockDoc ...' (with an optional leading article)
+  35:6-35:14  [GO_EXPORTED_FUNCTION] layer 3000  «BlockDoc»
+  35:6-35:14  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «BlockDoc»  TIP: Unused function 'BlockDoc'
+  35:6-35:19  [STICKY_LINE_MARKER] layer 0  «BlockDoc() {}»
+##### editor markup: 0 highlighters
+##### keys: count
+  GO_BUILTIN_CONSTANT: 7
+  GO_BUILTIN_TYPE_REFERENCE: 5
+  GO_EXPORTED_FUNCTION: 2
+  GO_FUNCTION_PARAMETER: 2
+  GO_PACKAGE: 1
+  GO_PACKAGE_EXPORTED_CONSTANT: 11
+  GO_PACKAGE_EXPORTED_VARIABLE: 1
+  GO_PACKAGE_LOCAL_STRUCT: 1
+  GO_STRUCT_LOCAL_MEMBER: 1
+  INFO_ATTRIBUTES: 2
+  NOT_USED_ELEMENT_ATTRIBUTES: 17
+  STICKY_LINE_MARKER: 5
+  WRONG_REFERENCES_ATTRIBUTES: 1
+##### inline inlays: 9
+  4:13  InlineInlayRenderer «= 0»
+  8:4  InlineInlayRenderer «= 1»
+  12:4  InlineInlayRenderer «= 0»
+  13:4  InlineInlayRenderer «= 2»
+  14:4  InlineInlayRenderer «= 3»
+  18:4  InlineInlayRenderer «= 0»
+  19:4  InlineInlayRenderer «= 1»
+  23:4  InlineInlayRenderer «= 0»
+  25:4  InlineInlayRenderer «= 7»
+##### after-line-end inlays: 15
+  4:20  InlineCodeVisionInlayRenderer
+  7:8  InlineCodeVisionInlayRenderer
+  8:11  InlineCodeVisionInlayRenderer
+  12:11  InlineCodeVisionInlayRenderer
+  13:15  InlineCodeVisionInlayRenderer
+  14:4  InlineCodeVisionInlayRenderer
+  18:15  InlineCodeVisionInlayRenderer
+  19:15  InlineCodeVisionInlayRenderer
+  23:11  InlineCodeVisionInlayRenderer
+  24:8  InlineCodeVisionInlayRenderer
+  25:4  InlineCodeVisionInlayRenderer
+  28:13  InlineCodeVisionInlayRenderer
+  30:54  InlineCodeVisionInlayRenderer
+  32:32  InlineCodeVisionInlayRenderer
+  35:19  InlineCodeVisionInlayRenderer
+##### block inlays: 1
+  32:1  BlockCodeVisionInlayRenderer
+

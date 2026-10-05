@@ -1,0 +1,341 @@
+##### document markup: 252 highlighters
+  2:9-2:15  [GO_PACKAGE] layer 3000  «probe2»
+  5:2-5:6  [INFO_ATTRIBUTES] layer 3750  «"os"»  TIP: Imports are not sorted
+  6:2-6:10  [INFO_ATTRIBUTES] layer 3750  «"errors"»  TIP: Imports are not sorted
+  7:2-7:5  [GO_PACKAGE] layer 3000  «fmt»
+  7:2-7:5  [NOT_USED_ELEMENT_ATTRIBUTES] layer 3750  «fmt»  TIP: Redundant alias
+  7:2-7:11  [INFO_ATTRIBUTES] layer 3750  «fmt "fmt"»  TIP: Imports are not sorted
+  8:2-8:11  [INFO_ATTRIBUTES] layer 3750  «"strings"»  TIP: Imports are not sorted
+  9:2-9:8  [INFO_ATTRIBUTES] layer 3750  «"time"»  TIP: Imports are not sorted
+  12:1-12:24  [INFO_ATTRIBUTES] layer 3750  «//no leading space here»  TIP: Comment should have the following format 'Snake_case_var ...' (with an optional leading article)
+  13:5-13:19  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «Snake_case_var»
+  13:5-13:19  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Snake_case_var»  TIP: Unused variable 'Snake_case_var'
+  13:5-13:19  [INFO_ATTRIBUTES] layer 3750  «Snake_case_var»  TIP: Use camel case instead of snake case
+  15:1-15:54  [INFO_ATTRIBUTES] layer 3750  «// Wrong name in the comment of an exported functi»  TIP: Comment should have the following format 'Exported ...' (with an optional leading article)
+  16:6-16:14  [GO_EXPORTED_FUNCTION] layer 3000  «Exported»
+  16:6-16:14  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Exported»  TIP: Unused function 'Exported'
+  16:6-16:19  [STICKY_LINE_MARKER] layer 0  «Exported() {}»
+  18:6-18:24  [STICKY_LINE_MARKER] layer 0  «NoDocExported() {}»
+  18:6-18:19  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «NoDocExported»  TIP: Unused function 'NoDocExported'
+  18:6-18:19  [GO_EXPORTED_FUNCTION] layer 3000  «NoDocExported»
+  20:5-20:6  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «A»
+  20:5-20:6  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «A»  TIP: Unused variable 'A'
+  20:8-20:9  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «B»
+  20:8-20:9  [INFO_ATTRIBUTES] layer 3750  «B»  TIP: Exported variable 'B' should have its own declaration
+  20:8-20:9  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «B»  TIP: Unused variable 'B'
+  22:6-26:2  [STICKY_LINE_MARKER] layer 0  «Probe2Config struct {⏎	TimeoutMs time.Duration⏎	na»
+  22:6-22:18  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Probe2Config»
+  22:6-22:18  [INFO_ATTRIBUTES] layer 3750  «Probe2Config»  TIP: Name starts with the package name
+  23:2-23:11  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «TimeoutMs»
+  23:12-23:16  [GO_PACKAGE] layer 3000  «time»
+  23:17-23:25  [GO_TYPE_REFERENCE] layer 3000  «Duration»
+  24:2-24:6  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «name»
+  24:12-24:18  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  25:2-25:3  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «n»
+  25:12-25:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  28:7-28:11  [GO_METHOD_RECEIVER] layer 3000  «this»
+  28:7-28:11  [INFO_ATTRIBUTES] layer 3750  «this»  TIP: Receiver names are different
+  28:7-28:11  [INFO_ATTRIBUTES] layer 3750  «this»  TIP: Receiver has a generic name
+  28:13-28:25  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  28:27-28:34  [STICKY_LINE_MARKER] layer 0  «M1() {}»
+  28:27-28:29  [INFO_ATTRIBUTES] layer 3750  «M1»  TIP: Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.
+  28:27-28:29  [GO_EXPORTED_FUNCTION] layer 3000  «M1»
+  29:7-29:11  [GO_METHOD_RECEIVER] layer 3000  «self»
+  29:7-29:11  [INFO_ATTRIBUTES] layer 3750  «self»  TIP: Receiver names are different
+  29:7-29:11  [INFO_ATTRIBUTES] layer 3750  «self»  TIP: Receiver has a generic name
+  29:12-29:24  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  29:26-29:34  [STICKY_LINE_MARKER] layer 0  «M2()  {}»
+  29:26-29:28  [GO_EXPORTED_FUNCTION] layer 3000  «M2»
+  29:26-29:28  [INFO_ATTRIBUTES] layer 3750  «M2»  TIP: Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.
+  30:7-30:8  [GO_METHOD_RECEIVER] layer 3000  «_»
+  30:7-30:8  [INFO_ATTRIBUTES] layer 3750  «_»  TIP: Receiver names are different
+  30:9-30:21  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  30:23-30:34  [STICKY_LINE_MARKER] layer 0  «M3()     {}»
+  30:23-30:25  [GO_EXPORTED_FUNCTION] layer 3000  «M3»
+  30:23-30:25  [INFO_ATTRIBUTES] layer 3750  «M3»  TIP: Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.
+  31:7-31:8  [GO_METHOD_RECEIVER] layer 3000  «c»
+  31:7-31:8  [INFO_ATTRIBUTES] layer 3750  «c»  TIP: Receiver names are different
+  31:9-31:21  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  31:23-31:34  [STICKY_LINE_MARKER] layer 0  «M4()     {}»
+  31:23-31:25  [GO_EXPORTED_FUNCTION] layer 3000  «M4»
+  31:23-31:25  [INFO_ATTRIBUTES] layer 3750  «M4»  TIP: Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.
+  32:7-32:8  [GO_METHOD_RECEIVER] layer 3000  «x»
+  32:7-32:8  [INFO_ATTRIBUTES] layer 3750  «x»  TIP: Receiver names are different
+  32:9-32:21  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  32:23-32:34  [STICKY_LINE_MARKER] layer 0  «M5()     {}»
+  32:23-32:25  [GO_EXPORTED_FUNCTION] layer 3000  «M5»
+  32:23-32:25  [INFO_ATTRIBUTES] layer 3750  «M5»  TIP: Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.
+  34:7-34:8  [GO_METHOD_RECEIVER] layer 3000  «c»
+  34:7-34:8  [INFO_ATTRIBUTES] layer 3750  «c»  TIP: Receiver names are different
+  34:9-34:21  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  34:23-37:2  [STICKY_LINE_MARKER] layer 0  «SetName(v string) {⏎	c.name = v⏎	c = Probe2Config{»
+  34:23-34:30  [GO_EXPORTED_FUNCTION] layer 3000  «SetName»
+  34:23-34:30  [INFO_ATTRIBUTES] layer 3750  «SetName»  TIP: Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.
+  34:31-34:32  [GO_FUNCTION_PARAMETER] layer 3000  «v»
+  34:33-34:39  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  35:2-35:3  [GO_METHOD_RECEIVER] layer 3000  «c»
+  35:4-35:8  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «name»
+  35:11-35:12  [GO_FUNCTION_PARAMETER] layer 3000  «v»
+  36:2-36:3  [INFO_ATTRIBUTES] layer 3750  «c»  TIP: Assignment to the method receiver doesn't propagate to other calls
+  36:2-36:3  [GO_METHOD_RECEIVER] layer 3000  «c»
+  36:6-36:18  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  39:6-39:40  [STICKY_LINE_MARKER] layer 0  «Generic[t any](x t) t { return x }»
+  39:6-39:13  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Generic»  TIP: Unused function 'Generic'
+  39:6-39:13  [GO_EXPORTED_FUNCTION] layer 3000  «Generic»
+  39:16-39:19  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «any»
+  39:21-39:22  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  39:37-39:38  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  41:6-41:24  [STICKY_LINE_MARKER] layer 0  «Unused[T any]() {}»
+  41:6-41:12  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Unused»  TIP: Unused function 'Unused'
+  41:6-41:12  [GO_EXPORTED_FUNCTION] layer 3000  «Unused»
+  41:13-41:18  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «T any»  TIP: Unused type parameter 'T any'
+  41:15-41:18  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «any»
+  43:6-43:14  [INFO_ATTRIBUTES] layer 3750  «do_thing»  TIP: Use camel case instead of snake case
+  43:6-43:14  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «do_thing»  TIP: Unused function 'do_thing'
+  43:6-43:58  [STICKY_LINE_MARKER] layer 0  «do_thing(count_total int) int { return count_total»
+  43:6-43:14  [GO_LOCAL_FUNCTION] layer 3000  «do_thing»
+  43:15-43:26  [INFO_ATTRIBUTES] layer 3750  «count_total»  TIP: Use camel case instead of snake case
+  43:15-43:26  [GO_FUNCTION_PARAMETER] layer 3000  «count_total»
+  43:27-43:30  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  43:32-43:35  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  43:45-43:56  [GO_FUNCTION_PARAMETER] layer 3000  «count_total»
+  45:6-45:15  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «redundant»  TIP: Unused function 'redundant'
+  45:6-51:2  [STICKY_LINE_MARKER] layer 0  «redundant(x int) int {⏎	if (x > 0) {⏎		return (x)⏎»
+  45:6-45:15  [GO_LOCAL_FUNCTION] layer 3000  «redundant»
+  45:16-45:17  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  45:18-45:21  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  45:23-45:26  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  46:5-46:12  [INFO_ATTRIBUTES] layer 3750  «(x > 0)»  TIP: Redundant parentheses
+  46:6-46:7  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  47:10-47:13  [INFO_ATTRIBUTES] layer 3750  «(x)»  TIP: Redundant parentheses
+  47:11-47:12  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  48:4-48:8  [INFO_ATTRIBUTES] layer 3750  «else»  TIP: Redundant 'else' in 'if'
+  49:11-49:12  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  53:6-53:11  [GO_LOCAL_FUNCTION] layer 3000  «loops»
+  53:6-77:2  [STICKY_LINE_MARKER] layer 0  «loops() {⏎	for true {⏎		break⏎	}⏎	y := 1;⏎	_ = y⏎	»
+  53:6-53:11  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «loops»  TIP: Unused function 'loops'
+  54:6-54:10  [GO_BUILTIN_CONSTANT] layer 3000  «true»
+  54:6-54:10  [INFO_ATTRIBUTES] layer 3750  «true»  TIP: Condition is redundant
+  57:2-57:3  [GO_LOCAL_VARIABLE] layer 3000  «y»
+  57:8-57:9  [NOT_USED_ELEMENT_ATTRIBUTES] layer 3750  «;»  TIP: Redundant semicolon
+  58:6-58:7  [GO_LOCAL_VARIABLE] layer 3000  «y»
+  59:6-59:7  [GO_LOCAL_VARIABLE] layer 3000  «n»
+  59:8-59:11  [NOT_USED_ELEMENT_ATTRIBUTES] layer 3750  «int»  TIP: Type can be omitted
+  59:8-59:11  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  60:6-60:7  [GO_LOCAL_VARIABLE] layer 3000  «n»
+  61:2-61:3  [GO_LOCAL_VARIABLE] layer 3000  «s»
+  61:7-61:12  [INFO_ATTRIBUTES] layer 3750  «[]int»  TIP: Empty slice declaration using a literal
+  61:9-61:12  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  62:6-62:7  [GO_LOCAL_VARIABLE] layer 3000  «s»
+  63:2-63:3  [GO_LOCAL_VARIABLE] layer 3000  «t»
+  63:9-63:12  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  63:17-63:18  [NOT_USED_ELEMENT_ATTRIBUTES] layer 3750  «,»  TIP: Redundant comma
+  64:6-64:7  [GO_LOCAL_VARIABLE] layer 3000  «t»
+  65:2-65:5  [GO_PACKAGE] layer 3000  «fmt»
+  65:6-65:13  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Println»
+  65:6-65:13  [INFORMATION_ATTRIBUTES] layer 3000  «Println»  TIP: Unused result: 'fmt.Println(1, 2,)'
+  65:18-65:19  [NOT_USED_ELEMENT_ATTRIBUTES] layer 3750  «,»  TIP: Redundant comma
+  66:7-66:31  [STICKY_LINE_MARKER] layer 0  «point struct{ x, y int }»
+  66:7-66:12  [GO_PACKAGE_LOCAL_STRUCT] layer 3000  «point»
+  66:21-66:22  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «x»
+  66:24-66:25  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «y»
+  66:26-66:29  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  67:2-67:5  [GO_LOCAL_VARIABLE] layer 3000  «pts»
+  67:11-67:16  [GO_LOCAL_STRUCT_REFERENCE] layer 3000  «point»
+  67:17-67:22  [GO_LOCAL_STRUCT_REFERENCE] layer 3000  «point»
+  67:17-67:22  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «point»  TIP: Redundant type
+  67:17-67:28  [INFORMATION_ATTRIBUTES] layer 3000  «point{1, 2}»  TIP: Fields are assigned without explicit names
+  68:6-68:9  [GO_LOCAL_VARIABLE] layer 3000  «pts»
+  69:2-69:4  [GO_LOCAL_VARIABLE] layer 3000  «pc»
+  69:8-69:20  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  69:8-69:31  [INFORMATION_ATTRIBUTES] layer 3000  «Probe2Config{1, "a", 2}»  TIP: Fields are assigned without explicit names
+  70:6-70:8  [GO_LOCAL_VARIABLE] layer 3000  «pc»
+  71:2-71:9  [GO_LOCAL_VARIABLE] layer 3000  «strings»
+  71:2-71:9  [WARNING_ATTRIBUTES] layer 4000  «strings»  TIP: Variable 'strings' collides with imported package name STRIPE
+  72:6-72:13  [GO_LOCAL_VARIABLE] layer 3000  «strings»
+  73:2-73:5  [CONSIDERATION_ATTRIBUTES] layer 3750  «new»  TIP: Declaration of 'new' shadows declaration at builtin.go
+  73:2-73:5  [GO_SHADOWING_VARIABLE] layer 3000  «new»
+  73:2-73:5  [WARNING_ATTRIBUTES] layer 4000  «new»  TIP: Variable 'new' collides with the 'builtin' function STRIPE
+  74:6-74:9  [GO_SHADOWING_VARIABLE] layer 3000  «new»
+  75:6-75:17  [INFO_ATTRIBUTES] layer 3750  «waitSeconds»  TIP: Unit-specific suffix 'Seconds'
+  75:6-75:17  [GO_LOCAL_VARIABLE] layer 3000  «waitSeconds»
+  75:18-75:22  [GO_PACKAGE] layer 3000  «time»
+  75:23-75:31  [GO_TYPE_REFERENCE] layer 3000  «Duration»
+  76:6-76:17  [GO_LOCAL_VARIABLE] layer 3000  «waitSeconds»
+  79:1-79:7  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «var ()»  TIP: Empty declaration 'var ()'
+  81:1-81:9  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «const ()»  TIP: Empty declaration 'const ()'
+  83:6-83:10  [GO_LOCAL_FUNCTION] layer 3000  «errs»
+  83:6-89:2  [STICKY_LINE_MARKER] layer 0  «errs() error {⏎	err := errors.New("Capitalized err»
+  83:6-83:10  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «errs»  TIP: Unused function 'errs'
+  83:13-83:18  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  84:2-84:5  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  84:9-84:15  [GO_PACKAGE] layer 3000  «errors»
+  84:16-84:19  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «New»
+  84:20-84:40  [INFO_ATTRIBUTES] layer 3750  «"Capitalized error."»  TIP: Error string should not be capitalized or end with punctuation mark
+  85:5-85:6  [GO_SCOPE_VARIABLE] layer 3000  «e»
+  85:8-85:10  [GO_SCOPE_VARIABLE] layer 3000  «ok»
+  85:14-85:17  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  85:14-85:33  [INFO_ATTRIBUTES] layer 3750  «err.(*os.PathError)»  TIP: Type assertion on errors fails on wrapped errors
+  85:20-85:22  [GO_PACKAGE] layer 3000  «os»
+  85:23-85:32  [GO_TYPE_REFERENCE] layer 3000  «PathError»
+  85:35-85:37  [GO_SCOPE_VARIABLE] layer 3000  «ok»
+  86:10-86:11  [GO_SCOPE_VARIABLE] layer 3000  «e»
+  88:9-88:12  [GO_PACKAGE] layer 3000  «fmt»
+  88:13-88:19  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Errorf»
+  91:6-94:2  [STICKY_LINE_MARKER] layer 0  «deferGo() {⏎	defer recover()⏎	go panic("x")⏎}»
+  91:6-91:13  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «deferGo»  TIP: Unused function 'deferGo'
+  91:6-91:13  [GO_LOCAL_FUNCTION] layer 3000  «deferGo»
+  92:2-92:17  [INFO_ATTRIBUTES] layer 3750  «defer recover()»  TIP: defer should not call recover() directly
+  92:8-92:15  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «recover»
+  93:2-93:15  [INFO_ATTRIBUTES] layer 3750  «go panic("x")»  TIP: go should not call panic() directly
+  93:5-93:10  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «panic»
+  97:2-97:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «A0»
+  97:2-97:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «A0»  TIP: Unused constant 'A0'
+  97:7-97:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  98:2-98:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «A1»
+  98:2-98:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «A1»  TIP: Unused constant 'A1'
+  98:7-98:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  99:2-99:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «A2»  TIP: Unused constant 'A2'
+  99:2-99:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «A2»
+  99:2-99:4  [STICKY_LINE_MARKER] layer 0  «A2»
+  103:2-103:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «B0»
+  103:2-103:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «B0»  TIP: Unused constant 'B0'
+  103:12-103:16  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  104:2-104:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «B1»
+  104:2-104:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «B1»  TIP: Unused constant 'B1'
+  104:12-104:16  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  105:2-105:4  [STICKY_LINE_MARKER] layer 0  «B2»
+  105:2-105:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «B2»
+  105:2-105:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «B2»  TIP: Unused constant 'B2'
+  109:2-109:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «C0»
+  109:2-109:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «C0»  TIP: Unused constant 'C0'
+  109:7-109:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  110:2-110:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «C1»  TIP: Unused constant 'C1'
+  110:2-110:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «C1»
+  111:2-111:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «C2»
+  111:2-111:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «C2»  TIP: Unused constant 'C2'
+  111:7-111:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  115:2-115:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «D0»
+  115:2-115:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «D0»  TIP: Unused constant 'D0'
+  115:7-115:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  116:2-116:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «D1»  TIP: Unused constant 'D1'
+  116:2-116:4  [STICKY_LINE_MARKER] layer 0  «D1»
+  116:2-116:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «D1»
+  117:2-117:4  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «D2»
+  117:2-117:4  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «D2»  TIP: Unused constant 'D2'
+  117:7-117:11  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  120:6-133:2  [STICKY_LINE_MARKER] layer 0  «shadow(ch chan int) {⏎	x := 1⏎	if x > 0 {⏎		x := 2»
+  120:6-120:12  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «shadow»  TIP: Unused function 'shadow'
+  120:6-120:12  [GO_LOCAL_FUNCTION] layer 3000  «shadow»
+  120:13-120:15  [GO_FUNCTION_PARAMETER] layer 3000  «ch»
+  120:21-120:24  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  121:2-121:3  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  122:5-122:10  [WARNING_ATTRIBUTES] layer 4000  «x > 0»  TIP: Condition 'x > 0' is always 'true' STRIPE
+  122:5-122:6  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  123:3-123:4  [GO_SHADOWING_VARIABLE] layer 3000  «x»
+  123:3-123:4  [CONSIDERATION_ATTRIBUTES] layer 3750  «x»  TIP: Declaration of 'x' shadows declaration at style.go
+  124:7-124:8  [GO_SHADOWING_VARIABLE] layer 3000  «x»
+  126:6-126:7  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  128:7-128:8  [GO_LOCAL_VARIABLE] layer 3000  «n»
+  128:14-128:16  [GO_FUNCTION_PARAMETER] layer 3000  «ch»
+  129:7-129:8  [GO_LOCAL_VARIABLE] layer 3000  «n»
+  132:6-132:13  [GO_PACKAGE] layer 3000  «strings»
+  132:14-132:21  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «ToUpper»
+  135:1-135:93  [INFO_ATTRIBUTES] layer 3750  «// Probe2Config is used by Exported with [Generic]»  TIP: Comment should have the following format 'Doc ...' (with an optional leading article)
+  135:4-135:16  [GO_COMMENT_REFERENCE] layer 3000  «Probe2Config»
+  135:28-135:36  [GO_COMMENT_REFERENCE] layer 3000  «Exported»
+  135:43-135:50  [GO_COMMENT_REFERENCE] layer 3000  «Generic»
+  135:56-135:60  [GO_COMMENT_REFERENCE] layer 3000  «time»
+  135:61-135:69  [GO_COMMENT_REFERENCE] layer 3000  «Duration»
+  135:80-135:82  [GO_COMMENT_REFERENCE] layer 3000  «os»
+  135:83-135:92  [GO_COMMENT_REFERENCE] layer 3000  «PathError»
+  136:6-136:9  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Doc»
+  136:6-136:18  [STICKY_LINE_MARKER] layer 0  «Doc struct{}»
+##### editor markup: 6 highlighters
+##### keys: count
+  CONSIDERATION_ATTRIBUTES: 2
+  GO_BUILTIN_CONSTANT: 9
+  GO_BUILTIN_FUNCTION_CALL: 2
+  GO_BUILTIN_TYPE_REFERENCE: 15
+  GO_COMMENT_REFERENCE: 7
+  GO_EXPORTED_FUNCTION: 10
+  GO_EXPORTED_FUNCTION_CALL: 4
+  GO_EXPORTED_STRUCT_REFERENCE: 8
+  GO_FUNCTION_PARAMETER: 12
+  GO_LOCAL_FUNCTION: 6
+  GO_LOCAL_STRUCT_REFERENCE: 2
+  GO_LOCAL_VARIABLE: 23
+  GO_METHOD_RECEIVER: 8
+  GO_PACKAGE: 9
+  GO_PACKAGE_EXPORTED_CONSTANT: 12
+  GO_PACKAGE_EXPORTED_STRUCT: 2
+  GO_PACKAGE_EXPORTED_VARIABLE: 3
+  GO_PACKAGE_LOCAL_STRUCT: 1
+  GO_SCOPE_VARIABLE: 4
+  GO_SHADOWING_VARIABLE: 4
+  GO_STRUCT_EXPORTED_MEMBER: 1
+  GO_STRUCT_LOCAL_MEMBER: 5
+  GO_TYPE_REFERENCE: 3
+  INFORMATION_ATTRIBUTES: 3
+  INFO_ATTRIBUTES: 38
+  NOT_USED_ELEMENT_ATTRIBUTES: 34
+  STICKY_LINE_MARKER: 22
+  WARNING_ATTRIBUTES: 3
+##### inline inlays: 21
+  65:14  ParameterHintsPresentationManager$MyRenderer «a...:»
+  67:23  ParameterHintsPresentationManager$MyRenderer «x:»
+  67:26  ParameterHintsPresentationManager$MyRenderer «y:»
+  69:21  ParameterHintsPresentationManager$MyRenderer «TimeoutMs:»
+  69:24  ParameterHintsPresentationManager$MyRenderer «name:»
+  69:29  ParameterHintsPresentationManager$MyRenderer «n:»
+  84:20  ParameterHintsPresentationManager$MyRenderer «text:»
+  88:20  ParameterHintsPresentationManager$MyRenderer «format:»
+  93:11  ParameterHintsPresentationManager$MyRenderer «v:»
+  97:4  InlineInlayRenderer «= 0»
+  98:4  InlineInlayRenderer «= 1»
+  99:4  InlineInlayRenderer «= 2»
+  103:4  InlineInlayRenderer «= 1»
+  104:4  InlineInlayRenderer «= 2»
+  105:4  InlineInlayRenderer «= 4»
+  109:4  InlineInlayRenderer «= 0»
+  111:4  InlineInlayRenderer «= 2»
+  115:4  InlineInlayRenderer «= 0»
+  116:4  InlineInlayRenderer «= 2»
+  117:4  InlineInlayRenderer «= 4»
+  132:22  ParameterHintsPresentationManager$MyRenderer «s:»
+##### after-line-end inlays: 31
+  13:23  InlineCodeVisionInlayRenderer
+  16:19  InlineCodeVisionInlayRenderer
+  18:24  InlineCodeVisionInlayRenderer
+  22:27  InlineCodeVisionInlayRenderer
+  28:34  InlineCodeVisionInlayRenderer
+  29:34  InlineCodeVisionInlayRenderer
+  30:34  InlineCodeVisionInlayRenderer
+  31:34  InlineCodeVisionInlayRenderer
+  32:34  InlineCodeVisionInlayRenderer
+  34:42  InlineCodeVisionInlayRenderer
+  39:40  InlineCodeVisionInlayRenderer
+  41:24  InlineCodeVisionInlayRenderer
+  43:58  InlineCodeVisionInlayRenderer
+  45:28  InlineCodeVisionInlayRenderer
+  53:15  InlineCodeVisionInlayRenderer
+  83:20  InlineCodeVisionInlayRenderer
+  91:17  InlineCodeVisionInlayRenderer
+  97:11  InlineCodeVisionInlayRenderer
+  98:11  InlineCodeVisionInlayRenderer
+  99:4  InlineCodeVisionInlayRenderer
+  103:16  InlineCodeVisionInlayRenderer
+  104:16  InlineCodeVisionInlayRenderer
+  105:4  InlineCodeVisionInlayRenderer
+  109:11  InlineCodeVisionInlayRenderer
+  110:9  InlineCodeVisionInlayRenderer
+  111:11  InlineCodeVisionInlayRenderer
+  115:15  InlineCodeVisionInlayRenderer
+  116:4  InlineCodeVisionInlayRenderer
+  117:15  InlineCodeVisionInlayRenderer
+  120:27  InlineCodeVisionInlayRenderer
+  136:18  InlineCodeVisionInlayRenderer
+##### block inlays: 2
+  22:1  BlockCodeVisionInlayRenderer
+  136:1  BlockCodeVisionInlayRenderer
+

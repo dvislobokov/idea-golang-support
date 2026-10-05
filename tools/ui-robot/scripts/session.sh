@@ -4,11 +4,18 @@ export PYTHONIOENCODING=utf-8
 ROBOT="python tools/ui-robot/robot.py"
 ROBOT_SCRIPTS="tools/ui-robot/scripts"
 ROBOT_TMP="${TEMP:-/tmp}/ui-robot.js"
+# ROBOT_WSL=1: the sandbox of tools/ui-robot/wsl (its robot is reached only by the Python of WSL; the script file must be readable there)
+if [ "${ROBOT_WSL:-}" = "1" ]; then
+    ROBOT="wsl -d Ubuntu -- bash tools/ui-robot/wsl/robot.sh"
+    mkdir -p build/ui-robot
+    ROBOT_TMP="build/ui-robot/robot.js"
+    PLAYGROUND="/home/$USER/robot/go-playground"
+fi
 
 # curl to the robot must not go through the proxy of the shell either (robot.py ignores it by itself)
 export NO_PROXY="127.0.0.1,localhost" no_proxy="127.0.0.1,localhost"
 # The playground copy the sandbox works on (see CLAUDE.md), as the scripts want it: forward slashes
-PLAYGROUND="$(pwd -W 2>/dev/null || pwd)/build/ui-robot/playground"
+[ "${ROBOT_WSL:-}" = "1" ] || PLAYGROUND="$(pwd -W 2>/dev/null || pwd)/build/ui-robot/playground"
 
 # robot_js FILE [sed-expression ...]: run a script with its __PLACEHOLDERS__ filled in, print what it returns.
 # prelude.js goes first: `cls("io.github...")` and `kotlinObject(...)` load the classes of the plugin, which Rhino cannot see as `io.github...`.

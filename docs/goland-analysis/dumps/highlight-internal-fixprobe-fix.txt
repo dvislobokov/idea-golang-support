@@ -1,0 +1,103 @@
+##### document markup: 76 highlighters
+  1:12-1:20  [TYPO] layer 3000  «fixprobe»  TIP: Typo: In word 'fixprobe'
+  2:9-2:17  [GO_PACKAGE] layer 3000  «fixprobe»
+  10:6-10:9  [GO_EXPORTED_FUNCTION] layer 3000  «Old»
+  10:6-10:9  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Old»  TIP: Unused function 'Old'
+  10:6-29:2  [STICKY_LINE_MARKER] layer 0  «Old(s []int, a, b int, name string) int {⏎	var x i»
+  10:10-10:11  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+  10:14-10:17  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  10:19-10:20  [GO_FUNCTION_PARAMETER] layer 3000  «a»
+  10:22-10:23  [GO_FUNCTION_PARAMETER] layer 3000  «b»
+  10:24-10:27  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  10:29-10:33  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  10:34-10:40  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  10:42-10:45  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  11:6-11:7  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  11:8-11:19  [GO_SYNTAX_UPDATE] layer 3000  «interface{}»  TIP: interface{} can be replaced by any
+  12:6-12:7  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  13:6-13:29  [GO_SYNTAX_UPDATE] layer 3000  «i := 0; i < len(s); i++»  TIP: for loop can be modernized using range over int
+  13:6-13:7  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  13:14-13:15  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  13:18-13:21  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «len»
+  13:22-13:23  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+  13:26-13:27  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  14:3-14:6  [GO_PACKAGE] layer 3000  «fmt»
+  14:7-14:14  [INFORMATION_ATTRIBUTES] layer 3000  «Println»  TIP: Unused result: 'fmt.Println(s[i])'
+  14:7-14:14  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Println»
+  14:15-14:16  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+  14:17-14:18  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  16:6-16:7  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  16:6-16:25  [GO_SYNTAX_UPDATE] layer 3000  «i := 0; i < 10; i++»  TIP: for loop can be modernized using range over int
+  16:14-16:15  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  16:22-16:23  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  17:3-17:6  [GO_PACKAGE] layer 3000  «fmt»
+  17:7-17:14  [INFORMATION_ATTRIBUTES] layer 3000  «Println»  TIP: Unused result: 'fmt.Println(i)'
+  17:7-17:14  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Println»
+  17:15-17:16  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  19:2-19:3  [GO_LOCAL_VARIABLE] layer 3000  «m»
+  19:7-19:8  [GO_FUNCTION_PARAMETER] layer 3000  «a»
+  20:5-20:6  [GO_FUNCTION_PARAMETER] layer 3000  «b»
+  20:5-20:10  [GO_SYNTAX_UPDATE] layer 3000  «b < m»  TIP: if statement can be modernized using min
+  20:9-20:10  [GO_LOCAL_VARIABLE] layer 3000  «m»
+  21:3-21:4  [GO_LOCAL_VARIABLE] layer 3000  «m»
+  21:7-21:8  [GO_FUNCTION_PARAMETER] layer 3000  «b»
+  23:2-23:6  [GO_PACKAGE] layer 3000  «sort»
+  23:2-23:12  [GO_SYNTAX_UPDATE] layer 3000  «sort.Slice»  TIP: sort.Slice can be modernized using slices.Sort
+  23:7-23:12  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Slice»
+  23:13-23:14  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+  23:21-23:22  [GO_FUNCTION_PARAMETER] layer 3000  «i»
+  23:24-23:25  [GO_FUNCTION_PARAMETER] layer 3000  «j»
+  23:26-23:29  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  23:31-23:35  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «bool»
+  23:45-23:46  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+  23:47-23:48  [GO_FUNCTION_PARAMETER] layer 3000  «i»
+  23:52-23:53  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+  23:54-23:55  [GO_FUNCTION_PARAMETER] layer 3000  «j»
+  24:5-24:12  [GO_PACKAGE] layer 3000  «strings»
+  24:5-24:34  [GO_SYNTAX_UPDATE] layer 3000  «strings.HasPrefix(name, "go")»  TIP: HasPrefix + TrimPrefix can be simplified to CutPrefix
+  24:13-24:22  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «HasPrefix»
+  24:23-24:27  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  25:3-25:7  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  25:10-25:17  [GO_PACKAGE] layer 3000  «strings»
+  25:18-25:28  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «TrimPrefix»
+  25:29-25:33  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  27:6-27:10  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  28:9-28:10  [GO_LOCAL_VARIABLE] layer 3000  «m»
+  31:6-33:2  [STICKY_LINE_MARKER] layer 0  «Sprintf(n int) string {⏎	return fmt.Sprintf("%d %s»
+  31:6-31:13  [GO_EXPORTED_FUNCTION] layer 3000  «Sprintf»
+  31:6-31:13  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Sprintf»  TIP: Unused function 'Sprintf'
+  31:14-31:15  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  31:16-31:19  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  31:21-31:27  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  32:9-32:12  [GO_PACKAGE] layer 3000  «fmt»
+  32:13-32:20  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Sprintf»
+  32:22-32:24  [GO_VALID_STRING_ESCAPE] layer 3000  «%d»
+  32:25-32:27  [GO_VALID_STRING_ESCAPE] layer 3000  «%s»
+  32:25-32:27  [INFO_ATTRIBUTES] layer 3750  «%s»  TIP: No argument for verb: argument index = 2, arguments count = 1 (%s)
+  32:30-32:31  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+##### editor markup: 4 highlighters
+##### keys: count
+  GO_BUILTIN_FUNCTION_CALL: 1
+  GO_BUILTIN_TYPE_REFERENCE: 8
+  GO_EXPORTED_FUNCTION: 2
+  GO_EXPORTED_FUNCTION_CALL: 6
+  GO_FUNCTION_PARAMETER: 22
+  GO_LOCAL_VARIABLE: 6
+  GO_PACKAGE: 7
+  GO_SCOPE_VARIABLE: 8
+  GO_SYNTAX_UPDATE: 6
+  GO_VALID_STRING_ESCAPE: 2
+  INFORMATION_ATTRIBUTES: 2
+  INFO_ATTRIBUTES: 1
+  NOT_USED_ELEMENT_ATTRIBUTES: 2
+  STICKY_LINE_MARKER: 2
+  TYPO: 1
+##### inline inlays: 3
+  24:29  ParameterHintsPresentationManager$MyRenderer «prefix:»
+  25:35  ParameterHintsPresentationManager$MyRenderer «prefix:»
+  32:21  ParameterHintsPresentationManager$MyRenderer «format:»
+##### after-line-end inlays: 2
+  10:47  InlineCodeVisionInlayRenderer
+  31:29  InlineCodeVisionInlayRenderer
+##### block inlays: 0
+

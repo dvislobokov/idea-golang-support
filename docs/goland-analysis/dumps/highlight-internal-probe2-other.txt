@@ -1,0 +1,89 @@
+##### document markup: 53 highlighters
+  1:9-1:15  [GO_PACKAGE] layer 3000  «probe2»
+  3:1-3:91  [INFO_ATTRIBUTES] layer 3750  «// Receiver name differs from the receivers in sty»  TIP: Comment should have the following format 'M6 ...' (with an optional leading article)
+  4:7-4:8  [GO_METHOD_RECEIVER] layer 3000  «y»
+  4:7-4:8  [INFO_ATTRIBUTES] layer 3750  «y»  TIP: Receiver names are different
+  4:9-4:21  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Probe2Config»
+  4:23-4:25  [GO_EXPORTED_FUNCTION] layer 3000  «M6»
+  4:23-4:25  [INFO_ATTRIBUTES] layer 3750  «M6»  TIP: Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.
+  4:23-4:30  [STICKY_LINE_MARKER] layer 0  «M6() {}»
+  6:6-9:2  [STICKY_LINE_MARKER] layer 0  «format(n int, s string) string {⏎	_ = n⏎	return fm»
+  6:6-6:12  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «format»  TIP: Unused function 'format'
+  6:6-6:12  [GO_LOCAL_FUNCTION] layer 3000  «format»
+  6:13-6:14  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  6:15-6:18  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  6:20-6:21  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+  6:20-6:28  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «s string»  TIP: Unused parameter 's string'
+  6:22-6:28  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  6:30-6:36  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  7:6-7:7  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  8:9-8:20  [GO_LOCAL_FUNCTION_CALL] layer 3000  «fmt_sprintf»
+  8:22-8:24  [GO_VALID_STRING_ESCAPE] layer 3000  «%d»
+  8:25-8:27  [INFO_ATTRIBUTES] layer 3750  «%s»  TIP: No argument for verb: argument index = 2, arguments count = 1 (%s)
+  8:25-8:27  [GO_VALID_STRING_ESCAPE] layer 3000  «%s»
+  11:6-11:57  [STICKY_LINE_MARKER] layer 0  «fmt_sprintf(f string, a ...any) string { return f »
+  11:6-11:17  [GO_LOCAL_FUNCTION] layer 3000  «fmt_sprintf»
+  11:6-11:17  [INFO_ATTRIBUTES] layer 3750  «fmt_sprintf»  TIP: Use camel case instead of snake case
+  11:18-11:19  [GO_FUNCTION_PARAMETER] layer 3000  «f»
+  11:20-11:26  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  11:28-11:29  [GO_FUNCTION_PARAMETER] layer 3000  «a»
+  11:28-11:36  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «a ...any»  TIP: Unused parameter 'a ...any'
+  11:33-11:36  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «any»
+  11:38-11:44  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  11:54-11:55  [GO_FUNCTION_PARAMETER] layer 3000  «f»
+  13:1-13:22  [] layer 3000  «//go:generate echo hi» GUTTER[GoRunGenerateLineMarkerProvider$1$1: Run go generate on comment]
+  13:3-13:14  [GO_COMMENT_KEYWORD] layer 3000  «go:generate»
+  13:15-13:22  [go:INJECTED_LANGUAGE_FRAGMENT] layer 1999  «echo hi»
+  13:15-13:19  [INFORMATION_ATTRIBUTES] layer 3000  «echo»
+  13:15-13:19  [INFORMATION_ATTRIBUTES] layer 1998  «echo»
+  13:15-13:19  [BASH.EXTERNAL_COMMAND] layer 3000  «echo»
+  13:19-13:20  [INFORMATION_ATTRIBUTES] layer 1998  « »
+  13:20-13:22  [INFORMATION_ATTRIBUTES] layer 3000  «hi»
+  13:20-13:22  [INFORMATION_ATTRIBUTES] layer 1998  «hi»
+  15:6-18:2  [STICKY_LINE_MARKER] layer 0  «Tagged struct {⏎	Name  string `json:"Name"`⏎	Value»
+  15:6-15:12  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Tagged»
+  16:2-16:6  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Name»
+  16:8-16:14  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  16:16-16:20  [GO_TAG_KEY] layer 1999  «json»
+  16:20-16:21  [GO_TAG_COLON] layer 1999  «:»
+  16:21-16:27  [GO_TAG_VALUE] layer 1999  «"Name"»
+  17:2-17:7  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Value»
+  17:8-17:11  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  17:16-17:20  [GO_TAG_KEY] layer 1999  «json»
+  17:20-17:21  [GO_TAG_COLON] layer 1999  «:»
+  17:21-17:28  [GO_TAG_VALUE] layer 1999  «"value"»
+##### editor markup: 0 highlighters
+##### keys: count
+  : 1
+  BASH.EXTERNAL_COMMAND: 1
+  GO_BUILTIN_TYPE_REFERENCE: 8
+  GO_COMMENT_KEYWORD: 1
+  GO_EXPORTED_FUNCTION: 1
+  GO_EXPORTED_STRUCT_REFERENCE: 1
+  GO_FUNCTION_PARAMETER: 6
+  GO_LOCAL_FUNCTION: 2
+  GO_LOCAL_FUNCTION_CALL: 1
+  GO_METHOD_RECEIVER: 1
+  GO_PACKAGE: 1
+  GO_PACKAGE_EXPORTED_STRUCT: 1
+  GO_STRUCT_EXPORTED_MEMBER: 2
+  GO_TAG_COLON: 2
+  GO_TAG_KEY: 2
+  GO_TAG_VALUE: 2
+  GO_VALID_STRING_ESCAPE: 2
+  INFORMATION_ATTRIBUTES: 5
+  INFO_ATTRIBUTES: 5
+  NOT_USED_ELEMENT_ATTRIBUTES: 3
+  STICKY_LINE_MARKER: 4
+  go:INJECTED_LANGUAGE_FRAGMENT: 1
+##### inline inlays: 2
+  8:21  ParameterHintsPresentationManager$MyRenderer «f:»
+  8:30  ParameterHintsPresentationManager$MyRenderer «a...:»
+##### after-line-end inlays: 4
+  4:30  InlineCodeVisionInlayRenderer
+  6:38  InlineCodeVisionInlayRenderer
+  11:57  InlineCodeVisionInlayRenderer
+  15:21  InlineCodeVisionInlayRenderer
+##### block inlays: 1
+  15:1  BlockCodeVisionInlayRenderer
+
