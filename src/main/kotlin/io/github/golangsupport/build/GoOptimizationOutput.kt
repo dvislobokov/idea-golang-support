@@ -42,6 +42,13 @@ object GoOptimizationOutput {
         else -> null
     }
 
+    /** The compiler's own complaints in a failed run (`x.go:6:2: "net/url" imported and not used`, `too many errors`): everything that is
+     *  neither a decision nor its indented reason, so a notification shows what broke the build, not the thousands of `-m` lines (seen live). */
+    fun errors(output: String): List<String> = output.lineSequence().map { it.trimEnd('\r') }.filter { line ->
+        val match = POSITION.matchEntire(line)
+        if (match == null) line.startsWith("too many errors") else match.groupValues[4].let { !it.startsWith(" ") && !it.startsWith("\t") && kindOf(it) == null }
+    }.distinct().toList()
+
     /** `can inline f with cost 4 as: func() { ... }`: the body the compiler repeats is left out. */
     fun shorten(message: String): String = message.substringBefore(" as: ").trimEnd(':', ' ')
 

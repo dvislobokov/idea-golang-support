@@ -99,7 +99,12 @@ class GoOptimizationService(private val project: Project) : Disposable {
         val commands = GoCli.commandLinesOrNotify(project, TITLE) { directories.map { GoCli.commandLine(it.path, *arguments.toTypedArray()) } } ?: return
         running = true
         changed()
-        GoCli.runInBackground(project, TITLE, commands, output = Collector())
+        GoCli.runInBackground(project, TITLE, commands, output = Collector(), onFailure = { result ->
+            // `go build` exits with 1 when a package does not compile: the decisions of the others are still shown, the notification names the errors
+            val errors = GoOptimizationOutput.errors(result.stderr.ifBlank { result.stdout })
+            if (errors.isNotEmpty()) GoCli.notifyError(project, "$TITLE: build failed", errors.take(15).joinToString("\n"))
+            true
+        })
     }
 
     /** Collects the diagnostics per command: their paths are relative to the directory of the command. */

@@ -11,6 +11,7 @@ import com.intellij.slicer.SliceUsage
 import com.intellij.slicer.SliceUsageCellRendererBase
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.Processor
+import io.github.golangsupport.lang.psi.GoReferenceExpression
 
 /** Analyze | Data Flow to Here / from Here for Go (`lang.sliceProvider`): one level of [GoSliceFlow] per node of the tree. */
 class GoSliceProvider : SliceLanguageSupportProvider {
@@ -18,7 +19,8 @@ class GoSliceProvider : SliceLanguageSupportProvider {
 
     override fun getExpressionAtCaret(atCaret: PsiElement, dataFlowToThis: Boolean): PsiElement? = GoSliceFlow.target(atCaret)
 
-    override fun getElementForDescription(element: PsiElement): PsiElement = element
+    /** The dialog title names the variable ("Analyze Dataflow to variable b"), not the reference expression class (seen live). */
+    override fun getElementForDescription(element: PsiElement): PsiElement = (element as? GoReferenceExpression)?.let { GoSliceFlow.variableOf(it) } ?: element
 
     override fun getRenderer(): SliceUsageCellRendererBase = GoSliceRenderer()
 

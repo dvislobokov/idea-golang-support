@@ -72,7 +72,8 @@ object GoSliceFlow {
     }
 
     /** The variable or parameter [ref] names, when it is a plain identifier. */
-    private fun variableOf(ref: GoReferenceExpression): io.github.golangsupport.lang.psi.GoNamedElement? {
+    /** The local variable or parameter a bare [ref] reads or writes, or null for fields, globals and selectors. */
+    fun variableOf(ref: GoReferenceExpression): io.github.golangsupport.lang.psi.GoNamedElement? {
         if (ref.expression != null) return null
         val target = ref.reference?.resolve()
         return (target as? GoVarDefinition) ?: (target as? GoParamDefinition)

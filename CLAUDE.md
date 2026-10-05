@@ -85,7 +85,11 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
   Скрипт `highlights.js` не видит подсветок аннотаторов в новом UI — смотреть снимок редактора. Работать на копии: `build/ui-robot/playground` (без `.idea`). Плагин в песочнице обновляется
   только перезапуском задачи; перед перезапуском закрыть IDE (`robot.py action Exit`, затем клик по `Exit` в диалоге). После проверки песочницу закрыть:
   порт даёт выполнять код внутри IDE. Логи песочницы — `.intellijPlatform/sandbox/idea-golang-support/IU-*/log_runIdeForUiTests/idea.log`; журнал плагина и логи delve — `~/idea-golang-logs` (общая папка с установленной IDE).
-  Чего так не видно (подсказки по наведению, ощущение скорости), просить пользователя посмотреть вживую и прямо говорить, что не проверено.
+  Рабочий стол Windows — `tools/ui-robot/desktop.ps1` (`shot`, `window`, `click`, `drag`, `key`, `type`, `hover`, `pos`): настоящие мышь и клавиатура и снимок того,
+  что видит пользователь (модальные диалоги, набор как у человека) — только когда пользователь сказал, что не трогает мышь и клавиатуру. Наведение так не
+  срабатывает (RDP: ни тултипов, ни quick doc) — наводить AWT-роботом внутри IDE (`hover.js`). Файл, открытый в редакторе с правками, с диска не перечитывается
+  (File Cache Conflict) — сначала `FileDocumentManager.reloadFromDisk` из JS.
+  Чего так не видно (ощущение скорости), просить пользователя посмотреть вживую и прямо говорить, что не проверено.
 - **Песочница в WSL (`tools/ui-robot/wsl/`, по образцу dotnet-плагина)**: та же IDEA для Linux (`~/ide/idea-IU-261.26222.65` в Ubuntu) на невидимом экране Xvfb :98
   с робот-сервером на 8597 — там можно настоящую мышь (наведение → документация), набор с клавиатуры, видео, не мешая человеку. Go в WSL — `~/sdk/go` (1.27.1, без sudo).
   `export MSYS_NO_PATHCONV=1 ROBOT_WSL=1`; `wsl -d Ubuntu -- bash tools/ui-robot/wsl/start-ide.sh build/distributions/idea-golang-support-<версия>.zip` (робот-сервер берётся

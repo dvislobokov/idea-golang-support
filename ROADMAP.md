@@ -186,6 +186,14 @@
   песочнице тот же пункт и значок (`HighlightInfoType.Iconable`); Update key value на совпадающем теге у GoLand доступен и ничего не меняет (как у нас); Add key to tags у
   GoLand без выбора вписывает `:"snake_case"` во все поля с шаблоном для ключа — у нас оставлен список ключей (сознательно). Доснято 0.2.179 (`probe2/sw.go`): исправления GoLand — «Create missing iota clauses» (по `case` на константу перед `}`) и «Create 'default' clause» с
   `panic("unhandled default case")`; битовые флаги `1 << iota` GoLand тоже отмечает — сделано так же.
+- [x] (2026-10-05, 0.2.180) Живая проверка G6–G9 на песочнике (`desktop.ps1` + робот, `build/recon/*.png`): Introduce Parameter (in-place, имена `n`/`v`; на
+  выражении с получателем — «Expression depends on local variables»), Introduce Field (попап Initialize in current method / Leave to the caller), Introduce Parameter
+  Object (`DescribeParams`, вызовы переписаны), Introduce Type (in-place, `Cfg`/`HostPort`/`Config`/`T`; на именованном типе — отказ «caret should be on a type
+  literal»), Invert Boolean (`IsNotReady`, `n <= 0`, `!IsNotReady(3)`), Copy Declaration (`DerivedCopy`, повтор — «already declared»), Override Methods (дерево
+  методов `Base`), Generate | Copyright (без профиля — платформенное «No Copyright Available»), вставка JSON (диалог Convert / Paste as Is на верхнем уровне,
+  внутри функции — как есть), Reformat on `}` и doc-комментарий по Enter (`// pasteHere`), quick doc по наведению (AWT-робот), Go Optimization (дерево по
+  файлам), Code Cleanup и Locate Duplicates (диалоги области), Share in Playground (диалог подтверждения), Attach Go Module (выбор файла), Sync Go Module (тихо),
+  страница Debugger. `Plugin to blame: Go` = 0. Исправлено по итогам: заголовок диалога Data Flow и уведомление Go Optimization при ошибке сборки.
 - [x] (2026-10-05, 0.2.177) G10 проверен вживую на песочнике теми же пробами (`infos.js`, `highlights.js`, попапы): `style.go`, `other.go`, `iota3.go`, цвета строк
   120–136 и списки Alt+Enter (`Sprintf`, `//go:generate`, теги) совпали с GoLand построчно; `Plugin to blame: Go` за прогон — 0. Найдено и исправлено: CutPrefix на
   `name = strings.TrimPrefix(name, "go")`. Осталось расхождений: `for true` — текст S1006 вместо `Condition is redundant`; `GoShadowedVar` у GoLand TEXT ATTRIBUTES(11)

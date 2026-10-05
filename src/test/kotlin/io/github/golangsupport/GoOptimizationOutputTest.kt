@@ -68,4 +68,26 @@ class GoOptimizationOutputTest {
         assertEquals(listOf("build", "-tags=a", "-gcflags=-m=2", "./..."), GoOptimizationOutput.arguments(listOf("-tags=a"), boundsChecks = false))
         assertEquals(listOf("build", "-gcflags=-m=2 -d=ssa/check_bce/debug=1", "./..."), GoOptimizationOutput.arguments(emptyList(), boundsChecks = true))
     }
+
+    @Test
+    fun errorsAreTheLinesThatAreNotDecisions() {
+        val output = """
+            # example.com/playground/internal/money
+            internal\money\money.go:6:2: "net/url" imported and not used
+            internal\money\money.go:31:2: declared and not used: tables
+            cmd\shop\main.go:20:14: ... argument does not escape
+            cmd\shop\main.go:20:15: "arguments:" escapes to heap
+            cmd\shop\main.go:5:6: can inline run with cost 3 as: func() { x := 1 }
+            cmd\shop\main.go:5:6:   flow: ~r0 = &x:
+            too many errors
+        """.trimIndent()
+        assertEquals(
+            listOf(
+                """internal\money\money.go:6:2: "net/url" imported and not used""",
+                """internal\money\money.go:31:2: declared and not used: tables""",
+                "too many errors",
+            ),
+            GoOptimizationOutput.errors(output),
+        )
+    }
 }

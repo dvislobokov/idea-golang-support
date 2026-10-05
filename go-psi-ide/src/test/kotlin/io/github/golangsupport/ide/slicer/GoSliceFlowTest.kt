@@ -53,6 +53,13 @@ class GoSliceFlowTest : GoSemanticIdeTestBase() {
 
     private fun texts(steps: List<GoSliceStep>): List<String> = steps.map { it.element.text }
 
+    fun testTheDescribedElementOfAReferenceIsItsVariable() {
+        val read = at<GoReferenceExpression>("consume(b)", shift = 8)
+        val described = GoSliceProvider().getElementForDescription(read)
+        assertTrue(described is GoVarDefinition)
+        assertEquals("b", (described as GoVarDefinition).name)
+    }
+
     fun testAReadIsFedByTheWritesThatReachIt() {
         val read = at<GoReferenceExpression>("consume(b)", shift = 8)
         assertEquals(listOf("1", "a"), texts(GoSliceFlow.sources(read, scope)).sorted())

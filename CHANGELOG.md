@@ -30,6 +30,15 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.180] - 2026-10-05
+
+### Changed — after a live pass over G6–G9 on the sandbox
+- Analyze Data Flow to / from Here: the dialog is titled by the variable ("Analyze Dataflow to variable b"), not by the PSI class of the reference.
+- Go Optimization: when `go build -gcflags=-m` fails for a package, the notification lists the compiler errors only (the decisions of the other
+  packages are still shown); before, it dumped the first `-m` lines as the error text.
+- `tools/ui-robot/desktop.ps1`: real mouse, keyboard and screenshots of the Windows desktop for live checks (dialogs, typing, screenshots);
+  hovers must still go through the IDE's AWT robot (`hover.js`) — injected moves do not open tooltips in an RDP session.
+
 ## [0.2.179] - 2026-10-05
 
 ### Changed — iota switch fixes as seen live on GoLand
