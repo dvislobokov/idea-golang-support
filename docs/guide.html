@@ -269,6 +269,7 @@ footer a { color: var(--text-2); }
         <tr><td>Вычислить выражение</td><td><kbd data-action="EvaluateExpression">Alt+F8</kbd></td><td>Можно вызывать функции и методы: <code>order.Total()</code>.</td></tr>
       </tbody>
     </table></div>
+
   </div>
 </section>
 
@@ -630,6 +631,16 @@ n := <span class="fn">next</span>()
         <tr><td>GOOS/GOARCH в статус-баре <span class="new">новое</span></td><td>Под какую платформу и с какими тегами сборки плагин разбирает код: <code>windows/amd64</code>, <code>linux/amd64 · tags</code>. Клик: частые пары (linux/amd64, linux/arm64, darwin/arm64, windows/amd64, js/wasm, wasip1/wasm), все пары <code>go tool dist list</code>, Host default, Edit build tags…. Файлы и пакеты с условиями сборки под выбранную платформу проверяются так, будто вы собираете под неё; подсветка пересчитывается сразу. На gopls не действует.</td></tr>
       </tbody>
     </table></div>
+    <h3>Analyze и Code Cleanup <span class="new">новое</span></h3>
+    <div class="table"><table class="two">
+      <thead><tr><th>Где</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Analyze, Data Flow to Here</td><td>На переменной или параметре (объявление или использование): откуда пришло значение. Для чтения — присваивания, которые до него доходят (по потоку управления функции); для параметра — аргументы его вызовов; для вызова — то, что возвращают <code>return</code> функции. Каждый узел дерева раскрывается на шаг дальше.</td></tr>
+        <tr><td>Analyze, Data Flow from Here</td><td>Куда уходит значение: переменная, которой оно присвоено, параметр, в который передано, вызовы, которым его вернули; для объявления — все чтения, для присваивания — чтения, до которых оно доходит.</td></tr>
+        <tr><td>Analyze, Locate Duplicates</td><td>В IDE, где есть это окно (коммерческие редакции), ищет повторяющийся код Go: функции и блоки, отличающиеся только именами переменных и литералами. Порог размера и что обезличивать — в диалоге, для языка Go.</td></tr>
+        <tr><td>Code, Code Cleanup</td><td>Одним проходом применяет исправления «формальных» проверок: лишние скобки, запятые, точки с запятой, типы в составных литералах, псевдонимы импорта и преобразования, лишний <code>else</code>, несортированные импорты, nil-срез вместо пустого литерала и группу Go fix (кроме <code>omitzero</code>: он меняет вывод encoding/json).</td></tr>
+      </tbody>
+    </table></div>
   </div>
 </section>
 
@@ -708,6 +719,8 @@ n := <span class="fn">next</span>()
         <tr><td>Modules, Tidy</td><td><code>go mod tidy</code></td></tr>
         <tr><td>Modules, Download</td><td><code>go mod download</code>. Исходники зависимостей появляются в дереве проекта.</td></tr>
         <tr><td>Modules, Vendor</td><td><code>go mod vendor</code></td></tr>
+        <tr><td>Modules, Sync Go Module <span class="new">новое</span></td><td><code>go mod download</code> модуля (из дерева проекта — модуля выделенного файла), затем граф модулей, каталог пакетов и подсветка перечитываются. Есть и в контекстном меню дерева проекта.</td></tr>
+        <tr><td>Modules, Attach Go Module… <span class="new">новое</span></td><td>Каталог с <code>go.mod</code> вне проекта становится его частью (корнем содержимого): второй модуль — например, библиотека, которую правят рядом с приложением, — индексируется, разрешается и собирается вместе с проектом. Detach Go Module… в контекстном меню такого каталога убирает его из проекта, файлы остаются на диске. Режим GOPATH не поддерживается — только модули.</td></tr>
         <tr><td>Modules, Dependencies…</td><td>Окно Go Dependencies.</td></tr>
         <tr><td>Modules, New Go Module…</td><td><code>go mod init</code> в выбранном каталоге.</td></tr>
         <tr><td>Read Packages Again <span class="new">новое</span></td><td>Заново читает имена пакетов, по которым работают подсказки по имени.</td></tr>
@@ -721,6 +734,7 @@ n := <span class="fn">next</span>()
       <thead><tr><th>Пункт</th><th>Что делает</th></tr></thead>
       <tbody>
         <tr><td>Open Profile… <span class="new">новое</span></td><td>Любой файл pprof (с сервера, из CI) во вкладке редактора: flame graph, Top, Graph, Source. Сервер <code>go tool pprof</code> живёт, пока открыта вкладка.</td></tr>
+        <tr><td>Go Optimization Decisions <span class="new">новое</span></td><td><code>go build -gcflags=-m=2 ./...</code> в каждом модуле: решения компилятора в окне Go Optimization — дерево «файл → Inlining / Escape analysis / Bounds checks → строка», двойной щелчок или Enter открывает место. На панели окна: запуск заново, Bounds Checks (добавляет <code>-d=ssa/check_bce/debug=1</code> — оставшиеся проверки границ, со следующего запуска), фильтры по видам и Show in Editor — значки на полях открытых редакторов с текстом решений в подсказке, пока окно открыто.</td></tr>
         <tr><td>Analyze Stack Trace…</td><td>Вставьте текст паники или дамп горутин: строки вида <code>file.go:12</code> станут ссылками.</td></tr>
         <tr><td>Monitor Go Process</td><td>Открывает окно Go Monitor.</td></tr>
         <tr><td>Go on This Machine…</td><td>Найденный Go, инструменты и их версии, модули проекта, <code>go env</code>.</td></tr>
@@ -734,6 +748,21 @@ n := <span class="fn">next</span>()
         <tr><td>Welcome to Go Project Support</td><td>Страница о плагине.</td></tr>
       </tbody>
     </table></div>
+
+    <h3>Подменю Go Tools <span class="new">новое</span></h3>
+    <p>Есть в меню Go, в Tools и в контекстном меню дерева проекта, как Tools | Go Tools в GoLand.</p>
+    <div class="table"><table class="two">
+      <thead><tr><th>Пункт</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Go Fmt Project</td><td><code>go fmt ./...</code> (<code>gofmt -l -w</code> по пакетам) в каждом модуле; файлы перечитываются с диска.</td></tr>
+        <tr><td>Goimports File</td><td><code>goimports -w</code> по файлу — импорты исправлены, файл отформатирован, какой бы форматтер ни стоял у Reformat Code. Без goimports уведомление предлагает установить его.</td></tr>
+        <tr><td>Generate File</td><td>То же, что в меню Go: <code>go generate файл.go</code>.</td></tr>
+        <tr><td>Go Vet File</td><td><code>go vet</code> пакета этого файла (вместе с тестами), вывод в окне Build.</td></tr>
+        <tr><td>Share in Playground</td><td>Выделение (или весь файл) уходит на play.golang.org; ссылка копируется в буфер и показывается в уведомлении с кнопкой Open. Сначала спрашивает подтверждение с флажком «Don't ask again»; вернуть вопрос — Settings | Go | Editor and Completion, «Ask before sharing in Go Playground».</td></tr>
+        <tr><td>Run in Playground</td><td>То же и сразу открывает фрагмент в браузере. Есть и в контекстном меню редактора.</td></tr>
+      </tbody>
+    </table></div>
+    <p>В меню-шестерёнке главной панели инструментов (рядом с Settings…) в проекте с <code>go.mod</code> есть <b>Go Settings…</b> (Settings | Go) и <b>Actions on Save…</b> (Settings | Tools | Actions on Save), как в GoLand.</p>
 
     <h3>Подменю gopls</h3>
     <div class="table"><table class="two">
@@ -779,6 +808,7 @@ n := <span class="fn">next</span>()
         <tr><td>Go Tests</td><td>Внизу</td><td>Пакеты и тесты проекта с результатом последнего прогона. Запуск, отладка, запуск с покрытием, повтор упавших, повтор тестов пакета при сохранении. Вкладка Benchmarks: время и память на операцию.</td></tr>
         <tr><td>Go Monitor</td><td>Справа</td><td>Работающая программа: процессор, память, куча, сборка мусора, потоки. Кнопка Goroutines снимает список горутин, Dump — дамп горутин со стеками во вкладку окна Run, Debug подключает отладчик.</td></tr>
         <tr><td>Go Dependencies</td><td>Внизу</td><td>Зависимости модуля: версия, более новая версия, прямая или косвенная. Обновление и проверка уязвимостей.</td></tr>
+        <tr><td>Go Optimization <span class="new">новое</span></td><td>Внизу</td><td>Решения компилятора после Go | Go Optimization Decisions: инлайнинг, escape analysis, проверки границ — по файлам и видам, с фильтрами и переходом к строке; значки на полях редактора, пока окно открыто.</td></tr>
         <tr><td>gopls</td><td>Внизу</td><td>Журнал сервера языка: его сообщения и отправленные ему команды.</td></tr>
         <tr><td>Debug, вкладка Goroutines</td><td>Окно отладки</td><td>Горутины, сгруппированные по функции. Поиск, скрытие служебных, двойной клик делает горутину текущей.</td></tr>
         <tr><td>Значок gopls <span class="new">новое</span></td><td>Статус-бар</td><td>Память и загрузка процессора сервера языка. По клику: версия, время работы, Restart, Log, Settings.</td></tr>
@@ -962,6 +992,7 @@ n := <span class="fn">next</span>()
         <tr><td>Colour grey-text suggestions like code <span class="new">новое</span></td><td>Подсказка раскрашена цветами схемы редактора (ключевые слова, строки, вызовы, типы, переменные), приглушёнными к фону. Без галочки — обычный серый.</td></tr>
         <tr><td>Show the actions of gopls in the list of Alt+Enter <span class="new">новое</span></td><td>Действия сервера отдельными пунктами. Без галочки они остаются в пункте Refactorings and actions of gopls…</td></tr>
         <tr><td>Type Latin characters in code when the keyboard layout is Russian <span class="new">новое</span></td><td>Русская буква в коде печатается латинским символом той же клавиши.</td></tr>
+        <tr><td>Ask before sharing in Go Playground <span class="new">новое</span></td><td>Share / Run in Playground спрашивают подтверждение, прежде чем отправить код на play.golang.org. Включено, как в GoLand; флажок «Don't ask again» в самом вопросе выключает его.</td></tr>
         <tr><td>Offer the values of a return statement as one item <span class="new">новое</span></td><td>Пункт <code>nil, err</code> после <code>return</code>.</td></tr>
         <tr><td>Names that begin with what is typed go first <span class="new">новое</span></td><td>Порядок списка. Без галочки действует порядок gopls.</td></tr>
         <tr><td>Show the values of the expected type in bold <span class="new">новое</span></td><td>Выделение подходящих значений и список только из них по <kbd data-action="SmartTypeCompletion">Ctrl+Shift+Space</kbd>.</td></tr>

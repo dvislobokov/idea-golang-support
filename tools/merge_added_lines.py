@@ -14,6 +14,8 @@ import re
 import subprocess
 import sys
 
+sys.stdout.reconfigure(errors='replace')  # Windows consoles may not encode the file's text
+
 
 def merge(worktree: str, path: str) -> None:
     out = subprocess.run(['git', '-C', worktree, 'diff', '-U3', '--', path], capture_output=True, text=True, encoding='utf-8').stdout

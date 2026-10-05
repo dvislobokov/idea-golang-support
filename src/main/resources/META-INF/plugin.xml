@@ -53,6 +53,8 @@
     <xi:include href="/META-INF/go-psi-ide-navigation.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- call and type hierarchy over that PSI (wave 5; the gate follows Navigation) -->
     <xi:include href="/META-INF/go-psi-ide-hierarchy.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- Analyze | Data Flow to / from Here and Locate Duplicates over that PSI (GoLand parity G9-8; no gate: gopls has neither) -->
+    <xi:include href="/META-INF/go-psi-ide-analysis.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- RE2 regular expressions in regexp calls (go-psi-ide-injection.xml; the gate follows Semantic colors) -->
     <xi:include href="/META-INF/go-psi-ide-injection.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- Go assembly (.s next to .go files): file type, highlighting, TEXT ·Name ↔ Go declaration without a body (go-psi-ide-asm.xml; navigation follows the NAVIGATION gate) -->
@@ -417,6 +419,13 @@
     </extensions>
     <!-- end of GoLand parity G8 (6-8) -->
 
+    <!-- GoLand parity G9 (4-8): Tools | Go Tools, Go Playground, Sync / Attach / Detach Go Module, Go Optimization, settings in the toolbar gear -->
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Go Optimization" anchor="bottom" icon="AllIcons.Actions.Lightning" factoryClass="io.github.golangsupport.build.GoOptimizationToolWindowFactory"
+                    doNotActivateOnStart="true"/>
+    </extensions>
+    <!-- end of GoLand parity G9 (4-8) -->
+
     <actions>
         <action id="Go.NewFile" class="io.github.golangsupport.templates.CreateGoFileAction">
             <add-to-group group-id="NewGroup" anchor="first"/>
@@ -544,6 +553,53 @@
             <separator/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="WeighingNewGroup"/>
         </group>
+    </actions>
+    <!-- GoLand parity G9 (4-8): the actions; after the main block, whose actions they refer to -->
+    <actions>
+        <group id="Go.Tools" text="Go Tools" popup="true">
+            <action id="Go.FmtProject" class="io.github.golangsupport.build.GoFmtProjectAction" text="Go Fmt Project"
+                    description="go fmt ./... in every module of the project: gofmt -l -w over its packages"/>
+            <action id="Go.ImportsFile" class="io.github.golangsupport.format.GoImportsFileAction" text="Goimports File"
+                    description="goimports -w over the Go file: the imports fixed and the file formatted, whatever formatter Reformat Code uses"/>
+            <reference ref="Go.GenerateFile"/>
+            <action id="Go.VetFile" class="io.github.golangsupport.build.GoVetFileAction" text="Go Vet File"
+                    description="go vet of the package of the Go file, in the Build window"/>
+            <action id="Go.ShareInPlayground" class="io.github.golangsupport.build.GoShareInPlaygroundAction" text="Share in Playground"
+                    description="Send the selection or the file to play.golang.org and copy the link"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <add-to-group group-id="Go.MainMenu" anchor="after" relative-to-action="Go.Reanalyze"/>
+            <add-to-group group-id="Go.ProjectViewPopup" anchor="last"/>
+        </group>
+        <action id="Go.RunInPlayground" class="io.github.golangsupport.build.GoRunInPlaygroundAction" text="Run in Playground"
+                description="Send the selection or the file to play.golang.org and open it there in the browser">
+            <add-to-group group-id="Go.Tools" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <action id="Go.OptimizationDecisions" class="io.github.golangsupport.build.GoOptimizationAction" text="Go Optimization Decisions" icon="AllIcons.Actions.Lightning"
+                description="go build -gcflags=-m=2 ./...: inlining, escape analysis and bounds checks of the compiler in the Go Optimization window and in the gutter">
+            <add-to-group group-id="Go.MainMenu" anchor="after" relative-to-action="Go.AnalyzeStackTrace"/>
+        </action>
+        <action id="Go.SyncModule" class="io.github.golangsupport.mod.GoSyncModuleAction" text="Sync Go Module" icon="AllIcons.Actions.Refresh"
+                description="go mod download of the module, then the module graph, the packages and the highlighting are read again">
+            <add-to-group group-id="Go.Modules" anchor="after" relative-to-action="Go.ModDownload"/>
+            <add-to-group group-id="Go.ProjectViewPopup" anchor="after" relative-to-action="Go.ModTidy"/>
+        </action>
+        <action id="Go.AttachModule" class="io.github.golangsupport.mod.GoAttachModuleAction" text="Attach Go Module..."
+                description="A directory with go.mod outside the project becomes a part of it: indexed, resolved and built with the project">
+            <add-to-group group-id="Go.Modules" anchor="after" relative-to-action="Go.SyncModule"/>
+        </action>
+        <action id="Go.DetachModule" class="io.github.golangsupport.mod.GoDetachModuleAction" text="Detach Go Module..."
+                description="The Go module attached to the project leaves it; the files stay on disk">
+            <add-to-group group-id="Go.ProjectViewPopup" anchor="after" relative-to-action="Go.SyncModule"/>
+        </action>
+        <action id="Go.EditSettings" class="io.github.golangsupport.settings.GoEditSettingsAction" text="Go Settings..."
+                description="Settings | Go">
+            <add-to-group group-id="SettingsEntryPointGroup" anchor="after" relative-to-action="ShowSettings"/>
+        </action>
+        <action id="Go.EditActionsOnSave" class="io.github.golangsupport.settings.GoEditActionsOnSaveAction" text="Actions on Save..."
+                description="Settings | Tools | Actions on Save: gofmt / goimports and Optimize imports on save">
+            <add-to-group group-id="SettingsEntryPointGroup" anchor="after" relative-to-action="Go.EditSettings"/>
+        </action>
     </actions>
 
     <applicationListeners>

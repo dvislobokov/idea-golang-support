@@ -254,11 +254,11 @@
   Не сделано: coverage для `go run` (`GOCOVERDIR` + `go tool covdata`).
 - [x] (2026-10-05, 0.2.161) **Run with Profiler** executor (CPU / Memory / Block / Mutex) поверх поля Profile + наш просмотрщик (только `go test`).
 - [x] (2026-10-05, 0.2.162) **Dump Goroutines** работающего процесса (delve attach через `GoSnapshot`, на Unix — SIGQUIT по подтверждению) и остановленной отладки (DAP).
-- [ ] Tools \| Go Tools: **Go Fmt Project**, **Go Vet File**, **Goimports File**; **Share in Playground** / Run in Playground (с подтверждением, как у GoLand). 0,5 дня.
-- [ ] Project view: **Sync Go Module**, GOPATH — Add Directory to Current Project / Detach. 0,5 дня.
-- [ ] Окно **Go Optimization** нативно: `go build -gcflags=-m=2` → инлайнинг, escape, bounds checks в дереве и в редакторе (сейчас только переключатель gopls). 1 день.
-- [ ] Тулбар: Go Settings… и Actions on Save… кнопками. Часы.
-- [ ] Analyze Data Flow to / from Here на `GoDataflow`; Locate Duplicates и Code Cleanup для Go — проверить, что платформа работает с нашим PSI и quick fix-ами. 1 день.
+- [x] (2026-10-05, 0.2.169–0.2.170) Tools \| Go Tools: **Go Fmt Project**, **Go Vet File**, **Goimports File**; **Share in Playground** / Run in Playground (с подтверждением, как у GoLand).
+- [x] (2026-10-05, 0.2.171) Project view: **Sync Go Module**, Attach / Detach Go Module (только модули; GOPATH-режим не поддерживается).
+- [x] (2026-10-05, 0.2.172) Окно **Go Optimization** нативно: `go build -gcflags=-m=2` → инлайнинг, escape, bounds checks в дереве и в редакторе.
+- [x] (2026-10-05, 0.2.171) Тулбар: Go Settings… и Actions on Save… — в меню шестерёнки, как у GoLand по дампу.
+- [x] (2026-10-05, 0.2.173) Analyze Data Flow to / from Here (`GoSliceProvider` на reaching definitions); Locate Duplicates (`GoDuplicatesProfile`) и Code Cleanup (`cleanupTool` у форматирующих инспекций и Go fix).
 
 Не повторяем: rr (Record / Rewind / Debug Saved Trace) — только Linux, уйдёт вместе с Run Targets; Code author — платформа (VCS).
 

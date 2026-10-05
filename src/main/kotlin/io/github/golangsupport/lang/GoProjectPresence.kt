@@ -202,7 +202,7 @@ class GoProjectPresence(private val project: Project) : Disposable {
         private val SKIPPED_DIRECTORIES = setOf("node_modules", "target", "obj", "dist", "__pycache__")
 
         /** The tool windows of the plugin that a project without Go files does not have (ids: `gopls` belongs to the lsp content module). */
-        val TOOL_WINDOWS = listOf("Go Dependencies", "Go Monitor", "Go Tests", "gopls")
+        val TOOL_WINDOWS = listOf("Go Dependencies", "Go Monitor", "Go Tests", "Go Optimization", "gopls")
         val WIDGETS = setOf("Go.Platform.Status", "Go.Gopls.Status")
 
         fun getInstance(project: Project): GoProjectPresence = project.service()

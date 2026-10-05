@@ -27,6 +27,7 @@
   <xi:include href="/META-INF/go-psi-ide-hints.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-gofix.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-hierarchy.xml" xpointer="xpointer(/idea-plugin/*)"/>
+  <xi:include href="/META-INF/go-psi-ide-analysis.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-injection.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <depends optional="true" config-file="go-psi-ide-injection-json.xml">com.intellij.modules.json</depends>

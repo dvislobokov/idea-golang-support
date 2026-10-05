@@ -180,6 +180,12 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.169–0.2.173) G9, пункты 4–8: группа `Go.Tools` (`build.GoToolsActions`, `format.GoImportsFileAction`), Playground (`build.GoPlayground`, `HttpRequests` в фоне,
+  настройка `askBeforePlayground`), Sync / Attach / Detach Go Module (`mod.GoModuleRootsActions`), Go Optimization (`build.GoOptimization` + `GoOptimizationOutput`, окно в
+  `GoProjectPresence.TOOL_WINDOWS`, гаттер при Show in Editor), Go Settings… / Actions on Save… в `SettingsEntryPointGroup` (`GoSettingsEntryActions`), Data Flow to / from Here
+  (`ide.slicer`), Locate Duplicates (`ide.duplicates`, EP модуля `intellij.platform.duplicates` — в IDE без него строка, предположительно, игнорируется; не проверено),
+  Code Cleanup (`cleanupTool` у 30 инспекций; `GoPreferNilSlice` и `GoFixOmitZero` не отмечены — меняют JSON). Открыто: шорткаты Playground GoLand не назначены, повторный запуск
+  Go Optimization опирается на кэш сборки (не проверено), вживую не проверено (сеть для Playground).
 - [x] (2026-10-05, 0.2.163–0.2.168) G8, пункты 1–5: Auto Import | Go (`GoAutoImportOptionsProvider`, `GoReferenceImporter`, `GoOptimizeImportsOnTheFly` на `DaemonListener`,
   `GoAddImportFix` как `HintAction`, список исключений в `GoImportPaths` / completion каталога / paste-resolver), Code Style | Go (`GoCodeStyleSettings`, вкладки Imports и
   Wrapping, `GoImportEdits.optimize`, `GoChopDownPostFormatProcessor`), printf-список на Linters, связанные переименования (`GoLinkedRenames`: `GoTestFileRenamerFactory`,

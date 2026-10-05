@@ -120,6 +120,7 @@ class GoEditorConfigurable(project: Project) : GoSettingsPage(project, "page.edi
             row { checkBox(GoBundle.message("editor.docComments")).bindSelected(settings::docCommentNames).comment(GoBundle.message("editor.docComments.comment")) }
             row { checkBox(GoBundle.message("editor.goplsActions")).bindSelected(settings::goplsActionsInMenu).comment(GoBundle.message("editor.goplsActions.comment")) }
             row { checkBox(GoBundle.message("editor.latin")).bindSelected(settings::latinInCode).comment(GoBundle.message("editor.latin.comment")) }
+            row { checkBox(GoBundle.message("editor.askBeforePlayground")).bindSelected(settings::askBeforePlayground).comment(GoBundle.message("editor.askBeforePlayground.comment")) }
             row { checkBox(GoBundle.message("editor.idioms")).bindSelected(settings::inlineIdioms).comment(GoBundle.message("editor.idioms.comment")) }
             row { checkBox(GoBundle.message("editor.suggestions")).bindSelected(settings::inlineSuggestions).comment(GoBundle.message("editor.suggestions.comment")) }
             row { checkBox(GoBundle.message("editor.suggestionColors")).bindSelected(settings::inlineSuggestionColors).comment(GoBundle.message("editor.suggestionColors.comment")) }

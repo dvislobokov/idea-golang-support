@@ -30,6 +30,44 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.173] - 2026-10-05
+
+### Added — Analyze and Code Cleanup for Go (GoLand parity G9)
+- Analyze | Data Flow to Here / from Here: where a variable's or parameter's value comes from and where it goes, one level per node, across assignments, call
+  arguments, parameters and returns (`lang.sliceProvider` on the reaching-definitions analysis).
+- Analyze | Locate Duplicates for Go (IDEs with the duplicates module): functions and blocks that differ only in identifiers and literals, with the dialog's
+  anonymization options; statements cost 2, expressions 1.
+- Code | Code Cleanup applies in one pass the fixes of the formatting-like inspections (redundant parentheses / comma / semicolon / type / import alias /
+  conversion / else, unsorted imports) and of the Go fix group except `omitzero`; "Empty slice literal" is left out too, as `nil` changes JSON output.
+
+## [0.2.172] - 2026-10-05
+
+### Added — Go Optimization tool window (GoLand parity G9)
+- Go | Go Optimization Decisions runs `go build -gcflags=-m=2` (plus `-d=ssa/check_bce/debug=1` when Bounds Checks is on) over every module in the background
+  and shows the compiler's decisions in the Go Optimization tool window: file → Inlining / Escape analysis / Bounds checks → `line:col text`, with filters per
+  kind, navigation and, while Show in Editor is on, gutter marks with the line's decisions in open editors. The gopls toggle in Go | gopls stays.
+
+## [0.2.171] - 2026-10-05
+
+### Added — Sync, Attach and Detach Go Module; toolbar entries (GoLand parity G9)
+- Sync Go Module (Go | Modules and the project-view context menu): `go mod download`, then the module graph, the packages and the highlighting are read again.
+- Attach Go Module… / Detach Go Module…: a Go module outside the project directory joins the project as a content root and leaves it again (modules only;
+  GOPATH mode is not supported, as before).
+- Go Settings… and Actions on Save… in the settings gear of the main toolbar for projects with go.mod, where GoLand keeps them.
+
+## [0.2.170] - 2026-10-05
+
+### Added — Share / Run in Playground (GoLand parity G9)
+- Share in Playground / Run in Playground (Go Tools, Run also in the editor menu): the selection or the file goes to play.golang.org, the `go.dev/play` link is
+  copied and shown with Open (Run also opens the browser), after a confirmation with "Don't ask again" (Settings | Tools | Go | Editor and Completion "Ask before
+  sharing in Go Playground", on). Blank code and code over 64 KB are refused before sending.
+
+## [0.2.169] - 2026-10-05
+
+### Added — Tools | Go Tools (GoLand parity G9)
+- The Go Tools submenu (Tools, the Go menu and the project-view context menu): Go Fmt Project (`go fmt ./...` in every module), Goimports File (`goimports -w`,
+  Install offered when missing), Go Vet File (vet of the file's package, Build window) and Generate File.
+
 ## [0.2.168] - 2026-10-05
 
 ### Added — paste JSON as a Go type (GoLand parity G8)

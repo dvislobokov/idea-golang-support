@@ -36,8 +36,11 @@ abstract class GoModulesAction(private val title: String) : AnAction(), DumbAwar
         val project = e.project ?: return
         val directories = directories(project, e)
         val commands = GoCli.commandLinesOrNotify(project, title) { directories.map { GoCli.commandLine(it.path, *arguments().toTypedArray()) } } ?: return
-        GoCli.runInBackground(project, title, commands, refresh = if (changesFiles) directories.map { File(it.path) } else emptyList())
+        GoCli.runInBackground(project, title, commands, refresh = if (changesFiles) directories.map { File(it.path) } else emptyList(), onSuccess = { succeeded(project) })
     }
+
+    /** On EDT after every command has succeeded. */
+    protected open fun succeeded(project: Project) {}
 
     private fun directories(project: Project, e: AnActionEvent): List<VirtualFile> {
         val modules = GoModulesService.getInstance(project)

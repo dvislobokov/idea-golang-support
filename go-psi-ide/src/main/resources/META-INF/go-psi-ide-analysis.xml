@@ -1,0 +1,9 @@
+<!-- go-psi-ide, Analyze: Data Flow to / from Here (the slicer of the platform over GoSliceFlow) and Locate Duplicates (the duplicates
+     profile of Go). Included by the host plugin; the tests of go-psi-ide list it in their test descriptor. No gate: gopls has neither. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <lang.sliceProvider language="Go" implementationClass="io.github.golangsupport.ide.slicer.GoSliceProvider"/>
+    <!-- the extension point belongs to intellij.platform.duplicates, a module of the commercial IDEs: elsewhere this line has no effect -->
+    <duplicates.profile implementation="io.github.golangsupport.ide.duplicates.GoDuplicatesProfile"/>
+  </extensions>
+</idea-plugin>

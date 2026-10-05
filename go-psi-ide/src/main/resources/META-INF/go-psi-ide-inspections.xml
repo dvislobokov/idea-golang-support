@@ -164,74 +164,74 @@
                      groupName="Go" enabledByDefault="false" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.project.GoUnusedExportedInspection"/>
     <!-- GoLand parity G5 (second set): Go fix -->
-    <localInspection language="Go" shortName="GoFixNewExpr" displayName="Pointer helper call can be replaced with 'new()'"
+    <localInspection language="Go" shortName="GoFixNewExpr" cleanupTool="true" displayName="Pointer helper call can be replaced with 'new()'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixNewExprInspection"/>
     <localInspection language="Go" shortName="GoFixOmitZero" displayName="'omitempty' tag on a struct field can be changed"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixOmitZeroInspection"/>
-    <localInspection language="Go" shortName="GoFixPlusBuild" displayName="Obsolete '+build' line"
+    <localInspection language="Go" shortName="GoFixPlusBuild" cleanupTool="true" displayName="Obsolete '+build' line"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixPlusBuildInspection"/>
-    <localInspection language="Go" shortName="GoFixEmbedTyped" displayName="Embedded variable converted at every use"
+    <localInspection language="Go" shortName="GoFixEmbedTyped" cleanupTool="true" displayName="Embedded variable converted at every use"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixEmbedTypedInspection"/>
-    <localInspection language="Go" shortName="GoFixHostPort" displayName="Address can be built with 'net.JoinHostPort'"
+    <localInspection language="Go" shortName="GoFixHostPort" cleanupTool="true" displayName="Address can be built with 'net.JoinHostPort'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixHostPortInspection"/>
-    <localInspection language="Go" shortName="GoFixWaitGroup" displayName="WaitGroup goroutine pattern can use 'WaitGroup.Go'"
+    <localInspection language="Go" shortName="GoFixWaitGroup" cleanupTool="true" displayName="WaitGroup goroutine pattern can use 'WaitGroup.Go'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixWaitGroupInspection"/>
-    <localInspection language="Go" shortName="GoFixTestingContext" displayName="Test context cancellation can use 't.Context()'"
+    <localInspection language="Go" shortName="GoFixTestingContext" cleanupTool="true" displayName="Test context cancellation can use 't.Context()'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixTestingContextInspection"/>
-    <localInspection language="Go" shortName="GoFixReflectTypeFor" displayName="'reflect.TypeOf' can be replaced with 'reflect.TypeFor'"
+    <localInspection language="Go" shortName="GoFixReflectTypeFor" cleanupTool="true" displayName="'reflect.TypeOf' can be replaced with 'reflect.TypeFor'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixReflectTypeForInspection"/>
-    <localInspection language="Go" shortName="GoFixErrorsAsType" displayName="'errors.As' can be replaced with 'errors.AsType'"
+    <localInspection language="Go" shortName="GoFixErrorsAsType" cleanupTool="true" displayName="'errors.As' can be replaced with 'errors.AsType'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixErrorsAsTypeInspection"/>
-    <localInspection language="Go" shortName="GoFixStringsSeq" displayName="'strings.Split' or 'strings.Fields' loop can use a 'Seq' variant"
+    <localInspection language="Go" shortName="GoFixStringsSeq" cleanupTool="true" displayName="'strings.Split' or 'strings.Fields' loop can use a 'Seq' variant"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixStringsSeqInspection"/>
-    <localInspection language="Go" shortName="GoFixStringsBuilder" displayName="String concatenation can use 'strings.Builder'"
+    <localInspection language="Go" shortName="GoFixStringsBuilder" cleanupTool="true" displayName="String concatenation can use 'strings.Builder'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixStringsBuilderInspection"/>
-    <localInspection language="Go" shortName="GoFixAtomicTypes" displayName="Primitive atomic value can use typed wrapper"
+    <localInspection language="Go" shortName="GoFixAtomicTypes" cleanupTool="true" displayName="Primitive atomic value can use typed wrapper"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixAtomicTypesInspection"/>
-    <localInspection language="Go" shortName="GoFixUnsafeFuncs" displayName="Pointer arithmetic can use 'unsafe.Add'"
+    <localInspection language="Go" shortName="GoFixUnsafeFuncs" cleanupTool="true" displayName="Pointer arithmetic can use 'unsafe.Add'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixUnsafeFuncsInspection"/>
     <!-- GoLand parity G5: Go fix -->
-    <localInspection language="Go" shortName="GoFixAny" displayName="'interface{}' can be replaced with 'any'"
+    <localInspection language="Go" shortName="GoFixAny" cleanupTool="true" displayName="'interface{}' can be replaced with 'any'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixAnyInspection"/>
-    <localInspection language="Go" shortName="GoFixMinMax" displayName="Conditional assignment can be replaced with 'min' or 'max'"
+    <localInspection language="Go" shortName="GoFixMinMax" cleanupTool="true" displayName="Conditional assignment can be replaced with 'min' or 'max'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixMinMaxInspection"/>
-    <localInspection language="Go" shortName="GoFixRangeInt" displayName="Counted loop can be replaced with range over integer"
+    <localInspection language="Go" shortName="GoFixRangeInt" cleanupTool="true" displayName="Counted loop can be replaced with range over integer"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixRangeIntInspection"/>
-    <localInspection language="Go" shortName="GoFixForVar" displayName="Redundant range variable shadowing"
+    <localInspection language="Go" shortName="GoFixForVar" cleanupTool="true" displayName="Redundant range variable shadowing"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixForVarInspection"/>
-    <localInspection language="Go" shortName="GoFixSlicesContains" displayName="Slice search loop can be replaced with 'slices.Contains'"
+    <localInspection language="Go" shortName="GoFixSlicesContains" cleanupTool="true" displayName="Slice search loop can be replaced with 'slices.Contains'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixSlicesContainsInspection"/>
-    <localInspection language="Go" shortName="GoFixSlicesSort" displayName="'sort.Slice' can be replaced with 'slices.Sort'"
+    <localInspection language="Go" shortName="GoFixSlicesSort" cleanupTool="true" displayName="'sort.Slice' can be replaced with 'slices.Sort'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixSlicesSortInspection"/>
-    <localInspection language="Go" shortName="GoFixSlicesBackward" displayName="Backward slice loop can use 'slices.Backward'"
+    <localInspection language="Go" shortName="GoFixSlicesBackward" cleanupTool="true" displayName="Backward slice loop can use 'slices.Backward'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixSlicesBackwardInspection"/>
-    <localInspection language="Go" shortName="GoFixStringsCut" displayName="'strings.Index' and slicing can use 'strings.Cut'"
+    <localInspection language="Go" shortName="GoFixStringsCut" cleanupTool="true" displayName="'strings.Index' and slicing can use 'strings.Cut'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixStringsCutInspection"/>
-    <localInspection language="Go" shortName="GoFixStringsCutPrefix" displayName="'HasPrefix' and 'TrimPrefix' can use 'strings.CutPrefix'"
+    <localInspection language="Go" shortName="GoFixStringsCutPrefix" cleanupTool="true" displayName="'HasPrefix' and 'TrimPrefix' can use 'strings.CutPrefix'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixStringsCutPrefixInspection"/>
-    <localInspection language="Go" shortName="GoFixMapsLoop" displayName="Map loop can be replaced with the 'maps' function"
+    <localInspection language="Go" shortName="GoFixMapsLoop" cleanupTool="true" displayName="Map loop can be replaced with the 'maps' function"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixMapsLoopInspection"/>
     <!-- GoLand parity G7: data flow, unused -->
@@ -244,7 +244,7 @@
     <localInspection language="Go" shortName="GoExportedFuncWithUnexportedType" displayName="Unexported return type of the exported function"
                      groupPath="Go" groupName="General" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.declarations.GoExportedFuncWithUnexportedTypeInspection"/>
-    <localInspection language="Go" shortName="GoRedundantConversion" displayName="Redundant type conversion"
+    <localInspection language="Go" shortName="GoRedundantConversion" cleanupTool="true" displayName="Redundant type conversion"
                      groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.declarations.GoRedundantConversionInspection"/>
     <localInspection language="Go" shortName="GoUnusedConst" displayName="Unused constant"
@@ -284,7 +284,7 @@
     <localInspection language="Go" shortName="GoReceiverNames" displayName="Receiver has a generic name"
                      groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.style.GoReceiverNamesInspection"/>
-    <localInspection language="Go" shortName="GoRedundantElseInIf" displayName="Redundant &apos;else&apos; in &apos;if&apos;"
+    <localInspection language="Go" shortName="GoRedundantElseInIf" cleanupTool="true" displayName="Redundant &apos;else&apos; in &apos;if&apos;"
                      groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.style.GoRedundantElseInIfInspection"/>
     <localInspection language="Go" shortName="GoStructInitializationWithoutFieldNames" displayName="Struct initialization without field names"
@@ -296,7 +296,7 @@
     <localInspection language="Go" shortName="GoUnitSpecificDurationSuffix" displayName="Unit-specific suffix for &apos;time.Duration&apos;"
                      groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.style.GoUnitSpecificDurationSuffixInspection"/>
-    <localInspection language="Go" shortName="GoUnsortedImport" displayName="Unsorted imports"
+    <localInspection language="Go" shortName="GoUnsortedImport" cleanupTool="true" displayName="Unsorted imports"
                      groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.style.GoUnsortedImportInspection"/>
     <localInspection language="Go" shortName="GoSnakeCaseUsage" displayName="Usage of Snake_Case"
@@ -308,16 +308,16 @@
     <localInspection language="Go" shortName="GoPreferNilSlice" displayName="Empty slice declared using a literal"
                      groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoPreferNilSliceInspection"/>
-    <localInspection language="Go" shortName="GoRedundantComma" displayName="Redundant comma"
+    <localInspection language="Go" shortName="GoRedundantComma" cleanupTool="true" displayName="Redundant comma"
                      groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantCommaInspection"/>
-    <localInspection language="Go" shortName="GoRedundantImportAlias" displayName="Redundant import alias"
+    <localInspection language="Go" shortName="GoRedundantImportAlias" cleanupTool="true" displayName="Redundant import alias"
                      groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantImportAliasInspection"/>
-    <localInspection language="Go" shortName="GoRedundantSemicolon" displayName="Redundant semicolon"
+    <localInspection language="Go" shortName="GoRedundantSemicolon" cleanupTool="true" displayName="Redundant semicolon"
                      groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantSemicolonInspection"/>
-    <localInspection language="Go" shortName="GoRedundantTypeDeclInCompositeLit" displayName="Redundant types in composite literals"
+    <localInspection language="Go" shortName="GoRedundantTypeDeclInCompositeLit" cleanupTool="true" displayName="Redundant types in composite literals"
                      groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantTypeDeclInCompositeLitInspection"/>
     <localInspection language="Go" shortName="GoVarAndConstTypeMayBeOmitted" displayName="Type can be omitted"
@@ -326,7 +326,7 @@
     <localInspection language="Go" shortName="GoUnusedTypeParameter" displayName="Unused type parameter"
                      groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoUnusedTypeParameterInspection"/>
-    <localInspection language="Go" shortName="GoRedundantParens" displayName="Redundant parentheses"
+    <localInspection language="Go" shortName="GoRedundantParens" cleanupTool="true" displayName="Redundant parentheses"
                      groupPath="Go" groupName="General" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantParensInspection"/>
     <localInspection language="Go" shortName="GoDeferGo" displayName="Defer/go statement calls &apos;recover&apos; or &apos;panic&apos; directly"

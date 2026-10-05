@@ -291,7 +291,19 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var downloadDependencies by property(true)
         /** `GOPROXY=…;GOPRIVATE=…`: added to the environment of the go commands of the plugin (Settings | Go | Go Modules). */
         var modulesEnvironment by string("")
+        /** Share / Run in Playground asks before the code leaves the machine; "Don't ask again" in that dialog clears it. On, as in GoLand. */
+        var askBeforePlayground by property(true)
+        /** Go Optimization: `-d=ssa/check_bce/debug=1` next to `-m=2`, the bounds checks the compiler kept. */
+        var optimizationBoundsChecks by property(false)
     }
+
+    var askBeforePlayground: Boolean
+        get() = state.askBeforePlayground
+        set(value) { state.askBeforePlayground = value }
+
+    var optimizationBoundsChecks: Boolean
+        get() = state.optimizationBoundsChecks
+        set(value) { state.optimizationBoundsChecks = value }
 
     var optimizeImportsOnSave: Boolean
         get() = state.optimizeImportsOnSave
