@@ -24,6 +24,9 @@ import com.intellij.ui.dsl.builder.toNullableProperty
 import com.intellij.util.ui.UIUtil
 import io.github.golangsupport.GoBundle
 import io.github.golangsupport.cli.GoEnvironment
+import io.github.golangsupport.cli.GoModulesEnvironment
+import io.github.golangsupport.mod.GoModDownloadChoice
+import io.github.golangsupport.mod.GoModDownloads
 import io.github.golangsupport.cli.GoPluginData
 import io.github.golangsupport.cli.GoPluginRelocation
 import io.github.golangsupport.cli.GoTool
@@ -109,6 +112,23 @@ class GoModulesConfigurable(project: Project) : GoSettingsPage(project, "page.mo
         group(GoBundle.message("modules.group")) {
             row { cell(modules) }
             row { comment(GoBundle.message("modules.comment")) }
+        }
+        group(GoBundle.message("modules.commands")) {
+            row(GoBundle.message("modules.environment")) {
+                textField().align(AlignX.FILL).bindText(settings::modulesEnvironment).comment(GoBundle.message("modules.environment.comment"))
+                    .validationOnInput { field -> GoModulesEnvironment.invalidEntry(field.text)?.let { error(GoBundle.message("modules.environment.invalid", it)) } }
+                    .validationOnApply { field -> GoModulesEnvironment.invalidEntry(field.text)?.let { error(GoBundle.message("modules.environment.invalid", it)) } }
+            }
+            row(GoBundle.message("modules.vendoring")) {
+                comboBox(GoVendoring.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::vendoring.toNullableProperty())
+                    .comment(GoBundle.message("modules.vendoring.comment"))
+            }
+            row(GoBundle.message("modules.download")) {
+                // the machine-wide switch and this project as its exception, as GoLand has it
+                comboBox(GoModDownloadChoice.entries, SimpleListCellRenderer.create("") { it.label })
+                    .bindItem({ GoModDownloads.choice(project) }, { it?.let { choice -> GoModDownloads.set(project, choice) } })
+                    .comment(GoBundle.message("modules.download.comment"))
+            }
         }
     }
 

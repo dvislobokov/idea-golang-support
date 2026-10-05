@@ -45,9 +45,14 @@ class GoValue(
 ) : XNamedValue(name) {
     override fun computePresentation(node: XValueNode, place: XValuePlace) {
         val shown = GoValuePresentation.of(type, value)
-        node.setPresentation(icon(), XRegularValuePresentation(shown.value, shown.type), reference > 0)
+        // Debugger | Data Views | Go: integers, pointer addresses, the String() view
+        val views = GoDebuggerSettings.getInstance().state
+        node.setPresentation(icon(), XRegularValuePresentation(GoDataViews.render(type, shown.value, views.integerFormat, views.showPointerAddresses), shown.type), reference > 0)
         // delve cuts long strings and slices short; the whole value is one request away (the "clipboard" context of delve loads it all)
         val expression = evaluateName?.takeIf { it.isNotBlank() }
+        if (views.stringView && expression != null && type != null) process.stringViews.of(expression, type, frameId)?.thenAccept { text ->
+            if (text != null && !node.isObsolete) node.setPresentation(icon(), XRegularValuePresentation(text, shown.type), reference > 0)
+        }
         if (expression != null && GoValuePresentation.isCut(value)) node.setFullValueEvaluator(object : XFullValueEvaluator() {
             override fun startEvaluation(callback: XFullValueEvaluationCallback) {
                 process.evaluate(expression, frameId, "clipboard").whenComplete { answer, error ->

@@ -180,6 +180,11 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.153–0.2.156) G8, пункты 6–8: Optimize imports on save (`GoOptimizeImportsOnSave`, `OptimizeImportsProcessor` → `GoImportOptimizer`, строка в Actions on Save),
+  Go Modules: Environment / vendoring / download (`GoModulesEnvironment`, `GoCli.buildEnvironment(subcommand, workDirectory)`, `GoModDownloads`, `GoVendoring`), Data Views | Go
+  (`GoDebuggerSettings` на `xdebugger.settings`, `GoDataViews`, String() view через `call` в верхнем кадре с кэшем на остановку), набор (`}` — платформенный `indentBrace`,
+  `GoDocCommentEnterHandler`). Открыто: загрузка зависимостей при открытии проекта, адреса указателей — только скрытие, вживую не проверено (Actions on Save, Build-задача
+  Download, Hex/Binary в Variables, `}` в живом редакторе).
 - [x] (2026-10-05, 0.2.150–0.2.152) G7, data flow / unused / go.mod: `GoDfaConstantCondition` (`flow.GoConstantConditionInspection` + `GoFlowConstants`: nil-факты и
   reaching definitions с одним литералом; `GoImpossibleNilCheck` выключен по умолчанию), `GoDivisionByZero`, `GoExportedFuncWithUnexportedType`, `GoRedundantConversion`;
   шесть unused-инспекций (`ide.inspections.unused`, Safe delete; экспортируемые — в закрытых пакетах `GoProjectPackages.isClosed`), `GoUnusedParameter` приведена к GoLand

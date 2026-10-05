@@ -74,17 +74,21 @@ object GoCli {
     fun commandLine(workDirectory: String?, vararg arguments: String): GeneralCommandLine {
         val executable = findExecutable()
             ?: throw ExecutionException("The 'go' executable is not found. Install Go (https://go.dev/dl) and make sure it is on PATH, or set the path in Settings | Go | GOROOT.")
-        return toolCommandLine(executable, workDirectory, *arguments).withEnvironment(buildEnvironment(arguments.firstOrNull()))
+        return toolCommandLine(executable, workDirectory, *arguments).withEnvironment(buildEnvironment(arguments.firstOrNull(), workDirectory))
     }
 
     /**
      * `CGO_ENABLED` / `GOEXPERIMENT` of Settings | Go | Build Tags for a `go` command: build, run, test, vet and the rest compile what the
      * analysis assumed. Not for `go env`: its answer is the "Default" the page shows. The environment of a run configuration is applied
-     * after this and wins.
+     * after this and wins. Then the Environment and the vendoring of Settings | Go | Go Modules ([GoModulesEnvironment]); the vendor
+     * directory is looked for from [workDirectory].
      */
-    fun buildEnvironment(subcommand: String?): Map<String, String> {
+    @JvmOverloads
+    fun buildEnvironment(subcommand: String?, workDirectory: String? = null): Map<String, String> {
         if (subcommand == "env" || ApplicationManager.getApplication() == null) return emptyMap()
-        return GoSettings.getInstance().goCommandEnvironment() + GoPluginData.goEnvironment(install = subcommand == "install")
+        val settings = GoSettings.getInstance()
+        return settings.goCommandEnvironment() + GoModulesEnvironment.of(settings.modulesEnvironment, settings.vendoring, workDirectory, System.getenv("GOFLAGS")) +
+            GoPluginData.goEnvironment(install = subcommand == "install")
     }
 
     /** A command line of `go` or of one of its tools: a tool started from the IDE must find the same `go` the plugin uses. */

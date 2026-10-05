@@ -72,6 +72,9 @@ class GoDebugProcess(
     private val functionBreakpoints = GoFunctionBreakpointHandler(this)
     private val editors = GoEditorsProvider()
 
+    /** The String() view of Debugger | Data Views | Go: its calls are per stop. */
+    val stringViews = GoStringViews(this)
+
     @Volatile var capabilities: JsonObject = JsonObject()
         private set
 
@@ -248,6 +251,7 @@ class GoDebugProcess(
         threads.thenCombine(top) { list, frames -> list to frames }.whenComplete { result, error ->
             if (error != null) return@whenComplete LOG.info("Cannot show the stop: ${errorText(error)}")
             val (list, frames) = result
+            stringViews.stopped(frames.firstOrNull()?.int("id"))
             // the goroutine of the event, not a guess: the ids of goroutines come in no particular order
             val active = threadId ?: list.firstOrNull()?.first
             val context = GoSuspendContext(this, list.ifEmpty { listOfNotNull(active?.let { it to "Goroutine $it" }) }, active, frames)

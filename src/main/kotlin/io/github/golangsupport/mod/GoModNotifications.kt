@@ -1,5 +1,6 @@
 package io.github.golangsupport.mod
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
@@ -56,7 +57,16 @@ class GoModChanges(private val project: Project) {
         GoCli.runInBackground(project, title, commands, refresh = listOf(File(root.path)), onSuccess = { clear(modFile) })
     }
 
+    /** `go mod download` on its own after the save (Download Go module dependencies, Settings | Go | Go Modules); the banner stays: tidy is still its business. */
+    fun download(modFile: VirtualFile) {
+        val root = modFile.parent ?: return
+        val commands = GoCli.commandLinesOrNotify(project, DOWNLOAD_TITLE) { listOf(GoCli.commandLine(root.path, "mod", "download")) } ?: return
+        GoCli.runInBackground(project, DOWNLOAD_TITLE, commands, refresh = listOf(File(root.path)))
+    }
+
     companion object {
+        private const val DOWNLOAD_TITLE = "Download Go Module Dependencies"
+
         fun getInstance(project: Project): GoModChanges = project.service()
     }
 }
@@ -68,7 +78,12 @@ class GoModSaveListener : FileDocumentManagerListener {
         val onDisk = runCatching { VfsUtilCore.loadText(file) }.getOrNull() ?: return
         if (!GoModDependencies.changed(onDisk, document.immutableCharSequence)) return
         val project = ProjectLocator.getInstance().guessProjectForFile(file) ?: return
-        if (!project.isDisposed) GoModChanges.getInstance(project).markPending(file)
+        if (project.isDisposed) return
+        GoModChanges.getInstance(project).markPending(file)
+        // after the save: the command reads go.mod from the disk; no real go in the tests
+        if (GoModDownloads.isEnabled(project) && !ApplicationManager.getApplication().isUnitTestMode) {
+            ApplicationManager.getApplication().invokeLater({ GoModChanges.getInstance(project).download(file) }, project.disposed)
+        }
     }
 }
 

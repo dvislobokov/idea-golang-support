@@ -881,3 +881,22 @@ gopls `Create …`, `Implement …` and `Declare missing methods …` actions th
   "What's New", click = the host's `Go.HelpPage.GoFix`: the guide at `#go-fix`). The count runs the enabled local Go fix tools on the file
   (`LocalInspectionTool.processFile`, stopped at 100), cached on the file by document stamp and the set of enabled tools; the daemon's highlights would be
   cheaper, but code vision and the inspection pass run in no fixed order. Tests: `inspections.gofix.GoSyntaxUpdateTest` (10, with a test-only `GoFixTestInspection`).
+
+### Settings and typing help (host; PLAN.md G8, items 6–8)
+- Optimize imports on save: `lang.GoOptimizeImportsOnSave` (`actionOnSave`) runs `OptimizeImportsProcessor` (so `lang.importOptimizer` =
+  `GoImportOptimizer`) over the Go files being saved when `GoSettings.optimizeImportsOnSave` (Settings | Go | Formatting, off) is on and the platform's
+  own Optimize imports on save does not cover Go already. `GoOptimizeImportsOnSaveInfoProvider` (`actionOnSaveInfoProvider`) shows it as "Optimize Go
+  imports" on Tools | Actions on Save, backed by the checkbox of `GoFormattingConfigurable`. Tests: `GoSettingsG8Test`.
+- Go Modules page: Environment (`modulesEnvironment`, `NAME=value;…`), Enable vendoring support (`GoVendoring`: AUTO / ALWAYS `-mod=vendor` /
+  NEVER `-mod=mod`, only for a module with `vendor/modules.txt`, through GOFLAGS unless it has a `-mod`), both applied by `GoCli.buildEnvironment`
+  via `cli.GoModulesEnvironment` (not to `go env`); Download Go module dependencies (`mod.GoModDownloadChoice`, GoLand's four choices: the app switch
+  `downloadDependencies` plus the project as its exception in `PropertiesComponent`) — `GoModSaveListener` runs `go mod download` after a save of
+  go.mod with other requirements. The project model's own vendor-mode decision (`GoModuleGraphBuilder`) is untouched. Tests: `GoModulesEnvironmentTest`, `GoSettingsG8Test`.
+- Debugger | Data Views | Go: `debugger.GoDebuggerSettings` (`xdebugger.settings`, id `go`, stored in the platform's debugger.xml): integer format
+  (`GoIntegerFormat`), pointer addresses, String() view. `GoDataViews.render` rewrites delve's value text in `GoValue.computePresentation`; the String()
+  view (`GoStringViews`, one per `GoDebugProcess`) evaluates `call (x).String()` in the top frame of the stop, cached per stop, and remembers the types
+  delve answers "has no member String" for. Delve sends no address of a pointer it followed, so "Show pointer addresses" can only hide. Tests: `GoDebugDataViewsTest`.
+- Typing: Reformat block on typing `}` needs no code — the platform's `TypedHandler.indentBrace` reformats the block through `lang.formatter`
+  (the range is not claimed by `GoFormattingService`: it has no FORMAT_FRAGMENTS) when Smart Keys | Reformat block on typing '}' is on; pinned by
+  `GoTypingTest`. `lang.GoDocCommentEnterHandler` (`enterHandlerDelegate`): Enter right after a bare `//` above a declaration writes `// Name `
+  (Smart Keys | Insert documentation comment stub and `docCommentNames`). Tests: `GoTypingTest`.

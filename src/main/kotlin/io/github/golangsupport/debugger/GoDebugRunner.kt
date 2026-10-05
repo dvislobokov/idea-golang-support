@@ -124,7 +124,7 @@ class GoDebugRunner : AsyncProgramRunner<RunnerSettings>() {
         GoPluginLog.info(GoDebuggerLogs.CATEGORY, "Starting $delve in $directory, log: ${log ?: "off"}")
         val commandLine = GoCli.toolCommandLine(delve.path, directory, *DlvDap.arguments(log != null, GoSettings.getInstance().debugAnyGoVersion).toTypedArray())
             // delve builds the program itself: Cgo support and Experiments of Build Tags reach that build through its environment
-            .withEnvironment(GoCli.buildEnvironment("build"))
+            .withEnvironment(GoCli.buildEnvironment("build", directory))
         return DelveProcess(commandLine, log)
     }
 

@@ -30,6 +30,35 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.156] - 2026-10-05
+
+### Added — typing (GoLand parity G8)
+- A `}` that closes a block reformats the block with the built-in formatter (platform Smart Keys "Reformat block on typing '}'", on by default; the plugin's
+  formatting service leaves fragment formatting to the built-in formatter, so no extra setting).
+- Enter right after a bare `//` on the line above a declaration writes the `// Name ` doc comment stub with the caret after the name (Smart Keys "Insert
+  documentation comment stub", on; also needs the plugin's doc-comment names option). Settings | Tools | Go | Editor and Completion links to Smart Keys.
+
+## [0.2.155] - 2026-10-05
+
+### Added — Debugger | Data Views | Go (GoLand parity G8)
+- A "Go" tab in Settings | Build, Execution, Deployment | Debugger | Data Views: "Show integers as" (Decimal by default / Hexadecimal / Binary / Decimal and
+  hexadecimal), "Show pointer addresses" (on; off hides the addresses delve prints for unloaded pointers and interface data), "Enable String() view" (off; the
+  value of `String()` for values of the top frame of the stopped goroutine, through delve's `call`, cached per stop; types without `String()` are not asked again).
+
+## [0.2.154] - 2026-10-05
+
+### Added — Go Modules settings (GoLand parity G8)
+- Settings | Tools | Go | Go Modules, group "Go Commands": "Environment" (`NAME=value;…` — GOPROXY, GOPRIVATE and other variables for the plugin's go commands;
+  `go env` keeps the machine's values), "Enable vendoring support" (Automatically by default / Always `-mod=vendor` / Never `-mod=mod`, for modules with
+  `vendor/modules.txt`, passed through GOFLAGS; a `-mod` in the user's GOFLAGS wins), "Download Go module dependencies" with GoLand's four choices (enabled for
+  all projects by default; the per-project exception is kept in the project): `go mod download` runs in the Build window after go.mod is saved with changed requirements.
+
+## [0.2.153] - 2026-10-05
+
+### Added — Optimize imports on save (GoLand parity G8)
+- Settings | Tools | Go | Formatting "Optimize imports on save" (off by default, as in GoLand), also shown as "Optimize Go imports" in Settings | Tools | Actions on
+  Save: the plugin's import optimizer runs on save independently of Reformat; when the platform's own Optimize imports on save covers Go, it takes precedence.
+
 ## [0.2.152] - 2026-10-05
 
 ### Added — go.mod dependency issues (GoLand parity G7)

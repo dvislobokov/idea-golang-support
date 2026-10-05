@@ -382,6 +382,15 @@
     </extensions>
     <!-- end of GoLand parity G4 -->
 
+    <!-- GoLand parity G8 (6-8): Optimize imports on save, Data Views | Go of the debugger, the doc comment stub on Enter -->
+    <extensions defaultExtensionNs="com.intellij">
+        <actionOnSave implementation="io.github.golangsupport.lang.GoOptimizeImportsOnSave"/>
+        <actionOnSaveInfoProvider implementation="io.github.golangsupport.lang.GoOptimizeImportsOnSaveInfoProvider"/>
+        <xdebugger.settings implementation="io.github.golangsupport.debugger.GoDebuggerSettings"/>
+        <enterHandlerDelegate order="first" implementation="io.github.golangsupport.lang.GoDocCommentEnterHandler"/>
+    </extensions>
+    <!-- end of GoLand parity G8 (6-8) -->
+
     <actions>
         <action id="Go.NewFile" class="io.github.golangsupport.templates.CreateGoFileAction">
             <add-to-group group-id="NewGroup" anchor="first"/>

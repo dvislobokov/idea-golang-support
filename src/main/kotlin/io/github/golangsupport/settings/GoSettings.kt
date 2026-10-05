@@ -248,7 +248,32 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** [GoDebugBinaryLocation.CUSTOM]: the directory, a relative path is from the package directory. */
         var debugBinaryDirectory by string("")
+
+        /** Optimize Imports over the Go files being saved, apart from Reformat; Settings | Tools | Actions on Save shows it too. Off, as in GoLand. */
+        var optimizeImportsOnSave by property(false)
+        /** `-mod=vendor` / `-mod=mod` (through GOFLAGS) of the go commands of a module that has `vendor/modules.txt`; AUTO: what go decides. */
+        var vendoring by enum(GoVendoring.AUTO)
+        /** `go mod download` after go.mod is saved with other requirements, for every project but the exceptions ([GoModDownloads]). On, as in GoLand. */
+        var downloadDependencies by property(true)
+        /** `GOPROXY=…;GOPRIVATE=…`: added to the environment of the go commands of the plugin (Settings | Go | Go Modules). */
+        var modulesEnvironment by string("")
     }
+
+    var optimizeImportsOnSave: Boolean
+        get() = state.optimizeImportsOnSave
+        set(value) { state.optimizeImportsOnSave = value }
+
+    var vendoring: GoVendoring
+        get() = state.vendoring
+        set(value) { state.vendoring = value }
+
+    var downloadDependencies: Boolean
+        get() = state.downloadDependencies
+        set(value) { state.downloadDependencies = value }
+
+    var modulesEnvironment: String
+        get() = state.modulesEnvironment.orEmpty()
+        set(value) { state.modulesEnvironment = value.trim() }
 
     var debugShowGlobalVariables: Boolean
         get() = state.debugShowGlobalVariables
@@ -495,4 +520,19 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** The first malformed name of a GOEXPERIMENT list, or null: names only (letters, digits, `_`), `no` before one turns it off. Not checked against a toolchain. */
         fun invalidExperiment(text: String): String? = text.split(',', ' ').map(String::trim).filter(String::isNotEmpty).firstOrNull { !EXPERIMENT.matches(it) }
     }
+}
+
+/** "Enable vendoring support" of Settings | Go | Go Modules: the `-mod` flag of the go commands of a module with a `vendor/modules.txt`. */
+enum class GoVendoring(val title: String, private val flag: String?) {
+    /** go's own rule: vendor mode when `vendor/modules.txt` is there and go.mod says go 1.14 or later. */
+    AUTO("Automatically", null),
+    ALWAYS("Always", "-mod=vendor"),
+    NEVER("Never", "-mod=mod");
+
+    val label: String get() = GoBundle.messageOr("modules.vendoring.$name", title)
+
+    /** The flag for a module that has (or has not) a vendor directory: without one `-mod=vendor` would fail, and `-mod=mod` changes nothing. */
+    fun modFlag(hasVendor: Boolean): String? = flag?.takeIf { hasVendor }
+
+    override fun toString(): String = title
 }

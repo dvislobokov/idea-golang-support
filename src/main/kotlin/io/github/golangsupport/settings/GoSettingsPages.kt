@@ -114,6 +114,13 @@ class GoEditorConfigurable(project: Project) : GoSettingsPage(project, "page.edi
             row { checkBox(GoBundle.message("editor.idioms")).bindSelected(settings::inlineIdioms).comment(GoBundle.message("editor.idioms.comment")) }
             row { checkBox(GoBundle.message("editor.suggestions")).bindSelected(settings::inlineSuggestions).comment(GoBundle.message("editor.suggestions.comment")) }
             row { checkBox(GoBundle.message("editor.suggestionColors")).bindSelected(settings::inlineSuggestionColors).comment(GoBundle.message("editor.suggestionColors.comment")) }
+            // Reformat block on typing '}' and Insert documentation comment stub are the platform's checkboxes, as in GoLand
+            row {
+                link(GoBundle.message("editor.smartKeys")) { event ->
+                    val settingsDialog = com.intellij.ide.DataManager.getInstance().getDataContext(event.source as java.awt.Component).getData(com.intellij.openapi.options.ex.Settings.KEY)
+                    settingsDialog?.find("editor.preferences.smartKeys")?.let(settingsDialog::select)
+                }.comment(GoBundle.message("editor.smartKeys.comment"))
+            }
         }
         group(GoBundle.message("completion.group")) {
             row { checkBox(GoBundle.message("completion.returnValues")).bindSelected(settings::completeReturnValues).comment(GoBundle.message("completion.returnValues.comment")) }
@@ -146,7 +153,15 @@ class GoFormattingConfigurable(project: Project) : GoSettingsPage(project, "page
         fillFormatters()
         row(GoBundle.message("quality.formatter")) { comboBox(formatters).bindItem(settings::formatter.toNullableProperty()).comment(GoBundle.message("formatting.formatter.comment")) }
         row { checkBox(GoBundle.message("quality.formatOnSave")).bindSelected(settings::formatOnSave).comment(GoBundle.message("quality.formatOnSave.comment")) }
+        row {
+            optimizeImportsOnSave = checkBox(GoBundle.message("formatting.optimizeImportsOnSave")).bindSelected(settings::optimizeImportsOnSave)
+                .comment(GoBundle.message("formatting.optimizeImportsOnSave.comment")).component
+        }
     }
+
+    /** Mirrored on Settings | Tools | Actions on Save ([io.github.golangsupport.lang.GoOptimizeImportsOnSaveInfoProvider]), which reads and sets the box of this page. */
+    lateinit var optimizeImportsOnSave: JCheckBox
+        private set
 
     private fun fillFormatters() {
         val available = GoFormatter.entries.filter { it != GoFormatter.GOLANGCI_LINT_FMT || settings.golangciLint }
