@@ -9,6 +9,7 @@ import com.intellij.psi.codeStyle.CodeStyleConfigurable
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.codeStyle.CodeStyleSettingsProvider
 import com.intellij.psi.codeStyle.CommonCodeStyleSettings
+import com.intellij.psi.codeStyle.CustomCodeStyleSettings
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider
 import io.github.golangsupport.lang.GoLanguage
 
@@ -76,12 +77,20 @@ class GoLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() 
     }
 }
 
-/** Registers the Go page under Settings | Editor | Code Style. */
+/** Registers the Go page under Settings | Editor | Code Style, unless a host plugin has its own Go page (then there would be two "Go" pages). */
 class GoCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
 
     override fun getLanguage(): Language = GoLanguage
 
+    override fun hasSettingsPage(): Boolean = LanguageCodeStyleSettingsProvider.getSettingsPagesProviders().none { it.language == GoLanguage }
+
     override fun getConfigurableDisplayName(): String = "Go"
+
+    /**
+     * The Imports and Wrapping options of Code Style | Go ([GoCodeStyleSettings]), whichever page edits them. Created here: the platform asks
+     * every `codeStyleSettingsProvider` for custom settings, but a language provider only when it has a page of its own.
+     */
+    override fun createCustomSettings(settings: CodeStyleSettings): CustomCodeStyleSettings = GoCodeStyleSettings(settings)
 
     override fun createConfigurable(settings: CodeStyleSettings, modelSettings: CodeStyleSettings): CodeStyleConfigurable =
         object : CodeStyleAbstractConfigurable(settings, modelSettings, configurableDisplayName) {

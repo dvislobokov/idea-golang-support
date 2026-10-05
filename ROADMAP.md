@@ -180,6 +180,11 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.163–0.2.168) G8, пункты 1–5: Auto Import | Go (`GoAutoImportOptionsProvider`, `GoReferenceImporter`, `GoOptimizeImportsOnTheFly` на `DaemonListener`,
+  `GoAddImportFix` как `HintAction`, список исключений в `GoImportPaths` / completion каталога / paste-resolver), Code Style | Go (`GoCodeStyleSettings`, вкладки Imports и
+  Wrapping, `GoImportEdits.optimize`, `GoChopDownPostFormatProcessor`), printf-список на Linters, связанные переименования (`GoLinkedRenames`: `GoTestFileRenamerFactory`,
+  `GoStructTagRenamerFactory`, флажок у `GoRenamePackageProcessor`), вставка JSON (`GoJsonPaste`). Открыто: подсказка импорта проверена тестом только как `HintAction`
+  (`hasHint()` у инспекционной проблемы — вживую), целые из JSON — `int`, а не `int64`; вживую не проверено (одна страница Code Style Go, Shift+F6 с флажками, диалог вставки).
 - [x] (2026-10-05, 0.2.160–0.2.162) G9, пункты 1–3: Coverage через `CoverageEngine` (`coverage.GoCoverageEngine`, `go-coverage.xml`, optional depends
   `com.intellij.modules.coverage`, `bundledModule("intellij.platform.coverage")`; пути профиля → файлы по самому длинному пути модуля; свой gutter оставлен), Run with Profiler
   (`run.GoProfiler`: executor + группа `Go.RunWithProfiler`, профиль открывается через `GoProfiles.openWhenReady`), Dump Goroutines (`monitor.GoGoroutineDump`, `GoSnapshot.attachAndDump`,

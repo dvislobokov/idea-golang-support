@@ -1,5 +1,6 @@
 package io.github.golangsupport.catalogue
 
+import io.github.golangsupport.ide.GoImportExclusions
 import io.github.golangsupport.ide.editor.paste.GoPasteImportResolver
 import io.github.golangsupport.lang.psi.GoFile
 
@@ -10,5 +11,5 @@ import io.github.golangsupport.lang.psi.GoFile
  */
 class GoCataloguePasteImportResolver : GoPasteImportResolver {
     override fun importPathFor(file: GoFile, packageName: String, members: Set<String>): String? =
-        GoCatalogueService.getInstance(file.project).index.standardPackagesOf(packageName, members).singleOrNull()
+        GoCatalogueService.getInstance(file.project).index.standardPackagesOf(packageName, members).singleOrNull()?.takeIf { !GoImportExclusions.excluded(it) }
 }

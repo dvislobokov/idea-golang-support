@@ -9,6 +9,7 @@ import com.intellij.openapi.components.service
 import com.intellij.util.execution.ParametersListUtil
 import io.github.golangsupport.GoBundle
 import io.github.golangsupport.PluginLanguage
+import io.github.golangsupport.ide.GoRenameChoice
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.project.impl.GoLibraryRootsMode
 
@@ -25,6 +26,18 @@ enum class GoDebugBinaryLocation(val title: String) {
 
     /** What the combo shows; [toString] is what the settings file keeps, so it stays English. */
     val label: String get() = GoBundle.messageOr("debugger.binaryLocation.$name", title)
+
+    override fun toString(): String = title
+}
+
+/** What happens to JSON pasted into a Go file ([io.github.golangsupport.lang.GoJsonPastePreProcessor]), as GoLand's "When JSON is pasted". */
+enum class GoPasteJson(val title: String) {
+    ASK("Show options"),
+    CONVERT("Convert JSON to a Go type"),
+    AS_IS("Insert JSON as-is");
+
+    /** What the combo shows; [toString] is what the settings file keeps, so it stays English. */
+    val label: String get() = GoBundle.messageOr("pasteJson.$name", title)
 
     override fun toString(): String = title
 }
@@ -250,6 +263,22 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
 
         /** [GoDebugBinaryLocation.CUSTOM]: the directory, a relative path is from the package directory. */
         var debugBinaryDirectory by string("")
+
+        // auto-import (Settings | Editor | General | Auto Import, Go), GoLand's defaults
+        var importUnambiguousOnTheFly by property(true)
+        var importOptimizeOnTheFly by property(false)
+        var importShowPopup by property(true)
+        /** Exclude from import and completion: import paths, `/...` or `/` + star takes the subpackages. */
+        var importExcluded by list<String>()
+
+        // the linked renames of Settings | Go | Editor and Completion
+        var renameTestFiles by enum(GoRenameChoice.ASK)
+        var renameStructTags by enum(GoRenameChoice.ASK)
+        var renameDirectoryPackage by enum(GoRenameChoice.ASK)
+        var renamePackageDirectory by enum(GoRenameChoice.ASK)
+
+        /** JSON pasted into a Go file: ask, convert to a Go type, or paste it as it is. */
+        var pasteJson by enum(GoPasteJson.ASK)
 
         /** Dump Goroutines through a delve attach (the program runs on) rather than SIGQUIT (the program prints the dump and exits); Windows has no SIGQUIT. */
         var debugDumpViaDelve by property(com.intellij.openapi.util.SystemInfo.isWindows)
@@ -498,6 +527,43 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var debugDumpViaDelve: Boolean
         get() = state.debugDumpViaDelve
         set(value) { state.debugDumpViaDelve = value }
+
+    var importUnambiguousOnTheFly: Boolean
+        get() = state.importUnambiguousOnTheFly
+        set(value) { state.importUnambiguousOnTheFly = value }
+
+    var importOptimizeOnTheFly: Boolean
+        get() = state.importOptimizeOnTheFly
+        set(value) { state.importOptimizeOnTheFly = value }
+
+    var importShowPopup: Boolean
+        get() = state.importShowPopup
+        set(value) { state.importShowPopup = value }
+
+    /** A new list on every change: BaseState notices only a new one. */
+    var importExcluded: List<String>
+        get() = state.importExcluded.toList()
+        set(value) { state.importExcluded = value.map { it.trim() }.filter { it.isNotEmpty() }.distinct().toMutableList() }
+
+    var renameTestFiles: GoRenameChoice
+        get() = state.renameTestFiles
+        set(value) { state.renameTestFiles = value }
+
+    var renameStructTags: GoRenameChoice
+        get() = state.renameStructTags
+        set(value) { state.renameStructTags = value }
+
+    var renameDirectoryPackage: GoRenameChoice
+        get() = state.renameDirectoryPackage
+        set(value) { state.renameDirectoryPackage = value }
+
+    var renamePackageDirectory: GoRenameChoice
+        get() = state.renamePackageDirectory
+        set(value) { state.renamePackageDirectory = value }
+
+    var pasteJson: GoPasteJson
+        get() = state.pasteJson
+        set(value) { state.pasteJson = value }
 
     var testArguments: String
         get() = state.testArguments.orEmpty()

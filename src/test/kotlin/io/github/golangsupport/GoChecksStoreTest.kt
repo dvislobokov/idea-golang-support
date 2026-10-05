@@ -44,7 +44,7 @@ class GoChecksStoreTest : BasePlatformTestCase() {
         val model = GoChecksStore.load(project)
         val inspections = model.checks.filter { it.kind == GoCheckKind.INSPECTION }.associateBy { it.id }
         assertTrue(inspections.keys.toString(), inspections.keys.containsAll(listOf("GoUnusedLabel", "GoLostCancel", "GoUncheckedError", "GoImportCycle", "GoModPaths", "GoRules")))
-        assertTrue("no inspection of the platform", inspections.keys.all { it.startsWith("Go") })
+        assertTrue("no inspection of the platform", inspections.keys.all { it.startsWith("Go") || it.startsWith("Vgo") })  // Vgo*: GoLand's go.mod ids
         assertEquals("Go", inspections.getValue("GoUnusedLabel").group)
         assertEquals("Go · Data flow", inspections.getValue("GoLostCancel").group)
         assertEquals("Go · Lint", inspections.getValue("GoUncheckedError").group)

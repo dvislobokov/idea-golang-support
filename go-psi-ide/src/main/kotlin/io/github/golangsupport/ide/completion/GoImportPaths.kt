@@ -7,6 +7,8 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import io.github.golangsupport.ide.GoIdeOptions
+import io.github.golangsupport.ide.GoImportExclusions
 import io.github.golangsupport.project.api.GoModule
 import io.github.golangsupport.project.api.GoModuleGraphProvider
 import io.github.golangsupport.project.api.GoToolchainProvider
@@ -39,8 +41,15 @@ object GoImportPaths {
     private val moduleCache = ConcurrentHashMap<Path, List<String>>()
     private const val MAX_DEPTH = 10
 
-    /** Every importable package seen from [file]: standard library first, then modules in build-list order. */
-    fun all(project: Project, file: VirtualFile?): List<Entry> = std(project) + modules(project, file)
+    /**
+     * Every importable package seen from [file]: standard library first, then modules in build-list order; without the paths the user
+     * excluded from import and completion ([GoImportExclusions]).
+     */
+    fun all(project: Project, file: VirtualFile?): List<Entry> {
+        val all = std(project) + modules(project, file)
+        val excluded = GoIdeOptions.getInstance().importExcluded
+        return if (excluded.isEmpty()) all else all.filter { !GoImportExclusions.excluded(it.path, excluded) }
+    }
 
     fun std(project: Project): List<Entry> {
         val src = GoToolchainProvider.getInstance().toolchainFor(project)?.gorootSrc ?: return emptyList()

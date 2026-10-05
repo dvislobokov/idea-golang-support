@@ -160,7 +160,8 @@ class GoEnterBetweenBracketsHandler : EnterHandlerDelegateAdapter() {
 
 /**
  * Settings | Editor | Code Style | Go. Tabs, as gofmt writes them; the width of a tab is the only thing that is a matter of taste.
- * The other tabs of a code style page (Spaces, Wrapping, Blank Lines) would promise a formatter of the IDE: the formatter is gofmt.
+ * The standard tabs of a code style page (Spaces, Blank Lines) would promise a formatter of the IDE: the formatter is gofmt. What gofmt
+ * leaves alone has its own tabs: Wrapping and Braces (chop down long lists) and Imports (the layout Optimize Imports writes), PLAN.md G8.
  */
 class GoCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() {
     override fun getLanguage(): Language = GoLanguage
@@ -177,7 +178,11 @@ class GoCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() {
     override fun createConfigurable(baseSettings: CodeStyleSettings, modelSettings: CodeStyleSettings): CodeStyleConfigurable =
         object : CodeStyleAbstractConfigurable(baseSettings, modelSettings, "Go") {
             override fun createPanel(settings: CodeStyleSettings): CodeStyleAbstractPanel = object : TabbedLanguageCodeStylePanel(GoLanguage, currentSettings, settings) {
-                override fun initTabs(settings: CodeStyleSettings) = addIndentOptionsTab(settings)
+                override fun initTabs(settings: CodeStyleSettings) {
+                    addIndentOptionsTab(settings)
+                    addTab(GoWrappingCodeStyleTab(settings))
+                    addTab(GoImportsCodeStyleTab(settings))
+                }
             }
         }
 

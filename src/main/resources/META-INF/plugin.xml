@@ -128,6 +128,13 @@
         <!-- the navigation and usages extensions of go-psi-ide answer only when their feature switch says Built-in (step 8c) -->
         <applicationService serviceInterface="io.github.golangsupport.ide.GoIdeFeatureGate"
                             serviceImplementation="io.github.golangsupport.lang.GoIgsIdeFeatureGate" overrides="true"/>
+        <!-- the auto-import and linked-rename options of go-psi-ide are kept in GoSettings (PLAN.md G8) -->
+        <applicationService serviceInterface="io.github.golangsupport.ide.GoIdeOptions"
+                            serviceImplementation="io.github.golangsupport.lang.GoIgsIdeOptions" overrides="true"/>
+        <!-- Settings | Editor | General | Auto Import, the Go section: on the fly imports, the import popup, exclusions -->
+        <autoImportOptionsProvider instance="io.github.golangsupport.settings.GoAutoImportOptionsProvider"/>
+        <!-- JSON pasted into a Go file becomes a Go type (Settings | Go | Editor and Completion, "When JSON is pasted") -->
+        <copyPastePreProcessor implementation="io.github.golangsupport.lang.GoJsonPastePreProcessor"/>
         <!-- *_test.go are tests: the "Tests" scope of the platform, and with it the green background in the tree and the tabs -->
         <testSourcesFilter implementation="io.github.golangsupport.testing.GoTestSourcesFilter"/>
 

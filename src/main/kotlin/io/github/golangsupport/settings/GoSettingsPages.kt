@@ -20,6 +20,7 @@ import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.Cell
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.builder.rows
 import com.intellij.ui.dsl.builder.selected
 import com.intellij.ui.dsl.builder.toNullableProperty
 import com.intellij.ui.layout.selectedValueMatches
@@ -32,6 +33,8 @@ import javax.swing.JCheckBox
 import javax.swing.table.TableCellEditor
 import javax.swing.table.TableCellRenderer
 import io.github.golangsupport.GoBundle
+import io.github.golangsupport.ide.GoRenameChoice
+import io.github.golangsupport.ide.inspections.printf.GoPrintfFunctions
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.problems.GoProjectProblems
 
@@ -137,6 +140,26 @@ class GoEditorConfigurable(project: Project) : GoSettingsPage(project, "page.edi
             row { checkBox(GoBundle.message("completion.values")).bindSelected(settings::completionValues).comment(GoBundle.message("completion.values.comment")) }
             row { checkBox(GoBundle.message("completion.arguments")).bindSelected(settings::completionArguments).comment(GoBundle.message("completion.arguments.comment")) }
         }
+        // GoLand's "When ... is renamed" / "When JSON is pasted" of its Go page
+        group(GoBundle.message("rename.group")) {
+            renameChoice("rename.testFiles", settings::renameTestFiles)
+            renameChoice("rename.structTags", settings::renameStructTags)
+            renameChoice("rename.directoryPackage", settings::renameDirectoryPackage)
+            renameChoice("rename.packageDirectory", settings::renamePackageDirectory)
+            row { comment(GoBundle.message("rename.comment")) }
+        }
+        group(GoBundle.message("paste.group")) {
+            row(GoBundle.message("paste.json")) {
+                comboBox(GoPasteJson.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::pasteJson.toNullableProperty())
+                    .comment(GoBundle.message("paste.json.comment"))
+            }
+        }
+    }
+
+    private fun Panel.renameChoice(key: String, property: kotlin.reflect.KMutableProperty0<GoRenameChoice>) {
+        row(GoBundle.message(key)) {
+            comboBox(GoRenameChoice.entries, SimpleListCellRenderer.create("") { GoBundle.message("renameChoice.${it.name}") }).bindItem(property.toNullableProperty())
+        }
     }
 }
 
@@ -146,6 +169,7 @@ class GoImportsConfigurable(project: Project) : GoSettingsPage(project, "page.im
         row { checkBox(GoBundle.message("completion.unimported")).bindSelected(settings::completionUnimportedPackages).comment(GoBundle.message("completion.unimported.comment")) }
         row { checkBox(GoBundle.message("completion.catalogue")).bindSelected(settings::completionCatalogue).comment(GoBundle.message("completion.catalogue.comment")) }
         row { comment(GoBundle.message("imports.paste")) }
+        row { comment(GoBundle.message("imports.autoImport")) }
     }
 }
 
@@ -205,6 +229,7 @@ class GoLintersConfigurable(project: Project) : GoSettingsPage(project, "page.li
 
     override fun createPanel(): DialogPanel = panel {
         group(GoBundle.message("linters.builtin")) { builtIn() }
+        group(GoBundle.message("printf.group")) { printf() }
         group(GoBundle.message("quality.golangci.group")) {
             row { checkBox(GoBundle.message("quality.golangci")).bindSelected(settings::golangciLint).comment(GoBundle.message("quality.golangci.comment")) }
         }
@@ -243,6 +268,26 @@ class GoLintersConfigurable(project: Project) : GoSettingsPage(project, "page.li
                 .onReset { checks.load(GoChecksStore.load(project)) }
         }.resizableRow()
         row { comment(GoBundle.message("linters.builtin.checks")) }
+    }
+
+    /**
+     * The printf-like functions of the format checks ([GoPrintfFunctions], also edited by Alt+Enter Mark as / Exclude string formatting
+     * function): vet's full names, one per line.
+     */
+    private fun Panel.printf() {
+        val functions = GoPrintfFunctions.getInstance()
+        row(GoBundle.message("printf.extra")) {}
+        row {
+            textArea().rows(3).align(AlignX.FILL)
+                .bindText({ functions.extra.joinToString("\n") }, { functions.extra = GoSettingsLists.lines(it) })
+                .comment(GoBundle.message("printf.extra.comment"))
+        }
+        row(GoBundle.message("printf.excluded")) {}
+        row {
+            textArea().rows(3).align(AlignX.FILL)
+                .bindText({ functions.excluded.joinToString("\n") }, { functions.excluded = GoSettingsLists.lines(it) })
+                .comment(GoBundle.message("printf.excluded.comment"))
+        }
     }
 
     private fun stopEditing() {

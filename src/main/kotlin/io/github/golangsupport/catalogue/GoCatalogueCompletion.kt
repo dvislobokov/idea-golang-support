@@ -9,6 +9,7 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
+import io.github.golangsupport.ide.GoImportExclusions
 import io.github.golangsupport.lang.GoCompletionOrder
 import io.github.golangsupport.lang.GoDeclarationKind
 import io.github.golangsupport.lang.GoFeature
@@ -91,7 +92,12 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         val qualifier = matcher.latin.substringBeforeLast('.', "").takeIf { it.isNotEmpty() }
         val wanted = matcher.latin.substringAfterLast('.')
         val native = GoFeatures.native(GoFeature.COMPLETION, file.project)
-        val candidates = index.find(wanted, if (native) Int.MAX_VALUE else LIMIT, imports.mapTo(HashSet()) { it.path }, qualifier) { it.importPath != own && GoCatalogueScanner.isVisible(it.importPath, own) }
+        val imported = imports.mapTo(HashSet()) { it.path }
+        // Exclude from import and completion (Settings | Editor | General | Auto Import): an imported package stays, it is the user's already
+        val excluded = GoSettings.getInstance().importExcluded
+        val candidates = index.find(wanted, if (native) Int.MAX_VALUE else LIMIT, imported, qualifier) {
+            it.importPath != own && GoCatalogueScanner.isVisible(it.importPath, own) && (it.importPath in imported || !GoImportExclusions.excluded(it.importPath, excluded))
+        }
         val typePlace = GoStructLiterals.isTypePlace(text, parameters.offset - typed.length)
         val found = GoCatalogueInsertion.offered(if (typePlace) candidates.filter { GoCatalogueInsertion.isType(it.symbol) } else candidates, native, LIMIT)
         // while the IDE indexes the built-in completion is off and gopls may not answer yet: the predeclared types are not lost then

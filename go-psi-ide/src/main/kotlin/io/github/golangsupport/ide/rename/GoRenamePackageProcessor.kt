@@ -21,6 +21,13 @@ import com.intellij.util.containers.MultiMap
 import com.intellij.util.indexing.FileBasedIndex
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
+import io.github.golangsupport.ide.GoIdeOptions
+import io.github.golangsupport.ide.GoRenameChoice
+import com.intellij.openapi.project.Project
+import com.intellij.refactoring.rename.RenameDialog
+import java.awt.GridBagConstraints
+import javax.swing.JCheckBox
+import javax.swing.JPanel
 import io.github.golangsupport.lang.index.GoFileImportsIndex
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoImportSpec
@@ -78,13 +85,50 @@ class GoRenamePackageProcessor : RenamePsiElementProcessor() {
                 val dir = element.containingFile?.containingDirectory ?: return
                 val old = element.name ?: return
                 addClauses(dir, old, newName, allRenames)
-                if (dir.name == old && dir.name != newName && isPackageDirectory(dir)) allRenames[dir] = newName
+                if (dir.name == old && dir.name != newName && isPackageDirectory(dir) && linked(GoIdeOptions.getInstance().renamePackageDirectory)) allRenames[dir] = newName
             }
             is PsiDirectory -> {
                 val old = element.name
-                if (old != "main" && GoNamesValidator.isValidIdentifier(newName) && primaryClause(element, old) != null) {
+                if (old != "main" && GoNamesValidator.isValidIdentifier(newName) && primaryClause(element, old) != null &&
+                    linked(GoIdeOptions.getInstance().renameDirectoryPackage)) {
                     addClauses(element, old, newName, allRenames)
                 }
+            }
+        }
+    }
+
+    private fun linked(choice: GoRenameChoice): Boolean = when (choice) {
+        GoRenameChoice.ALWAYS -> true
+        GoRenameChoice.NEVER -> false
+        GoRenameChoice.ASK -> askedLinked
+    }
+
+    /**
+     * With [GoRenameChoice.ASK] the rename dialog of a package clause or a package directory has a check box for the other half
+     * ("Rename directory" / "Rename package"); its state is what [prepareRenaming] reads, and it stays for the renames without a dialog.
+     */
+    override fun createRenameDialog(project: Project, element: PsiElement, nameSuggestionContext: PsiElement?, editor: Editor?): RenameDialog {
+        val options = GoIdeOptions.getInstance()
+        val label = when {
+            element is GoPackageClause && options.renamePackageDirectory == GoRenameChoice.ASK -> "Rename directory"
+            element is PsiDirectory && options.renameDirectoryPackage == GoRenameChoice.ASK -> "Rename package"
+            else -> return super.createRenameDialog(project, element, nameSuggestionContext, editor)
+        }
+        return object : RenameDialog(project, element, nameSuggestionContext, editor) {
+            private val linkedBox = JCheckBox(label, askedLinked)
+
+            override fun createCheckboxes(panel: JPanel, gbConstraints: GridBagConstraints) {
+                super.createCheckboxes(panel, gbConstraints)
+                gbConstraints.gridx = 0
+                gbConstraints.gridy = GridBagConstraints.RELATIVE
+                gbConstraints.gridwidth = GridBagConstraints.REMAINDER
+                gbConstraints.fill = GridBagConstraints.HORIZONTAL
+                panel.add(linkedBox, gbConstraints)
+            }
+
+            override fun doAction() {
+                askedLinked = linkedBox.isSelected
+                super.doAction()
             }
         }
     }
@@ -156,6 +200,9 @@ class GoRenamePackageProcessor : RenamePsiElementProcessor() {
     }
 
     companion object {
+        /** The last state of the "Rename directory" / "Rename package" check box ([GoRenameChoice.ASK]); on until the user unchecks it. */
+        @Volatile var askedLinked = true
+
         /** The primary package clause of an unaliased import of a project package (the target of renaming `pkg` in `pkg.X`), else null. */
         fun importedClause(spec: GoImportSpec): GoPackageClause? {
             if (spec.alias != null || spec.path == "C") return null

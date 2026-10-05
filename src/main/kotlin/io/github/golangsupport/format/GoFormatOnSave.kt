@@ -52,9 +52,10 @@ class GoFormatOnSave : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
             val text = document.immutableCharSequence.toString()
             val stamp = document.modificationStamp
             val directory = file.parent?.path
+            val local = GoFormattingService.localPrefixes(project, file)
             ApplicationManager.getApplication().executeOnPooledThread {
                 val formatter = GoFormattingService.formatter() ?: return@executeOnPooledThread
-                val replacement = format(formatter, directory, text)?.let { GoTextDiff.minimal(text, it) } ?: return@executeOnPooledThread
+                val replacement = format(formatter, directory, local, text)?.let { GoTextDiff.minimal(text, it) } ?: return@executeOnPooledThread
                 ApplicationManager.getApplication().invokeLater({
                     // typed on since: the next save formats what is there then
                     if (document.modificationStamp != stamp || !file.isValid) return@invokeLater
@@ -76,8 +77,8 @@ class GoFormatOnSave : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
         if (psiFiles.isNotEmpty()) ReformatCodeProcessor(project, psiFiles.toTypedArray(), null, false).run()
     }
 
-    private fun format(executable: java.io.File, directory: String?, text: String): String? = try {
-        val handler = CapturingProcessHandler(GoFormattingService.commandLine(executable, directory))
+    private fun format(executable: java.io.File, directory: String?, local: List<String>, text: String): String? = try {
+        val handler = CapturingProcessHandler(GoFormattingService.commandLine(executable, directory, local))
         handler.processInput.use { it.write(text.toByteArray(StandardCharsets.UTF_8)) }
         val output = handler.runProcess(TIMEOUT_MS)
         // a syntax error is the business of the editor, not of saving

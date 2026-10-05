@@ -6,6 +6,8 @@
     <!-- Phase 6d: inspections over GoSemanticService.check, quick fixes (docs/IDE-FEATURES.md). -->
     <lang.inspectionSuppressor language="Go" implementationClass="io.github.golangsupport.ide.inspections.GoInspectionSuppressor"/>
     <lang.importOptimizer language="Go" implementationClass="io.github.golangsupport.ide.inspections.GoImportOptimizer"/>
+    <!-- "Add unambiguous imports on the fly" (GoIdeOptions): ShowAutoImportPass asks it for every error it sees -->
+    <referenceImporter implementation="io.github.golangsupport.ide.imports.GoReferenceImporter"/>
     <localInspection language="Go" shortName="GoUnresolvedReference" displayName="Unresolved reference"
                      groupName="Go" enabledByDefault="true" level="ERROR"
                      implementationClass="io.github.golangsupport.ide.inspections.GoUnresolvedReferenceInspection"/>
@@ -349,4 +351,9 @@
                      groupPath="Go" groupName="Control flow issues" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.bugs.GoAssignmentToReceiverInspection"/>
   </extensions>
+  <!-- "Optimize imports on the fly" (GoIdeOptions): unused imports go away when the daemon has finished and they are the only problems -->
+  <projectListeners>
+    <listener class="io.github.golangsupport.ide.imports.GoOptimizeImportsOnTheFly"
+              topic="com.intellij.codeInsight.daemon.DaemonCodeAnalyzer$DaemonListener"/>
+  </projectListeners>
 </idea-plugin>

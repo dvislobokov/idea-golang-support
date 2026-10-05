@@ -16,6 +16,9 @@
     <renamePsiElementProcessor implementation="io.github.golangsupport.ide.rename.GoRenameMethodProcessor"/>
     <renamePsiElementProcessor implementation="io.github.golangsupport.ide.rename.GoRenamePackageProcessor" order="first"/>
     <vetoRenameCondition implementation="io.github.golangsupport.ide.rename.GoLibraryPackageRenameVeto"/>
+    <!-- linked renames with GoLand's Ask / Always / Never (GoIdeOptions): foo.go <-> foo_test.go, a field's struct tag names -->
+    <automaticRenamerFactory implementation="io.github.golangsupport.ide.rename.GoTestFileRenamerFactory"/>
+    <automaticRenamerFactory implementation="io.github.golangsupport.ide.rename.GoStructTagRenamerFactory"/>
     <refactoring.safeDeleteProcessor implementation="io.github.golangsupport.ide.refactoring.GoSafeDeleteProcessor"/>
     <inlineActionHandler implementation="io.github.golangsupport.ide.refactoring.GoInlineActionHandler"/>
     <refactoring.moveHandler implementation="io.github.golangsupport.ide.refactoring.GoMoveHandler" id="goMoveDeclarations" order="before moveFileOrDir"/>

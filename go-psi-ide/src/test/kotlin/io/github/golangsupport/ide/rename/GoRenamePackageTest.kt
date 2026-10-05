@@ -114,6 +114,30 @@ class GoRenamePackageTest : GoSemanticIdeTestBase() {
         assertEquals("package uses\n\nimport \"example.com/app/tools\"\n\nvar _ = helpers.Help\n", text("uses/uses.go"))
     }
 
+    fun testPackageRenameKeepsTheDirectoryWhenToldNever() = inModule {
+        val options = io.github.golangsupport.ide.GoIdeOptions.getInstance()
+        options.renamePackageDirectory = io.github.golangsupport.ide.GoRenameChoice.NEVER
+        try {
+            renameAt("store/store.go", "package store", "shop", shift = "package ".length + 1)
+            assertNotNull(root.findChild("store"))
+            assertEquals("package shop\n\ntype Item struct{}\n\nfunc Load() Item { return Item{} }\n", text("store/store.go"))
+        } finally {
+            options.renamePackageDirectory = io.github.golangsupport.ide.GoRenameChoice.ASK
+        }
+    }
+
+    fun testDirectoryRenameKeepsThePackageWhenToldNever() = inModule {
+        val options = io.github.golangsupport.ide.GoIdeOptions.getInstance()
+        options.renameDirectoryPackage = io.github.golangsupport.ide.GoRenameChoice.NEVER
+        try {
+            myFixture.renameElement(dir("store"), "shop")
+            assertEquals("package store\n\ntype Item struct{}\n\nfunc Load() Item { return Item{} }\n", text("shop/store.go"))
+            assertEquals(MAIN.replace("app/store", "app/shop"), text("main.go"))
+        } finally {
+            options.renameDirectoryPackage = io.github.golangsupport.ide.GoRenameChoice.ASK
+        }
+    }
+
     fun testMainPackageKeepsItsName() = inModule {
         myFixture.renameElement(dir("cmd/tool"), "server")
         assertEquals("package main\n\nfunc main() {}\n", text("cmd/server/main.go"))

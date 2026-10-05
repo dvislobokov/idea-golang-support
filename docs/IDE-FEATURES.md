@@ -882,6 +882,29 @@ gopls `Create …`, `Implement …` and `Declare missing methods …` actions th
   (`LocalInspectionTool.processFile`, stopped at 100), cached on the file by document stamp and the set of enabled tools; the daemon's highlights would be
   cheaper, but code vision and the inspection pass run in no fixed order. Tests: `inspections.gofix.GoSyntaxUpdateTest` (10, with a test-only `GoFixTestInspection`).
 
+### Imports, code style, linked renames (PLAN.md G8, items 1–5)
+- `GoIdeOptions` (`go-psi-ide-editor.xml`, application service, `DefaultGoIdeOptions` in memory): the options of go-psi-ide that the host keeps; IGS overrides
+  it with `lang.GoIgsIdeOptions` over `GoSettings`. `GoImportExclusions.excluded(path)`: exact path, `/...` or `/*` = the path and its subpackages, a
+  trailing `*` / `...` = a string prefix. `GoImportPaths.all()` drops excluded paths (import-path completion and the import fixes).
+- Auto import: `GoAddImportFix` is a `HintAction` too (the inspection fix itself reaches the daemon: `QuickFixWrapper.wrap` returns an `IntentionAction`
+  fix unwrapped), so `ShowAutoImportPass` shows "Import "x"? Alt+Enter" unless `importShowPopup` is off; one candidate imports at once, several open a chooser.
+  `imports.GoReferenceImporter` (`referenceImporter`): an undefined qualifier with exactly one candidate (`GoAddImportFix.candidates(…, 2)`) is imported on the
+  fly, never while the caret is on the name or right after it. `imports.GoOptimizeImportsOnTheFly` (`DaemonListener`): when the daemon finishes, a file
+  whose only problems are `GoUnusedImport` loses those specs (no lookup / template, caret outside the imports, document committed and writable).
+- `formatter.GoCodeStyleSettings` (`CustomCodeStyleSettings`, created by `GoCodeStyleSettingsProvider`: the platform asks every `codeStyleSettingsProvider`
+  but a language provider only when it has a page): `IMPORT_SORTING` goimports / gofmt / none, `IMPORT_GROUP_STDLIB`, `IMPORT_GROUP_LOCAL` +
+  `IMPORT_LOCAL_PREFIXES` (`localGroup(file)`: typed prefixes, else the main modules), `IMPORT_ONE_DECLARATION`, `IMPORT_REMOVE_REDUNDANT_ALIASES`,
+  `CHOP_DOWN_CALL_ARGUMENTS` / `_COMPOSITE_LITERALS` / `_PARAMETERS`. `GoImportEdits.optimize` applies them (`GoImportGroups.merge`,
+  `withoutRedundantAlias`, `regroup(…, groupStdlib)`); `import "C"` is never merged. The host's tabs: `lang.GoCodeStylePanels`.
+- `formatter.GoChopDownPostFormatProcessor`: a one-line argument list / literal value / parameter list (not results) wider than the right margin becomes one
+  item per line with a trailing comma; lists with comments or line breaks are left alone. Built-in formatter only (an external gofmt claims the file first).
+- `rename.GoLinkedRenames`: `GoTestFileRenamerFactory` (`a.go` ↔ `a_test.go` in the same directory), `GoStructTagRenamerFactory` (tag keys of
+  `GoStructTagCompletion` whose value is a style of the old field name, renamed in that style; `GoTagNameElement` is the fake named element). Ask = the
+  dialog check box, Always = no option name (always joins), Never = not applicable. `GoRenamePackageProcessor`: directory ↔ package follow
+  `renameDirectoryPackage` / `renamePackageDirectory`; Ask adds a check box to the dialog, remembered for in-place renames.
+- Tests: `imports.GoAutoImportTest` (10), `formatter.GoCodeStyleOptionsTest` (12), `rename.GoLinkedRenamesTest` (7), two more in `GoRenamePackageTest`;
+  host `GoJsonPasteTest` (paste JSON → Go type with `GoJsonPastePreProcessor`, goimports `-local`).
+
 ### Coverage, profiler, goroutine dump (host `coverage`, `run`, `monitor`; PLAN.md G9 items 1–3)
 - Coverage through the platform (`coverage` package, `META-INF/go-coverage.xml`, `<depends optional="true">com.intellij.modules.coverage</depends>`; the module is the
   product module `intellij.platform.coverage`, `bundledModule` in Gradle): `GoCoverageEngine` (applies to `go test` configurations not over SSH; counts `.go`

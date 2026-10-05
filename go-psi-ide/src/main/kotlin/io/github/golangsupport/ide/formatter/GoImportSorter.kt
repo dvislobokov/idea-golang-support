@@ -133,11 +133,46 @@ class GoImportSorter : PreFormatProcessor {
 object GoImportGroups {
     enum class Group { CGO, STANDARD, THIRD_PARTY, LOCAL }
 
-    fun groupOf(path: String, locals: Collection<String>): Group = when {
+    /** The group of [path]; with [groupStdlib] off (Code Style | Go | Imports) the standard library shares the group of third-party packages. */
+    fun groupOf(path: String, locals: Collection<String>, groupStdlib: Boolean = true): Group = when {
         path == "C" -> Group.CGO
         locals.any { path == it || path.startsWith("$it/") } -> Group.LOCAL
-        '.' !in path.substringBefore('/') -> Group.STANDARD
+        '.' !in path.substringBefore('/') && groupStdlib -> Group.STANDARD
         else -> Group.THIRD_PARTY
+    }
+
+    /**
+     * "Move all imports to a single declaration": the texts of several import declarations ([declarations], `import "a"` or `import (…)`)
+     * as one parenthesised declaration with every spec line (and the comment lines inside the parentheses) in their order; null when there is
+     * nothing to merge or a declaration has several specs on a line.
+     */
+    fun merge(declarations: List<String>): String? {
+        if (declarations.size < 2) return null
+        val lines = ArrayList<String>()
+        for (declaration in declarations) {
+            val body = declaration.trim().removePrefix("import").trim()
+            if (body.startsWith("(")) {
+                if (!body.endsWith(")")) return null
+                for (raw in body.substring(1, body.length - 1).split('\n')) {
+                    val line = raw.trim()
+                    if (line.isEmpty()) continue
+                    if (!line.startsWith("//") && !line.startsWith("/*") && SPEC.matchEntire(line) == null) return null
+                    lines += line
+                }
+            } else {
+                if (SPEC.matchEntire(body) == null) return null
+                lines += body
+            }
+        }
+        return "import (\n" + lines.joinToString("") { "\t$it\n" } + ")"
+    }
+
+    /** The spec text without its alias when the alias is [importName] (the name the package is imported under anyway): `fmt "fmt"` -> `"fmt"`. */
+    fun withoutRedundantAlias(spec: String, importName: String): String? {
+        val match = SPEC.matchEntire(spec.trim()) ?: return null
+        val alias = match.groupValues[1]
+        if (alias.isEmpty() || alias == "_" || alias == "." || alias != importName) return null
+        return spec.trim().removePrefix(alias).trimStart()
     }
 
     /** The module paths of the main modules (go.mod, or every `use` of go.work) the file belongs to; empty outside a module. Read action. */
@@ -156,7 +191,7 @@ object GoImportGroups {
      * by path, name, comment and separated by one blank line; null when nothing changes or the layout is not one spec per line (then
      * gofmt's sort is all it gets). Comment lines above a spec move with it; those after the last spec stay at the end.
      */
-    fun regroup(declaration: String, locals: Collection<String>): String? {
+    fun regroup(declaration: String, locals: Collection<String>, groupStdlib: Boolean = true): String? {
         val open = declaration.indexOf('(')
         val close = declaration.lastIndexOf(')')
         if (open < 0 || close < open) return null
@@ -180,7 +215,7 @@ object GoImportGroups {
             }
         }
         if (specs.size < 2) return null
-        val groups = specs.groupBy { groupOf(it.path, locals) }.toSortedMap().values
+        val groups = specs.groupBy { groupOf(it.path, locals, groupStdlib) }.toSortedMap().values
             .map { group -> group.sortedWith(compareBy<Spec>({ it.path }, { it.name }, { it.comment })) }
         val body = groups.joinToString("\n") { group -> group.joinToString("") { spec -> spec.lines.joinToString("") { "\t$it\n" } } } +
             pending.joinToString("") { "\t$it\n" }

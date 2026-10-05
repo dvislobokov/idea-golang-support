@@ -236,11 +236,13 @@
 - [x] (2026-10-05, 0.2.159) **Vulnerable API usage** в коде (результат govulncheck — подсветка вызова, выключена по умолчанию, как у GoLand) и импорт уязвимого пакета; Go | Check Vulnerabilities.
 
 ### G8. Настройки и помощь при наборе (≈4 дня)
-- [ ] Imports: **Add unambiguous imports on the fly**, **Optimize imports on the fly**, **Show import popup**, исключения из импорта / completion. 1 день.
-- [ ] Code Style \| Go \| Imports: сортировка goimports / gofmt / нет, группа «проект» или local prefixes (`goimports -local`), один блок, удалять лишние алиасы; Wrapping (аргументы, литералы, параметры). 1 день.
-- [ ] Список **printf-подобных функций** (Settings + Alt+Enter Exclude). Часы.
-- [ ] Переименование: **файл ↔ `_test`-файл**, **тег** при переименовании поля, каталог ↔ пакет (есть) — с выбором Show options / делать / не делать. 0,5 дня.
-- [ ] **Вставка JSON → тип Go** при Ctrl+V (спросить / конвертировать / как есть; `CopyPastePreProcessor`). 0,5 дня.
+- [x] (2026-10-05, 0.2.164) Imports: **Add unambiguous imports on the fly**, **Optimize imports on the fly**, **Show import popup**, исключения из импорта / completion
+  (раздел Go на платформенной странице Auto Import; `GoIdeOptions` в go-psi-ide, `GoIgsIdeOptions` в IGS).
+- [x] (2026-10-05, 0.2.165) Code Style \| Go \| Imports: сортировка goimports / gofmt / нет, группа «проект» или local prefixes (`goimports -local`), один блок, удалять лишние алиасы;
+  Wrapping (аргументы, литералы, параметры — только встроенный форматтер).
+- [x] (2026-10-05, 0.2.166) Список **printf-подобных функций** (Settings + Alt+Enter Exclude).
+- [x] (2026-10-05, 0.2.167) Переименование: **файл ↔ `_test`-файл**, **тег** при переименовании поля, каталог ↔ пакет — с выбором Show options / делать / не делать.
+- [x] (2026-10-05, 0.2.168) **Вставка JSON → тип Go** при Ctrl+V (спросить / конвертировать / как есть; `CopyPastePreProcessor`, конвертер `GoJsonTypes`).
 - [x] (2026-10-05, 0.2.153–0.2.154) Actions on Save: **Optimize imports** отдельной галочкой (Reformat есть); Go Modules: vendoring, загрузка зависимостей (четыре варианта GoLand),
   Environment для команд go. Не сделано: загрузка зависимостей при открытии проекта (только после сохранения go.mod).
 - [x] (2026-10-05, 0.2.155) Debugger Data Views \| Go: формат целых (dec / hex / bin / оба), адреса указателей (только скрытие: delve адрес пройденного указателя не шлёт), String() view.

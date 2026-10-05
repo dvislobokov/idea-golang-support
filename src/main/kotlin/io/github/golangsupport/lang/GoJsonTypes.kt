@@ -87,6 +87,35 @@ object GoJsonTypes {
         return Result(code.toString(), imports.distinct())
     }
 
+    /** A JSON object (not an array, not a scalar): what paste converts. */
+    fun looksLikeJsonObject(text: String?): Boolean = looksLikeJson(text) && text!!.trim().startsWith("{")
+
+    /**
+     * The field lines of the root object of [json] for the body of an existing struct (paste between its braces): a nested object is an
+     * anonymous struct in place, so that nothing has to be declared elsewhere. Lines indented by [indent]; throws when not a JSON object.
+     */
+    fun fields(json: String, options: Options = Options(), indent: String = "\t"): Result {
+        val root = runCatching { JsonParser.parseString(json) }.getOrElse { throw IllegalArgumentException(it.message ?: "not JSON") }
+        val type = infer(root, "Data", options) as? Type.Struct ?: throw IllegalArgumentException("not a JSON object")
+        val imports = ArrayList<String>()
+        return Result(inlineFields(type, options, indent, imports), imports.distinct())
+    }
+
+    private fun inlineFields(struct: Type.Struct, options: Options, indent: String, imports: MutableList<String>): String = buildString {
+        val names = HashSet<String>()
+        for ((key, type) in struct.fields) {
+            val tag = "`json:\"$key${if (options.omitEmpty) ",omitempty" else ""}\"`"
+            append(indent).append(unique(fieldName(key), names)).append(' ').append(renderInline(type, options, indent, imports)).append(' ').append(tag).append('\n')
+        }
+    }
+
+    private fun renderInline(type: Type, options: Options, indent: String, imports: MutableList<String>): String = when (type) {
+        is Type.Struct -> "struct {\n" + inlineFields(type, options, "$indent\t", imports) + indent + "}"
+        is Type.Slice -> "[]" + renderInline(type.element, options, indent, imports)
+        is Type.Pointer -> "*" + renderInline(type.target, options, indent, imports)
+        else -> render(type, imports)
+    }
+
     private fun infer(element: JsonElement, hint: String, options: Options): Type = when {
         element.isJsonNull -> Type.Any
         element is JsonPrimitive -> when {

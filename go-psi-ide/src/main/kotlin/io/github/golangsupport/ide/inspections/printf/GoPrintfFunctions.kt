@@ -10,7 +10,7 @@ import com.intellij.util.xmlb.annotations.XCollection
 /**
  * The user's corrections to [GoPrintfCalls]: functions to treat as printf-like ([State.extra]) and printf-like ones to ignore
  * ([State.excluded]), by vet's full name (`fmt.Printf`, `example.com/log.Infof`, `(*example.com/log.Logger).Infof`). Filled by the
- * intentions Mark as / Exclude string formatting function; a settings page edits the same lists later (PLAN.md G8). Application-level:
+ * intentions Mark as / Exclude string formatting function; the host's settings page (Settings | Go | Linters) edits the same lists. Application-level:
  * the names are import paths, the same in every project.
  */
 @Service(Service.Level.APP)
@@ -34,6 +34,18 @@ class GoPrintfFunctions : PersistentStateComponent<GoPrintfFunctions.State> {
     override fun loadState(state: State) {
         this.state = state
     }
+
+    /** The functions marked as printf-like, as the settings page edits them (a copy; set replaces the list). */
+    var extra: List<String>
+        get() = state.extra.toList()
+        set(value) { state.extra = clean(value) }
+
+    /** The printf-like functions that are not checked, as the settings page edits them. */
+    var excluded: List<String>
+        get() = state.excluded.toList()
+        set(value) { state.excluded = clean(value) }
+
+    private fun clean(names: List<String>): MutableList<String> = names.map { it.trim() }.filter { it.isNotEmpty() }.distinct().toMutableList()
 
     fun isExtra(name: String): Boolean = name in state.extra
 

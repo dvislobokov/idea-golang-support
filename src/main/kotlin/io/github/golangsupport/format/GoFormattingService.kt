@@ -4,7 +4,12 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
+import io.github.golangsupport.ide.formatter.GoCodeStyleSettings
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.cli.GoTool
@@ -32,12 +37,13 @@ class GoFormattingService : AsyncDocumentFormattingService() {
             return null
         }
         val directory = request.context.virtualFile?.parent?.path
+        val local = request.context.virtualFile?.let { localPrefixes(request.context.project, it) }.orEmpty()
         return object : FormattingTask {
             private var handler: CapturingProcessHandler? = null
 
             override fun run() {
                 try {
-                    val commandLine = commandLine(executable, directory)
+                    val commandLine = commandLine(executable, directory, local)
                     val process = CapturingProcessHandler(commandLine).also { handler = it }
                     process.processInput.use { it.write(request.documentText.toByteArray(StandardCharsets.UTF_8)) }
                     val output = process.runProcess(30_000)
@@ -67,11 +73,32 @@ class GoFormattingService : AsyncDocumentFormattingService() {
             GoFormatter.NONE, GoFormatter.NATIVE -> null
         }
 
-        /** The text comes on stdin, the result on stdout, for every formatter; golangci-lint needs to be told so (`fmt --stdin`, v2). */
-        fun arguments(formatter: GoFormatter): List<String> = if (formatter == GoFormatter.GOLANGCI_LINT_FMT) listOf("fmt", "--stdin") else emptyList()
+        /**
+         * The text comes on stdin, the result on stdout, for every formatter; golangci-lint needs to be told so (`fmt --stdin`, v2).
+         * goimports gets `-local` with the prefixes of Code Style | Go | Imports ([local]).
+         */
+        fun arguments(formatter: GoFormatter, local: List<String> = emptyList()): List<String> = when {
+            formatter == GoFormatter.GOLANGCI_LINT_FMT -> listOf("fmt", "--stdin")
+            formatter == GoFormatter.GOIMPORTS && local.isNotEmpty() -> listOf("-local", local.joinToString(","))
+            else -> emptyList()
+        }
 
         /** In the directory of the file: golangci-lint finds its `.golangci.yml` from there, goimports its module. */
-        fun commandLine(executable: File, directory: String?) = GoCli.toolCommandLine(executable.path, directory, *arguments(GoSettings.getInstance().formatter).toTypedArray())
+        fun commandLine(executable: File, directory: String?, local: List<String> = emptyList()) =
+            GoCli.toolCommandLine(executable.path, directory, *arguments(GoSettings.getInstance().formatter, local).toTypedArray())
+
+        /**
+         * The local prefixes typed in Code Style | Go | Imports for [file] (with the project group on); empty otherwise, and then goimports
+         * keeps its own grouping: the main module is not passed on its own, so that a project that never asked keeps what goimports writes.
+         */
+        fun localPrefixes(project: Project, file: VirtualFile): List<String> {
+            if (GoSettings.getInstance().formatter != GoFormatter.GOIMPORTS) return emptyList()
+            return ReadAction.compute<List<String>, RuntimeException> {
+                val psi = PsiManager.getInstance(project).findFile(file) ?: return@compute emptyList()
+                val style = GoCodeStyleSettings.of(psi)
+                if (style.IMPORT_GROUP_LOCAL) style.localPrefixes() else emptyList()
+            }
+        }
 
         /** `<standard input>:12:3: expected ...` -> `12:3: expected ...`, the first of them. */
         fun errorMessage(stderr: String): String = stderr.lineSequence().firstOrNull { it.isNotBlank() }?.removePrefix("<standard input>:")?.trim() ?: "The formatter has failed"

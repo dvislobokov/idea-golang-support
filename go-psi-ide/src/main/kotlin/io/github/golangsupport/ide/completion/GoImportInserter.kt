@@ -4,6 +4,7 @@ import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.openapi.editor.Document
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.ide.formatter.GoCodeStyleSettings
 import io.github.golangsupport.ide.formatter.GoImportGroups
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoImportDeclaration
@@ -39,7 +40,7 @@ object GoImportInserter {
         val grouped = declarations.firstOrNull { it.lparen != null && it.rparen != null }
         // `import "C"` keeps its own declaration: the cgo preamble is the comment above it
         val single = declarations.firstOrNull { d -> d.importSpecList.none { it.path == "C" } }
-        val locals = GoImportGroups.localPrefixes(file)
+        val locals = GoCodeStyleSettings.localGroup(file)
         when {
             grouped != null -> insertIntoGroup(grouped, document, path, line, locals)
             single != null -> {

@@ -30,6 +30,49 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.168] - 2026-10-05
+
+### Added — paste JSON as a Go type (GoLand parity G8)
+- JSON pasted into a Go file (Settings | Tools | Go | Editor and Completion "When JSON is pasted": Show options by default / Convert JSON to a Go type / Insert
+  JSON as-is): between declarations a `type Generated struct` with nested types, after `type Name` the struct type, inside a struct its fields (nested objects as
+  anonymous structs); inside functions, strings and expressions the text stays as pasted. The options dialog has "Don't ask again".
+
+## [0.2.167] - 2026-10-05
+
+### Added — linked renames (GoLand parity G8)
+- Settings | Tools | Go | Editor and Completion, each with Show options / Rename / Do not rename (Show options by default): renaming a file renames its test or
+  production file (`foo.go` ↔ `foo_test.go`), renaming a struct field renames its struct tags in the style of each key, renaming a directory renames its package
+  and a package its directory (checkbox in the Rename dialog; the last choice is kept for in-place renames).
+
+## [0.2.166] - 2026-10-05
+
+### Added — printf-like functions in Settings (GoLand parity G8)
+- Settings | Tools | Go | Linters: the lists of functions checked as printf-like and of functions excluded from the check, the same lists Alt+Enter "Mark as
+  string formatting function" / "Exclude …" edit.
+
+## [0.2.165] - 2026-10-05
+
+### Added — Code Style | Go: Imports and Wrapping (GoLand parity G8)
+- Imports tab: sorting goimports / gofmt / None (goimports by default), group standard library (on), group project packages with local prefixes (on; typed prefixes
+  are also passed to goimports as `-local`), move all imports to a single declaration (off; `import "C"` stays apart), remove redundant import aliases (off);
+  applied by Optimize Imports.
+- Wrapping and Braces: chop down call arguments / composite literal elements / function parameters if long (all off): one item per line with a trailing comma past
+  the right margin; Reformat Code with the Built-in formatter only — gofmt and goimports never move line breaks. One "Go" page in Code Style (the duplicate
+  page is gone).
+
+## [0.2.164] - 2026-10-05
+
+### Added — auto import options (GoLand parity G8)
+- Settings | Editor | General | Auto Import, section Go: "Show import popup" (on; `Import "strings"? Alt+Enter` over an unresolved package), "Add unambiguous
+  imports on the fly" (on; the import is added when the candidate package is the only one and the caret has left the name), "Optimize imports on the fly" (off;
+  unused imports go when they are the file's only problems and no lookup or template is open), "Exclude from import and completion" (import paths, `/...` for
+  subpackages; honoured by bare-name completion, the import quick fixes and paste import resolution). Settings | Tools | Go | Imports links to the section.
+
+## [0.2.163] - 2026-10-05
+
+### Fixed
+- The checks settings test accepts GoLand's `Vgo*` ids of the go.mod inspections.
+
 ## [0.2.162] - 2026-10-05
 
 ### Added — Dump Goroutines (GoLand parity G9)
