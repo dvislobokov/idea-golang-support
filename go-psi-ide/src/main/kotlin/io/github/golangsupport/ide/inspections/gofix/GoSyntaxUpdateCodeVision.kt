@@ -7,7 +7,10 @@ import com.intellij.codeInsight.codeVision.CodeVisionRelativeOrdering
 import com.intellij.codeInsight.codeVision.settings.CodeVisionGroupSettingProvider
 import com.intellij.codeInsight.codeVision.settings.CodeVisionSettings
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.project.Project
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.codeInsight.codeVision.ui.model.ClickableTextCodeVisionEntry
 import com.intellij.codeInsight.hints.codeVision.DaemonBoundCodeVisionProvider
@@ -122,7 +125,8 @@ class GoModernizerWhatsNewCodeVisionSettings : CodeVisionGroupSettingProvider {
  * turns the lenses on later keeps them.
  */
 class GoSyntaxUpdateLensDefaults : ProjectActivity {
-    override suspend fun execute(project: Project) = apply()
+    // setProviderEnabled drops the PSI caches, which the platform allows on EDT only (SEVERE in the headless go-inspect run, seen live)
+    override suspend fun execute(project: Project) = withContext(Dispatchers.EDT) { apply() }
 
     companion object {
         const val APPLIED_KEY = "go.syntax.update.lenses.defaultOff"

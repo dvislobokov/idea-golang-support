@@ -51,6 +51,52 @@ class GoG7FlowInspectionsTest : GoSemanticIdeTestBase() {
         GoConstantConditionInspection(),
     )
 
+    // MIGRATION 13A: `x == nil` for a value that can never be nil, by the operand's form
+    fun testConstantConditionNeverNilOperand() = doHighlight(
+        """
+        package p
+
+        type T struct{ n int }
+
+        func (t T) M() {}
+
+        func get() *T { return nil }
+
+        func forms(v int, t T) {
+        	_ = <warning descr="Condition '&T{} == nil' is always 'false'">&T{} == nil</warning>
+        	_ = <warning descr="Condition '&v != nil' is always 'true'">&v != nil</warning>
+        	_ = <warning descr="Condition 'nil == new(T)' is always 'false'">nil == new(T)</warning>
+        	_ = <warning descr="Condition 'make(map[string]int) != nil' is always 'true'">make(map[string]int) != nil</warning>
+        	_ = <warning descr="Condition 'make(chan int) == nil' is always 'false'">make(chan int) == nil</warning>
+        	_ = <warning descr="Condition '[]int{} == nil' is always 'false'">[]int{} == nil</warning>
+        	_ = <warning descr="Condition 'map[int]bool{} != nil' is always 'true'">map[int]bool{} != nil</warning>
+        	_ = <warning descr="Condition '(func() {}) == nil' is always 'false'">(func() {}) == nil</warning>
+        	if <warning descr="Condition '(&t) == nil' is always 'false'">(&t) == nil</warning> {
+        		return
+        	}
+        }
+
+        func quiet(p *T, s []int, f func()) {
+        	_ = get() == nil
+        	_ = p == nil
+        	_ = s[1:] == nil
+        	_ = f != nil
+        	_ = []int(nil) == nil
+        	var e error
+        	_ = e == nil
+        	q := &T{}
+        	q = get()
+        	_ = q == nil
+        }
+
+        func generic[P any, S ~[]int](x P, s S) {
+        	_ = S{} == nil
+        	_ = <warning descr="Condition '&x != nil' is always 'true'">&x != nil</warning>
+        }
+        """,
+        GoConstantConditionInspection(),
+    )
+
     // G10: the probe of GoLand 2026.2.3 (probe2/style.go `shadow`), GoBoolExpressions WARNING "Condition 'x > 0' is always 'true'"
     fun testConstantConditionOfTheShadowProbe() = doHighlight(
         """

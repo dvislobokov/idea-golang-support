@@ -166,6 +166,9 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** Where the plugin keeps the programs it builds and installs, its catalogue and temporary builds; empty: the system directory of the IDE. */
         var pluginDataDirectory by string("")
 
+        /** Where GOROOT shared index chunks are downloaded from (`<url>/index.json`, docs/SHARED-INDEXES.md); empty: only chunks built locally. */
+        var sharedIndexUrl by string("")
+
         /** The library roots of the native PSI: `$GOROOT/src` alone, or also the module directories of the build list. */
         var libraryRoots by enum(GoLibraryRoots.STANDARD_LIBRARY_AND_DEPENDENCIES)
 
@@ -393,6 +396,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var pluginDataDirectory: String
         get() = state.pluginDataDirectory ?: ""
         set(value) { state.pluginDataDirectory = value }
+
+    var sharedIndexUrl: String
+        get() = state.sharedIndexUrl ?: ""
+        set(value) { state.sharedIndexUrl = value.trim() }
 
     var languageServerEnabled: Boolean
         get() = state.languageServerEnabled

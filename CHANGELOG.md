@@ -30,6 +30,47 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.183] - 2026-10-05
+
+### Added — GOROOT shared indexes (MIGRATION step 11, wave 5; docs/SHARED-INDEXES.md)
+- With the Shared Indexes plugin of the IDE (optional dependency `intellij.indexing.shared.core`, go-shared-indexes.xml) the platform's
+  on-disk locator asks `GoSharedIndexFinder` (`sharedIndexLocalFinder`) for chunks of the project's GOROOT before the first indexing, so
+  `$GOROOT/src` is attached instead of indexed. Key: release from `$GOROOT/VERSION`, `pkg/tool/<goos>_<goarch>`, sha256 of VERSION
+  (`go1.27.1-windows-amd64-<12 hex>`); chunks in `<IDE system>/go-plugin/shared-indexes/<key>/`. Go | Build Shared Index for GOROOT... runs
+  the IDE's `dump-shared-index project` headless over a throwaway go.mod project (own config/system/log, the running IDE's plugins), moves
+  the chunk there and notifies; journal category `index`. Settings | Go: "Shared indexes URL" (`<url>/index.json`, entries key / ideBuild /
+  url / sha256) downloads a missing chunk in the background for the next open. Development GOROOTs get no key.
+
+### Fixed
+- The one-time "lenses off" default of the syntax-update code vision was written off EDT (a SEVERE "dropPsiCaches must be called in EDT" in
+  the headless go-inspect run); it now runs on EDT.
+
+## [0.2.182] - 2026-10-05
+
+### Added — function literal by the expected type in basic completion
+- Wherever a function is expected (an argument, `return`, an assignment, a field of a literal), basic completion offers the literal first:
+  `func(name string) error {}` with the caret in the body; `fu` matches it. After `go` / `defer` the item is `func() {}()`. Before, the literal
+  was in smart completion only (Ctrl+Shift+Space), and `fu` listed catalogue names (`ast.Fun`, `expvar.Func`) instead (seen live).
+- Ranking against the host's catalogue: items of the PSI completion now carry the same priority as the catalogue's importable names
+  (2.0 / 1.0 for a name that begins with what is typed) plus the fit of the expected type (+1.0 identical, +0.5 assignable,
+  `GoLookupPriority`), so a local `fuel` or a fitting literal sorts above `ast.Fun`; before, every catalogue name that began with the prefix
+  came first (seen live).
+- A signature without parameter names (`http.HandleFunc`'s `func(ResponseWriter, *Request)`) gets names after the types in the literal,
+  `func(w http.ResponseWriter, r *http.Request) {}`, not `p0`, `p1` (seen live).
+
+## [0.2.181] - 2026-10-05
+
+### Added — `x == nil` of a value that can never be nil (MIGRATION 13A)
+- Constant condition (`GoDfaConstantCondition`) also reports nil comparisons whose operand is never nil by its form: `&T{}`, `&v`,
+  `new(T)`, `make(…)`, `[]T{}`, `map[K]V{}`, a function literal (`Condition '&T{} == nil' is always 'false'`). Operands typed by a
+  type parameter are skipped; declared functions and method values stay with govet `nilfunc` (`GoRules`).
+
+### Added — `tools/vet/compare.py`: the 13A gate "our findings ⊇ go vet"
+- Runs `go vet -json ./...` (`--module`) or reads saved output (`--vet-json`) and compares it with the go-inspect SARIF (`--sarif`)
+  by file:line through an analyzer → inspection table (`GoRules[govet:x]` for the rule engine). Prints vet-only, ours-only and counts
+  per analyzer; exit 1 on vet-only findings of covered analyzers, `--allow` takes `path:line analyzer reason` exceptions.
+  `asmdecl`, `cgocall`, `framepointer` are reported as not covered. Usage in docs/CI.md.
+
 ## [0.2.180] - 2026-10-05
 
 ### Changed — after a live pass over G6–G9 on the sandbox

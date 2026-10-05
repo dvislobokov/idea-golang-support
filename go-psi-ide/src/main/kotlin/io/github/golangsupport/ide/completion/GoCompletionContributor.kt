@@ -89,9 +89,10 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
         /** Converts candidates, lets a registered [GoCompletionRanker] score them, and adds them to [result]. */
         fun emit(candidates: List<GoCandidate>, context: GoCompletionContext, result: CompletionResultSet) {
             if (candidates.isEmpty()) return
+            val prefix = result.prefixMatcher.prefix
             val elements: List<LookupElement> = candidates.map { GoLookupElementFactory.create(it, context) }
-            applyRankers(elements, context, result.prefixMatcher.prefix)
-            result.addAllElements(elements)
+            applyRankers(elements, context, prefix)
+            result.addAllElements(elements.map { GoLookupPriority.wrap(it, prefix) })
         }
 
         private fun applyRankers(elements: List<LookupElement>, context: GoCompletionContext, prefix: String) {
@@ -249,8 +250,20 @@ private object GoBasicCompletion {
         out += scope
         GoKeywordCandidates.collect(context, out)
         GoSnippets.collect(context, scope, out)
+        functionLiterals(context, out)
         unimportedPackages(context, result.prefixMatcher, scope, out)
         return scope
+    }
+
+    /** The function literal written for an expected function type, and `func() {}()` right after `go` / `defer`. */
+    private fun functionLiterals(context: GoCompletionContext, out: MutableList<GoCandidate>) {
+        if (!context.isExpression) return
+        val statement = context.reference?.parent
+        if (statement is GoDeferStatement || statement is GoGoStatement) {
+            out += GoSmartLiterals(context).deferredCall()
+            return
+        }
+        context.semantics.expectedType?.let { GoSmartLiterals(context).collectFunctionLiteral(it, out) }
     }
 
     /**

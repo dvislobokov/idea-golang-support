@@ -194,6 +194,11 @@
   внутри функции — как есть), Reformat on `}` и doc-комментарий по Enter (`// pasteHere`), quick doc по наведению (AWT-робот), Go Optimization (дерево по
   файлам), Code Cleanup и Locate Duplicates (диалоги области), Share in Playground (диалог подтверждения), Attach Go Module (выбор файла), Sync Go Module (тихо),
   страница Debugger. `Plugin to blame: Go` = 0. Исправлено по итогам: заголовок диалога Data Flow и уведомление Go Optimization при ошибке сборки.
+- [x] (2026-10-05, 0.2.181–0.2.183) Миграция, хвосты закрыты: 13A — «сравнение с nil значения, которое не бывает nil» в Constant condition и гейт
+  `tools/vet/compare.py` (наши находки ⊇ `go vet -json` по SARIF headless-прогона; на playground 0 vet-only при 33 наших, golang.org/x/tools и playground
+  для vet чисты — гейт содержателен на коде с находками, таблица соответствий закреплена тестом); волна 5 — shared indexes для GOROOT
+  (`sharedIndexLocalFinder`, Go | Build Shared Index for GOROOT…, URL в настройках); 0.2.182 — литерал функции по ожидаемому типу в обычном
+  completion (аргумент, `return`, присваивание, поле; `func() {}()` после `go`/`defer`).
 - [x] (2026-10-05, 0.2.177) G10 проверен вживую на песочнике теми же пробами (`infos.js`, `highlights.js`, попапы): `style.go`, `other.go`, `iota3.go`, цвета строк
   120–136 и списки Alt+Enter (`Sprintf`, `//go:generate`, теги) совпали с GoLand построчно; `Plugin to blame: Go` за прогон — 0. Найдено и исправлено: CutPrefix на
   `name = strings.TrimPrefix(name, "go")`. Осталось расхождений: `for true` — текст S1006 вместо `Condition is redundant`; `GoShadowedVar` у GoLand TEXT ATTRIBUTES(11)

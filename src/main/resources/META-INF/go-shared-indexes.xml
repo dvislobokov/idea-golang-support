@@ -1,0 +1,14 @@
+<!-- Shared indexes of $GOROOT/src per Go release (an optional dependency of plugin.xml on the Shared Indexes plugin; docs/SHARED-INDEXES.md):
+     the platform's on-disk locator asks GoSharedIndexFinder for chunk files before the first indexing; Go | Build Shared Index for GOROOT...
+     dumps one with the IDE's own dump-shared-index starter. Classes of io.github.golangsupport.sharedindex are referenced from here only. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <sharedIndexLocalFinder implementation="io.github.golangsupport.sharedindex.GoSharedIndexFinder"/>
+  </extensions>
+  <actions>
+    <action id="Go.BuildSharedIndex" class="io.github.golangsupport.sharedindex.GoBuildSharedIndexAction" text="Build Shared Index for GOROOT..."
+            description="Index the standard library of this project's Go once, with the IDE's dump-shared-index, so that later opens attach it instead of indexing GOROOT">
+      <add-to-group group-id="Go.MainMenu" anchor="after" relative-to-action="Go.RebuildCatalogue"/>
+    </action>
+  </actions>
+</idea-plugin>

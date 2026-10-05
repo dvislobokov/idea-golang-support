@@ -1,6 +1,8 @@
 package io.github.golangsupport.settings
 
 import com.intellij.ide.DataManager
+import com.intellij.ide.plugins.PluginManagerCore
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.extensions.ExtensionPointName
@@ -85,6 +87,12 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "page.g
             row(GoBundle.message("settings.language")) {
                 comboBox(PluginLanguage.entries, SimpleListCellRenderer.create("") { it.label }).bindItem(settings::language.toNullableProperty())
             }
+            // only where the IDE has the Shared Indexes plugin: go-shared-indexes.xml is loaded with it
+            if (sharedIndexesAvailable()) {
+                row(GoBundle.message("settings.sharedIndexUrl")) {
+                    textField().align(AlignX.FILL).bindText(settings::sharedIndexUrl).comment(GoBundle.message("settings.sharedIndexUrl.comment"))
+                }
+            }
         }
         group(GoBundle.message("root.pages")) {
             for ((id, key) in GoSettingsTree.PAGES) {
@@ -107,6 +115,9 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "page.g
     }
 
     companion object {
+        /** The plugin of go-shared-indexes.xml is installed and on; checked by id, so nothing of the package `sharedindex` is loaded here. */
+        fun sharedIndexesAvailable(): Boolean = PluginManagerCore.getPlugin(PluginId.getId("intellij.indexing.shared.core"))?.let { !PluginManagerCore.isDisabled(it.pluginId) } == true
+
         /** `go` found, its version and GOROOT, or "not found"; `go env` blocks, so it is asked off EDT. [then] gets the executable on EDT. */
         fun refreshGoStatus(label: JBLabel, then: (String?) -> Unit = {}) {
             ApplicationManager.getApplication().executeOnPooledThread {

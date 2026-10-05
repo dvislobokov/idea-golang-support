@@ -36,25 +36,41 @@ class GoSmartLiterals(private val context: GoCompletionContext) {
                 source(expected.elem)?.let { literal("&$it{}", 1, expected, it) }?.let(out::add)
             underlying is GoSliceType -> source(expected)?.let { literal("make($it, 0)", 0, expected, "make") }?.let(out::add)
             underlying is GoMapType || underlying is GoChanType -> source(expected)?.let { literal("make($it)", 0, expected, "make") }?.let(out::add)
-            underlying is GoSignatureType -> functionLiteral(underlying)?.let { literal(it, 1, expected, "func") }?.let(out::add)
+            underlying is GoSignatureType -> collectFunctionLiteral(expected, out)
             underlying is GoBasicType && underlying.kind.isString -> out += literal("\"\"", 1, expected, null)
             underlying is GoBasicType && underlying.kind.isNumeric -> out += literal("0", 0, expected, null)
         }
     }
 
-    private fun literal(text: String, caretFromEnd: Int, type: GoType, alias: String?): GoCandidate = GoCandidate(
+    /**
+     * The `func(a int) error {}` literal for an expected function type, offered by basic completion too (as GoLand: an argument, a
+     * `return`, an assignment or a field whose type is a function gets the literal first, `fu` matches it); nothing for a type parameter.
+     */
+    fun collectFunctionLiteral(expected: GoType, out: MutableList<GoCandidate>) {
+        if (expected is GoTypeParamType) return
+        val signature = expected.underlying() as? GoSignatureType ?: return
+        functionLiteral(signature)?.let { literal(it, 1, expected, "func") }?.let(out::add)
+    }
+
+    /** `go`/`defer` take a call: the literal called in place, caret inside the body (as GoLand's `func() {}()` after `defer`). */
+    fun deferredCall(): GoCandidate = literal("func() {}()", 3, null, "func")
+
+    private fun literal(text: String, caretFromEnd: Int, type: GoType?, alias: String?): GoCandidate = GoCandidate(
         text, GoCandidateKind.LITERAL, GoScopeLevel.KEYWORD, valueType = type,
         insertHandler = caretHandler(caretFromEnd), lookupStrings = listOfNotNull(alias?.substringAfterLast('.')).filter { it != text },
     )
 
-    /** `func(a int, b ...string) (int, error) {}`: parameter names of the type, or `p0`, `p1`, ... when it has none. */
+    /** `func(a int, b ...string) (int, error) {}`: parameter names of the type, or names after the types (`w`, `r`
+     *  for `http.HandleFunc`, whose signature has none: GoLand does the same) when it has none. */
     private fun functionLiteral(signature: GoSignatureType): String? {
         if (signature.isGeneric) return null
         val named = signature.params.all { !it.name.isNullOrEmpty() }
+        val used = HashSet<String>()
         val params = signature.params.mapIndexed { i, p ->
             val variadic = signature.variadic && i == signature.params.lastIndex
             val type = if (variadic) (p.type as? GoSliceType)?.elem?.let(::source)?.let { "...$it" } else source(p.type)
-            (if (named) p.name!! else "p$i") + " " + (type ?: return null)
+            val name = if (named) p.name!! else GoNameSuggestions.parameterName(type?.removePrefix("...") ?: return null) { it in used }.also(used::add)
+            name + " " + (type ?: return null)
         }
         val results = results(signature.results) ?: return null
         return "func(" + params.joinToString(", ") + ")" + results + " {}"

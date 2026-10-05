@@ -86,6 +86,21 @@ set GO_PLUGIN=C:\work\idea-golang-support-0.2.51.zip
 tools\ci\go-inspect.cmd C:\work\app C:\work\app\go-inspections.sarif
 ```
 
+## Coverage of `go vet` (`tools/vet/compare.py`)
+
+The gate of MIGRATION step 13A: the plugin's findings must include every `go vet` finding of the analyzers it covers.
+
+```sh
+tools/ci/go-inspect.sh playground build/vet/playground.sarif
+uv run tools/vet/compare.py --module playground --sarif build/vet/playground.sarif [--allow tools/vet/allow.txt]
+```
+
+`--module` runs `go vet -json ./...` there (`--vet-json FILE` reads a saved copy). Findings match by file and line; columns and texts
+are ignored. The script prints vet-only findings (missing in ours), ours-only findings of the mapped inspections (informational) and
+counts per analyzer; exit code `1` when a mapped analyzer has a vet-only finding not in `--allow` (`path:line analyzer reason` per
+line), `2` on bad input. The mapping analyzer → inspection ids (`GoRules[govet:x]` for the rule engine) is `MAPPING` at the top of the
+script; `asmdecl`, `cgocall`, `framepointer` are listed as not covered. Tests: `uvx pytest tools/vet -q`.
+
 ## GitHub Actions
 
 ```yaml

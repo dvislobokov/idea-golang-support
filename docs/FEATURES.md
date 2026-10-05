@@ -124,7 +124,7 @@ fit the declarative rules engine planned in `docs/RULES.md`.
 | `Printf` family: verb vs argument type, argument count, `%w` only in `Errorf`, completion of verbs; user wrappers detected like vet | ✅ (wave 2, 0.2.15, 0.2.22) | `ide.inspections.printf` (pure parser + vet tables), `GoPrintfInspection`, verb completion `GoFormatVerbCompletion`; wrappers within the call's package, depth 3 | |
 | Per-function data-flow framework: CFG, liveness, reaching definitions, nilness | ✅ (wave 4, 0.2.37) | `semantic.flow` (`GoControlFlow`, `GoDataflowSolver`, `GoLiveness`, `GoReachingDefinitions`, `GoNilness`); corpus gate `goroot-src-flow.json` | |
 | Error flow: overwritten unchecked, wrong `err` checked, nilerr and its inverse, `defer` before the check, shadowed `err`, result used before the check | ✅ (wave 4, 0.2.38) | `ide.inspections.flow`; "error assigned and never checked" is `GoUnusedResult` / errcheck of golangci-lint | |
-| Nil flow: dereference of a nil value, impossible `nil` comparison, `return nil, nil` | ✅ (wave 4, 0.2.39) | `GoNilDereference`, `GoImpossibleNilCheck`, `GoNilValueNilError` (opt-in) | |
+| Nil flow: dereference of a nil value, impossible `nil` comparison, `return nil, nil` | ✅ (wave 4, 0.2.39) | `GoNilDereference`, `GoImpossibleNilCheck`, `GoNilValueNilError` (opt-in); `x == nil` of an operand never nil by its form (`&T{}`, `new`, `make`, slice/map/function literal) — `GoDfaConstantCondition` (13A) | |
 | Resources: response body / `sql.Rows` not closed, lost cancel, context not propagated | ✅ (wave 4, 0.2.41) | `GoBodyNotClosed`, `GoRowsNotClosed`, `GoLostCancel`, `GoContextNotPropagated` | |
 | Concurrency: copying locks (`copylocks`), lock not released, `wg.Add` inside the goroutine, loop variable capture for `go` < 1.22, send on a closed channel, `t.Fatal` in a goroutine | ✅ (wave 4, 0.2.42) | `GoCopyLocks`, `GoLockNotReleased`, `GoWaitGroupAddInGoroutine`, `GoLoopClosure`, `GoSendAfterClose`, `GoTestingGoroutine` | |
 | `context.Context` not first, lost or replaced by `context.Background()` | ✅ (wave 2, 0.2.17) | `GoContextPlacementInspection`, fixes "Use ctx" | |
@@ -179,7 +179,7 @@ Since the transplant (2026-10-02) the host plugin idea-golang-support provides a
 | Per-package trackers, library caches independent of project edits | ✅ | CHANGELOG 2026-10-02 | |
 | One inference cache per function body | ✅ | CHANGELOG 2026-10-02 | |
 | Lazy reparse of function bodies | ✅ | `GoLazyBlockElementType`, CHANGELOG 2026-10-02 | |
-| Shared indexes for GOROOT per Go version | ❌ | first open spends 3-5 s indexing GOROOT (UI robot P7); platform shared-indexes mechanism | M |
+| Shared indexes for GOROOT per Go version | ✅ (live check pending) | host `sharedindex` (optional on `intellij.indexing.shared.core`): `sharedIndexLocalFinder` + Go menu Build Shared Index for GOROOT (`dump-shared-index project` headless), optional download URL; `docs/SHARED-INDEXES.md` | |
 | Headless inspections (CLI, SARIF report for CI) | ✅ (0.2.59; Go menu Inspect Project / Export SARIF 0.2.66) | `go-inspect` app starter (`ci.GoInspectStarter`), SARIF 2.1.0, `tools/ci/go-inspect.sh|cmd`, `docs/CI.md` | |
 | ML completion ranking, name suggestions | 🗓️ | `docs/ML.md` | L |
 | errcheck while typing | ✅ (0.2.64) | `GoUncheckedError`; `defer` / `go` and `-blank` not checked, as errcheck by default | |

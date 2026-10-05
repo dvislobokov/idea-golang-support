@@ -30,6 +30,8 @@
     <!-- "Run with Coverage", the Coverage window and the editor bars of the platform for go test (go-coverage.xml); without the module the box
          "Collect coverage" of the configuration keeps the plugin's own gutter -->
     <depends optional="true" config-file="go-coverage.xml">com.intellij.modules.coverage</depends>
+    <!-- shared indexes of $GOROOT/src per Go release (go-shared-indexes.xml, docs/SHARED-INDEXES.md): only where the IDE has the Shared Indexes plugin -->
+    <depends optional="true" config-file="go-shared-indexes.xml">intellij.indexing.shared.core</depends>
 
     <!-- optional parts: a module is loaded only where its dependencies are (see the descriptor of the module next to META-INF) -->
     <content>

@@ -48,6 +48,8 @@ dependencies {
         // SQL in Go strings (go-psi-ide-injection-sql.xml, optional dependency of plugin.xml): only for the tests, the code finds SQL by id;
         // IntelliJ IDEA Community has no Database plugin
         if (ideBundles(localIde?.takeIf { file(it).exists() }, "com.intellij.database")) bundledPlugin("com.intellij.database")
+        // GOROOT shared indexes (go-shared-indexes.xml, optional dependency of plugin.xml): package io.github.golangsupport.sharedindex only
+        if (ideBundles(localIde?.takeIf { file(it).exists() }, "intellij.indexing.shared.core")) bundledPlugin("intellij.indexing.shared.core")
         testFramework(TestFrameworkType.Platform)
         // The native Go PSI (go-psi-core, go-psi-semantic, go-psi-ide; MIGRATION.md): composed, so the classes go into the main jar, which
         // a v1 descriptor loads (lib/modules only serves declared content modules). What of their META-INF/go-psi-*.xml plugin.xml

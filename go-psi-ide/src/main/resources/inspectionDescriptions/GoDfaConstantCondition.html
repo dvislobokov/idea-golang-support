@@ -4,6 +4,9 @@ Reports a comparison whose result the data flow knows, so the condition is alway
 <ul>
   <li>a nil comparison of a variable whose nil-ness is known on every path: after <code>if x == nil { return }</code>, after
   <code>&amp;T{}</code>, <code>new</code>, <code>make</code> or a literal, after <code>x = nil</code>;</li>
+  <li>a nil comparison of an operand that can never be nil by its form: <code>&amp;T{}</code>, <code>&amp;v</code>, <code>new(T)</code>,
+  <code>make(…)</code>, <code>[]T{}</code>, <code>map[K]V{}</code>, a function literal (operands typed by a type parameter are skipped;
+  a declared function or method is reported by govet <code>nilfunc</code>);</li>
   <li>a comparison of a local variable every reaching assignment of which stores the same literal, with a literal or another such variable;</li>
   <li>a comparison of literals.</li>
 </ul>
