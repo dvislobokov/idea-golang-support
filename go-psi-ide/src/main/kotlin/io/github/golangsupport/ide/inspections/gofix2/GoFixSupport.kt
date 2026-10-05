@@ -5,15 +5,13 @@ import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.ide.completion.GoImportInserter
 import io.github.golangsupport.ide.inspections.GoAnalysisInspectionBase
 import io.github.golangsupport.ide.inspections.GoImportEdits
+import io.github.golangsupport.ide.inspections.gofix.GoFixVersions
 import io.github.golangsupport.ide.inspections.lint.GoLintPsi
 import io.github.golangsupport.ide.intentions.GoSourceText
 import io.github.golangsupport.ide.rules.builtin.simple.GoSimplePsi
@@ -27,41 +25,22 @@ import io.github.golangsupport.lang.psi.GoNamedElement
 import io.github.golangsupport.lang.psi.GoReferenceExpression
 import io.github.golangsupport.lang.psi.GoTypeCaseClause
 import io.github.golangsupport.lang.psi.GoTypes
-import io.github.golangsupport.project.api.GoModuleGraphProvider
 import io.github.golangsupport.semantic.api.GoSemanticService
-import io.github.golangsupport.semantic.cache.GoTrackers
 import io.github.golangsupport.semantic.psi.GoPsiUtil
 
 /**
- * The `go` directive of the module of a file, for the version gates of the Go fix inspections (modernizers only suggest what
- * the module's language version has). No module or no directive: everything is suggested.
+ * The language version of a file for the version gates of the Go fix inspections of this package: the same answer as the `gofix`
+ * package's [GoFixVersions] (the file's `//go:build go1.N` line, else the module's `go` directive), so both groups agree.
+ * No module or no directive: everything is suggested.
  */
 object GoFixGoVersion {
-    private val KEY = Key.create<com.intellij.psi.util.CachedValue<Pair<Int, Int>?>>("go.fix2.goVersion")
 
-    /** Whether the module of [file] declares at least `go [version]` (`"1.21"`); true without a module or a directive. */
-    fun atLeast(file: GoFile, version: String): Boolean {
-        val have = of(file) ?: return true
-        val want = GoLintPsi.parseVersion(version) ?: return true
-        return compareValuesBy(have, want, { it.first }, { it.second }) >= 0
-    }
+    /** Whether [file] may use the features of Go [version] (`"1.21"`); true when its version is unknown. */
+    fun atLeast(file: GoFile, version: String): Boolean = GoFixVersions.allows(file, version)
 
-    /** (major, minor) of the module's `go` directive, cached per file on the project model tracker (go.mod edits). */
-    fun of(file: GoFile): Pair<Int, Int>? {
-        val original = GoPsiUtil.originalFile(file)
-        return CachedValuesManager.getManager(file.project).getCachedValue(original, KEY, {
-            CachedValueProvider.Result.create(compute(original), GoTrackers.getInstance(original.project).projectModel)
-        }, false)
-    }
-
-    private fun compute(file: GoFile): Pair<Int, Int>? {
-        val virtualFile = GoPsiUtil.originalVirtualFile(file)
-        val graph = GoModuleGraphProvider.getInstance(file.project).graphFor(virtualFile) ?: return null
-        val path = virtualFile.path
-        val module = graph.mainModules.filter { m -> m.dir?.let { path.startsWith(it.toString().replace(java.io.File.separatorChar, '/') + "/") } == true }
-            .maxByOrNull { it.dir.toString().length } ?: graph.mainModules.singleOrNull() ?: return null
-        return GoLintPsi.parseVersion(module.goVersion)
-    }
+    /** (major, minor) of the language version of [file] ([GoFixVersions.languageVersion]), null when unknown. */
+    fun of(file: GoFile): Pair<Int, Int>? =
+        GoFixVersions.languageVersion(file)?.takeIf { it.major >= 0 && it.minor >= 0 }?.let { it.major to it.minor }
 }
 
 /** A text edit of a Go fix rewrite (absolute offsets in the file). */

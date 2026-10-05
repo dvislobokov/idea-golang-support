@@ -13,9 +13,14 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.VirtualFileVisitor
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import java.util.Collections
+import java.util.concurrent.atomic.AtomicInteger
 
 /** The go.mod (not go.work) of [file] with its document and directory, or null. */
 private class GoModLayoutContext(val file: PsiFile, val document: Document, val dir: VirtualFile?) {
@@ -127,7 +132,14 @@ class GoModUnresolvedIgnorePathInspection : LocalInspectionTool() {
     override fun checkFile(file: PsiFile, manager: InspectionManager, isOnTheFly: Boolean): Array<ProblemDescriptor>? {
         val context = GoModLayoutContext.of(file) ?: return null
         val dir = context.dir ?: return null
-        val unresolved = GoModLayout.unresolvedIgnores(context.text, { GoModLayoutContext.resolve(dir, it) != null }, { existsAnywhere(dir, it) })
+        // walks of up to WALK_LIMIT nodes, remembered per path until the VFS structure changes: not again on every highlighting pass
+        val known = CachedValuesManager.getCachedValue(file) {
+            CachedValueProvider.Result.create(Collections.synchronizedMap(HashMap<String, Boolean?>()), VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS)
+        }
+        val unresolved = GoModLayout.unresolvedIgnores(context.text, { GoModLayoutContext.resolve(dir, it) != null }) { path ->
+            synchronized(known) { if (known.containsKey(path)) return@unresolvedIgnores known[path] }
+            existsAnywhere(dir, path).also { synchronized(known) { known[path] = it } }
+        }
         return unresolved.filter { it.line < context.document.lineCount }.map { p ->
             manager.createProblemDescriptor(file, context.range(p.line, p.path), "Unresolved path '${p.path}' in 'ignore' directive", ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
                 isOnTheFly, RemoveIgnorePathFix(p.line, p.path))
@@ -138,6 +150,7 @@ class GoModUnresolvedIgnorePathInspection : LocalInspectionTool() {
     private fun existsAnywhere(root: VirtualFile, path: String): Boolean? {
         val first = path.substringBefore('/')
         val rest = path.substringAfter('/', "")
+        walks.incrementAndGet()
         var seen = 0
         var found = false
         var gaveUp = false
@@ -162,7 +175,10 @@ class GoModUnresolvedIgnorePathInspection : LocalInspectionTool() {
         }
     }
 
-    private companion object {
-        const val WALK_LIMIT = 20_000
+    companion object {
+        private const val WALK_LIMIT = 20_000
+
+        /** How many module walks [existsAnywhere] made, for tests of the cache. */
+        val walks: AtomicInteger = AtomicInteger()
     }
 }

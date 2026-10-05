@@ -1,5 +1,7 @@
 package io.github.golangsupport
 
+import io.github.golangsupport.mod.GoModDependencies
+import io.github.golangsupport.mod.GoModDownloadFailures
 import io.github.golangsupport.mod.GoModFile
 import io.github.golangsupport.mod.GoModIssues
 import io.github.golangsupport.mod.GoModuleList
@@ -80,5 +82,20 @@ class GoModUpdatesTest {
         assertFalse(GoModUpdates.isModuleArgument("--exec=rm@v1"))
         assertFalse(GoModUpdates.isModuleArgument("a b@v1"))
         assertFalse(GoModUpdates.isModuleArgument(""))
+    }
+
+    @Test
+    fun aFailedDownloadOnSaveIsNotRepeatedForTheSameRequirements() {
+        val failures = GoModDownloadFailures()
+        val first = GoModDependencies.of("module m\n\nrequire a.com/x v1.0.0\n")
+        val second = GoModDependencies.of("module m\n\nrequire a.com/x v1.1.0\n")
+        assertTrue(failures.shouldDownload("/m/go.mod", first))
+        assertFalse("the first failure is notified", failures.failed("/m/go.mod", first))
+        assertFalse("not again for the same requirements", failures.shouldDownload("/m/go.mod", first))
+        assertTrue("other requirements: tried again", failures.shouldDownload("/m/go.mod", second))
+        assertTrue("a second failure goes to the log only", failures.failed("/m/go.mod", second))
+        assertTrue("another go.mod is not affected", failures.shouldDownload("/n/go.mod", second))
+        failures.succeeded("/m/go.mod")
+        assertTrue(failures.shouldDownload("/m/go.mod", second))
     }
 }

@@ -36,7 +36,7 @@ class GoFixStringsBuilderInspection : GoFix2InspectionBase() {
         if (service.declarationType(variable) != GoBasicType.STRING) return null
         val refs = GoFixPsi.references(body, variable)
         val (appends, reads) = refs.partition { appendOf(it) != null }
-        if (appends.first() !== target) return null
+        if (appends.firstOrNull() !== target) return null
         val read = reads.singleOrNull() ?: return null
         if (!isPlainRead(read) || GoFixPsi.enclosingBody(read) != body) return null
         val statements = appends.map { appendOf(it)!! }

@@ -114,4 +114,80 @@ class GoIntroduceFieldTest : GoSemanticIdeTestBase() {
         val message = refused("package fq\n\ntype fqN int\n\nfunc (n fqN) f() int {\n    return <selection>1</selection>\n}")
         assertTrue(message, message.contains("not a struct"))
     }
+
+    fun testFieldGoesAfterTheTrailingCommentOfTheLastField() = doTest(
+        """
+        package fi
+
+        type fiNoted struct {
+            host string // the host name
+        }
+
+        func (s *fiNoted) addr() string {
+            return s.host + <selection>":8080"</selection>
+        }
+        """,
+        """
+        package fi
+
+        type fiNoted struct {
+            host string // the host name
+            port string
+        }
+
+        func (s *fiNoted) addr() string {
+            s.port = ":8080"
+            return s.host + s.port
+        }
+        """,
+        GoIntroduceFieldOptions(name = "port"),
+    )
+
+    fun testPositionalLiteralIsRefused() {
+        val message = refused(
+            "package fq\n\ntype fqPos struct {\n    a, b int\n}\n\nvar fqP = fqPos{1, 2}\n\n" +
+                "func (p fqPos) f() int {\n    return <selection>3</selection>\n}",
+        )
+        assertTrue(message, message.contains("positional literal at fq.go:7"))
+    }
+
+    fun testElidedPositionalLiteralIsRefused() {
+        val message = refused(
+            "package fq\n\ntype fqEl struct {\n    a, b int\n}\n\nvar fqE = []fqEl{\n    {1, 2},\n}\n\n" +
+                "func (p fqEl) f() int {\n    return <selection>3</selection>\n}",
+        )
+        assertTrue(message, message.contains("positional literal at fq.go:8"))
+    }
+
+    fun testKeyedLiteralIsNotAConflict() = doTest(
+        """
+        package fi
+
+        type fiKeyed struct {
+            a int
+        }
+
+        var fiK = fiKeyed{a: 1}
+
+        func (k fiKeyed) f() int {
+            return k.a + <selection>3</selection>
+        }
+        """,
+        """
+        package fi
+
+        type fiKeyed struct {
+            a int
+            b int
+        }
+
+        var fiK = fiKeyed{a: 1}
+
+        func (k fiKeyed) f() int {
+            k.b = 3
+            return k.a + k.b
+        }
+        """,
+        GoIntroduceFieldOptions(name = "b"),
+    )
 }

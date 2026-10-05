@@ -30,6 +30,36 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.174] - 2026-10-05
+
+### Fixed — review of the G5–G9 parity batches
+- Go fix "slices.Backward": when the loop body writes an element of the slice, takes its address or passes the slice on, element reads stay `s[i]` instead of
+  becoming a value that could be stale.
+- "Redundant 'else' in 'if'": the quick fix is no longer offered when outdenting the else block would redeclare or capture a variable (`v, err := …` next to an outer `err`).
+- "Struct initialization without field names": no "Add field names" fix for structs with a blank `_` field.
+- "Type assertion on errors": the "Replace with 'errors.As'" fix picks a free variable name (`e2`, …) instead of redeclaring or shadowing an existing one.
+- Go fix "CutPrefix / CutSuffix": `if r := strings.TrimPrefix(s, p); r != s` is only rewritten when `p` is a non-empty constant (an empty prefix changed the result).
+- Go fix "strings.Builder": no internal error when the first `+=` of a variable could not be matched.
+- Go fix "slices.Sort": no longer suggested for float slices (`slices.Sort` orders NaN differently from `sort.Slice` with `<`).
+- Go fix inspections of the second group honour a file's `//go:build go1.N` line for the Go version, like the others.
+- Unused declaration inspections: usage search results are cached between highlighting passes (per file for local names, per package and project-wide
+  dependencies for exported ones) instead of searching the project again on every pass.
+- "Update syntax" lens: counts the daemon's findings once highlighting has finished instead of re-running all Go fix inspections, and caches the enabled tool list.
+- Introduce Type: "replace all" no longer rewrites the type inside type assertions `x.(T)`, type-switch `case T:` clauses or method signatures.
+- Remove method from interface and all its implementations: refused with a hint naming the first call through the interface; implementing methods that may
+  satisfy another interface (another project interface, or `String`, `Error`, `MarshalJSON`, `ServeHTTP` and the like) are no longer ticked by default.
+- Introduce Field: the new field goes after the last field's trailing comment; refused with the location of the first positional literal (`S{1, 2}`) of the struct.
+- Introduce Parameter: cancelling the search for calls from other packages no longer throws.
+- Generate Test / Tests for Package: generated tests compile for slice, map, func and struct results (`reflect.DeepEqual`, with the import), variadic parameters
+  (`[]T` field passed with `...`) and unnamed or `_` parameters (`arg1`, `arg2`, …); Generate Test adds the imports to an existing `_test.go`.
+- go.mod "Unresolved path in 'ignore' directive" caches the module walk until files or directories change.
+- Vulnerability check: a running govulncheck is stopped when the project closes and writes nothing afterwards.
+- Dump Goroutines: Cancel stops collecting stacks through delve; goroutine ids beyond 2^31 are read.
+- Saving go.mod offline no longer shows an error after every save: a failed automatic `go mod download` is not repeated for the same requirements and only the
+  first failure is notified until a download succeeds.
+- Goimports File passes the file as `./name`, and go.mod paths never reach `go list` / `go get` as flags.
+- Refactor | Update Syntax… is shown only in projects with Go files.
+
 ## [0.2.173] - 2026-10-05
 
 ### Added — Analyze and Code Cleanup for Go (GoLand parity G9)

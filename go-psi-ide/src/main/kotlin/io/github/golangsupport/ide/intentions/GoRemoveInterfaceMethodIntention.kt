@@ -22,6 +22,7 @@ import com.intellij.psi.SmartPsiElementPointer
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.refactoring.util.CommonRefactoringUtil
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.navigation.GoImplementations
@@ -31,11 +32,20 @@ import io.github.golangsupport.ide.refactoring.GoSignatureHierarchy
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoMethodSpec
+import io.github.golangsupport.lang.psi.GoTypeSpec
 import org.jetbrains.annotations.TestOnly
 import javax.swing.Icon
 
-/** A method that implements the removed interface method: [type].[name] in [file]; [used] when something other than itself calls it. */
-class GoRemoveMethodCandidate(val method: SmartPsiElementPointer<GoMethodDeclaration>, val type: String, val name: String, val file: String, val used: Boolean) {
+/**
+ * A method that implements the removed interface method: [type].[name] in [file]; [used] when something other than itself calls it,
+ * [otherInterface] when it may also implement another interface (a project one, or a well-known name like `String`).
+ */
+class GoRemoveMethodCandidate(
+    val method: SmartPsiElementPointer<GoMethodDeclaration>, val type: String, val name: String, val file: String, val used: Boolean,
+    val otherInterface: Boolean = false,
+) {
+    /** Ticked in the chooser by default: nothing calls it and no other interface needs it. */
+    val preChecked: Boolean get() = !used && !otherInterface
     override fun toString(): String = "$type.$name"
 }
 
@@ -61,8 +71,35 @@ object GoRemoveInterfaceMethod {
         val pointers = SmartPointerManager.getInstance(project)
         return GoImplementations.implementingMethods(spec, GlobalSearchScope.projectScope(project)).distinct()
             .filter { m -> GoImplementations.isInProject(m) && !GoSignatureHierarchy.isGenerated(m.containingFile) && GoImplementations.receiverTypeSpec(m) in types }
-            .map { m -> GoRemoveMethodCandidate(pointers.createSmartPsiElementPointer(m), m.receiverTypeName ?: "?", m.name ?: "?", m.containingFile.name, isUsed(m)) }
+            .map { m ->
+                GoRemoveMethodCandidate(pointers.createSmartPsiElementPointer(m), m.receiverTypeName ?: "?", m.name ?: "?", m.containingFile.name, isUsed(m), implementsOther(m, iface))
+            }
             .sortedWith(compareBy({ it.file }, { it.type }))
+    }
+
+    /** Method names stdlib interfaces call through (`fmt.Stringer`, `error`, `json.Marshaler`, `http.Handler`, `io.*`, `sort.Interface`…). */
+    val WELL_KNOWN_METHODS: Set<String> = setOf(
+        "String", "GoString", "Format", "Error", "Unwrap", "Is", "As", "MarshalJSON", "UnmarshalJSON", "MarshalText", "UnmarshalText",
+        "MarshalBinary", "UnmarshalBinary", "MarshalXML", "UnmarshalXML", "MarshalYAML", "UnmarshalYAML", "ServeHTTP", "Read", "Write", "Close",
+        "Seek", "ReadFrom", "WriteTo", "Len", "Less", "Swap", "Scan", "Value",
+    )
+
+    /** Whether [method] may be needed by an interface other than [iface]: a well-known stdlib method name, or another project interface. */
+    fun implementsOther(method: GoMethodDeclaration, iface: GoTypeSpec): Boolean =
+        method.name in WELL_KNOWN_METHODS ||
+            GoImplementations.superMethods(method, GlobalSearchScope.projectScope(method.project)).any { GoImplementations.interfaceSpecOf(it) != iface }
+
+    /** References to [spec] itself (calls through the interface, method values), outside the spec. Read action. */
+    fun specUsages(spec: GoMethodSpec): List<PsiElement> =
+        ReferencesSearch.search(spec, GlobalSearchScope.projectScope(spec.project)).findAll().map { it.element }
+            .filter { !PsiTreeUtil.isAncestor(spec, it, false) }.sortedWith(compareBy({ it.containingFile.name }, { it.textRange.startOffset }))
+
+    /** "file.go:line" of [element], for hints. */
+    fun location(element: PsiElement): String {
+        val file = element.containingFile
+        val offset = element.textRange.startOffset
+        val line = file.viewProvider.contents.subSequence(0, offset).count { it == '\n' }
+        return "${file.name}:${line + 1}"
     }
 
     /** Whether a reference to [method] stands outside it (a recursive call does not count). */
@@ -115,8 +152,9 @@ object GoRemoveInterfaceMethod {
 }
 
 /**
- * Alt+Enter on a method of an interface of the project: the method goes from the interface and, after a chooser listing the
- * methods of the implementing types (all ticked), the ticked ones go too, unless something calls them: those stay and are named
+ * Alt+Enter on a method of an interface of the project: refused with a hint naming a call through the interface when there is one;
+ * otherwise the method goes from the interface and, after a chooser listing the methods of the implementing types (ticked unless
+ * called or possibly needed by another interface), the ticked ones go too, unless something calls them: those stay and are named
  * in a hint. One command, one undo.
  */
 class GoRemoveInterfaceMethodIntention : PsiElementBaseIntentionAction() {
@@ -135,6 +173,22 @@ class GoRemoveInterfaceMethodIntention : PsiElementBaseIntentionAction() {
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
         val spec = GoRemoveInterfaceMethod.specAt(element) ?: return
+        // the call sites first: a spec called through the interface cannot go, whatever happens to the implementations
+        val usages = try {
+            ProgressManager.getInstance().runProcessWithProgressSynchronously(
+                ThrowableComputable<List<String>, RuntimeException> {
+                    ReadAction.compute<List<String>, RuntimeException> { GoRemoveInterfaceMethod.specUsages(spec).map { GoRemoveInterfaceMethod.location(it) } }
+                },
+                "Finding Usages of ${spec.name}", true, project,
+            )
+        } catch (_: ProcessCanceledException) {
+            return
+        }
+        if (usages.isNotEmpty()) {
+            val more = if (usages.size > 1) " and ${usages.size - 1} more" else ""
+            CommonRefactoringUtil.showErrorHint(project, editor, "Cannot remove ${spec.name}: it is called through the interface at ${usages.first()}$more", TITLE, null)
+            return
+        }
         val candidates = try {
             ProgressManager.getInstance().runProcessWithProgressSynchronously(
                 ThrowableComputable<List<GoRemoveMethodCandidate>, RuntimeException> { ReadAction.compute<List<GoRemoveMethodCandidate>, RuntimeException> { GoRemoveInterfaceMethod.candidates(spec) } },
@@ -153,20 +207,22 @@ class GoRemoveInterfaceMethodIntention : PsiElementBaseIntentionAction() {
 
     private fun choose(project: Project, candidates: List<GoRemoveMethodCandidate>): List<GoRemoveMethodCandidate>? {
         chooser?.let { return it(candidates) }
-        if (ApplicationManager.getApplication().isUnitTestMode) return candidates
+        if (ApplicationManager.getApplication().isUnitTestMode) return candidates.filter { it.preChecked }
         val dialog = object : ChooseElementsDialog<GoRemoveMethodCandidate>(project, candidates, "Remove Implementations", "Methods to remove with the interface method:", true) {
-            override fun getItemText(item: GoRemoveMethodCandidate): String = "${item.type}.${item.name}" + if (item.used) " (called elsewhere: kept)" else ""
+            override fun getItemText(item: GoRemoveMethodCandidate): String =
+                "${item.type}.${item.name}" + if (item.used) " (called elsewhere: kept)" else if (item.otherInterface) " (may implement another interface)" else ""
             override fun getItemIcon(item: GoRemoveMethodCandidate): Icon = AllIcons.Nodes.Method
             override fun getItemLocation(item: GoRemoveMethodCandidate): String = item.file
-            override fun isElementMarkedByDefault(element: GoRemoveMethodCandidate): Boolean = !element.used
+            override fun isElementMarkedByDefault(element: GoRemoveMethodCandidate): Boolean = element.preChecked
         }
         return if (dialog.showAndGet()) dialog.markedElements else null
     }
 
     companion object {
         const val TEXT: String = "Remove method from interface and all its implementations"
+        private const val TITLE: String = "Remove Interface Method"
 
-        /** What the chooser answers in tests (the candidates in, the ticked ones out); null: all of them. */
+        /** What the chooser answers in tests (the candidates in, the ticked ones out); null: the pre-checked ones. */
         @TestOnly
         @JvmStatic
         var chooser: ((List<GoRemoveMethodCandidate>) -> List<GoRemoveMethodCandidate>)? = null

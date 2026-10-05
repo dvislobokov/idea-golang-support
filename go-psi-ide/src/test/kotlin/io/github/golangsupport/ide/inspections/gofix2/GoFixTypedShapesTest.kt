@@ -142,6 +142,26 @@ class GoFixStringsBuilderTest : GoFixInspectionTestBase() {
         }
         """
     )
+
+    /** Regression: appends only inside a function literal (the first `+=` the visitor meets may not be the first reference) must not throw. */
+    fun testAppendsInAFunctionLiteralStayQuiet() = highlight(
+        """
+        package a
+
+        func f(words []string) string {
+        	s := ""
+        	add := func(w string) {
+        		for i := 0; i < 2; i++ {
+        			s += w
+        		}
+        	}
+        	for _, w := range words {
+        		add(w)
+        	}
+        	return s
+        }
+        """
+    )
 }
 
 class GoFixAtomicTypesTest : GoFixInspectionTestBase() {

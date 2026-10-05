@@ -1,25 +1,37 @@
 package io.github.golangsupport.ide.refactoring
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.progress.ProcessCanceledException
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.util.ThrowableComputable
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.codeStyle.CodeStyleManager
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.util.CommonRefactoringUtil
 import io.github.golangsupport.ide.completion.GoImportInserter
 import io.github.golangsupport.ide.intentions.GoIntentionText
 import io.github.golangsupport.ide.intentions.GoSourceText
 import io.github.golangsupport.ide.navigation.GoImplementations
+import io.github.golangsupport.lang.psi.GoCompositeLit
+import io.github.golangsupport.lang.psi.GoElement
 import io.github.golangsupport.lang.psi.GoExpression
 import io.github.golangsupport.lang.psi.GoFieldDefinition
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoLiteralValue
 import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoStatement
+import io.github.golangsupport.lang.psi.GoType
+import io.github.golangsupport.lang.psi.GoTypeReferenceExpression
 import io.github.golangsupport.lang.psi.GoTypeSpec
 import io.github.golangsupport.semantic.api.GoSemanticService
 import io.github.golangsupport.semantic.scope.GoUniverse
@@ -35,7 +47,8 @@ class GoIntroduceFieldOptions @TestOnly constructor(val replaceAll: Boolean = fa
  * new unexported field of that struct (type from the semantic model, name suggested and unique among the type's fields and methods)
  * and the expression (or all its equivalents in the method) is replaced by `r.name`. A popup asks where the value comes from:
  * "Initialize in current method" puts `r.name = expr` before the statement evaluating the first replaced occurrence; "Leave
- * initialization to the caller" only declares the field.
+ * initialization to the caller" only declares the field. The field goes after the line of the last one (its comment included);
+ * refused when the project builds the struct with a positional literal (`S{1, 2}`), which the new field would break.
  */
 class GoIntroduceFieldHandler @JvmOverloads constructor(private val fieldOptions: GoIntroduceFieldOptions? = null) :
     GoIntroduceHandlerBase(fieldOptions?.let { GoIntroduceOptions(it.replaceAll, it.name) }) {
@@ -60,6 +73,16 @@ class GoIntroduceFieldHandler @JvmOverloads constructor(private val fieldOptions
         val spec = GoImplementations.receiverTypeSpec(method) ?: return
         if (!GoImplementations.isInProject(spec)) return error(project, editor, "The receiver type is not in the project")
         if (!CommonRefactoringUtil.checkReadOnlyStatus(project, spec)) return
+        // a new field breaks every `S{1, 2}` of the project: refuse rather than leave code that does not compile
+        val positional = try {
+            ProgressManager.getInstance().runProcessWithProgressSynchronously(
+                ThrowableComputable<String?, RuntimeException> { ReadAction.compute<String?, RuntimeException> { positionalLiteral(spec) } },
+                "Finding Literals of ${spec.name}", true, project,
+            )
+        } catch (_: ProcessCanceledException) {
+            return
+        }
+        if (positional != null) return error(project, editor, "${spec.name} is built with a positional literal at $positional: a new field would break it")
         val type = GoIntroduceSupport.declaredType(expr)
         if (GoIntroduceSupport.isLocalType(type)) return error(project, editor, "The type of the expression is declared inside the function")
         val structFile = spec.containingFile as? GoFile ?: return
@@ -131,8 +154,11 @@ class GoIntroduceFieldHandler @JvmOverloads constructor(private val fieldOptions
         val rbrace = struct.rbrace ?: return
         val baseIndent = GoIntentionText.indentAt(document.charsSequence, spec.textRange.startOffset)
         if (last != null) {
-            val indent = GoIntentionText.indentAt(document.charsSequence, last.textRange.startOffset)
-            document.insertString(last.textRange.endOffset, "\n$indent$name $type")
+            val text = document.charsSequence
+            val indent = GoIntentionText.indentAt(text, last.textRange.startOffset)
+            // after the whole line of the last field, its trailing comment included; a one-line struct has none
+            val lineEnd = text.indexOf('\n', last.textRange.endOffset).takeIf { it in 0 until rbrace.textRange.startOffset } ?: last.textRange.endOffset
+            document.insertString(lineEnd, "\n$indent$name $type")
         } else {
             document.replaceString(lbrace.textRange.endOffset, rbrace.textRange.startOffset, "\n$baseIndent\t$name $type\n$baseIndent")
         }
@@ -153,6 +179,35 @@ class GoIntroduceFieldHandler @JvmOverloads constructor(private val fieldOptions
         const val TITLE: String = "Introduce Field"
         const val HERE: String = "Initialize in current method"
         const val CALLER: String = "Leave initialization to the caller"
+
+        /**
+         * "file.go:line" of the first positional (unkeyed, non-empty) composite literal of the project building [spec]: `S{1, 2}`,
+         * `&S{…}`, or an element of `[]S{{1, 2}}` / `map[K]S{k: {1, 2}}` with the type elided. Read action.
+         */
+        fun positionalLiteral(spec: GoTypeSpec): String? {
+            val found = ArrayList<PsiElement>()
+            for (ref in ReferencesSearch.search(spec, GlobalSearchScope.projectScope(spec.project)).findAll()) {
+                ProgressManager.checkCanceled()
+                val element = ref.element
+                val literal = PsiTreeUtil.getParentOfType(element, GoCompositeLit::class.java) ?: continue
+                val literalType = literal.typeReferenceExpression ?: literal.typeList.firstOrNull() ?: continue
+                if (!PsiTreeUtil.isAncestor(literalType, element, false)) continue
+                val value = literal.literalValue ?: continue
+                if (literalType is GoTypeReferenceExpression || (literalType as? GoType)?.typeReferenceExpression != null) {
+                    if (isPositional(value)) found += value
+                } else {
+                    // `[]S{…}`, `[N]S{…}`, `map[K]S{…}`: the elements of type S are written without it
+                    for (e in PsiTreeUtil.getChildrenOfTypeAsList(value, GoElement::class.java)) {
+                        e.value?.literalValue?.takeIf(::isPositional)?.let { found += it }
+                    }
+                }
+            }
+            val first = found.minWithOrNull(compareBy({ it.containingFile.name }, { it.textRange.startOffset })) ?: return null
+            val line = first.containingFile.viewProvider.contents.subSequence(0, first.textRange.startOffset).count { it == '\n' }
+            return "${first.containingFile.name}:${line + 1}"
+        }
+
+        private fun isPositional(value: GoLiteralValue): Boolean = PsiTreeUtil.getChildrenOfTypeAsList(value, GoElement::class.java).firstOrNull()?.let { it.key == null } == true
 
         /** The method declaration whose body holds [expr] (through function literals). */
         fun methodOf(expr: GoExpression): GoMethodDeclaration? = GoIntroduceParameterHandler.declarationOf(expr) as? GoMethodDeclaration

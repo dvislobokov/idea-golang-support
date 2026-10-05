@@ -30,6 +30,7 @@ import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoFunctionType
 import io.github.golangsupport.lang.psi.GoInterfaceType
 import io.github.golangsupport.lang.psi.GoMapType
+import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoParType
 import io.github.golangsupport.lang.psi.GoParameterDeclaration
 import io.github.golangsupport.lang.psi.GoPointerType
@@ -37,6 +38,8 @@ import io.github.golangsupport.lang.psi.GoShortVarDeclaration
 import io.github.golangsupport.lang.psi.GoSpecType
 import io.github.golangsupport.lang.psi.GoStructType
 import io.github.golangsupport.lang.psi.GoType
+import io.github.golangsupport.lang.psi.GoTypeAssertionExpr
+import io.github.golangsupport.lang.psi.GoTypeCaseClause
 import io.github.golangsupport.lang.psi.GoTypeList
 import io.github.golangsupport.lang.psi.GoTypeParamDefinition
 import io.github.golangsupport.lang.psi.GoTypeReferenceExpression
@@ -107,14 +110,30 @@ object GoIntroduceType {
         return null
     }
 
-    /** The type expressions of [file] equivalent to [type] that can be replaced, [type] included, in order. */
+    /**
+     * The type expressions of [file] equivalent to [type] that can be replaced, [type] included, in order. Others in a type assertion,
+     * a type switch case or a method signature are left alone: `type N T` is a different type there, so `x.(N)` stops matching values
+     * of `T` created elsewhere and the method stops implementing interfaces spelled with `T`.
+     */
     fun occurrences(type: GoType, file: GoFile): List<GoType> {
         val result = ArrayList<GoType>()
         PsiTreeUtil.processElements(file) { e ->
-            if (e === type || (e is GoType && e.javaClass == type.javaClass && problem(e) == null && PsiEquivalenceUtil.areElementsEquivalent(e, type))) result += e as GoType
+            if (e === type || (e is GoType && e.javaClass == type.javaClass && problem(e) == null && !identitySensitive(e) && PsiEquivalenceUtil.areElementsEquivalent(e, type))) {
+                result += e as GoType
+            }
             true
         }
         return result.filter { e -> e === type || result.none { o -> o !== e && o.textRange.contains(e.textRange) } }.sortedBy { it.textRange.startOffset }
+    }
+
+    /** [type] sits where the identity of the type matters: `x.(T)`, `case T:` of a type switch, the signature of a method. */
+    fun identitySensitive(type: GoType): Boolean {
+        val assertion = PsiTreeUtil.getParentOfType(type, GoTypeAssertionExpr::class.java)
+        if (assertion?.type?.let { PsiTreeUtil.isAncestor(it, type, false) } == true) return true
+        val clause = PsiTreeUtil.getParentOfType(type, GoTypeCaseClause::class.java)
+        if (clause?.type?.let { PsiTreeUtil.isAncestor(it, type, false) } == true) return true
+        val method = PsiTreeUtil.getParentOfType(type, GoMethodDeclaration::class.java)
+        return method?.signature?.let { PsiTreeUtil.isAncestor(it, type, false) } == true
     }
 
     /** The top-level declaration the new type goes above: the first one holding an occurrence. */

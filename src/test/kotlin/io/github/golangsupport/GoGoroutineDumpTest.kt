@@ -47,7 +47,7 @@ class GoGoroutineDumpTest {
 
     @Test fun headersStatesAndFrames() {
         val dump = GoGoroutineDump.parse(sigquit)
-        assertEquals(listOf(1, 18, 19, 20), dump.map { it.id })
+        assertEquals(listOf(1L, 18L, 19L, 20L), dump.map { it.id })
         assertEquals(listOf("chan receive", "select", "chan receive", "running"), dump.map { it.state })
         assertEquals(3, dump[0].waitMinutes)
         assertNull(dump[1].waitMinutes)
@@ -57,7 +57,7 @@ class GoGoroutineDumpTest {
         assertEquals(GoStackFrame("net/http.(*Server).Serve", "/usr/local/go/src/net/http/server.go", 3360), dump[1].frames[0])
         assertEquals("main.serve.func1", dump[1].frames[1].function)
         assertEquals(GoStackFrame("main.serve", "/home/dev/app/server.go", 12), dump[1].createdBy)
-        assertEquals(1, dump[1].createdIn)
+        assertEquals(1L, dump[1].createdIn)
         // Windows paths keep their drive; an elided marker is not a frame; `created by` without a goroutine number (before Go 1.21)
         assertEquals(listOf(GoStackFrame("main.worker", "C:/work/app/worker.go", 8)), dump[2].frames)
         assertEquals(GoStackFrame("main.main", "C:/work/app/main.go", 17), dump[2].createdBy)
@@ -92,16 +92,39 @@ class GoGoroutineDumpTest {
             "threads" to """{"threads":[{"id":7,"name":"[Go 7] main.worker"},{"id":1,"name":"* [Go 1] main.main"}]}""",
             "stackTrace:1" to """{"stackFrames":[{"id":1000,"name":"main.main","line":21,"source":{"path":"C:\\work\\app\\main.go"}}]}""",
         )
-        val dump = GoGoroutineDump.collect(50) { command, arguments: JsonObject ->
+        val dump = GoGoroutineDump.collect(50, checkCanceled = {}) { command, arguments: JsonObject ->
             val key = if (command == "stackTrace") "stackTrace:" + arguments.get("threadId").asInt else command
             JsonParser.parseString(answers[key] ?: throw IllegalStateException("goroutine is gone")).asJsonObject
         }
-        assertEquals(listOf(1, 7), dump.map { it.id })
+        assertEquals(listOf(1L, 7L), dump.map { it.id })
         assertEquals(listOf(GoStackFrame("main.main", "C:/work/app/main.go", 21)), dump[0].frames)
         // a goroutine whose stack could not be read is still listed
         assertEquals(emptyList<GoStackFrame>(), dump[1].frames)
         assertEquals("goroutine 1:\nmain.main(...)\n\tC:/work/app/main.go:21\n\ngoroutine 7:\n\n", GoGoroutineDump.format(dump))
         assertEquals("2 goroutines", GoGoroutineDump.summary(dump))
+    }
+
+    @Test fun goroutineIdsBeyondIntAreRead() {
+        val dump = GoGoroutineDump.parse("goroutine 3000000000 [running]:\nmain.main()\n\t/app/main.go:5 +0x1d\ncreated by main.start in goroutine 2999999999\n\t/app/main.go:3\n")
+        assertEquals(3_000_000_000L, dump.single().id)
+        assertEquals(2_999_999_999L, dump.single().createdIn)
+        val collected = GoGoroutineDump.collect(10, checkCanceled = {}) { command, _ ->
+            JsonParser.parseString(if (command == "threads") """{"threads":[{"id":3000000000}]}""" else """{"stackFrames":[]}""").asJsonObject
+        }
+        assertEquals(listOf(3_000_000_000L), collected.map { it.id })
+    }
+
+    @Test fun collectStopsWhenCanceled() {
+        var stacks = 0
+        var checks = 0
+        val canceled = runCatching {
+            GoGoroutineDump.collect(10, checkCanceled = { if (++checks > 2) throw java.util.concurrent.CancellationException("canceled") }) { command, _ ->
+                if (command == "stackTrace") stacks++
+                JsonParser.parseString(if (command == "threads") """{"threads":[{"id":1},{"id":2},{"id":3},{"id":4}]}""" else """{"stackFrames":[]}""").asJsonObject
+            }
+        }.exceptionOrNull()
+        assertTrue(canceled is java.util.concurrent.CancellationException)
+        assertEquals("no stack asked for after the cancel", 2, stacks)
     }
 
     @Test fun whatTheActionActsOn() {

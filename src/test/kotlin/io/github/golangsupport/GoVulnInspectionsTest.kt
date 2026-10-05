@@ -1,5 +1,6 @@
 package io.github.golangsupport
 
+import com.intellij.execution.process.NopProcessHandler
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import io.github.golangsupport.lint.GoVulnOutput
 import io.github.golangsupport.lint.GoVulnService
@@ -99,5 +100,19 @@ class GoVulnInspectionsTest : BasePlatformTestCase() {
         myFixture.addFileToProject("go.mod", "module example.com/app\n")
         myFixture.configureFromExistingVirtualFile(myFixture.addFileToProject("web/lang.go", source).virtualFile)
         assertEmpty(myFixture.doHighlighting().filter { it.description?.contains("GO-2022-1059") == true })
+    }
+
+    fun testDisposeStopsARunningCheckAndKeepsNothingAfter() {
+        val service = GoVulnService(project)
+        val handler = NopProcessHandler().apply { startNotify() }
+        service.track(handler)
+        service.dispose()
+        assertTrue("the process is stopped", handler.isProcessTerminating || handler.isProcessTerminated)
+        // what a run finishing after the project closed would store
+        service.store("/closed/module", "key", null, "")
+        assertFalse(service.hasResult("/closed/module"))
+        val late = NopProcessHandler().apply { startNotify() }
+        service.track(late)
+        assertTrue("a process started after dispose is stopped at once", late.isProcessTerminating || late.isProcessTerminated)
     }
 }

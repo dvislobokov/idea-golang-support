@@ -15,6 +15,7 @@ import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
 import com.intellij.ui.EditorNotifications
 import io.github.golangsupport.cli.GoCli
+import io.github.golangsupport.cli.GoPluginLog
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Function
@@ -30,6 +31,24 @@ object GoModDependencies {
 
     /** True when saving [new] over [old] changes what the module depends on. */
     fun changed(old: CharSequence, new: CharSequence): Boolean = of(old) != of(new)
+}
+
+/**
+ * The automatic `go mod download` after a save that failed (offline, a typo in a version), per go.mod: it is not run again for the same
+ * dependencies ([GoModDependencies.of]), and only the first failure of a go.mod shows a notification until a download succeeds.
+ */
+class GoModDownloadFailures {
+    private val failed = ConcurrentHashMap<String, Set<String>>()
+
+    /** Whether the download after saving [path] with [dependencies] should run: not again for the set it failed on. */
+    fun shouldDownload(path: String, dependencies: Set<String>): Boolean = failed[path] != dependencies
+
+    /** Remembers the failure; true when an earlier failure of [path] has been notified already (this one goes to the log only). */
+    fun failed(path: String, dependencies: Set<String>): Boolean = failed.put(path, dependencies) != null
+
+    fun succeeded(path: String) {
+        failed.remove(path)
+    }
 }
 
 /** The go.mod files whose dependencies were edited by hand and not followed by `go mod tidy` yet: the banner of the editor comes from here. */
@@ -54,14 +73,29 @@ class GoModChanges(private val project: Project) {
         val root = modFile.parent ?: return
         val title = "Go Mod " + arguments.last().replaceFirstChar(Char::uppercase)
         val commands = GoCli.commandLinesOrNotify(project, title) { listOf(GoCli.commandLine(root.path, *arguments)) } ?: return
-        GoCli.runInBackground(project, title, commands, refresh = listOf(File(root.path)), onSuccess = { clear(modFile) })
+        GoCli.runInBackground(project, title, commands, refresh = listOf(File(root.path)), onSuccess = {
+            downloadFailures.succeeded(modFile.path)
+            clear(modFile)
+        })
     }
 
-    /** `go mod download` on its own after the save (Download Go module dependencies, Settings | Go | Go Modules); the banner stays: tidy is still its business. */
-    fun download(modFile: VirtualFile) {
+    /** The automatic downloads that failed: not repeated on every save (offline that was a notification per save). */
+    val downloadFailures = GoModDownloadFailures()
+
+    /**
+     * `go mod download` on its own after the save (Download Go module dependencies, Settings | Go | Go Modules) of go.mod with
+     * [dependencies]; the banner stays: tidy is still its business. A failure is remembered in [downloadFailures].
+     */
+    fun download(modFile: VirtualFile, dependencies: Set<String>) {
         val root = modFile.parent ?: return
+        val path = modFile.path
+        if (!downloadFailures.shouldDownload(path, dependencies)) return
         val commands = GoCli.commandLinesOrNotify(project, DOWNLOAD_TITLE) { listOf(GoCli.commandLine(root.path, "mod", "download")) } ?: return
-        GoCli.runInBackground(project, DOWNLOAD_TITLE, commands, refresh = listOf(File(root.path)))
+        GoCli.runInBackground(project, DOWNLOAD_TITLE, commands, refresh = listOf(File(root.path)), onFailure = { output ->
+            val notified = downloadFailures.failed(path, dependencies)
+            GoPluginLog.warn("go", "go mod download has failed in ${root.path} (exit code ${output.exitCode}): not run on save again until the requirements change")
+            notified
+        }, onSuccess = { downloadFailures.succeeded(path) })
     }
 
     companion object {
@@ -81,8 +115,10 @@ class GoModSaveListener : FileDocumentManagerListener {
         if (project.isDisposed) return
         GoModChanges.getInstance(project).markPending(file)
         // after the save: the command reads go.mod from the disk; no real go in the tests
-        if (GoModDownloads.isEnabled(project) && !ApplicationManager.getApplication().isUnitTestMode) {
-            ApplicationManager.getApplication().invokeLater({ GoModChanges.getInstance(project).download(file) }, project.disposed)
+        val dependencies = GoModDependencies.of(document.immutableCharSequence)
+        if (GoModDownloads.isEnabled(project) && !ApplicationManager.getApplication().isUnitTestMode &&
+            GoModChanges.getInstance(project).downloadFailures.shouldDownload(file.path, dependencies)) {
+            ApplicationManager.getApplication().invokeLater({ GoModChanges.getInstance(project).download(file, dependencies) }, project.disposed)
         }
     }
 }

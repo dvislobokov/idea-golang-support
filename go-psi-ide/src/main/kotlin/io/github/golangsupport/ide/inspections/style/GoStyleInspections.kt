@@ -34,7 +34,10 @@ import io.github.golangsupport.lang.psi.GoStatement
 import io.github.golangsupport.lang.psi.GoStringLiteral
 import io.github.golangsupport.lang.psi.GoTypeCaseClause
 import io.github.golangsupport.lang.psi.GoValue
+import io.github.golangsupport.ide.rules.builtin.simple.GoSimplePsi
 import io.github.golangsupport.semantic.api.GoSemanticService
+import io.github.golangsupport.semantic.psi.GoPsiUtil
+import io.github.golangsupport.semantic.scope.GoScopes
 import io.github.golangsupport.semantic.psi.GoPsiUtil.arguments
 import io.github.golangsupport.semantic.psi.GoPsiUtil.block
 import io.github.golangsupport.semantic.psi.GoPsiUtil.elements
@@ -108,7 +111,8 @@ class GoErrorStringFormatInspection : GoAnalysisInspectionBase() {
  * GoLand's "Redundant 'else' in 'if'" (`GoRedundantElseInIf`, golint `indent-error-flow`): `if c { …; return } else { … }` where the
  * `if` block ends with `return`, `break`, `continue`, `goto` or `panic(…)`: the `else` block can follow the `if` unindented. Not for
  * `else if` chains or an `if` that is itself an `else` branch. Fix (when the `if` has no init statement, which would scope its
- * variables to the `else`): remove the `else` and outdent its block.
+ * variables to the `else`, and when no top-level declaration of the `else` block reuses a name visible at the `if` or mentioned after it):
+ * remove the `else` and outdent its block.
  */
 class GoRedundantElseInIfInspection : GoAnalysisInspectionBase() {
 
@@ -118,12 +122,26 @@ class GoRedundantElseInIfInspection : GoAnalysisInspectionBase() {
         if (elseStatement.statement !is GoBlock || !inStatementList(element)) return
         val last = element.block?.statementList?.lastOrNull() ?: return
         val what = terminator(last) ?: return
-        val fixes = if (element.initStatement == null && !hasComments(elseStatement)) arrayOf<LocalQuickFix>(FIX) else emptyArray()
+        val safe = element.initStatement == null && !hasComments(elseStatement) && outdentKeepsNames(element, elseStatement.statement as GoBlock)
+        val fixes = if (safe) arrayOf<LocalQuickFix>(FIX) else emptyArray()
         holder.registerProblem(elseStatement, TextRange(0, elseStatement.`else`.textLength),
             "'if' block ends with a '$what' statement, so drop this 'else' and outdent its block", *fixes)
     }
 
     companion object {
+        /**
+         * The top-level declarations of [elseBlock] move into the statement list of [ifStatement]: none of their names may be visible at the
+         * `if` (`v, err := b()` with an outer `err` would assign it or fail to compile) or mentioned after it (a later `x :=` would clash,
+         * a later use would see the moved variable).
+         */
+        private fun outdentKeepsNames(ifStatement: GoIfStatement, elseBlock: GoBlock): Boolean {
+            val names = elseBlock.statementList.flatMap(GoPsiUtil::declarationsOf).mapNotNull { it.name }.filter { it != "_" }.distinct()
+            if (names.isEmpty()) return true
+            val list = ifStatement.parent
+            val later = list.children.filter { it is GoStatement && it.textRange.startOffset > ifStatement.textRange.startOffset }
+            return names.none { n -> GoScopes.resolveName(ifStatement, n).isNotEmpty() || later.any { GoSimplePsi.mentions(it, n) } }
+        }
+
         private fun inStatementList(s: PsiElement): Boolean = s.parent.let { it is GoBlock || it is GoExprCaseClause || it is GoTypeCaseClause || it is GoCommClause }
 
         private fun hasComments(e: PsiElement) = PsiTreeUtil.findChildOfType(e, PsiComment::class.java) != null
@@ -239,11 +257,14 @@ class GoStructInitializationWithoutFieldNamesInspection : GoAnalysisInspectionBa
         if (elements.isEmpty() || elements.any { it.key != null }) return
         val struct = structOf(element) ?: return
         if (struct.fields.isEmpty()) return
-        val fixes = if (elements.size == struct.fields.size) arrayOf<LocalQuickFix>(FIX) else emptyArray()
+        val fixes = if (elements.size == struct.fields.size && namable(struct)) arrayOf<LocalQuickFix>(FIX) else emptyArray()
         holder.registerProblem(element, "Fields are assigned without explicit names", *fixes)
     }
 
     companion object {
+        /** Every field can be written as a key: a blank `_` field cannot (`_: x` does not compile). */
+        private fun namable(struct: GoStructType): Boolean = struct.fields.none { it.name == "_" }
+
         /** The struct type a literal value builds, through named types and an elided `&T` / `*T`; null for other literals. */
         fun structOf(value: GoLiteralValue): GoStructType? = literalType(value)?.let { t ->
             val base = (t as? GoPointerType)?.takeIf { value.parent !is GoCompositeLit }?.elem ?: t
@@ -268,7 +289,7 @@ class GoStructInitializationWithoutFieldNamesInspection : GoAnalysisInspectionBa
 
         private val FIX = GoEditFix("Add field names") { e ->
             val value = e as? GoLiteralValue ?: return@GoEditFix null
-            val fields = structOf(value)?.fields ?: return@GoEditFix null
+            val fields = structOf(value)?.takeIf(::namable)?.fields ?: return@GoEditFix null
             val elements = value.elements
             if (elements.size != fields.size || elements.any { it.key != null }) return@GoEditFix null
             elements.mapIndexed { i, el -> GoEditPlan.Edit(el.textRange.startOffset, el.textRange.startOffset, "${fields[i].name}: ") }

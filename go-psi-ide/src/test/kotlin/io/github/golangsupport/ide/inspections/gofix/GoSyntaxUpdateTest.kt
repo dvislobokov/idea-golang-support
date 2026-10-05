@@ -32,10 +32,18 @@ class GoFixTestInspection : LocalInspectionTool() {
     override fun getGroupPath(): Array<String> = arrayOf("Go", GoSyntaxUpdate.GROUP_NAME)
     override fun isEnabledByDefault(): Boolean = true
 
-    override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor = object : PsiElementVisitor() {
-        override fun visitElement(element: PsiElement) {
-            if (element is LeafPsiElement && element.text == "interface") holder.registerProblem(element, "interface{} can be any")
+    override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
+        if (!isOnTheFly) batchRuns++
+        return object : PsiElementVisitor() {
+            override fun visitElement(element: PsiElement) {
+                if (element is LeafPsiElement && element.text == "interface") holder.registerProblem(element, "interface{} can be any")
+            }
         }
+    }
+
+    companion object {
+        /** Runs outside the daemon (`processFile`, the lens fallback). */
+        @Volatile var batchRuns = 0
     }
 }
 
@@ -149,6 +157,16 @@ class GoSyntaxUpdateTest : GoIdeTestBase() {
         }
         com.intellij.psi.PsiDocumentManager.getInstance(project).commitAllDocuments()
         assertEquals(listOf("package p: Update syntax (2 places)"), lenses(GoBatchSyntaxUpdateCodeVisionProvider()))
+    }
+
+    /** Regression: once the daemon has highlighted the file, the lens counts its highlights instead of running the inspections again. */
+    fun testLensCountsTheDaemonHighlights() {
+        myFixture.enableInspections(GoFixTestInspection())
+        myFixture.configureByText("a.go", withFinding + "\n\nfunc g(w interface{}) {}\n")
+        myFixture.doHighlighting()
+        GoFixTestInspection.batchRuns = 0
+        assertEquals(listOf("package p: Update syntax (2 places)"), lenses(GoBatchSyntaxUpdateCodeVisionProvider()))
+        assertEquals(0, GoFixTestInspection.batchRuns)
     }
 
     fun testLensesAreGatedByDiagnostics() {

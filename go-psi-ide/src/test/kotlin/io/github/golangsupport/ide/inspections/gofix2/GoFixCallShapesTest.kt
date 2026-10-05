@@ -143,6 +143,32 @@ class GoFixErrorsAsTypeTest : GoFixInspectionTestBase() {
         """
     )
 
+    /** Regression: the file's own `//go:build go1.26` line lifts the `go 1.24` of the module, as in the `gofix` inspections. */
+    fun testGoBuildLineOfTheFileWins() {
+        goVersion("1.24")
+        highlight(
+            """
+            //go:build go1.26
+
+            package a
+
+            import "errors"
+
+            type E struct{}
+
+            func (*E) Error() string { return "" }
+
+            func f(err error) bool {
+            	var e *E
+            	if <SYNTAX_UPDATE descr="errors.As can be simplified using AsType[*E]">errors.As</SYNTAX_UPDATE>(err, &e) {
+            		return e != nil
+            	}
+            	return false
+            }
+            """
+        )
+    }
+
     fun testBelowGo126() {
         goVersion("1.25")
         highlight(

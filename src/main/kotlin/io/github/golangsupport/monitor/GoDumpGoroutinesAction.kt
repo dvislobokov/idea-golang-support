@@ -10,6 +10,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.DumbAware
@@ -84,6 +85,8 @@ object GoGoroutineDumps {
             override fun run(indicator: ProgressIndicator) {
                 val goroutines = try {
                     GoGoroutineDump.collect(depth) { command, arguments -> process.connection.request(command, arguments).get(15, TimeUnit.SECONDS) }
+                } catch (_: ProcessCanceledException) {
+                    return
                 } catch (e: Exception) {
                     return GoCli.notifyError(project, "Dump Goroutines", GoPluginLog.describe(e))
                 }
@@ -101,6 +104,8 @@ object GoGoroutineDumps {
             override fun run(indicator: ProgressIndicator) {
                 val goroutines = try {
                     GoSnapshot.attachAndDump(delve.path, programPid(target), depth)
+                } catch (_: ProcessCanceledException) {
+                    return
                 } catch (e: Exception) {
                     GoPluginLog.warn(CATEGORY, "Dump Goroutines of $title: ${GoPluginLog.describe(e)}")
                     return GoCli.notifyError(project, "Dump Goroutines of $title", e.message ?: e.javaClass.simpleName)

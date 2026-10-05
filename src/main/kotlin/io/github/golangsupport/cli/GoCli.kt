@@ -5,6 +5,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.execution.process.ProcessOutputTypes
@@ -105,14 +106,17 @@ object GoCli {
     fun displayString(command: GeneralCommandLine): String =
         (listOf(File(command.exePath).nameWithoutExtension) + command.parametersList.list).joinToString(" ") { if (' ' in it) "\"$it\"" else it }
 
-    /** Runs a short command and captures its output; the command and how it ended go to the logs ([GoLogs]). Must not be called on EDT. */
+    /**
+     * Runs a short command and captures its output; the command and how it ended go to the logs ([GoLogs]). Must not be called on EDT.
+     * [onStart] gets the handler before the wait, for an owner that must be able to stop the process (a disposed service).
+     */
     @Throws(ExecutionException::class)
-    fun execute(commandLine: GeneralCommandLine, timeoutMs: Int = TIMEOUT_MS): ProcessOutput {
+    fun execute(commandLine: GeneralCommandLine, timeoutMs: Int = TIMEOUT_MS, onStart: (ProcessHandler) -> Unit = {}): ProcessOutput {
         val tag = commandLine.exePath.substringAfterLast(File.separatorChar).removeSuffix(".exe")
         val startedAt = System.currentTimeMillis()
         GoLogs.commandStarted(tag, commandLine)
         val output = try {
-            CapturingProcessHandler(commandLine).runProcess(timeoutMs)
+            CapturingProcessHandler(commandLine).also(onStart).runProcess(timeoutMs)
         } catch (e: ExecutionException) {
             GoLogs.commandFinished(tag, "could not start: ${e.message}", failed = true)
             throw e

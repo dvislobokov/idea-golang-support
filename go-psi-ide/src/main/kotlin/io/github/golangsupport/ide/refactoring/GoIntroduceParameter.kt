@@ -2,6 +2,7 @@ package io.github.golangsupport.ide.refactoring
 
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ThrowableComputable
@@ -26,6 +27,15 @@ import io.github.golangsupport.semantic.types.GoTypePredicates
 
 /** What Introduce Parameter and Introduce Field share: the declarations an expression uses, its type as a declaration spells it. */
 internal object GoIntroduceSupport {
+
+    /** [compute] in a read action under a modal progress titled [title]; null when the user cancels it. */
+    fun <T : Any> underProgress(project: Project, title: String, compute: () -> T?): T? = try {
+        ProgressManager.getInstance().runProcessWithProgressSynchronously(
+            ThrowableComputable<T?, RuntimeException> { ReadAction.compute<T?, RuntimeException> { compute() } }, title, true, project,
+        )
+    } catch (_: ProcessCanceledException) {
+        null
+    }
 
     /** The declarations [expr] names (values and types), not counting those declared inside [expr] itself (a function literal's). */
     fun targets(expr: GoExpression): List<PsiElement> {
@@ -90,7 +100,7 @@ class GoIntroduceParameterHandler @JvmOverloads constructor(options: GoIntroduce
         if (!GoImplementations.isInProject(decl)) return error(project, editor, "The function is not in the project")
         val type = GoIntroduceSupport.declaredType(expr)
         if (GoIntroduceSupport.isLocalType(type)) return error(project, editor, "The type of the expression is declared inside the function")
-        if (GoIntroduceSupport.usesOwnPackage(expr) && calledFromOtherPackage(project, decl, file)) {
+        if (GoIntroduceSupport.usesOwnPackage(expr) && (calledFromOtherPackage(project, decl, file) ?: return)) {
             return error(project, editor, "The expression uses names of package ${file.packageName} and the function is called from another package")
         }
         val typeText = GoSourceText(file).type(type)
@@ -124,18 +134,18 @@ class GoIntroduceParameterHandler @JvmOverloads constructor(options: GoIntroduce
         renameInPlace(editor, parameter, names, member = false)
     }
 
-    /** Whether a reference to [decl] stands in another package than [file]'s (searched under a modal progress, not on the EDT itself). */
-    private fun calledFromOtherPackage(project: Project, decl: GoFunctionOrMethodDeclaration, file: GoFile): Boolean {
+    /**
+     * Whether a reference to [decl] stands in another package than [file]'s (searched under a modal progress, not on the EDT itself);
+     * null when the user cancels the search.
+     */
+    private fun calledFromOtherPackage(project: Project, decl: GoFunctionOrMethodDeclaration, file: GoFile): Boolean? {
         val dir = file.originalFile.virtualFile?.parent
-        val search = ThrowableComputable<Boolean, RuntimeException> {
-            ReadAction.compute<Boolean, RuntimeException> {
-                ReferencesSearch.search(decl, decl.useScope).anyMatch { ref ->
-                    val other = ref.element.containingFile as? GoFile
-                    other != null && (other.originalFile.virtualFile?.parent != dir || other.packageName != file.packageName)
-                }
+        return GoIntroduceSupport.underProgress(project, "Looking for Calls of ${decl.name}") {
+            ReferencesSearch.search(decl, decl.useScope).anyMatch { ref ->
+                val other = ref.element.containingFile as? GoFile
+                other != null && (other.originalFile.virtualFile?.parent != dir || other.packageName != file.packageName)
             }
         }
-        return ProgressManager.getInstance().runProcessWithProgressSynchronously(search, "Looking for Calls of ${decl.name}", true, project)
     }
 
     companion object {

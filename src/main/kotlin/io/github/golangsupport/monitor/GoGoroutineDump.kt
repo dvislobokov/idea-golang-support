@@ -1,6 +1,7 @@
 package io.github.golangsupport.monitor
 
 import com.google.gson.JsonObject
+import com.intellij.openapi.progress.ProgressManager
 import io.github.golangsupport.debugger.json
 import io.github.golangsupport.debugger.objects
 import io.github.golangsupport.debugger.string
@@ -13,8 +14,8 @@ data class GoStackFrame(val function: String, val file: String?, val line: Int)
  * its DAP threads carry no wait reason.
  */
 data class GoGoroutine(
-    val id: Int, val state: String, val waitMinutes: Int? = null, val lockedToThread: Boolean = false,
-    val frames: List<GoStackFrame> = emptyList(), val createdBy: GoStackFrame? = null, val createdIn: Int? = null,
+    val id: Long, val state: String, val waitMinutes: Int? = null, val lockedToThread: Boolean = false,
+    val frames: List<GoStackFrame> = emptyList(), val createdBy: GoStackFrame? = null, val createdIn: Long? = null,
 )
 
 /**
@@ -32,7 +33,7 @@ object GoGoroutineDump {
         val result = ArrayList<GoGoroutine>()
         var current: GoGoroutine? = null
         var pendingFunction: String? = null
-        var pendingCreated: Pair<String, Int?>? = null
+        var pendingCreated: Pair<String, Long?>? = null
         fun flush() {
             current?.let { result += it }
             current = null
@@ -44,7 +45,7 @@ object GoGoroutineDump {
             val header = HEADER.matchEntire(line)
             if (header != null) {
                 flush()
-                current = header(header.groupValues[1].toInt(), header.groupValues[2])
+                current = header(header.groupValues[1].toLongOrNull() ?: continue, header.groupValues[2])
                 continue
             }
             val goroutine = current ?: continue
@@ -53,7 +54,7 @@ object GoGoroutineDump {
             // frames are a line of the function and an indented line of its place
             if (location != null) {
                 val file = location.groupValues[1]
-                val number = location.groupValues[2].toInt()
+                val number = location.groupValues[2].toIntOrNull() ?: 0
                 val created = pendingCreated
                 val function = pendingFunction
                 current = when {
@@ -67,7 +68,7 @@ object GoGoroutineDump {
             }
             val created = CREATED.matchEntire(line)
             if (created != null) {
-                pendingCreated = created.groupValues[1] to created.groupValues[2].toIntOrNull()
+                pendingCreated = created.groupValues[1] to created.groupValues[2].toLongOrNull()
                 continue
             }
             // `...additional frames elided...` and the like are not frames
@@ -92,7 +93,7 @@ object GoGoroutineDump {
         return text
     }
 
-    private fun header(id: Int, bracket: String): GoGoroutine {
+    private fun header(id: Long, bracket: String): GoGoroutine {
         val parts = bracket.split(", ").map(String::trim)
         val minutes = parts.firstNotNullOfOrNull { MINUTES.matchEntire(it)?.groupValues?.get(1)?.toInt() }
         return GoGoroutine(id, parts.firstOrNull().orEmpty(), minutes, lockedToThread = "locked to thread" in parts)
@@ -123,11 +124,15 @@ object GoGoroutineDump {
         return if (states.isEmpty()) count else count + ": " + states.joinToString(", ") { "${it.value} ${it.key}" }
     }
 
-    /** The dump through a DAP adapter that has the program stopped: `threads`, then `stackTrace` of each, [depth] frames deep. */
-    fun collect(depth: Int, request: (String, JsonObject) -> JsonObject): List<GoGoroutine> {
+    /**
+     * The dump through a DAP adapter that has the program stopped: `threads`, then `stackTrace` of each, [depth] frames deep. A request
+     * per goroutine (thousands in a server): [checkCanceled] runs before each, so that Cancel of the progress stops the dump.
+     */
+    fun collect(depth: Int, checkCanceled: () -> Unit = { ProgressManager.checkCanceled() }, request: (String, JsonObject) -> JsonObject): List<GoGoroutine> {
         val threads = request("threads", JsonObject()).objects("threads")
         return threads.mapNotNull { thread ->
-            val id = thread.get("id")?.takeIf { it.isJsonPrimitive }?.asInt ?: return@mapNotNull null
+            checkCanceled()
+            val id = thread.get("id")?.takeIf { it.isJsonPrimitive }?.asLong ?: return@mapNotNull null
             // a goroutine that is gone by now answers with an error: listed without frames rather than failing the dump
             val frames = runCatching { request("stackTrace", json("threadId" to id, "startFrame" to 0, "levels" to depth)).objects("stackFrames") }.getOrDefault(emptyList())
             GoGoroutine(id, "", frames = frames.map(::frameOf))

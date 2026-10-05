@@ -10,15 +10,18 @@ import io.github.golangsupport.lang.psi.GoIfStatement
 import io.github.golangsupport.lang.psi.GoNamedElement
 import io.github.golangsupport.lang.psi.GoReferenceExpression
 import io.github.golangsupport.lang.psi.GoShortVarDeclaration
+import io.github.golangsupport.semantic.api.GoSemanticService
 import io.github.golangsupport.semantic.psi.GoPsiUtil.block
 import io.github.golangsupport.semantic.psi.GoPsiUtil.condition
 import io.github.golangsupport.semantic.psi.GoPsiUtil.initStatement
+import io.github.golangsupport.semantic.types.GoConstant
 
 /**
  * `strings.HasPrefix` + `strings.TrimPrefix` → `strings.CutPrefix` (go1.20; modernize `stringscutprefix`), also the `Suffix` pair and package `bytes`:
  * - `if strings.HasPrefix(s, pre) { … strings.TrimPrefix(s, pre) … }` → `if after, ok := strings.CutPrefix(s, pre); ok { … after … }`;
  * - `if after := strings.TrimPrefix(s, pre); after != s { … }` → `if after, ok := strings.CutPrefix(s, pre); ok { … }`.
- * `s` and `pre` are pure and not written inside the `if`.
+ * `s` and `pre` are pure and not written inside the `if`. The second form needs `pre` to be a non-empty string constant: with `pre == ""`
+ * `after != s` is false where `ok` is true.
  */
 class GoFixStringsCutPrefixInspection : GoFixInspectionBase() {
 
@@ -60,7 +63,7 @@ class GoFixStringsCutPrefixInspection : GoFixInspectionBase() {
         val trim = GoFixPsi.unparen(init.expressionList.singleOrNull()) as? GoCallExpr ?: return null
         val (_, kind) = call(trim, kinds.map { it.trim }) ?: return null
         val (s, pre) = GoFixPsi.args(trim)?.takeIf { it.size == 2 } ?: return null
-        if (!invariant(s, statement) || !invariant(pre, statement)) return null
+        if (!invariant(s, statement) || !invariant(pre, statement) || !nonEmptyConstant(pre)) return null
         val cond = GoFixPsi.unparen(statement.condition) as? GoConditionalExpr ?: return null
         if (cond.neq == null) return null
         val matches = (GoFixPsi.refersTo(cond.left, def) && GoFixPsi.same(cond.right, s)) || (GoFixPsi.refersTo(cond.right, def) && GoFixPsi.same(cond.left, s))
@@ -85,6 +88,10 @@ class GoFixStringsCutPrefixInspection : GoFixInspectionBase() {
         }
         return null
     }
+
+    /** A string constant (literal or named) with at least one byte. */
+    private fun nonEmptyConstant(e: GoExpression): Boolean =
+        (GoSemanticService.getInstance(e.project).constantValue(e) as? GoConstant.Str)?.value?.isNotEmpty() == true
 
     /** A pure expression whose variables are not written inside [statement]. */
     private fun invariant(e: GoExpression, statement: GoIfStatement): Boolean {

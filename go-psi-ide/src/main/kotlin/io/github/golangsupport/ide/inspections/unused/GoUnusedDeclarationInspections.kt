@@ -2,8 +2,12 @@ package io.github.golangsupport.ide.inspections.unused
 
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.util.CachedValue
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.Processor
@@ -20,6 +24,7 @@ import io.github.golangsupport.lang.psi.GoNamedElement
 import io.github.golangsupport.lang.psi.GoTypeSpec
 import io.github.golangsupport.lang.psi.GoTypes
 import io.github.golangsupport.lang.psi.GoVarDefinition
+import io.github.golangsupport.semantic.cache.GoTrackers
 import io.github.golangsupport.semantic.psi.GoPsiUtil
 
 /**
@@ -120,8 +125,32 @@ internal object GoUnusedDeclarations {
         return true
     }
 
-    /** Whether some reference outside the declaration (and, for a type, outside its methods) resolves to [element]. */
-    fun isUsed(element: GoNamedElement): Boolean {
+    private val USED = Key.create<CachedValue<Boolean>>("gopsi.unused.isUsed")
+
+    /**
+     * Whether some reference outside the declaration (and, for a type, outside its methods) resolves to [element]. Cached on the element:
+     * every highlighting pass of every inspection of this group asks, and the search reads other files.
+     */
+    fun isUsed(element: GoNamedElement): Boolean =
+        CachedValuesManager.getCachedValue(element, USED) { CachedValueProvider.Result.create(search(element), *dependencies(element)) }
+
+    /**
+     * What can add or remove a use: a local declaration — its file; a package-level one — any change of a file of its package (uses in
+     * bodies included) and the package's file set; an exported one also any out-of-block change in the project (an import of the package
+     * or a new file elsewhere). A use typed into a function body of another package is seen at the next out-of-block change there: the
+     * project-wide search is not repeated on every keystroke.
+     */
+    private fun dependencies(element: GoNamedElement): Array<Any> {
+        val file = element.containingFile
+        val trackers = GoTrackers.getInstance(element.project)
+        val own = listOfNotNull(file.takeIf { !it.isPhysical }, trackers.forFile(file))
+        if (PsiTreeUtil.getParentOfType(element, GoBlock::class.java) != null) return own.toTypedArray()
+        val siblings = file.originalFile.containingDirectory?.files.orEmpty().filter { it is GoFile && it != file }.map(trackers::forFile)
+        val wide = if (element.isPublic()) trackers.projectWideDependencies().toList() else emptyList()
+        return (own + siblings + trackers.ownPackageDependencies(file) + wide).toTypedArray()
+    }
+
+    private fun search(element: GoNamedElement): Boolean {
         val project = element.project
         val scope = element.useScope.intersectWith(GlobalSearchScope.projectScope(project))
         return !ReferencesSearch.search(element, scope).forEach(Processor { ref -> !counts(element, ref.element) })

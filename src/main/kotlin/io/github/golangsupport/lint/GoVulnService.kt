@@ -1,6 +1,7 @@
 package io.github.golangsupport.lint
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.execution.process.ProcessHandler
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
@@ -43,6 +44,9 @@ class GoVulnService(private val project: Project) : Disposable {
     private val running = ConcurrentHashMap.newKeySet<String>()
     private val scheduled = ConcurrentHashMap<String, ScheduledFuture<*>>()
     private val keys = ConcurrentHashMap<String, Pair<Long, String>>()
+    // the running govulncheck processes: a run takes up to TIMEOUT_MS and must not outlive the project
+    private val processes = ConcurrentHashMap.newKeySet<ProcessHandler>()
+    @Volatile private var disposed = false
 
     /** The report for the current go.mod + go.sum of [module], or null; asks for a run in the background when the setting is on and there is none or it is old. */
     fun report(module: GoModule): GoVulnReport? {
@@ -89,8 +93,19 @@ class GoVulnService(private val project: Project) : Disposable {
             }
             val started = System.currentTimeMillis()
             GoPluginLog.info(CATEGORY, "govulncheck ./... in $root")
-            val output = runCatching { GoCli.execute(GoCli.toolCommandLine(tool.path, root, *GoVulnOutput.arguments(GoSettings.getInstance().tagList()).toTypedArray()), TIMEOUT_MS) }
-                .onFailure { GoPluginLog.warn(CATEGORY, "govulncheck has failed to start: ${GoPluginLog.describe(it)}") }.getOrNull()
+            if (disposed) return null
+            var handler: ProcessHandler? = null
+            val output = try {
+                runCatching {
+                    GoCli.execute(GoCli.toolCommandLine(tool.path, root, *GoVulnOutput.arguments(GoSettings.getInstance().tagList()).toTypedArray()), TIMEOUT_MS) { h ->
+                        handler = h
+                        track(h)
+                    }
+                }.onFailure { GoPluginLog.warn(CATEGORY, "govulncheck has failed to start: ${GoPluginLog.describe(it)}") }.getOrNull()
+            } finally {
+                handler?.let { processes.remove(it) }
+            }
+            if (disposed || project.isDisposed) return null
             if (output == null) {
                 store(root, key ?: keyOf(root), null, "")
                 return null
@@ -107,6 +122,8 @@ class GoVulnService(private val project: Project) : Disposable {
 
     /** Keeps the result of a run (also of Go | Check Vulnerabilities) for [root], on disk too, and highlights the files again. */
     fun store(root: String, key: String?, report: GoVulnReport?, stdout: String) {
+        // a run that ends after the project closed keeps nothing
+        if (disposed || project.isDisposed) return
         val at = System.currentTimeMillis()
         val k = key ?: return
         val previous = entries.put(root, Entry(k, at, report))
@@ -147,9 +164,22 @@ class GoVulnService(private val project: Project) : Disposable {
         if (report == null) entries.remove(root.path) else entries[root.path] = Entry(keyOf(root)!!, System.currentTimeMillis(), report)
     }
 
+    /** Remembers [handler] so that [dispose] stops it; a handler coming after dispose is stopped at once. */
+    internal fun track(handler: ProcessHandler) {
+        processes += handler
+        if (disposed) handler.destroyProcess()
+    }
+
+    /** Whether a result is kept for [root], for tests. */
+    @TestOnly
+    fun hasResult(root: String): Boolean = entries.containsKey(root)
+
     override fun dispose() {
+        disposed = true
         scheduled.values.forEach { it.cancel(false) }
         scheduled.clear()
+        processes.forEach { it.destroyProcess() }
+        processes.clear()
     }
 
     /** go.mod / go.sum changed on disk: a run for that module a moment later (`go get` writes both, an editor saves often). */

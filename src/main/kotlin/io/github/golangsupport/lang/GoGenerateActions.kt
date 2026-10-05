@@ -376,6 +376,7 @@ class GoGenerateTestAction : GoGenerateAction() {
                     context.hint("$testName has a test of ${function.name} already")
                 } else {
                     document.insertString(text.length, (if (text.endsWith("\n")) "\n" else "\n\n") + test)
+                    for (path in GoGenerators.testImports(function)) GoImports.add(document.immutableCharSequence, path)?.let { document.insertString(it.offset, it.text) }
                 }
                 PsiDocumentManager.getInstance(context.project).commitDocument(document)
                 FileEditorManager.getInstance(context.project).openTextEditor(OpenFileDescriptor(context.project, file, document.textLength - test.length + 1), true)
@@ -485,7 +486,9 @@ class GoGenerateTestsForPackageAction : GoGenerateAction() {
                     val tests = functions.joinToString("\n") { GoGenerators.testFunction(it.function, packageName) }
                     val text = document.text
                     document.insertString(text.length, (if (text.endsWith("\n\n") || text.isEmpty()) "" else if (text.endsWith("\n")) "\n" else "\n\n") + tests)
-                    GoImports.add(document.immutableCharSequence, "testing")?.let { document.insertString(it.offset, it.text) }
+                    for (path in functions.flatMap { GoGenerators.testImports(it.function) }.distinct()) {
+                        GoImports.add(document.immutableCharSequence, path)?.let { document.insertString(it.offset, it.text) }
+                    }
                     PsiDocumentManager.getInstance(project).commitDocument(document)
                 }
             })

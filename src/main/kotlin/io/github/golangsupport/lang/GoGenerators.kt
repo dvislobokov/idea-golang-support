@@ -197,22 +197,44 @@ object GoGenerators {
     fun missingMethods(iface: GoDeclarationInfo, existing: Set<String>): GoDeclarationInfo =
         GoDeclarationInfo(iface.kind, iface.name, iface.nameRange, iface.range, body = iface.body, children = iface.children.filter { it.name !in existing })
 
-    /** A table-driven test for a function or a method; the arguments and the want are left for the writer, as GoLand does. */
+    /**
+     * A table-driven test for a function or a method; the arguments and the want are left for the writer, as GoLand does. A variadic
+     * parameter is a slice field passed with `...`, an unnamed or `_` one is named `arg1`, `arg2`… by position, and results `==` cannot
+     * compare (slices, maps, funcs, structs…) are compared with `reflect.DeepEqual` ([testImports] then has `reflect`).
+     */
     fun testFunction(function: GoDeclarationInfo, packageName: String?): String {
         val name = if (function.receiver != null) "${function.receiver}_${function.name}" else function.name
         val (parameters, results) = GoIdioms.splitSignature(function.signature.orEmpty())
-        val fields = parameters.mapIndexed { i, p -> "\t\t${p.name ?: "arg$i"} ${p.type}" } + results.mapIndexed { i, r -> "\t\twant${if (results.size > 1) i.toString() else ""} ${r.type}" }
-        val call = parameters.mapIndexed { i, p -> "tt.${p.name ?: "arg$i"}" }.joinToString(", ")
+        val names = parameters.mapIndexed { i, p -> p.name?.takeIf { it != "_" } ?: "arg${i + 1}" }
+        val fields = parameters.mapIndexed { i, p -> "\t\t${names[i]} ${p.type.trim().let { t -> if (t.startsWith("...")) "[]" + t.removePrefix("...").trim() else t }}" } +
+            results.mapIndexed { i, r -> "\t\twant${if (results.size > 1) i.toString() else ""} ${r.type}" }
+        val call = parameters.mapIndexed { i, p -> "tt.${names[i]}" + if (p.type.trimStart().startsWith("...")) "..." else "" }.joinToString(", ")
         val callee = if (function.receiver != null) "${receiverName(function.receiver)}.${function.name}" else function.name
         val gots = results.indices.joinToString(", ") { "got${if (results.size > 1) it.toString() else ""}" }
         val receiverSetup = if (function.receiver != null) "\t\t\tvar ${receiverName(function.receiver)} ${function.receiver}\n" else ""
         val body = if (results.isEmpty()) "$receiverSetup\t\t\t$callee($call)\n"
         else "$receiverSetup\t\t\t$gots := $callee($call)\n" + results.indices.joinToString("") { i ->
             val suffix = if (results.size > 1) i.toString() else ""
-            "\t\t\tif got$suffix != tt.want$suffix {\n\t\t\t\tt.Errorf(\"${function.name}() = %v, want %v\", got$suffix, tt.want$suffix)\n\t\t\t}\n"
+            val differs = if (isComparable(results[i].type)) "got$suffix != tt.want$suffix" else "!reflect.DeepEqual(got$suffix, tt.want$suffix)"
+            "\t\t\tif $differs {\n\t\t\t\tt.Errorf(\"${function.name}() = %v, want %v\", got$suffix, tt.want$suffix)\n\t\t\t}\n"
         }
         return "func Test$name(t *testing.T) {\n\ttests := []struct {\n\t\tname string\n${fields.joinToString("") { "$it\n" }}\t}{\n\t\t// TODO: add test cases\n\t}\n" +
             "\tfor _, tt := range tests {\n\t\tt.Run(tt.name, func(t *testing.T) {\n$body\t\t})\n\t}\n}\n"
+    }
+
+    /** The imports the [testFunction] of [function] needs: `testing`, and `reflect` when a result is compared with `reflect.DeepEqual`. */
+    fun testImports(function: GoDeclarationInfo): List<String> =
+        listOf("testing") + if (GoIdioms.splitSignature(function.signature.orEmpty()).second.any { !isComparable(it.type) }) listOf("reflect") else emptyList()
+
+    private val COMPARABLE_TYPES = setOf(
+        "bool", "string", "error", "byte", "rune", "uintptr", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64",
+        "float32", "float64", "complex64", "complex128",
+    )
+
+    /** Whether `!=` surely compiles and means equality for a value of [type] as written: basic types, pointers and channels; else DeepEqual. */
+    private fun isComparable(type: String): Boolean {
+        val t = type.trim()
+        return t in COMPARABLE_TYPES || t.startsWith("*") || t.startsWith("chan ") || t.startsWith("<-chan") || t.startsWith("chan<-")
     }
 
     /**
@@ -264,11 +286,16 @@ object GoGenerators {
      * Tests for package: the exported functions and methods of [functions] (no `init`, `main` or test functions) whose test is in none of
      * [testTexts] (the `_test.go` files of the package).
      */
-    fun untested(functions: List<GoDeclarationInfo>, testTexts: Collection<String>): List<GoDeclarationInfo> = functions.filter { f ->
-        (f.kind == GoDeclarationKind.FUNCTION || f.kind == GoDeclarationKind.METHOD) && f.isExported &&
-            !Regex("""^(Test|Benchmark|Fuzz|Example)""").containsMatchIn(f.name) &&
-            testTexts.none { Regex("""func ${Regex.escape(testName(f))}\(""").containsMatchIn(it) }
+    fun untested(functions: List<GoDeclarationInfo>, testTexts: Collection<String>): List<GoDeclarationInfo> {
+        // the test names of the files, read once: not a regex per function and file
+        val existing = testTexts.flatMapTo(HashSet()) { text -> TEST_DECLARATION.findAll(text).map { it.groupValues[1] } }
+        return functions.filter { f ->
+            (f.kind == GoDeclarationKind.FUNCTION || f.kind == GoDeclarationKind.METHOD) && f.isExported && !TEST_LIKE.containsMatchIn(f.name) && testName(f) !in existing
+        }
     }
+
+    private val TEST_DECLARATION = Regex("""func (Test\w*)\(""")
+    private val TEST_LIKE = Regex("""^(Test|Benchmark|Fuzz|Example)""")
 
     private fun hasTopLevelComma(text: String): Boolean {
         var depth = 0

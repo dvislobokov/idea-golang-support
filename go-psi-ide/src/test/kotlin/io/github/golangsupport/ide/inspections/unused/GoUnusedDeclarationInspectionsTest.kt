@@ -1,7 +1,15 @@
 package io.github.golangsupport.ide.inspections.unused
 
 import com.intellij.codeInspection.LocalInspectionTool
+import com.intellij.openapi.application.WriteAction
+import com.intellij.openapi.vfs.VirtualFileFilter
+import com.intellij.psi.impl.PsiManagerEx
+import com.intellij.psi.impl.source.PsiFileImpl
+import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.util.AstLoadingFilter
 import io.github.golangsupport.ide.GoSemanticIdeTestBase
+import io.github.golangsupport.lang.psi.GoConstDefinition
+import io.github.golangsupport.lang.psi.GoFile
 
 /** The unused-declaration inspections in a light project (the files are not under `internal/` there: exported names stay quiet). */
 class GoUnusedDeclarationInspectionsTest : GoSemanticIdeTestBase() {
@@ -137,5 +145,23 @@ class GoUnusedDeclarationInspectionsTest : GoSemanticIdeTestBase() {
         myFixture.configureByText("u7e.go", "package u7e\n\nfunc keep() {}\n\nfunc <caret>dead() {}\n\nvar _ = keep\n")
         myFixture.launchAction(myFixture.findSingleIntention("Safe delete"))
         myFixture.checkResult("package u7e\n\nfunc keep() {}\n\nvar _ = keep\n")
+    }
+
+    /** Regression: the search result is cached, so a repeated check (every highlighting pass) does not load the other file's AST again. */
+    fun testUsageSearchIsCachedAcrossPasses() {
+        val decl = myFixture.addFileToProject("u7f/decl.go", "package u7f\n\nfunc helper() {}\n\nconst limit = 1\n") as GoFile
+        val use = myFixture.addFileToProject("u7f/use.go", "package u7f\n\nfunc run() int {\n\thelper()\n\treturn limit\n}\n") as PsiFileImpl
+        val helper = decl.functions.single()
+        val limit = PsiTreeUtil.findChildrenOfType(decl, GoConstDefinition::class.java).single()
+        assertTrue(GoUnusedDeclarations.isUsed(helper))
+        assertTrue(GoUnusedDeclarations.isUsed(limit))
+        WriteAction.run<Throwable> { use.onContentReload() }
+        assertNull("use.go must start without an AST", use.treeElement)
+        PsiManagerEx.getInstanceEx(project).setAssertOnFileLoadingFilter(VirtualFileFilter { it == use.virtualFile }, testRootDisposable)
+        AstLoadingFilter.disallowTreeLoading<Throwable> {
+            assertTrue(GoUnusedDeclarations.isUsed(helper))
+            assertTrue(GoUnusedDeclarations.isUsed(limit))
+        }
+        assertNull("checking again loaded use.go's AST", use.treeElement)
     }
 }

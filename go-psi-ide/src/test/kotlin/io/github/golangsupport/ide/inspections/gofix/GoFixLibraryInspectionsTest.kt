@@ -258,6 +258,22 @@ class GoFixSlicesSortInspectionTest : GoFixTestBase() {
         }
         """
     )
+
+    /** Regression: `slices.Sort` orders NaNs first, `sort.Slice` with `<` does not, so float slices stay as they are. */
+    fun testFloatElementsStayQuiet() = highlight(
+        """
+        package p
+
+        import "sort"
+
+        type F float32
+
+        func f(s []float64, t []F) {
+            sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })
+            sort.Slice(t, func(i, j int) bool { return t[i] < t[j] })
+        }
+        """
+    )
 }
 
 /** Backward index loops → `slices.Backward` (GoFixSlicesBackward). */
@@ -302,7 +318,7 @@ class GoFixSlicesBackwardInspectionTest : GoFixTestBase() {
         func f(s []int) (sum int) {
             for ${warn(msg, "i := len(s) - 1; i >= 0; i--")} {
                 s[i] = 0
-                sum += i
+                sum += i + s[i]
             }
             return
         }
@@ -316,7 +332,58 @@ class GoFixSlicesBackwardInspectionTest : GoFixTestBase() {
         func f(s []int) (sum int) {
             for i := range slices.Backward(s) {
                 s[i] = 0
-                sum += i
+                sum += i + s[i]
+            }
+            return
+        }
+        """,
+    )
+
+    /** Regression: `&s[i]`, `s[i]++` or `s` passed to a call may change the element, so a later `s[i]` must not become the stale `v`. */
+    fun testReadsKeptWhenElementsMayChange() = doTest(
+        """
+        package p
+
+        func g(s []int) {}
+
+        func f(s []int, t []int) (sum int) {
+            for ${warn(msg, "i := len(s) - 1; i >= 0; i--")} {
+                p := &s[i]
+                *p = 1
+                sum += s[i]
+            }
+            for ${warn(msg, "i := len(t) - 1; i >= 0; i--")} {
+                g(t)
+                sum += t[i]
+            }
+            for ${warn(msg, "j := len(s) - 1; j >= 0; j--")} {
+                s[j]++
+                sum += s[j]
+            }
+            return
+        }
+        """,
+        "Replace with range over slices.Backward",
+        """
+        package p
+
+        import "slices"
+
+        func g(s []int) {}
+
+        func f(s []int, t []int) (sum int) {
+            for i := range slices.Backward(s) {
+                p := &s[i]
+                *p = 1
+                sum += s[i]
+            }
+            for i := range slices.Backward(t) {
+                g(t)
+                sum += t[i]
+            }
+            for j := range slices.Backward(s) {
+                s[j]++
+                sum += s[j]
             }
             return
         }
@@ -488,7 +555,9 @@ class GoFixStringsCutPrefixInspectionTest : GoFixTestBase() {
 
         import "strings"
 
-        func f(s, suffix string) string {
+        const suffix = ".go"
+
+        func f(s string) string {
             if ${warn("HasSuffix + TrimSuffix can be simplified to CutSuffix", "rest := strings.TrimSuffix(s, suffix)")}; s != rest {
                 return rest
             }
@@ -501,13 +570,39 @@ class GoFixStringsCutPrefixInspectionTest : GoFixTestBase() {
 
         import "strings"
 
-        func f(s, suffix string) string {
+        const suffix = ".go"
+
+        func f(s string) string {
             if rest, ok := strings.CutSuffix(s, suffix); ok {
                 return rest
             }
             return ""
         }
         """,
+    )
+
+    /** Regression: with `pre == ""` the comparison is false where `ok` is true, so only a non-empty constant `pre` qualifies. */
+    fun testTrimComparedNeedsNonEmptyConstant() = highlight(
+        """
+        package p
+
+        import "strings"
+
+        const empty = ""
+
+        func f(s, pre string) string {
+            if after := strings.TrimPrefix(s, pre); after != s {
+                return after
+            }
+            if after := strings.TrimPrefix(s, ""); after != s {
+                return after
+            }
+            if after := strings.TrimPrefix(s, empty); after != s {
+                return after
+            }
+            return ""
+        }
+        """
     )
 
     fun testMismatchesStayQuiet() = highlight(

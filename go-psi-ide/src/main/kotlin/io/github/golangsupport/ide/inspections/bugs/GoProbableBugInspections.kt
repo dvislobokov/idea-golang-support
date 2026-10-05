@@ -22,6 +22,7 @@ import io.github.golangsupport.ide.inspections.GoRenameVariableFix
 import io.github.golangsupport.ide.inspections.lint.GoLintPsi
 import io.github.golangsupport.ide.intentions.GoEditPlan
 import io.github.golangsupport.ide.intentions.GoSourceText
+import io.github.golangsupport.ide.rules.builtin.simple.GoSimplePsi
 import io.github.golangsupport.lang.psi.GoAssignmentStatement
 import io.github.golangsupport.lang.psi.GoBlock
 import io.github.golangsupport.lang.psi.GoCallExpr
@@ -225,7 +226,8 @@ class GoMixedReceiverTypesInspection : GoAnalysisInspectionBase() {
 /**
  * GoLand's "Type assertion on errors fails on wrapped errors" (`GoTypeAssertionOnErrors`, errorlint): `err.(*MyErr)` on a value of type
  * `error` misses an error wrapped with `%w`; `errors.As` unwraps. `Is` / `As` / `Unwrap` methods are skipped (they inspect one level by
- * design). Fix for `if e, ok := err.(*T); ok {` (the `ok` used only there): `var e *T` before it and `if errors.As(err, &e) {`.
+ * design). Fix for `if e, ok := err.(*T); ok {` (the `ok` used only there): `var e *T` before it and `if errors.As(err, &e) {`; when `e` is
+ * already visible at the `if` or mentioned after it, the variable gets a free name (`e2`) and its uses inside the `if` follow.
  */
 class GoTypeAssertionOnErrorsInspection : GoAnalysisInspectionBase() {
 
@@ -235,7 +237,7 @@ class GoTypeAssertionOnErrorsInspection : GoAnalysisInspectionBase() {
         if (method?.name in setOf("Is", "As", "Unwrap")) return
         val type = GoSemanticService.getInstance(file.project).typeOf(element.expression)
         if (!GoAnalysisPsi.isError(type)) return
-        val fixes = if (rewritable(element) != null) arrayOf<LocalQuickFix>(GoUseErrorsAsFix()) else emptyArray()
+        val fixes = if (rewritable(element)?.let { targetName(element, it) } != null) arrayOf<LocalQuickFix>(GoUseErrorsAsFix()) else emptyArray()
         holder.registerProblem(element, "Type assertion on errors fails on wrapped errors", *fixes)
     }
 
@@ -254,6 +256,20 @@ class GoTypeAssertionOnErrorsInspection : GoAnalysisInspectionBase() {
             if (uses != 1) return null
             return ifStatement
         }
+
+        /**
+         * The name of the `var` the fix declares before [ifStatement] (in the enclosing block): the asserted variable's own name when nothing
+         * named so is visible at the `if` (a redeclaration, or a shadowed outer variable) or mentioned after it, else `e2`, `e3`, … free in the
+         * `if` too; null when none is.
+         */
+        fun targetName(assertion: GoTypeAssertionExpr, ifStatement: GoIfStatement): String? {
+            val value = (assertion.parent as? GoShortVarDeclaration)?.varDefinitionList?.firstOrNull()?.name ?: return null
+            val block = ifStatement.parent as? GoBlock ?: return null
+            val after = block.statementList.filter { it.textRange.startOffset > ifStatement.textRange.startOffset }
+            fun free(name: String) = GoScopes.resolveName(ifStatement, name).isEmpty() && after.none { GoSimplePsi.mentions(it, name) }
+            if (free(value)) return value
+            return (2..9).map { "$value$it" }.firstOrNull { free(it) && !GoSimplePsi.mentions(ifStatement, it) }
+        }
     }
 }
 
@@ -266,14 +282,20 @@ class GoUseErrorsAsFix : LocalQuickFix {
         val ifStatement = GoTypeAssertionOnErrorsInspection.rewritable(assertion) ?: return
         val file = assertion.containingFile as? GoFile ?: return
         val declaration = assertion.parent as GoShortVarDeclaration
-        val value = declaration.varDefinitionList[0].name
+        val definition = declaration.varDefinitionList[0]
+        val value = GoTypeAssertionOnErrorsInspection.targetName(assertion, ifStatement) ?: return
         val type = assertion.type?.text ?: return
+        val condition = ifStatement.condition ?: return
+        val service = GoSemanticService.getInstance(project)
+        // A fresh name renames the uses inside the `if` (all after the header, so they are edited first, from the end).
+        val renames = if (value == definition.name) emptyList() else PsiTreeUtil.findChildrenOfType(ifStatement, GoReferenceExpression::class.java)
+            .filter { it.expression == null && it.identifier.text == definition.name && it.textRange.startOffset > condition.textRange.endOffset && service.resolve(it).singleOrNull() == definition }
         val source = GoSourceText(file)
         val prefix = source.prefix("errors", "errors")
         val document = GoImportEdits.document(file) ?: return
         val text = document.charsSequence
         val indent = GoInspectionText.indentAt(text, ifStatement.textRange.startOffset)
-        val condition = ifStatement.condition ?: return
+        for (ref in renames.sortedByDescending { it.textRange.startOffset }) document.replaceString(ref.identifier.textRange.startOffset, ref.identifier.textRange.endOffset, value)
         val headerStart = declaration.textRange.startOffset
         document.replaceString(headerStart, condition.textRange.endOffset, "${prefix}As(${assertion.expression.text}, &$value)")
         document.insertString(ifStatement.textRange.startOffset, "var $value $type\n$indent")

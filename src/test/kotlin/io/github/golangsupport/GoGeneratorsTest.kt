@@ -151,4 +151,33 @@ class GoGeneratorsTest {
         assertEquals(listOf("Start"), GoGenerators.untested(functions, tests).map { it.name })
         assertEquals("TestServer_Start", GoGenerators.testName(f("Start", "Server")))
     }
+
+    private fun function(name: String, signature: String) = GoDeclarationInfo(GoDeclarationKind.FUNCTION, name, TextRange(0, 0), TextRange(0, 0), null, signature)
+
+    @Test fun testOfNonComparableResultsUsesDeepEqual() {
+        val f = function("Split", "(s string) ([]string, map[string]int, func() error, int)")
+        val test = GoGenerators.testFunction(f, "p")
+        assertTrue(test, test.contains("if !reflect.DeepEqual(got0, tt.want0) {"))
+        assertTrue(test, test.contains("if !reflect.DeepEqual(got1, tt.want1) {"))
+        assertTrue(test, test.contains("if !reflect.DeepEqual(got2, tt.want2) {"))
+        assertTrue(test, test.contains("if got3 != tt.want3 {"))
+        assertEquals(listOf("testing", "reflect"), GoGenerators.testImports(f))
+        assertEquals(listOf("testing"), GoGenerators.testImports(function("Len", "(s string) (int, error)")))
+    }
+
+    @Test fun testOfAVariadicFunctionPassesTheSlice() {
+        val test = GoGenerators.testFunction(function("Join", "(sep string, args ...string) string"), "p")
+        assertTrue(test, test.contains("\t\targs []string\n"))
+        assertTrue(test, test.contains("got := Join(tt.sep, tt.args...)"))
+        assertTrue(test, test.contains("if got != tt.want {"))
+    }
+
+    @Test fun testOfUnnamedAndBlankParametersNamesThem() {
+        val blank = GoGenerators.testFunction(function("Handle", "(_ int, s string)"), "p")
+        assertTrue(blank, blank.contains("\t\targ1 int\n\t\ts string\n"))
+        assertTrue(blank, blank.contains("Handle(tt.arg1, tt.s)"))
+        val unnamed = GoGenerators.testFunction(function("Apply", "(int, string) bool"), "p")
+        assertTrue(unnamed, unnamed.contains("\t\targ1 int\n\t\targ2 string\n"))
+        assertTrue(unnamed, unnamed.contains("got := Apply(tt.arg1, tt.arg2)"))
+    }
 }

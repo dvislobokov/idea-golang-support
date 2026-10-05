@@ -228,6 +228,53 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
         GoTypeAssertionOnErrorsInspection(),
     )
 
+    /** Regression: an `e` already in the block (or used after the `if`) must not be redeclared or shadowed: the new variable is `e2`. */
+    fun testTypeAssertionOnErrorsUseErrorsAsPicksFreeName() = doFix(
+        """
+        package p
+
+        import (
+        	"errors"
+        	"fmt"
+        )
+
+        type MyErr struct{}
+
+        func (*MyErr) Error() string { return "" }
+
+        func f(err error) {
+        	e := errors.New("x")
+        	if e, ok := err.(*My<caret>Err); ok {
+        		fmt.Println(e)
+        	}
+        	fmt.Println(e)
+        }
+        """,
+        "Replace with 'errors.As'",
+        """
+        package p
+
+        import (
+        	"errors"
+        	"fmt"
+        )
+
+        type MyErr struct{}
+
+        func (*MyErr) Error() string { return "" }
+
+        func f(err error) {
+        	e := errors.New("x")
+        	var e2 *MyErr
+        	if errors.As(err, &e2) {
+        		fmt.Println(e2)
+        	}
+        	fmt.Println(e)
+        }
+        """,
+        GoTypeAssertionOnErrorsInspection(),
+    )
+
     // --- GoAssignmentToReceiver ---
 
     fun testAssignmentToReceiver() = doHighlight(

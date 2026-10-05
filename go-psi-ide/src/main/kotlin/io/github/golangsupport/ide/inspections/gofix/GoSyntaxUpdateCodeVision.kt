@@ -30,15 +30,18 @@ object GoSyntaxUpdateLenses {
     /** The host's action that opens the guide at the Go fix section (registered by the plugin, absent in a standalone go-psi). */
     const val GUIDE_ACTION = "Go.HelpPage.GoFix"
 
-    private val CACHE = Key.create<Pair<Pair<Long, List<String>>, Int>>("go.syntax.update.findings")
+    private val CACHE = Key.create<Pair<Pair<Long, Set<String>>, Int>>("go.syntax.update.findings")
 
     /**
-     * The findings of [file], counted once per file version and set of enabled Go fix tools: both lenses ask, and the answer is the same
-     * until the file is edited or the profile changes.
+     * The findings of [file]: the daemon's Go fix highlights once its inspection pass has finished for the current text
+     * ([GoSyntaxUpdate.countHighlights]); before that, the Go fix tools run over the file ([GoSyntaxUpdate.countFindings]) once per file
+     * version and set of enabled tools (both lenses ask, and the answer is the same until the file is edited or the profile changes).
      */
     fun findings(file: GoFile): Int {
-        val stamp = PsiDocumentManager.getInstance(file.project).getDocument(file)?.modificationStamp ?: file.modificationStamp
-        val key = stamp to GoSyntaxUpdate.enabledTools(file.project).map { it.shortName }
+        val tools = GoSyntaxUpdate.enabledToolNames(file.project).takeIf { it.isNotEmpty() } ?: return 0
+        val document = PsiDocumentManager.getInstance(file.project).getDocument(file)
+        if (document != null) GoSyntaxUpdate.countHighlights(file, document, tools)?.let { return it }
+        val key = (document?.modificationStamp ?: file.modificationStamp) to tools
         file.getUserData(CACHE)?.let { (cachedKey, count) -> if (cachedKey == key) return count }
         return GoSyntaxUpdate.countFindings(file).also { file.putUserData(CACHE, key to it) }
     }

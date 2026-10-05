@@ -1,5 +1,6 @@
 package io.github.golangsupport
 
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import io.github.golangsupport.mod.GoModMigrateToWorkspaceInspection
 import io.github.golangsupport.mod.GoModRequireDirectivesMergeInspection
@@ -66,5 +67,23 @@ class GoModLayoutInspectionsTest : BasePlatformTestCase() {
         myFixture.editor.caretModel.moveToOffset(myFixture.editor.document.text.indexOf("./gone"))
         myFixture.launchAction(myFixture.findSingleIntention("Remove the path"))
         myFixture.checkResult("module m\n\ngo 1.25\n\nignore (\n\t./web/node_modules\n\tstatic\n)\n")
+    }
+
+    fun testIgnorePathWalkIsCachedUntilTheTreeChanges() {
+        myFixture.enableInspections(GoModUnresolvedIgnorePathInspection::class.java)
+        myFixture.configureByText("go.mod", "module m\n\ngo 1.25\n\nignore cache\n")
+        val walks = GoModUnresolvedIgnorePathInspection.walks
+        val unresolved = { myFixture.doHighlighting().count { it.description == "Unresolved path 'cache' in 'ignore' directive" } }
+        val before = walks.get()
+        assertEquals(1, unresolved())
+        val first = walks.get()
+        assertTrue("the first pass walks the module", first > before)
+        // a pass after an edit of go.mod: the same answer without walking again
+        WriteCommandAction.runWriteCommandAction(project) { myFixture.editor.document.insertString(0, "// edited\n") }
+        assertEquals(1, unresolved())
+        assertEquals("the second pass walks nothing", first, walks.get())
+        myFixture.addFileToProject("build/cache/x.txt", "")
+        assertEquals("a new directory is seen", 0, unresolved())
+        assertTrue("a new directory makes it walk again", walks.get() > first)
     }
 }

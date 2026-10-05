@@ -180,6 +180,11 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.174) Ревью Opus всего диффа G5–G9 (235 файлов): 3 обязательных и 12 желательных замечаний исправлены двумя агентами с регрессионными тестами
+  (см. CHANGELOG 0.2.174). Осталось из заметок ревью: Introduce Parameter переносит нечистое выражение (`time.Now()`) в точку вызова без предупреждения; Copy Declaration
+  в другой файл не переносит алиасы и dot-импорты; String() view выполняет код программы на каждое значение (opt-in), точка внутри `String()` прервёт вызов;
+  `GoSnapshot.attachAndList` читает id горутин как int; в сгенерированном тесте параметр `name` конфликтует с полем таблицы; `GoUnusedExported` (выкл.) дублирует новые
+  unused-инспекции при включении; кэш unused для экспортируемых имён не видит использование, впечатанное в тело функции чужого пакета, до следующего изменения вне тел.
 - [x] (2026-10-05, 0.2.169–0.2.173) G9, пункты 4–8: группа `Go.Tools` (`build.GoToolsActions`, `format.GoImportsFileAction`), Playground (`build.GoPlayground`, `HttpRequests` в фоне,
   настройка `askBeforePlayground`), Sync / Attach / Detach Go Module (`mod.GoModuleRootsActions`), Go Optimization (`build.GoOptimization` + `GoOptimizationOutput`, окно в
   `GoProjectPresence.TOOL_WINDOWS`, гаттер при Show in Editor), Go Settings… / Actions on Save… в `SettingsEntryPointGroup` (`GoSettingsEntryActions`), Data Flow to / from Here

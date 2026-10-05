@@ -2,6 +2,8 @@ package io.github.golangsupport.ide.inspections.gofix
 
 import com.intellij.analysis.AnalysisScope
 import com.intellij.analysis.BaseAnalysisAction
+import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerEx
+import com.intellij.codeInsight.daemon.impl.HighlightInfo
 import com.intellij.codeInspection.InspectionManager
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ex.InspectionManagerEx
@@ -9,11 +11,17 @@ import com.intellij.codeInspection.ex.InspectionProfileImpl
 import com.intellij.codeInspection.ex.InspectionToolWrapper
 import com.intellij.codeInspection.ex.InspectionToolsSupplier
 import com.intellij.codeInspection.ex.LocalInspectionToolWrapper
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.util.Key
+import com.intellij.profile.ProfileChangeAdapter
+import com.intellij.codeInspection.InspectionProfile
+import io.github.golangsupport.semantic.cache.GoTrackers
 import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.PsiFile
+import java.lang.ref.WeakReference
 
 /**
  * Refactor | Update Syntax… and the "Batch syntax update" lens: the enabled inspections of the "Go fix" group (GoLand's modernizers,
@@ -43,6 +51,55 @@ object GoSyntaxUpdate {
 
     fun currentProfile(project: Project): InspectionProfileImpl = InspectionProjectProfileManager.getInstance(project).currentProfile
 
+    private class EnabledNames(val profile: WeakReference<InspectionProfileImpl>, val stamp: Long, val names: Set<String>)
+
+    /** Counts the profile changes the platform announces (Settings | Editor | Inspections applied, a profile activated). */
+    private class ProfileStamp : ProfileChangeAdapter {
+        @Volatile var count = 0L
+        override fun profileChanged(profile: InspectionProfile) { count++ }
+        override fun profileActivated(oldProfile: InspectionProfile?, profile: InspectionProfile?) { count++ }
+        override fun profilesInitialized() { count++ }
+    }
+
+    private val ENABLED_NAMES = Key.create<EnabledNames>("go.syntax.update.enabledNames")
+    private val PROFILE_STAMP = Key.create<ProfileStamp>("go.syntax.update.profileStamp")
+
+    private fun profileStamp(project: Project): ProfileStamp = project.getUserData(PROFILE_STAMP) ?: synchronized(PROFILE_STAMP) {
+        project.getUserData(PROFILE_STAMP) ?: ProfileStamp().also { stamp ->
+            // disposed with a project service, so the connection does not outlive the plugin
+            project.messageBus.connect(GoTrackers.getInstance(project)).subscribe(ProfileChangeAdapter.TOPIC, stamp)
+            project.putUserData(PROFILE_STAMP, stamp)
+        }
+    }
+
+    /**
+     * The short names of [enabledTools] of the current profile, kept until the profile is switched or changed: the lenses ask on every
+     * daemon pass, and walking every tool of the profile each time is wasted work.
+     */
+    fun enabledToolNames(project: Project): Set<String> {
+        val profile = currentProfile(project)
+        val stamp = profileStamp(project).count
+        project.getUserData(ENABLED_NAMES)?.let { if (it.profile.get() === profile && it.stamp == stamp) return it.names }
+        val names = enabledTools(project, profile).map { it.shortName }.toSet()
+        project.putUserData(ENABLED_NAMES, EnabledNames(WeakReference(profile), stamp, names))
+        return names
+    }
+
+    /**
+     * The Go fix findings of [file] as the daemon highlighted them (severity [GoSyntaxUpdateSeverity] or above, from a tool of
+     * [tools]), or null while the daemon has no complete result for the current text of [document]. Stops counting at [limit].
+     */
+    fun countHighlights(file: PsiFile, document: Document, tools: Set<String>, limit: Int = MAX_COUNT): Int? {
+        val project = file.project
+        if (tools.isEmpty() || !DaemonCodeAnalyzerEx.getInstanceEx(project).isErrorAnalyzingFinished(file)) return null
+        var count = 0
+        DaemonCodeAnalyzerEx.processHighlights(document, project, GoSyntaxUpdateSeverity.SEVERITY, 0, document.textLength) { info: HighlightInfo ->
+            if (info.inspectionToolId in tools) count++
+            count < limit
+        }
+        return minOf(count, limit)
+    }
+
     /** A profile with [tools] only, all enabled, their settings copied from the current profile (as Run Inspection by Name builds its own). */
     fun profileOf(project: Project, tools: List<InspectionToolWrapper<*, *>>, base: InspectionProfileImpl = currentProfile(project)): InspectionProfileImpl {
         val copies: List<InspectionToolWrapper<*, *>> = tools.map { InspectionProfileImpl.copyToolSettings(it) }
@@ -65,9 +122,9 @@ object GoSyntaxUpdate {
     }
 
     /**
-     * How many Go fix findings [file] has: the enabled local Go fix tools of the profile for this file run over it directly (the
-     * Go fix inspections are cheap PSI visitors; the daemon's highlights would be the cheaper source, but code vision is computed in the
-     * daemon too, in no fixed order with the inspection pass, so the lens would come and go). Stops counting at [limit].
+     * How many Go fix findings [file] has: the enabled local Go fix tools of the profile for this file run over it directly. The fallback
+     * of [countHighlights]: code vision is computed in the daemon too, in no fixed order with the inspection pass, so before that pass has
+     * finished for the current text its highlights are missing or stale and the lens would come and go. Stops counting at [limit].
      */
     fun countFindings(file: PsiFile, limit: Int = MAX_COUNT): Int {
         val project = file.project
@@ -95,4 +152,13 @@ object GoSyntaxUpdate {
  */
 class GoUpdateSyntaxAction : BaseAnalysisAction("Update Syntax", "Update Syntax") {
     override fun analyze(project: Project, scope: AnalysisScope) = GoSyntaxUpdate.run(project, scope)
+
+    /** The Refactor menu is shared by every language: hidden in projects without a Go file (left alone while indexing). */
+    override fun update(e: com.intellij.openapi.actionSystem.AnActionEvent) {
+        super.update(e)
+        val project = e.project ?: return
+        if (com.intellij.openapi.project.DumbService.isDumb(project)) return
+        if (!com.intellij.psi.search.FileTypeIndex.containsFileOfType(io.github.golangsupport.lang.GoFileType, com.intellij.psi.search.GlobalSearchScope.projectScope(project)))
+            e.presentation.isEnabledAndVisible = false
+    }
 }

@@ -367,6 +367,67 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         assertFalse(texts.toString(), "Remove redundant 'else'" in texts)
     }
 
+    /** Regression: `v, err := b()` outdented next to an outer `err` would assign it (or not compile); a later `w :=` would clash. */
+    fun testRedundantElseNoFixWhenNamesClash() {
+        for (body in listOf("v, err := b()\n\t\t_ = v\n\t\treturn err", "w := 1\n\t\t_ = w")) {
+            val texts = offered(
+                """
+                package p
+
+                func b() (int, error) { return 0, nil }
+
+                func g(x int) error {
+                	var err error
+                	if x > 0 {
+                		return nil
+                	} el<caret>se {
+                		BODY
+                	}
+                	w := 2
+                	_ = w
+                	return err
+                }
+                """.trimIndent().replace("BODY", body),
+                GoRedundantElseInIfInspection(),
+            )
+            assertFalse(texts.toString(), "Remove redundant 'else'" in texts)
+        }
+    }
+
+    fun testRedundantElseFixWithFreshNames() = doFix(
+        """
+        package p
+
+        func b() (int, error) { return 0, nil }
+
+        func g(x int) error {
+        	if x > 0 {
+        		return nil
+        	} el<caret>se {
+        		v, err := b()
+        		_ = v
+        		return err
+        	}
+        }
+        """,
+        "Remove redundant 'else'",
+        """
+        package p
+
+        func b() (int, error) { return 0, nil }
+
+        func g(x int) error {
+        	if x > 0 {
+        		return nil
+        	}
+        	v, err := b()
+        	_ = v
+        	return err
+        }
+        """,
+        GoRedundantElseInIfInspection(),
+    )
+
     // --- GoTypeParameterInLowerCase (information level) ---
 
     fun testTypeParameterInLowerCase() {
@@ -546,4 +607,10 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         "package p\n\ntype P struct{ X, Y int }\n\nvar a = P{X: 1, Y: 2}",
         GoStructInitializationWithoutFieldNamesInspection(),
     )
+
+    /** Regression: a blank field cannot be keyed (`_: 0` does not compile), so the literal is reported without the fix. */
+    fun testStructInitializationNoFixWithBlankField() {
+        val texts = offered("package p\n\ntype P struct {\n\tX int\n\t_ int\n}\n\nvar a = P{<caret>1, 2}", GoStructInitializationWithoutFieldNamesInspection())
+        assertFalse(texts.toString(), "Add field names" in texts)
+    }
 }

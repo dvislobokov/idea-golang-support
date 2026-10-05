@@ -161,4 +161,83 @@ class GoIntroduceTypeTest : GoSemanticIdeTestBase() {
         type Point <caret>struct{ X, Y int }
         """,
     )
+
+    fun testReplaceAllKeepsTypeAssertions() = doTest(
+        """
+        package it
+
+        var names <caret>map[string]int
+
+        func get(v any) {
+            m, ok := v.(map[string]int)
+            _, _ = m, ok
+        }
+        """,
+        """
+        package it
+
+        type Names map[string]int
+
+        var names Names
+
+        func get(v any) {
+            m, ok := v.(map[string]int)
+            _, _ = m, ok
+        }
+        """,
+    )
+
+    fun testReplaceAllKeepsTypeSwitchCases() = doTest(
+        """
+        package it
+
+        var names <caret>[]string
+
+        func kind(v any) int {
+            switch v.(type) {
+            case []string:
+                return 1
+            }
+            return 0
+        }
+        """,
+        """
+        package it
+
+        type Names []string
+
+        var names Names
+
+        func kind(v any) int {
+            switch v.(type) {
+            case []string:
+                return 1
+            }
+            return 0
+        }
+        """,
+    )
+
+    fun testReplaceAllKeepsMethodSignatures() = doTest(
+        """
+        package it
+
+        type W struct{}
+
+        func (W) Write(p []byte) (int, error) { return len(p), nil }
+
+        var buf <caret>[]byte
+        """,
+        """
+        package it
+
+        type W struct{}
+
+        func (W) Write(p []byte) (int, error) { return len(p), nil }
+
+        type Buf []byte
+
+        var buf Buf
+        """,
+    )
 }

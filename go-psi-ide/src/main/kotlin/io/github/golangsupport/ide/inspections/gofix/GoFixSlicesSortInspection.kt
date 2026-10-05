@@ -11,7 +11,8 @@ import io.github.golangsupport.semantic.types.GoSliceType
 
 /**
  * `sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })` → `slices.Sort(s)` (go1.21; modernize `sortslice`): `s` is a pure slice
- * expression of an ordered basic element type (integers, floats, strings), written the same in all three places. The `sort` import goes
+ * expression of an ordered basic element type (integers, strings; not floats: `slices.Sort` puts NaNs first where `<` leaves them
+ * anywhere), written the same in all three places. The `sort` import goes
  * when nothing else uses it.
  */
 class GoFixSlicesSortInspection : GoFixInspectionBase() {
@@ -32,7 +33,7 @@ class GoFixSlicesSortInspection : GoFixInspectionBase() {
         if (!GoFixPsi.refersTo(li, params[0]) || !GoFixPsi.refersTo(ri, params[1])) return null
         if (!GoFixPsi.isPure(s) || !GoFixPsi.same(s, ls) || !GoFixPsi.same(s, rs)) return null
         val elem = (GoFixPsi.typeOf(s).underlying() as? GoSliceType)?.elem ?: return null
-        if (!GoFixPsi.isOrderedBasic(elem, floats = true)) return null
+        if (!GoFixPsi.isOrderedBasic(elem, floats = false)) return null
         if (GoFixPsi.hasComments(element)) return null
         val q = GoFixPsi.qualifier(element, "slices") ?: return null
         val callee = element.expression ?: return null

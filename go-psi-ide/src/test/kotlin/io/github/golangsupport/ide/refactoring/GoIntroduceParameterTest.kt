@@ -1,6 +1,7 @@
 package io.github.golangsupport.ide.refactoring
 
 import com.intellij.lang.LanguageRefactoringSupport
+import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.refactoring.util.CommonRefactoringUtil
 import io.github.golangsupport.ide.GoSemanticIdeTestBase
 import io.github.golangsupport.lang.GoLanguage
@@ -178,5 +179,10 @@ class GoIntroduceParameterTest : GoSemanticIdeTestBase() {
         val provider = LanguageRefactoringSupport.getInstance().forLanguage(GoLanguage)!!
         assertTrue(provider.introduceParameterHandler is GoIntroduceParameterHandler)
         assertTrue(provider.introduceFieldHandler is GoIntroduceFieldHandler)
+    }
+
+    fun testCancelledSearchReturnsNullInsteadOfThrowing() {
+        assertNull(GoIntroduceSupport.underProgress<Boolean>(project, "Looking for Calls") { throw ProcessCanceledException() })
+        assertEquals(true, GoIntroduceSupport.underProgress(project, "Looking for Calls") { true })
     }
 }
