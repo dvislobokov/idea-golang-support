@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/google/uuid"
@@ -13,6 +14,11 @@ import (
 const defaultCurrency = "EUR"
 
 func main() {
+
+	http.HandleFunc("/path", func(w http.ResponseWriter, r *http.Request) {
+		
+	})
+
 	order := store.NewOrder(defaultCurrency)
 	order.Add(store.Item{Name: "tea", Price: 350, Quantity: 2})
 	order.Add(store.Item{Name: "cup", Price: 900, Quantity: 1})
