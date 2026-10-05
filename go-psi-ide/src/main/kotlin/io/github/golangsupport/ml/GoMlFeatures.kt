@@ -15,7 +15,7 @@ import kotlin.math.abs
 import kotlin.math.ln
 
 /**
- * The Go adapter of the shared ML completion engine (`ml/docs/ADAPTER.md`): the lexer-only language description plus
+ * The Go adapter of the shared ML completion engine (`https://github.com/dvislobokov/idea-ml-completion/blob/main/docs/ADAPTER.md`): the lexer-only language description plus
  * the language block of ranker features. The `ml` package is internal to go-psi-ide: the offline dataset export
  * (test source set) and the IDE ranker compute every feature through this object, which is what keeps training and
  * serving identical.

@@ -131,9 +131,13 @@ can be computed by the implementation from `element` and `context.file`.
 
 ### ML-1: completion ranking
 
-Status 2026-10-05 (0.2.178): the shared engine lives in `ml/` (subtree of idea-ml-completion), the Go feature adapter
-`io.github.golangsupport.ml.GoMlFeatures` and the headless dataset export `:go-psi-ide:mlDataset` exist; the IDE-side
-`GoMlCompletionRanker` and model loading are next, after a model is trained on the server corpus (`ml/README.md`).
+Status 2026-10-05 (0.2.184): `ml-core/` is a copy of the pure-Kotlin engine module of idea-ml-completion (`tools/ml/sync-ml-core.sh`), the Go feature adapter
+`io.github.golangsupport.ml.GoMlFeatures` and the headless dataset export `:go-psi-ide:mlDataset` exist, and so does the
+IDE side: `GoMlCompletionRanker` (the `completionRanker` EP), `GoMlModels` (bundled or user-chosen `lm.cml` + `rank.cml`,
+loaded in the background on the first completion) and Settings | Go | Smart Completion (`GoMlSettings`). All of it is
+opt-in at build time: `./gradlew.bat buildPlugin -PmlEnabled=true -Pml.models=<dir>` (or `MLENABLED=true`) copies
+`META-INF/go-ml.xml` and the models into the plugin; a plain build has neither the ranker nor the page. Measured offline
+(https://github.com/dvislobokov/idea-ml-completion/blob/main/docs/REPORT-GO-RU.md): MRR 0.783 vs 0.534 for the deterministic order on held-out repositories.
 - Offline dataset from GOROOT + golang.org/x: for each identifier/selector position, the
   candidate list our completion would produce (headless, via a `*CorpusTest`-style exporter)
   and the actual token; export as a feature table.

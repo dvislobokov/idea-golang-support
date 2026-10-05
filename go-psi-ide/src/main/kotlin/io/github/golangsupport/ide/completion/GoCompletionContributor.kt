@@ -9,6 +9,8 @@ import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.CompletionUtil
 import com.intellij.codeInsight.completion.PrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElement
+import com.intellij.codeInsight.lookup.LookupElementDecorator
+import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.DumbAware
@@ -91,13 +93,13 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
             if (candidates.isEmpty()) return
             val prefix = result.prefixMatcher.prefix
             val elements: List<LookupElement> = candidates.map { GoLookupElementFactory.create(it, context) }
-            applyRankers(elements, context, prefix)
-            result.addAllElements(elements.map { GoLookupPriority.wrap(it, prefix) })
+            result.addAllElements(applyRankers(elements, context, prefix).map { GoLookupPriority.wrap(it, prefix) })
         }
 
-        private fun applyRankers(elements: List<LookupElement>, context: GoCompletionContext, prefix: String) {
+        /** The elements, scored by the first ranker that answers; wrapped with its [GoCompletionRanker.marker] when it has one. */
+        private fun applyRankers(elements: List<LookupElement>, context: GoCompletionContext, prefix: String): List<LookupElement> {
             val rankers = GoCompletionRanker.EP_NAME.extensionList
-            if (rankers.isEmpty()) return
+            if (rankers.isEmpty()) return elements
             val infos = elements.map { GoCompletionWeigher.infoOf(it)!! }
             val candidates = elements.zip(infos).map { (e, info) ->
                 GoCompletionCandidate(e.lookupString, info.kind.name, info.level, info.expectedMatch, info.element)
@@ -115,8 +117,18 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
                 } ?: continue
                 if (scores.size != candidates.size) continue
                 infos.forEachIndexed { i, info -> info.rankerScore = scores[i] }
-                return
+                val marker = ranker.marker ?: return elements
+                return elements.map { MarkedElement(it, marker) }
             }
+            return elements
+        }
+    }
+
+    /** A scored element with the ranker's marker as grey tail text; everything else (insert, lookup strings, user data) is the delegate's. */
+    private class MarkedElement(delegate: LookupElement, private val marker: String) : LookupElementDecorator<LookupElement>(delegate) {
+        override fun renderElement(presentation: LookupElementPresentation) {
+            super.renderElement(presentation)
+            presentation.appendTailText(" $marker", true)
         }
     }
 }

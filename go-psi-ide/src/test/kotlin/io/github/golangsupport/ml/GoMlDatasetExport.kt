@@ -24,7 +24,7 @@ import java.io.File
 import java.util.Random
 
 /**
- * Offline dataset export for the ML ranker (`ml/docs/ADAPTER.md` §3): runs the plugin's real completion headlessly over
+ * Offline dataset export for the ML ranker (`https://github.com/dvislobokov/idea-ml-completion/blob/main/docs/ADAPTER.md` §3): runs the plugin's real completion headlessly over
  * Go repositories and writes one example shard per repository. Not a test of behaviour — a `testIde` task
  * (`:go-psi-ide:mlDataset`) runs it, the regular `test` task excludes `*MlDatasetExport`.
  *

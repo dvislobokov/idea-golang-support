@@ -9,8 +9,10 @@ import com.intellij.codeInsight.lookup.LookupElementDecorator
  * Deterministic ranking of Go candidates (registered before the platform's `prefix` weigher, so
  * it decides before prefix/camel-hump quality and statistics):
  *
- * 1. expected-type match (identical > assignable > none), see [GoLookupElementFactory.expectedMatch];
- * 2. the score of a registered `GoCompletionRanker`, when one answered;
+ * 1. the score of a registered `GoCompletionRanker`, when one answered: it is trained on the
+ *    expected-type match and the scope level among its features, so it decides alone, and scored
+ *    candidates go above unscored ones;
+ * 2. expected-type match (identical > assignable > none), see [GoLookupElementFactory.expectedMatch];
  * 3. scope distance: locals > parameters > keywords/snippets > package > imported > universe >
  *    unimported (members: direct > promoted).
  *
@@ -20,7 +22,8 @@ import com.intellij.codeInsight.lookup.LookupElementDecorator
 class GoCompletionWeigher : CompletionWeigher() {
     override fun weigh(element: LookupElement, location: CompletionLocation): Comparable<*> {
         val info = infoOf(element) ?: return NEUTRAL
-        return Weight(info.expectedMatch, info.rankerScore ?: 0.0, -info.level)
+        val score = info.rankerScore
+        return if (score != null) Weight(RANKED, score, -info.level) else Weight(info.expectedMatch, 0.0, -info.level)
     }
 
     /** Larger is better (the platform orders completion weigher results descending). */
@@ -30,6 +33,8 @@ class GoCompletionWeigher : CompletionWeigher() {
 
     companion object {
         private val NEUTRAL = Weight(0, 0.0, -GoScopeLevel.PACKAGE)
+        /** The `expected` bucket of ranker-scored candidates: above every expected-type match (the ranker is trained on that match). */
+        private const val RANKED = 3
 
         fun infoOf(element: LookupElement): GoLookupInfo? {
             var e: LookupElement = element

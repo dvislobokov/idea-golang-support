@@ -30,6 +30,30 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.184] - 2026-10-05
+
+### Added — ML completion ranking, step 2: the ranker in the IDE, behind a build flag (docs/ML.md ML-1)
+- `./gradlew.bat buildPlugin -PmlEnabled=true -Pml.models=<dir>` (or `MLENABLED=true` in the environment; the directory holds the trained
+  `lm.cml` and `rank.cml`, default `../ml-data/go/models`) builds the plugin with Smart Completion: `META-INF/go-ml.xml` registers
+  `io.github.golangsupport.ml.GoMlCompletionRanker` on the `completionRanker` extension point and the page Settings | Go | Smart
+  Completion; the models go into the plugin under `ml/go/`. A build without the flag has none of it (plugin.xml includes go-ml.xml
+  with an `xi:fallback`), and `GoSettingsTree.PAGES` lists the page only when the models are bundled.
+- `GoMlCompletionRanker`: the text before the caret feeds the per-file cache of the n-gram language model, every candidate gets the
+  13 common and 17 Go features (the code of the dataset export, `GoMlFeatureParityTest`) and the linear ranker scores them. The
+  models (`GoMlModels`) load once, in the background, on the first completion; until then and whenever the switch is off, the
+  deterministic order applies. The page has the switch and a directory with other `lm.cml` / `rank.cml` for trying a new training.
+- `GoCompletionRanker.marker`: a ranker may name a grey tail text for the rows it scored; the ML ranker shows `ML` (switch on the page,
+  on by default) so that a tester sees which order is the model's.
+- `GoCompletionWeigher`: a ranker score now decides before the expected-type match (the ranker is trained on that match and on the
+  scope level), scored candidates above unscored ones; without a ranker nothing changes.
+- `GoMlCompletionRankerTest`: with `-Dml.models=<dir>` (`-Pml.models` of `:go-psi-ide:test`) completes over the real models and
+  checks that every Go candidate is scored and the expected parameter stays on top; without the models it checks the abstention.
+### Changed — the ML engine is a plain copy, not a subtree
+- `ml/` (the git subtree of idea-ml-completion with its training CLI, corpus tools and docs) is gone; `ml-core/` is a copy of that
+  repository's pure-Kotlin `ml-core` module alone (`tools/ml/sync-ml-core.sh <checkout>` refreshes it). Nothing else of the engine
+  is needed at build time; models are trained with the CLI of that repository and handed to the build through `-Pml.models`.
+- Engine subtree `ml/` synced (streaming corpus loader, model readers over a stream for bundled resources; `ml/CHANGELOG.md` e10–e11).
+
 ## [0.2.183] - 2026-10-05
 
 ### Added — GOROOT shared indexes (MIGRATION step 11, wave 5; docs/SHARED-INDEXES.md)

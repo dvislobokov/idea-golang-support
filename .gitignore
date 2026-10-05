@@ -13,6 +13,7 @@ out/
 *.iml
 # go-psi library modules and tools (docs/PSI-README.md)
 /go-psi-*/build/
+/ml-core/build/
 tools/astdump/*.exe
 tools/portshorttest/*.exe
 tools/ml/data/
