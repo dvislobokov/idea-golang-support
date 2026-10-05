@@ -6,6 +6,8 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import io.github.golangsupport.lang.GoPostfixExpressions
 import io.github.golangsupport.lang.GoPostfixKinds
+import io.github.golangsupport.lang.GoPostfixNames
+import io.github.golangsupport.lang.GoPostfixTemplateProvider
 import io.github.golangsupport.lang.psi.GoFile
 
 /** The postfix templates: where each applies by the PSI and the type of the expression, and what it writes. */
@@ -26,6 +28,13 @@ class GoPostfixTemplatesTest : BasePlatformTestCase() {
         func save() error { return nil }
         func count() int { return 0 }
         func work() {}
+        type Circle struct{ Radius float64 }
+        func (c Circle) Area() float64 { return 0 }
+        func loadUser() (Item, error) { return Item{}, nil }
+        type byName []Item
+        func (b byName) Len() int { return 0 }
+        func (b byName) Less(i, j int) bool { return false }
+        func (b byName) Swap(i, j int) {}
     """.trimIndent()
 
     private fun source(signature: String, line: String) = "package a\n\n$declarations\n\nfunc f($signature) {\n\t$line\n}\n"
@@ -102,14 +111,25 @@ class GoPostfixTemplatesTest : BasePlatformTestCase() {
         assertEquals("\tfor k, v := range m {\n\t\t\n\t}", expand("for", "m map[string]int", "m<caret>"))
         assertEquals("\tfor v := range ch {\n\t\t\n\t}", expand("for", "ch chan int", "ch<caret>"))
         assertEquals("\tfor i := range n {\n\t\t\n\t}", expand("for", "n int", "n<caret>"))
-        assertEquals("\tfor _, v := range items {\n\t\t\n\t}", expand("for", "items []Item", "items<caret>"))
+        assertEquals("the value is named after the slice", "\tfor _, item := range items {\n\t\t\n\t}", expand("for", "items []Item", "items<caret>"))
+        assertEquals("no plural", "\tfor _, v := range data {\n\t\t\n\t}", expand("for", "data []Item", "data<caret>"))
         assertFalse("a send-only channel", applies("for", "ch chan<- int", "ch<caret>"))
     }
 
-    fun testForiAndForrCountToALengthOrAnInteger() {
+    fun testForiAndForrevCountToALengthOrAnInteger() {
         assertEquals("\tfor i := 0; i < n; i++ {\n\t\t\n\t}", expand("fori", "n int", "n<caret>"))
         assertEquals("\tfor i := 0; i < len(xs); i++ {\n\t\t\n\t}", expand("fori", "xs []int", "xs<caret>"))
-        assertEquals("\tfor i := len(xs) - 1; i >= 0; i-- {\n\t\t\n\t}", expand("forr", "xs []int", "xs<caret>"))
+        assertEquals("\tfor i := len(xs) - 1; i >= 0; i-- {\n\t\t\n\t}", expand("forrev", "xs []int", "xs<caret>"))
+        assertFalse(applies("forrev", "ok bool", "ok<caret>"))
+    }
+
+    fun testForrNamesTheIndexAndTheElementAfterTheSlice() {
+        assertEquals("\tfor i, name := range names {\n\t\t\n\t}", expand("forr", "names []string", "names<caret>"))
+        assertEquals("\tfor i, entry := range entries {\n\t\t\n\t}", expand("forr", "entries []Item", "entries<caret>"))
+        assertEquals("\tfor i, box := range boxes {\n\t\t\n\t}", expand("forr", "boxes []Item", "boxes<caret>"))
+        assertEquals("no plural", "\tfor i, item := range data {\n\t\t\n\t}", expand("forr", "data []Item", "data<caret>"))
+        assertEquals("taken names get a number", "\tfor i1, name1 := range names {\n\t\t\n\t}", expand("forr", "names []string, name string, i int", "names<caret>"))
+        assertEquals("a map keeps k, v", "\tfor k, v := range users {\n\t\t\n\t}", expand("forr", "users map[string]Item", "users<caret>"))
         assertFalse(applies("forr", "ok bool", "ok<caret>"))
     }
 
@@ -117,6 +137,31 @@ class GoPostfixTemplatesTest : BasePlatformTestCase() {
         assertEquals("\tv, err := load()", expand("var", "", "load()<caret>"))
         assertEquals("\tv := count()", expand("var", "", "count()<caret>"))
         assertFalse("no result", applies("var", "", "work()<caret>"))
+    }
+
+    fun testVarTakesTheNameFromTheExpression() {
+        assertEquals("\tarea := c.Area()", expand("var", "c Circle", "c.Area()<caret>"))
+        assertEquals("\tradius := c.Radius", expand("var", "c Circle", "c.Radius<caret>"))
+        assertEquals("a verb is cut off", "\tuser, err := loadUser()", expand("var", "", "loadUser()<caret>"))
+        assertEquals("an element of a slice", "\titem := items[0]", expand("var", "items []Item", "items[0]<caret>"))
+        assertEquals("a taken name gets a number", "\tarea1 := c.Area()", expand("var", "c Circle, area float64", "c.Area()<caret>"))
+        assertEquals("a plain name says nothing new", "\tv := n", expand("var", "n int", "n<caret>"))
+    }
+
+    fun testTheNamesOfTheExpressionByText() {
+        assertEquals("area", GoPostfixNames.variableName("c.Area()"))
+        assertEquals("server", GoPostfixNames.variableName("http.NewServer(addr)"))
+        assertEquals("open", GoPostfixNames.variableName("os.Open(path)"))
+        assertEquals("id", GoPostfixNames.variableName("u.ID"))
+        assertEquals("httpClient", GoPostfixNames.variableName("s.HTTPClient"))
+        assertNull("a literal", GoPostfixNames.variableName("\"text\""))
+        assertNull("a keyword", GoPostfixNames.variableName("x.Type"))
+        assertEquals("category", GoPostfixNames.elementName("categories"))
+        assertEquals("match", GoPostfixNames.elementName("s.Matches"))
+        assertEquals("url", GoPostfixNames.elementName("URLs"))
+        assertEquals("name", GoPostfixNames.elementName("getNames()"))
+        assertNull("not a plural", GoPostfixNames.elementName("status"))
+        assertNull("not a plural", GoPostfixNames.elementName("list"))
     }
 
     fun testReturnPutsTheValueAmongTheResultsByItsType() {
@@ -133,12 +178,97 @@ class GoPostfixTemplatesTest : BasePlatformTestCase() {
         assertFalse(applies("append", "n int", "n<caret>"))
     }
 
-    fun testSortUsesSlicesForOrderedElementsAndImportsIt() {
-        myFixture.configureByText("a.go", source("xs []int", "xs<caret>"))
-        myFixture.type(".sort\t")
+    /** The whole file after `.key` + Tab at `<caret>` with every stop at its default. */
+    private fun expandFile(key: String, signature: String, line: String, results: String = ""): String {
+        val text = source(signature, line).let { if (results.isEmpty()) it else it.replace("func f($signature) {", "func f($signature) $results {") }
+        myFixture.configureByText("a.go", text)
+        myFixture.type(".$key\t")
         finishTemplate()
-        val text = myFixture.editor.document.text
+        return myFixture.editor.document.text
+    }
+
+    fun testSortUsesSlicesForOtherOrderedElementsAndImportsIt() {
+        val text = expandFile("sort", "xs []int64", "xs<caret>")
         assertTrue(text, text.contains("\tslices.Sort(xs)") && text.contains("import \"slices\""))
+    }
+
+    fun testSortPicksTheFunctionOfPackageSortByTheType() {
+        assertTrue(expandFile("sort", "xs []int", "xs<caret>").let { it.contains("\tsort.Ints(xs)") && it.contains("import \"sort\"") })
+        assertTrue(expandFile("sort", "xs []string", "xs<caret>").contains("\tsort.Strings(xs)"))
+        assertTrue(expandFile("sort", "xs []float64", "xs<caret>").contains("\tsort.Float64s(xs)"))
+        assertTrue(expandFile("sort", "b byName", "b<caret>").contains("\tsort.Sort(b)"))
+    }
+
+    fun testNewBuiltinWrappers() {
+        assertEquals("\t_ = cap(xs)", expand("cap", "xs []int", "_ = xs<caret>"))
+        assertEquals("\t_ = copy(xs, )", expand("copy", "xs []int", "_ = xs<caret>"))
+        assertEquals("\t_ = append(xs, )", expand("append", "xs []int", "_ = xs<caret>"))
+        assertEquals("\txs = append(xs, )", expand("aappend", "xs []int", "xs<caret>"))
+        assertEquals("\txs = append(xs, )", expand("appendAssign", "xs []int", "xs<caret>"))
+        assertEquals("\txs = append(xs[:i], xs[i+1:]...)", expand("remove", "xs []int", "xs<caret>"))
+        assertEquals("\tclose(ch)", expand("close", "ch chan int", "ch<caret>"))
+        assertEquals("\tdelete(m, )", expand("delete", "m map[string]int", "m<caret>"))
+        assertEquals("\t_ = complex(x, )", expand("complex", "x float64", "_ = x<caret>"))
+        assertEquals("\t_ = real(z)", expand("real", "z complex128", "_ = z<caret>"))
+        assertEquals("\t_ = imag(z)", expand("imag", "z complex128", "_ = z<caret>"))
+        assertEquals("\tprintln(n)", expand("println", "n int", "n<caret>"))
+    }
+
+    fun testNewBuiltinWrappersWantTheirTypes() {
+        assertFalse(applies("cap", "m map[int]int", "_ = m<caret>"))
+        assertFalse(applies("close", "ch <-chan int", "ch<caret>"))
+        assertFalse(applies("close", "xs []int", "xs<caret>"))
+        assertFalse(applies("delete", "xs []int", "xs<caret>"))
+        assertFalse(applies("remove", "m map[int]int", "m<caret>"))
+        assertFalse(applies("complex", "n int", "_ = n<caret>"))
+        assertFalse(applies("real", "x float64", "_ = x<caret>"))
+        assertFalse(applies("println", "", "work()<caret>"))
+    }
+
+    fun testAddressAndDereference() {
+        for (key in listOf("&", "p", "pointer")) assertEquals(key, "\t_ = &i", expand(key, "i Item", "_ = i<caret>"))
+        for (key in listOf("*", "d", "dereference")) assertEquals(key, "\t_ = *p", expand(key, "p *Item", "_ = p<caret>"))
+        assertEquals("\t_ = !ok", expand("!", "ok bool", "_ = ok<caret>"))
+        assertFalse("not a pointer", applies("d", "i Item", "_ = i<caret>"))
+        assertFalse("a call is not addressable", applies("p", "", "_ = count()<caret>"))
+        assertFalse("a literal", applies("&", "", "_ = 42<caret>"))
+        assertFalse(applies("!", "n int", "_ = n<caret>"))
+    }
+
+    fun testErrorsAsAndIsImportErrors() {
+        val text = expandFile("as", "e error", "_ = e<caret>")
+        assertTrue(text, text.contains("\t_ = errors.As(e, &target)") && text.contains("import \"errors\""))
+        assertTrue(expandFile("is", "e error", "_ = e<caret>").contains("\t_ = errors.Is(e, )"))
+    }
+
+    fun testErrorOnlyKeysAreNotOfferedOnAnInt() {
+        for (key in listOf("as", "is", "wrap", "err", "nil", "nn", "notnil")) assertFalse(key, applies(key, "n int", if (key == "err" || key.startsWith("n")) "n<caret>" else "_ = n<caret>"))
+        for (key in listOf("as", "is", "nn")) assertTrue(key, applies(key, "e error", if (key == "nn") "e<caret>" else "_ = e<caret>"))
+    }
+
+    fun testParseIntAndParseFloatCheckTheError() {
+        val text = expandFile("parseInt", "s string", "s<caret>", "error")
+        assertTrue(text, text.contains("\tn, err := strconv.ParseInt(s, 10, 64)\n\tif err != nil {\n\t\treturn err\n\t}") && text.contains("import \"strconv\""))
+        // `f` is the function around
+        assertTrue(expandFile("parseFloat", "s string", "s<caret>", "error").contains("\tf1, err := strconv.ParseFloat(s, 64)"))
+        assertFalse(applies("parseInt", "n int", "n<caret>"))
+    }
+
+    fun testAPackageOrATypeIsNoSubject() {
+        myFixture.configureByText("a.go", "package a\n\nimport \"fmt\"\n\ntype T struct{}\n\nfunc f() {\n\tfmt<caret>\n\t_ = fmt.Sprint()\n}\n")
+        val file = myFixture.file as GoFile
+        assertNull(GoPostfixExpressions.subject(file, myFixture.editor.document, myFixture.caretOffset, statement = false))
+        myFixture.configureByText("a.go", "package a\n\ntype T struct{}\n\nfunc f() {\n\tT<caret>\n}\n")
+        assertNull(GoPostfixExpressions.subject(myFixture.file as GoFile, myFixture.editor.document, myFixture.caretOffset, statement = false))
+    }
+
+    fun testEveryKeyHasItsDescriptionAndSymbolsAreKeysOfTheirOwn() {
+        val templates = GoPostfixTemplateProvider().templates.associateBy { it.key }
+        assertEquals("Adds the & operator before the expression.", templates.getValue(".p").description)
+        assertTrue("`x.!` reads back to the symbol", "!" in templates && "&" in templates && "*" in templates)
+        assertEquals("ids are unique", templates.size, templates.values.map { it.id }.toSet().size)
+        val html = javaClass.getResource("/postfixTemplates/GoPostfixTemplate/description.html")!!.readText().replace("&amp;", "&")
+        for (kind in GoPostfixKinds.ALL) assertTrue(kind.key, "<code>.${kind.key}</code>" in html)
     }
 
     fun testSortOfStructsUsesSortSlice() {

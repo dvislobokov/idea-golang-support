@@ -1,0 +1,2 @@
+s := Server{Host: "localhost"}
+s.Port = 8080

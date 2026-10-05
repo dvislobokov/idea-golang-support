@@ -1,0 +1,4 @@
+fmt.Println(
+	<spot>a</spot>,
+	b,
+)

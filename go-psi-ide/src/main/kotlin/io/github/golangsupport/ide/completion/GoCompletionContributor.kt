@@ -124,6 +124,7 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
 private class GoIdentifierProvider : CompletionProvider<CompletionParameters>(), DumbAware {
     override fun addCompletions(parameters: CompletionParameters, processing: ProcessingContext, result: CompletionResultSet) {
         val context = GoCompletionContext.of(parameters) ?: return
+        if (context.kind == Kind.NONE && GoNameCompletion.variableNames(context, result)) return
         GoBasicCompletion.fill(context, result)
     }
 }
@@ -181,17 +182,24 @@ private object GoBasicCompletion {
         var typesOnly = false
         when (context.kind) {
             Kind.STATEMENT, Kind.EXPRESSION -> {
-                structKeys(context, out)
+                structKeys(context, out, result)
                 scope = expression(context, result, out)
             }
             Kind.STRUCT_KEY -> {
                 // A key of a map or slice literal is an ordinary expression.
-                if (!structKeys(context, out)) scope = expression(context, result, out)
+                if (!structKeys(context, out, result)) scope = expression(context, result, out)
             }
             Kind.TYPE -> {
                 val types = ArrayList<GoCandidate>()
                 val place = context.typeReference ?: context.leaf
                 GoScopeCandidates(context).collect(place, GoScopeCandidates.Filter.TYPES, types)
+                // `func g(<caret>`: names with their types, as GoLand (`err error`, `base Base`), instead of bare types.
+                if (GoNameCompletion.isParameterNamePosition(context)) {
+                    GoNameCompletion.parameterItems(context, types, result.prefixMatcher.prefix, out)
+                    unimportedPackages(context, result.prefixMatcher, types, out)
+                    GoCompletionContributor.emit(out, context, result)
+                    return
+                }
                 out += types
                 GoKeywordCandidates.collect(context, out)
                 unimportedPackages(context, result.prefixMatcher, types, out)
@@ -201,7 +209,11 @@ private object GoBasicCompletion {
             Kind.RECEIVER_TYPE -> receiverTypes(context, out)
             Kind.SELECTOR -> GoMemberCandidates(context).collect(out, typesOnly = false)
             Kind.TYPE_SELECTOR -> GoMemberCandidates(context).collect(out, typesOnly = true)
-            Kind.TOP_LEVEL, Kind.SWITCH_BODY -> GoKeywordCandidates.collect(context, out)
+            Kind.TOP_LEVEL -> {
+                GoKeywordCandidates.collect(context, out)
+                GoTopLevelTemplates.collect(context, out)
+            }
+            Kind.SWITCH_BODY -> GoKeywordCandidates.collect(context, out)
             else -> return
         }
         GoCompletionContributor.emit(out, context, result)
@@ -241,14 +253,18 @@ private object GoBasicCompletion {
         return scope
     }
 
-    /** Field names of a struct literal (promoted and embedded ones included) not used yet; false when the literal is not a struct. */
-    private fun structKeys(context: GoCompletionContext, out: MutableList<GoCandidate>): Boolean {
+    /**
+     * Field names of a struct literal (promoted and embedded ones included) not used yet, after the Fill items ([GoFillStructCompletion]);
+     * false when the literal is not a struct.
+     */
+    private fun structKeys(context: GoCompletionContext, out: MutableList<GoCandidate>, result: CompletionResultSet): Boolean {
         val literal = context.literalValue ?: return false
         val type = context.semantics.literalType(literal)?.let(GoCompletionSemantics::derefUnderlying) as? GoStructType ?: return false
         val elements = GoPsiUtil.children(literal, GoElement::class.java)
         val current = PsiTreeUtil.getParentOfType(context.leaf, GoElement::class.java)
         // Positional literals (`T{1, 2}`) take no keys.
         if (!context.keyOnly && elements.any { it !== current && it.key == null }) return true
+        GoFillStructCompletion.collect(context, literal, current, result)
         val used = elements.filter { it !== current }.mapNotNull { (it.key?.expression as? GoReferenceExpression)?.identifier?.text }.toSet()
         for ((field, depth) in GoMemberCandidates(context).fields(type)) {
             if (field.name in used) continue

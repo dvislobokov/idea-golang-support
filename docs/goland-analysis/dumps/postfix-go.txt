@@ -1,0 +1,52 @@
+.return — Adds the return keyword before the expression.  e.g. return expr
+.d — Creates a dereference expression.  e.g. *expr
+.remove — Creates a copy of a slice with a range of elements removed. For more information about operations with slices, see Slice Tricks in the golang repository at github.com .  e.g. xs = xs[:i], xs[i+1:]...
+.imag — Wraps the expression with the imag() built-in function.  e.g. imag()
+.notnil — Checks whether the if condition expression is not nil .  e.g. expr != nil
+.sort — Wraps the expression with the sort.Float64s() function.  e.g. sort.Float64s()
+.real — Wraps the expression with the real() built-in function.  e.g. real()
+.nil — Checks whether the if condition expression is nil .  e.g. expr == nil
+.p — Adds the & operator before the expression.  e.g. &expr
+.parseFloat — Generates the code to parse float64 from string.  e.g. strconv.ParseFloat()
+.aappend — Wraps the expression with the append() built-in function and assigns its result to the expression.  e.g. xs = append(xs, ...)
+.var — Assigns the expression to a new variable by using := .  e.g. var name = expr
+.rr — Generates boilerplate code for idiomatic error handling. Can be called on variables and expressions of the error type. Replaces the err variable with the following construction: if err != nil { return value1, value2, ... } Replaces the expr expression with the following construction: if err := expr; err != nil { return value1, value2, ... } Each value is either the err variable or a default value of the corresponding return type of the enclosing function. You can call this template on expressions with multiple values.  e.g. if err := f(); err != nil { return }
+.appendAssign — Wraps the expression with the append() built-in function and assigns its result to the expression.  e.g. xs = append(xs, ...)
+.print — Wraps the expression with the print() built-in function.  e.g. print()
+.pointer — Adds the & operator before the expression.  e.g. &expr
+.* — Creates a dereference expression.  e.g. *expr
+.forr — Creates the range form of the for loop with an index and a value to iterate over a slice or an array.  e.g. for index, elem := range expr
+.as — Wraps the expression with the errors.As() function.  e.g. errors.As()
+.par — Wraps the expression with parentheses.  e.g. (expr)
+.not — Negates the boolean expression.  e.g. !expr
+.reterr — Generates boilerplate code for idiomatic error handling. Can be called on variables and expressions of the error type. Replaces variable err with the following construction: if err != nil { return value1, value2, ... } Replaces expression expr with the following construction: if err := expr; err != nil { return value1, value2, ... } Each value is either the err variable or a default value of the corresponding return type of the enclosing function. You can call this template on expressions with multiple values.  e.g. if err != nil { return err }
+.if — Turns the E expression into if E {} .  e.g. if (expr)
+.append — Wraps the expression with the append() built-in function.  e.g. append()
+.sort — Wraps the expression with the sort.Strings() function.  e.g. sort.Strings()
+.sort — Wraps the expression with the sort.Slice() function.  e.g. sort.Slice()
+.close — Wraps the expression with the close() built-in function.  e.g. close()
+.& — Adds the & operator before the expression.  e.g. &expr
+.reterr — Generates boilerplate code for idiomatic error handling. Can be called on variables and expressions of the error type. Replaces the err variable with the following construction: if err != nil { return value1, value2, ... } Replaces the expr expression with the following construction: if err := expr; err != nil { return value1, value2, ... } Each value is either the err variable or a default value of the corresponding return type of the enclosing function. You can call this template on expressions with multiple values.  e.g. if err := f(); err != nil { return }
+.notnil — Wraps the expression with the if statement that checks whether the expression is not nil .  e.g. if expr != nil
+.sort — Wraps the expression with the sort.Sort() function.  e.g. sort.Sort()
+.parseInt — Generates the code to parse int from string.  e.g. strconv.ParseInt()
+.len — Wraps the expression with the len() built-in function.  e.g. len()
+.dereference — Creates a dereference expression.  e.g. *expr
+.rr — Generates boilerplate code for idiomatic error handling. Can be called on variables and expressions of the error type. Replaces variable err with the following construction: if err != nil { return value1, value2, ... } Replaces expression expr with the following construction: if err := expr; err != nil { return value1, value2, ... } Each value is either the err variable or a default value of the corresponding return type of the enclosing function. You can call this template on expressions with multiple values.  e.g. if err != nil { return err }
+.varCheckError — Generates boilerplate code for idiomatic error handling. You can invoke the template on calls that return error or on any expressions of the error type. The template introduces new variables, assigns the expression to them, and checks if error is not nil by using the following code: if err != nil { return value1, value2, ... } Each value is either the err variable or a default value of the corresponding return type of the enclosing function.  e.g. err := f(); if err != nil { return }
+.copy — Wraps the expression with the copy() built-in function.  e.g. copy()
+.nil — Wraps the expression with the if statement that checks whether the expression is nil .  e.g. if expr == nil
+.! — Negates the boolean expression.  e.g. !expr
+.for — Creates the range form of the for loop to iterate over a slice or an array.  e.g. for index := range expr
+.nn — Checks whether the if condition expression is not nil .  e.g. expr != nil
+.complex — Wraps the expression with the complex() built-in function.  e.g. complex()
+.panic — Wraps the expression with the panic() built-in function.  e.g. panic()
+.cap — Wraps the expression with the cap() built-in function.  e.g. cap()
+.delete — Wraps the expression with the delete() built-in function.  e.g. delete()
+.else — Turns the E expression into if !E {} .  e.g. if (!expr)
+.nn — Wraps the expression with the if statement that checks whether the expression is not nil .  e.g. if expr != nil
+.println — Wraps the expression with the println() built-in function.  e.g. println()
+.is — Wraps the expression with the errors.Is() function.  e.g. errors.Is()
+.sort — Wraps the expression with the sort.Ints() function.  e.g. sort.Ints()
+postfix templates: 50
+

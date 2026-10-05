@@ -1,0 +1,28 @@
+<html><body>
+Go postfix template: type the key after an expression and press Tab, or pick it in the completion list after <code>.</code>
+(the keys come after the fields and methods). A key is offered only where it fits the type of the expression; the tree shows
+what each one writes.
+<table>
+<tr><td><code>.if</code> <code>.else</code></td><td>if expr {} / if !expr {} (bool)</td></tr>
+<tr><td><code>.nil</code> <code>.nn</code> <code>.notnil</code></td><td>if expr == nil {} / if expr != nil {} (pointers, slices, maps, channels, functions, interfaces)</td></tr>
+<tr><td><code>.err</code> <code>.errv</code> <code>.errn</code></td><td>check the error of a call or of an error value</td></tr>
+<tr><td><code>.return</code> <code>.rr</code></td><td>return expr (other results get zero values) / return expr, nil</td></tr>
+<tr><td><code>.var</code></td><td>name := expr, the name from the expression: area := c.Area()</td></tr>
+<tr><td><code>.for</code> <code>.forr</code> <code>.range</code></td><td>for _, v := range expr {} / for i, name := range names {} / for range expr {}</td></tr>
+<tr><td><code>.fori</code> <code>.forrev</code></td><td>for i := 0; i &lt; len(expr); i++ {} / from the last index down</td></tr>
+<tr><td><code>.len</code> <code>.cap</code></td><td>len(expr) / cap(expr)</td></tr>
+<tr><td><code>.print</code> <code>.printf</code> <code>.println</code></td><td>fmt.Println(expr) / fmt.Printf("%v\n", expr) / println(expr)</td></tr>
+<tr><td><code>.panic</code> <code>.go</code> <code>.defer</code></td><td>panic(expr) / go call / defer call</td></tr>
+<tr><td><code>.append</code> <code>.aappend</code> <code>.appendAssign</code></td><td>append(xs, …) / xs = append(xs, …) (slices)</td></tr>
+<tr><td><code>.copy</code> <code>.remove</code></td><td>copy(xs, …) / xs = append(xs[:i], xs[i+1:]...) (slices)</td></tr>
+<tr><td><code>.close</code> <code>.delete</code></td><td>close(ch) (channels) / delete(m, key) (maps)</td></tr>
+<tr><td><code>.complex</code> <code>.real</code> <code>.imag</code></td><td>complex(f, …) (floats) / real(z), imag(z) (complex numbers)</td></tr>
+<tr><td><code>.not</code> <code>.!</code></td><td>!expr (bool)</td></tr>
+<tr><td><code>.&amp;</code> <code>.p</code> <code>.pointer</code></td><td>&amp;expr</td></tr>
+<tr><td><code>.*</code> <code>.d</code> <code>.dereference</code></td><td>*expr (pointers)</td></tr>
+<tr><td><code>.par</code> <code>.switch</code></td><td>(expr) / switch expr {}</td></tr>
+<tr><td><code>.wrap</code> <code>.as</code> <code>.is</code></td><td>fmt.Errorf("…: %w", err) / errors.As(err, &amp;target) / errors.Is(err, target) (errors)</td></tr>
+<tr><td><code>.parseInt</code> <code>.parseFloat</code></td><td>n, err := strconv.ParseInt(s, 10, 64) / strconv.ParseFloat(s, 64) with the check of the error (strings)</td></tr>
+<tr><td><code>.sort</code></td><td>sort.Strings / sort.Ints / sort.Float64s, sort.Sort for a sort.Interface, slices.Sort, sort.Slice</td></tr>
+</table>
+</body></html>

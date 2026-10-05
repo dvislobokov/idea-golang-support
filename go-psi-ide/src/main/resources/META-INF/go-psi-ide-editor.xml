@@ -9,6 +9,8 @@
     <indexPatternBuilder implementation="io.github.golangsupport.ide.editor.GoIndexPatternBuilder"/>
     <lang.findUsagesProvider language="Go" implementationClass="io.github.golangsupport.ide.editor.GoFindUsagesProvider"/>
     <lang.foldingBuilder language="Go" implementationClass="io.github.golangsupport.ide.folding.GoFoldingBuilder"/>
+    <!-- the Go section of Code Folding: which one-line regions are collapsed by default (GoFoldingSettings, an application light service) -->
+    <codeFoldingOptionsProvider instance="io.github.golangsupport.ide.folding.GoCodeFoldingOptionsProvider"/>
     <lang.psiStructureViewFactory language="Go"
                                   implementationClass="io.github.golangsupport.ide.structure.GoStructureViewFactory"/>
     <breadcrumbsInfoProvider implementation="io.github.golangsupport.ide.structure.GoBreadcrumbsProvider"/>

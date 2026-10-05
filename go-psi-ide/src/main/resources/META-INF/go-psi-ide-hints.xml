@@ -7,7 +7,9 @@
   <extensions defaultExtensionNs="com.intellij">
     <codeInsight.declarativeInlayProvider language="Go" providerId="go.parameter.names" group="PARAMETERS_GROUP" isEnabledByDefault="true"
                                           implementationClass="io.github.golangsupport.ide.hints.GoParameterNameHintsProvider"
-                                          bundle="messages.GoInlayHintsBundle" nameKey="hints.parameters.name" descriptionKey="hints.parameters.description"/>
+                                          bundle="messages.GoInlayHintsBundle" nameKey="hints.parameters.name" descriptionKey="hints.parameters.description">
+      <option optionId="return" enabledByDefault="true" bundle="messages.GoInlayHintsBundle" nameKey="hints.parameters.return.name" descriptionKey="hints.parameters.return.description"/>
+    </codeInsight.declarativeInlayProvider>
     <codeInsight.declarativeInlayProvider language="Go" providerId="go.literal.fields" group="PARAMETERS_GROUP" isEnabledByDefault="true"
                                           implementationClass="io.github.golangsupport.ide.hints.GoLiteralFieldHintsProvider"
                                           bundle="messages.GoInlayHintsBundle" nameKey="hints.fields.name" descriptionKey="hints.fields.description"/>

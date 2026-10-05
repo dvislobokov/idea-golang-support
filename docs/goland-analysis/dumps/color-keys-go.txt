@@ -1,0 +1,231 @@
+scheme: _@user_Islands Dark
+##### Go  (com.goide.highlighting.GoColorsAndFontsPage)
+  Keyword  =  GO_KEYWORD  (fallback DEFAULT_KEYWORD)  fg #cf8e6d
+  Identifier  =  GO_IDENTIFIER  (fallback DEFAULT_IDENTIFIER)  fg #bcbec4
+  Number  =  GO_NUMBER  (fallback DEFAULT_NUMBER)  fg #2aacb8
+  Bad character  =  GO_BAD_TOKEN  (fallback BAD_CHARACTER)  fg #f75464
+  String//Text  =  GO_STRING  (fallback DEFAULT_STRING)  fg #6aab73
+  String//Valid escape  =  GO_VALID_STRING_ESCAPE  (fallback DEFAULT_VALID_STRING_ESCAPE)  fg #cf8e6d
+  String//Invalid escape  =  GO_INVALID_STRING_ESCAPE  (fallback DEFAULT_INVALID_STRING_ESCAPE)  fg #cf8e6d effect WAVE_UNDERSCORE #fa6675
+  Comments//Line comment  =  GO_LINE_COMMENT  (fallback DEFAULT_LINE_COMMENT)  fg #7a7e85
+  Comments//Block comment  =  GO_BLOCK_COMMENT  (fallback DEFAULT_BLOCK_COMMENT)  fg #7a7e85
+  Comments//Comment keyword  =  GO_COMMENT_KEYWORD  (fallback DEFAULT_DOC_COMMENT_TAG)  fg #67a37c
+  Comments//Comment reference  =  GO_COMMENT_REFERENCE  (fallback DEFAULT_LINE_COMMENT)  fg #a1a1a1
+  Comments//Build constraints//Tag  =  GO_BUILD_TAG  (fallback GO_IDENTIFIER)  fg #bcbec4
+  Comments//Build constraints//Parentheses  =  GO_BUILD_PAREN  (fallback GO_PARENTHESES)  fg #bcbec4
+  Comments//Build constraints//Operators  =  GO_BUILD_OPERATOR  (fallback GO_OPERATOR)  fg #bcbec4
+  Braces and operators//Semicolon  =  GO_SEMICOLON  (fallback DEFAULT_SEMICOLON)  fg #bcbec4
+  Braces and operators//Colon  =  GO_COLON  (fallback TEXT)  fg #bcbec4 bg #191a1c
+  Braces and operators//Comma  =  GO_COMMA  (fallback DEFAULT_COMMA)  fg #bcbec4
+  Braces and operators//Dot  =  GO_DOT  (fallback DEFAULT_DOT)  fg #bcbec4
+  Braces and operators//Operator  =  GO_OPERATOR  (fallback DEFAULT_OPERATION_SIGN)  fg #bcbec4
+  Braces and operators//Brackets  =  GO_BRACKET  (fallback DEFAULT_BRACKETS)  fg #bcbec4
+  Braces and operators//Braces  =  GO_BRACES  (fallback DEFAULT_BRACES)  fg #bcbec4
+  Braces and operators//Parentheses  =  GO_PARENTHESES  (fallback DEFAULT_PARENTHS)  fg #bcbec4
+  References//Type references//Builtin type reference  =  GO_BUILTIN_TYPE_REFERENCE  (fallback DEFAULT_CLASS_REFERENCE)  fg #cc7832
+  References//Type references//Type specification  =  GO_TYPE_REFERENCE  (fallback DEFAULT_CLASS_REFERENCE)  fg #6fafbd
+  References//Type references//Package exported interface  =  GO_EXPORTED_INTERFACE_REFERENCE  (fallback GO_TYPE_REFERENCE)  fg #6fafbd
+  References//Type references//Package exported struct  =  GO_EXPORTED_STRUCT_REFERENCE  (fallback GO_TYPE_REFERENCE)  fg #6fafbd
+  References//Type references//Package local interface  =  GO_LOCAL_INTERFACE_REFERENCE  (fallback GO_TYPE_REFERENCE)  fg #6fafbd
+  References//Type references//Package local struct  =  GO_LOCAL_STRUCT_REFERENCE  (fallback GO_TYPE_REFERENCE)  fg #6fafbd
+  References//Function calls//Builtin function call  =  GO_BUILTIN_FUNCTION_CALL  (fallback DEFAULT_FUNCTION_CALL)  fg #cc7832
+  References//Function calls//Exported function call  =  GO_EXPORTED_FUNCTION_CALL  (fallback DEFAULT_FUNCTION_CALL)  fg #b09d79
+  References//Function calls//Local function call  =  GO_LOCAL_FUNCTION_CALL  (fallback DEFAULT_FUNCTION_CALL)  fg #b09d79
+  References//Variable calls//Exported variable call  =  GO_PACKAGE_EXPORTED_VARIABLE_CALL  (fallback DEFAULT_FUNCTION_CALL)  fg #bcbec4
+  References//Variable calls//Package local variable call  =  GO_PACKAGE_LOCAL_VARIABLE_CALL  (fallback DEFAULT_FUNCTION_CALL)  fg #bcbec4
+  References//Variable calls//Local variable call  =  GO_LOCAL_VARIABLE_CALL  (fallback DEFAULT_FUNCTION_CALL)  fg #bcbec4
+  References//Variable calls//Struct local member call  =  GO_STRUCT_LOCAL_MEMBER_CALL  (fallback DEFAULT_FUNCTION_CALL)  fg #bcbec4
+  References//Variable calls//Struct exported member call  =  GO_STRUCT_EXPORTED_MEMBER_CALL  (fallback DEFAULT_FUNCTION_CALL)  fg #bcbec4
+  Declarations//Package  =  GO_PACKAGE  (fallback DEFAULT_IDENTIFIER)  fg #afbf7e
+  Declarations//Method receiver  =  GO_METHOD_RECEIVER  (fallback DEFAULT_LOCAL_VARIABLE)  fg #4eade5
+  Declarations//Function parameter  =  GO_FUNCTION_PARAMETER  (fallback DEFAULT_LOCAL_VARIABLE)  fg #bcbec4
+  Declarations//Label  =  GO_LABEL  (fallback DEFAULT_LABEL)  fg #bcbec4
+  Declarations//Types//Type specification  =  GO_TYPE_SPECIFICATION  (fallback DEFAULT_CLASS_NAME)  fg #bcbec4
+  Declarations//Types//Package exported interface  =  GO_PACKAGE_EXPORTED_INTERFACE  (fallback DEFAULT_INTERFACE_NAME)  fg #bcbec4
+  Declarations//Types//Package exported struct  =  GO_PACKAGE_EXPORTED_STRUCT  (fallback DEFAULT_CLASS_NAME)  fg #bcbec4
+  Declarations//Types//Package local interface  =  GO_PACKAGE_LOCAL_INTERFACE  (fallback DEFAULT_INTERFACE_NAME)  fg #bcbec4
+  Declarations//Types//Package local struct  =  GO_PACKAGE_LOCAL_STRUCT  (fallback DEFAULT_CLASS_NAME)  fg #bcbec4
+  Declarations//Struct tags//Key  =  GO_TAG_KEY  (fallback GO_IDENTIFIER)  fg #bcbec4
+  Declarations//Struct tags//Colon  =  GO_TAG_COLON  (fallback GO_COLON)  fg #bcbec4 bg #191a1c
+  Declarations//Struct tags//Value  =  GO_TAG_VALUE  (fallback GO_STRING)  fg #6aab73
+  Declarations//Struct tags//Arbitrary text  =  GO_TAG_TEXT  (fallback NOT_USED_ELEMENT_ATTRIBUTES)  fg #6f737a
+  Declarations//Constants//Builtin constant  =  GO_BUILTIN_CONSTANT  (fallback DEFAULT_CONSTANT)  fg #cc7832
+  Declarations//Constants//Package exported constant  =  GO_PACKAGE_EXPORTED_CONSTANT  (fallback DEFAULT_CONSTANT)  fg #c77dbb font 2
+  Declarations//Constants//Package local constant  =  GO_PACKAGE_LOCAL_CONSTANT  (fallback DEFAULT_CONSTANT)  fg #c77dbb font 2
+  Declarations//Constants//Local constant  =  GO_LOCAL_CONSTANT  (fallback DEFAULT_CONSTANT)  fg #c77dbb font 2
+  Declarations//Variables//Builtin variable  =  GO_BUILTIN_VARIABLE  (fallback DEFAULT_GLOBAL_VARIABLE)  fg #cc7832
+  Declarations//Variables//Package exported variable  =  GO_PACKAGE_EXPORTED_VARIABLE  (fallback DEFAULT_GLOBAL_VARIABLE)  fg #bcbec4
+  Declarations//Variables//Package local variable  =  GO_PACKAGE_LOCAL_VARIABLE  (fallback DEFAULT_LOCAL_VARIABLE)  fg #bcbec4
+  Declarations//Variables//Local variable  =  GO_LOCAL_VARIABLE  (fallback DEFAULT_LOCAL_VARIABLE)  fg #bcbec4
+  Declarations//Variables//Scope declared variable  =  GO_SCOPE_VARIABLE  (fallback DEFAULT_LOCAL_VARIABLE)  fg #bcbec4
+  Declarations//Variables//Reassignment in short variable declaration  =  GO_REASSIGNMENT_IN_SHORT_VAR_DECLARATION  (fallback DEFAULT_REASSIGNED_LOCAL_VARIABLE)  fg #bcbec4 effect LINE_UNDERSCORE #84868c
+  Declarations//Variables//Shadowing variable  =  GO_SHADOWING_VARIABLE  (fallback DEFAULT_LOCAL_VARIABLE)  fg #7dbda2
+  Declarations//Variables//Struct local member  =  GO_STRUCT_LOCAL_MEMBER  (fallback DEFAULT_LOCAL_VARIABLE)  fg #bcbec4
+  Declarations//Variables//Struct exported member  =  GO_STRUCT_EXPORTED_MEMBER  (fallback DEFAULT_GLOBAL_VARIABLE)  fg #bcbec4
+  Declarations//Functions//Builtin function  =  GO_BUILTIN_FUNCTION  (fallback DEFAULT_FUNCTION_DECLARATION)  fg #56a8f5
+  Declarations//Functions//Exported function  =  GO_EXPORTED_FUNCTION  (fallback DEFAULT_FUNCTION_DECLARATION)  fg #56a8f5
+  Declarations//Functions//Package local function  =  GO_LOCAL_FUNCTION  (fallback DEFAULT_FUNCTION_DECLARATION)  fg #56a8f5
+  --- demo text ---
+/*
+ * Go highlight sample
+ */
+//go:build <goBuildParens>(</goBuildParens><goBuildTag>linux</goBuildTag> <goBuildOperator>||</goBuildOperator> <goBuildTag>windows</goBuildTag><goBuildParens>)</goBuildParens> <goBuildOperator>&&</goBuildOperator> <goBuildTag>arm</goBuildTag>
+// +build <goBuildTag>linux</goBuildTag><goBuildOperator>,</goBuildOperator><goBuildTag>arm</goBuildTag> <goBuildTag>windows</goBuildTag><goBuildOperator>,</goBuildOperator><goBuildTag>arm</goBuildTag>
+
+// Package main
+package <package>main</package>
+
+import "fmt"
+import <package>alias</package> "fmt"
+
+//<goGenerate>go:generate</goGenerate> go tool yacc -o gopher.go -p parser gopher.y
+
+/*
+Semantic highlighting:
+Generated spectrum to pick colors for local variables and parameters:
+ <rainbow_demo>Color#1</rainbow_demo> <rainbow_demo>SC1.1</rainbow_demo> <rainbow_demo>SC1.2</rainbow_demo> <rainbow_demo>SC1.3</rainbow_demo> <rainbow_demo>SC1.4</rainbow_demo> <rainbow_demo>Color#2</rainbow_demo> <rainbow_demo>SC2.1</rainbow_demo> <rainbow_demo>SC2.2</rainbow_demo> <rainbow_demo>SC2.3</rainbow_demo> <rainbow_demo>SC2.4</rainbow_demo> <rainbow_demo>Color#3</rainbow_demo>
+ <rainbow_demo>Color#3</rainbow_demo> <rainbow_demo>SC3.1</rainbow_demo> <rainbow_demo>SC3.2</rainbow_demo> <rainbow_demo>SC3.3</rainbow_demo> <rainbow_demo>SC3.4</rainbow_demo> <rainbow_demo>Color#4</rainbow_demo> <rainbow_demo>SC4.1</rainbow_demo> <rainbow_demo>SC4.2</rainbow_demo> <rainbow_demo>SC4.3</rainbow_demo> <rainbow_demo>SC4.4</rainbow_demo> <rainbow_demo>Color#5</rainbow_demo>
+*/
+
+type (
+	<pei>PublicInterface</pei> interface {
+		<ef>PublicFunc</ef>() <bt>int</bt>
+		<lf>privateFunc</lf>() <bt>int</bt>
+	}
+
+	<pli>privateInterface</pli> interface {
+		<ef>PublicFunc</ef>() <bt>int</bt>
+		<lf>privateFunc</lf>() <bt>int</bt>
+	}
+
+	<pes>PublicStruct</pes> struct {
+		<sem>PublicField</sem>  <bt>int</bt>
+		<slm>privateField</slm> <bt>int</bt>
+	}
+
+	<pls>privateStruct</pls> struct {
+		<sem>PublicField</sem>  <bt>int</bt>
+		<slm>privateField</slm> <bt>int</bt>
+	}
+
+	<ts>demoInt</ts> <bt>int</bt>
+
+	<pes>T</pes> struct {
+		<sem>FirstName</sem> <bt>string</bt> `<goTagKey>json</goTagKey><goTagColon>:</goTagColon><goTagValue>"first_name"</goTagValue><goTagText> arbitrary text</goTagText>`
+	}
+)
+
+const (
+	<pec>PublicConst</pec>  = 1
+	<plc>privateConst</plc> = 2
+)
+
+var (
+	<pev>PublicVar</pev>  = 1
+	<plv>privateVar</plv> = 2
+)
+
+// <goCommentRef>PublicFunc</goCommentRef> does the thing
+func <ef>PublicFunc</ef>() <bt>int</bt> {
+	<lv>localVar</lv> := <pev>PublicVar</pev>
+	return <lv>localVar</lv>
+}
+
+// <goCommentRef>privateFunc</goCommentRef> does the thing
+func <lf>privateFunc</lf>() (<bt>int</bt>, <bt>int</bt>) {
+	<lv>LocalVar</lv> := <plv>privateVar</plv>
+	return <lv>LocalVar</lv>, <pev>PublicVar</pev>
+}
+
+func (<mr>ps</mr> <esr>PublicStruct</esr>) <ef>PublicFunc</ef>() <bt>int</bt> {
+	return <mr>ps</mr>.<slm>privateField</slm>
+}
+
+func (<mr>ps</mr> <lsr>privateStruct</lsr>) <lf>privateFunc</lf>() <bt>int</bt> {
+	return <mr>ps</mr>.<sem>PublicField</sem>
+}
+
+func _(<fp>pi</fp> <eir>PublicInterface</eir>) {
+}
+
+func _(<fp>pi</fp> <lir>privateInterface</lir>) {
+}
+
+func <lf>variableFunc</lf>(<fp>demo1</fp> <bt>int</bt>, <fp>demo2</fp> <tsr>demoInt</tsr>) {
+	<fp>demo1</fp> = 3
+	<lv>a</lv> := <esr>PublicStruct</esr>{}
+	<lv>a</lv>.<ef_call>PublicFunc</ef_call>()
+	<lv>b</lv> := <lsr>privateStruct</lsr>{}
+	<lv>b</lv>.<lf_call>privateFunc</lf_call>()
+	<lv>demo2</lv> = 4
+	if <sv>demo1</sv>, <sv>demo2</sv> := <lf_call>privateFunc</lf_call>(); <sv>demo1</sv> != 3 {
+		_ = <sv>demo1</sv>
+		_ = <sv>demo2</sv>
+		return
+	}
+<ll>demoLabel</ll>:
+	for <sv>demo1</sv> := range []<bt>int</bt>{1, 2, 3, 4} {
+		_ = <sv>demo1</sv>
+		continue <ll>demoLabel</ll>
+	}
+
+	switch {
+	case 1 == 2:
+		<sv>demo1</sv>, <sv>demo2</sv> := <lf_call>privateFunc</lf_call>()
+		_ = <sv>demo1</sv>
+		_ = <sv>demo2</sv>
+	default:
+		_ = <fp>demo1</fp>
+	}
+
+	<lv>f</lv> := func() <bt>int</bt> {
+		return 1
+	}
+	<lv_call>f</lv_call>()
+	<ef_call>PublicFunc</ef_call>()
+	<lf_call>variableFunc</lf_call>(1, 2)
+	_ = <fp>demo1</fp>
+	_ = <lv>demo2</lv>
+	<bf_call>println</bf_call>("builtin function")
+}
+
+func <lf>main</lf>() {
+	const <lc>LocalConst</lc> = 1
+	const <lc>localConst</lc> = 2
+	<package>fmt</package>.<ef_call>Println</ef_call>("demo<se_valid>\n</se_valid><se_invalid>\xA</se_invalid>")
+	<package>alias</package>.<ef_call>Println</ef_call>("demo")
+	<lf_call>variableFunc</lf_call>(1, 2)
+	var <lv>d</lv>, <lv>c</lv> *<bt>int</bt> = <bv>nil</bv>, <bv>nil</bv>
+	_, _ = <lv>c</lv>, <lv>d</lv>
+	_, _ = <bc>true</bc>, <bc>false</bc>
+}
+
+var <pev>ExportedVariableFunction</pev> = func() {}
+var <plv>packageLocalVariableFunction</plv> = func() {}
+
+type <pls>typeWithCall</pls> struct {
+	<sem>PublicFieldCall</sem>  func()
+	<slm>privateFieldCall</slm> func()
+}
+
+func <lf>calls</lf>(<fp>t</fp> <lsr>typeWithCall</lsr>) {
+	var <lv>localVariableFunction</lv> = func() {}
+
+	<pev_call>ExportedVariableFunction</pev_call>()
+	<plv_call>packageLocalVariableFunction</plv_call>()
+	<lv_call>localVariableFunction</lv_call>()
+	<fp>t</fp>.<sem_call>PublicFieldCall</sem_call>()
+	<fp>t</fp>.<slm_call>privateFieldCall</slm_call>()
+}
+
+func _() {
+	var <lv>err</lv> <bt>error</bt>
+	<lv>a</lv>, <re_in_svd>err</re_in_svd> := 1, <bv>nil</bv>
+	<bf_call>println</bf_call>(<lv>a</lv>, <lv>err</lv>)
+
+	for <shv>a</shv> := 0; <shv>a</shv> < 10; <shv>a</shv>++ {
+		<bf_call>println</bf_call>(<shv>a</shv>)
+	}
+}
+
+

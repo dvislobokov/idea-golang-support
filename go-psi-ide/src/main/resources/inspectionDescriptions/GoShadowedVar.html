@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports a local variable that shadows a variable, constant, parameter, result or receiver of an enclosing scope, or a package-level
+variable or constant of the same package. The name is painted with the <b>Shadowing variable</b> colour. A <code>:=</code> that reuses
+a variable of its own scope does not declare one and is not reported; nor are parameters, <code>x := x</code> and
+<code>switch x := x.(type)</code>.
+<pre><code>value, err := load(name)
+if value != "" {
+    value, err := load(value + "x") // shadows both
+    ...
+}</code></pre>
+<p>Quick fixes: <b>Navigate to shadowed declaration</b>, <b>Rename variable</b>.</p>
+</body>
+</html>

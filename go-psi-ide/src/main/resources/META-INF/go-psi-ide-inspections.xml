@@ -136,6 +136,9 @@
     <localInspection language="Go" shortName="GoShadowedError" displayName="Shadowed error"
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.flow.GoShadowedErrorInspection"/>
+    <localInspection language="Go" shortName="GoShadowedVar" displayName="Shadowing variable"
+                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.GoShadowingVariableInspection"/>
     <localInspection language="Go" shortName="GoResultUsedBeforeErrorCheck" displayName="Result used before the error check"
                      groupName="Go" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.flow.GoResultUsedBeforeErrorCheckInspection"/>

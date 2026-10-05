@@ -1,0 +1,177 @@
+##### MainToolbarNewUI
+[+] <no text>  {MainToolbarNewUI}  
+  [+] Left  {MainToolbarLeft}  
+    goland-playground  {main.toolbar.Project}  
+    Dev Container Dashboard  {devcontainer.ui.dashboard.DevcontainerDashboardAction}   [hidden]
+    [+] VCS Group  {MainToolbarVCSGroup}  
+      Version Control  {main.toolbar.git.Branches}  
+      VCS Merge/Rebase Widget  {main.toolbar.git.MergeRebase}  
+    [+] General Actions  {MainToolbarGeneralActionsGroup}  
+      -----
+  [+] Center  {MainToolbarCenter}  
+    File Name Widget (when editor tabs are hidden or “Always show full path” is enabled)  {main.toolbar.Filename}   [hidden] [disabled]
+  [+] Right  {MainToolbarRight}  
+    [+] <no text>  {ExecutionTargetsToolbarGroup}  
+      Targets  {ExecutionTargets}   [hidden] [disabled]
+    Run Widget  {NewUiRunWidget}  
+    Share Feedback  {EAPFeedbackToolbarAction}   [hidden] [disabled]
+    [+] CodeWithMe  {CodeWithMeToolbarGroupNewUi}  
+      [+] Code With Me Call Actions  {CWMToolbarCallActions}  
+        Audio and Calls  {CWMCallSplitButtonAction}   [hidden] [disabled]
+        Join Call  {JoinCallAction}   [hidden] [disabled]
+      <no text>  {CodeWithMeUsersActionOldUi}   [hidden] [disabled]
+      User Avatars  {CodeWithMeUsersAction}   [hidden] [disabled]
+      [+] Code With Me Popup  {CWMShowPopupActionGroup}  
+        Code With Me  {CWMHostShowPopupAction}  Ctrl+Shift+Y [hidden] [disabled]
+    JetBrains AI  {AIAssistantHubPopupAction}  
+    Search Everywhere  {SearchEverywhere}  
+    [+] IDE and Project Settings  {SettingsEntryPoint}  
+      Update 6 Plugins…  {}
+      Install Git 0.0.0  {UpdateAction} [hidden] [disabled]
+      [+] <no text>  {UpdateEntryPointGroup}  
+      -----
+      [+] <no text>  {SettingsEntryPointGroup}  
+        Run Anything  {RunAnything}  
+        -----
+        <no text>  {ShowSettings}  Ctrl+Alt+S
+        Go Settings…  {GoEditSettingsAction}  
+        Plugins…  {ShowPlugins}  
+        <no text>  {SettingsSyncSeparator}  
+        Backup and Sync  {SettingsSyncStatusAction}  
+        Actions on Save…  {GoEditActionsOnSaveAction}  
+        -----
+        Theme  {ChangeLaf}  
+        Keymap  {ChangeKeymap}  
+        View Mode  {ChangeView}  
+      -----
+      [+] Customize Main Toolbar  {CustomizeMainToolbarGroup}  
+        Customize Toolbar…  {CustomizeMainToolbarAction}  
+        ----- Add Action to Main Toolbar
+        [+] <no text>  {MainToolbarQuickActionsRaw}  
+          [+] <no text>  {MainToolbarQuickActions.General}  
+          [+] <no text>  {GitMainToolbarQuickActions}  
+            [+] <no text>  {MainToolbarQuickActions.VCS}  
+          [+] <no text>  {MainToolbarQuickActions.Run}  
+          [+] <no text>  {MainToolbarQuickActions.GeneralLast}  
+
+##### MainToolbarLeft
+[+] Left  {MainToolbarLeft}  
+  goland-playground  {main.toolbar.Project}  
+  Dev Container Dashboard  {devcontainer.ui.dashboard.DevcontainerDashboardAction}   [hidden]
+  [+] VCS Group  {MainToolbarVCSGroup}  
+    Version Control  {main.toolbar.git.Branches}  
+    VCS Merge/Rebase Widget  {main.toolbar.git.MergeRebase}  
+  [+] General Actions  {MainToolbarGeneralActionsGroup}  
+    -----
+
+##### MainToolbarCenter
+[+] Center  {MainToolbarCenter}  
+  File Name Widget (when editor tabs are hidden or “Always show full path” is enabled)  {main.toolbar.Filename}   [hidden] [disabled]
+
+##### MainToolbarRight
+[+] Right  {MainToolbarRight}  
+  [+] <no text>  {ExecutionTargetsToolbarGroup}  
+    Targets  {ExecutionTargets}   [hidden] [disabled]
+  Run Widget  {NewUiRunWidget}  
+  Share Feedback  {EAPFeedbackToolbarAction}   [hidden] [disabled]
+  [+] CodeWithMe  {CodeWithMeToolbarGroupNewUi}  
+    [+] Code With Me Call Actions  {CWMToolbarCallActions}  
+      Audio and Calls  {CWMCallSplitButtonAction}   [hidden] [disabled]
+      Join Call  {JoinCallAction}   [hidden] [disabled]
+    <no text>  {CodeWithMeUsersActionOldUi}   [hidden] [disabled]
+    User Avatars  {CodeWithMeUsersAction}   [hidden] [disabled]
+    [+] Code With Me Popup  {CWMShowPopupActionGroup}  
+      Code With Me  {CWMHostShowPopupAction}  Ctrl+Shift+Y [hidden] [disabled]
+  JetBrains AI  {AIAssistantHubPopupAction}  
+  Search Everywhere  {SearchEverywhere}  
+  [+] IDE and Project Settings  {SettingsEntryPoint}  
+    Update 6 Plugins…  {}
+    Install Git 0.0.0  {UpdateAction} [hidden] [disabled]
+    [+] <no text>  {UpdateEntryPointGroup}  
+    -----
+    [+] <no text>  {SettingsEntryPointGroup}  
+      Run Anything  {RunAnything}  
+      -----
+      <no text>  {ShowSettings}  Ctrl+Alt+S
+      Go Settings…  {GoEditSettingsAction}  
+      Plugins…  {ShowPlugins}  
+      <no text>  {SettingsSyncSeparator}  
+      Backup and Sync  {SettingsSyncStatusAction}  
+      Actions on Save…  {GoEditActionsOnSaveAction}  
+      -----
+      Theme  {ChangeLaf}  
+      Keymap  {ChangeKeymap}  
+      View Mode  {ChangeView}  
+    -----
+    [+] Customize Main Toolbar  {CustomizeMainToolbarGroup}  
+      Customize Toolbar…  {CustomizeMainToolbarAction}  
+      ----- Add Action to Main Toolbar
+      [+] <no text>  {MainToolbarQuickActionsRaw}  
+        [+] <no text>  {MainToolbarQuickActions.General}  
+        [+] <no text>  {GitMainToolbarQuickActions}  
+          [+] <no text>  {MainToolbarQuickActions.VCS}  
+        [+] <no text>  {MainToolbarQuickActions.Run}  
+        [+] <no text>  {MainToolbarQuickActions.GeneralLast}  
+
+##### RunToolbarMainActionGroup
+[+] <no text>  {RunToolbarMainActionGroup}  
+  go build example.com/playground/cmd/check  {RedesignedRunConfigurationSelector}  
+  [+] <no text>  {compositeResumeGroup}  
+    Pause 'go build example.com/playground/cmd/check'  {ConfigurationXDebuggerResumeAction}   [hidden] [disabled]
+  [+] <no text>  {RunToolbarTopLevelExecutorActionGroup}  
+    Run 'go build example.com/playground/cmd/check'  {Run}  Shift+F10
+    Debug 'go build example.com/playground/cmd/check'  {Debug}  Shift+F9
+  Stop  {Stop}  Ctrl+F2 [disabled]
+  More Actions  {MoreRunToolbarActions}  
+  <no text>  {InactiveStopActionPlaceholder}   [disabled]
+
+##### NavBarToolBar
+[+] <no text>  {NavBarToolBar}  
+  [+] <no text>  {CodeWithMeNavbarGroup}  
+    [+] <no text>  {CWMTelephonyGroup}  
+      -----
+      <no text>  {CallLabelAction}  
+      Microphone  {EnableMicrophoneAction}  
+      Camera  {EnableCameraAction}  
+      Screen Sharing  {EnableScreenSharingAction}  
+      -----
+    <no text>  {CodeWithMeUsersActionOldUi}  
+    User Avatars  {CodeWithMeUsersAction}  
+    [+] Code With Me Popup  {CWMShowPopupActionGroup}  
+      Code With Me  {CWMHostShowPopupAction}  Ctrl+Shift+Y [hidden] [disabled]
+    -----
+  [+] Toolbar Run Actions  {ToolbarRunGroup}  
+    Select Run/Debug Configuration  {RunConfiguration}  
+    [+] Run/Debug  {RunnerActions}  
+      Run 'go build example.com/playground/cmd/check'  {Run}  Shift+F10
+      Debug 'go build example.com/playground/cmd/check'  {Debug}  Shift+F9
+      Run 'go build example.com/playground/cmd/check' with Coverage  {Coverage}  
+      Record and Debug 'go build example.com/playground/cmd/check'  {DlvRecordAndDebug}   [hidden] [disabled]
+      [+] Run with Profiler  {Profiler}  
+        Profile 'go build example.com/playground/cmd/check' with 'CPU Profiler'  {ExecutorAction} [disabled]
+        Profile 'go build example.com/playground/cmd/check' with 'Memory Profiler'  {ExecutorAction} [disabled]
+        Profile 'go build example.com/playground/cmd/check' with 'Blocking Profiler'  {ExecutorAction} [disabled]
+        Profile 'go build example.com/playground/cmd/check' with 'Mutex Profiler'  {ExecutorAction} [disabled]
+        Profile 'go build example.com/playground/cmd/check' with 'GoLand Profiler'  {ExecutorAction}
+    Stop  {Stop}  Ctrl+F2
+  -----
+  [+] <no text>  {NavBarVcsGroup}  
+    [+] <no text>  {VcsNavBarToolbarActions}  
+      VCS Label  {VcsToolbarLabelAction}  
+      Update Project  {Vcs.UpdateProject}  Ctrl+T
+      Commit…  {CheckinProject}  Ctrl+K
+      Commit…  {Git.Commit.Stage}  Ctrl+K
+      Toggle Commit UI…  {ChangesView.ToggleCommitUi}  Ctrl+K
+      Push…  {Vcs.Push}  Ctrl+Shift+K
+      Show History  {Vcs.ShowTabbedFileHistory}  
+      Rollback…  {ChangesView.Revert}  Ctrl+Alt+Z
+      -----
+  -----
+  [+] <no text>  {NavBarToolBarOthers}  
+  -----
+  <no text>  {AIAssistantHubPopupAction}  
+  Search Everywhere  {SearchEverywhere}  
+  [+] IDE and Project Settings  {SettingsEntryPoint}  
+
+actions dumped: 144
+

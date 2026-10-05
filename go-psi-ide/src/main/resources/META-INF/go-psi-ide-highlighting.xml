@@ -3,5 +3,7 @@
 <idea-plugin>
   <extensions defaultExtensionNs="com.intellij">
     <annotator language="Go" implementationClass="io.github.golangsupport.ide.annotator.GoSemanticHighlightingAnnotator"/>
+    <!-- struct tag parts and printf verbs inside string literals (GoLand parity G1) -->
+    <annotator language="Go" implementationClass="io.github.golangsupport.ide.annotator.GoStringContentAnnotator"/>
   </extensions>
 </idea-plugin>

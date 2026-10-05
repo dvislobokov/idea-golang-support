@@ -75,7 +75,7 @@ class GoIdentifierAnnotatorTest : BasePlatformTestCase() {
         settings.languageFeaturesSource = GoFeatureSource.GOPLS
         assertTrue(GoIdentifierAnnotator.coloursIdentifiers(project))
         val keys = annotatorKeys()
-        for (expected in listOf("GO_DIRECTIVE", "GO_PACKAGE", "GO_TYPE_DECLARATION", "GO_FIELD", "GO_BUILTIN_TYPE", "GO_FUNCTION_DECLARATION", "GO_BUILTIN_FUNCTION", "GO_FUNCTION_CALL", "GO_BUILTIN_CONSTANT")) {
+        for (expected in listOf("GO_COMMENT_KEYWORD", "GO_BUILD_TAG", "GO_PACKAGE", "GO_TYPE_DECLARATION", "GO_FIELD", "GO_BUILTIN_TYPE", "GO_FUNCTION_DECLARATION", "GO_BUILTIN_FUNCTION", "GO_FUNCTION_CALL", "GO_BUILTIN_CONSTANT")) {
             assertTrue("$expected in $keys", expected in keys)
         }
     }
@@ -85,9 +85,9 @@ class GoIdentifierAnnotatorTest : BasePlatformTestCase() {
         settings.languageServerEnabled = true
         settings.languageFeaturesSource = GoFeatureSource.NATIVE
         assertFalse(GoIdentifierAnnotator.coloursIdentifiers(project))
-        assertEquals(listOf("GO_DIRECTIVE"), annotatorKeys())
+        assertEquals(DIRECTIVE_KEYS, annotatorKeys())
         settings.languageServerEnabled = false // without the server whatever is built in is the source
-        assertEquals(listOf("GO_DIRECTIVE"), annotatorKeys())
+        assertEquals(DIRECTIVE_KEYS, annotatorKeys())
     }
 
     /** The whole pass without the server, the semantic annotator of go-psi-ide shut by its gate: the directive is the one colour left. */
@@ -98,6 +98,26 @@ class GoIdentifierAnnotatorTest : BasePlatformTestCase() {
         myFixture.configureByText("shop.go", code)
         val keys = myFixture.doHighlighting().filter { it.severity == HighlightSeverity.INFORMATION }
             .mapNotNull { it.forcedTextAttributesKey?.externalName?.takeIf { key -> key.startsWith("GO_") } }
-        assertEquals(listOf(GoSyntaxHighlighter.DIRECTIVE.externalName), keys)
+        assertEquals(DIRECTIVE_KEYS, keys)
+    }
+
+    /** GoLand's parts of a directive: the name a comment keyword, the arguments the directive, build expressions split up. */
+    fun testDirectiveParts() {
+        fun parts(comment: String) = GoIdentifierAnnotator.directiveRanges(comment).map { (range, key) -> "${range.substring(comment)} ${key.externalName}" }
+        assertEquals(
+            listOf("go:build GO_COMMENT_KEYWORD", "( GO_BUILD_PAREN", "linux GO_BUILD_TAG", "|| GO_BUILD_OPERATOR", "! GO_BUILD_OPERATOR",
+                "windows GO_BUILD_TAG", ") GO_BUILD_PAREN", "&& GO_BUILD_OPERATOR", "go1.21 GO_BUILD_TAG"),
+            parts("//go:build (linux || !windows) && go1.21"),
+        )
+        assertEquals(listOf("linux GO_BUILD_TAG", ", GO_BUILD_OPERATOR", "arm GO_BUILD_TAG", "! GO_BUILD_OPERATOR", "cgo GO_BUILD_TAG"), parts("// +build linux,arm !cgo"))
+        assertEquals(listOf("go:generate GO_COMMENT_KEYWORD", "stringer -type=Level GO_DIRECTIVE"), parts("//go:generate stringer -type=Level"))
+        assertEquals(listOf("go:embed GO_COMMENT_KEYWORD", "static/* GO_DIRECTIVE"), parts("//go:embed static/*"))
+        assertEquals(listOf("line GO_COMMENT_KEYWORD", "a.go:10 GO_DIRECTIVE"), parts("//line a.go:10"))
+        assertEquals(emptyList<String>(), parts("// go:build is not a directive with a space"))
+        assertEquals(emptyList<String>(), parts("// plain comment"))
+    }
+
+    private companion object {
+        val DIRECTIVE_KEYS = listOf("GO_COMMENT_KEYWORD", "GO_BUILD_TAG")
     }
 }

@@ -3,7 +3,9 @@ package io.github.golangsupport.ide.completion
 import com.intellij.codeInsight.completion.CompletionUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.extapi.psi.StubBasedPsiElementBase
 import io.github.golangsupport.lang.psi.*
+import io.github.golangsupport.lang.stubs.GoConstSpecStub
 import io.github.golangsupport.semantic.psi.GoPsiUtil
 import io.github.golangsupport.semantic.psi.GoPsiUtil.forClause
 import io.github.golangsupport.semantic.psi.GoPsiUtil.guard
@@ -92,7 +94,7 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
                     if (filter == Filter.TYPES && e !is GoTypeSpec) continue
                     val name = e.name
                     if (!accept(name)) continue
-                    out += declarationCandidate(e, name!!, GoScopeLevel.IMPORTED).also { it.typeText = pkg.name }
+                    out += declarationCandidate(e, name!!, GoScopeLevel.IMPORTED).also { it.typeText = pkg.name; it.typeSupplier = null }
                 }
                 continue
             }
@@ -234,6 +236,35 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
             "recover" to "() any",
         )
 
+        /** Longest value text shown in a constant's row; longer expressions are cut with `…`. */
+        private const val MAX_VALUE = 40
+
+        /**
+         * The expression of constant [def] as written (`10`, `iota`, `1 << iota`), whitespace collapsed; for a row without values the
+         * one of the row it repeats. Read from the stubs of the const specs, so the AST of another file is not loaded.
+         */
+        fun constValueText(def: GoConstDefinition): String? {
+            val spec = def.parent as? GoConstSpec ?: return null
+            val index = spec.constDefinitionList.indexOf(def)
+            val specs = (spec.parent as? GoConstDeclaration)?.constSpecList ?: listOf(spec)
+            var i = specs.indexOf(spec)
+            while (i >= 0) {
+                val values = valuesOf(specs[i])
+                if (values.isNotEmpty()) return values.getOrNull(index)?.let(::shorten)
+                if (specs[i].type != null) return null
+                i--
+            }
+            return null
+        }
+
+        private fun valuesOf(spec: GoConstSpec): List<String> =
+            ((spec as? StubBasedPsiElementBase<*>)?.greenStub as? GoConstSpecStub)?.values ?: spec.expressionList.map { it.text }
+
+        private fun shorten(text: String): String {
+            val flat = text.replace(Regex("\\s+"), " ")
+            return if (flat.length <= MAX_VALUE) flat else flat.take(MAX_VALUE - 1) + "…"
+        }
+
         fun declarationCandidate(e: GoNamedElement, name: String, level: Int, context: GoCompletionContext): GoCandidate {
             val semantics = context.semantics
             return when (e) {
@@ -250,7 +281,11 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
                 is GoConstDefinition -> {
                     val typed = (e.parent as? GoConstSpec)?.type != null
                     val type = if (typed || GoLookupElementFactory.astAvailable(e, context)) semantics.declarationType(e) else null
-                    GoCandidate(name, GoCandidateKind.CONSTANT, level, e, valueType = type, tailSupplier = type?.let { { " " + GoLookupElementFactory.typeText(it) } })
+                    // as GoLand shows them: `MaxItems = 10  untyped int`, `Info = iota  Level` (a repeated row shows the expression it repeats)
+                    GoCandidate(
+                        name, GoCandidateKind.CONSTANT, level, e, valueType = type,
+                        tailSupplier = { constValueText(e)?.let { " = $it" } }, typeSupplier = type?.let { { GoLookupElementFactory.typeText(it) } },
+                    )
                 }
                 is GoVarDefinition -> {
                     val typed = (e.parent as? GoVarSpec)?.type != null

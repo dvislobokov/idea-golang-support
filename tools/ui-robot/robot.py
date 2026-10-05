@@ -319,6 +319,12 @@ SANDBOX = "idea-golang-support"
 def check_sandbox():
     """Refuses to touch an IDE that is not a sandbox of this repository: another agent may have one on the same port."""
     path = (js("com.intellij.openapi.application.PathManager.getConfigPath()") or "").replace("\\", "/")
+    # A reference IDE (tools/ui-robot/goland/start-goland.ps1) names its own config dir, e.g. ROBOT_CONFIG=goland-robot/config
+    expected = os.environ.get("ROBOT_CONFIG")
+    if expected:
+        if expected not in path:
+            raise RobotError("robot: the IDE on %s is not the one with config %r (its configuration is in %r): wrong port?" % (BASE, expected, path))
+        return
     # `.intellijPlatform/sandbox/idea-golang-support/IU-*/config_runIdeForUiTests` of this checkout or of a worktree of it
     if SANDBOX not in path or "/sandbox/" not in path:
         raise RobotError("robot: the IDE on %s is not the sandbox of %s (its configuration is in %r): wrong port?" % (BASE, SANDBOX, path))

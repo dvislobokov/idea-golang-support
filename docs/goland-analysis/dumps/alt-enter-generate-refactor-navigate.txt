@@ -1,0 +1,697 @@
+######## ShowIntentionActions at «unused := 42» (internal/probeerr/broken.go)
+caret line 24: unused := 42
+
+== window HeavyWeightWindow 247x128
+  list MyList rows 3
+    Delete variable 'unused'
+    Rename to _
+    Convert to var declaration
+== window HeavyWeightWindow 300x28
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [unused := 42]
+
+######## ShowIntentionActions at «os.Remove("tmp")» (internal/probeerr/broken.go)
+caret line 25: os.Remove("tmp")
+== window HeavyWeightWindow 247x128
+  list MyList rows 3
+    Delete variable 'unused'
+    Rename to _
+    Convert to var declaration
+
+== window HeavyWeightWindow 363x152
+  list MyList rows 4
+    Handle error
+    Ignore explicitly
+    Do not report this method/function anymore
+    Introduce local variable
+== window HeavyWeightWindow 300x94
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [err := os.Remove("tmp")
+if err != nil {
+	return 0
+}]
+
+######## ShowIntentionActions at «"%d items» (internal/probeerr/broken.go)
+caret line 26: fmt.Printf("%d items\n", "many")
+== window HeavyWeightWindow 363x152
+  list MyList rows 4
+    Handle error
+    Ignore explicitly
+    Do not report this method/function anymore
+    Introduce local variable
+
+== window HeavyWeightWindow 540x224
+  list MyList rows 7
+    Inspection 'Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions' options
+    Add format string argument
+    Convert double-quoted string to raw string
+    Exclude string formatting function
+    Do not show hints for current method
+    Inject language or reference
+    Put arguments on separate lines
+== window HeavyWeightWindow 345x105
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [<html>
+  <head>
+    
+  </head>
+  <body>
+    Inspection 'Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions' 
+    has no quick-fixes for this problem. Click to edit inspection options, 
+    suppress the warning, or disable the inspection completely.
+  </body>
+</html>
+]
+
+######## ShowIntentionActions at «x = x» (internal/probeerr/broken.go)
+caret line 28: x = x
+== window HeavyWeightWindow 540x224
+  list MyList rows 7
+    Inspection 'Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions' options
+    Add format string argument
+    Convert double-quoted string to raw string
+    Exclude string formatting function
+    Do not show hints for current method
+    Inject language or reference
+    Put arguments on separate lines
+
+== window HeavyWeightWindow 540x224
+  list MyList rows 7
+    Inspection 'Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions' options
+    Add format string argument
+    Convert double-quoted string to raw string
+    Exclude string formatting function
+    Do not show hints for current method
+    Inject language or reference
+    Put arguments on separate lines
+
+######## ShowIntentionActions at «defer f.Close()» (internal/probeerr/broken.go)
+caret line 31: defer f.Close()
+== window HeavyWeightWindow 540x224
+  list MyList rows 7
+    Inspection 'Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions' options
+    Add format string argument
+    Convert double-quoted string to raw string
+    Exclude string formatting function
+    Do not show hints for current method
+    Inject language or reference
+    Put arguments on separate lines
+
+== window HeavyWeightWindow 302x71
+  list MyList rows 1
+    Inspection ''defer' in the loop' options
+== window HeavyWeightWindow 345x88
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [<html>
+  <head>
+    
+  </head>
+  <body>
+    Inspection ''defer' in the loop' has no quick-fixes for this problem. 
+    Click to edit inspection options, suppress the warning, or disable the 
+    inspection completely.
+  </body>
+</html>
+]
+
+######## ShowIntentionActions at «missing(items)» (internal/probeerr/broken.go)
+caret line 36: missing(items)
+== window HeavyWeightWindow 302x71
+  list MyList rows 1
+    Inspection ''defer' in the loop' options
+
+== window HeavyWeightWindow 276x176
+  list MyList rows 5
+    Create function 'missing'
+    Create variable 'missing'
+    Create global variable 'missing'
+    Create parameter 'missing'
+    Introduce local variable
+== window HeavyWeightWindow 336x72
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [func missing(items []string) {
+	
+}]
+
+######## ShowIntentionActions at «json:name» (internal/probeerr/broken.go)
+caret line 42: Name string `json:name`
+== window HeavyWeightWindow 276x176
+  list MyList rows 5
+    Create function 'missing'
+    Create variable 'missing'
+    Create global variable 'missing'
+    Create parameter 'missing'
+    Introduce local variable
+
+== window HeavyWeightWindow 356x191
+  list MyList rows 6
+    Add key to tags
+    Add parens to declaration
+    Convert raw string to double-quoted string
+    Generate constructor
+    Generate struct fields from JSON
+    Inject language or reference
+== window HeavyWeightWindow 544x50
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [Name string `json:name json:"name,omitempty"`
+Port int    `json:"port" json:"p" json:"port,omitempty"`]
+
+######## ShowIntentionActions at «"strings"» (internal/probeerr/broken.go)
+caret line 7: "strings"
+== window HeavyWeightWindow 356x191
+  list MyList rows 6
+    Add key to tags
+    Add parens to declaration
+    Convert raw string to double-quoted string
+    Generate constructor
+    Generate struct fields from JSON
+    Inject language or reference
+
+== window HeavyWeightWindow 356x176
+  list MyList rows 5
+    Import for side-effects
+    Optimize imports
+    Add import alias
+    Convert double-quoted string to raw string
+    Add dot import alias
+== window HeavyWeightWindow 300x28
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [_ "strings"]
+
+######## ShowIntentionActions at «if get() == nil» (internal/probeerr/broken.go)
+caret line 33: if get() == nil {
+== window HeavyWeightWindow 356x176
+  list MyList rows 5
+    Import for side-effects
+    Optimize imports
+    Add import alias
+    Convert double-quoted string to raw string
+    Add dot import alias
+
+== window HeavyWeightWindow 213x71
+  list MyList rows 1
+    Replace 'if' with 'switch'
+== window HeavyWeightWindow 300x50
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [switch {
+case get() == nil:]
+
+######## ShowIntentionActions at «return p» (internal/probeerr/broken.go)
+caret line 20: return p
+== window HeavyWeightWindow 213x71
+  list MyList rows 1
+    Replace 'if' with 'switch'
+
+== window HeavyWeightWindow 213x71
+  list MyList rows 1
+    Replace 'if' with 'switch'
+
+######## ShowIntentionActions at «type Circle struct» (internal/probe/analysis.go)
+caret line 51: type Circle struct {
+== window HeavyWeightWindow 213x71
+  list MyList rows 1
+    Replace 'if' with 'switch'
+
+== window HeavyWeightWindow 274x176
+  list MyList rows 5
+    Generate method
+    Implement interface… |      Ctrl+I
+    Add parens to declaration
+    Generate constructor
+    Go to Interfaces |      Ctrl+U
+== window HeavyWeightWindow 300x72
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [func (c Circle) name()  {
+	
+}]
+
+######## ShowIntentionActions at «type Shape interface» (internal/probe/analysis.go)
+caret line 36: type Shape interface {
+== window HeavyWeightWindow 274x176
+  list MyList rows 5
+    Generate method
+    Implement interface… |      Ctrl+I
+    Add parens to declaration
+    Generate constructor
+    Go to Interfaces |      Ctrl+U
+
+== window HeavyWeightWindow 408x128
+  list MyList rows 3
+    Add method to interface and all its implementations
+    Add parens to declaration
+    Go to Implementations |      Ctrl+Alt+B
+== window HeavyWeightWindow 300x28
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [newMethod()]
+
+######## ShowIntentionActions at «func (c Circle) Area» (internal/probe/analysis.go)
+caret line 57: func (c Circle) Area() float64 { return 3.14 * c.Radius * c.Radius }
+== window HeavyWeightWindow 408x128
+  list MyList rows 3
+    Add method to interface and all its implementations
+    Add parens to declaration
+    Go to Implementations |      Ctrl+Alt+B
+
+== window HeavyWeightWindow 290x104
+  list MyList rows 2
+    Add comment
+    Go to Method Specifications |      Ctrl+U
+== window HeavyWeightWindow 300x28
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [// Area ]
+
+######## ShowIntentionActions at «for _, s := range shapes» (internal/probe/analysis.go)
+caret line 189: for _, s := range shapes {
+== window HeavyWeightWindow 290x104
+  list MyList rows 2
+    Add comment
+    Go to Method Specifications |      Ctrl+U
+
+== window HeavyWeightWindow 290x104
+  list MyList rows 2
+    Add comment
+    Go to Method Specifications |      Ctrl+U
+
+######## ShowIntentionActions at «Circle{Radius: 1}» (internal/probe/analysis.go)
+caret line 188: shapes := []Shape{Circle{Radius: 1}, &Square{Side: 2}}
+== window HeavyWeightWindow 290x104
+  list MyList rows 2
+    Add comment
+    Go to Method Specifications |      Ctrl+U
+
+== window HeavyWeightWindow 259x95
+  list MyList rows 2
+    Convert to var declaration
+    Put elements on separate lines
+== window HeavyWeightWindow 552x28
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [var shapes = []Shape{Circle{Radius: 1}, &Square{Side: 2}}]
+
+######## ShowIntentionActions at «json:"radius» (internal/probe/analysis.go)
+caret line 53: Radius float64 `json:"radius,omitempty"`
+== window HeavyWeightWindow 259x95
+  list MyList rows 2
+    Convert to var declaration
+    Put elements on separate lines
+
+== window HeavyWeightWindow 356x239
+  list MyList rows 8
+    Add key to tags
+    Change field name style in tags
+    Update key value in tags
+    Add parens to declaration
+    Convert raw string to double-quoted string
+    Generate constructor
+    Generate struct fields from JSON
+    Inject language or reference
+== window HeavyWeightWindow 608x72
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [Base   `json:"base"`
+Radius float64 `json:"radius,omitempty" json:"radius,omitempty"`
+Label  string  `json:"label" yaml:"label" json:"label,omitempty"`]
+
+######## ShowIntentionActions at «fmt.Sprintf("%d %s» (internal/probe/analysis.go)
+caret line 177: msg := fmt.Sprintf("%d %s %v %q", total, stamp, re.MatchString(value), value)
+== window HeavyWeightWindow 356x239
+  list MyList rows 8
+    Add key to tags
+    Change field name style in tags
+    Update key value in tags
+    Add parens to declaration
+    Convert raw string to double-quoted string
+    Generate constructor
+    Generate struct fields from JSON
+    Inject language or reference
+
+== window HeavyWeightWindow 336x215
+  list MyList rows 7
+    Add format string argument
+    Convert double-quoted string to raw string
+    Convert to var declaration
+    Exclude string formatting function
+    Do not show hints for current method
+    Inject language or reference
+    Put arguments on separate lines
+== window HeavyWeightWindow 345x105
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [<html>
+  <head>
+    
+  </head>
+  <body>
+    Generates a formatting verb for an expression. You need to enter the 
+    expression in the pop-up. Then intention action inserts the formatting 
+    verb into a format string and passes the expression as an argument for 
+    this formatting verb.
+  </body>
+</html>
+]
+
+######## ShowIntentionActions at «"regexp"» (internal/probe/analysis.go)
+caret line 9: "regexp"
+== window HeavyWeightWindow 336x215
+  list MyList rows 7
+    Add format string argument
+    Convert double-quoted string to raw string
+    Convert to var declaration
+    Exclude string formatting function
+    Do not show hints for current method
+    Inject language or reference
+    Put arguments on separate lines
+
+== window HeavyWeightWindow 336x119
+  list MyList rows 3
+    Add import alias
+    Convert double-quoted string to raw string
+    Add dot import alias
+== window HeavyWeightWindow 345x37
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [<html>
+  <head>
+    
+  </head>
+  <body>
+    Adds an alias to the selected import statement.
+  </body>
+</html>
+<!--
+  ~ Copyright 2013-2016 Sergey Ignatov, Alexander Zolotov, Florin Patan
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+]
+
+######## ShowIntentionActions at «value, err := load(value» (internal/probe/analysis.go)
+caret line 167: value, err := load(value + "x")
+== window HeavyWeightWindow 336x119
+  list MyList rows 3
+    Add import alias
+    Convert double-quoted string to raw string
+    Add dot import alias
+
+== window HeavyWeightWindow 298x128
+  list MyList rows 3
+    Navigate to shadowed declaration
+    Rename variable
+    Convert to var declaration
+
+######## ShowIntentionActions at «if value != ""» (internal/probe/analysis.go)
+caret line 166: if value != "" {
+== window HeavyWeightWindow 298x128
+  list MyList rows 3
+    Navigate to shadowed declaration
+    Rename variable
+    Convert to var declaration
+
+== window HeavyWeightWindow 213x71
+  list MyList rows 1
+    Replace 'if' with 'switch'
+== window HeavyWeightWindow 300x50
+  texts: [<html>
+  <head>
+    
+  </head>
+  <body>
+    Loading&#8230;
+  </body>
+</html>
+] | [switch {
+case value != "":]
+
+######## Generate at «type Holder struct» (internal/probe/analysis.go)
+caret line 220: type Holder struct {
+== window HeavyWeightWindow 213x71
+  list MyList rows 1
+    Replace 'if' with 'switch'
+
+== window HeavyWeightWindow 222x200
+  list MyList rows 6
+    Constructor
+    Method
+    Implement Methods… |      Ctrl+I
+    Tests for file
+    Tests for package
+    Copyright
+
+######## Generate at «func Factorial» (internal/probe/analysis.go)
+caret line 99: func Factorial(n int) int {
+== window HeavyWeightWindow 222x200
+  list MyList rows 6
+    Constructor
+    Method
+    Implement Methods… |      Ctrl+I
+    Tests for file
+    Tests for package
+    Copyright
+
+== window HeavyWeightWindow 222x167
+  list MyList rows 5
+    Implement Methods… |      Ctrl+I
+    Test for function
+    Tests for file
+    Tests for package
+    Copyright
+
+######## Generate at «func TestSum» (internal/probe/analysis_test.go)
+caret line 16: func TestSum(t *testing.T) {
+== window HeavyWeightWindow 222x167
+  list MyList rows 5
+    Implement Methods… |      Ctrl+I
+    Test for function
+    Tests for file
+    Tests for package
+    Copyright
+
+== window HeavyWeightWindow 222x119
+  list MyList rows 3
+    Implement Methods… |      Ctrl+I
+    Tests for package
+    Copyright
+
+######## Refactorings.QuickListPopupAction at «func load(» (internal/probe/analysis.go)
+caret line 153: func load(name string) (string, error) {
+== window HeavyWeightWindow 222x119
+  list MyList rows 3
+    Implement Methods… |      Ctrl+I
+    Tests for package
+    Copyright
+
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+
+######## GotoImplementation at «type Shape interface» (internal/probe/analysis.go)
+caret line 36: type Shape interface {
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+== window HeavyWeightWindow 542x95
+  list JBList rows 2
+    Circle |  ( | in example.com/playground/internal/probe/analysis.go | )
+    Square |  ( | in example.com/playground/internal/probe/analysis.go | )
+
+######## GotoSuperMethod at «func (c Circle) Area» (internal/probe/analysis.go)
+caret line 57: func (c Circle) Area() float64 { return 3.14 * c.Radius * c.Radius }
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+
+######## GotoRelated at «func (c Circle) Area» (internal/probe/analysis.go)
+caret line 57: func (c Circle) Area() float64 { return 3.14 * c.Radius * c.Radius }
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+
+######## FileStructurePopup at «type Circle struct» (internal/probe/analysis.go)
+caret line 51: type Circle struct {
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+
+== window HeavyWeightWindow 289x263
+  list MyList rows 7
+    Rename… |      Shift+F6 | 1
+    Change Signature… |      Ctrl+F6 | 2
+    Introduce Variable… |      Ctrl+Alt+V | 3
+    Introduce Constant… |      Ctrl+Alt+C | 4
+    Inline Function/Method |      Ctrl+Alt+N | 5
+    Move… |      F6 | 6
+    Copy File… |      F5 | 7
+== window HeavyWeightWindow 540x539
+  texts: analysis.go
+

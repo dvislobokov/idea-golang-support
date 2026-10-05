@@ -62,7 +62,7 @@ class GoPrintfCall(val call: GoCallExpr, val name: String, val kind: GoPrintKind
  * functions and methods of the call's own package whose last two parameters are `(format string, args ...any)` (or the last one
  * is `args ...any` for Print-like ones) and whose body forwards `format, args...` to a printf-like function. Each body is
  * scanned once ([GoBodyCache], so an edit elsewhere keeps the result); the chain of wrappers is followed at most [MAX_DEPTH]
- * levels, one cached step per body.
+ * levels, one cached step per body. The user's [GoPrintfFunctions] come first: an excluded name is never printf-like, a marked one is.
  */
 object GoPrintfCalls {
     const val MAX_DEPTH = 3
@@ -104,6 +104,28 @@ object GoPrintfCalls {
         return GoPrintfCall(call, name, kind, formatIndex, firstArg)
     }
 
+    /** vet's full name of the function or method [call] invokes (what [GoPrintfFunctions] stores), or null. */
+    fun nameOf(call: GoCallExpr): String? {
+        val callee = calleeOf(call, GoSemanticService.getInstance(call.project)) ?: return null
+        return fullName(callee, callee.containingFile as? GoFile ?: return null)
+    }
+
+    /** Whether [call] is not printf-like but could be marked so: its callee's last parameter is `...any`. */
+    fun markable(call: GoCallExpr): Boolean {
+        if (of(call) != null) return false
+        val service = GoSemanticService.getInstance(call.project)
+        val callee = calleeOf(call, service) ?: return false
+        return markedKind(callee, service) != null
+    }
+
+    /** The kind of a function the user marked as printf-like: Printf-like after a `string` parameter, Print-like otherwise; null without `...any`. */
+    private fun markedKind(callee: GoNamedElement, service: GoSemanticService): GoPrintKind? {
+        val signature = service.declarationType(callee) as? GoSignatureType ?: return null
+        if (!signature.variadic || signature.params.isEmpty() || !isAnySlice(signature.params.last().type)) return null
+        val format = signature.params.getOrNull(signature.params.size - 2)?.type as? GoBasicType
+        return if (format?.kind == GoBasicKind.STRING) GoPrintKind.PRINTF else GoPrintKind.PRINT
+    }
+
     /** The declaration a call invokes when its callee is a (qualified) name: a function, a method or an interface method. */
     private fun calleeOf(call: GoCallExpr, service: GoSemanticService): GoNamedElement? {
         var e: GoExpression? = call.expression
@@ -120,7 +142,10 @@ object GoPrintfCalls {
     private fun kindOf(callee: GoNamedElement, from: GoFile, service: GoSemanticService, depth: Int): Pair<String, GoPrintKind>? {
         val file = callee.containingFile as? GoFile ?: return null
         val name = fullName(callee, file) ?: return null
+        val user = GoPrintfFunctions.getInstance()
+        if (user.isExcluded(name)) return null
         KNOWN[name]?.let { return name to it }
+        if (user.isExtra(name)) return markedKind(callee, service)?.let { name to it }
         if (depth >= MAX_DEPTH || callee !is GoFunctionOrMethodDeclaration) return null
         // Wrappers are looked for in the package of the call only: their bodies are read from the PSI.
         if (GoPsiUtil.originalVirtualFile(file).parent != GoPsiUtil.originalVirtualFile(from).parent) return null

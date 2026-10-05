@@ -13,18 +13,27 @@ import io.github.golangsupport.lang.GoColors
 class GoSemanticHighlightingTest : GoSemanticIdeTestBase() {
     override val testDataSubdir: String = "highlighting"
 
-    fun testIdentifierKinds() {
-        myFixture.configureByFile("semantic.go")
+    fun testIdentifierKinds() = checkGolden("semantic")
+
+    /**
+     * The keys of GoLand (`docs/goland-analysis/dumps/color-keys-go.txt`): exported / local declarations and calls, struct / interface
+     * types, receiver apart from parameters, scope and reassigned-in-`:=` variables, calls of func-valued variables and fields, `nil`,
+     * doc comment references, and the string contents (tag parts, printf verbs, escapes) of [GoStringContentAnnotator].
+     */
+    fun testGoLandKeys() = checkGolden("goland")
+
+    private fun checkGolden(name: String) {
+        myFixture.configureByFile("$name.go")
         val document = myFixture.editor.document
         val infos = myFixture.doHighlighting()
             .filter { it.severity == HighlightSeverity.INFORMATION && it.forcedTextAttributesKey?.externalName?.startsWith("GO_") == true }
-            .sortedBy { it.startOffset }
+            .sortedWith(compareBy({ it.startOffset }, { it.endOffset }, { it.forcedTextAttributesKey!!.externalName }))
         val actual = infos.joinToString("\n") { info ->
             val line = document.getLineNumber(info.startOffset)
             val column = info.startOffset - document.getLineStartOffset(line)
             "${line + 1}:${column + 1} ${document.charsSequence.subSequence(info.startOffset, info.endOffset)} ${info.forcedTextAttributesKey!!.externalName}"
         }
-        assertGolden("semantic.txt", actual)
+        assertGolden("$name.txt", actual)
         // the very key objects of the palette, not look-alikes with the same external name
         val palette = GoColors::class.java.declaredFields.filter { it.type == TextAttributesKey::class.java }.map { it.isAccessible = true; it.get(null) }.toSet()
         for (info in infos) assertTrue(info.forcedTextAttributesKey!!.externalName, info.forcedTextAttributesKey in palette)

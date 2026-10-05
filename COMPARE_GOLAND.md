@@ -56,6 +56,7 @@
 | Возможности gopls | зонд, gopls v0.23.0, ответ `initialize` и список команд | замер |
 | Возможности LSP-клиента платформы | классы `intellij.platform.lsp.jar` из IDEA 2026.1.4 | замер наличия; поведение с нашими файлами не проверено |
 | Возможности GoLand | справка и блог JetBrains (ссылки в разделе 11) | см. оговорки ниже |
+| GoLand вживую | `docs/goland-analysis` — GoLand 2026.2.3 под UI-роботом: меню, настройки, подсветка, completion, набор | замер (сверка — раздел 12) |
 | Слабые места GoLand | трекер JetBrains, Hacker News | мнения пользователей, не замеры |
 
 Оговорки по GoLand. Страницы «What's New» 2026.1 и 2026.2 не читаются без браузера — содержание взято из постов блога. Оглавление справки
@@ -539,3 +540,20 @@ GoLand, справка (https://www.jetbrains.com/help/go/):
 - delve — https://github.com/go-delve/delve/blob/master/Documentation/cli/README.md
 - Отзывы: https://news.ycombinator.com/item?id=48185188 , https://news.ycombinator.com/item?id=29378676 ,
   задачи GO-20036, GO-19226, GO-20037, GO-20470, GO-19041, GO-7603, GO-5016 на https://youtrack.jetbrains.com
+
+## 12. Сверка с живым GoLand (2026-10-05)
+
+GoLand 2026.2.3 снят UI-роботом; подробности, дампы и таблица разрывов с ценами — `docs/goland-analysis/README.md`. Что уточнилось:
+- Инспекций у GoLand **129 в 12 группах**, а не 123 в 9. Новые группы: **Go fix** (26 правил modernize, плюс пакетное Refactor | Update Syntax…)
+  и Go modules (7).
+- Live templates — **29** (18 для Go, 2 тега, 9 Go Template), а не около 40. У нас 41.
+- Postfix — 50 шаблонов, 38 разных ключей. Имена выводятся из выражения (`.var` → `area := c.Area()`, `.forr` → `name` из `names`).
+- Цветовых ключей Go — 64: экспортируемое и локальное отдельно, получатель, затенение, переменная области, переприсваивание в `:=`,
+  ключ / значение тега, глаголы `Printf`.
+- Сворачивание однострочных `if err != nil { return … }`, `case` и коротких функций включено по умолчанию.
+- Code vision: usages и implementations — в конце строки; над каждой структурой — линза «Implement interface».
+- В completion литерала — пункты «Fill all fields… / Fill selected fields…»; имя тега `json` — в 4 стилях; completion глаголов `Printf` у GoLand нет.
+- Подтверждены: гаттер Recursive call, инъекция Bash в `//go:generate`, RegExp, раскладка времени.
+- Устарело в разделе 5: «группировки использований по чтению и записи нет» — у нас есть `GoReadWriteAccessDetector`.
+
+Колонка «У нас» в таблице разрывов заполнена по коду и документам; те же пробы на песочнице плагина не прогонялись.

@@ -1,5 +1,6 @@
 package io.github.golangsupport.ide.codevision
 
+import com.intellij.codeInsight.codeVision.CodeVisionAnchorKind
 import com.intellij.codeInsight.hints.codeVision.DaemonBoundCodeVisionProvider
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
@@ -110,6 +111,92 @@ class GoCodeVisionTest : GoSemanticIdeTestBase() {
         myFixture.configureByText("shapes.go", shapes)
         assertEmpty(entries(usages()))
         assertEmpty(entries(implementations()))
+    }
+
+    /** `line: text` per entry, the line of the range start trimmed: the action lenses anchor at the `type` keyword of the declaration. */
+    private fun lines(provider: DaemonBoundCodeVisionProvider): List<String> {
+        val document = myFixture.editor.document
+        return provider.computeForEditor(myFixture.editor, myFixture.file).map { (range, entry) ->
+            val line = document.getLineNumber(range.startOffset)
+            val text = document.getText(com.intellij.openapi.util.TextRange(document.getLineStartOffset(line), document.getLineEndOffset(line))).trim()
+            "$text: ${(entry as com.intellij.codeInsight.codeVision.ui.model.ClickableTextCodeVisionEntry).text}"
+        }
+    }
+
+    private val types = """
+        package p
+
+        // Level is a named basic type: GoLand offers Implement interface on it too.
+        type Level int
+
+        type Alias = Level
+
+        type (
+            Item   struct{ N int }
+            Priced interface{ Total() int }
+        )
+
+        type (
+            Reader interface{ Read() }
+        )
+
+        type Set[K comparable] struct{ m map[K]bool }
+
+        // Shape has no implementation.
+        type Shape interface{ Area() float64 }
+    """.trimIndent()
+
+    fun testImplementInterfaceAboveEveryNonInterfaceTypeDeclaration() {
+        myFixture.configureByText("types.go", types)
+        assertEquals(
+            listOf("type Level int: Implement interface", "type (: Implement interface", "type Set[K comparable] struct{ m map[K]bool }: Implement interface"),
+            lines(GoImplementInterfaceCodeVisionProvider()),
+        )
+        myFixture.configureByText("shapes.go", shapes)
+        assertEquals(
+            listOf("type Circle struct{ R float64 }: Implement interface", "type Square struct{ S float64 }: Implement interface", "type Point struct{ X, Y int }: Implement interface"),
+            lines(GoImplementInterfaceCodeVisionProvider()),
+        )
+    }
+
+    fun testAddMethodOnlyAboveInterfacesWithImplementations() {
+        myFixture.configureByText("types.go", types)
+        assertEmpty(lines(GoAddInterfaceMethodCodeVisionProvider()))
+        myFixture.configureByText("shapes.go", shapes + "\n\ntype Named interface{ Name() string; Title() string }\n\ntype Generic[T any] interface{ Area() float64 }\n")
+        assertEquals(listOf("type Shape interface {: Add method"), lines(GoAddInterfaceMethodCodeVisionProvider()))
+    }
+
+    fun testActionLensesAreGated() {
+        var closed = GoIdeFeature.RENAME
+        ApplicationManager.getApplication().replaceService(GoIdeFeatureGate::class.java, object : GoIdeFeatureGate {
+            override fun enabled(feature: GoIdeFeature, project: Project): Boolean = feature != closed
+        }, testRootDisposable)
+        myFixture.configureByText("shapes.go", shapes)
+        assertEmpty(lines(GoAddInterfaceMethodCodeVisionProvider()))
+        assertEquals(3, lines(GoImplementInterfaceCodeVisionProvider()).size)
+        closed = GoIdeFeature.IMPLEMENTATION_MARKERS
+        assertEmpty(lines(GoAddInterfaceMethodCodeVisionProvider()))
+        assertEmpty(lines(GoImplementInterfaceCodeVisionProvider()))
+    }
+
+    /**
+     * Where a hint goes is the platform's to decide: `CodeVisionHost.getAnchorForProvider` takes the position set for the provider's group in
+     * Settings | Editor | Inlay Hints | Code vision, else the default position (`CodeVisionSettings.defaultPosition`, the product's
+     * `CodeVisionSettingsDefaults`: line end in GoLand, top in IDEA). Usages and implementations stay [CodeVisionAnchorKind.Default] in the
+     * platform's groups, so both settings govern them; the action lenses go above the line, in groups of their own with names in the settings.
+     */
+    fun testPositionsAndGroups() {
+        assertEquals(CodeVisionAnchorKind.Default, usages().defaultAnchor)
+        assertEquals(CodeVisionAnchorKind.Default, implementations().defaultAnchor)
+        assertEquals(listOf("references", "inheritors"), listOf(usages().groupId, implementations().groupId))
+        val implement = GoImplementInterfaceCodeVisionProvider()
+        val addMethod = GoAddInterfaceMethodCodeVisionProvider()
+        assertEquals(CodeVisionAnchorKind.Top, implement.defaultAnchor)
+        assertEquals(CodeVisionAnchorKind.Top, addMethod.defaultAnchor)
+        assertEquals(implement.id, GoImplementInterfaceCodeVisionSettings().groupId)
+        assertEquals(addMethod.id, GoAddInterfaceMethodCodeVisionSettings().groupId)
+        assertEquals("Implement interface", GoImplementInterfaceCodeVisionSettings().groupName)
+        assertEquals("Add method to interface and all its implementations", GoAddInterfaceMethodCodeVisionSettings().groupName)
     }
 
     /** Counting implementations works from stubs: the file declaring them keeps its AST unloaded. */

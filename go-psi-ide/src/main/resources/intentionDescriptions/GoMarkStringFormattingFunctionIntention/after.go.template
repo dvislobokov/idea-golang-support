@@ -1,0 +1,1 @@
+report("<spot>%d</spot> items", "many") // checked like fmt.Printf

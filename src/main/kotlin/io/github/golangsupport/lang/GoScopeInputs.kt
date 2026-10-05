@@ -95,6 +95,9 @@ object GoScopeInputs {
         return result
     }
 
+    /** The names of the variables and parameters in scope at [offset] around [place] (postfix templates make a new name unique against them). */
+    fun visibleNames(place: PsiElement, offset: Int): List<String> = visible(place, offset).mapNotNull { it.name }
+
     /** The variables and parameters declared before [offset] in the scopes around [place], innermost first: the walk of `GoScopeCandidates.locals`. */
     private fun visible(place: PsiElement, offset: Int): List<GoNamedElement> {
         val result = ArrayList<GoNamedElement>()

@@ -48,6 +48,9 @@ class GoInlayHintsTest : GoSemanticIdeTestBase() {
         })
     }
 
+    private val withReturns = mapOf(GoParameterNameHintsProvider.RETURN to true)
+
+    /** Hints at literal arguments only, as GoLand shows them (docs/goland-analysis/dumps/highlight-*.txt, inline inlays). */
     fun testParameterNames() = doTest("""
         package p
 
@@ -58,34 +61,133 @@ class GoInlayHintsTest : GoSemanticIdeTestBase() {
         func log(format string, args ...any)          {}
         func pair() (string, int)                     { return "", 0 }
         func two(a string, b int)                     {}
+        func sum(xs []int)                            {}
+        func sorted(names []string)                   {}
 
         type user struct{ Name string }
 
         func use(u user, userName string, times int) {
         	greet(/*<# name: #>*/"a", /*<# times: #>*/3, /*<# loud: #>*/true)
         	greet(u.Name, times, /*<# loud: #>*/false)
-        	greet(userName, /*<# times: #>*/1+2, /*<# loud: #>*/len("x") > 0)
+        	greet(userName, 1+2, len("x") > 0)
         	SetName("x")
-        	_ = lower("X")
+        	_ = lower(/*<# s: #>*/"X")
         	wait(/*<# seconds: #>*/5)
+        	wait(/*<# seconds: #>*/-1)
+        	wait(times)
         	log(/*<# format: #>*/"%d %d", /*<# args...: #>*/1, 2)
+        	log(/*<# format: #>*/"%d", times)
         	two(pair())
+        	sum([]int{1, 2})
+        	sorted(/*<# names: #>*/nil)
         	println("builtin")
         }
-    """, GoParameterNameHintsProvider())
+    """, GoParameterNameHintsProvider(), withReturns)
 
     fun testParameterLabelRules() {
-        assertEquals("name:", GoInlayHints.parameterLabel("name", "\"x\"", "greet", 3, variadic = false))
-        assertNull(GoInlayHints.parameterLabel("name", "name", "greet", 3, variadic = false))
-        assertNull(GoInlayHints.parameterLabel("name", "u.Name", "greet", 3, variadic = false))
-        assertNull(GoInlayHints.parameterLabel("name", "userName", "greet", 3, variadic = false))
-        assertNull(GoInlayHints.parameterLabel("ctx", "reqCtx", "do", 2, variadic = false))
-        assertEquals("id:", GoInlayHints.parameterLabel("id", "valid", "find", 2, variadic = false))
-        assertNull(GoInlayHints.parameterLabel("name", "\"x\"", "SetName", 1, variadic = false))
-        assertNull(GoInlayHints.parameterLabel("s", "\"X\"", "ToLower", 1, variadic = false))
-        assertNull(GoInlayHints.parameterLabel("_", "1", "f", 2, variadic = false))
-        assertNull(GoInlayHints.parameterLabel(null, "1", "f", 2, variadic = false))
-        assertEquals("args...:", GoInlayHints.parameterLabel("args", "1", "log", 2, variadic = true))
+        assertEquals("name:", GoInlayHints.parameterLabel("name", "greet", 3, variadic = false))
+        assertEquals("id:", GoInlayHints.parameterLabel("id", "find", 2, variadic = false))
+        assertNull(GoInlayHints.parameterLabel("name", "SetName", 1, variadic = false))
+        assertEquals("s:", GoInlayHints.parameterLabel("s", "ToLower", 1, variadic = false))
+        assertEquals("n:", GoInlayHints.parameterLabel("n", "produce", 1, variadic = false))
+        assertEquals("text:", GoInlayHints.parameterLabel("text", "New", 1, variadic = false))
+        assertEquals("a...:", GoInlayHints.parameterLabel("a", "Println", 1, variadic = true))
+        assertEquals("args...:", GoInlayHints.parameterLabel("args", "Args", 1, variadic = true))
+        assertNull(GoInlayHints.parameterLabel("_", "f", 2, variadic = false))
+        assertNull(GoInlayHints.parameterLabel(null, "f", 2, variadic = false))
+        assertEquals("args...:", GoInlayHints.parameterLabel("args", "log", 2, variadic = true))
+        assertEquals("err:", GoInlayHints.resultLabel("err"))
+        assertNull(GoInlayHints.resultLabel("_"))
+        assertNull(GoInlayHints.resultLabel(null))
+    }
+
+    /**
+     * The calls of the GoLand probe (tools/ui-robot/goland/probe, cmd/check, store/order.go, probeerr/broken.go) with the hints GoLand
+     * showed at them: `format:` / `text:` / `layout:` / `str:` / `n:` / `target:` / `name:` / variadic `a...:` at literals, nothing at
+     * identifiers, selectors, calls, composite and function literals.
+     */
+    fun testParameterNamesAsInTheGoLandProbe() = doTest("""
+        package p
+
+        import (
+        	"errors"
+        	"fmt"
+        	"os"
+        	"regexp"
+        	"time"
+        )
+
+        var ErrNotFound = errors.New(/*<# text: #>*/"probe: not found")
+
+        type Base struct{ ID int }
+
+        func (b Base) Describe() string { return fmt.Sprintf(/*<# format: #>*/"#%d", b.ID) }
+
+        func Factorial(n int) int { return n }
+
+        func produce(n int) <-chan int { return nil }
+
+        func find(grid [][]int, target int) (int, int, error) { return 0, 0, nil }
+
+        func Sum(xs []int) int { return 0 }
+
+        func classify(x any) string { return "" }
+
+        func fits(title string, lines int, verbose bool) string { return title }
+
+        func load(name string) (string, error) { return name, nil }
+
+        func Analysis(name string, timeout time.Duration, value string, total int, it string, items []string) {
+        	_ = fmt.Errorf(/*<# format: #>*/"load %s: %w", name, ErrNotFound)
+        	re := regexp.MustCompile(/*<# str: #>*/`^[a-z]+\d{2,}$`)
+        	stamp := time.Now().Format(/*<# layout: #>*/"2006-01-02 15:04:05")
+        	_ = fmt.Sprintf(/*<# format: #>*/"%d %s %v %q", total, stamp, re.MatchString(value), value)
+        	n := <-produce(/*<# n: #>*/3)
+        	_ = fmt.Sprint(n)
+        	_ = fmt.Sprint(Factorial, Factorial(/*<# n: #>*/3), Sum([]int{1, 2}), classify(Base{}))
+        	_, _, _ = find([][]int{{1}}, /*<# target: #>*/1)
+        	_ = fits(/*<# title: #>*/"check", /*<# lines: #>*/1, /*<# verbose: #>*/false)
+        	_, _ = load(/*<# name: #>*/"go.mod")
+        	_ = os.Remove(/*<# name: #>*/"tmp")
+        	fmt.Printf(/*<# format: #>*/"%d items\n", /*<# a...: #>*/"many")
+        	f, _ := os.Open(it)
+        	_ = f
+        	fmt.Println(/*<# a...: #>*/"unreachable")
+        	_, _ = load(name)
+        	_ = items
+        }
+    """, GoParameterNameHintsProvider(), withReturns)
+
+    fun testReturnParameters() {
+        val text = """
+            package p
+
+            func named() (n int, err error) {
+            	if n > 0 {
+            		return /*<# n: #>*/0, /*<# err: #>*/nil
+            	}
+            	return n, err
+            }
+
+            func unnamed() (int, error) { return 0, nil }
+
+            func tuple() (n int, err error) { return named() }
+
+            func blank() (_ int, err error) { return 0, /*<# err: #>*/nil }
+
+            func grouped() (a, b string) { return /*<# a: #>*/"x", /*<# b: #>*/"y" }
+
+            type T struct{}
+
+            func (T) ok() (ok bool) { return /*<# ok: #>*/true }
+
+            func literal() {
+            	f := func() (msg string) { return /*<# msg: #>*/"x" }
+            	_ = f
+            }
+        """
+        doTest(text, GoParameterNameHintsProvider(), withReturns)
+        doTest(InlayDumpUtil.removeInlays(text.trimIndent()), GoParameterNameHintsProvider(), mapOf(GoParameterNameHintsProvider.RETURN to false))
     }
 
     fun testLiteralFieldNames() = doTest("""
@@ -277,7 +379,7 @@ class GoInlayHintsTest : GoSemanticIdeTestBase() {
             	_ = n
             }
         """
-        doTest(text, GoParameterNameHintsProvider())
+        doTest(text, GoParameterNameHintsProvider(), withReturns)
         doTest(text, GoTypeHintsProvider(), allTypes)
         doTest(text, GoConstantValueHintsProvider())
         doTest("""
@@ -317,7 +419,7 @@ class GoInlayHintsTest : GoSemanticIdeTestBase() {
             	c, err := Dial(/*<# address: #>*/"localhost")
             	_, _ = c, err
             }
-        """, GoParameterNameHintsProvider())
+        """, GoParameterNameHintsProvider(), withReturns)
         assertNull(other.treeElement)
     }
 }

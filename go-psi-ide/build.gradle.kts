@@ -36,6 +36,9 @@ dependencies {
         // injection: SQL into Go strings (go-psi-ide-injection-sql.xml; an optional dependency of the host on the Database plugin). Only
         // for the tests: the code finds SQL by id, and IntelliJ IDEA Community has no Database plugin.
         if (ideBundles(localIde?.takeIf { file(it).exists() }, "com.intellij.database")) bundledPlugin("com.intellij.database")
+        // injection: Shell Script into //go:generate (go-psi-ide-injection-sh.xml; an optional dependency of the host). Only for the tests:
+        // the code finds the language by id.
+        if (ideBundles(localIde?.takeIf { file(it).exists() }, "com.jetbrains.sh")) bundledPlugin("com.jetbrains.sh")
         testFramework(TestFrameworkType.Platform)
     }
     testImplementation(libs.junit)

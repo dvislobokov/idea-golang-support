@@ -13,6 +13,7 @@ import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
@@ -82,12 +83,14 @@ class GoSyntaxHighlighter : SyntaxHighlighterBase() {
             put(GoTypes.RBRACE, BRACES)
             put(GoTypes.LPAREN, PARENTHESES)
             put(GoTypes.RPAREN, PARENTHESES)
-            put(GoTypes.LBRACK, BRACKETS)
-            put(GoTypes.RBRACK, BRACKETS)
+            put(GoTypes.LBRACK, GoColors.BRACKET)
+            put(GoTypes.RBRACK, GoColors.BRACKET)
+            put(GoTypes.COLON, GoColors.COLON)
+            put(GoTypes.IDENTIFIER, GoColors.IDENTIFIER)
             put(GoTypes.SEMICOLON, SEMICOLON)
             put(GoTypes.COMMA, COMMA)
             put(GoTypes.PERIOD, DOT)
-            put(TokenType.BAD_CHARACTER, BAD_CHARACTER)
+            put(TokenType.BAD_CHARACTER, GoColors.BAD_TOKEN)
         }
     }
 }
@@ -139,15 +142,19 @@ class GoSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
  * no token of their own: `//go:build` is a line comment). No resolve here: a shadowed `len` is still coloured as the builtin. The semantic
  * tokens of gopls, where it runs, are laid over this. With the Built-in source of the semantic colours the identifiers are left to the
  * semantic annotator of go-psi-ide, which colours them by resolve (MIGRATION.md step 8d); the directives are coloured here in every mode,
- * no other source knows them.
+ * no other source knows them: the name as a comment keyword, the build expression by parts ([directiveRanges]).
  */
 class GoIdentifierAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        val key = when {
-            element is PsiComment -> GoSyntaxHighlighter.DIRECTIVE.takeIf { isDirective(element.text) }
-            element.elementType == GoTypes.IDENTIFIER -> if (coloursIdentifiers(element.project)) classify(element) else null
-            else -> null
-        } ?: return
+        if (element is PsiComment) {
+            val start = element.textRange.startOffset
+            for ((range, key) in directiveRanges(element.text)) {
+                holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(range.shiftRight(start)).textAttributes(key).create()
+            }
+            return
+        }
+        if (element.elementType != GoTypes.IDENTIFIER || !coloursIdentifiers(element.project)) return
+        val key = classify(element) ?: return
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(element).textAttributes(key).create()
     }
 
@@ -184,6 +191,47 @@ class GoIdentifierAnnotator : Annotator {
         fun isDirective(comment: String): Boolean = comment.startsWith("//go:") || comment.startsWith("//line ") || comment.startsWith("//export ")
 
         /**
+         * The parts of a directive comment, as GoLand colours them: the name (`go:generate`, `line`, `export`) is a comment keyword and
+         * its arguments the directive; the expression of `//go:build` and of `// +build` is split into tags, parentheses and operators.
+         * Ranges are relative to the comment; empty for other comments.
+         */
+        fun directiveRanges(comment: String): List<Pair<TextRange, TextAttributesKey>> {
+            val plusBuild = PLUS_BUILD.find(comment)
+            if (plusBuild != null) return buildExpression(comment, plusBuild.range.last + 1)
+            if (!isDirective(comment)) return emptyList()
+            var nameEnd = 2
+            while (nameEnd < comment.length && !comment[nameEnd].isWhitespace()) nameEnd++
+            val out = arrayListOf(TextRange(2, nameEnd) to GoColors.COMMENT_KEYWORD)
+            if (comment.startsWith("//go:build") && nameEnd == 10) return out + buildExpression(comment, nameEnd)
+            val argsStart = (nameEnd until comment.length).firstOrNull { !comment[it].isWhitespace() } ?: return out
+            out += TextRange(argsStart, comment.trimEnd().length) to GoSyntaxHighlighter.DIRECTIVE
+            return out
+        }
+
+        private val PLUS_BUILD = Regex("""^//\s*\+build(?=\s)""")
+
+        /** Tags (`linux`, `go1.21`), `(` `)` and `&&` `||` `!` `,` of a build constraint expression starting at [from]. */
+        private fun buildExpression(text: String, from: Int): List<Pair<TextRange, TextAttributesKey>> {
+            val out = ArrayList<Pair<TextRange, TextAttributesKey>>()
+            var i = from
+            while (i < text.length) {
+                val c = text[i]
+                when {
+                    c == '(' || c == ')' -> { out += TextRange(i, i + 1) to GoColors.BUILD_PAREN; i++ }
+                    c == '!' || c == ',' -> { out += TextRange(i, i + 1) to GoColors.BUILD_OPERATOR; i++ }
+                    (c == '&' || c == '|') && text.getOrNull(i + 1) == c -> { out += TextRange(i, i + 2) to GoColors.BUILD_OPERATOR; i += 2 }
+                    c.isLetterOrDigit() || c == '_' || c == '.' -> {
+                        val start = i
+                        while (i < text.length && (text[i].isLetterOrDigit() || text[i] == '_' || text[i] == '.')) i++
+                        out += TextRange(start, i) to GoColors.BUILD_TAG
+                    }
+                    else -> i++
+                }
+            }
+            return out
+        }
+
+        /**
          * The text rules colour the identifiers while gopls is the source of the semantic colours (the tokens of the server are laid over
          * them) and while the IDE indexes (the semantic annotator of go-psi-ide is not dumb-aware); with the Built-in source in smart mode
          * that annotator colours every identifier it resolves, and these rules would paint a shadowed `len` over it.
@@ -209,6 +257,11 @@ private fun isImportAlias(element: PsiElement): Boolean = (element.parent as? Go
 private fun importedNames(element: PsiElement): Set<String> =
     (element.containingFile as? GoFile)?.imports.orEmpty().mapTo(HashSet()) { it.alias?.takeIf { alias -> alias != "_" && alias != "." } ?: GoSemanticColors.packageName(it.path) }
 
+/**
+ * Settings | Editor | Color Scheme | Go: the keys of GoLand in GoLand's groups and names (`docs/goland-analysis/dumps/color-keys-go.txt`,
+ * pinned by `GoColorSettingsPageTest`), then the base keys they inherit from (what the text rules, gopls and older schemes colour with).
+ * The annotators do not run on the demo, so every semantic key has a tag of its own.
+ */
 class GoColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName(): String = "Go"
     override fun getIcon(): Icon = GoIcons.File
@@ -217,67 +270,269 @@ class GoColorSettingsPage : ColorSettingsPage {
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
     override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey> = TAGS
 
-    override fun getDemoText(): String = """
-        <directive>//go:build linux</directive>
+    override fun getDemoText(): String = DEMO
 
-        // Package shop sells things.
-        package shop
+    companion object {
+        private fun d(name: String, key: TextAttributesKey) = AttributesDescriptor(name, key)
 
-        import "fmt"
-
-        const <const>DefaultPort</const> = 8080
-
-        /* A Server serves. */
-        type <type>Server</type> struct {
-            <field>Port</field> <bt>int</bt>
-            <field>name</field> <bt>string</bt> `json:"name"`
-        }
-
-        func (s *<tref>Server</tref>) <fn>Start</fn>(<param>args</param> ...<bt>string</bt>) <bt>error</bt> {
-            if <bf>len</bf>(<param>args</param>) == 0 || s == <bc>nil</bc> {
-                return <pkg>fmt</pkg>.<call>Errorf</call>("no arguments: %d, %q", 0x1F, 'x')
-            }
-            return <bc>nil</bc>
-        }
-    """.trimIndent()
-
-    private companion object {
         val DESCRIPTORS = arrayOf(
-            AttributesDescriptor("Keyword", GoSyntaxHighlighter.KEYWORD),
-            AttributesDescriptor("String", GoSyntaxHighlighter.STRING),
-            AttributesDescriptor("Number", GoSyntaxHighlighter.NUMBER),
-            AttributesDescriptor("Comments//Line comment", GoSyntaxHighlighter.LINE_COMMENT),
-            AttributesDescriptor("Comments//Block comment", GoSyntaxHighlighter.BLOCK_COMMENT),
-            AttributesDescriptor("Comments//Compiler directive", GoSyntaxHighlighter.DIRECTIVE),
-            AttributesDescriptor("Braces and Operators//Braces", GoSyntaxHighlighter.BRACES),
-            AttributesDescriptor("Braces and Operators//Parentheses", GoSyntaxHighlighter.PARENTHESES),
-            AttributesDescriptor("Braces and Operators//Brackets", GoSyntaxHighlighter.BRACKETS),
-            AttributesDescriptor("Braces and Operators//Semicolon", GoSyntaxHighlighter.SEMICOLON),
-            AttributesDescriptor("Braces and Operators//Comma", GoSyntaxHighlighter.COMMA),
-            AttributesDescriptor("Braces and Operators//Dot", GoSyntaxHighlighter.DOT),
-            AttributesDescriptor("Braces and Operators//Operator", GoSyntaxHighlighter.OPERATOR),
-            AttributesDescriptor("Builtins//Type", GoSyntaxHighlighter.BUILTIN_TYPE),
-            AttributesDescriptor("Builtins//Constant", GoSyntaxHighlighter.BUILTIN_CONSTANT),
-            AttributesDescriptor("Builtins//Function", GoSyntaxHighlighter.BUILTIN_FUNCTION),
-            AttributesDescriptor("Declarations//Function", GoSyntaxHighlighter.FUNCTION_DECLARATION),
-            AttributesDescriptor("Declarations//Type", GoSyntaxHighlighter.TYPE_DECLARATION),
-            AttributesDescriptor("Declarations//Struct field", GoSyntaxHighlighter.FIELD),
-            AttributesDescriptor("Declarations//Constant", GoSyntaxHighlighter.CONSTANT),
-            AttributesDescriptor("Function call", GoSyntaxHighlighter.FUNCTION_CALL),
-            AttributesDescriptor("References//Type", GoSyntaxHighlighter.TYPE_REFERENCE),
-            AttributesDescriptor("References//Package", GoSyntaxHighlighter.PACKAGE),
-            AttributesDescriptor("Variables//Parameter", GoSyntaxHighlighter.PARAMETER),
-            AttributesDescriptor("Variables//Local variable", GoSyntaxHighlighter.LOCAL_VARIABLE),
-            AttributesDescriptor("Variables//Package variable", GoSyntaxHighlighter.PACKAGE_VARIABLE),
-            AttributesDescriptor("Label", GoSyntaxHighlighter.LABEL),
-            AttributesDescriptor("Bad character", GoSyntaxHighlighter.BAD_CHARACTER),
+            d("Keyword", GoColors.KEYWORD),
+            d("Identifier", GoColors.IDENTIFIER),
+            d("Number", GoColors.NUMBER),
+            d("Bad character", GoColors.BAD_TOKEN),
+            d("String//Text", GoColors.STRING),
+            d("String//Valid escape", GoColors.VALID_STRING_ESCAPE),
+            d("String//Invalid escape", GoColors.INVALID_STRING_ESCAPE),
+            d("String//Format verb", GoColors.FORMAT_VERB),
+            d("Comments//Line comment", GoColors.LINE_COMMENT),
+            d("Comments//Block comment", GoColors.BLOCK_COMMENT),
+            d("Comments//Comment keyword", GoColors.COMMENT_KEYWORD),
+            d("Comments//Comment reference", GoColors.COMMENT_REFERENCE),
+            d("Comments//Build constraints//Tag", GoColors.BUILD_TAG),
+            d("Comments//Build constraints//Parentheses", GoColors.BUILD_PAREN),
+            d("Comments//Build constraints//Operators", GoColors.BUILD_OPERATOR),
+            d("Braces and operators//Semicolon", GoColors.SEMICOLON),
+            d("Braces and operators//Colon", GoColors.COLON),
+            d("Braces and operators//Comma", GoColors.COMMA),
+            d("Braces and operators//Dot", GoColors.DOT),
+            d("Braces and operators//Operator", GoColors.OPERATOR),
+            d("Braces and operators//Brackets", GoColors.BRACKET),
+            d("Braces and operators//Braces", GoColors.BRACES),
+            d("Braces and operators//Parentheses", GoColors.PARENTHESES),
+            d("References//Type references//Builtin type reference", GoColors.BUILTIN_TYPE_REFERENCE),
+            d("References//Type references//Type specification", GoColors.TYPE_REFERENCE),
+            d("References//Type references//Package exported interface", GoColors.EXPORTED_INTERFACE_REFERENCE),
+            d("References//Type references//Package exported struct", GoColors.EXPORTED_STRUCT_REFERENCE),
+            d("References//Type references//Package local interface", GoColors.LOCAL_INTERFACE_REFERENCE),
+            d("References//Type references//Package local struct", GoColors.LOCAL_STRUCT_REFERENCE),
+            d("References//Function calls//Builtin function call", GoColors.BUILTIN_FUNCTION_CALL),
+            d("References//Function calls//Exported function call", GoColors.EXPORTED_FUNCTION_CALL),
+            d("References//Function calls//Local function call", GoColors.LOCAL_FUNCTION_CALL),
+            d("References//Variable calls//Exported variable call", GoColors.PACKAGE_EXPORTED_VARIABLE_CALL),
+            d("References//Variable calls//Package local variable call", GoColors.PACKAGE_LOCAL_VARIABLE_CALL),
+            d("References//Variable calls//Local variable call", GoColors.LOCAL_VARIABLE_CALL),
+            d("References//Variable calls//Struct local member call", GoColors.STRUCT_LOCAL_MEMBER_CALL),
+            d("References//Variable calls//Struct exported member call", GoColors.STRUCT_EXPORTED_MEMBER_CALL),
+            d("Declarations//Package", GoColors.PACKAGE),
+            d("Declarations//Method receiver", GoColors.METHOD_RECEIVER),
+            d("Declarations//Function parameter", GoColors.FUNCTION_PARAMETER),
+            d("Declarations//Label", GoColors.LABEL),
+            d("Declarations//Types//Type specification", GoColors.TYPE_SPECIFICATION),
+            d("Declarations//Types//Package exported interface", GoColors.PACKAGE_EXPORTED_INTERFACE),
+            d("Declarations//Types//Package exported struct", GoColors.PACKAGE_EXPORTED_STRUCT),
+            d("Declarations//Types//Package local interface", GoColors.PACKAGE_LOCAL_INTERFACE),
+            d("Declarations//Types//Package local struct", GoColors.PACKAGE_LOCAL_STRUCT),
+            d("Declarations//Struct tags//Key", GoColors.TAG_KEY),
+            d("Declarations//Struct tags//Colon", GoColors.TAG_COLON),
+            d("Declarations//Struct tags//Value", GoColors.TAG_VALUE),
+            d("Declarations//Struct tags//Arbitrary text", GoColors.TAG_TEXT),
+            d("Declarations//Constants//Builtin constant", GoColors.BUILTIN_CONSTANT),
+            d("Declarations//Constants//Package exported constant", GoColors.PACKAGE_EXPORTED_CONSTANT),
+            d("Declarations//Constants//Package local constant", GoColors.PACKAGE_LOCAL_CONSTANT),
+            d("Declarations//Constants//Local constant", GoColors.LOCAL_CONSTANT),
+            d("Declarations//Variables//Builtin variable", GoColors.BUILTIN_VARIABLE),
+            d("Declarations//Variables//Package exported variable", GoColors.PACKAGE_EXPORTED_VARIABLE),
+            d("Declarations//Variables//Package local variable", GoColors.PACKAGE_LOCAL_VARIABLE),
+            d("Declarations//Variables//Local variable", GoColors.LOCAL_VARIABLE),
+            d("Declarations//Variables//Scope declared variable", GoColors.SCOPE_VARIABLE),
+            d("Declarations//Variables//Reassignment in short variable declaration", GoColors.REASSIGNMENT_IN_SHORT_VAR_DECLARATION),
+            d("Declarations//Variables//Shadowing variable", GoColors.SHADOWING_VARIABLE),
+            d("Declarations//Variables//Struct local member", GoColors.STRUCT_LOCAL_MEMBER),
+            d("Declarations//Variables//Struct exported member", GoColors.STRUCT_EXPORTED_MEMBER),
+            d("Declarations//Functions//Builtin function", GoColors.BUILTIN_FUNCTION),
+            d("Declarations//Functions//Exported function", GoColors.EXPORTED_FUNCTION),
+            d("Declarations//Functions//Package local function", GoColors.LOCAL_FUNCTION),
+            // the keys the finer ones above inherit from: a scheme tuned before them keeps its look, and the text rules and gopls use them
+            d("Base colors//Compiler directive", GoColors.DIRECTIVE),
+            d("Base colors//Builtin type", GoColors.BUILTIN_TYPE),
+            d("Base colors//Function declaration", GoColors.FUNCTION_DECLARATION),
+            d("Base colors//Function call", GoColors.FUNCTION_CALL),
+            d("Base colors//Type declaration", GoColors.TYPE_DECLARATION),
+            d("Base colors//Struct field", GoColors.FIELD),
+            d("Base colors//Constant", GoColors.CONSTANT),
+            d("Base colors//Parameter", GoColors.PARAMETER),
+            d("Base colors//Package variable", GoColors.PACKAGE_VARIABLE),
+            d("Base colors//Brackets", GoColors.BRACKETS),
+            d("Base colors//Bad character", GoColors.BAD_CHARACTER),
         )
 
-        val TAGS = mapOf(
-            "bt" to GoSyntaxHighlighter.BUILTIN_TYPE, "bc" to GoSyntaxHighlighter.BUILTIN_CONSTANT, "bf" to GoSyntaxHighlighter.BUILTIN_FUNCTION,
-            "fn" to GoSyntaxHighlighter.FUNCTION_DECLARATION, "type" to GoSyntaxHighlighter.TYPE_DECLARATION, "field" to GoSyntaxHighlighter.FIELD,
-            "const" to GoSyntaxHighlighter.CONSTANT, "call" to GoSyntaxHighlighter.FUNCTION_CALL,
-            "tref" to GoSyntaxHighlighter.TYPE_REFERENCE, "directive" to GoSyntaxHighlighter.DIRECTIVE, "pkg" to GoSyntaxHighlighter.PACKAGE, "param" to GoSyntaxHighlighter.PARAMETER,
+        val TAGS: Map<String, TextAttributesKey> = mapOf(
+            "goBuildParens" to GoColors.BUILD_PAREN, "goBuildTag" to GoColors.BUILD_TAG, "goBuildOperator" to GoColors.BUILD_OPERATOR,
+            "package" to GoColors.PACKAGE, "goGenerate" to GoColors.COMMENT_KEYWORD, "directive" to GoColors.DIRECTIVE, "goCommentRef" to GoColors.COMMENT_REFERENCE,
+            "pei" to GoColors.PACKAGE_EXPORTED_INTERFACE, "pli" to GoColors.PACKAGE_LOCAL_INTERFACE, "pes" to GoColors.PACKAGE_EXPORTED_STRUCT,
+            "pls" to GoColors.PACKAGE_LOCAL_STRUCT, "ts" to GoColors.TYPE_SPECIFICATION,
+            "ef" to GoColors.EXPORTED_FUNCTION, "lf" to GoColors.LOCAL_FUNCTION, "bt" to GoColors.BUILTIN_TYPE_REFERENCE,
+            "sem" to GoColors.STRUCT_EXPORTED_MEMBER, "slm" to GoColors.STRUCT_LOCAL_MEMBER,
+            "goTagKey" to GoColors.TAG_KEY, "goTagColon" to GoColors.TAG_COLON, "goTagValue" to GoColors.TAG_VALUE, "goTagText" to GoColors.TAG_TEXT,
+            "pec" to GoColors.PACKAGE_EXPORTED_CONSTANT, "plc" to GoColors.PACKAGE_LOCAL_CONSTANT, "lc" to GoColors.LOCAL_CONSTANT, "bc" to GoColors.BUILTIN_CONSTANT,
+            "pev" to GoColors.PACKAGE_EXPORTED_VARIABLE, "plv" to GoColors.PACKAGE_LOCAL_VARIABLE, "lv" to GoColors.LOCAL_VARIABLE, "bv" to GoColors.BUILTIN_VARIABLE,
+            "sv" to GoColors.SCOPE_VARIABLE, "re_in_svd" to GoColors.REASSIGNMENT_IN_SHORT_VAR_DECLARATION, "shv" to GoColors.SHADOWING_VARIABLE,
+            "mr" to GoColors.METHOD_RECEIVER, "fp" to GoColors.FUNCTION_PARAMETER, "ll" to GoColors.LABEL,
+            "esr" to GoColors.EXPORTED_STRUCT_REFERENCE, "lsr" to GoColors.LOCAL_STRUCT_REFERENCE, "eir" to GoColors.EXPORTED_INTERFACE_REFERENCE,
+            "lir" to GoColors.LOCAL_INTERFACE_REFERENCE, "tsr" to GoColors.TYPE_REFERENCE,
+            "ef_call" to GoColors.EXPORTED_FUNCTION_CALL, "lf_call" to GoColors.LOCAL_FUNCTION_CALL, "bf_call" to GoColors.BUILTIN_FUNCTION_CALL,
+            "lv_call" to GoColors.LOCAL_VARIABLE_CALL, "pev_call" to GoColors.PACKAGE_EXPORTED_VARIABLE_CALL, "plv_call" to GoColors.PACKAGE_LOCAL_VARIABLE_CALL,
+            "sem_call" to GoColors.STRUCT_EXPORTED_MEMBER_CALL, "slm_call" to GoColors.STRUCT_LOCAL_MEMBER_CALL,
+            "se_valid" to GoColors.VALID_STRING_ESCAPE, "se_invalid" to GoColors.INVALID_STRING_ESCAPE, "fv" to GoColors.FORMAT_VERB,
         )
+
+        /** GoLand's demo (`color-keys-go.txt`) with its tags, without the rainbow block, plus a directive's arguments and printf verbs. */
+        val DEMO = """
+            /*
+             * Go highlight sample
+             */
+            //<goGenerate>go:build</goGenerate> <goBuildParens>(</goBuildParens><goBuildTag>linux</goBuildTag> <goBuildOperator>||</goBuildOperator> <goBuildTag>windows</goBuildTag><goBuildParens>)</goBuildParens> <goBuildOperator>&&</goBuildOperator> <goBuildTag>arm</goBuildTag>
+            // +build <goBuildTag>linux</goBuildTag><goBuildOperator>,</goBuildOperator><goBuildTag>arm</goBuildTag> <goBuildTag>windows</goBuildTag><goBuildOperator>,</goBuildOperator><goBuildTag>arm</goBuildTag>
+
+            // Package main
+            package <package>main</package>
+
+            import "fmt"
+            import <package>alias</package> "fmt"
+
+            //<goGenerate>go:generate</goGenerate> <directive>go tool yacc -o gopher.go -p parser gopher.y</directive>
+
+            type (
+            	<pei>PublicInterface</pei> interface {
+            		<ef>PublicFunc</ef>() <bt>int</bt>
+            		<lf>privateFunc</lf>() <bt>int</bt>
+            	}
+
+            	<pli>privateInterface</pli> interface {
+            		<ef>PublicFunc</ef>() <bt>int</bt>
+            		<lf>privateFunc</lf>() <bt>int</bt>
+            	}
+
+            	<pes>PublicStruct</pes> struct {
+            		<sem>PublicField</sem>  <bt>int</bt>
+            		<slm>privateField</slm> <bt>int</bt>
+            	}
+
+            	<pls>privateStruct</pls> struct {
+            		<sem>PublicField</sem>  <bt>int</bt>
+            		<slm>privateField</slm> <bt>int</bt>
+            	}
+
+            	<ts>demoInt</ts> <bt>int</bt>
+
+            	<pes>T</pes> struct {
+            		<sem>FirstName</sem> <bt>string</bt> `<goTagKey>json</goTagKey><goTagColon>:</goTagColon><goTagValue>"first_name"</goTagValue><goTagText> arbitrary text</goTagText>`
+            	}
+            )
+
+            const (
+            	<pec>PublicConst</pec>  = 1
+            	<plc>privateConst</plc> = 2
+            )
+
+            var (
+            	<pev>PublicVar</pev>  = 1
+            	<plv>privateVar</plv> = 2
+            )
+
+            // <goCommentRef>PublicFunc</goCommentRef> does the thing
+            func <ef>PublicFunc</ef>() <bt>int</bt> {
+            	<lv>localVar</lv> := <pev>PublicVar</pev>
+            	return <lv>localVar</lv>
+            }
+
+            // <goCommentRef>privateFunc</goCommentRef> does the thing
+            func <lf>privateFunc</lf>() (<bt>int</bt>, <bt>int</bt>) {
+            	<lv>LocalVar</lv> := <plv>privateVar</plv>
+            	return <lv>LocalVar</lv>, <pev>PublicVar</pev>
+            }
+
+            func (<mr>ps</mr> <esr>PublicStruct</esr>) <ef>PublicFunc</ef>() <bt>int</bt> {
+            	return <mr>ps</mr>.<slm>privateField</slm>
+            }
+
+            func (<mr>ps</mr> <lsr>privateStruct</lsr>) <lf>privateFunc</lf>() <bt>int</bt> {
+            	return <mr>ps</mr>.<sem>PublicField</sem>
+            }
+
+            func _(<fp>pi</fp> <eir>PublicInterface</eir>) {
+            }
+
+            func _(<fp>pi</fp> <lir>privateInterface</lir>) {
+            }
+
+            func <lf>variableFunc</lf>(<fp>demo1</fp> <bt>int</bt>, <fp>demo2</fp> <tsr>demoInt</tsr>) {
+            	<fp>demo1</fp> = 3
+            	<lv>a</lv> := <esr>PublicStruct</esr>{}
+            	<lv>a</lv>.<ef_call>PublicFunc</ef_call>()
+            	<lv>b</lv> := <lsr>privateStruct</lsr>{}
+            	<lv>b</lv>.<lf_call>privateFunc</lf_call>()
+            	<fp>demo2</fp> = 4
+            	if <sv>demo1</sv>, <sv>demo2</sv> := <lf_call>privateFunc</lf_call>(); <sv>demo1</sv> != 3 {
+            		_ = <sv>demo1</sv>
+            		_ = <sv>demo2</sv>
+            		return
+            	}
+            <ll>demoLabel</ll>:
+            	for <sv>demo1</sv> := range []<bt>int</bt>{1, 2, 3, 4} {
+            		_ = <sv>demo1</sv>
+            		continue <ll>demoLabel</ll>
+            	}
+
+            	switch {
+            	case 1 == 2:
+            		<sv>demo1</sv>, <sv>demo2</sv> := <lf_call>privateFunc</lf_call>()
+            		_ = <sv>demo1</sv>
+            		_ = <sv>demo2</sv>
+            	default:
+            		_ = <fp>demo1</fp>
+            	}
+
+            	<lv>f</lv> := func() <bt>int</bt> {
+            		return 1
+            	}
+            	<lv_call>f</lv_call>()
+            	<ef_call>PublicFunc</ef_call>()
+            	<lf_call>variableFunc</lf_call>(1, 2)
+            	_ = <fp>demo1</fp>
+            	_ = <fp>demo2</fp>
+            	<bf_call>println</bf_call>("builtin function")
+            }
+
+            func <lf>main</lf>() {
+            	const <lc>LocalConst</lc> = 1
+            	const <lc>localConst</lc> = 2
+            	<package>fmt</package>.<ef_call>Println</ef_call>("demo<se_valid>\n</se_valid><se_invalid>\xA</se_invalid>")
+            	<package>fmt</package>.<ef_call>Printf</ef_call>("<fv>%-10s</fv> <fv>%[1]d</fv> <fv>%%</fv><se_valid>\n</se_valid>", "demo")
+            	<package>alias</package>.<ef_call>Println</ef_call>("demo")
+            	<lf_call>variableFunc</lf_call>(1, 2)
+            	var <lv>d</lv>, <lv>c</lv> *<bt>int</bt> = <bv>nil</bv>, <bv>nil</bv>
+            	_, _ = <lv>c</lv>, <lv>d</lv>
+            	_, _ = <bc>true</bc>, <bc>false</bc>
+            }
+
+            var <pev>ExportedVariableFunction</pev> = func() {}
+            var <plv>packageLocalVariableFunction</plv> = func() {}
+
+            type <pls>typeWithCall</pls> struct {
+            	<sem>PublicFieldCall</sem>  func()
+            	<slm>privateFieldCall</slm> func()
+            }
+
+            func <lf>calls</lf>(<fp>t</fp> <lsr>typeWithCall</lsr>) {
+            	var <lv>localVariableFunction</lv> = func() {}
+
+            	<pev_call>ExportedVariableFunction</pev_call>()
+            	<plv_call>packageLocalVariableFunction</plv_call>()
+            	<lv_call>localVariableFunction</lv_call>()
+            	<fp>t</fp>.<sem_call>PublicFieldCall</sem_call>()
+            	<fp>t</fp>.<slm_call>privateFieldCall</slm_call>()
+            }
+
+            func _() {
+            	var <lv>err</lv> <bt>error</bt>
+            	<lv>a</lv>, <re_in_svd>err</re_in_svd> := 1, <bv>nil</bv>
+            	<bf_call>println</bf_call>(<lv>a</lv>, <lv>err</lv>)
+
+            	for <shv>a</shv> := 0; <shv>a</shv> < 10; <shv>a</shv>++ {
+            		<bf_call>println</bf_call>(<shv>a</shv>)
+            	}
+            }
+        """.trimIndent()
     }
 }

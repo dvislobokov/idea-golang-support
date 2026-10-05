@@ -1,0 +1,302 @@
+
+=================== 1 '(' after function name
+after [(]:
+  | 	load(<caret>)
+result:
+  | 	// PROBE:body
+  | 	load(<caret>)
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 2 '"' opens a pair, overtyped at the end
+after ["]:
+  | 	s := "<caret>"
+after [a]:
+  | 	s := "a<caret>"
+after [b]:
+  | 	s := "ab<caret>"
+after ["]:
+  | 	s := "ab"<caret>
+result:
+  | 	// PROBE:body
+  | 	s := "ab"<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 3 backtick pair
+after [`]:
+  | 	s := `<caret>`
+after [a]:
+  | 	s := `a<caret>`
+after [b]:
+  | 	s := `ab<caret>`
+after [`]:
+  | 	s := `ab`<caret>
+result:
+  | 	// PROBE:body
+  | 	s := `ab`<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 4 '[' and '{' pairs
+after [[]:
+  | 	a := [<caret>]
+after []]:
+  | 	a := []<caret>
+after [i]:
+  | 	a := []i<caret>
+after [n]:
+  | 	a := []in<caret>
+after [t]:
+  | 	a := []int<caret>
+after [{]:
+  | 	a := []int{<caret>}
+after [1]:
+  | 	a := []int{1<caret>}
+after [}]:
+  | 	a := []int{1}<caret>
+result:
+  | 	// PROBE:body
+  | 	a := []int{1}<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 5 rune quote
+after [']:
+  | 	r := '<caret>'
+after [x]:
+  | 	r := 'x<caret>'
+after [']:
+  | 	r := 'x'<caret>
+result:
+  | 	// PROBE:body
+  | 	r := 'x'<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 6 Enter between braces after if
+result:
+  | 	// PROBE:body
+  | 	if total > 0 {
+  | 		<caret>
+  | 	}
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 7 '{' Enter after func header (top level)
+result:
+  | // PROBE:top
+  | func newOne() {
+  | 	<caret>
+  | }
+  | // Holder is a struct for literal and tag probes.
+  | type Holder struct {
+  | 	Name    string
+
+
+=================== 8 Enter in a line comment continues it?
+result:
+  | 	// PROBE:body
+  | 	// first part
+  | 	<caret>
+  | 	// PROBE:body2
+  | 
+
+
+=================== 9 Enter inside a string literal splits it
+result:
+  | 	// PROBE:body
+  | 	s := "hello 
+  | 	<caret>
+  | 	// PROBE:body2
+  | 
+
+
+=================== 10 if err + Tab (live template?)
+result:
+  | 	// PROBE:body
+  | 	_, err = load("x")
+  | 	err	<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+  | 	return nil
+
+
+=================== 11 Ctrl+Shift+Enter in if
+result:
+  | 	// PROBE:body
+  | 	if total > 0 {
+  | 		<caret>
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 12 Ctrl+Shift+Enter in for
+result:
+  | 	// PROBE:body
+  | 	for i := 0; i < 3; i++ {
+  | 		<caret>
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 13 Ctrl+Shift+Enter on a call
+result:
+  | 	// PROBE:body
+  | 	load("x")
+  | 	<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 14 Ctrl+Shift+Enter on func header (top level)
+result:
+  | // PROBE:top
+  | func other(a int) error {
+  | 	<caret>
+  | }
+  | 
+  | // Holder is a struct for literal and tag probes.
+  | type Holder struct {
+
+
+=================== 15 Smart Enter in a struct literal
+result:
+  | 	// PROBE:body
+  | 	h := Holder{Name: "x",<caret>
+  | 		// PROBE:body2
+  | 
+  | 		_ = total
+  | 		return nil
+
+
+=================== 16 Enter after 'case X:'
+result:
+  | 	// PROBE:body
+  | 	switch total {
+  | 	case 1:
+  | 		<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 17 '}' reformats block
+result:
+  | 	// PROBE:body
+  | 	if total>0 {   total=1   }<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+  | 	return nil
+  | }
+
+
+=================== 18 Backspace removes pair
+result:
+  | 	// PROBE:body
+  | 	s := <caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 19 ':' after a name (:= assist?)
+result:
+  | 	// PROBE:body
+  | 	nv :=1<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 20 auto-popup on letters (identifier start)
+result (lookup open, 123 items):
+  | 	// PROBE:body
+  | 	lo<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 21 '/' then Enter above a func: doc comment stub?
+result:
+  | // PROBE:top
+  | //
+  | <caret>
+  | // Holder is a struct for literal and tag probes.
+  | type Holder struct {
+  | 	Name    string
+  | 	Count   int
+  | 	Enabled bool
+
+
+=================== 22 '.' after method name inserts ()?
+after [.]:
+  | 	x := c.Name.<caret>
+result (lookup open, 2 items):
+  | 	// PROBE:body
+  | 	x := c.Name.<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 23 Enter in import block
+result:
+  | import (
+  | 	"os"
+  | 	<caret>_ "embed"
+  | 	"errors"
+  | 	"fmt"
+
+
+=================== 24 save runs gofmt (Actions on Save)
+result:
+  | 	// PROBE:body
+  | 	total=total+1<caret>
+  | 	// PROBE:body2
+  | 
+
+
+=================== 25 Reformat Code (Ctrl+Alt+L)
+result:
+  | 	// PROBE:body
+  | 	total = total + 1<caret>
+  | 	// PROBE:body2
+  | 
+
+
+=================== 26 Optimize Imports removes the unused import
+result:
+  | // Package probeerr has deliberate problems so that GoLand's inspections fire (docs/goland-analysis). It does not compile on purpose.
+  | <caret>package probeerr
+  | 
+  | import (
+  | 	"fmt"
+  | 	"os"
+  | )
+  | 
+  | type Reader interface {
+  | 	Read() string
+  | }
+  | 
+  | type impl struct{}
+  | 
+

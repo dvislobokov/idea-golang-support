@@ -1,0 +1,3 @@
+import "strings"
+
+var s = <spot>strings.</spot>ToUpper("a")

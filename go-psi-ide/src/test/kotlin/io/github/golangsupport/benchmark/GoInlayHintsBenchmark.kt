@@ -34,7 +34,7 @@ class GoInlayHintsBenchmark : GoSemanticIdeTestBase() {
         myFixture.configureFromTempProjectFile("nethttp/server.go")
     }
 
-    private val options = mapOf(GoTypeHintsProvider.ASSIGN to true, GoTypeHintsProvider.RANGE to true, GoTypeHintsProvider.LITERAL to true, GoTypeHintsProvider.INSTANTIATION to true)
+    private val options = mapOf(GoTypeHintsProvider.ASSIGN to true, GoTypeHintsProvider.RANGE to true, GoTypeHintsProvider.LITERAL to true, GoTypeHintsProvider.INSTANTIATION to true, GoParameterNameHintsProvider.RETURN to true)
 
     private val providers = listOf(GoParameterNameHintsProvider(), GoLiteralFieldHintsProvider(), GoTypeHintsProvider(), GoConstantValueHintsProvider(), GoStructSizeHintsProvider())
 

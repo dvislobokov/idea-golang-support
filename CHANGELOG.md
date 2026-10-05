@@ -30,6 +30,219 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.130] - 2026-10-05
+
+### Added — go.mod intentions (GoLand parity G4)
+- "Merge a group of directives" (consecutive one-line directives of one kind into a `( … )` block), "Merge all directives" (every directive of that kind in the
+  file into one block), "Merge directive up" (a one-line directive into the block of the same kind right above); comments kept; go.mod and go.work, for
+  `require`, `replace`, `exclude`, `retract`, `tool`, `ignore`, `godebug`, `use`.
+- "Update dependencies…" on a `require` with a known newer version: a dialog with the direct dependencies that have one (all checked); Update runs
+  `go get module@version` for the chosen ones in the background, then `go mod vendor` when the module vendors.
+
+## [0.2.129] - 2026-10-05
+
+### Added — Run go generate from Alt+Enter (GoLand parity G4)
+- On a `//go:generate` line: "Run go generate on comment" (this directive alone, `go generate -run '^…$' file.go`), "Run go generate on file", "Run go generate
+  on package" (`go generate .`); output in the Build tool window; available during indexing.
+
+## [0.2.128] - 2026-10-05
+
+### Added — navigation from Alt+Enter (GoLand parity G4)
+- "Go to Implementations" on an interface type or an interface method, "Go to Interfaces" on a type that implements interfaces, "Go to Method Specifications" on a
+  method that implements interface methods — listed low, offered only when there is a target; one target opens at once, several in a chooser.
+
+### Fixed — review of the parity batch
+- "Negate topmost expression" no longer throws on a binary expression without a right operand (code being typed).
+- `.not` postfix: the operand goes through the template variable, a `$` in its text no longer breaks the template.
+- Fill all fields… from completion: no exception when the struct changed before the chooser answered.
+- The semantic annotator checks the feature gate only for the elements it colours.
+
+## [0.2.127] - 2026-10-05
+
+### Added — struct tag intentions (GoLand parity G4)
+- "Change field name style in tags" (on a tag, the type name or `struct`): a popup of `full-name`, `full_name`, `FullName`, `fullName`, applied to every field with that
+  key, options kept. "Update key value in tags" on a field whose tag name no longer matches the style the other fields use.
+
+## [0.2.126] - 2026-10-05
+
+### Added — Unchecked error: "Do not report this method/function anymore" (GoLand parity G4)
+- The quick fix adds the callee (`path.Func` / `path.Type.Method`, as the built-in errcheck exclusions) to the inspection's exclude list, editable in the inspection
+  options; the errcheck rule has the same fix.
+
+## [0.2.125] - 2026-10-05
+
+### Added — printf intentions (GoLand parity G4)
+- "Add format string argument" asks for an expression and adds `%v` with its argument at the caret; "Exclude string formatting function" / "Mark as string
+  formatting function" turn the printf check (and verb highlighting) off or on for a function, remembered for all projects (`GoPrintfFunctions`, vet-style names
+  `fmt.Printf`, `(*log.Logger).Printf`, `example.com/x.report`). Mark is offered for functions ending in `...any`.
+
+## [0.2.124] - 2026-10-05
+
+### Added — argument layout and string intentions (GoLand parity G4)
+- "Put arguments on separate lines" / "Put arguments on one line" for call arguments and "Put elements on separate lines" / "Put elements on one line" for composite
+  literals (gofmt layout, trailing comma; lists with comments are left alone). "Join concatenated string literals" merges adjacent literals of a `+` chain
+  (raw parts are escaped into an interpreted string).
+
+## [0.2.123] - 2026-10-05
+
+### Added — import intentions (GoLand parity G4)
+- "Import for side-effects" (an unused import → `_ "pkg"`), "Add import alias" (the package name as alias, typing a new name renames the qualifiers),
+  "Add dot import alias" / "Remove dot import alias" (qualifiers dropped / restored in the file; not offered when a name would change meaning).
+
+## [0.2.122] - 2026-10-05
+
+### Added — Create global variable / Create parameter from usage (GoLand parity G4)
+- Alt+Enter on an undefined name inside a function: "Create global variable 'x'" (after the imports, a `func(…)` type for a call) and "Create parameter 'x'"
+  (the calls of the function in the project get the zero value so they keep compiling). Package-level names keep the existing "Create variable".
+
+## [0.2.121] - 2026-10-05
+
+### Added — Export, Migrate function parameter to method receiver (GoLand parity G4)
+- "Export" renames an unexported function, type, variable, constant, method or field to its exported name with all usages (the rename refactoring; no preview).
+- "Migrate function parameter to method receiver" turns `func f(t *T, x int)` into `func (t *T) f(x int)` and rewrites the calls (`f(&v, 1)` → `v.f(1)`);
+  unavailable when the type is from another package or `T.f` exists.
+
+## [0.2.120] - 2026-10-05
+
+### Added — signature and declaration intentions (GoLand parity G4)
+- "Expand signature types" (`a, b int` → `a int, b int`) and "Reuse signature types" (back) on function, method and function literal signatures.
+- "Merge declaration up" (into an existing group too), "Merge declaration up via comma" (`var a int` + `var b int` → `var a, b int`, `:=` too) and
+  "Split declarations into two groups". GoLand's "Split all declarations" / "by comma" are the existing "Split into separate declarations".
+
+## [0.2.119] - 2026-10-05
+
+### Added — struct literal intentions (GoLand parity G4)
+- "Remove keys from struct literal" turns `T{B: "a", A: 2}` into `T{2, "a", nil}` as GoLand does (field order, omitted fields as zero values); not for
+  literals of another package's struct with unexported fields or with an elided type.
+- "Move field assignment to struct initialization" folds the `s.F = v` statements right after `s := T{…}` into the literal.
+
+## [0.2.118] - 2026-10-05
+
+### Added — expression intentions (GoLand parity G4)
+- "Flip binary operator" swaps the operands ("Flip '>=' to '<='", "Flip '+'", "Flip '-' (changes semantics)").
+- "Negate expression", "Negate expression recursively", "Negate topmost expression" and "… recursively" rewrite a boolean expression as the equivalent negated
+  one (De Morgan, flipped comparisons, "Negate '||' to '&&'"); `<` / `>` on floats are left alone (NaN). The topmost / recursive variants appear only when they
+  differ from the plain one.
+- "Specify type explicitly" adds the type to `var x = v` / `const c = v` (`var i int = 1`), importing the type's package when needed; `x := 1` keeps the existing
+  "Convert to 'var' declaration". GoLand's "Specify dot type" is a Go templates feature, not done.
+
+## [0.2.117] - 2026-10-05
+
+### Added — parameter names by type and variable name hints (GoLand parity G3)
+- In `func g(` (functions, methods, function literals) the types come as `name Type` items: `err error`, `base Base`, `string2 string` (a reserved or taken name
+  gets the next digit), `t T` for a type parameter; packages stay in the list; after a typed prefix exported types of imported packages follow at the bottom
+  (`ctx context.Context`).
+- Variable name hints where a name is declared: `var <caret> Circle` → `circle`, `c`; `<caret> := c.Area()` → `area`; `for i, <caret> := range names` → `name`;
+  range index `i` (`j`, `k` nested). Names come from the right-hand side (getter / constructor prefixes dropped, singular for elements), then from the type
+  (idiomatic `ctx`, `err`, `t`, `w`, `r`, `buf`, `mu`, `wg`, the lowercased type name, its last word, its initial). Names in scope are skipped or numbered.
+
+## [0.2.116] - 2026-10-05
+
+### Added — live templates from GoLand (GoLand parity G3)
+- `map` (in type positions: after a name, `]`, `*`, `chan`, `make(`, `new(`), `p`, `imports`, `consts`, `vars`, `types`, `iota`, `:` and the `xml` struct tag,
+  with GoLand's keys, texts and variables. The 9 Go Template templates wait for Go templates support.
+
+## [0.2.115] - 2026-10-05
+
+### Changed — postfix templates: GoLand's keys and names (GoLand parity G3)
+- New: `.!`, `.&` / `.p` / `.pointer`, `.*` / `.d` / `.dereference`, `.cap`, `.copy`, `.close`, `.delete`, `.complex`, `.real`, `.imag`, `.println`,
+  `.aappend` / `.appendAssign`, `.remove`, `.as`, `.is`, `.parseInt`, `.parseFloat`. `.sort` picks `sort.Strings` / `sort.Ints` / `sort.Float64s` / `sort.Sort` /
+  `slices.Sort` by type.
+- Names inferred as GoLand does: `.var` → `area := c.Area()`, `user, err := loadUser()`; `.forr` → `for i, name := range names` (singular of the slice name).
+- **Behaviour changes**: `.forr` is now GoLand's range loop (the reverse loop moved to `.forrev`); `.append` is now the expression `append(expr, …)` (the
+  assignment form is `.aappend` / `.appendAssign`). `.print` (`fmt.Println`) and `.rr` stay ours.
+
+## [0.2.114] - 2026-10-05
+
+### Fixed — postfix templates in the completion list (GoLand parity G3)
+- After `expr.` the applicable postfix keys follow the fields and methods (a weigher keeps them behind the members), filtered by the expression's type:
+  `err.` offers `as`, `is`, `nil`, `nn`; a package or type qualifier (`fmt.`, `T.`) offers none (before, every key applied to an unknown type).
+- Settings | Editor | General | Postfix Completion | Go has a description page: the platform logged an error without the resources.
+
+## [0.2.113] - 2026-10-05
+
+### Added — struct tag completion as in GoLand (GoLand parity G3)
+- At a tag key the first item is **Add tag key to all fields…**: a popup of keys (`json`, `yaml`, `xml`, `toml`, `db`, …), the chosen key goes to every exported field
+  that lacks it, named in the style the struct already uses. In `json:"…"` (and the other name keys) the field name is offered in GoLand's four styles:
+  `full-name`, `full_name`, `FullName`, `fullName`; a style another field already uses comes first.
+
+## [0.2.112] - 2026-10-05
+
+### Added — top-level completion items `func (*T)` and Implement Interface (GoLand parity G3)
+- At the top level of a file, next to `func`: **`func (*T)`** inserts a method stub for the nearest type above the caret with the receiver its methods already use;
+  **`func` · Implement Interface...** puts the caret on that type and opens the plugin's Implement Interface chooser.
+
+## [0.2.111] - 2026-10-05
+
+### Changed — constant rows show their value (GoLand parity G3)
+- Constants in completion show value and type as GoLand does: `MaxItems = 10  untyped int`, `Debug = iota  Level`; a repeated row in a `const` group shows the
+  expression it repeats. Values come from the stubs, no other file's AST is loaded.
+
+## [0.2.110] - 2026-10-05
+
+### Added — Fill all fields… / Fill selected fields… in completion (GoLand parity G3)
+- In a struct literal (`T{}`, `&T{}`, nested, partly filled) the first two items are **Fill all fields…** and **Fill selected fields…**: the fields not set yet,
+  one per line, zero values aligned like gofmt, caret after the first value; Fill selected asks which fields to write. Not offered in positional literals.
+  The Alt+Enter Fill intention shares the generator (its output is unchanged, unaligned).
+
+## [0.2.109] - 2026-10-05
+
+### Added — Shadowing variable inspection (GoLand parity G1)
+- A local variable that shadows a variable, constant, parameter or receiver of an enclosing scope, or a package-level variable of the same package, is painted
+  with the "Shadowing variable" colour (`GO_SHADOWING_VARIABLE`) and gets a weak warning "Declaration of 'x' shadows declaration at line N" (`b.go:N` for another
+  file); Alt+Enter offers Navigate to shadowed declaration and Rename variable. A `:=` that reuses a variable of its own scope, `x := x` and `switch x := x.(type)`
+  are not reported. The dataflow check "Shadowed error" (the outer `err` is what gets returned) stays as it was.
+
+## [0.2.108] - 2026-10-05
+
+### Changed — inlay hints as in GoLand (GoLand parity G2)
+- Parameter name hints are shown only at literal arguments (strings, numbers, `nil`, `true`, `false`), never at variables, selectors or calls; one-letter
+  parameter names are shown too (`produce(n: 3)`). Checked line by line against the GoLand probe files.
+- New option "Show return parameters" (Parameter names, on by default): the names of named results at the literal values of `return` (`return n: 0, err: nil`).
+
+## [0.2.107] - 2026-10-05
+
+### Added — code vision "Implement interface" and "Add method" (GoLand parity G2)
+- "Implement interface" above every type declaration that is not an interface (structs, named basic types, generic types; one per `type ( … )` group): a click
+  opens Implement Methods (Ctrl+I) for that type. Own group in Settings | Editor | Inlay Hints | Code vision, on by default.
+- "Add method" above an interface that has implementations in the project: a click opens Add Method to Interface, which adds the method to the interface and a stub
+  to every implementation. Own group "Add method to interface and all its implementations", on by default.
+- Usages / implementations code vision follows the platform's position setting (per group, or the default position); choose "Right" there to get them at the end
+  of the declaration line as in GoLand.
+
+## [0.2.106] - 2026-10-05
+
+### Added — struct tags and printf verbs highlighted (GoLand parity G1)
+- Struct tags are highlighted by parts: key, colon, quoted value and arbitrary text (`GO_TAG_KEY`, `GO_TAG_COLON`, `GO_TAG_VALUE`, `GO_TAG_TEXT`).
+- Printf verbs (`%d`, `%-10s`, `%[1]v`, `%%`) are highlighted inside the format string of `fmt.Printf`, `Sprintf`, `Errorf`, `log.Printf`, `t.Errorf`
+  and the project's own printf wrappers (the list of the Printf inspection); valid and invalid string escapes are highlighted too (`GO_FORMAT_VERB` falls back
+  onto the valid escape colour, as GoLand paints verbs).
+
+## [0.2.105] - 2026-10-05
+
+### Changed — Go colours as in GoLand (GoLand parity G1)
+- The Color Scheme | Go page has GoLand's 64 keys in GoLand's groups: exported and local functions and their calls, builtin calls, struct and interface
+  types (declaration and reference), package / local constants, package / scope variables, method receiver apart from parameters, exported / local fields,
+  calls of func-valued variables and fields, `nil`, reassignment in `:=`, comment keyword, doc comment references, build constraint tag / parentheses / operators.
+  A scheme exported from GoLand reads the same here; each new key falls back onto the key that coloured the element before, so a scheme tuned earlier keeps its look.
+- Directive comments: the directive name (`go:generate`, `go:embed`, `line`, `export`) is the comment keyword, `//go:build` lines are split into tags, parentheses
+  and operators.
+
+## [0.2.104] - 2026-10-05
+
+### Added — recursive call gutter, Shell Script in `//go:generate` (GoLand parity G1)
+- A "Recursive call" icon in the gutter marks calls of the function or method they are made from (`f(n-1)`, `r.walk(x)`, `(*T).f(r)`); off together with the
+  implementation gutters (Settings | Editor | General | Gutter Icons, "Go recursive call").
+- The command of a `//go:generate` line is highlighted as Shell Script when the IDE has the Shell Script plugin (optional dependency); for `-command NAME cmd`
+  the aliased command is highlighted. Only `//go:generate` comments became injection hosts, other comments stay cheap on reformat.
+
+## [0.2.103] - 2026-10-05
+
+### Added — one-line folding (GoLand parity G1)
+- Code folding shows short blocks on one line, like GoLand: `if err != nil { return "", err }`, a function with a single `return`, a `case` with one statement,
+  empty functions and empty struct / interface types. Five options in Settings | Editor | General | Code Folding (Go), all on by default. Syntactic: the
+  condition is a nil comparison, the body one `return` / `panic` / `break` / `continue` / `goto` that fits one line, no comments inside.
+
 ## [0.2.102] - 2026-10-04
 
 ### Changed — the form of a Go configuration

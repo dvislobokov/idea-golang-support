@@ -14,30 +14,28 @@ import io.github.golangsupport.semantic.types.GoTypeRenderer
 
 /** The pure rules of the inlay hints: what a parameter hint says and when it says nothing, constant texts, struct layouts. */
 object GoInlayHints {
-    private val WORD = Regex("[A-Za-z_][A-Za-z0-9_]*")
+    /** The predeclared names that count as literals for the parameter hints, as in GoLand (`sorted(/*names:*/ nil)`, `fits(…, /*verbose:*/ false)`). */
+    val LITERAL_NAMES = setOf("nil", "true", "false")
 
     /** The longest text of a constant value hint (the platform cuts a hint at about this length too); a longer one ends with an ellipsis, the tooltip has it all. */
     const val MAX_VALUE_CHARS = 30
 
     /**
-     * The label of the argument hint of [paramName] (`name:`, `args...:` for the first variadic argument), or null when it would say
-     * nothing new (the gopls `parameterNames` hint, with its noise cut):
+     * The label of the argument hint of [paramName] (`name:`, `args...:` for the first variadic argument), or null. The provider asks
+     * for literal arguments only, as GoLand does (a string, a number, `-1`, `nil`, `true`, `false`; an identifier, a selector, a call or
+     * a composite literal says enough by itself), and the label is null when:
      * - the parameter has no name or is `_`;
-     * - the argument names it already: an identifier of the argument is the name, or ends with it for names of three letters and more
-     *   (`name`, `user.Name`, `userName` for `name`; `reqCtx` for `ctx`);
-     * - the function has one parameter and its own name says it (`SetName("x")`, `strconv.Itoa(i)`), or that parameter has a one-letter
-     *   name (`strings.ToLower(s)`, `fmt.Println(a...)`).
+     * - the function has one parameter (not variadic) and its own name says it (`SetName("x")`).
+     * One-letter names are shown (`produce(/*n:*/ 3)`, `fmt.Println(/*a...:*/ "x")`), as GoLand shows them.
      */
-    fun parameterLabel(paramName: String?, argumentText: String, calleeName: String?, paramCount: Int, variadic: Boolean): String? {
+    fun parameterLabel(paramName: String?, calleeName: String?, paramCount: Int, variadic: Boolean): String? {
         if (paramName.isNullOrEmpty() || paramName == "_") return null
-        if (namesParameter(argumentText, paramName)) return null
-        if (paramCount == 1 && (paramName.length == 1 || calleeName?.contains(paramName, ignoreCase = true) == true)) return null
+        if (paramCount == 1 && !variadic && paramName.length > 1 && calleeName?.contains(paramName, ignoreCase = true) == true) return null
         return paramName + (if (variadic) "..." else "") + ":"
     }
 
-    fun namesParameter(argumentText: String, paramName: String): Boolean = WORD.findAll(argumentText).any { word ->
-        word.value.equals(paramName, ignoreCase = true) || (paramName.length >= 3 && word.value.endsWith(paramName, ignoreCase = true))
-    }
+    /** The hint at a value of `return` for the named result [resultName] (GoLand's "Show return parameters"); null for an unnamed or blank result. */
+    fun resultLabel(resultName: String?): String? = resultName?.takeIf { it.isNotEmpty() && it != "_" }?.let { "$it:" }
 
     /** `= 1`, `= 1, 2`; long texts are cut at [MAX_VALUE_CHARS]. */
     fun constantsText(values: List<GoConstant>): String {

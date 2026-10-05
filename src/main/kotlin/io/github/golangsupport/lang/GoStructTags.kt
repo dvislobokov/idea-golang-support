@@ -125,9 +125,9 @@ object GoStructTags {
         return Context.AtValue(key, prefix.trimStart(), lastSeparator < 0, chosen)
     }
 
-    /** The values offered at the first part of a key: the name of the field in the cases people use, `-` to skip it. */
+    /** The values offered at the first part of a key: the name of the field in GoLand's four styles, then in lower case. */
     fun names(key: Key, fieldName: String): List<String> = when (key.naming) {
-        Naming.FIELD -> listOf(GoGenerators.snakeCase(fieldName), GoGenerators.camelCase(fieldName), fieldName.lowercase(), fieldName, GoGenerators.snakeCase(fieldName).replace('_', '-')).distinct()
+        Naming.FIELD -> (GoStructTagCompletion.nameStyles(fieldName) + fieldName.lowercase()).distinct()
         Naming.UPPER_SNAKE -> listOf(GoGenerators.snakeCase(fieldName).uppercase())
         Naming.NONE -> emptyList()
     }
@@ -167,6 +167,8 @@ class GoStructTagCompletionContributor : CompletionContributor() {
         when (context) {
             is GoStructTags.Context.AtKey -> {
                 val keys = result.withPrefixMatcher(context.prefix)
+                // GoLand's first item; only in a closed tag (`Age int ``): a tag still being typed runs to the end of the file
+                if (GoStructTagKeyToAllFields.applicable(parameters.originalFile, offset)) keys.addElement(GoStructTagKeyToAllFields.item())
                 for (key in GoStructTags.KEYS) {
                     if (key.name in context.present) continue
                     keys.addElement(LookupElementBuilder.create(key.name).withTypeText(key.description, true).withIcon(AllIcons.Nodes.Tag).withInsertHandler(KEY_INSERT))
@@ -175,9 +177,9 @@ class GoStructTagCompletionContributor : CompletionContributor() {
             is GoStructTags.Context.AtValue -> {
                 val values = result.withPrefixMatcher(context.prefix)
                 val key = GoStructTags.key(context.key)
-                // the style the struct's other fields use for this key comes first (`user_id` next to `first_name`)
+                // the style the struct's other fields use for this key comes first (`user_id` next to `first_name`), then GoLand's four
                 val styled = parameters.originalFile.findElementAt(offset - 1)?.let { GoStructTagCompletion.tagAt(it, offset) }?.first
-                    ?.let { GoStructTagCompletion.namesFor(it, context.key) }.orEmpty().takeIf { key?.naming == GoStructTags.Naming.FIELD }.orEmpty()
+                    ?.let { GoStructTagCompletion.namesFor(it, context.key, observedOnly = true) }.orEmpty().takeIf { key?.naming == GoStructTags.Naming.FIELD }.orEmpty()
                 if (context.first && key != null) (styled + GoStructTags.names(key, field)).distinct().forEachIndexed { i, name ->
                     values.addElement(com.intellij.codeInsight.completion.PrioritizedLookupElement.withPriority(
                         LookupElementBuilder.create(name).withTypeText("name of $field", true).withIcon(AllIcons.Nodes.Field), 100.0 - i,

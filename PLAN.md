@@ -13,6 +13,7 @@
 3. **Уровень 2 (день)** — подтесты и табличные кейсы, покрытие, fuzz, рендереры отладчика, монитор для отладки.
 4. **Уровень 3 (дни)** — бенчмарки, горутины, зависимости, remote debug, ошибки сборки без gopls, endpoints.
 5. **Уровень 4 (неделя+)** — профили в IDE, Go templates, свой парсер (сделан 2026-10-02, `MIGRATION.md`).
+6. **Паритет с GoLand (G1–G9)** — все различия, снятые с живого GoLand 2026.2.3; это то, что значит «доведи до уровня GoLand» (см. `CLAUDE.md`).
 
 ---
 
@@ -146,9 +147,116 @@
 - [x] (2026-10-02) Свой парсер и PSI — go-psi, подключён шагами 1–10 `MIGRATION.md`.
 - [ ] **cgo** — навигация и подсветка вокруг `import "C"`: только если появится запрос (ассемблер `.s` сделан в 0.2.60–0.2.66).
 
+## Паритет с GoLand (по живой разведке 2026-10-05)
+
+Источник — `docs/goland-analysis/README.md` (что снято и как), дампы `docs/goland-analysis/dumps/*.txt` (точные пункты, тексты, списки), сверка
+с кодом плагина 2026-10-05 (по исходникам, не роботом; «частично» — что есть, но не как у GoLand). Блоки — в порядке пользы для ежедневной
+работы; внутри блока — сверху вниз. Эталон спорного поведения — переснять на GoLand (`tools/ui-robot/goland/start-goland.ps1`), не угадывать.
+Готовность блока: юнит/платформенные тесты + те же пробы на песочнице (`TARGET=plugin`, `tools/ui-robot/goland/analysis/*.sh`) совпали с дампом GoLand.
+Пересечения с уровнями выше помечены ссылкой — делать один раз.
+
+### G1. Вид кода в редакторе (≈6 дней)
+- [x] (2026-10-05) **Сворачивание однострочников**: `if err != nil { return … }`, функция с одним `return`, ветка `case` → в одну строку с текстом тела; пустые функции
+  и типы; 5 галочек в Code Folding (`CodeFoldingOptionsProvider`), по умолчанию включены, как в GoLand. `GoFoldingBuilder`. 1 день.
+- [x] (2026-10-05) **Цветовые ключи как у GoLand** (64, `color-keys-go.txt`; у нас 28): экспортируемая / локальная функция, вызов, тип (struct / interface, объявление
+  и ссылка), константа (пакетная экспорт. / локальная / локальная в функции), переменная пакета; получатель отдельно от параметра; поле экспорт. / нет;
+  вызов переменной-функции и поля-функции; встроенная переменная `nil`; переменная области (`for` / `if` / `switch`); переприсваивание в `:=`;
+  экранирование valid / invalid; `:`; comment keyword (`go:generate`); build-тег (тег, скобки, операторы). Fallback новых ключей — на текущие, чтобы
+  пользовательские схемы не поменялись. `GoColors`, `GoSemanticHighlightingAnnotator`, `GoColorSettingsPage` (демо-текст с примерами). 2 дня.
+- [x] (2026-10-05) **Затенение для всех переменных**: ключ `GO_SHADOWING_VARIABLE` + weak warning «Declaration of 'x' shadows declaration at line N» + Alt+Enter
+  Navigate to shadowed declaration / Rename. Сейчас только `GoShadowedError` и модификатор gopls. Resolve по областям. 1 день.
+- [x] (2026-10-05) **Глаголы `%d %s %v %w`** подсвечены внутри строки формата printf-подобных (тот же список, что у `GoPrintfInspection`); ключ verb с fallback на escape. 0,5 дня.
+- [x] (2026-10-05) **Тег структуры**: ключ / `:` / значение / прочий текст — свои ключи; разбор из `GoStructTags`. 0,5 дня.
+- [x] (2026-10-05) **Bash в `//go:generate`**: `MultiHostInjector`, если в IDE есть Shell Script (опциональная зависимость). 0,5 дня.
+- [x] (2026-10-05) **Гаттер Recursive call** у вызова своей же функции / метода. `LineMarkerProvider` + resolve. 0,5 дня.
+
+### G2. Code vision и inlay (≈2 дня)
+- [x] (2026-10-05) Линза **Implement interface** над каждой структурой → наш Implement Methods (Ctrl+I). 0,5 дня.
+- [x] (2026-10-05) Линза **Add method to interface and all its implementations** над интерфейсом (вместе с G6 «Add Method»). 0,5 дня.
+- [x] (2026-10-05) Usages / implementations **в конце строки** объявления, как в GoLand (`CodeVisionAnchorKind` по настройке платформы, проверить, что наша позиция настраивается). 0,5 дня.
+- [x] (2026-10-05) Inlay **имена результатов** (`Show return parameters`) у вызова с именованными результатами; inlay параметров — только у литералов и неясных аргументов, как в GoLand (сверить с `GoParameterNameHintsProvider`). 0,5 дня.
+- Линзы «Batch syntax update» и «What's New» (modernizer) — в G5. Линзы Change signature / Rename refactoring и Code author — платформенные, проверить, что работают с нашим PSI.
+
+### G3. Completion (≈5 дней)
+- [x] (2026-10-05) **Fill all fields… / Fill selected fields…** пунктами в lookup литерала `T{}` (первыми); выбор — литерал по строкам с выравниванием; Fill selected — диалог выбора полей. Сейчас только intention. 1 день.
+- [x] (2026-10-05) **Значение константы в пункте**: `MaxItems = 10 : untyped int`, `Debug = iota : Level`. 0,5 часа.
+- [x] (2026-10-05) Верхний уровень: пункты **`func (*T) : Method`** и **`func : Implement Interface...`**. Часы.
+- [x] (2026-10-05) **Имена параметров по типу** в `func g(`: `err error`, `base Base`, `string2 string`. Вместе с подсказкой имён переменных (уровень 3, «Подсказки имён переменных»). 1 день вместе.
+- [x] (2026-10-05) Тег: в completion ключа — пункт **Add tag key to all fields…**; имя в `json:"…"` — **4 стиля** (`full-name`, `full_name`, `FullName`, `fullName`), сверить с `GoStructTagCompletionContributor`. Часы.
+- [x] (2026-10-05) **Postfix в общем списке после `.`** (как у GoLand: `c.` → поля, методы, затем `p`, `panic`, `par`…), подбор по типу (`error` → `as is nn nil notnil`). 0,5 дня.
+- [x] (2026-10-05) **Postfix — недостающие ключи** (`postfix-go.txt`): `! & * d p pointer dereference aappend appendAssign cap copy close delete complex imag real println remove as is parseInt parseFloat`;
+  `.sort` — вариант по типу (`sort.Strings` / `Ints` / `Float64s` / `sort.Sort`); `.print` как builtin `print()` — у нас `fmt.Println`, оставить свой и добавить `println`;
+  **вывод имён**: `.var` → `area := c.Area()`, `.forr` → `name` из `names` (единственное число). `GoPostfixTemplates`. 1 день.
+- [x] (2026-10-05) **Live templates — недостающие** (`live-templates-go.txt`): `map p imports consts vars types iota :`, тег `xml`; 9 шаблонов Go Template — вместе с Go templates (уровень 4). Часы.
+- [ ] (G3, осталось; 2026-10-05 роботом сверены `c.`, `err.`, `Holder{`, `fmt.`, Alt+Enter в 12 точках и подсветка `analysis.go` — см. ROADMAP) Сверить роботом пробы, где у нас «есть» по коду: `return err` первым на пустой строке, `&Square` по набору методов, импорт при выборе `json.Marshal`, json/v2, раскладка времени `YYYY MM DD`.
+
+### G4. Alt+Enter — недостающие intentions (≈3 дня; список — `intentions-go.txt` и `alt-enter-…txt`)
+- [x] (2026-10-05) Импорты: **Import for side-effects** (`_`), **Add import alias**, **Add / Remove dot import alias**.
+- [x] (2026-10-05) Строки и вызовы: **Put arguments / elements on separate lines** (и обратно), **Join concatenated string literals**, Convert to raw string (сверить с `GoChangeQuote`).
+- [x] (2026-10-05) Формат: **Add format string argument**, **Exclude string formatting function** (+ список printf-подобных в настройках, G8).
+- [x] (2026-10-05) Ошибки: **Do not report this method/function anymore** у Unhandled error (список исключений в инспекции).
+- [x] (2026-10-05) Теги: **Change field name style in tags**, **Update key value in tags**.
+- [x] (2026-10-05) Выражения: **Flip binary operator**, **Negate expression** (4 вида), **Specify type explicitly**, **Specify dot type** (не Go: фича Go templates).
+- [x] (2026-10-05) Литералы: **Remove keys from struct literal**, **Fill all fields recursively** (не сделано, отдельный заход), **Move field assignment to struct initialization**.
+- [x] (2026-10-05) Сигнатуры: **Expand / Reuse signature types** (`a, b int` ↔ `a int, b int`).
+- [x] (2026-10-05) Объявления: **Export** (переименовать в экспортируемое), **Migrate function parameter to method receiver**, Merge declaration up / via comma, Split declarations (сверить с `GoSplitDeclaration`).
+- [x] (2026-10-05) Unresolved: Create **global variable** / **parameter** (функция, метод, поле, тип, переменная есть).
+- [x] (2026-10-05) Навигация из Alt+Enter: Go to Implementations / Interfaces / Method Specifications, **Navigate to shadowed declaration** (G1); **Run go generate** на комментарии / файле / пакете.
+- [x] (2026-10-05) go.mod: Merge a group of directives / all directives / directive up, Update dependencies….
+
+### G5. Go fix (modernize) нативно (≈4 дня)
+- [ ] Группа инспекций **Go fix** (уровень `SYNTAX_UPDATE`, с учётом версии `go` в go.mod), простые: `any` вместо `interface{}`, `min`/`max`, range over int, переменная цикла (go 1.22),
+  `slices.Contains` / `Sort` / `Backward`, `strings.Cut` / `CutPrefix`, `maps` вместо цикла, `new(expr)`, `omitzero`, `//go:build` вместо `// +build`, embed-литерал,
+  `net.JoinHostPort`, `WaitGroup.Go`, `t.Context()`, `reflect.TypeFor`, `errors.AsType`. Каждое — инспекция + quick fix + тест. 2,5 дня.
+- [ ] С типами: итераторы stdlib, `strings.SplitSeq`, `strings.Builder` в цикле, `atomic.Int64` и т. п., `unsafe.*`; `//go:fix inline` (нужен inline). 1 день.
+- [ ] **Refactor | Update Syntax…**: все Go fix по области с предпросмотром (платформенный `RunInspection` по группе) + линза «Batch syntax update» + «What's New» в файле. 0,5 дня.
+
+### G6. Рефакторинги и Generate (≈6 дней)
+- [ ] **Override Methods** (Ctrl+O): методы встроенных типов для переопределения. 0,5 дня.
+- [ ] **Extract Interface** — уровень 3, пункт уже есть. **Introduce Type** (тип из выражения / литерала). 1 день.
+- [ ] **Add Method** во интерфейс **и все реализации** (сейчас только в интерфейс) + **Remove method from interface and all its implementations**. 1 день.
+- [ ] **Introduce Parameter**, **Introduce Field**, **Introduce Parameter Object**. 2 дня.
+- [ ] **Invert Boolean**, **Copy** (файл / объявление). 1 день.
+- [ ] Generate: **Tests for package**, **Method** (диалог), **Copyright**. 0,5 дня.
+
+### G7. Инспекции — недостающие (≈6 дней; `inspections-go.txt`)
+- [ ] Дёшево (синтаксис / локально), по часу–два: Code style — пробел после `//`, комментарий экспортируемого начинается не с имени (сверить с `GoDocComment`),
+  текст ошибки с заглавной / точкой, `var A, B int` у экспортируемых, имя начинается с имени пакета, имя получателя (`this`/`self`, разные имена), лишний `else`
+  после `return`, `for true`, тип-параметр в нижнем регистре, `timeoutSeconds time.Duration`, несортированные импорты, snake_case, литерал без имён полей;
+  Redundancy — пустое объявление, `[]T{}` → nil slice, лишние запятая / `;` / скобки / алиас импорта / тип в составном литерале / тип у `var`/`const`,
+  неиспользуемый тип-параметр; Probable bugs — `defer recover()`, имя = имя импорта, предобъявленное имя, `strings.Replace(..., 0)`, неправильный `iota`, пробел в директиве,
+  кривой build-тег (сверить с `GoBuildConstraint`), смешанные получатели, `err.(*T)` на обёрнутой ошибке; Control flow — присваивание получателю. 3 дня.
+- [ ] Data flow: **Constant condition**, **Error may be not nil**, **деление на ноль**, **межпроцедурное разыменование nil** (сверить с `GoNilDereference`), лишнее приведение,
+  экспортируемая функция с неэкспортируемым типом. На `GoDataflow`. 2 дня.
+- [ ] Неиспользуемые **функции, глобальные переменные, константы, типы** (не только экспортируемое) — поиск ссылок по индексу. 0,5 дня.
+- [ ] go.mod: **deprecated** модуль, **retracted** версия (данные `go list -m -u -json`), миграция replace → go.work, неразрешённый путь в `ignore`, слияние `require`. 0,5 дня.
+- [ ] **Vulnerable API usage** в коде (результат govulncheck — подсветка вызова) и импорт уязвимого пакета. 1 день.
+
+### G8. Настройки и помощь при наборе (≈4 дня)
+- [ ] Imports: **Add unambiguous imports on the fly**, **Optimize imports on the fly**, **Show import popup**, исключения из импорта / completion. 1 день.
+- [ ] Code Style \| Go \| Imports: сортировка goimports / gofmt / нет, группа «проект» или local prefixes (`goimports -local`), один блок, удалять лишние алиасы; Wrapping (аргументы, литералы, параметры). 1 день.
+- [ ] Список **printf-подобных функций** (Settings + Alt+Enter Exclude). Часы.
+- [ ] Переименование: **файл ↔ `_test`-файл**, **тег** при переименовании поля, каталог ↔ пакет (есть) — с выбором Show options / делать / не делать. 0,5 дня.
+- [ ] **Вставка JSON → тип Go** при Ctrl+V (спросить / конвертировать / как есть; `CopyPastePreProcessor`). 0,5 дня.
+- [ ] Actions on Save: **Optimize imports** отдельной галочкой (Reformat есть); Go Modules: галочка vendoring, загрузка зависимостей (всегда / никогда / для проекта). Часы.
+- [ ] Debugger Data Views \| Go: формат целых (dec / hex), адреса указателей, String() view. 0,5 дня.
+- [ ] Набор: **Reformat block on typing `}`** (сейчас только отступы) — сверить вживую в GoLand (робот не воспроизвёл); заготовка doc-комментария по Enter после `//` над объявлением. 0,5 дня.
+
+### G9. Запуск, инструменты, меню (≈5 дней)
+- [ ] **Coverage через платформенный `CoverageEngine`**: окно Coverage, отчёт, Run with Coverage как executor (сейчас свой gutter). 2 дня (это «второй шаг» из уровня 2).
+- [ ] **Run with Profiler** executor (CPU / Memory / Block / Mutex) поверх поля Profile + наш просмотрщик (уровень 4). 0,5 дня без просмотрщика.
+- [ ] **Dump Goroutines** работающего процесса (SIGQUIT / `debug.SetTraceback`, на Windows — через delve attach, `GoSnapshot`). 0,5 дня.
+- [ ] Tools \| Go Tools: **Go Fmt Project**, **Go Vet File**, **Goimports File**; **Share in Playground** / Run in Playground (с подтверждением, как у GoLand). 0,5 дня.
+- [ ] Project view: **Sync Go Module**, GOPATH — Add Directory to Current Project / Detach. 0,5 дня.
+- [ ] Окно **Go Optimization** нативно: `go build -gcflags=-m=2` → инлайнинг, escape, bounds checks в дереве и в редакторе (сейчас только переключатель gopls). 1 день.
+- [ ] Тулбар: Go Settings… и Actions on Save… кнопками. Часы.
+- [ ] Analyze Data Flow to / from Here на `GoDataflow`; Locate Duplicates и Code Cleanup для Go — проверить, что платформа работает с нашим PSI и quick fix-ами. 1 день.
+
+Не повторяем: rr (Record / Rewind / Debug Saved Trace) — только Linux, уйдёт вместе с Run Targets; Code author — платформа (VCS).
+
 ## Не делать (по замыслу плагина)
 
-- Настройки code style сверх отступов — стиль задаёт gofmt.
+- Настройки code style, которые спорят с gofmt. Исключение — то, что gofmt не решает и есть в GoLand (G8): группировка импортов как у `goimports -local`, перенос длинных строк.
 - Свои списки опций gopls — страница генерируется из `gopls api-json`.
 - Платформенный DAP-клиент — свой клиент работает в любой IDE.
 - HTTP Client, Database, Docker, Kubernetes, Terraform, AI — это плагины IDE-хоста, не Go-плагина.

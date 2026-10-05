@@ -1,0 +1,675 @@
+##### EditorPopupMenu
+[+] Editor Popup Menu  {EditorPopupMenu}  
+  [+] <no text>  {ShowIntentionsGroup}  
+    Show Context Actions  {ShowIntentionActions}  Alt+Enter
+    -----
+  [+] <no text>  {LightEditModePopup}  
+    <no text>  {LightEditOpenFileInProject}  
+    -----
+  Cut  {$Cut}  Ctrl+X
+  Copy  {$Copy}  Ctrl+C
+  Copy as Rich Text  {CopyAsRichText}  
+  Paste  {$Paste}  Ctrl+V
+  [+] Copy / Paste Special  {Copy.Paste.Special}  
+    Copy Reference  {CopyReference}  Ctrl+Alt+Shift+C
+    [+] <no text>  {Git.Hosting.Copy.Link.Group}  
+      [+] Copy Link to GitLab Repository  {GitLab.Copy.Link}  
+      [+] Copy Link to GitHub Repository  {GitHub.Copy.Link}  
+    Copy as Plain Text  {CopyAsPlainText}  
+    Paste as Plain Text  {EditorPasteSimple}  Ctrl+Alt+Shift+V
+    Paste from History…  {PasteMultiple}  Ctrl+Shift+V
+    Convert to cURL and Copy  {HTTPClientConvertToCurlAndCopy}  
+  Copy JSON Pointer  {JsonCopyPointer}  
+  Column Selection Mode  {EditorToggleColumnMode}  Alt+Shift+Insert
+  [+] <no text>  {Markdown.EditorContextMenuGroup}  
+    -----
+    [+] Table  {Markdown.TableContextMenuGroup}  
+      Insert Column Left  {Markdown.Table.InsertTableColumn.InsertBefore}  
+      Insert Column Right  {Markdown.Table.InsertTableColumn.InsertAfter}  
+      Insert Row Above  {Markdown.Table.InsertRow.InsertAbove}  
+      Insert Row Below  {Markdown.Table.InsertRow.InsertBelow}  
+      -----
+      [+] Column Alignment  {Markdown.TableColumnActions.ColumnAlignmentActions.Popup}  
+        [+] Set Column Alignment  {Markdown.Table.ColumnAlignmentActions}  
+          Align Left  {Markdown.Table.SetColumnAlignment.Left}  
+          Align Center  {Markdown.Table.SetColumnAlignment.Center}  
+          Align Right  {Markdown.Table.SetColumnAlignment.Right}  
+      Move Column Left  {Markdown.Table.SwapColumns.SwapWithLeftColumn}  
+      Move Column Right  {Markdown.Table.SwapColumns.SwapWithRightColumn}  
+      -----
+      Remove Column  {Markdown.Table.RemoveCurrentColumn}  
+      Remove Row  {Markdown.Table.RemoveCurrentRow}  
+    Insert…  {Markdown.Insert}  Alt+Insert
+  -----
+  [+] Editor Popup Menu Actions (1)  {EditorPopupMenu1}  
+    Find in Files  {FindSelectionInPath}  Ctrl+Shift+F
+    [+] <no text>  {EditorPopupMenu1.FindRefactor}  
+      Find Usages  {FindUsages}  Alt+F7
+      [+] Go To  {EditorPopupMenu.GoTo}  
+        [+] <no text>  {Console.TableResult.Navigate.Group}  
+          First Page  {Console.TableResult.FirstPage}  
+          Previous Page  {Console.TableResult.PreviousPage}  Ctrl+Alt+Up
+          Next Page  {Console.TableResult.NextPage}  Ctrl+Alt+Down
+          Last Page  {Console.TableResult.LastPage}  
+          -----
+        Jump to Navigation Bar  {ShowNavBar}  Alt+Home
+        Go to Declaration or Usages  {GotoDeclaration}  Ctrl+B
+        Edit Data  {Jdbc.OpenEditor.Data}  F4
+        Select in Database Explorer  {sql.SelectInDatabaseView}  Alt+Shift+B
+        Go to Implementation(s)  {GotoImplementation}  Ctrl+Alt+B
+        Go to Type Declaration  {GotoTypeDeclaration}  Ctrl+Shift+B
+        Go to Super Method  {GotoSuperMethod}  Ctrl+U
+        Related Symbol…  {GotoRelated}  Ctrl+Alt+Home
+        Go to Test  {GotoTest}  Ctrl+Shift+T
+        DDL  {Jdbc.OpenEditor.Grid.DDL}  Ctrl+Alt+Home
+        Row…  {GotoRow}  Ctrl+G
+        [+] <no text>  {Console.TableResult.Database.GoTo}  
+          Related Rows  {Console.TableResult.NavigateAction}  F4
+          Open URL  {Console.TableResult.OpenWebUrlAction}  F4
+          Open File URI  {Console.TableResult.OpenLocalFileAction}  F4
+        Referencing Result  {Console.TableResult.GotoReferencingResult}  Ctrl+B
+      -----
+      [+] Folding  {FoldingGroup}  
+        Expand  {ExpandRegion}  Ctrl+NumPad +
+        Expand Recursively  {ExpandRegionRecursively}  Ctrl+Alt+NumPad +
+        Expand All  {ExpandAllRegions}  Ctrl+Shift+NumPad +
+        -----
+        Collapse  {CollapseRegion}  Ctrl+NumPad -
+        Collapse Recursively  {CollapseRegionRecursively}  Ctrl+Alt+NumPad -
+        Collapse All  {CollapseAllRegions}  Ctrl+Shift+NumPad -
+        -----
+        [+] Expand to Level  {ExpandToLevel}  
+          1  {ExpandToLevel1}  Ctrl+NumPad *, 1
+          2  {ExpandToLevel2}  Ctrl+NumPad *, 2
+          3  {ExpandToLevel3}  Ctrl+NumPad *, 3
+          4  {ExpandToLevel4}  Ctrl+NumPad *, 4
+          5  {ExpandToLevel5}  Ctrl+NumPad *, 5
+        [+] Expand All to Level  {ExpandAllToLevel}  
+          1  {ExpandAllToLevel1}  Ctrl+Shift+NumPad *, 1
+          2  {ExpandAllToLevel2}  Ctrl+Shift+NumPad *, 2
+          3  {ExpandAllToLevel3}  Ctrl+Shift+NumPad *, 3
+          4  {ExpandAllToLevel4}  Ctrl+Shift+NumPad *, 4
+          5  {ExpandAllToLevel5}  Ctrl+Shift+NumPad *, 5
+        -----
+        [+] <no text>  {LanguageSpecificFoldingGroup}  
+          Expand Doc Comments  {ExpandDocComments}  
+          Collapse Doc Comments  {CollapseDocComments}  
+        -----
+        Toggle Folding  {ExpandCollapseToggleAction}  
+        -----
+        Fold Selection / Remove Region  {CollapseSelection}  Ctrl+.
+        Fold Code Block  {CollapseBlock}  Ctrl+Shift+.
+  -----
+  [+] <no text>  {EditorPopupMenu2}  
+    [+] SQL Scripts  {DatabaseView.ObjectContext.Sql.Scripts}  
+      SQL Generator…  {DatabaseView.SqlGenerator}  Ctrl+Alt+G
+      -----
+      Request and Copy Original DDL  {DatabaseView.CopyDdlFromDbAction}  
+      Generate DDL to Clipboard  {DatabaseView.CopyDdlAction}  Ctrl+Alt+Shift+G
+      Generate DDL to Query Console  {DatabaseView.OpenDdlInConsole}  Ctrl+Alt+Shift+B
+      [+] Context Templates  {DatabaseView.Context.Templates}  
+      -----
+      Run SQL Script…  {DatabaseView.ImportFromSql}  
+    Regenerate definition  {DDL.Editor.Regenerate}  
+    Import to Database…  {FileEditor.ImportToDatabase}  
+    View as Table  {FileEditor.OpenDataViewer}  
+    Edit as Table  {FileEditor.OpenDataEditor}  
+    Change File Language  {Scratch.ChangeLanguage}  
+    Change SQL Dialect  {sql.ChangeDialect}  
+    Duplicate  {Console.File.Duplicate}  
+  -----
+  [+] <no text>  {EditorPopupMenu3}  
+    Set Background Image  {Images.SetBackgroundImage}  
+  -----
+  Search with Google  {$SearchWeb}  
+  -----
+  [+] Editor Popup Menu Actions (2)  {EditorLangPopupMenu}  
+    -----
+    Rename…  {RenameElement}  Shift+F6
+    [+] Refactor  {RefactoringMenu}  
+      Refactor This…  {Refactorings.QuickListPopupAction}  Ctrl+Alt+Shift+T
+      Rename…  {RenameElement}  Shift+F6
+      Change Signature…  {ChangeSignature}  Ctrl+F6
+      Modify Object…  {DatabaseView.Ddl.AlterObject}  Ctrl+F6
+      Convert to Function Component  {ReactClassToFunctionComponentAction}  
+      Convert to Class Component  {ReactFunctionToClassComponentAction}  
+      -----
+      [+] Extract/Introduce  {IntroduceActionsGroup}  
+        Introduce Variable…  {IntroduceVariable}  Ctrl+Alt+V
+        Extract Routine...  {sql.ExtractFunctionAction}  Ctrl+Alt+M
+        Table alias...  {sql.IntroduceAliasAction}  
+        Introduce Constant…  {IntroduceConstant}  Ctrl+Alt+C
+        Introduce Field…  {IntroduceField}  Ctrl+Alt+F
+        Introduce Parameter…  {IntroduceParameter}  Ctrl+Alt+P
+        -----
+        Introduce Parameter Object…  {IntroduceParameterObject}  
+        -----
+        Extract Method…  {ExtractMethod}  Ctrl+Alt+M
+        -----
+        Extract Delegate…  {ExtractClass}  
+        Include File…  {ExtractInclude}  
+        Extract Interface…  {ExtractInterface}  
+        Introduce Type…  {GoIntroduceTypeAction}  
+        Add Method…  {GoAddMethodToInterfaceAction}  
+        Extract Superclass…  {ExtractSuperclass}  
+        Extract Module…  {ExtractModule}  
+        Type Alias…  {TypeScriptExtractTypeAlias}  
+        Extract Component…  {ReactExtractComponentAction}  
+        Subquery as CTE  {sql.ExtractNamedQueryAction}  
+      Inline…  {Inline}  Ctrl+Alt+N
+      -----
+      Move…  {Move}  F6
+      Copy…  {CopyElement}  F5
+      Safe Delete…  {SafeDelete}  Alt+Delete
+      -----
+      Pull Members Up…  {MembersPullUp}  
+      Push Members Down…  {MemberPushDown}  
+      Invert Boolean…  {InvertBoolean}  
+      [+] XML Refactorings  {XMLRefactoringMenu}  
+        Rename Tag…  {RenameTagAction}  
+        Rename Attribute…  {RenameAttributeAction}  
+        Delete Tag…  {DeleteTagAction}  
+        Delete Attribute…  {DeleteAttributeAction}  
+        Add Attribute…  {AddAttributeAction}  
+        Add Subtag…  {AddSubtagAction}  
+        Change Attribute Value..  {ChangeAttributeValueAction}  
+        Unwrap Tag…  {UnwrapTagAction}  
+        Wrap Tag…  {WrapTagAction}  
+        Wrap Tag Contents…  {WrapTagContentsAction}  
+        Convert Tag Contents To Attribute…  {ConvertContentsToAttributeAction}  
+        Replace Tag with Attribute…  {ReplaceTagWithAttributeAction}  
+        Replace Attribute with Tag…  {ReplaceAttributeWithTagAction}  
+        Move Attribute In…  {MoveAttributeInAction}  
+        Move Attribute Out…  {MoveAttributeOutAction}  
+      Update Syntax…  {GoSyntaxUpdateAction}  
+    Generate…  {Generate}  Alt+Insert
+    -----
+    [+] Debug Actions  {EditorPopupMenuDebug}  
+      Copy JS Script to Clipboard  {com.intellij.database.actions.ToDatabaseScriptTranslationCopyAction}  
+      Show JS Script  {com.intellij.database.actions.ToDatabaseScriptTranslationPreviewAction}  
+      -----
+      Evaluate Expression…  {EvaluateExpression}  Alt+F8
+      Run to Cursor  {RunToCursor}  Alt+F9
+      Force Run to Cursor  {ForceRunToCursor}  Ctrl+Alt+F9
+      Add to Watches  {Debugger.AddToWatch}  
+      Add Inline Watch  {Debugger.AddInlineWatch}  
+      Evaluate in Console  {Debugger.EvaluateInConsole}  
+      -----
+      [+] <no text>  {EditorPopupMenuDebugHotSwap}  
+        Compile and Reload Modified Files  {XDebugger.Hotswap.Modified.Files}  
+        -----
+    [+] Compile/Run Actions  {EditorPopupMenu.Run}  
+      [+] Run Configurations  {RunContextPopupGroup}  
+        [+] <no text>  {RunContextGroup}  
+          [+] <no text>  {RunContextGroupInner}  
+            [+] <no text>  {RunContextExecutorsGroup}  
+              [+] Run 'go build analysis.go...'  {RunClass}  Ctrl+Shift+F10
+              [+] Debug 'go build analysis.go...'  {DebugClass}  
+            [+] More Run/Debug  {RunContextGroupMore}  
+              [+] Run 'go build analysis.go...' with Coverage  {RunCoverage}  
+              [+] Record and Debug context configuration  {RecordAndDebug}   [hidden] [disabled]
+              [+] Run with Profiler  {DefaultProfilerExecutorGroupContextActionId}  
+                [+] Profile with 'CPU Profiler' context configuration  {RunContextAction} [hidden] [disabled]
+                [+] Profile with 'Memory Profiler' context configuration  {RunContextAction} [hidden] [disabled]
+                [+] Profile with 'Blocking Profiler' context configuration  {RunContextAction} [hidden] [disabled]
+                [+] Profile with 'Mutex Profiler' context configuration  {RunContextAction} [hidden] [disabled]
+                [+] Profile 'go build analysis.go...' with 'GoLand Profiler'  {RunContextAction}
+              [+] Create Run Configuration  {CreateRunConfiguration}  
+              -----
+              [+] Run context configuration  {newConfigurationRunClass}   [hidden] [disabled]
+              [+] Debug context configuration  {newConfigurationDebugClass}   [hidden] [disabled]
+              [+] Run with Coverage context configuration  {newConfigurationRunCoverage}   [hidden] [disabled]
+              [+] Record and Debug context configuration  {newConfigurationRecordAndDebug}   [hidden] [disabled]
+              [+] Run with Profiler  {newConfigurationDefaultProfilerExecutorGroupContextActionId}  
+                [+] Profile with 'CPU Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+                [+] Profile with 'Memory Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+                [+] Profile with 'Blocking Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+                [+] Profile with 'Mutex Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+                [+] Profile with 'GoLand Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+              [+] <no text>  {CreateNewRunConfiguration}  
+          -----
+          [+] Helm  {Kubernetes.HelmActions}  
+            Helm Template  {Kubernetes.HelmRenderTemplate}  
+            Helm Dependency Update  {Kubernetes.HelmDependencyUpdate}  
+            Helm Lint  {Kubernetes.HelmLint}  
+            Configure Helm Parameters  {Kubernetes.ConfigureHelmParameters}  
+          [+] Interact with Cluster  {Kubernetes.ClusterInteractionActions}  
+            Apply (Current Cluster Not Configured)  {Kubernetes.Apply}  
+            Delete (Current Cluster Not Configured)  {Kubernetes.Delete}  
+            Reload Content From Cluster  {Kubernetes.ReloadContent}  
+            Compare with Cluster  {Kubernetes.CompareWithCluster}  
+            [+] Set Current Cluster  {Kubernetes.SetCurrentContext}  
+          [+] <no text>  {Console.Jdbc.RunContextGroup}  
+            [+] Attach Data Source  {Console.Jdbc.ChooseDataSource}  
+            -----
+            <no text>  {DatabaseView.Alterations.RecompileAction}  
+            [+] Explain Plan  {Console.Jdbc.ExplainGroup}  
+              Explain Plan  {Console.Jdbc.ExplainPlan}  
+              Explain Analyse  {Console.Jdbc.ExplainAnalyse}  
+            Execute  {Console.Jdbc.Execute}  Ctrl+Enter
+            Execute Selection as Single Statement  {Console.Jdbc.Execute.Selection}  
+            Export Data…  {Console.TableResult.ShowDumpDialogAction}  
+            Debug  {Console.Jdbc.Debug}  
+            Debug Routine…  {DatabaseView.DebugRoutine}  
+            -----
+    [+] <no text>  {SplitRevealGroup}  
+      Open in Right Split  {OpenInRightSplit}  Shift+Enter
+      Open in Split with Chooser…  {SplitChooser}  Alt+Shift+Enter
+      [+] Open In  {RevealGroup}  
+        Show in File Manager  {RevealIn}  
+        Open in Associated Application  {OpenInAssociatedApplication}  
+        [+] <no text>  {OpenInBrowserGroup}  
+        File Path  {ShowFilePath}  Ctrl+Alt+F12
+        Open in Terminal  {Terminal.OpenInTerminal}  
+        Open in Terminal  {Terminal.OpenInReworkedTerminal}  
+        Playground  {GoOpenInPlaygroundAction}  
+        [+] <no text>  {Git.Hosting.Open.In.Browser.Group}  
+          [+] View in browser  {GitLab.Open.In.Browser}  
+          [+] <no text>  {Github.Open.In.Browser}  
+    -----
+    [+] VCS/LVCS Actions  {VersionControlsGroup}  
+      [+] Local History  {LocalHistory}  
+        Show History…  {LocalHistory.ShowHistory}  
+        Show History for Selection…  {LocalHistory.ShowSelectionHistory}  
+        -----
+        Show Project History…  {LocalHistory.ShowProjectHistory}  
+        Recent Changes  {RecentChanges}  Alt+Shift+C
+        Put Label…  {LocalHistory.PutLabel}  
+      [+] Version Control Group  {VcsFileGroupPopup}  
+    -----
+    [+] External Tools  {ExternalToolsGroup}  
+    Update tag with Emmet  {EmmetUpdateTag}  
+    [+] Terraform Tools  {TfTools}  
+      Initialize  {TfInitAction}  
+      Format Files  {TfFmtFileAction}  Ctrl+Alt+Shift+F
+      Generate Providers Metadata  {TfGenerateLocalMetadataAction}  
+    [+] OpenTofu Tools  {TofuTools}  
+      Initialize  {TfInitAction}  
+      Format Files  {TfFmtFileAction}  Ctrl+Alt+Shift+F
+      Generate Providers Metadata  {TfGenerateLocalMetadataAction}  
+    Show Applied Styles For Tag  {ShowAppliedStylesAction}  
+    Go Mod Tidy  {com.goide.vgo.actions.VgoTidyAction}  
+    Go Mod Vendor  {com.goide.vgo.actions.VgoVendorAction}  
+    Sync Go Module  {com.goide.vgo.actions.VgoSyncAction}  
+    [+] Go Tools  {GoTools}  
+      Go Fmt File  {GoFmtFileAction}  Ctrl+Alt+Shift+F
+      Go Fmt Project  {GoFmtProjectAction}  Ctrl+Alt+Shift+P
+      Goimports File  {GoImportsFileAction}  
+      Go Generate File  {GoGenerateFileAction}  Ctrl+Alt+G
+      Go Vet File  {GoVetFileAction}  
+      Share in Playground  {GoShareInPlaygroundAction}  Ctrl+Alt+Shift+S
+  Compare with Clipboard  {CompareClipboardWithSelection}  
+  Compare with Last Specification Revision  {ComputeDiffWithPreviousRevisionAction}  
+  [+] Diagrams  {UML.EditorGroup}  
+    <no text>  {ShowUmlDiagram}  Ctrl+Alt+Shift+U
+    <no text>  {ShowUmlDiagramPopup}  Ctrl+Alt+U
+  [+] Deployment  {PublishGroupPopupMenu}  
+    [+] <no text>  {PublishGroup.Base}  
+      Upload to Default Server  {PublishGroup.Upload}  
+      Upload To…  {PublishGroup.UploadTo}  Ctrl+Alt+Shift+X
+      Upload All Open Files to Default Server  {PublishGroup.UploadAllOpenFiles}  
+      Upload All Open Files To…  {PublishGroup.UploadAllOpenFilesTo}  
+      Download from Default Server  {PublishGroup.Download}  
+      Download From…  {PublishGroup.DownloadFrom}  
+      -----
+      Compare Local File with Deployed Version  {PublishGroup.CompareLocalVsRemote}  
+      Compare with Deployed To…  {PublishGroup.CompareLocalVsRemoteWith}  
+      Sync Local Subtree with Deployed  {PublishGroup.SyncLocalVsRemote}  
+      Sync with Deployed To…  {PublishGroup.SyncLocalVsRemoteWith}  
+    Edit Remote File  {RemoteHostView.EditRemoteFile}  
+  Insert Schema Annotation  {prototext.InsertSchemaDirective}  
+  Export Mermaid Diagram  {Mermaid.ExportDiagram}  
+  Evaluate JSONPath Expression…  {JsonPathEvaluateAction}  
+  Export Self-Contained Specification (JSON)  {SwGenerateJsonSelfContainedSpecificationAction}  
+  Export Self-Contained Specification (YAML)  {SwGenerateYamlSelfContainedSpecificationAction}  
+  [+] <no text>  {ShowJsbtTasks}  
+    <no text>  {ShowGruntTasks}  
+    <no text>  {ShowGulpTasks}  
+    <no text>  {ShowNpmScripts}  
+  <no text>  {JS.TypeScript.Compile}  
+  Include Child '.d.ts' Files  {JS.TypeScript.Include.Generated.Declarations}  
+  Install Node.js Dependencies  {InstallNodeLocalDependencies}  
+  <no text>  {Stylelint.Fix}  
+  <no text>  {Javascript.Linters.EsLint.Fix}  
+  <no text>  {Javascript.Linters.StandardJS.Fix}  
+  Apply ESLint Code Style Rules  {EslintImportCodeStyle}  
+  Visualize Source Map  {VisualizeSourceMap}  
+  Add Sources to Source Map  {AddSourcesContentToSourceMap}  
+  <no text>  {Code.Review.Editor.Show.Diff}  
+  <no text>  {Code.Review.Editor.New.Comment}  Ctrl+Shift+X
+  [+] Git  {Git.Stage.Index.File.Menu}  
+    Show Local Version  {Git.Stage.Show.Local}  
+    Compare with HEAD Version  {Git.Stage.Compare.Staged.Head}  
+    Compare with Local Version  {Git.Stage.Compare.Staged.Local}  
+    Compare HEAD, Staged and Local Versions  {Git.Stage.Compare.Three.Versions}  
+  Create Snippet…  {GitLab.Create.Snippet}  
+  Create Gist…  {Github.Create.Gist}  
+  Toggle viewed/not viewed state  {Github.PullRequest.Changed.MarkViewed.Toggle}  Ctrl+Shift+S
+  [+] Dev Containers  {Dev.Container.Actions}  
+    Create Dev Container and Clone Sources…  {Create.Dev.Container.CloneSources}  
+    [+] Create Dev Container and Mount Sources…  {Create.Dev.Container.MountSources}  
+    -----
+    Manage Dev Container Backends  {Dev.Container.ManageBackends}  
+    Show Dev Containers  {Dev.Container.ShowRecent}  
+    [+] <no text>  {Dev.Container.File.Actions}  
+      -----
+      <no text>  {Dev.Container.ideSettings.AddSettingsAction}  
+  Change Template Data Language  {ChangeTemplateDataLanguage}  
+
+##### EditorTabPopupMenu
+[+] Editor Tab Popup Menu  {EditorTabPopupMenu}  
+  [+] Editor Close Actions  {CloseEditorsGroup}  
+    Close Tab  {CloseContent}  Ctrl+F4
+    Close Other Tabs  {CloseAllEditorsButActive}  
+    Close All Tabs  {CloseAllEditors}  
+    Close Unmodified Tabs  {CloseAllUnmodifiedEditors}  
+    Close All but Pinned  {CloseAllUnpinnedEditors}  
+    Close Tabs to the Left  {CloseAllToTheLeft}  
+    Close Tabs to the Right  {CloseAllToTheRight}  
+    Close All Read-Only Tabs  {CloseAllReadonly}  
+    Open as Editor Tab  {MoveToolWindowTabToEditorAction}  
+  -----
+  Copy JSON Pointer  {JsonCopyPointer}  
+  Change Template Data Language  {ChangeTemplateDataLanguage}  
+  [+] Copy Path/Reference…  {CopyReferencePopupGroup}  
+    [+] <no text>  {CopyFileReference}  
+      Absolute Path  {CopyAbsolutePath}  Ctrl+Shift+C
+      File Name  {CopyFileName}  
+      -----
+      Path with Line Number  {CopyPathWithLineNumber}  
+      Path from Content Root  {CopyContentRootPath}  
+      Path from Source Root  {CopySourceRootPath}  
+      Path From Repository Root  {CopyPathFromRepositoryRootProvider}  
+      [+] <no text>  {Git.Hosting.Copy.Link.Group}  
+        [+] Copy Link to GitLab Repository  {GitLab.Copy.Link}  
+        [+] Copy Link to GitHub Repository  {GitHub.Copy.Link}  
+    -----
+    [+] <no text>  {CopyExternalReferenceGroup}  
+      Toolbox URL  {CopyTBXReference}  
+  -----
+  Show Diff in Separate Window  {Vcs.Diff.ShowDiffInNewWindow}  
+  Show All Files in One Diff View  {Vcs.Diff.EnableDisableCombinedDiff}  
+  [+] <no text>  {Vcs.Diff.EditorTabs.Group}  
+    Collapse All Files  {Vcs.CombinedDiff.ToggleCollapseAllBlock}  
+  Split Right  {SplitVertically}  
+  Split and Move Right  {MoveTabRight}  
+  Split Down  {SplitHorizontally}  
+  Split and Move Down  {MoveTabDown}  
+  Move to Opposite Group  {MoveEditorToOppositeTabGroup}  
+  Open in Opposite Group  {OpenEditorInOppositeTabGroup}  
+  Change Splitter Orientation  {ChangeSplitOrientation}  
+  Unsplit  {Unsplit}  
+  Unsplit All  {UnsplitAll}  
+  -----
+  Pin Active Tab  {PinActiveEditorTab}  
+  Keep Tab Open  {KeepTabOpen}  
+  Open Tab in New Window  {EditSourceInNewWindow}  Shift+F4
+  Configure Editor Tabs…  {ConfigureEditorTabs}  
+  -----
+  Reopen Closed Tab  {ReopenClosedTab}  
+  [+] <no text>  {Database.EditorTabPopupMenu}  
+    -----
+    Shorten Tab Titles  {Console.Toggle.Shorten.Tab.Titles}  
+    Duplicate  {Console.File.Duplicate}  
+  [+] Bookmarks  {popup@ExpandableBookmarkContextMenu}  
+    Add Bookmark to Another List  {AddAnotherBookmark}  
+    Rename Bookmark…  {EditBookmark}  
+    Toggle Bookmark  {ToggleBookmark}  F11
+  [+] Editor Tab Popup Menu Actions (1)  {EditorTabPopupMenuEx}  
+    -----
+    Change File Language  {Scratch.ChangeLanguage}  
+    Associate with File Type…  {AssociateWithFileType}  
+    [+] Mark File As  {MarkFileAs}  
+      Override File Type  {OverrideFileTypeAction}  
+      Revert File Type Override  {ReverteOverrideFileTypeAction}  
+    -----
+    [+] Run Configurations  {RunContextPopupGroup}  
+      [+] <no text>  {RunContextGroup}  
+        [+] <no text>  {RunContextGroupInner}  
+          [+] <no text>  {RunContextExecutorsGroup}  
+            [+] Run 'go build analysis.go...'  {RunClass}  Ctrl+Shift+F10
+            [+] Debug 'go build analysis.go...'  {DebugClass}  
+          [+] More Run/Debug  {RunContextGroupMore}  
+            [+] Run 'go build analysis.go...' with Coverage  {RunCoverage}  
+            [+] Record and Debug context configuration  {RecordAndDebug}   [hidden] [disabled]
+            [+] Run with Profiler  {DefaultProfilerExecutorGroupContextActionId}  
+              [+] Profile with 'CPU Profiler' context configuration  {RunContextAction} [hidden] [disabled]
+              [+] Profile with 'Memory Profiler' context configuration  {RunContextAction} [hidden] [disabled]
+              [+] Profile with 'Blocking Profiler' context configuration  {RunContextAction} [hidden] [disabled]
+              [+] Profile with 'Mutex Profiler' context configuration  {RunContextAction} [hidden] [disabled]
+              [+] Profile 'go build analysis.go...' with 'GoLand Profiler'  {RunContextAction}
+            [+] Create Run Configuration  {CreateRunConfiguration}  
+            -----
+            [+] Run context configuration  {newConfigurationRunClass}   [hidden] [disabled]
+            [+] Debug context configuration  {newConfigurationDebugClass}   [hidden] [disabled]
+            [+] Run with Coverage context configuration  {newConfigurationRunCoverage}   [hidden] [disabled]
+            [+] Record and Debug context configuration  {newConfigurationRecordAndDebug}   [hidden] [disabled]
+            [+] Run with Profiler  {newConfigurationDefaultProfilerExecutorGroupContextActionId}  
+              [+] Profile with 'CPU Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+              [+] Profile with 'Memory Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+              [+] Profile with 'Blocking Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+              [+] Profile with 'Mutex Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+              [+] Profile with 'GoLand Profiler' context configuration  {RunNewConfigurationContextAction} [hidden] [disabled]
+            [+] <no text>  {CreateNewRunConfiguration}  
+        -----
+        [+] Helm  {Kubernetes.HelmActions}  
+          Helm Template  {Kubernetes.HelmRenderTemplate}  
+          Helm Dependency Update  {Kubernetes.HelmDependencyUpdate}  
+          Helm Lint  {Kubernetes.HelmLint}  
+          Configure Helm Parameters  {Kubernetes.ConfigureHelmParameters}  
+        [+] Interact with Cluster  {Kubernetes.ClusterInteractionActions}  
+          Apply (Current Cluster Not Configured)  {Kubernetes.Apply}  
+          Delete (Current Cluster Not Configured)  {Kubernetes.Delete}  
+          Reload Content From Cluster  {Kubernetes.ReloadContent}  
+          Compare with Cluster  {Kubernetes.CompareWithCluster}  
+          [+] Set Current Cluster  {Kubernetes.SetCurrentContext}  
+        [+] <no text>  {Console.Jdbc.RunContextGroup}  
+          [+] Attach Data Source  {Console.Jdbc.ChooseDataSource}  
+          -----
+          <no text>  {DatabaseView.Alterations.RecompileAction}  
+          [+] Explain Plan  {Console.Jdbc.ExplainGroup}  
+            Explain Plan  {Console.Jdbc.ExplainPlan}  
+            Explain Analyse  {Console.Jdbc.ExplainAnalyse}  
+          Execute  {Console.Jdbc.Execute}  Ctrl+Enter
+          Execute Selection as Single Statement  {Console.Jdbc.Execute.Selection}  
+          Export Data…  {Console.TableResult.ShowDumpDialogAction}  
+          Debug  {Console.Jdbc.Debug}  
+          Debug Routine…  {DatabaseView.DebugRoutine}  
+          -----
+    [+] <no text>  {SplitRevealGroup}  
+      Open in Right Split  {OpenInRightSplit}  Shift+Enter
+      Open in Split with Chooser…  {SplitChooser}  Alt+Shift+Enter
+      [+] Open In  {RevealGroup}  
+        Show in File Manager  {RevealIn}  
+        Open in Associated Application  {OpenInAssociatedApplication}  
+        [+] <no text>  {OpenInBrowserGroup}  
+        File Path  {ShowFilePath}  Ctrl+Alt+F12
+        Open in Terminal  {Terminal.OpenInTerminal}  
+        Open in Terminal  {Terminal.OpenInReworkedTerminal}  
+        Playground  {GoOpenInPlaygroundAction}  
+        [+] <no text>  {Git.Hosting.Open.In.Browser.Group}  
+          [+] View in browser  {GitLab.Open.In.Browser}  
+          [+] <no text>  {Github.Open.In.Browser}  
+    -----
+    [+] VCS/LVCS Actions  {VersionControlsGroup}  
+      [+] Local History  {LocalHistory}  
+        Show History…  {LocalHistory.ShowHistory}  
+        Show History for Selection…  {LocalHistory.ShowSelectionHistory}  
+        -----
+        Show Project History…  {LocalHistory.ShowProjectHistory}  
+        Recent Changes  {RecentChanges}  Alt+Shift+C
+        Put Label…  {LocalHistory.PutLabel}  
+      [+] Version Control Group  {VcsFileGroupPopup}  
+    -----
+    [+] External Tools  {ExternalToolsGroup}  
+    Rename File…  {RenameFile}  
+  [+] Deployment  {PublishGroupPopupMenu}  
+    [+] <no text>  {PublishGroup.Base}  
+      Upload to Default Server  {PublishGroup.Upload}  
+      Upload To…  {PublishGroup.UploadTo}  Ctrl+Alt+Shift+X
+      Upload All Open Files to Default Server  {PublishGroup.UploadAllOpenFiles}  
+      Upload All Open Files To…  {PublishGroup.UploadAllOpenFilesTo}  
+      Download from Default Server  {PublishGroup.Download}  
+      Download From…  {PublishGroup.DownloadFrom}  
+      -----
+      Compare Local File with Deployed Version  {PublishGroup.CompareLocalVsRemote}  
+      Compare with Deployed To…  {PublishGroup.CompareLocalVsRemoteWith}  
+      Sync Local Subtree with Deployed  {PublishGroup.SyncLocalVsRemote}  
+      Sync with Deployed To…  {PublishGroup.SyncLocalVsRemoteWith}  
+    Edit Remote File  {RemoteHostView.EditRemoteFile}  
+  [+] <no text>  {ShowJsbtTasks}  
+    <no text>  {ShowGruntTasks}  
+    <no text>  {ShowGulpTasks}  
+    <no text>  {ShowNpmScripts}  
+  Install Node.js Dependencies  {InstallNodeLocalDependencies}  
+  Visualize Source Map  {VisualizeSourceMap}  
+  Add Sources to Source Map  {AddSourcesContentToSourceMap}  
+  [+] Go Tools  {GoTools}  
+    Go Fmt File  {GoFmtFileAction}  Ctrl+Alt+Shift+F
+    Go Fmt Project  {GoFmtProjectAction}  Ctrl+Alt+Shift+P
+    Goimports File  {GoImportsFileAction}  
+    Go Generate File  {GoGenerateFileAction}  Ctrl+Alt+G
+    Go Vet File  {GoVetFileAction}  
+    Share in Playground  {GoShareInPlaygroundAction}  Ctrl+Alt+Shift+S
+  Create Snippet…  {GitLab.Create.Snippet}  
+  Create Gist…  {Github.Create.Gist}  
+
+##### EditorGutterPopupMenu
+[+] Editor Gutter Popup Menu  {EditorGutterPopupMenu}  
+  [+] <no text>  {EditorGutterVcsPopupMenu}  
+    Annotate  {Annotate}  
+    -----
+  [+] <no text>  {popup@BookmarkContextMenu}  
+    Add Bookmark to Another List  {AddAnotherBookmark}  
+    Rename Bookmark…  {EditBookmark}  
+    Toggle Bookmark  {ToggleBookmark}  F11
+    Remove Mnemonic  {DeleteMnemonicFromBookmark}  
+    Toggle Bookmark Mnemonic…  {ToggleBookmarkWithMnemonic}  Ctrl+F11
+    -----
+  Soft-Wrap  {EditorToggleUseSoftWraps}  
+  Configure Soft Wraps…  {ConfigureSoftWraps}  
+  -----
+  -----
+  [+] Appearance  {EditorGutterPopupMenu.Appearance}  
+    Show Line Numbers  {EditorGutterToggleGlobalLineNumbers}  
+    Breakpoints Over Line Numbers  {XDebugger.Show.Breakpoints.Over.Line.Numbers}  
+    Show Indent Guides  {EditorGutterToggleGlobalIndentLines}  
+    Show Sticky Lines  {EditorGutterToggleGlobalStickyLines}  
+    [+] Breadcrumbs  {EditorBreadcrumbsSettings}  
+      Top  {EditorBreadcrumbsShowAbove}  
+      Bottom  {EditorBreadcrumbsShowBelow}  
+      Don't Show  {EditorBreadcrumbsHideBoth}  
+  Configure Gutter Icons…  {ShowGutterIconsSettings}  
+  Remove other breakpoints  {XDebugger.RemoveAllButThisBreakpoint}  
+  Disable other breakpoints  {XDebugger.DisableAllButThisBreakpoint}  
+
+##### GenerateGroup
+[+] Generate  {GenerateGroup}  
+  [+] <no text>  {SqlGenerateGroup}  
+  [+] <no text>  {GoGenerateForStruct}  
+    Constructor  {GoGenerateConstructorAction}  
+    Getter and Setter  {GoGenerateGetterSetterAction}  
+    Getter  {GoGenerateGetterAction}  
+    Setter  {GoGenerateSetterAction}  
+    Type from JSON  {GoGenerateTypeFromJsonAction}  
+    Method  {GoGenerateMethodAction}  
+    Struct Fields from JSON  {GoGenerateStructFieldsFromJsonAction}  
+  [+] <no text>  {GoTestGenerateGroup}  
+  Helm Dependency  {Kubernetes.HelmGenerateDependency}  
+  Constructor  {Generate.Constructor.JavaScript}  
+  Getter  {Generate.GetAccessor.JavaScript}  
+  Setter  {Generate.SetAccessor.JavaScript}  
+  Getter and Setter  {Generate.GetSetAccessor.JavaScript}  
+  [+] <no text>  {ShGenerateGroup}  
+    For Loop  {ShGenerateForLoop}  
+    While Loop  {ShGenerateWhileLoop}  
+    Until Loop  {ShGenerateUntilLoop}  
+  XML Tag…  {GenerateXmlTag}  
+  [+] <no text>  {JsTestFrameworkCodeGeneratorGroup}  
+    <no text>  {JasmineGenerateNewSuiteAction}  
+    <no text>  {JasmineGenerateNewSpecAction}  
+    <no text>  {JasmineGenerateBeforeEachMethodAction}  
+    <no text>  {JasmineGenerateAfterEachMethodAction}  
+    -----
+    <no text>  {QUnitGenerateNewTestAction}  
+    <no text>  {QUnitGenerateSetupAction}  
+    <no text>  {QUnitGenerateTearDownAction}  
+    -----
+  Implement Members…  {Generate.Missing.Members.TypeScript}  Ctrl+I
+  Implement Methods…  {Generate.Missing.Members.ES6}  Ctrl+I
+  Override Methods…  {OverrideMethods}  Ctrl+O
+  Implement Methods…  {ImplementMethods}  Ctrl+I
+  Delegate Methods…  {DelegateMethods}  
+  [+] <no text>  {GenerateFromTestCreatorsGroup}  
+  Add a New Column to the Table Before the Current One  {HtmlAddTableColumnBefore}  
+  Add a New Column to the Table After the Current One  {HtmlAddTableColumnAfter}  
+  Copyright  {GenerateCopyright}  
+  [+] <no text>  {Markdown.InsertGroup}  
+    Create Link  {Markdown.Styling.CreateLink}  Ctrl+Shift+U
+    Generate Table Of Contents  {Markdown.GenerateTableOfContents}  
+    Insert Table  {Markdown.InsertEmptyTable}  
+    Insert Image  {org.intellij.plugins.markdown.ui.actions.styling.InsertImageAction}  Ctrl+U
+  Language Properties  {org.editorconfig.configmanagement.generate.EditorConfigGenerateLanguagePropertiesAction}  
+
+##### RefactoringMenu
+[+] Refactor  {RefactoringMenu}  
+  Refactor This…  {Refactorings.QuickListPopupAction}  Ctrl+Alt+Shift+T
+  Rename…  {RenameElement}  Shift+F6
+  Change Signature…  {ChangeSignature}  Ctrl+F6
+  Modify Object…  {DatabaseView.Ddl.AlterObject}  Ctrl+F6
+  Convert to Function Component  {ReactClassToFunctionComponentAction}  
+  Convert to Class Component  {ReactFunctionToClassComponentAction}  
+  -----
+  [+] Extract/Introduce  {IntroduceActionsGroup}  
+    Introduce Variable…  {IntroduceVariable}  Ctrl+Alt+V
+    Extract Routine...  {sql.ExtractFunctionAction}  Ctrl+Alt+M
+    Table alias...  {sql.IntroduceAliasAction}  
+    Introduce Constant…  {IntroduceConstant}  Ctrl+Alt+C
+    Introduce Field…  {IntroduceField}  Ctrl+Alt+F
+    Introduce Parameter…  {IntroduceParameter}  Ctrl+Alt+P
+    -----
+    Introduce Parameter Object…  {IntroduceParameterObject}  
+    -----
+    Extract Method…  {ExtractMethod}  Ctrl+Alt+M
+    -----
+    Extract Delegate…  {ExtractClass}  
+    Include File…  {ExtractInclude}  
+    Extract Interface…  {ExtractInterface}  
+    Introduce Type…  {GoIntroduceTypeAction}  
+    Add Method…  {GoAddMethodToInterfaceAction}  
+    Extract Superclass…  {ExtractSuperclass}  
+    Extract Module…  {ExtractModule}  
+    Type Alias…  {TypeScriptExtractTypeAlias}  
+    Extract Component…  {ReactExtractComponentAction}  
+    Subquery as CTE  {sql.ExtractNamedQueryAction}  
+  Inline…  {Inline}  Ctrl+Alt+N
+  -----
+  Move…  {Move}  F6
+  Copy…  {CopyElement}  F5
+  Safe Delete…  {SafeDelete}  Alt+Delete
+  -----
+  Pull Members Up…  {MembersPullUp}  
+  Push Members Down…  {MemberPushDown}  
+  Invert Boolean…  {InvertBoolean}  
+  [+] XML Refactorings  {XMLRefactoringMenu}  
+    Rename Tag…  {RenameTagAction}  
+    Rename Attribute…  {RenameAttributeAction}  
+    Delete Tag…  {DeleteTagAction}  
+    Delete Attribute…  {DeleteAttributeAction}  
+    Add Attribute…  {AddAttributeAction}  
+    Add Subtag…  {AddSubtagAction}  
+    Change Attribute Value..  {ChangeAttributeValueAction}  
+    Unwrap Tag…  {UnwrapTagAction}  
+    Wrap Tag…  {WrapTagAction}  
+    Wrap Tag Contents…  {WrapTagContentsAction}  
+    Convert Tag Contents To Attribute…  {ConvertContentsToAttributeAction}  
+    Replace Tag with Attribute…  {ReplaceTagWithAttributeAction}  
+    Replace Attribute with Tag…  {ReplaceAttributeWithTagAction}  
+    Move Attribute In…  {MoveAttributeInAction}  
+    Move Attribute Out…  {MoveAttributeOutAction}  
+  Update Syntax…  {GoSyntaxUpdateAction}  
+
+##### AnalyzeMenu (not found)
+
+actions dumped: 592
+

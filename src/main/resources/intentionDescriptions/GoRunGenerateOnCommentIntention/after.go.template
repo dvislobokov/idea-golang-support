@@ -1,0 +1,3 @@
+// go generate -run '^//go:generate stringer -type=Level$' level.go
+<spot>//go:generate stringer -type=Level</spot>
+type Level int

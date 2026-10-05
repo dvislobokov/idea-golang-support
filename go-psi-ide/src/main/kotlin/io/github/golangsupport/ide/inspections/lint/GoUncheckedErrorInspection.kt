@@ -1,9 +1,16 @@
 package io.github.golangsupport.ide.inspections.lint
 
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.codeInsight.intention.LowPriorityAction
+import com.intellij.codeInsight.intention.preview.IntentionPreviewInfo
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.codeInspection.options.OptPane
+import com.intellij.openapi.util.text.StringUtil
+import com.intellij.profile.codeInspection.InspectionProjectProfileManager
+import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
@@ -43,13 +50,19 @@ import io.github.golangsupport.semantic.types.GoPointerType
  * errcheck while typing: a call standing alone as a statement whose last result is `error` (`os.Open("x")`, `f.Close()`, a method
  * through an interface). errcheck's defaults: `go` / `defer` calls, `_ = f()` and type assertions are not reported, nor the symbols of
  * its embedded exclude list ([EXCLUDED]). A `//nolint` / `//nolint:errcheck` at the end of the line silences it as it silences
- * golangci-lint.
+ * golangci-lint. The user's own excludes ([excludedFunctions], filled by "Do not report this method/function anymore") are names in the
+ * same form as [EXCLUDED]; the errcheck rule of the rule engine reads them from the profile's instance ([configuredExclusions]).
  *
  * Not behind [io.github.golangsupport.ide.GoIdeFeature.DIAGNOSTICS] (so not a [io.github.golangsupport.ide.inspections.GoAnalysisInspectionBase]):
  * gopls has no errcheck analyzer, so with diagnostics from gopls nothing else reports this before the file is saved for golangci-lint;
  * there is no second source to stand down for. Not dumb-aware: callee signatures need the stub indices.
  */
 class GoUncheckedErrorInspection : LocalInspectionTool() {
+
+    /** Functions and methods not to report (`path.Name`, `path.Type.Name`), besides errcheck's [EXCLUDED]; shown in the options. */
+    @JvmField var excludedFunctions: MutableList<String> = ArrayList()
+
+    override fun getOptionsPane(): OptPane = OptPane.pane(OptPane.stringList("excludedFunctions", "Do not report calls of (path.Func, path.Type.Method):"))
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         if (holder.file !is GoFile) return PsiElementVisitor.EMPTY_VISITOR
@@ -59,10 +72,10 @@ class GoUncheckedErrorInspection : LocalInspectionTool() {
         }
         return object : PsiElementVisitor() {
             override fun visitElement(element: PsiElement) {
-                if (element !is GoCallExpr || !isUnchecked(element)) return
+                if (element !is GoCallExpr || !isUnchecked(element, excludedFunctions)) return
                 val shown = GoLintPsi.calleeReference(element)?.text
                 val message = if (shown != null) "Error return value of `$shown` is not checked" else "Error return value is not checked"
-                holder.registerProblem(element, message, GoHandleUncheckedErrorFix(), GoAssignToBlankFix())
+                holder.registerProblem(element, message, *fixes(element))
             }
         }
     }
@@ -87,27 +100,54 @@ class GoUncheckedErrorInspection : LocalInspectionTool() {
         /** The writers `fmt.Fprint*` may ignore errors of: `*bytes.Buffer`, `*strings.Builder` (by type) and `os.Stderr` (the variable). */
         private val EXCLUDED_WRITERS = setOf("bytes.Buffer", "strings.Builder")
 
-        /** Whether [call] stands alone as a statement, returns `error` last, is not excluded and is not marked `//nolint` for errcheck. */
-        fun isUnchecked(call: GoCallExpr): Boolean {
+        const val DO_NOT_REPORT = "Do not report this method/function anymore"
+
+        /**
+         * Whether [call] stands alone as a statement, returns `error` last, is not excluded (errcheck's defaults and the user's [excluded],
+         * by default those of the inspection in the current profile) and is not marked `//nolint` for errcheck.
+         */
+        fun isUnchecked(call: GoCallExpr, excluded: Collection<String> = configuredExclusions(call)): Boolean {
             if (!GoLintPsi.isExpressionStatement(call)) return false
             val results = GoSemanticService.getInstance(call.project).calleeSignature(call)?.results ?: return false
             if (results.isEmpty() || !GoZeroValues.isError(results.last().type)) return false
-            return !isExcluded(call) && !hasNolint(call)
+            if (isExcluded(call)) return false
+            if (excluded.isNotEmpty() && calleeName(call) in excluded) return false
+            return !hasNolint(call)
+        }
+
+        /** The inspection of the current profile (where the user's excludes live); null outside a project profile. */
+        fun profileInstance(element: PsiElement): GoUncheckedErrorInspection? =
+            InspectionProjectProfileManager.getInstance(element.project).currentProfile.getUnwrappedTool(SHORT_NAME, element) as? GoUncheckedErrorInspection
+
+        /** The user's excludes of the current profile. */
+        fun configuredExclusions(element: PsiElement): List<String> = profileInstance(element)?.excludedFunctions.orEmpty()
+
+        /** The fixes of a finding at [call]; "Do not report this method/function anymore" adds its callee to the profile's excludes. */
+        fun fixes(call: GoCallExpr): Array<LocalQuickFix> {
+            val name = calleeName(call) ?: return arrayOf(GoHandleUncheckedErrorFix(), GoAssignToBlankFix())
+            return arrayOf(GoHandleUncheckedErrorFix(), GoAssignToBlankFix(), GoDoNotReportCalleeFix(name))
+        }
+
+        /** The name of [call]'s callee as the excludes spell it: `path.Name` for a function, `path.Type.Name` for a method (by the receiver's static type). */
+        fun calleeName(call: GoCallExpr): String? {
+            val callee = GoLintPsi.calleeReference(call) ?: return null
+            val name = callee.identifier.text
+            val service = GoSemanticService.getInstance(call.project)
+            val target = service.resolve(callee).singleOrNull()
+            if (target is GoFunctionDeclaration) return GoLintPsi.packagePath(target)?.let { "$it.$name" }
+            val receiver = callee.expression ?: return null
+            val type = service.typeOf(receiver).let { if (it is GoPointerType) it.elem else it } as? GoNamedType ?: return null
+            return "${type.pkgPath}.${type.name}.$name"
         }
 
         private fun isExcluded(call: GoCallExpr): Boolean {
             val callee = GoLintPsi.calleeReference(call) ?: return false
             val name = callee.identifier.text
-            val service = GoSemanticService.getInstance(call.project)
-            val target = service.resolve(callee).singleOrNull()
-            if (target is GoFunctionDeclaration) {
-                val path = GoLintPsi.packagePath(target) ?: return false
-                if (path == "fmt" && name in FPRINT) return excludedWriter(call.arguments.firstOrNull() as? GoExpression)
-                return "$path.$name" in EXCLUDED
+            val target = GoSemanticService.getInstance(call.project).resolve(callee).singleOrNull()
+            if (target is GoFunctionDeclaration && GoLintPsi.packagePath(target) == "fmt" && name in FPRINT) {
+                return excludedWriter(call.arguments.firstOrNull() as? GoExpression)
             }
-            val receiver = callee.expression ?: return false
-            val type = service.typeOf(receiver).let { if (it is GoPointerType) it.elem else it } as? GoNamedType ?: return false
-            return "${type.pkgPath}.${type.name}.$name" in EXCLUDED
+            return calleeName(call) in EXCLUDED
         }
 
         private fun excludedWriter(writer: GoExpression?): Boolean {
@@ -191,6 +231,30 @@ class GoHandleUncheckedErrorFix : LocalQuickFix {
             GoBlock::class.java, GoIfStatement::class.java, GoForStatement::class.java, GoExprSwitchStatement::class.java, GoTypeSwitchStatement::class.java,
             GoSelectStatement::class.java, GoExprCaseClause::class.java, GoTypeCaseClause::class.java, GoCommClause::class.java, GoFunctionLit::class.java,
         )
+    }
+}
+
+/**
+ * Do not report this method/function anymore: adds [name] to [GoUncheckedErrorInspection.excludedFunctions] of the current profile's
+ * instance (also read by the errcheck rule) and restarts the highlighting. The tool is changed in place and the profile told so: the
+ * ModCommand way (`AddToInspectionOptionListFix`) finds no tool through the profile's option controller in the light test profile.
+ */
+class GoDoNotReportCalleeFix(private val name: String) : LocalQuickFix, LowPriorityAction {
+    override fun getFamilyName(): String = GoUncheckedErrorInspection.DO_NOT_REPORT
+
+    override fun startInWriteAction(): Boolean = false
+
+    override fun generatePreview(project: Project, previewDescriptor: ProblemDescriptor): IntentionPreviewInfo =
+        IntentionPreviewInfo.Html("Adds <code>${StringUtil.escapeXmlEntities(name)}</code> to the functions the inspection does not report.")
+
+    override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
+        val element = descriptor.psiElement ?: return
+        val inspection = GoUncheckedErrorInspection.profileInstance(element) ?: return
+        if (name !in inspection.excludedFunctions) inspection.excludedFunctions.add(name)
+        val profile = InspectionProjectProfileManager.getInstance(project).currentProfile
+        profile.profileChanged()
+        ProjectInspectionProfileManager.getInstance(project).fireProfileChanged(profile)
+        DaemonCodeAnalyzer.getInstance(project).restart()
     }
 }
 

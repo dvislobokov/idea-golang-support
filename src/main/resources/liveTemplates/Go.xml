@@ -199,4 +199,44 @@
     <variable name="ERR" expression="" defaultValue='"err"' alwaysStopAt="true"/>
     <context><option name="GO_EXPRESSION" value="true"/></context>
   </template>
+  <!-- GoLand's set (docs/goland-analysis/dumps/live-templates-go.txt): same keys, texts and variables; GO_FILE is GO_TOP_LEVEL here, GO_TAG is GO_STRUCT_FIELD -->
+  <template name="map" value="map[$KEY_TYPE$]$VALUE_TYPE$" description="Map type" toReformat="false" toShortenFQNames="false">
+    <variable name="KEY_TYPE" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <variable name="VALUE_TYPE" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <context><option name="GO_TYPE" value="true"/></context>
+  </template>
+  <template name="p" value="package $NAME$" description="Package declaration" toReformat="false" toShortenFQNames="false">
+    <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
+  </template>
+  <template name="imports" value="import (&#10;&#9;&quot;$END$&quot;&#10;)&#10;" description="Imports declaration" toReformat="false" toShortenFQNames="false">
+    <context><option name="GO_TOP_LEVEL" value="true"/></context>
+  </template>
+  <template name="consts" value="const (&#10;&#9;$NAME$ = $VALUE$$END$&#10;)&#10;" description="Constants declaration" toReformat="false" toShortenFQNames="false">
+    <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <variable name="VALUE" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <context><option name="GO_TOP_LEVEL" value="true"/><option name="GO_STATEMENT" value="true"/></context>
+  </template>
+  <template name="vars" value="var (&#10;&#9;$NAME$ = $VALUE$$END$&#10;)&#10;" description="Variables declaration" toReformat="false" toShortenFQNames="false">
+    <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <variable name="VALUE" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <context><option name="GO_TOP_LEVEL" value="true"/><option name="GO_STATEMENT" value="true"/></context>
+  </template>
+  <template name="types" value="type (&#10;&#9;$END$&#10;)&#10;" description="Types declaration" toReformat="false" toShortenFQNames="false">
+    <context><option name="GO_TOP_LEVEL" value="true"/><option name="GO_STATEMENT" value="true"/></context>
+  </template>
+  <template name="iota" value="const $NAME$ $TYPE$ = iota" description="Iota constant declaration" toReformat="false" toShortenFQNames="false">
+    <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <variable name="TYPE" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <context><option name="GO_TOP_LEVEL" value="true"/><option name="GO_STATEMENT" value="true"/></context>
+  </template>
+  <template name=":" value="$NAME$ := $VALUE$" description="Variable declaration :=" toReformat="false" toShortenFQNames="false">
+    <variable name="NAME" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <variable name="VALUE" expression="" defaultValue='""' alwaysStopAt="true"/>
+    <context><option name="GO_STATEMENT" value="true"/></context>
+  </template>
+  <template name="xml" value="`xml:&quot;$FIELD_NAME$&quot;$END$`" description="`xml:&quot;&quot;`" toReformat="false" toShortenFQNames="false">
+    <variable name="FIELD_NAME" expression="" defaultValue="" alwaysStopAt="true"/>
+    <context><option name="GO_STRUCT_FIELD" value="true"/></context>
+  </template>
 </templateSet>

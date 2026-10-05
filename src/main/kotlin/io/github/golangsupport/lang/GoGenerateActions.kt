@@ -316,11 +316,15 @@ class GoGenerateStructTagsAction : GoGenerateAction() {
          * written after the type of a declaration without one. A declaration of several names is tagged after its first one.
          */
         fun tagEdits(fields: List<GoStructPsi.Field>, kinds: List<String>, case: GoGenerators.TagCase, omitEmpty: Boolean): List<Pair<TextRange, String>> =
+            tagEdits(fields, kinds, case.apply, omitEmpty)
+
+        /** [tagEdits] with the names written by [naming] (the style the struct uses already: Add Tag Key to All Fields of completion). */
+        fun tagEdits(fields: List<GoStructPsi.Field>, kinds: List<String>, naming: (String) -> String, omitEmpty: Boolean): List<Pair<TextRange, String>> =
             fields.distinctBy { it.declaration }.mapNotNull { field ->
                 val value = existingTagValue(field)
                 // a backquote cannot go into the raw string the keys are written to
                 if (value != null && '`' in value) return@mapNotNull null
-                val tag = GoGenerators.tagFor(field.name, field.exported, value, kinds, case, omitEmpty) ?: return@mapNotNull null
+                val tag = GoGenerators.tagFor(field.name, field.exported, value, kinds, naming, omitEmpty) ?: return@mapNotNull null
                 val existing = field.declaration.tag
                 if (existing != null) existing.textRange to tag
                 else {

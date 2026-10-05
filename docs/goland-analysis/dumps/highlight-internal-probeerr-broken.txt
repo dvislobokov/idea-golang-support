@@ -1,0 +1,134 @@
+##### document markup: 83 highlighters
+  1:12-1:20  [TYPO] layer 3000  «probeerr»  TIP: Typo: In word 'probeerr'
+  2:9-2:17  [GO_PACKAGE] layer 3000  «probeerr»
+  7:2-7:11  [ERRORS_ATTRIBUTES] layer 5000  «"strings"»  TIP: Unused import STRIPE
+  10:6-12:2  [STICKY_LINE_MARKER] layer 0  «Reader interface {⏎	Read() string⏎}»
+  10:6-10:12  [GO_PACKAGE_EXPORTED_INTERFACE] layer 3000  «Reader»
+  10:6-10:12  [] layer 3000  «Reader» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to ImplementationsClick or press Ctrl+Alt+B to navigate]
+  11:2-11:6  [] layer 3000  «Read» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to ImplementationsClick or press Ctrl+Alt+B to navigate]
+  11:2-11:6  [GO_EXPORTED_FUNCTION] layer 3000  «Read»
+  11:9-11:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  14:6-14:10  [] layer 3000  «impl» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to InterfacesClick or press Ctrl+U to navigate]
+  14:6-14:10  [GO_PACKAGE_LOCAL_STRUCT] layer 3000  «impl»
+  14:6-14:19  [STICKY_LINE_MARKER] layer 0  «impl struct{}»
+  16:8-16:12  [GO_LOCAL_STRUCT_REFERENCE] layer 3000  «impl»
+  16:14-16:41  [STICKY_LINE_MARKER] layer 0  «Read() string { return "" }»
+  16:14-16:18  [GO_EXPORTED_FUNCTION] layer 3000  «Read»
+  16:14-16:18  [] layer 3000  «Read» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to Method SpecificationsClick or press Ctrl+U to navigate]
+  16:21-16:27  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  18:6-18:9  [GO_LOCAL_FUNCTION] layer 3000  «get»
+  18:6-21:2  [STICKY_LINE_MARKER] layer 0  «get() Reader {⏎	var p *impl⏎	return p⏎}»
+  18:12-18:18  [GO_EXPORTED_INTERFACE_REFERENCE] layer 3000  «Reader»
+  19:6-19:7  [GO_LOCAL_VARIABLE] layer 3000  «p»
+  19:9-19:13  [GO_LOCAL_STRUCT_REFERENCE] layer 3000  «impl»
+  20:9-20:10  [GO_LOCAL_VARIABLE] layer 3000  «p»
+  23:6-23:12  [GO_EXPORTED_FUNCTION] layer 3000  «Broken»
+  23:6-23:12  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Broken»  TIP: Unused function 'Broken'
+  23:6-39:2  [STICKY_LINE_MARKER] layer 0  «Broken(items []string) int {⏎	unused := 42⏎	os.Rem»
+  23:13-23:18  [GO_FUNCTION_PARAMETER] layer 3000  «items»
+  23:21-23:27  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  23:29-23:32  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  24:2-24:8  [GO_LOCAL_VARIABLE] layer 3000  «unused»
+  24:2-24:8  [ERRORS_ATTRIBUTES] layer 5000  «unused»  TIP: Unused variable 'unused' STRIPE
+  25:2-25:4  [GO_PACKAGE] layer 3000  «os»
+  25:5-25:11  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Remove»
+  25:5-25:11  [INFORMATION_ATTRIBUTES] layer 3000  «Remove»  TIP: Unused result: 'os.Remove("tmp")'
+  25:5-25:11  [WARNING_ATTRIBUTES] layer 4000  «Remove»  TIP: Unhandled error STRIPE
+  26:2-26:5  [GO_PACKAGE] layer 3000  «fmt»
+  26:6-26:12  [INFORMATION_ATTRIBUTES] layer 3000  «Printf»  TIP: Unused result: 'fmt.Printf("%d items\n", "many")'
+  26:6-26:12  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Printf»
+  26:14-26:16  [INFO_ATTRIBUTES] layer 3750  «%d»  TIP: Placeholder argument '"many"' has the wrong type 'string' (%d)
+  26:14-26:16  [GO_VALID_STRING_ESCAPE] layer 3000  «%d»
+  27:2-27:3  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  28:2-28:3  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  28:6-28:7  [INFO_ATTRIBUTES] layer 3750  «x»  TIP: Value of 'x' is assigned to itself
+  28:6-28:7  [GO_LOCAL_VARIABLE] layer 3000  «x»
+  29:6-29:7  [GO_SCOPE_VARIABLE] layer 3000  «_»
+  29:9-29:11  [GO_SCOPE_VARIABLE] layer 3000  «it»
+  29:21-29:26  [GO_FUNCTION_PARAMETER] layer 3000  «items»
+  30:3-30:4  [GO_SCOPE_VARIABLE] layer 3000  «f»
+  30:6-30:7  [GO_SCOPE_VARIABLE] layer 3000  «_»
+  30:11-30:13  [GO_PACKAGE] layer 3000  «os»
+  30:14-30:18  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Open»
+  30:19-30:21  [GO_SCOPE_VARIABLE] layer 3000  «it»
+  31:3-31:8  [INFO_ATTRIBUTES] layer 3750  «defer»  TIP: Possible resource leak, 'defer' is called in the 'for' loop
+  31:9-31:10  [GO_SCOPE_VARIABLE] layer 3000  «f»
+  31:11-31:16  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Close»
+  31:11-31:16  [WARNING_ATTRIBUTES] layer 4000  «Close»  TIP: Unhandled error STRIPE
+  33:5-33:8  [GO_LOCAL_FUNCTION_CALL] layer 3000  «get»
+  33:14-33:17  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  36:2-36:9  [INFORMATION_ATTRIBUTES] layer 3000  «missing»  TIP: Unused result: 'missing(items)'
+  36:2-36:9  [WRONG_REFERENCES_ATTRIBUTES] layer 5000  «missing»  TIP: Unresolved reference 'missing' STRIPE
+  36:10-36:15  [GO_FUNCTION_PARAMETER] layer 3000  «items»
+  37:9-37:12  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «len»
+  37:13-37:18  [GO_FUNCTION_PARAMETER] layer 3000  «items»
+  38:2-38:5  [GO_PACKAGE] layer 3000  «fmt»
+  38:6-38:13  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Println»
+  38:6-38:13  [WARNING_ATTRIBUTES] layer 4000  «Println»  TIP: Unreachable code STRIPE
+  38:6-38:13  [INFORMATION_ATTRIBUTES] layer 3000  «Println»  TIP: Unused result: 'fmt.Println("unreachable")'
+  38:14-38:27  [WARNING_ATTRIBUTES] layer 4000  «"unreachable"»  TIP: Unreachable code STRIPE
+  39:1-39:2  [ERRORS_ATTRIBUTES] layer 5000  «}»  TIP: Missing the 'return' statement at the end of the function STRIPE
+  41:6-41:12  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Config»
+  41:6-44:2  [STICKY_LINE_MARKER] layer 0  «Config struct {⏎	Name string `json:name`⏎	Port int»
+  42:2-42:6  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Name»
+  42:7-42:13  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  42:15-42:24  [GO_TAG_TEXT] layer 1999  «json:name»
+  42:20-42:21  [WARNING_ATTRIBUTES] layer 4000  «n»  TIP: Expected an opening double quote character after ':' STRIPE
+  43:2-43:6  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Port»
+  43:7-43:10  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  43:15-43:19  [GO_TAG_KEY] layer 1999  «json»
+  43:19-43:20  [GO_TAG_COLON] layer 1999  «:»
+  43:20-43:26  [GO_TAG_VALUE] layer 1999  «"port"»
+  43:27-43:31  [GO_TAG_KEY] layer 1999  «json»
+  43:31-43:32  [GO_TAG_COLON] layer 1999  «:»
+  43:32-43:35  [GO_TAG_VALUE] layer 1999  «"p"»
+##### editor markup: 2 highlighters
+##### keys: count
+  : 4
+  ERRORS_ATTRIBUTES: 3
+  GO_BUILTIN_FUNCTION_CALL: 1
+  GO_BUILTIN_TYPE_REFERENCE: 6
+  GO_BUILTIN_VARIABLE: 1
+  GO_EXPORTED_FUNCTION: 3
+  GO_EXPORTED_FUNCTION_CALL: 5
+  GO_EXPORTED_INTERFACE_REFERENCE: 1
+  GO_FUNCTION_PARAMETER: 4
+  GO_LOCAL_FUNCTION: 1
+  GO_LOCAL_FUNCTION_CALL: 1
+  GO_LOCAL_STRUCT_REFERENCE: 2
+  GO_LOCAL_VARIABLE: 6
+  GO_PACKAGE: 5
+  GO_PACKAGE_EXPORTED_INTERFACE: 1
+  GO_PACKAGE_EXPORTED_STRUCT: 1
+  GO_PACKAGE_LOCAL_STRUCT: 1
+  GO_SCOPE_VARIABLE: 6
+  GO_STRUCT_EXPORTED_MEMBER: 2
+  GO_TAG_COLON: 2
+  GO_TAG_KEY: 2
+  GO_TAG_TEXT: 1
+  GO_TAG_VALUE: 2
+  GO_VALID_STRING_ESCAPE: 1
+  INFORMATION_ATTRIBUTES: 4
+  INFO_ATTRIBUTES: 3
+  NOT_USED_ELEMENT_ATTRIBUTES: 1
+  STICKY_LINE_MARKER: 6
+  TYPO: 1
+  WARNING_ATTRIBUTES: 5
+  WRONG_REFERENCES_ATTRIBUTES: 1
+##### inline inlays: 4
+  25:12  ParameterHintsPresentationManager$MyRenderer «name:»
+  26:13  ParameterHintsPresentationManager$MyRenderer «format:»
+  26:27  ParameterHintsPresentationManager$MyRenderer «a...:»
+  38:14  ParameterHintsPresentationManager$MyRenderer «a...:»
+##### after-line-end inlays: 7
+  10:24  InlineCodeVisionInlayRenderer
+  11:15  InlineCodeVisionInlayRenderer
+  14:19  InlineCodeVisionInlayRenderer
+  16:41  InlineCodeVisionInlayRenderer
+  18:20  InlineCodeVisionInlayRenderer
+  23:34  InlineCodeVisionInlayRenderer
+  41:21  InlineCodeVisionInlayRenderer
+##### block inlays: 2
+  14:1  BlockCodeVisionInlayRenderer
+  41:1  BlockCodeVisionInlayRenderer
+

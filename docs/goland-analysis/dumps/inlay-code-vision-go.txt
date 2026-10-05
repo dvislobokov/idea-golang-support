@@ -1,0 +1,26 @@
+declarative providers: 0
+  (old) GoInlayConstantDefinitionProvider
+  (old) UrlPathInlayHintsProvider
+  (old) LspInlayHintsProvider
+parameter hints provider: com.goide.highlighting.GoInlayParameterHintsProvider
+  option Show unnamed fields in structure values = true
+  option Show return parameters = true
+  default blacklist: 0 — 
+code vision enabled: true
+  cv Change signature — Change signature enabled=true
+  cv Rename refactoring — Rename refactoring enabled=true
+  cv LspCodeVisionProvider — LSP Code Lens enabled=true
+  cv vcs.code.vision — Code author enabled=true
+  cv JSComponentUsageCodeVisionProvider — Component usages enabled=true
+  cv tf.references — Usages enabled=true
+  cv js.references — Usages enabled=true
+  cv js.inheritors — Inheritors enabled=true
+  cv Update all dependencies — Update all dependencies enabled=true
+  cv Update direct dependencies — Update direct dependencies enabled=true
+  cv Go modernizer whats new — What's New enabled=true
+  cv go.syntax.update — Batch syntax update enabled=true
+  cv go.references — Usages enabled=true
+  cv go.inheritors — Inheritors enabled=true
+  cv Implement interface — Implement interface enabled=true
+  cv GoAddMethodToInterfaceCodeVisionProvider — Add method to interface and all its implementations enabled=true
+

@@ -43,7 +43,7 @@ class GoStructTagsTest {
 
     @Test fun names() {
         val json = GoStructTags.key("json")!!
-        assertEquals(listOf("user_id", "userID", "userid", "UserID", "user-id"), GoStructTags.names(json, "UserID"))
+        assertEquals(listOf("user-id", "user_id", "UserID", "userID", "userid"), GoStructTags.names(json, "UserID"))
         assertEquals(listOf("DATABASE_URL"), GoStructTags.names(GoStructTags.key("env")!!, "DatabaseURL"))
         assertTrue(GoStructTags.names(GoStructTags.key("validate")!!, "Name").isEmpty())
     }

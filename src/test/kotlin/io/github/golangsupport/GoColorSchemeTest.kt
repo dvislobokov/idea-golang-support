@@ -3,6 +3,7 @@ package io.github.golangsupport
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import io.github.golangsupport.lang.GoColors
 import io.github.golangsupport.lang.GoSyntaxHighlighter
 import java.awt.Color
 
@@ -40,5 +41,21 @@ class GoColorSchemeTest : BasePlatformTestCase() {
         assertEquals(Color(0xAFBF7E), derived.getAttributes(GoSyntaxHighlighter.PACKAGE)?.foregroundColor)
         assertEquals(Color(0x6FAFBD), derived.getAttributes(GoSyntaxHighlighter.TYPE_REFERENCE)?.foregroundColor)
         assertEquals(Color(0xC77DBB), derived.getAttributes(GoSyntaxHighlighter.FIELD)?.foregroundColor)
+    }
+
+    /** The keys of GoLand inherit the colours Go had before them, and take GoLand's own where it differs (Islands Dark). */
+    fun testTheKeysOfGoLandInheritTheBaseColoursOrTakeGoLandsOwn() {
+        val darcula = EditorColorsManager.getInstance().getScheme("Darcula")!!
+        fun fg(key: com.intellij.openapi.editor.colors.TextAttributesKey) = darcula.getAttributes(key)?.foregroundColor
+        assertEquals(Color(0x57AAF7), fg(GoColors.EXPORTED_FUNCTION_CALL))
+        assertEquals(Color(0x56A8F5), fg(GoColors.LOCAL_FUNCTION))
+        assertEquals(Color(0xC77DBB), fg(GoColors.STRUCT_EXPORTED_MEMBER))
+        assertEquals(Color(0xC77DBB), fg(GoColors.PACKAGE_LOCAL_CONSTANT))
+        assertEquals(Color(0x6FAFBD), fg(GoColors.LOCAL_STRUCT_REFERENCE))
+        assertEquals(Color(0x4EADE5), fg(GoColors.METHOD_RECEIVER))
+        assertEquals(Color(0x7DBDA2), fg(GoColors.SHADOWING_VARIABLE))
+        assertEquals(Color(0x6F737A), fg(GoColors.TAG_TEXT))
+        assertEquals(com.intellij.openapi.editor.markup.EffectType.LINE_UNDERSCORE, darcula.getAttributes(GoColors.REASSIGNMENT_IN_SHORT_VAR_DECLARATION)?.effectType)
+        assertEquals(darcula.getAttributes(GoColors.VALID_STRING_ESCAPE), darcula.getAttributes(GoColors.FORMAT_VERB))
     }
 }

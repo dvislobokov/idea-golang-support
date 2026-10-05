@@ -1,0 +1,60 @@
+[Go] map — Map type  {contexts: GO_TYPE}
+      map[$KEY_TYPE$]$VALUE_TYPE$
+[Go] p — Package declaration  {contexts: GO_FILE}
+      package $NAME$
+[Go Template] val — Go Template value  {contexts: GO_TEMPLATE}
+      {{ .$VAL$$END$ }}
+[Go Template] if — Surround with {{ if }}  {contexts: GO_TEMPLATE}
+      {{ if $END$ }}⏎$SELECTION$⏎{{ end }}
+[Go Template] ifel — Surround with {{ if }}{{ else }}  {contexts: GO_TEMPLATE}
+      {{ if $END$ }}⏎$SELECTION$⏎{{ else }}⏎{{ end }}
+[Go Template] elif — Insert {{ else if }}  {contexts: GO_TEMPLATE}
+      {{ else if $END$ }}
+[Go Template] with — Surround with {{ with }}  {contexts: GO_TEMPLATE}
+      {{ with .$VAL$ }}⏎$SELECTION$⏎{{ end }}
+[Go Template] range — Surround with {{ range }}  {contexts: GO_TEMPLATE}
+      {{ range .$VAL$ }}⏎$SELECTION$⏎{{ end }}
+[Go Template] rangekv — Surround with {{ range }} with key/value variables  {contexts: GO_TEMPLATE}
+      {{ range $$$KEY_NAME$, $$$VALUE_NAME$ := .$VAL$ }}⏎$SELECTION$⏎{{ end }}
+[Go Template] def — Define template  {contexts: GO_TEMPLATE}
+      {{- define "$NAME$" -}}⏎$END$⏎{{- end -}}
+[Go Template] templ — Call template  {contexts: GO_TEMPLATE}
+      {{ template "$NAME$" $END$}}
+[Go] fori — Indexed for loop  {contexts: GO_STATEMENT}
+      for $INDEX$ := 0; $INDEX$ < $LIMIT$; $INDEX$++ {⏎ $END$⏎}
+[Go] imports — Imports declaration  {contexts: GO_FILE}
+      import (⏎ "$END$"⏎)⏎
+[Go] consts — Constants declaration  {contexts: GO_FILE, GO_STATEMENT}
+      const (⏎ $NAME$ = $VALUE$$END$⏎)⏎
+[Go] vars — Variables declaration  {contexts: GO_FILE, GO_STATEMENT}
+      var (⏎ $NAME$ = $VALUE$$END$⏎)⏎
+[Go] types — Types declaration  {contexts: GO_FILE, GO_STATEMENT}
+      type (⏎ $END$⏎)⏎
+[Go] iota — Iota constant declaration  {contexts: GO_FILE, GO_STATEMENT}
+      const $NAME$ $TYPE$ = iota
+[Go] forr — For range loop  {contexts: GO_STATEMENT}
+      for $KEY$, $VALUE$ := range $COLLECTION$ {⏎ $END$⏎}
+[Go] printf — printf  {contexts: GO_STATEMENT}
+      fmt.Printf("$END$",$VAR$)
+[Go] err — If error  {contexts: GO_STATEMENT}
+      if $ERR$ != nil {⏎ $END$⏎}
+[Go] main — Main function  {contexts: GO_FILE}
+      func main() {⏎ $END$⏎}
+[Go] init — Init function  {contexts: GO_FILE}
+      func init() {⏎ $END$⏎}
+[Go] meth — Method  {contexts: GO_FILE}
+      func ($RECEIVER$ $TYPE_1$) $NAME$($PARAMS$) $TYPE_2$ {   ⏎ $END$⏎}
+[Go] test — Test  {contexts: GO_FILE}
+      func Test$NAME$(t *testing.T) {⏎ $END$⏎}
+[Go] bench — Benchmark  {contexts: GO_FILE}
+      func Benchmark$NAME$(b *testing.B) {⏎ for i := 0; i < b.N; i++ {⏎ $END$⏎ }⏎}
+[Go] fuzz — Fuzzing  {contexts: GO_FILE}
+      func Fuzz$NAME$(f *testing.F) {⏎ $END$⏎}
+[Go] : — Variable declaration :=  {contexts: GO_STATEMENT}
+      $NAME$ := $VALUE$
+[Go Struct Tags] xml — `xml:""`  {contexts: GO_TAG}
+      `xml:"$FIELD_NAME$"$END$`
+[Go Struct Tags] json — `json:""`  {contexts: GO_TAG}
+      `json:"$FIELD_NAME$"$END$`
+templates: 29
+

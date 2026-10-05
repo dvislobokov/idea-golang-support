@@ -8,8 +8,9 @@ import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.GoCodeInsightTestBase
 import io.github.golangsupport.lang.psi.impl.GoCommentImpl
+import io.github.golangsupport.lang.psi.impl.GoGenerateCommentImpl
 
-/** Go comments are [GoCommentImpl]: `PsiComment` semantics without being injection hosts. */
+/** Go comments are [GoCommentImpl]: `PsiComment` semantics without being injection hosts, except `//go:generate` lines. */
 class GoCommentImplTest : GoCodeInsightTestBase() {
 
     private val source = """
@@ -47,6 +48,26 @@ class GoCommentImplTest : GoCodeInsightTestBase() {
             assertEquals("PsiComment(${c.tokenType})", c.toString())
             assertNull(InjectedLanguageManager.getInstance(project).getInjectedPsiFiles(c))
         }
+    }
+
+    /** `//go:generate` lines are the only hosts (Shell Script injection); a look-alike without the separator or a block comment is not. */
+    fun testGoGenerateCommentIsTheOnlyHost() {
+        val file = myFixture.configureByText(
+            "p.go",
+            "package p\n\n//go:generate stringer -type=Kind\n//go:generate\n//go:generated no\n// go:generate no\n/*go:generate no*/\ntype Kind int\n",
+        )
+        val hosts = PsiTreeUtil.collectElementsOfType(file, PsiComment::class.java).sortedBy { it.textOffset }.map { it.text to (it is PsiLanguageInjectionHost) }
+        assertEquals(
+            listOf("//go:generate stringer -type=Kind" to true, "//go:generate" to true, "//go:generated no" to false, "// go:generate no" to false,
+                "/*go:generate no*/" to false),
+            hosts,
+        )
+        val host = PsiTreeUtil.collectElementsOfType(file, GoGenerateCommentImpl::class.java).first()
+        assertEquals("PsiComment(${GoTypes.LINE_COMMENT})", host.toString())
+        WriteCommandAction.runWriteCommandAction(project) {
+            assertTrue(host.updateText("//go:generate go run gen.go") is GoGenerateCommentImpl)
+        }
+        assertTrue(myFixture.file.text.contains("//go:generate go run gen.go\n"))
     }
 
     fun testVisitorSeesComments() {

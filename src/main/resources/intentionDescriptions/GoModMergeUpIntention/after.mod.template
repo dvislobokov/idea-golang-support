@@ -1,0 +1,4 @@
+require (
+	github.com/google/uuid v1.6.0
+	<spot>golang.org/x/text v0.15.0</spot>
+)

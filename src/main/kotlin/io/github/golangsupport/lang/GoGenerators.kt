@@ -169,11 +169,15 @@ object GoGenerators {
      * The raw tag literal of a field named [name] with the keys of [kinds] it lacks added to [existing] (the value of its tag, without
      * the quotes, or null); null when nothing is added. `json`, `yaml` and `xml` skip an unexported field, which they cannot see.
      */
-    fun tagFor(name: String, exported: Boolean, existing: String?, kinds: List<String>, case: TagCase, omitEmpty: Boolean): String? {
+    fun tagFor(name: String, exported: Boolean, existing: String?, kinds: List<String>, case: TagCase, omitEmpty: Boolean): String? =
+        tagFor(name, exported, existing, kinds, case.apply, omitEmpty)
+
+    /** [tagFor] with the name of the field written by [naming]. */
+    fun tagFor(name: String, exported: Boolean, existing: String?, kinds: List<String>, naming: (String) -> String, omitEmpty: Boolean): String? {
         val wanted = kinds.filter { exported || it !in setOf("json", "yaml", "xml") }
         if (wanted.isEmpty()) return null
         val present = existing?.let { Regex("""(\w+):"[^"]*"""").findAll(it).map { m -> m.groupValues[1] }.toSet() }.orEmpty()
-        val added = wanted.filter { it !in present }.joinToString(" ") { kind -> "$kind:\"${case.apply(name)}${if (omitEmpty && kind == "json") ",omitempty" else ""}\"" }
+        val added = wanted.filter { it !in present }.joinToString(" ") { kind -> "$kind:\"${naming(name)}${if (omitEmpty && kind == "json") ",omitempty" else ""}\"" }
         if (added.isEmpty()) return null
         return "`" + ((existing?.let { "$it " } ?: "") + added).trim() + "`"
     }

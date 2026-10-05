@@ -1,0 +1,5 @@
+func scale(p *Point, k int) {}
+
+func main() {
+	scale(&p, 2)
+}

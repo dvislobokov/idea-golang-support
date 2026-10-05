@@ -87,6 +87,35 @@ class GoLiveTemplatesTest : BasePlatformTestCase() {
         assertEquals("no abbreviation twice", keys.size, keys.toSet().size)
     }
 
+    fun testTheTemplatesOfGoLandAreThereInTheirPlaces() {
+        val keys = TemplateSettings.getInstance().templates.filter { it.groupName == "Go" }.associateBy { it.key }
+        for (key in listOf("map", "p", "imports", "consts", "vars", "types", "iota", ":", "xml")) assertTrue(key, key in keys)
+        assertEquals("map[\$KEY_TYPE$]\$VALUE_TYPE$", keys.getValue("map").string)
+        assertEquals("const \$NAME$ \$TYPE$ = iota", keys.getValue("iota").string)
+        assertEquals("\$NAME$ := \$VALUE$", keys.getValue(":").string)
+        assertEquals("`xml:\"\$FIELD_NAME$\"\$END$`", keys.getValue("xml").string)
+        val top = applicable("package a\n\nfunc f() {}\n\nimports<caret>\n")
+        assertTrue(top.toString(), listOf("p", "imports", "consts", "vars", "types", "iota").all { it in top })
+        assertFalse(top.toString(), ":" in top || "map" in top || "xml" in top)
+        val body = applicable("package a\n\nfunc f() {\n\tconsts<caret>\n}\n")
+        assertTrue(body.toString(), listOf("consts", "vars", "types", "iota").all { it in body })
+        assertFalse(body.toString(), "p" in body || "imports" in body || "map" in body)
+        assertTrue(":" in applicable("package a\n\nfunc f() {\n\t:<caret>\n}\n"))
+        assertTrue("xml" in applicable("package a\n\ntype S struct {\n\tName string xml<caret>\n}\n"))
+        for (source in listOf("package a\n\nvar m map<caret>\n", "package a\n\nfunc f() {\n\tx := make(map<caret>\n}\n", "package a\n\ntype S struct {\n\tM map<caret>\n}\n",
+            "package a\n\nfunc f(m map<caret>) {}\n", "package a\n\nvar m []map<caret>\n")) assertTrue(source, "map" in applicable(source))
+        assertFalse("a statement", "map" in applicable("package a\n\nfunc f() {\n\tmap<caret>\n}\n"))
+        assertFalse("after a selector", "map" in applicable("package a\n\nfunc f() {\n\t_ = x.map<caret>\n}\n"))
+    }
+
+    fun testTheTemplatesOfGoLandExpand() {
+        assertTrue(expand("package a\n\nfunc f() {\n\t:<caret>\n}\n").contains("\t := \n"))
+        assertEquals("package a\n\nconst (\n\t = \n)\n\n", expand("package a\n\nconsts<caret>\n"))
+        assertEquals("package a\n\nimport (\n\t\"\"\n)\n\n", expand("package a\n\nimports<caret>\n"))
+        assertTrue(expand("package a\n\nvar m map<caret>\n").contains("var m map[]\n"))
+        assertTrue(expand("package a\n\ntype S struct {\n\tName string xml<caret>\n}\n").contains("\tName string `xml:\"\"`\n"))
+    }
+
     fun testFuncExpandsAtTheTop() {
         val text = expand("package a\n\nfunc<caret>\n")
         // an empty result leaves two spaces, as `fn` does; gofmt takes one away

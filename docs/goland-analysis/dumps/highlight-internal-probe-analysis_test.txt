@@ -1,0 +1,129 @@
+##### document markup: 94 highlighters
+  1:9-1:14  [GO_PACKAGE] layer 3000  «probe»
+  1:9-1:14  [] layer 3000  «probe» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Test Ctrl+Shift+F10]
+  8:6-8:19  [] layer 3000  «TestFactorial» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Test Ctrl+Shift+F10]
+  8:6-14:2  [STICKY_LINE_MARKER] layer 0  «TestFactorial(t *testing.T) {⏎	if Factorial(5) != »
+  8:6-8:19  [GO_EXPORTED_FUNCTION] layer 3000  «TestFactorial»
+  8:20-8:21  [GO_FUNCTION_PARAMETER] layer 3000  «t»
+  8:23-8:30  [GO_PACKAGE] layer 3000  «testing»
+  8:31-8:32  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «T»
+  9:5-9:14  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Factorial»
+  10:3-10:4  [GO_FUNCTION_PARAMETER] layer 3000  «t»
+  10:5-10:10  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Fatal»
+  16:6-32:2  [STICKY_LINE_MARKER] layer 0  «TestSum(t *testing.T) {⏎	tests := []struct {⏎		nam»
+  16:6-16:13  [GO_EXPORTED_FUNCTION] layer 3000  «TestSum»
+  16:6-16:13  [] layer 3000  «TestSum» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Test Ctrl+Shift+F10]
+  16:14-16:15  [GO_FUNCTION_PARAMETER] layer 3000  «t»
+  16:17-16:24  [GO_PACKAGE] layer 3000  «testing»
+  16:25-16:26  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «T»
+  17:2-17:7  [GO_LOCAL_VARIABLE] layer 3000  «tests»
+  18:3-18:7  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «name»
+  18:8-18:14  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  19:3-19:5  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «in»
+  19:10-19:13  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  20:3-20:7  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «want»
+  20:8-20:11  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  22:3-22:4  [] layer 3000  «{» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Test Ctrl+Shift+F10]
+  22:3-22:20  [INFORMATION_ATTRIBUTES] layer 3000  «{"empty", nil, 0}»  TIP: Fields are assigned without explicit names
+  22:13-22:16  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  23:3-23:4  [] layer 3000  «{» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Test Ctrl+Shift+F10]
+  23:3-23:26  [INFORMATION_ATTRIBUTES] layer 3000  «{"two", []int{1, 2}, 3}»  TIP: Fields are assigned without explicit names
+  23:13-23:16  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  25:6-25:7  [GO_SCOPE_VARIABLE] layer 3000  «_»
+  25:9-25:11  [GO_SCOPE_VARIABLE] layer 3000  «tt»
+  25:21-25:26  [GO_LOCAL_VARIABLE] layer 3000  «tests»
+  26:3-26:4  [GO_FUNCTION_PARAMETER] layer 3000  «t»
+  26:5-26:8  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Run»
+  26:5-26:8  [INFORMATION_ATTRIBUTES] layer 3000  «Run»  TIP: Unused result: 't.Run(tt.name, func(t *testing.T) { if got := Sum(tt.in); got != tt.want { t.Errorf("Sum() = ...'
+  26:9-26:11  [GO_SCOPE_VARIABLE] layer 3000  «tt»
+  26:12-26:16  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «name»
+  26:18-30:4  [STICKY_LINE_MARKER] layer 0  «func(t *testing.T) {⏎			if got := Sum(tt.in); got »
+  26:23-26:24  [GO_FUNCTION_PARAMETER] layer 3000  «t»
+  26:26-26:33  [GO_PACKAGE] layer 3000  «testing»
+  26:34-26:35  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «T»
+  27:7-27:10  [GO_SCOPE_VARIABLE] layer 3000  «got»
+  27:14-27:17  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Sum»
+  27:18-27:20  [GO_SCOPE_VARIABLE] layer 3000  «tt»
+  27:21-27:23  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «in»
+  27:26-27:29  [GO_SCOPE_VARIABLE] layer 3000  «got»
+  27:33-27:35  [GO_SCOPE_VARIABLE] layer 3000  «tt»
+  27:36-27:40  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «want»
+  28:5-28:6  [GO_FUNCTION_PARAMETER] layer 3000  «t»
+  28:7-28:13  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Errorf»
+  28:23-28:25  [GO_VALID_STRING_ESCAPE] layer 3000  «%v»
+  28:32-28:34  [GO_VALID_STRING_ESCAPE] layer 3000  «%v»
+  28:37-28:40  [GO_SCOPE_VARIABLE] layer 3000  «got»
+  28:42-28:44  [GO_SCOPE_VARIABLE] layer 3000  «tt»
+  28:45-28:49  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «want»
+  34:6-34:24  [GO_EXPORTED_FUNCTION] layer 3000  «BenchmarkFactorial»
+  34:6-34:24  [] layer 3000  «BenchmarkFactorial» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Test Ctrl+Shift+F10]
+  34:6-38:2  [STICKY_LINE_MARKER] layer 0  «BenchmarkFactorial(b *testing.B) {⏎	for i := 0; i »
+  34:25-34:26  [GO_FUNCTION_PARAMETER] layer 3000  «b»
+  34:28-34:35  [GO_PACKAGE] layer 3000  «testing»
+  34:36-34:37  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «B»
+  35:6-35:7  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  35:14-35:15  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  35:18-35:19  [GO_FUNCTION_PARAMETER] layer 3000  «b»
+  35:20-35:21  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «N»
+  35:23-35:24  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  36:3-36:12  [INFORMATION_ATTRIBUTES] layer 3000  «Factorial»  TIP: Unused result: 'Factorial(10)'
+  36:3-36:12  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Factorial»
+  40:6-43:2  [STICKY_LINE_MARKER] layer 0  «ExampleFactorial() {⏎	fmt.Println(Factorial(3))⏎	/»
+  40:6-40:22  [GO_EXPORTED_FUNCTION] layer 3000  «ExampleFactorial»
+  40:6-40:22  [] layer 3000  «ExampleFactorial» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Test Ctrl+Shift+F10]
+  41:2-41:5  [GO_PACKAGE] layer 3000  «fmt»
+  41:6-41:13  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Println»
+  41:6-41:13  [INFORMATION_ATTRIBUTES] layer 3000  «Println»  TIP: Unused result: 'fmt.Println(Factorial(3))'
+  41:14-41:23  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Factorial»
+  45:6-45:14  [] layer 3000  «FuzzLoad» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Test Ctrl+Shift+F10]
+  45:6-45:14  [GO_EXPORTED_FUNCTION] layer 3000  «FuzzLoad»
+  45:6-50:2  [STICKY_LINE_MARKER] layer 0  «FuzzLoad(f *testing.F) {⏎	f.Add("abc")⏎	f.Fuzz(fun»
+  45:15-45:16  [GO_FUNCTION_PARAMETER] layer 3000  «f»
+  45:18-45:25  [GO_PACKAGE] layer 3000  «testing»
+  45:26-45:27  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «F»
+  46:2-46:3  [GO_FUNCTION_PARAMETER] layer 3000  «f»
+  46:4-46:7  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Add»
+  47:2-47:3  [GO_FUNCTION_PARAMETER] layer 3000  «f»
+  47:4-47:8  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Fuzz»
+  47:9-49:3  [STICKY_LINE_MARKER] layer 0  «func(t *testing.T, s string) {⏎		_, _ = load(s)⏎	}»
+  47:14-47:15  [GO_FUNCTION_PARAMETER] layer 3000  «t»
+  47:17-47:24  [GO_PACKAGE] layer 3000  «testing»
+  47:25-47:26  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «T»
+  47:28-47:29  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+  47:30-47:36  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  48:10-48:14  [GO_LOCAL_FUNCTION_CALL] layer 3000  «load»
+  48:15-48:16  [GO_FUNCTION_PARAMETER] layer 3000  «s»
+##### editor markup: 8 highlighters
+##### keys: count
+  : 8
+  GO_BUILTIN_TYPE_REFERENCE: 5
+  GO_BUILTIN_VARIABLE: 1
+  GO_EXPORTED_FUNCTION: 5
+  GO_EXPORTED_FUNCTION_CALL: 10
+  GO_EXPORTED_STRUCT_REFERENCE: 6
+  GO_FUNCTION_PARAMETER: 14
+  GO_LOCAL_FUNCTION_CALL: 1
+  GO_LOCAL_VARIABLE: 2
+  GO_PACKAGE: 8
+  GO_SCOPE_VARIABLE: 12
+  GO_STRUCT_EXPORTED_MEMBER: 1
+  GO_STRUCT_LOCAL_MEMBER: 7
+  GO_VALID_STRING_ESCAPE: 2
+  INFORMATION_ATTRIBUTES: 5
+  STICKY_LINE_MARKER: 7
+##### inline inlays: 12
+  9:15  ParameterHintsPresentationManager$MyRenderer «n:»
+  10:11  ParameterHintsPresentationManager$MyRenderer «args...:»
+  22:4  ParameterHintsPresentationManager$MyRenderer «name:»
+  22:13  ParameterHintsPresentationManager$MyRenderer «in:»
+  22:18  ParameterHintsPresentationManager$MyRenderer «want:»
+  23:4  ParameterHintsPresentationManager$MyRenderer «name:»
+  23:11  ParameterHintsPresentationManager$MyRenderer «in:»
+  23:24  ParameterHintsPresentationManager$MyRenderer «want:»
+  28:14  ParameterHintsPresentationManager$MyRenderer «format:»
+  36:13  ParameterHintsPresentationManager$MyRenderer «n:»
+  41:24  ParameterHintsPresentationManager$MyRenderer «n:»
+  46:8  ParameterHintsPresentationManager$MyRenderer «args...:»
+##### after-line-end inlays: 0
+##### block inlays: 0
+

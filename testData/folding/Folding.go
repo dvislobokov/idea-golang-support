@@ -53,8 +53,8 @@ func f() <fold text='{...}'>{
 		x++
 	}</fold>
 	switch x <fold text='{...}'>{
-	case 1:
-		x--
+	case 1:<fold text=' x--'>
+		x--</fold>
 	}</fold>
 	select <fold text='{...}'>{
 	default:

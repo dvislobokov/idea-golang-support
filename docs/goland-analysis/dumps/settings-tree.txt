@@ -1,0 +1,260 @@
+Go  {go}  GoRootConfigurable
+  GOROOT  {go.sdk}  GoSdkConfigurable
+  GOPATH  {com.goide.configuration.GoLibrariesConfigurableProvider}  GoLibrariesConfigurableProvider$1
+  Go Modules  {go.vgo}  VgoConfigurable
+  Build Tags  {com.goide.configuration.GoProjectSettingsConfigurable}  GoProjectSettingsConfigurable
+  Formatting Functions  {go.custom.fmt.functions}  GoPrintfFuncsConfigurable
+  Imports  {go.autoimport}  GoImportConfigurable
+  Linters  {preference.GoLinterConfigurable}  GoLinterConfigurable
+Project Structure  {goland.project.structure}  GoContentEntriesConfigurableProvider$GoContentEntriesConfigurable
+Appearance & Behavior  {configurable.group.appearance}  SortedConfigurableGroup
+  Appearance  {preferences.lookFeel}  AppearanceConfigurable
+  Menus and Toolbars  {preferences.customizations}  CustomizationConfigurable
+  System Settings  {preferences.general}  GeneralSettingsConfigurable
+    Data Sharing  {consents}  ConsentConfigurable
+    Date Formats  {ide.date.format}  DateTimeFormatConfigurable
+    HTTP Proxy  {http.proxy}  HttpProxyConfigurable
+    Language and Region  {preferences.language.and.region}  LanguageAndRegionConfigurable
+    Passwords  {application.passwordSafe}  PasswordSafeConfigurable
+    Process Elevation  {application.elevation}  ElevationSettingsConfigurable
+    Server Certificates  {http.certificates}  CertificateConfigurable
+    Trusted Hosts  {gateway.deploy.ssh.trusted.hosts}  GatewayTrustedHostsConfigurable
+    Updates  {preferences.updates}  UpdateSettingsConfigurable
+  File Colors  {reference.settings.ide.settings.file-colors}  FileColorsConfigurable
+  Scopes  {project.scopes}  ScopeChooserConfigurable
+  Notifications  {reference.settings.ide.settings.notifications}  NotificationsConfigurable
+  Data Editor and Viewer  {database.data.views.appearance}  DataGridAppearanceConfigurable
+  Quick Lists  {reference.idesettings.quicklists}  QuickListsPanel
+  Required Plugins  {preferences.externalDependencies}  ExternalDependenciesConfigurable
+  Trusted Locations  {trusted.hosts}  TrustedHostsConfigurable
+  Path Variables  {preferences.pathVariables}  PathMacroConfigurable
+  Presentation Assistant  {com.intellij.platform.ide.impl.presentationAssistant.PresentationAssistantConfigurable}  PresentationAssistantConfigurable
+Keymap  {preferences.keymap}  KeymapPanel
+Editor  {configurable.group.editor}  SortedConfigurableGroup
+  General  {preferences.editor}  EditorOptionsPanel
+    Auto Import  {editor.preferences.import}  AutoImportOptionsConfigurable
+    Appearance  {editor.preferences.appearance}  EditorAppearanceConfigurable
+    Breadcrumbs  {editor.breadcrumbs}  BreadcrumbsConfigurable
+    Code Completion  {editor.preferences.completion}  CompletionConfigurable
+      Popup  {editor.preferences.completion.popup}  CodeCompletionConfigurable
+      Inline  {editor.preferences.completion.inline}  InlineCompletionConfigurable
+    Code Folding  {editor.preferences.folding}  CodeFoldingConfigurable
+    Console  {Console}  ConsoleConfigurable
+    Editor Tabs  {editor.preferences.tabs}  EditorTabsConfigurable
+    Gutter Icons  {editor.preferences.gutterIcons}  GutterIconsConfigurable
+    Postfix Completion  {reference.settingsdialog.IDE.editor.postfix.templates}  PostfixTemplatesConfigurable
+    Smart Keys  {editor.preferences.smartKeys}  EditorSmartKeysConfigurable
+      YAML  {editor.preferences.yamlOptions}  YAMLSmartOptionsProvider
+      JSON  {editor.preferences.jsonOptions}  JsonSmartKeysConfigurable
+      Markdown  {Settings.Markdown.SmartKeys}  MarkdownSmartKeysConfigurable
+      HTML/CSS  {editor.preferences.webOptions}  WebSmartKeysConfigurable
+      JavaScript  {editor.preferences.jsOptions}  JSSmartKeysConfigurable
+      React  {editor.preferences.reactOptions}  ReactSmartKeysConfigurable
+      SQL  {editor.preferences.sqlOptions}  SqlEditorOptionsProvider
+    Sticky Lines  {editor.stickyLines}  StickyLinesConfigurable
+  Code Editing  {preferences.editor.code.editing}  EditorCodeEditingConfigurable
+  Font  {editor.preferences.fonts.default}  AppEditorFontConfigurable
+  Color Scheme  {reference.settingsdialog.IDE.editor.colors}  ColorAndFontOptions
+    General  {reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.options.colors.pages.GeneralColorsPage}  GeneralColorsPage
+    Language Defaults  {reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.options.colors.pages.DefaultLanguageColorsPage}  DefaultLanguageColorsPage
+    Color Scheme Font  {reference.settingsdialog.IDE.editor.colors.ColorSchemeFont}  ColorAndFontOptions$FontConfigurableFactory
+    Console Font  {reference.settingsdialog.IDE.editor.colors.ConsoleFont}  ColorAndFontOptions$ConsoleFontConfigurableFactory
+    Code Review  {reference.settingsdialog.IDE.editor.colors.com.intellij.collaboration.ui.codereview.ReviewColorsPageFactory}  ReviewColorsPageFactory
+    Console Colors  {reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.options.colors.pages.ANSIColoredConsoleColorsPage}  ANSIColoredConsoleColorsPage
+    Debugger  {reference.settingsdialog.IDE.editor.colors.com.intellij.xdebugger.impl.ui.DebuggerColorsPage}  DebuggerColorsPage
+    Diff & Merge  {reference.settingsdialog.IDE.editor.colors.DiffAndMerge}  DiffColorsPageFactory
+    User-Defined File Types  {reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.options.colors.pages.CustomColorsPage}  CustomColorsPage
+    VCS  {reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.vcs.actions.VcsColorsPageFactory}  VcsColorsPageFactory
+    CSS  {reference.settingsdialog.IDE.editor.colors.com.intellij.psi.css.impl.util.CssColorsAndFontsPage}  CssColorsAndFontsPage
+    Data Editor and Viewer  {reference.settingsdialog.IDE.editor.colors.com.intellij.database.editor.DataGridColorSettingsPage}  DataGridColorSettingsPage
+    Database  {reference.settingsdialog.IDE.editor.colors.com.intellij.database.editor.DatabaseColorSettingsPage}  DatabaseColorSettingsPage
+    Diagrams  {reference.settingsdialog.IDE.editor.colors.com.intellij.diagram.DiagramColorsSettingsPage}  DiagramColorsSettingsPage
+    Dockerfile  {reference.settingsdialog.IDE.editor.colors.com.intellij.docker.dockerFile.highlighting.highlight.DockerColorSettingsPage}  DockerColorSettingsPage
+    EditorConfig  {reference.settingsdialog.IDE.editor.colors.com.intellij.editorconfig.frontend.settings.EditorConfigColorSettingsPage}  EditorConfigColorSettingsPage
+    GitLab CI Expression  {reference.settingsdialog.IDE.editor.colors.com.intellij.vcs.gitlab.ultimate.features.expressionLang.highlighting.GitLabCiExpressionColorSettingsPage}  GitLabCiExpressionColorSettingsPage
+    Go  {reference.settingsdialog.IDE.editor.colors.com.goide.highlighting.GoColorsAndFontsPage}  GoColorsAndFontsPage
+    Go Template  {reference.settingsdialog.IDE.editor.colors.com.goide.template.highlighting.GoTemplateColorsAndFontsPage}  GoTemplateColorsAndFontsPage
+    HashiCorp Interpolation Language  {reference.settingsdialog.IDE.editor.colors.org.intellij.terraform.hil.HILColorPage}  HILColorPage
+    HCL  {reference.settingsdialog.IDE.editor.colors.org.intellij.terraform.hcl.HCLColorsPage}  HCLColorsPage
+    HTML  {reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.options.colors.pages.HTMLColorsPage}  HTMLColorsPage
+    HTTP Request  {reference.settingsdialog.IDE.editor.colors.com.intellij.httpClient.http.request.highlighting.HttpRequestColorSettingsPage}  HttpRequestColorSettingsPage
+    JavaScript  {reference.settingsdialog.IDE.editor.colors.com.intellij.lang.javascript.highlighting.JavaScriptColorsAndFontsPage}  JavaScriptColorsAndFontsPage
+    JSON  {reference.settingsdialog.IDE.editor.colors.com.intellij.json.highlighting.JsonColorsPage}  JsonColorsPage
+    JSONPath  {reference.settingsdialog.IDE.editor.colors.com.intellij.jsonpath.JsonPathColorSettingsPage}  JsonPathColorSettingsPage
+    Kubernetes  {reference.settingsdialog.IDE.editor.colors.com.intellij.kubernetes.settings.KubernetesColorSettingsPage}  KubernetesColorSettingsPage
+    Makefile  {reference.settingsdialog.IDE.editor.colors.com.jetbrains.lang.makefile.MakefileColorSettingsPage}  MakefileColorSettingsPage
+    Markdown  {reference.settingsdialog.IDE.editor.colors.org.intellij.plugins.markdown.highlighting.MarkdownColorSettingsPage}  MarkdownColorSettingsPage
+    Mermaid  {reference.settingsdialog.IDE.editor.colors.com.intellij.mermaid.lang.highlighting.MermaidColorSettingsPage}  MermaidColorSettingsPage
+    plan9_x86  {reference.settingsdialog.IDE.editor.colors.com.plan9.intel.ide.highlighting.AsmIntelColorsAndFontsPage}  AsmIntelColorsAndFontsPage
+    Protocol Buffer  {reference.settingsdialog.IDE.editor.colors.com.intellij.protobuf.ide.highlighter.PbColorSettingsPage}  PbColorSettingsPage
+    Protocol Buffer Text  {reference.settingsdialog.IDE.editor.colors.com.intellij.protobuf.ide.highlighter.PbTextColorSettingsPage}  PbTextColorSettingsPage
+    RegExp  {reference.settingsdialog.IDE.editor.colors.org.intellij.lang.regexp.RegExpColorsPage}  RegExpColorsPage
+    Shell Script  {reference.settingsdialog.IDE.editor.colors.com.intellij.sh.highlighter.ShColorPage}  ShColorPage
+    SQL  {reference.settingsdialog.IDE.editor.colors.com.intellij.database.sql.common.impl.editor.SqlColorSettingsPage}  SqlColorSettingsPage
+    Table Diff  {reference.settingsdialog.IDE.editor.colors.com.intellij.database.diff.TableDiffColorSettingsPage}  TableDiffColorSettingsPage
+    TypeScript  {reference.settingsdialog.IDE.editor.colors.TypeScript}  TypeScriptColorSettingsPage
+    XML  {reference.settingsdialog.IDE.editor.colors.com.intellij.openapi.options.colors.pages.XMLColorsPage}  XMLColorsPage
+    YAML  {reference.settingsdialog.IDE.editor.colors.org.jetbrains.yaml.YAMLColorsPage}  YAMLColorsPage
+    By Scope  {reference.settingsdialog.IDE.editor.colors.ByScope}  ScopeColorsPageFactory
+    Images  {reference.settingsdialog.IDE.editor.colors.org.intellij.images.options.impl.ImageEditorColorSchemeSettings}  ImageEditorColorSchemeSettings
+  Code Style  {preferences.sourceCode}  CodeStyleSchemesConfigurable
+    Go  {preferences.sourceCode.go}  GoBackendLanguageCodeStyleSettingsProvider
+    EditorConfig  {preferences.sourceCode.EditorConfig}  EditorConfigLanguageCodeStyleSettingsProvider
+    HTML  {preferences.sourceCode.HTML}  HtmlLanguageCodeStyleSettingsProvider
+    HTTP Request  {preferences.sourceCode.HTTP Request}  HttpRequestCodeStyleSettingsProvider
+    JavaScript  {preferences.sourceCode.JavaScript}  JSLanguageCodeStyleSettingsProvider
+    JSON  {preferences.sourceCode.JSON}  JsonCodeStyleSettingsProvider
+    Makefile  {preferences.sourceCode.Makefile}  MakefileCodeStyleSettingsProvider
+    Markdown  {preferences.sourceCode.Markdown}  MarkdownCodeStyleSettingsProvider
+    Mermaid  {preferences.sourceCode.Mermaid}  MermaidCodeStyleSettingsProvider
+    Protocol Buffer  {preferences.sourceCode.Protocol Buffer}  PbCodeStyleSettingsProvider
+    Protocol Buffer Text  {preferences.sourceCode.Protocol Buffer Text}  PbTextCodeStyleSettingsProvider
+    Shell Script  {preferences.sourceCode.Shell Script}  ShLanguageCodeStyleSettingsProvider
+    SQL  {sql.code.style.group}  CodeStyleGroupProvider$CodeStyleGroupConfigurable
+      General  {preferences.sourceCode.SQL}  SqlGeneralCodeStyleSettingsProvider
+      SQL:2016, Generic  {preferences.sourceCode.SQL92}  SqlDialectCodeStyleSettingsAutoProvider
+      Apache Derby  {preferences.sourceCode.Derby}  SqlDialectCodeStyleSettingsAutoProvider
+      Db2  {preferences.sourceCode.DB2}  SqlDialectCodeStyleSettingsAutoProvider
+      H2  {preferences.sourceCode.H2}  SqlDialectCodeStyleSettingsAutoProvider
+      HSQLDB  {preferences.sourceCode.HSQLDB}  SqlDialectCodeStyleSettingsAutoProvider
+      MS SQL Server, MS Azure  {preferences.sourceCode.TSQL}  SqlDialectCodeStyleSettingsAutoProvider
+      MySQL, MariaDB  {preferences.sourceCode.MySQL}  SqlDialectCodeStyleSettingsAutoProvider
+      Oracle  {preferences.sourceCode.Oracle}  SqlDialectCodeStyleSettingsAutoProvider
+      PostgreSQL, Greenplum, Redshift  {preferences.sourceCode.PostgreSQL}  SqlDialectCodeStyleSettingsAutoProvider
+      SQLite  {preferences.sourceCode.SQLite}  SqlDialectCodeStyleSettingsAutoProvider
+      Sybase ASE  {preferences.sourceCode.Sybase}  SqlDialectCodeStyleSettingsAutoProvider
+    Style Sheets  {stylesheet.code.style.group}  CodeStyleGroupProvider$CodeStyleGroupConfigurable
+      CSS  {preferences.sourceCode.CSS}  CssLanguageCodeStyleSettingsProvider
+    Terraform/OpenTofu  {preferences.sourceCode.HCL-Terraform}  TfCodeStyleSettingsProvider
+    TypeScript  {preferences.sourceCode.TypeScript}  TypeScriptLanguageCodeStyleSettingsProvider
+    XML  {preferences.sourceCode.XML}  XmlLanguageCodeStyleSettingsProvider
+    YAML  {preferences.sourceCode.yaml}  YAMLLanguageCodeStyleSettingsProvider
+    Other File Types  {preferences.sourceCode.Other File Types}  OtherFileTypesCodeStyleOptionsProvider
+  Inspections  {Errors}  ProjectInspectionToolsConfigurable
+  File and Code Templates  {fileTemplates}  AllFileTemplatesConfigurable
+  File Encodings  {File.Encoding}  FileEncodingConfigurable
+  Live Templates  {editing.templates}  LiveTemplatesConfigurable
+  File Types  {preferences.fileTypes}  FileTypeConfigurable
+  Copyright  {copyright}  CopyrightProjectConfigurable
+    Copyright Profiles  {copyright.profiles}  CopyrightProfilesPanel
+    Formatting  {template.copyright.formatting}  CopyrightFormattingConfigurable
+      CSS  {copyright.filetypes.CSS}  UpdateCssCopyrightsProvider
+      DTD  {copyright.filetypes.DTD}  UpdateXmlCopyrightsProvider
+      Go  {copyright.filetypes.Go}  UpdateGoCopyrightsProvider
+      HCL  {copyright.filetypes.HCL}  TfUpdateCopyrightsProvider
+      HTML  {copyright.filetypes.HTML}  UpdateXmlCopyrightsProvider
+      JavaScript  {copyright.filetypes.JavaScript}  JSUpdateCopyrightsProvider
+      Shell Script  {copyright.filetypes.Shell Script}  ShUpdateCopyrightsProvider
+      SQL  {copyright.filetypes.SQL}  SqlUpdateCopyrightsProvider
+      SVG  {copyright.filetypes.SVG}  SvgCopyrightUpdater
+      TypeScript  {copyright.filetypes.TypeScript}  JSUpdateCopyrightsProvider
+      XHTML  {copyright.filetypes.XHTML}  UpdateXmlCopyrightsProvider
+      XML  {copyright.filetypes.XML}  UpdateXmlCopyrightsProvider
+  Inlay Hints  {inlay.hints}  InlaySettingsConfigurable
+  Duplicates  {duplicates.index}  DuplicatesConfigurable
+  Emmet  {reference.idesettings.emmet}  EmmetCompositeConfigurable
+    CSS  {reference.idesettings.emmet.css}  CssEmmetConfigurable
+    HTML  {reference.idesettings.emmet.xml}  XmlEmmetConfigurable
+    JSX  {reference.idesettings.emmet.jsx}  JSXConfigurable
+  Intentions  {preferences.intentionPowerPack}  IntentionSettingsConfigurable
+  Language Injections  {IntelliLang.Configuration}  InjectionsSettingsUI
+  Natural Languages  {proofread}  ProofreadConfigurable
+    Grammar and Style  {reference.settingsdialog.project.grazie}  GrazieConfigurable
+    Spelling  {reference.settings.ide.settings.spelling}  SpellCheckerConfigurable
+  Reader Mode  {editor.reader.mode}  ReaderModeConfigurable
+  TextMate Bundles  {reference.settingsdialog.textmate.bundles}  TextMateConfigurableUi
+  TODO  {preferences.toDoOptions}  TodoConfigurable
+Plugins  {preferences.pluginManager}  PluginManagerConfigurable
+Version Control  {project.propVCSSupport.Mappings}  VcsManagerConfigurable
+  Changelists  {project.propVCSSupport.ChangelistConflict}  ChangelistConflictConfigurable
+  Commit  {project.propVCSSupport.CommitDialog}  CommitDialogConfigurable
+  Confirmation  {project.propVCSSupport.Confirmation}  VcsGeneralSettingsConfigurable
+  Directory Mappings  {project.propVCSSupport.DirectoryMappings}  VcsMappingConfigurable
+  File Status Colors  {file.status.colors}  FileStatusColorsConfigurable
+  Issue Navigation  {project.propVCSSupport.Issue.Navigation}  IssueNavigationConfigurable
+  Shelf  {Shelf.Project.Settings}  ShelfProjectConfigurable
+  Git  {vcs.Git}  GitVcsPanel
+  GitHub  {org.jetbrains.plugins.github.ui.GithubSettingsConfigurable}  GithubSettingsConfigurable
+  GitLab  {org.jetbrains.plugins.gitlab.GitLabSettingsConfigurable}  GitLabSettingsConfigurable
+Build, Execution, Deployment  {configurable.group.build}  SortedConfigurableGroup
+  Build Tools  {build.tools}  ExternalSystemGroupConfigurable
+    Make  {reference.settingsdialog.project.make}  MakeConfigurable
+  Coverage  {coverage}  CoverageOptionsConfigurable
+  Debugger  {project.propDebugger}  DebuggerConfigurable
+    Data Views  {debugger.dataViews}  DataViewsConfigurable
+      JavaScript  {debugger.dataViews.javascript}  JavaScriptDataViewsConfigurableUi
+      Go  {dlv.dataViews}  DlvDataViewsSettingsUi
+    Stepping  {debugger.stepping}  MergedCompositeConfigurable
+  Deployment  {web.server}  DeploymentConfigurable
+    Options  {reference.settings.deploy.options}  PublishOptionsConfigurable
+  Docker  {Docker}  DockerConnectionsListConfigurable
+    Console  {reference.settingsDialog.application.dockerConsole}  DockerConsoleConfigurable
+    Docker Compose  {docker.compose.service.completion}  ComposeServiceCompletionConfigurable
+    Docker Registry  {DockerRegistry}  DockerRegistryListConfigurable
+  Kubernetes  {kubernetes.configurable.id}  KubernetesConfigurable
+    Cluster Interaction  {kubernetes.cluster.configurable.id}  KubernetesClusterConfigurable
+    Logs  {kubernetes.logs.configurable.id}  KubernetesLogsConfigurable
+    Schemas  {kubernetes.schemas.configurable.id}  KubernetesSchemasConfigurable
+  Profilers  {configurable.group.profiler}  SortedConfigurableGroup
+    Go Profiler: Applications  {go.profiler.settings}  GoLandProfilerConfigurable
+    Go Profiler: Tests  {go.profiler.test.configurations}  SearchableConfigurable$Delegate
+  Run Targets  {Runtime.Targets.Configurable}  TargetEnvironmentsConfigurable
+Languages & Frameworks  {configurable.group.language}  SortedConfigurableGroup
+  JavaScript  {Settings.JavaScript}  JSRootConfigurable
+    Code Quality Tools  {Settings.JavaScript.Linters}  JSLintersConfigurable
+      ESLint  {settings.javascript.linters.eslint}  EslintConfigurable
+    Libraries  {JavaScript.Libraries}  JSScriptingContextConfigurable
+    Webpack  {settings.webpack}  WebpackConfigurable
+  JavaScript Runtime  {settings.javascript.runtime}  JavaScriptRuntimeConfigurable
+  Markdown  {Settings.Markdown}  MarkdownSettingsConfigurable
+  Mermaid  {Settings.Mermaid}  MermaidSettingsConfigurable
+  OpenAPI Specifications  {swagger}  SwaggerConfigurable
+  Protocol Buffers  {google.protobuf.language}  PbLanguageSettingsConfigurable
+    Text Format  {google.prototext.language}  PbTextLanguageSettingsConfigurable
+  Schemas and DTDs  {preferences.externalResources}  ExternalResourceConfigurable
+    Default XML Schemas  {xml.defaultSchemas}  DefaultSchemasConfigurable
+    JSON Schema Mappings  {settings.json.schema}  JsonSchemaMappingsConfigurable
+    Remote JSON Schemas  {settings.json.schema.catalog}  JsonSchemaCatalogConfigurable
+    XML Catalog  {xml.catalog}  XMLCatalogConfigurable
+  SQL Dialects  {SQL Dialects}  SqlDialectsConfigurable
+  SQL Resolution Scopes  {SQL Resolution Scopes}  SqlResolveConfigurable
+  Style Sheets  {configurable.stylesheets}  StylesheetsConfigurable
+    Stylelint  {configurable.stylesheets.stylelint}  StylelintConfigurable
+  Template Data Languages  {Template Data Languages}  TemplateDataLanguageConfigurable
+  TypeScript  {settings.typescriptcompiler}  TypeScriptConfigurable
+Tools  {configurable.group.tools}  SortedConfigurableGroup
+  Actions on Save  {actions.on.save}  ActionsOnSaveConfigurable
+  CSV Formats  {database.data.csv.formats}  CsvSettingsConfigurable
+  Database  {configurable.group.database.main}  SortedConfigurableGroup
+    Query Execution  {database.query.execution}  DatabaseSettingsQueryExecution
+      Output and Results  {database.output.results}  DatabaseSettingsOutputResults
+      User Parameters  {database.sql.templating}  DatabaseSettingsUserParameters
+    Data Editor and Viewer  {database.data.views}  DatabaseSettingsDataViews
+    Database Explorer  {database.explorer.settings}  DatabaseExplorerSettingsConfigurable
+    AI Tools  {database.ai.tools}  DatabaseSettingsAiToolsConfigurable
+    Query Files and Consoles  {database.sql.files}  QueryFilesConfigurable
+    Other  {database.other}  DatabaseSettingsOther
+  Diagrams  {reference.settings.ide.settings.uml}  UmlConfigurable
+  Diff & Merge  {diff.base}  DiffSettingsConfigurable
+    External Diff Tools  {diff.external}  ExternalDiffSettingsConfigurable
+  External Tools  {preferences.externalTools}  ToolConfigurable
+  Features Suggester  {org.intellij.featuresSuggester.FeatureSuggesterConfigurable}  FeatureSuggesterConfigurable
+  Features Trainer  {FeaturesTrainerSettingsPanel}  FeaturesTrainerSettingsPanel
+  File Watchers  {watcher.settings}  WatchersConfigurable
+  HTTP Client  {httpClient}  HttpClientConfigurable
+  MCP Server  {com.intellij.mcpserver.settings}  McpServerSettingsConfigurable
+    Exposed Tools  {com.intellij.mcpserver.settings.filter}  McpToolFilterConfigurable
+  Qodana  {settings.qodana}  QodanaCloudSettingsPanel
+  Remote SSH External Tools  {preferences.remoteExternalTools}  RemoteToolConfigurable
+  Rsync  {rsyncConfigurable}  RsyncConfigurable
+  Shared Indexes  {shared-indexes}  SharedIndexConfigurable
+  SSH Configurations  {ssh.settings}  SshConfigConfigurable$Main
+  SSH Terminal  {sshConsole}  SshConsoleOptionsConfigurable
+  Startup Tasks  {preferences.startup.tasks}  ProjectStartupConfigurable
+  Terminal  {terminal}  TerminalOptionsConfigurable
+  Terraform Tools  {reference.settings.dialog.project.terraform}  TfToolConfigurable
+  Web Browsers and Preview  {reference.settings.ide.settings.web.browsers}  BrowserSettings
+Backup and Sync  {settings.sync}  SettingsSyncConfigurable
+Advanced Settings  {advanced.settings}  AdvancedSettingsConfigurable
+configurables: 258
+

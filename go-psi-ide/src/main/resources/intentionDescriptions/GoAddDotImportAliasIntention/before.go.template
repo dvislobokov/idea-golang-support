@@ -1,0 +1,3 @@
+import "<spot>strings</spot>"
+
+var s = strings.ToUpper("a")

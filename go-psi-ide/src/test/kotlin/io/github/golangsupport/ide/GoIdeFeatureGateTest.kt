@@ -164,7 +164,8 @@ class GoIdeFeatureGateTest : GoSemanticIdeTestBase() {
     /** SEMANTIC_COLORS off: the annotator colours nothing; the default gate colours the declarations and the resolved references. */
     fun testClosedGateSemanticColours() {
         val open = semanticColours("open.go", shapes)
-        assertTrue(open.toString(), "GO_TYPE_DECLARATION" in open && "GO_FUNCTION_DECLARATION" in open && "GO_TYPE_REFERENCE" in open)
+        // GoLand's keys since 0.2.105: struct / interface declarations, exported functions, struct references
+        assertTrue(open.toString(), "GO_PACKAGE_EXPORTED_STRUCT" in open && "GO_EXPORTED_FUNCTION" in open && "GO_EXPORTED_STRUCT_REFERENCE" in open)
         close(GoIdeFeature.SEMANTIC_COLORS)
         val closed = semanticColours("closed.go", shapes)
         assertEmpty("no colour of the semantic annotator: $closed", closed)

@@ -8,6 +8,15 @@ folding, Go to Class / Symbol, commenter, скобки — из `go-psi-ide-edit
 С плагином JetBrains (`org.jetbrains.plugins.go`, GoLand) объявлена несовместимость: тот же тип файлов, и добавить там нечего.
 
 Статус фич — `ROADMAP.md`, что делать дальше и в каком порядке — `PLAN.md`, переход с gopls на свой PSI по шагам — `MIGRATION.md` (оба ведутся по-русски; сделанный пункт плана отмечать и переносить в ROADMAP). `playground/` — Go-модуль для живой проверки (один тест в нём падает нарочно), к сборке не относится.
+
+**«Доведи до уровня GoLand»** (и близкие формулировки: «паритет с GoLand», «как в GoLand», «закрой разрывы с GoLand») — это раздел
+`PLAN.md` «Паритет с GoLand (по живой разведке 2026-10-05)», блоки G1–G9: брать следующий незакрытый пункт по порядку блоков (или блок, который
+назвал пользователь), делать по правилам ниже (тесты, версия на фичу в CHANGELOG, отметка в PLAN и перенос в ROADMAP). Эталон поведения — живой
+GoLand: `docs/goland-analysis/README.md` (что и где снято), дампы `docs/goland-analysis/dumps/*.txt` (точные пункты меню, тексты Alt+Enter,
+списки инспекций / intentions / postfix, completion), картинки `img/`. Спорное поведение переснимать на GoLand (`tools/ui-robot/goland/start-goland.ps1`,
+порт 8595, одна IDE за раз), а не угадывать. Порядок пакетов агентов — спросить пользователя (без авто-волн); перед «готово» по блоку — те же пробы
+на песочнице плагина (`TARGET=plugin GOLAND_PID=<pid песочницы> bash tools/ui-robot/goland/analysis/completions.sh` и др.: порт 8083,
+площадка `build/ui-robot/playground`, пробные файлы из `tools/ui-robot/goland/probe/` положить туда и убрать после) и сверка с дампом GoLand.
 `tools/dlv-dap/probe.py` — зонд `dlv dap` (как объявляет порт, capabilities). `tools/gopls/probe.py` — зонд gopls без IDE: диагностики файла и code actions в заданных местах (так отличают «сервер не предлагает» от «платформа не показывает»). `tools/icons/generate.py` — все SVG плагина (править фигуры там, потом запускать). Анализ платформенных API LSP / DAP — в соседнем репозитории:
 `../idea-dotnet-support/docs/platform-lsp-dap.html`, `tools/platform-api/api.json`, журнал находок по DAP-клиенту — `PLATFORM_DAP_PLAN.md` там же.
 

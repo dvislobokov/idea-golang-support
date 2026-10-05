@@ -1,0 +1,222 @@
+##### document markup: 170 highlighters
+  2:9-2:14  [GO_PACKAGE] layer 3000  «store»
+  9:4-9:12  [GO_COMMENT_REFERENCE] layer 3000  «ErrEmpty»
+  10:5-10:13  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «ErrEmpty»
+  10:16-10:22  [GO_PACKAGE] layer 3000  «errors»
+  10:23-10:26  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «New»
+  13:5-13:9  [GO_COMMENT_REFERENCE] layer 3000  «Item»
+  14:2-18:3  [STICKY_LINE_MARKER] layer 0  «Item struct {⏎		Name     string `json:"name" valid»
+  14:2-14:6  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Item»
+  15:3-15:7  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Name»
+  15:12-15:18  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  15:20-15:24  [GO_TAG_KEY] layer 1999  «json»
+  15:24-15:25  [GO_TAG_COLON] layer 1999  «:»
+  15:25-15:31  [GO_TAG_VALUE] layer 1999  «"name"»
+  15:32-15:40  [GO_TAG_KEY] layer 1999  «validate»
+  15:40-15:41  [GO_TAG_COLON] layer 1999  «:»
+  15:41-15:48  [GO_TAG_VALUE] layer 1999  «"min=1"»
+  15:49-15:53  [GO_TAG_KEY] layer 1999  «yaml»
+  15:53-15:54  [GO_TAG_COLON] layer 1999  «:»
+  15:54-15:60  [GO_TAG_VALUE] layer 1999  «"name"»
+  16:3-16:8  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Price»
+  16:12-16:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  16:20-16:24  [GO_TAG_KEY] layer 1999  «json»
+  16:24-16:25  [GO_TAG_COLON] layer 1999  «:»
+  16:25-16:32  [GO_TAG_VALUE] layer 1999  «"price"»
+  17:3-17:11  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Quantity»
+  17:12-17:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  17:20-17:24  [GO_TAG_KEY] layer 1999  «json»
+  17:24-17:25  [GO_TAG_COLON] layer 1999  «:»
+  17:25-17:35  [GO_TAG_VALUE] layer 1999  «"quantity"»
+  20:5-20:11  [GO_COMMENT_REFERENCE] layer 3000  «Priced»
+  21:2-21:8  [GO_PACKAGE_EXPORTED_INTERFACE] layer 3000  «Priced»
+  21:2-23:3  [STICKY_LINE_MARKER] layer 0  «Priced interface {⏎		Total() int⏎	}»
+  21:2-21:8  [] layer 3000  «Priced» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to ImplementationsClick or press Ctrl+Alt+B to navigate]
+  22:3-22:8  [] layer 3000  «Total» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to ImplementationsClick or press Ctrl+Alt+B to navigate]
+  22:3-22:8  [GO_EXPORTED_FUNCTION] layer 3000  «Total»
+  22:11-22:14  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  26:4-26:9  [GO_COMMENT_REFERENCE] layer 3000  «Order»
+  27:6-30:2  [STICKY_LINE_MARKER] layer 0  «Order struct {⏎	Currency string `json:"currency" y»
+  27:6-27:11  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Order»
+  27:6-27:11  [] layer 3000  «Order» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to InterfacesClick or press Ctrl+U to navigate]
+  28:2-28:10  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Currency»
+  28:11-28:17  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  28:19-28:23  [GO_TAG_KEY] layer 1999  «json»
+  28:23-28:24  [GO_TAG_COLON] layer 1999  «:»
+  28:24-28:34  [GO_TAG_VALUE] layer 1999  «"currency"»
+  28:35-28:39  [GO_TAG_KEY] layer 1999  «yaml»
+  28:39-28:40  [GO_TAG_COLON] layer 1999  «:»
+  28:40-28:50  [GO_TAG_VALUE] layer 1999  «"currency"»
+  28:51-28:54  [GO_TAG_KEY] layer 1999  «xml»
+  28:54-28:55  [GO_TAG_COLON] layer 1999  «:»
+  28:55-28:65  [GO_TAG_VALUE] layer 1999  «"currency"»
+  28:66-28:68  [GO_TAG_KEY] layer 1999  «db»
+  28:68-28:69  [GO_TAG_COLON] layer 1999  «:»
+  28:69-28:79  [GO_TAG_VALUE] layer 1999  «"currency"»
+  28:80-28:92  [GO_TAG_KEY] layer 1999  «mapstructure»
+  28:80-28:92  [TYPO] layer 3000  «mapstructure»  TIP: Typo: In word 'mapstructure'
+  28:92-28:93  [GO_TAG_COLON] layer 1999  «:»
+  28:93-28:103  [GO_TAG_VALUE] layer 1999  «"currency"»
+  28:104-28:108  [GO_TAG_KEY] layer 1999  «toml»
+  28:108-28:109  [GO_TAG_COLON] layer 1999  «:»
+  28:109-28:119  [GO_TAG_VALUE] layer 1999  «"currency"»
+  29:2-29:7  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  29:13-29:17  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Item»
+  29:19-29:21  [GO_TAG_KEY] layer 1999  «db»
+  29:21-29:22  [GO_TAG_COLON] layer 1999  «:»
+  29:22-29:29  [GO_TAG_VALUE] layer 1999  «"items"»
+  29:30-29:42  [GO_TAG_KEY] layer 1999  «mapstructure»
+  29:30-29:42  [TYPO] layer 3000  «mapstructure»  TIP: Typo: In word 'mapstructure'
+  29:42-29:43  [GO_TAG_COLON] layer 1999  «:»
+  29:43-29:50  [GO_TAG_VALUE] layer 1999  «"items"»
+  29:51-29:55  [GO_TAG_KEY] layer 1999  «toml»
+  29:55-29:56  [GO_TAG_COLON] layer 1999  «:»
+  29:56-29:63  [GO_TAG_VALUE] layer 1999  «"items"»
+  32:4-32:9  [GO_COMMENT_REFERENCE] layer 3000  «Flags»
+  32:92-32:106  [TYPO] layer 3000  «fieldalignment»  TIP: Typo: In word 'fieldalignment'
+  32:110-32:118  [TYPO] layer 3000  «golangci»  TIP: Typo: In word 'golangci'
+  33:6-33:11  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Flags»
+  33:6-37:2  [STICKY_LINE_MARKER] layer 0  «Flags struct {⏎	Debug   bool⏎	Timeout int64⏎	Verbo»
+  34:2-34:7  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Debug»
+  34:10-34:14  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «bool»
+  35:2-35:9  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Timeout»
+  35:10-35:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int64»
+  36:2-36:9  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Verbose»
+  36:10-36:14  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «bool»
+  39:1-39:12  [INFO_ATTRIBUTES] layer 3750  «// NewOrder»  TIP: Comment should be meaningful or it should be removed
+  39:4-39:12  [GO_COMMENT_REFERENCE] layer 3000  «NewOrder»
+  40:6-42:2  [STICKY_LINE_MARKER] layer 0  «NewOrder(currency string) *Order {⏎	return &Order{»
+  40:6-40:14  [GO_EXPORTED_FUNCTION] layer 3000  «NewOrder»
+  40:15-40:23  [GO_FUNCTION_PARAMETER] layer 3000  «currency»
+  40:24-40:30  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  40:33-40:38  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Order»
+  41:10-41:15  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Order»
+  41:16-41:24  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Currency»
+  41:26-41:34  [GO_FUNCTION_PARAMETER] layer 3000  «currency»
+  44:7-44:8  [GO_METHOD_RECEIVER] layer 3000  «o»
+  44:10-44:15  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Order»
+  44:17-46:2  [STICKY_LINE_MARKER] layer 0  «Add(item Item) {⏎	o.items = append(o.items, item)⏎»
+  44:17-44:20  [GO_EXPORTED_FUNCTION] layer 3000  «Add»
+  44:21-44:25  [GO_FUNCTION_PARAMETER] layer 3000  «item»
+  44:26-44:30  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Item»
+  45:2-45:3  [GO_METHOD_RECEIVER] layer 3000  «o»
+  45:4-45:9  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  45:12-45:18  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «append»
+  45:19-45:20  [GO_METHOD_RECEIVER] layer 3000  «o»
+  45:21-45:26  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  45:28-45:32  [GO_FUNCTION_PARAMETER] layer 3000  «item»
+  48:4-48:9  [GO_COMMENT_REFERENCE] layer 3000  «Total»
+  49:7-49:8  [GO_METHOD_RECEIVER] layer 3000  «o»
+  49:10-49:15  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Order»
+  49:17-49:22  [GO_EXPORTED_FUNCTION] layer 3000  «Total»
+  49:17-68:2  [STICKY_LINE_MARKER] layer 0  «Total() int {⏎	total := 0⏎	for _, item := range o.»
+  49:17-49:22  [] layer 3000  «Total» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to Method SpecificationsClick or press Ctrl+U to navigate]
+  49:25-49:28  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  50:2-50:7  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  51:6-51:7  [GO_SCOPE_VARIABLE] layer 3000  «_»
+  51:9-51:13  [GO_SCOPE_VARIABLE] layer 3000  «item»
+  51:23-51:24  [GO_METHOD_RECEIVER] layer 3000  «o»
+  51:25-51:30  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  52:3-52:8  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  52:12-52:16  [GO_SCOPE_VARIABLE] layer 3000  «item»
+  52:17-52:22  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Price»
+  52:25-52:29  [GO_SCOPE_VARIABLE] layer 3000  «item»
+  52:30-52:38  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Quantity»
+  55:2-55:3  [GO_LOCAL_VARIABLE] layer 3000  «_»
+  55:5-55:8  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  55:12-55:14  [GO_PACKAGE] layer 3000  «os»
+  55:15-55:19  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Open»
+  55:15-55:19  [WARNING_ATTRIBUTES] layer 4000  «Open»  TIP: Potential resource leak: ensure the resource is closed on all execution paths STRIPE
+  56:5-56:8  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  56:12-56:15  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  60:2-60:3  [GO_LOCAL_VARIABLE] layer 3000  «f»
+  60:5-60:8  [GO_REASSIGNMENT_IN_SHORT_VAR_DECLARATION] layer 3000  «err»
+  60:12-60:14  [GO_PACKAGE] layer 3000  «os»
+  60:15-60:19  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Open»
+  61:5-61:8  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  61:12-61:15  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  64:8-64:9  [GO_LOCAL_VARIABLE] layer 3000  «f»
+  64:10-64:15  [WARNING_ATTRIBUTES] layer 4000  «Close»  TIP: Unhandled error STRIPE
+  64:10-64:15  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Close»
+  66:9-66:14  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  70:7-70:8  [GO_METHOD_RECEIVER] layer 3000  «o»
+  70:10-70:15  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Order»
+  70:17-75:2  [STICKY_LINE_MARKER] layer 0  «Validate() error {⏎	if len(o.items) == 0 {⏎		retur»
+  70:17-70:25  [GO_EXPORTED_FUNCTION] layer 3000  «Validate»
+  70:28-70:33  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  71:5-71:8  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «len»
+  71:9-71:10  [GO_METHOD_RECEIVER] layer 3000  «o»
+  71:11-71:16  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  72:10-72:18  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «ErrEmpty»
+  74:9-74:12  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  77:4-77:14  [GO_COMMENT_REFERENCE] layer 3000  «Discounted»
+  77:20-77:26  [GO_COMMENT_REFERENCE] layer 3000  «Priced»
+  78:6-78:16  [] layer 3000  «Discounted» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to InterfacesClick or press Ctrl+U to navigate]
+  78:6-81:2  [STICKY_LINE_MARKER] layer 0  «Discounted struct {⏎	Order   *Order⏎	Percent int⏎}»
+  78:6-78:16  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Discounted»
+  79:2-79:7  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Order»
+  79:11-79:16  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Order»
+  80:2-80:9  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Percent»
+  80:10-80:13  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  83:7-83:8  [GO_METHOD_RECEIVER] layer 3000  «d»
+  83:9-83:19  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Discounted»
+  83:21-83:26  [] layer 3000  «Total» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to Method SpecificationsClick or press Ctrl+U to navigate]
+  83:21-83:26  [GO_EXPORTED_FUNCTION] layer 3000  «Total»
+  83:21-85:2  [STICKY_LINE_MARKER] layer 0  «Total() int {⏎	return d.Order.Total() * (100 - d.P»
+  83:29-83:32  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  84:9-84:10  [GO_METHOD_RECEIVER] layer 3000  «d»
+  84:11-84:16  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Order»
+  84:17-84:22  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Total»
+  84:34-84:35  [GO_METHOD_RECEIVER] layer 3000  «d»
+  84:36-84:43  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Percent»
+##### editor markup: 6 highlighters
+##### keys: count
+  : 6
+  GO_BUILTIN_FUNCTION_CALL: 2
+  GO_BUILTIN_TYPE_REFERENCE: 13
+  GO_BUILTIN_VARIABLE: 3
+  GO_COMMENT_REFERENCE: 9
+  GO_EXPORTED_FUNCTION: 6
+  GO_EXPORTED_FUNCTION_CALL: 5
+  GO_EXPORTED_STRUCT_REFERENCE: 9
+  GO_FUNCTION_PARAMETER: 4
+  GO_LOCAL_VARIABLE: 9
+  GO_METHOD_RECEIVER: 10
+  GO_PACKAGE: 4
+  GO_PACKAGE_EXPORTED_INTERFACE: 1
+  GO_PACKAGE_EXPORTED_STRUCT: 4
+  GO_PACKAGE_EXPORTED_VARIABLE: 2
+  GO_REASSIGNMENT_IN_SHORT_VAR_DECLARATION: 1
+  GO_SCOPE_VARIABLE: 4
+  GO_STRUCT_EXPORTED_MEMBER: 14
+  GO_STRUCT_LOCAL_MEMBER: 5
+  GO_TAG_COLON: 14
+  GO_TAG_KEY: 14
+  GO_TAG_VALUE: 14
+  INFO_ATTRIBUTES: 1
+  STICKY_LINE_MARKER: 10
+  TYPO: 4
+  WARNING_ATTRIBUTES: 2
+##### inline inlays: 3
+  10:27  ParameterHintsPresentationManager$MyRenderer «text:»
+  55:20  ParameterHintsPresentationManager$MyRenderer «name:»
+  60:20  ParameterHintsPresentationManager$MyRenderer «name:»
+##### after-line-end inlays: 12
+  10:48  InlineCodeVisionInlayRenderer
+  14:15  InlineCodeVisionInlayRenderer
+  21:20  InlineCodeVisionInlayRenderer
+  22:14  InlineCodeVisionInlayRenderer
+  27:20  InlineCodeVisionInlayRenderer
+  33:20  InlineCodeVisionInlayRenderer
+  40:40  InlineCodeVisionInlayRenderer
+  44:33  InlineCodeVisionInlayRenderer
+  49:30  InlineCodeVisionInlayRenderer
+  70:35  InlineCodeVisionInlayRenderer
+  78:25  InlineCodeVisionInlayRenderer
+  83:34  InlineCodeVisionInlayRenderer
+##### block inlays: 4
+  12:1  BlockCodeVisionInlayRenderer
+  27:1  BlockCodeVisionInlayRenderer
+  33:1  BlockCodeVisionInlayRenderer
+  78:1  BlockCodeVisionInlayRenderer
+

@@ -1,0 +1,131 @@
+profile Project Default, 129 inspections
+Code Coverage :: Check GO source code coverage  {GoCoverageInspection}  WARNING
+Go Template | General :: Duplicate variable  {GoTemplateDuplicateVariable}  ERROR
+Go Template | General :: Unknown variable  {GoTemplateUnknownVariable}  ERROR
+Go modules | Declaration redundancy :: Unused dependency  {VgoUnusedDependency}  WARNING
+Go modules | Dependency issues (go list -m -u) :: Dependency update available  {VgoDependencyUpdateAvailable}  WEAK WARNING
+Go modules | Dependency issues (go list -m -u) :: Deprecated dependency  {VgoDependencyDeprecated}  WARNING
+Go modules | Dependency issues (go list -m -u) :: Multiple 'require' directives can be merged in groups by dependency type  {VgoRequireDirectivesMerge}  INFORMATION
+Go modules | Dependency issues (go list -m -u) :: Retracted dependency version  {VgoDependencyVersionRetracted}  WARNING
+Go modules | General :: Migration to Go workspace is possible  {VgoMigrateFromReplacesToWorkspace}  WARNING
+Go modules | General :: Unresolved path in 'ignore' directive  {VgoUnresolvedIgnorePath}  WARNING
+Go | Code style issues :: Comment has no leading space  {GoCommentLeadingSpace}  WEAK WARNING
+Go | Code style issues :: Comment of exported element starts with the incorrect name  {GoCommentStart}  WEAK WARNING
+Go | Code style issues :: Convert string literals  {GoConvertStringLiterals}  INFORMATION
+Go | Code style issues :: Error string should not be capitalized or end with punctuation  {GoErrorStringFormat}  WEAK WARNING
+Go | Code style issues :: Exported element should have a comment  {GoExportedElementShouldHaveComment}  INFORMATION
+Go | Code style issues :: Exported element should have its own declaration  {GoExportedOwnDeclaration}  WEAK WARNING
+Go | Code style issues :: Name starts with a package name  {GoNameStartsWithPackageName}  WEAK WARNING
+Go | Code style issues :: Receiver has a generic name  {GoReceiverNames}  WEAK WARNING
+Go | Code style issues :: Redundant 'else' in 'if'  {GoRedundantElseInIf}  WEAK WARNING
+Go | Code style issues :: Redundant 'true' in for loop condition  {GoRedundantTrueInForCondition}  WEAK WARNING
+Go | Code style issues :: Struct initialization without field names  {GoStructInitializationWithoutFieldNames}  WEAK WARNING
+Go | Code style issues :: Type parameter is declared in lowercase  {GoTypeParameterInLowerCase}  INFORMATION
+Go | Code style issues :: Unit-specific suffix for 'time.Duration'  {GoUnitSpecificDurationSuffix}  WEAK WARNING
+Go | Code style issues :: Unsorted imports  {GoUnsortedImport}  WEAK WARNING
+Go | Code style issues :: Usage of Snake_Case  {GoSnakeCaseUsage}  WEAK WARNING
+Go | Control flow issues :: 'defer' in the loop  {GoDeferInLoop}  WEAK WARNING
+Go | Control flow issues :: Assignment to a receiver  {GoAssignmentToReceiver}  WEAK WARNING
+Go | Control flow issues :: Infinite 'for' loop  {GoInfiniteFor}  WARNING
+Go | Control flow issues :: Unreachable code  {GoUnreachableCode}  WARNING
+Go | Data flow analysis :: Constant condition  {GoDfaConstantCondition}  WARNING
+Go | Data flow analysis :: Data flow analysis  {GoDfaInspectionRunner}  WARNING
+Go | Data flow analysis :: Error may be not nil  {GoDfaErrorMayBeNotNil}  WARNING
+Go | Data flow analysis :: Interprocedural potential nil dereference  {GoMaybeNil}  WARNING
+Go | Data flow analysis :: Potential nil dereference  {GoDfaNilDereference}  WARNING
+Go | Data flow analysis :: Potential resource leak  {GoResourceLeak}  WARNING
+Go | Declaration redundancy :: Bool condition  {GoBoolExpressions}  WARNING
+Go | Declaration redundancy :: Empty declaration  {GoEmptyDeclaration}  WARNING
+Go | Declaration redundancy :: Empty slice declared using a literal  {GoPreferNilSlice}  WEAK WARNING
+Go | Declaration redundancy :: Redundant blank argument in range  {GoRedundantBlankArgInRange}  WARNING
+Go | Declaration redundancy :: Redundant comma  {GoRedundantComma}  WEAK WARNING
+Go | Declaration redundancy :: Redundant import alias  {GoRedundantImportAlias}  WEAK WARNING
+Go | Declaration redundancy :: Redundant second index in slices  {GoRedundantSecondIndexInSlices}  WARNING
+Go | Declaration redundancy :: Redundant semicolon  {GoRedundantSemicolon}  WEAK WARNING
+Go | Declaration redundancy :: Redundant type conversion  {GoRedundantConversion}  WEAK WARNING
+Go | Declaration redundancy :: Redundant types in composite literals  {GoRedundantTypeDeclInCompositeLit}  WARNING
+Go | Declaration redundancy :: Self assignment  {GoSelfAssignment}  WEAK WARNING
+Go | Declaration redundancy :: Type can be omitted  {GoVarAndConstTypeMayBeOmitted}  WEAK WARNING
+Go | Declaration redundancy :: Unused constant  {GoUnusedConst}  WARNING
+Go | Declaration redundancy :: Unused exported function  {GoUnusedExportedFunction}  WARNING
+Go | Declaration redundancy :: Unused exported type  {GoUnusedExportedType}  WARNING
+Go | Declaration redundancy :: Unused function  {GoUnusedFunction}  WARNING
+Go | Declaration redundancy :: Unused global variable  {GoUnusedGlobalVariable}  WARNING
+Go | Declaration redundancy :: Unused parameter  {GoUnusedParameter}  WARNING
+Go | Declaration redundancy :: Unused type  {GoUnusedType}  WARNING
+Go | Declaration redundancy :: Unused type parameter  {GoUnusedTypeParameter}  WARNING
+Go | General :: Cyclic imports  {GoCyclicImports}  ERROR
+Go | General :: Deprecated element  {GoDeprecation}  WARNING
+Go | General :: Detect usages of runtime.SetFinalizer  {GoDetectSetFinalizerUsages}  WARNING
+Go | General :: Disabled GOPATH analysis  {GoDisabledGopathIndexing}  WEAK WARNING
+Go | General :: Fuzzing is supported starting with Go 1.18  {GoFuzzingSupport}  WARNING
+Go | General :: Malformed test function name  {GoTestName}  WARNING
+Go | General :: Missing trailing comma before a newline in a composite literal  {GoMissingTrailingComma}  ERROR
+Go | General :: Redundant parentheses  {GoRedundantParens}  WEAK WARNING
+Go | General :: Struct field alignment  {GoStructLayout}  WEAK WARNING  [off]
+Go | General :: Unexported return type of the exported function  {GoExportedFuncWithUnexportedType}  WARNING
+Go | General :: Unnecessarily exported identifier  {GoUnnecessarilyExportedIdentifiers}  WEAK WARNING  [off]
+Go | General :: Usage of 'interface{}' as a type  {GoInterfaceToAny}  INFORMATION
+Go | General :: Usage of context.TODO()  {GoContextTodo}  WEAK WARNING  [off]
+Go | General :: Warnings from 'golangci-lint'  {GoLinter}  WARNING
+Go | Go fix :: 'HasPrefix' and 'TrimPrefix' can use 'strings.CutPrefix'  {GoFixStringsCutPrefix}  SYNTAX_UPDATE
+Go | Go fix :: 'Len()'/'At()' loop can be replaced with iterator  {GoFixStdIterators}  SYNTAX_UPDATE
+Go | Go fix :: 'errors.As' can be replaced with 'errors.AsType'  {GoFixErrorsAsType}  SYNTAX_UPDATE
+Go | Go fix :: 'interface{}' can be replaced with 'any'  {GoFixAny}  SYNTAX_UPDATE
+Go | Go fix :: 'omitempty' tag on a struct field can be changed  {GoFixOmitZero}  SYNTAX_UPDATE
+Go | Go fix :: 'reflect.TypeOf' can be replaced with ‘reflect.TypeFor’  {GoFixReflectTypeFor}  SYNTAX_UPDATE
+Go | Go fix :: 'sort.Slice' can be replaced with 'slices.Sort'  {GoFixSlicesSort}  SYNTAX_UPDATE
+Go | Go fix :: 'strings.Index' and slicing can use 'strings.Cut'  {GoFixStringsCut}  SYNTAX_UPDATE
+Go | Go fix :: 'strings.Split' or 'strings.Fields' loop can use a 'Seq' variant  {GoFixStringsSeq}  SYNTAX_UPDATE
+Go | Go fix :: Address can be built with 'net.JoinHostPort'  {GoFixHostPort}  SYNTAX_UPDATE
+Go | Go fix :: Backward slice loop can use 'slices.Backward'  {GoFixSlicesBackward}  SYNTAX_UPDATE
+Go | Go fix :: Conditional assignment can be replaced with 'min' or 'max'  {GoFixMinMax}  SYNTAX_UPDATE
+Go | Go fix :: Counted loop can be replaced with range over integer  {GoFixRangeInt}  SYNTAX_UPDATE
+Go | Go fix :: Declaration marked with '//go:fix inline' can be inlined  {GoFixInline}  SYNTAX_UPDATE
+Go | Go fix :: Invalid build constraint directive  {GoFixBuildTag}  SYNTAX_UPDATE
+Go | Go fix :: Map loop can be replaced with the 'maps' function  {GoFixMapsLoop}  SYNTAX_UPDATE
+Go | Go fix :: Nested embedded field literals can be removed  {GoFixEmbedLit}  SYNTAX_UPDATE
+Go | Go fix :: Obsolete '+build' line  {GoFixPlusBuild}  SYNTAX_UPDATE
+Go | Go fix :: Pointer arithmetic can use 'unsafe.Add'  {GoFixUnsafeFuncs}  SYNTAX_UPDATE
+Go | Go fix :: Pointer helper call can be replaced with 'new()'  {GoFixNewExpr}  SYNTAX_UPDATE
+Go | Go fix :: Primitive atomic value can use typed wrapper  {GoFixAtomicTypes}  SYNTAX_UPDATE
+Go | Go fix :: Redundant range variable shadowing  {GoFixForVar}  SYNTAX_UPDATE
+Go | Go fix :: Slice search loop can be replaced with 'slices.Contains'  {GoFixSlicesContains}  SYNTAX_UPDATE
+Go | Go fix :: String concatenation can use 'strings.Builder'  {GoFixStringsBuilder}  SYNTAX_UPDATE
+Go | Go fix :: Test context cancellation can use 't.Context()'  {GoFixTestingContext}  SYNTAX_UPDATE
+Go | Go fix :: WaitGroup goroutine pattern can use 'WaitGroup.Go'  {GoFixWaitGroup}  SYNTAX_UPDATE
+Go | Probable bugs :: 'FailNow' in a non-test goroutine  {GoVetFailNowInNotTestGoroutine}  WARNING
+Go | Probable bugs :: 'Unmarshal' is called with the incorrect argument  {GoVetUnmarshal}  WARNING
+Go | Probable bugs :: 'context.CancelFunc' is not called  {GoVetLostCancel}  WARNING
+Go | Probable bugs :: Defer/go statement calls 'recover' or 'panic' directly  {GoDeferGo}  WEAK WARNING
+Go | Probable bugs :: Direct comparison of errors  {GoDirectComparisonOfErrors}  WEAK WARNING
+Go | Probable bugs :: Division by zero  {GoDivisionByZero}  WARNING
+Go | Probable bugs :: Exceeded shift expression  {GoShift}  WARNING
+Go | Probable bugs :: Imported package name as a name identifier  {GoImportUsedAsName}  WARNING
+Go | Probable bugs :: Impossible interface type assertion  {GoVetImpossibleInterfaceToInterfaceAssertion}  WARNING
+Go | Probable bugs :: Incorrect 'strings.Replace' count argument  {GoStringsReplaceCount}  WARNING
+Go | Probable bugs :: Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions  {GoPrintFunctions}  WEAK WARNING
+Go | Probable bugs :: Incorrect usage of the 'errors.As' function  {GoErrorsAs}  WARNING
+Go | Probable bugs :: Incorrect usage of the 'sync/atomic' package  {GoVetAtomic}  WARNING
+Go | Probable bugs :: Integer to string type conversion  {GoVetIntToStringConversion}  WARNING
+Go | Probable bugs :: Invalid conversions of 'uintptr' to 'unsafe.Pointer'  {GoVetUnsafePointer}  WARNING
+Go | Probable bugs :: Irregular usage of 'iota'  {GoIrregularIota}  WEAK WARNING
+Go | Probable bugs :: Leading whitespace in directive comment  {GoLeadingWhitespaceInDirectiveComment}  WARNING
+Go | Probable bugs :: Locks mistakenly passed by value  {GoVetCopyLock}  WARNING
+Go | Probable bugs :: Loop variables captured by the func literal  {GoLoopClosure}  WARNING
+Go | Probable bugs :: Malformed build tag  {GoBuildTag}  WEAK WARNING
+Go | Probable bugs :: Malformed struct tag  {GoVetStructTag}  WARNING
+Go | Probable bugs :: Missing 'case' statements for 'iota' consts in 'switch'  {GoSwitchMissingCasesForIotaConsts}  WARNING
+Go | Probable bugs :: Mixed value and pointer receivers  {GoMixedReceiverTypes}  WEAK WARNING
+Go | Probable bugs :: Nilness analyzer  {GoNilness}  WARNING  [off]
+Go | Probable bugs :: Non-standard signature for well-known function names  {GoStandardMethods}  WARNING
+Go | Probable bugs :: Reserved word used as name  {GoReservedWordUsedAsName}  WARNING
+Go | Probable bugs :: Shadowing variable  {GoShadowedVar}  TEXT ATTRIBUTES
+Go | Probable bugs :: The 'go:debug' directive is ignored in Go versions earlier than 1.21  {GoDebugMinGoSdkVersion}  WARNING
+Go | Probable bugs :: The 'go:debug' directive must be placed before the package clause  {GoDebugDirective}  WARNING
+Go | Probable bugs :: Type assertion on errors fails on wrapped errors  {GoTypeAssertionOnErrors}  WEAK WARNING
+Go | Probable bugs :: Unhandled error  {GoUnhandledErrorResult}  WARNING
+Go | Probable bugs :: Unused function or method call result  {GoUnusedCallResult}  WARNING
+Go | Security :: Vulnerable API usage  {GoVulnerableCodeUsages}  WARNING  [off]
+Go | Security :: Vulnerable API usage  {GoVulnerablePackageImport}  WARNING
+

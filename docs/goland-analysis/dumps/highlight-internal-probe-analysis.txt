@@ -1,0 +1,593 @@
+##### document markup: 488 highlighters
+  3:9-3:14  [GO_PACKAGE] layer 3000  «probe»
+  6:2-6:3  [GO_PACKAGE] layer 3000  «_»
+  14:1-14:35  [] layer 3000  «//go:generate stringer -type=Level» GUTTER[GoRunGenerateLineMarkerProvider$1$1: Run go generate on comment]
+  14:3-14:14  [GO_COMMENT_KEYWORD] layer 3000  «go:generate»
+  14:15-14:23  [INFORMATION_ATTRIBUTES] layer 1998  «stringer»
+  14:15-14:23  [INFORMATION_ATTRIBUTES] layer 3000  «stringer»
+  14:15-14:23  [BASH.EXTERNAL_COMMAND] layer 3000  «stringer»
+  14:15-14:35  [go:INJECTED_LANGUAGE_FRAGMENT] layer 1999  «stringer -type=Level»
+  14:23-14:24  [INFORMATION_ATTRIBUTES] layer 1998  « »
+  14:24-14:29  [INFORMATION_ATTRIBUTES] layer 3000  «-type»
+  14:24-14:29  [BASH.VAR_DEF] layer 3000  «-type»
+  14:24-14:29  [INFORMATION_ATTRIBUTES] layer 1998  «-type»
+  14:29-14:30  [INFORMATION_ATTRIBUTES] layer 1998  «=»
+  14:30-14:35  [INFORMATION_ATTRIBUTES] layer 3000  «Level»
+  14:30-14:35  [INFORMATION_ATTRIBUTES] layer 1998  «Level»
+  16:3-16:11  [GO_COMMENT_KEYWORD] layer 3000  «go:embed»
+  16:12-16:23  [GO_COMMENT_REFERENCE] layer 3000  «analysis.go»
+  17:5-17:15  [GO_PACKAGE_LOCAL_VARIABLE] layer 3000  «selfSource»
+  17:16-17:22  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  19:4-19:9  [GO_COMMENT_REFERENCE] layer 3000  «Level»
+  20:6-20:11  [GO_TYPE_SPECIFICATION] layer 3000  «Level»
+  20:6-20:15  [STICKY_LINE_MARKER] layer 0  «Level int»
+  20:12-20:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  23:2-23:7  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Debug»  TIP: Unused constant 'Debug'
+  23:2-23:7  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «Debug»
+  23:8-23:13  [GO_TYPE_REFERENCE] layer 3000  «Level»
+  23:16-23:20  [GO_BUILTIN_CONSTANT] layer 3000  «iota»
+  24:2-24:6  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «Info»
+  24:2-24:6  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Info»  TIP: Unused constant 'Info'
+  24:2-24:6  [STICKY_LINE_MARKER] layer 0  «Info»
+  25:2-25:6  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «Warn»
+  25:2-25:6  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Warn»  TIP: Unused constant 'Warn'
+  25:2-25:6  [STICKY_LINE_MARKER] layer 0  «Warn»
+  28:4-28:12  [GO_COMMENT_REFERENCE] layer 3000  «MaxItems»
+  29:7-29:15  [GO_PACKAGE_EXPORTED_CONSTANT] layer 3000  «MaxItems»
+  29:7-29:15  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «MaxItems»  TIP: Unused constant 'MaxItems'
+  31:7-31:15  [GO_PACKAGE_LOCAL_CONSTANT] layer 3000  «minItems»
+  33:5-33:16  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «ErrNotFound»
+  33:19-33:25  [GO_PACKAGE] layer 3000  «errors»
+  33:26-33:29  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «New»
+  35:4-35:9  [GO_COMMENT_REFERENCE] layer 3000  «Shape»
+  35:39-35:45  [GO_COMMENT_REFERENCE] layer 3000  «Circle»
+  35:67-35:73  [GO_COMMENT_REFERENCE] layer 3000  «Square»
+  36:6-36:11  [GO_PACKAGE_EXPORTED_INTERFACE] layer 3000  «Shape»
+  36:6-36:11  [] layer 3000  «Shape» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to ImplementationsClick or press Ctrl+Alt+B to navigate]
+  36:6-39:2  [STICKY_LINE_MARKER] layer 0  «Shape interface {⏎	Area() float64⏎	Name() string⏎}»
+  37:2-37:6  [GO_EXPORTED_FUNCTION] layer 3000  «Area»
+  37:2-37:6  [] layer 3000  «Area» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to ImplementationsClick or press Ctrl+Alt+B to navigate]
+  37:9-37:16  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «float64»
+  38:2-38:6  [] layer 3000  «Name» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to ImplementationsClick or press Ctrl+Alt+B to navigate]
+  38:2-38:6  [GO_EXPORTED_FUNCTION] layer 3000  «Name»
+  38:9-38:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  41:4-41:8  [GO_COMMENT_REFERENCE] layer 3000  «Base»
+  41:26-41:32  [GO_COMMENT_REFERENCE] layer 3000  «Circle»
+  42:6-45:2  [STICKY_LINE_MARKER] layer 0  «Base struct {⏎	ID      int⏎	created time.Time⏎}»
+  42:6-42:10  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Base»
+  43:2-43:4  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «ID»
+  43:10-43:13  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  44:2-44:9  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «created»
+  44:10-44:14  [GO_PACKAGE] layer 3000  «time»
+  44:15-44:19  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Time»
+  47:4-47:12  [GO_COMMENT_REFERENCE] layer 3000  «Describe»
+  47:28-47:34  [GO_COMMENT_REFERENCE] layer 3000  «Circle»
+  47:56-47:60  [GO_COMMENT_REFERENCE] layer 3000  «Base»
+  48:7-48:8  [GO_METHOD_RECEIVER] layer 3000  «b»
+  48:9-48:13  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Base»
+  48:15-48:23  [GO_EXPORTED_FUNCTION] layer 3000  «Describe»
+  48:15-48:68  [STICKY_LINE_MARKER] layer 0  «Describe() string { return fmt.Sprintf("#%d", b.ID»
+  48:26-48:32  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  48:42-48:45  [GO_PACKAGE] layer 3000  «fmt»
+  48:46-48:53  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Sprintf»
+  48:56-48:58  [GO_VALID_STRING_ESCAPE] layer 3000  «%d»
+  48:61-48:62  [GO_METHOD_RECEIVER] layer 3000  «b»
+  48:63-48:65  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «ID»
+  50:4-50:10  [GO_COMMENT_REFERENCE] layer 3000  «Circle»
+  50:22-50:27  [GO_COMMENT_REFERENCE] layer 3000  «Shape»
+  51:6-51:12  [] layer 3000  «Circle» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to InterfacesClick or press Ctrl+U to navigate]
+  51:6-55:2  [STICKY_LINE_MARKER] layer 0  «Circle struct {⏎	Base⏎	Radius float64 `json:"radiu»
+  51:6-51:12  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Circle»
+  52:2-52:6  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Base»
+  52:2-52:6  [STICKY_LINE_MARKER] layer 0  «Base»
+  53:2-53:8  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Radius»
+  53:9-53:16  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «float64»
+  53:18-53:22  [GO_TAG_KEY] layer 1999  «json»
+  53:22-53:23  [GO_TAG_COLON] layer 1999  «:»
+  53:23-53:41  [GO_TAG_VALUE] layer 1999  «"radius,omitempty"»
+  54:2-54:7  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Label»
+  54:9-54:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  54:18-54:22  [GO_TAG_KEY] layer 1999  «json»
+  54:22-54:23  [GO_TAG_COLON] layer 1999  «:»
+  54:23-54:30  [GO_TAG_VALUE] layer 1999  «"label"»
+  54:31-54:35  [GO_TAG_KEY] layer 1999  «yaml»
+  54:35-54:36  [GO_TAG_COLON] layer 1999  «:»
+  54:36-54:43  [GO_TAG_VALUE] layer 1999  «"label"»
+  57:7-57:8  [GO_METHOD_RECEIVER] layer 3000  «c»
+  57:9-57:15  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Circle»
+  57:17-57:21  [] layer 3000  «Area» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to Method SpecificationsClick or press Ctrl+U to navigate]
+  57:17-57:21  [GO_EXPORTED_FUNCTION] layer 3000  «Area»
+  57:17-57:69  [STICKY_LINE_MARKER] layer 0  «Area() float64 { return 3.14 * c.Radius * c.Radius»
+  57:24-57:31  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «float64»
+  57:48-57:49  [GO_METHOD_RECEIVER] layer 3000  «c»
+  57:50-57:56  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Radius»
+  57:59-57:60  [GO_METHOD_RECEIVER] layer 3000  «c»
+  57:61-57:67  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Radius»
+  59:7-59:8  [GO_METHOD_RECEIVER] layer 3000  «c»
+  59:9-59:15  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Circle»
+  59:17-59:21  [] layer 3000  «Name» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to Method SpecificationsClick or press Ctrl+U to navigate]
+  59:17-59:21  [GO_EXPORTED_FUNCTION] layer 3000  «Name»
+  59:17-59:49  [STICKY_LINE_MARKER] layer 0  «Name() string { return c.Label }»
+  59:24-59:30  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  59:40-59:41  [GO_METHOD_RECEIVER] layer 3000  «c»
+  59:42-59:47  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Label»
+  61:4-61:10  [GO_COMMENT_REFERENCE] layer 3000  «Square»
+  61:22-61:27  [GO_COMMENT_REFERENCE] layer 3000  «Shape»
+  62:6-64:2  [STICKY_LINE_MARKER] layer 0  «Square struct {⏎	Side float64 `json:"side"`⏎}»
+  62:6-62:12  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Square»
+  62:6-62:12  [] layer 3000  «Square» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to InterfacesClick or press Ctrl+U to navigate]
+  63:2-63:6  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Side»
+  63:7-63:14  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «float64»
+  63:16-63:20  [GO_TAG_KEY] layer 1999  «json»
+  63:20-63:21  [GO_TAG_COLON] layer 1999  «:»
+  63:21-63:27  [GO_TAG_VALUE] layer 1999  «"side"»
+  66:7-66:8  [GO_METHOD_RECEIVER] layer 3000  «s»
+  66:10-66:16  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Square»
+  66:18-66:22  [] layer 3000  «Area» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to Method SpecificationsClick or press Ctrl+U to navigate]
+  66:18-66:22  [GO_EXPORTED_FUNCTION] layer 3000  «Area»
+  66:18-66:59  [STICKY_LINE_MARKER] layer 0  «Area() float64 { return s.Side * s.Side }»
+  66:25-66:32  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «float64»
+  66:42-66:43  [GO_METHOD_RECEIVER] layer 3000  «s»
+  66:44-66:48  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Side»
+  66:51-66:52  [GO_METHOD_RECEIVER] layer 3000  «s»
+  66:53-66:57  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Side»
+  68:7-68:8  [GO_METHOD_RECEIVER] layer 3000  «s»
+  68:10-68:16  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Square»
+  68:18-68:22  [GO_EXPORTED_FUNCTION] layer 3000  «Name»
+  68:18-68:51  [STICKY_LINE_MARKER] layer 0  «Name() string { return "square" }»
+  68:18-68:22  [] layer 3000  «Name» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Go to Method SpecificationsClick or press Ctrl+U to navigate]
+  68:25-68:31  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  70:4-70:10  [GO_COMMENT_REFERENCE] layer 3000  «Number»
+  71:6-71:12  [GO_PACKAGE_EXPORTED_INTERFACE] layer 3000  «Number»
+  71:6-73:2  [STICKY_LINE_MARKER] layer 0  «Number interface {⏎	~int | ~float64⏎}»
+  72:3-72:6  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  72:10-72:17  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «float64»
+  75:4-75:7  [GO_COMMENT_REFERENCE] layer 3000  «Sum»
+  75:35-75:41  [GO_COMMENT_REFERENCE] layer 3000  «Number»
+  76:6-76:9  [GO_EXPORTED_FUNCTION] layer 3000  «Sum»
+  76:6-82:2  [STICKY_LINE_MARKER] layer 0  «Sum[T Number](xs []T) T {⏎	var total T⏎	for _, x :»
+  76:12-76:18  [GO_EXPORTED_INTERFACE_REFERENCE] layer 3000  «Number»
+  76:20-76:22  [GO_FUNCTION_PARAMETER] layer 3000  «xs»
+  77:6-77:11  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  78:6-78:7  [GO_SCOPE_VARIABLE] layer 3000  «_»
+  78:9-78:10  [GO_SCOPE_VARIABLE] layer 3000  «x»
+  78:20-78:22  [GO_FUNCTION_PARAMETER] layer 3000  «xs»
+  79:3-79:8  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  79:12-79:13  [GO_SCOPE_VARIABLE] layer 3000  «x»
+  81:9-81:14  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  84:4-84:7  [GO_COMMENT_REFERENCE] layer 3000  «Set»
+  85:6-85:9  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Set»
+  85:6-87:2  [STICKY_LINE_MARKER] layer 0  «Set[K comparable] struct {⏎	items map[K]struct{}⏎}»
+  85:12-85:22  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «comparable»
+  86:2-86:7  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  89:7-89:8  [GO_METHOD_RECEIVER] layer 3000  «s»
+  89:10-89:13  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Set»
+  89:18-89:21  [GO_EXPORTED_FUNCTION] layer 3000  «Add»
+  89:18-94:2  [STICKY_LINE_MARKER] layer 0  «Add(k K) {⏎	if s.items == nil {⏎		s.items = make(m»
+  89:22-89:23  [GO_FUNCTION_PARAMETER] layer 3000  «k»
+  90:5-90:6  [GO_METHOD_RECEIVER] layer 3000  «s»
+  90:7-90:12  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  90:16-90:19  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  91:3-91:4  [GO_METHOD_RECEIVER] layer 3000  «s»
+  91:5-91:10  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  91:13-91:17  [GO_BUILTIN_FUNCTION] layer 3000  «make»
+  93:2-93:3  [GO_METHOD_RECEIVER] layer 3000  «s»
+  93:4-93:9  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  93:10-93:11  [GO_FUNCTION_PARAMETER] layer 3000  «k»
+  96:7-96:8  [GO_METHOD_RECEIVER] layer 3000  «s»
+  96:10-96:13  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Set»
+  96:18-96:51  [STICKY_LINE_MARKER] layer 0  «Len() int { return len(s.items) }»
+  96:18-96:21  [GO_EXPORTED_FUNCTION] layer 3000  «Len»
+  96:24-96:27  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  96:37-96:40  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «len»
+  96:41-96:42  [GO_METHOD_RECEIVER] layer 3000  «s»
+  96:43-96:48  [GO_STRUCT_LOCAL_MEMBER] layer 3000  «items»
+  98:4-98:13  [GO_COMMENT_REFERENCE] layer 3000  «Factorial»
+  99:6-99:15  [GO_EXPORTED_FUNCTION] layer 3000  «Factorial»
+  99:6-104:2  [STICKY_LINE_MARKER] layer 0  «Factorial(n int) int {⏎	if n <= 1 {⏎		return 1⏎	}⏎»
+  99:16-99:17  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  99:18-99:21  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  99:23-99:26  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  100:5-100:6  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  103:9-103:10  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  103:13-103:22  [] layer 3000  «Factorial» GUTTER[LineMarkerInfo$LineMarkerGutterIconRenderer: Recursive call]
+  103:13-103:22  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Factorial»
+  103:23-103:24  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  106:6-106:13  [GO_LOCAL_FUNCTION] layer 3000  «counter»
+  106:6-112:2  [STICKY_LINE_MARKER] layer 0  «counter() func() int {⏎	count := 0⏎	return func() »
+  106:23-106:26  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  107:2-107:7  [GO_LOCAL_VARIABLE] layer 3000  «count»
+  108:9-111:3  [STICKY_LINE_MARKER] layer 0  «func() int {⏎		count++⏎		return count⏎	}»
+  108:16-108:19  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  109:3-109:8  [GO_LOCAL_VARIABLE] layer 3000  «count»
+  110:10-110:15  [GO_LOCAL_VARIABLE] layer 3000  «count»
+  114:6-114:13  [GO_LOCAL_FUNCTION] layer 3000  «produce»
+  114:6-123:2  [STICKY_LINE_MARKER] layer 0  «produce(n int) <-chan int {⏎	ch := make(chan int, »
+  114:14-114:15  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  114:16-114:19  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  114:28-114:31  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  115:2-115:4  [GO_LOCAL_VARIABLE] layer 3000  «ch»
+  115:8-115:12  [GO_BUILTIN_FUNCTION] layer 3000  «make»
+  115:18-115:21  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  115:23-115:24  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  116:5-121:3  [STICKY_LINE_MARKER] layer 0  «func() {⏎		defer close(ch)⏎		for i := 0; i < n; i+»
+  117:9-117:14  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «close»
+  117:15-117:17  [GO_LOCAL_VARIABLE] layer 3000  «ch»
+  118:7-118:8  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  118:7-118:25  [GO_SYNTAX_UPDATE] layer 3000  «i := 0; i < n; i++»  TIP: for loop can be modernized using range over int
+  118:15-118:16  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  118:19-118:20  [GO_FUNCTION_PARAMETER] layer 3000  «n»
+  118:22-118:23  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  119:4-119:6  [GO_LOCAL_VARIABLE] layer 3000  «ch»
+  119:10-119:11  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  122:9-122:11  [GO_LOCAL_VARIABLE] layer 3000  «ch»
+  125:6-125:14  [GO_LOCAL_FUNCTION] layer 3000  «classify»
+  125:6-136:2  [STICKY_LINE_MARKER] layer 0  «classify(x any) string {⏎	switch v := x.(type) {⏎	»
+  125:15-125:16  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  125:17-125:20  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «any»
+  125:22-125:28  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  126:9-126:10  [GO_SCOPE_VARIABLE] layer 3000  «v»
+  126:14-126:15  [GO_FUNCTION_PARAMETER] layer 3000  «x»
+  127:7-127:10  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  128:10-128:13  [GO_PACKAGE] layer 3000  «fmt»
+  128:14-128:21  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Sprintf»
+  128:27-128:29  [GO_VALID_STRING_ESCAPE] layer 3000  «%d»
+  128:32-128:33  [GO_SCOPE_VARIABLE] layer 3000  «v»
+  129:7-129:13  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  130:22-130:23  [GO_SCOPE_VARIABLE] layer 3000  «v»
+  131:7-131:12  [GO_EXPORTED_INTERFACE_REFERENCE] layer 3000  «Shape»
+  132:10-132:11  [GO_SCOPE_VARIABLE] layer 3000  «v»
+  132:12-132:16  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Name»
+  138:6-138:10  [GO_LOCAL_FUNCTION] layer 3000  «find»
+  138:6-151:2  [STICKY_LINE_MARKER] layer 0  «find(grid [][]int, target int) (int, int, error) {»
+  138:11-138:15  [GO_FUNCTION_PARAMETER] layer 3000  «grid»
+  138:20-138:23  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  138:25-138:31  [GO_FUNCTION_PARAMETER] layer 3000  «target»
+  138:32-138:35  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  138:38-138:41  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  138:43-138:46  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  138:48-138:53  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  139:1-139:6  [GO_LABEL] layer 3000  «Outer»
+  140:6-140:7  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  140:9-140:12  [GO_SCOPE_VARIABLE] layer 3000  «row»
+  140:22-140:26  [GO_FUNCTION_PARAMETER] layer 3000  «grid»
+  141:7-141:8  [GO_SCOPE_VARIABLE] layer 3000  «j»
+  141:10-141:11  [GO_SCOPE_VARIABLE] layer 3000  «v»
+  141:21-141:24  [GO_SCOPE_VARIABLE] layer 3000  «row»
+  142:7-142:8  [GO_SCOPE_VARIABLE] layer 3000  «v»
+  143:11-143:16  [GO_LABEL] layer 3000  «Outer»
+  145:7-145:8  [GO_SCOPE_VARIABLE] layer 3000  «v»
+  145:12-145:18  [GO_FUNCTION_PARAMETER] layer 3000  «target»
+  146:12-146:13  [GO_SCOPE_VARIABLE] layer 3000  «i»
+  146:15-146:16  [GO_SCOPE_VARIABLE] layer 3000  «j»
+  146:18-146:21  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  150:17-150:28  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «ErrNotFound»
+  153:6-153:10  [GO_LOCAL_FUNCTION] layer 3000  «load»
+  153:6-158:2  [STICKY_LINE_MARKER] layer 0  «load(name string) (string, error) {⏎	if name == ""»
+  153:11-153:15  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  153:16-153:22  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  153:25-153:31  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  153:33-153:38  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  154:5-154:9  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  155:14-155:25  [GO_PACKAGE_EXPORTED_VARIABLE] layer 3000  «ErrNotFound»
+  157:9-157:16  [GO_PACKAGE] layer 3000  «strings»
+  157:17-157:24  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «ToUpper»
+  157:25-157:29  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  157:32-157:35  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  160:4-160:12  [GO_COMMENT_REFERENCE] layer 3000  «Analysis»
+  161:6-161:14  [GO_EXPORTED_FUNCTION] layer 3000  «Analysis»
+  161:6-161:14  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Analysis»  TIP: Unused function 'Analysis'
+  161:6-197:2  [STICKY_LINE_MARKER] layer 0  «Analysis(name string, timeout time.Duration) (stri»
+  161:15-161:19  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  161:20-161:26  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  161:28-161:35  [GO_FUNCTION_PARAMETER] layer 3000  «timeout»
+  161:36-161:40  [GO_PACKAGE] layer 3000  «time»
+  161:41-161:49  [GO_TYPE_REFERENCE] layer 3000  «Duration»
+  161:52-161:58  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  161:60-161:65  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  162:2-162:7  [GO_LOCAL_VARIABLE] layer 3000  «value»
+  162:9-162:12  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  162:16-162:20  [GO_LOCAL_FUNCTION_CALL] layer 3000  «load»
+  162:21-162:25  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  163:5-163:8  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  163:12-163:15  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  164:14-164:17  [GO_PACKAGE] layer 3000  «fmt»
+  164:18-164:24  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Errorf»
+  164:31-164:33  [GO_VALID_STRING_ESCAPE] layer 3000  «%s»
+  164:35-164:37  [GO_VALID_STRING_ESCAPE] layer 3000  «%w»
+  164:40-164:44  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  164:46-164:49  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  166:5-166:10  [GO_LOCAL_VARIABLE] layer 3000  «value»
+  167:3-167:8  [CONSIDERATION_ATTRIBUTES] layer 3750  «value»  TIP: Declaration of 'value' shadows declaration at analysis.go
+  167:3-167:8  [GO_SHADOWING_VARIABLE] layer 3000  «value»
+  167:10-167:13  [CONSIDERATION_ATTRIBUTES] layer 3750  «err»  TIP: Declaration of 'err' shadows declaration at analysis.go
+  167:10-167:13  [GO_SHADOWING_VARIABLE] layer 3000  «err»
+  167:17-167:21  [GO_LOCAL_FUNCTION_CALL] layer 3000  «load»
+  167:22-167:27  [GO_LOCAL_VARIABLE] layer 3000  «value»
+  168:6-168:9  [GO_SHADOWING_VARIABLE] layer 3000  «err»
+  168:13-168:16  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  169:15-169:18  [GO_SHADOWING_VARIABLE] layer 3000  «err»
+  171:7-171:12  [GO_SHADOWING_VARIABLE] layer 3000  «value»
+  173:2-173:7  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  174:2-174:7  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  174:10-174:15  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  174:18-174:21  [GO_BUILTIN_FUNCTION_CALL] layer 3000  «len»
+  174:22-174:27  [GO_LOCAL_VARIABLE] layer 3000  «value»
+  175:2-175:4  [GO_LOCAL_VARIABLE] layer 3000  «re»
+  175:8-175:14  [GO_PACKAGE] layer 3000  «regexp»
+  175:15-175:26  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «MustCompile»
+  175:28-175:29  [INFORMATION_ATTRIBUTES] layer 1998  «^»
+  175:28-175:29  [INFORMATION_ATTRIBUTES] layer 1998  «^»
+  175:28-175:42  [go:INJECTED_LANGUAGE_FRAGMENT] layer 1999  «^[a-z]+\d{2,}$»
+  175:29-175:30  [INFORMATION_ATTRIBUTES] layer 1998  «[»
+  175:29-175:30  [INFORMATION_ATTRIBUTES] layer 1998  «[»
+  175:30-175:31  [INFORMATION_ATTRIBUTES] layer 1998  «a»
+  175:30-175:31  [INFORMATION_ATTRIBUTES] layer 1998  «a»
+  175:31-175:32  [INFORMATION_ATTRIBUTES] layer 1998  «-»
+  175:31-175:32  [INFORMATION_ATTRIBUTES] layer 1998  «-»
+  175:31-175:32  [REGEXP.META] layer 3000  «-»
+  175:32-175:33  [INFORMATION_ATTRIBUTES] layer 1998  «z»
+  175:32-175:33  [INFORMATION_ATTRIBUTES] layer 1998  «z»
+  175:33-175:34  [INFORMATION_ATTRIBUTES] layer 1998  «]»
+  175:33-175:34  [INFORMATION_ATTRIBUTES] layer 1998  «]»
+  175:34-175:35  [INFORMATION_ATTRIBUTES] layer 1998  «+»
+  175:34-175:35  [INFORMATION_ATTRIBUTES] layer 1998  «+»
+  175:35-175:37  [INFORMATION_ATTRIBUTES] layer 1998  «\d»
+  175:35-175:37  [INFORMATION_ATTRIBUTES] layer 1998  «\d»
+  175:37-175:38  [INFORMATION_ATTRIBUTES] layer 1998  «{»
+  175:37-175:38  [INFORMATION_ATTRIBUTES] layer 1998  «{»
+  175:38-175:39  [INFORMATION_ATTRIBUTES] layer 1998  «2»
+  175:38-175:39  [INFORMATION_ATTRIBUTES] layer 1998  «2»
+  175:39-175:40  [INFORMATION_ATTRIBUTES] layer 1998  «,»
+  175:39-175:40  [INFORMATION_ATTRIBUTES] layer 1998  «,»
+  175:40-175:41  [INFORMATION_ATTRIBUTES] layer 1998  «}»
+  175:40-175:41  [INFORMATION_ATTRIBUTES] layer 1998  «}»
+  175:41-175:42  [INFORMATION_ATTRIBUTES] layer 1998  «$»
+  175:41-175:42  [INFORMATION_ATTRIBUTES] layer 1998  «$»
+  176:2-176:7  [GO_LOCAL_VARIABLE] layer 3000  «stamp»
+  176:11-176:15  [GO_PACKAGE] layer 3000  «time»
+  176:16-176:19  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Now»
+  176:22-176:28  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Format»
+  176:30-176:34  [INFORMATION_ATTRIBUTES] layer 1998  «2006»
+  176:30-176:34  [INFORMATION_ATTRIBUTES] layer 1998  «2006»
+  176:30-176:49  [go:INJECTED_LANGUAGE_FRAGMENT] layer 1999  «2006-01-02 15:04:05»
+  176:34-176:35  [INFORMATION_ATTRIBUTES] layer 1998  «-»
+  176:34-176:35  [INFORMATION_ATTRIBUTES] layer 1998  «-»
+  176:35-176:37  [INFORMATION_ATTRIBUTES] layer 1998  «01»
+  176:35-176:37  [INFORMATION_ATTRIBUTES] layer 1998  «01»
+  176:37-176:38  [INFORMATION_ATTRIBUTES] layer 1998  «-»
+  176:37-176:38  [INFORMATION_ATTRIBUTES] layer 1998  «-»
+  176:38-176:40  [INFORMATION_ATTRIBUTES] layer 1998  «02»
+  176:38-176:40  [INFORMATION_ATTRIBUTES] layer 1998  «02»
+  176:40-176:41  [INFORMATION_ATTRIBUTES] layer 1998  « »
+  176:40-176:41  [INFORMATION_ATTRIBUTES] layer 1998  « »
+  176:41-176:43  [INFORMATION_ATTRIBUTES] layer 1998  «15»
+  176:41-176:43  [INFORMATION_ATTRIBUTES] layer 1998  «15»
+  176:43-176:44  [INFORMATION_ATTRIBUTES] layer 1998  «:»
+  176:43-176:44  [INFORMATION_ATTRIBUTES] layer 1998  «:»
+  176:44-176:46  [INFORMATION_ATTRIBUTES] layer 1998  «04»
+  176:44-176:46  [INFORMATION_ATTRIBUTES] layer 1998  «04»
+  176:46-176:47  [INFORMATION_ATTRIBUTES] layer 1998  «:»
+  176:46-176:47  [INFORMATION_ATTRIBUTES] layer 1998  «:»
+  176:47-176:49  [INFORMATION_ATTRIBUTES] layer 1998  «05»
+  176:47-176:49  [INFORMATION_ATTRIBUTES] layer 1998  «05»
+  177:2-177:5  [GO_LOCAL_VARIABLE] layer 3000  «msg»
+  177:9-177:12  [GO_PACKAGE] layer 3000  «fmt»
+  177:13-177:20  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Sprintf»
+  177:22-177:24  [GO_VALID_STRING_ESCAPE] layer 3000  «%d»
+  177:25-177:27  [GO_VALID_STRING_ESCAPE] layer 3000  «%s»
+  177:28-177:30  [GO_VALID_STRING_ESCAPE] layer 3000  «%v»
+  177:31-177:33  [GO_VALID_STRING_ESCAPE] layer 3000  «%q»
+  177:36-177:41  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  177:43-177:48  [GO_LOCAL_VARIABLE] layer 3000  «stamp»
+  177:50-177:52  [GO_LOCAL_VARIABLE] layer 3000  «re»
+  177:53-177:64  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «MatchString»
+  177:65-177:70  [GO_LOCAL_VARIABLE] layer 3000  «value»
+  177:73-177:78  [GO_LOCAL_VARIABLE] layer 3000  «value»
+  179:7-179:8  [GO_LOCAL_VARIABLE] layer 3000  «n»
+  179:14-179:21  [GO_LOCAL_FUNCTION_CALL] layer 3000  «produce»
+  180:3-180:6  [GO_LOCAL_VARIABLE] layer 3000  «msg»
+  180:10-180:13  [GO_PACKAGE] layer 3000  «fmt»
+  180:14-180:20  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Sprint»
+  180:21-180:22  [GO_LOCAL_VARIABLE] layer 3000  «n»
+  181:9-181:13  [GO_PACKAGE] layer 3000  «time»
+  181:14-181:19  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «After»
+  181:20-181:27  [GO_FUNCTION_PARAMETER] layer 3000  «timeout»
+  182:3-182:6  [GO_LOCAL_VARIABLE] layer 3000  «msg»
+  184:2-184:6  [GO_LOCAL_VARIABLE] layer 3000  «next»
+  184:10-184:17  [GO_LOCAL_FUNCTION_CALL] layer 3000  «counter»
+  185:2-185:5  [GO_LOCAL_VARIABLE] layer 3000  «msg»
+  185:9-185:12  [GO_PACKAGE] layer 3000  «fmt»
+  185:13-185:19  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Sprint»
+  185:20-185:24  [GO_LOCAL_VARIABLE_CALL] layer 3000  «next»
+  185:28-185:37  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Factorial»
+  185:42-185:45  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Sum»
+  185:48-185:51  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  185:60-185:68  [GO_LOCAL_FUNCTION_CALL] layer 3000  «classify»
+  185:69-185:75  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Circle»
+  185:80-185:88  [GO_PACKAGE_LOCAL_CONSTANT] layer 3000  «minItems»
+  186:6-186:9  [GO_LOCAL_VARIABLE] layer 3000  «set»
+  186:10-186:13  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Set»
+  186:14-186:20  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  187:2-187:5  [GO_LOCAL_VARIABLE] layer 3000  «set»
+  187:6-187:9  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Add»
+  187:10-187:13  [GO_LOCAL_VARIABLE] layer 3000  «msg»
+  188:2-188:8  [GO_LOCAL_VARIABLE] layer 3000  «shapes»
+  188:14-188:19  [GO_EXPORTED_INTERFACE_REFERENCE] layer 3000  «Shape»
+  188:20-188:26  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Circle»
+  188:27-188:33  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Radius»
+  188:40-188:46  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Square»
+  188:47-188:51  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Side»
+  189:6-189:7  [GO_SCOPE_VARIABLE] layer 3000  «_»
+  189:9-189:10  [GO_SCOPE_VARIABLE] layer 3000  «s»
+  189:20-189:26  [GO_LOCAL_VARIABLE] layer 3000  «shapes»
+  190:3-190:6  [GO_LOCAL_VARIABLE] layer 3000  «msg»
+  190:10-190:11  [GO_SCOPE_VARIABLE] layer 3000  «s»
+  190:12-190:16  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Name»
+  192:5-192:6  [GO_SCOPE_VARIABLE] layer 3000  «_»
+  192:8-192:9  [GO_SCOPE_VARIABLE] layer 3000  «_»
+  192:11-192:14  [GO_SHADOWING_VARIABLE] layer 3000  «err»
+  192:11-192:14  [CONSIDERATION_ATTRIBUTES] layer 3750  «err»  TIP: Declaration of 'err' shadows declaration at analysis.go
+  192:18-192:22  [GO_LOCAL_FUNCTION_CALL] layer 3000  «find»
+  192:27-192:30  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  192:41-192:44  [GO_SHADOWING_VARIABLE] layer 3000  «err»
+  192:48-192:51  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  193:14-193:17  [GO_SHADOWING_VARIABLE] layer 3000  «err»
+  195:6-195:16  [GO_PACKAGE_LOCAL_VARIABLE] layer 3000  «selfSource»
+  196:9-196:12  [GO_LOCAL_VARIABLE] layer 3000  «msg»
+  196:14-196:17  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  199:4-199:10  [GO_COMMENT_REFERENCE] layer 3000  «Probes»
+  200:6-200:12  [GO_EXPORTED_FUNCTION] layer 3000  «Probes»
+  200:6-200:12  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Probes»  TIP: Unused function 'Probes'
+  200:6-208:2  [STICKY_LINE_MARKER] layer 0  «Probes(c Circle, sq *Square, shapes []Shape, names»
+  200:13-200:21  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «c Circle»  TIP: Unused parameter 'c Circle'
+  200:13-200:14  [GO_FUNCTION_PARAMETER] layer 3000  «c»
+  200:15-200:21  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Circle»
+  200:23-200:25  [GO_FUNCTION_PARAMETER] layer 3000  «sq»
+  200:23-200:33  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «sq *Square»  TIP: Unused parameter 'sq *Square'
+  200:27-200:33  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Square»
+  200:35-200:41  [GO_FUNCTION_PARAMETER] layer 3000  «shapes»
+  200:35-200:49  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «shapes []Shape»  TIP: Unused parameter 'shapes []Shape'
+  200:44-200:49  [GO_EXPORTED_INTERFACE_REFERENCE] layer 3000  «Shape»
+  200:51-200:56  [GO_FUNCTION_PARAMETER] layer 3000  «names»
+  200:51-200:65  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «names []string»  TIP: Unused parameter 'names []string'
+  200:59-200:65  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  200:67-200:78  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «ch chan int»  TIP: Unused parameter 'ch chan int'
+  200:67-200:69  [GO_FUNCTION_PARAMETER] layer 3000  «ch»
+  200:75-200:78  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  200:80-200:89  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «err error»  TIP: Unused parameter 'err error'
+  200:80-200:83  [GO_FUNCTION_PARAMETER] layer 3000  «err»
+  200:84-200:89  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  200:91-200:100  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «lvl Level»  TIP: Unused parameter 'lvl Level'
+  200:91-200:94  [GO_FUNCTION_PARAMETER] layer 3000  «lvl»
+  200:95-200:100  [GO_TYPE_REFERENCE] layer 3000  «Level»
+  200:102-200:107  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  201:6-201:11  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  201:12-201:15  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  206:6-206:11  [GO_LOCAL_VARIABLE] layer 3000  «total»
+  207:9-207:12  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  210:4-210:11  [GO_COMMENT_REFERENCE] layer 3000  «Returns»
+  211:6-215:2  [STICKY_LINE_MARKER] layer 0  «Returns(name string) (*Circle, int, error) {⏎	// P»
+  211:6-211:13  [GO_EXPORTED_FUNCTION] layer 3000  «Returns»
+  211:6-211:13  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «Returns»  TIP: Unused function 'Returns'
+  211:14-211:18  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  211:14-211:25  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «name string»  TIP: Unused parameter 'name string'
+  211:19-211:25  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  211:29-211:35  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Circle»
+  211:37-211:40  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  211:42-211:47  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  214:9-214:12  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  214:17-214:20  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  219:4-219:10  [GO_COMMENT_REFERENCE] layer 3000  «Holder»
+  220:6-226:2  [STICKY_LINE_MARKER] layer 0  «Holder struct {⏎	Name    string⏎	Count   int⏎	Enab»
+  220:6-220:12  [GO_PACKAGE_EXPORTED_STRUCT] layer 3000  «Holder»
+  221:2-221:6  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Name»
+  221:10-221:16  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  222:2-222:7  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Count»
+  222:10-222:13  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  223:2-223:9  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Enabled»
+  223:10-223:14  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «bool»
+##### editor markup: 22 highlighters
+##### keys: count
+  : 11
+  BASH.EXTERNAL_COMMAND: 1
+  BASH.VAR_DEF: 1
+  CONSIDERATION_ATTRIBUTES: 3
+  GO_BUILTIN_CONSTANT: 1
+  GO_BUILTIN_FUNCTION: 2
+  GO_BUILTIN_FUNCTION_CALL: 3
+  GO_BUILTIN_TYPE_REFERENCE: 53
+  GO_BUILTIN_VARIABLE: 10
+  GO_COMMENT_KEYWORD: 2
+  GO_COMMENT_REFERENCE: 24
+  GO_EXPORTED_FUNCTION: 14
+  GO_EXPORTED_FUNCTION_CALL: 19
+  GO_EXPORTED_INTERFACE_REFERENCE: 4
+  GO_EXPORTED_STRUCT_REFERENCE: 16
+  GO_FUNCTION_PARAMETER: 33
+  GO_LABEL: 2
+  GO_LOCAL_FUNCTION: 5
+  GO_LOCAL_FUNCTION_CALL: 6
+  GO_LOCAL_VARIABLE: 43
+  GO_LOCAL_VARIABLE_CALL: 1
+  GO_METHOD_RECEIVER: 17
+  GO_PACKAGE: 15
+  GO_PACKAGE_EXPORTED_CONSTANT: 4
+  GO_PACKAGE_EXPORTED_INTERFACE: 2
+  GO_PACKAGE_EXPORTED_STRUCT: 5
+  GO_PACKAGE_EXPORTED_VARIABLE: 3
+  GO_PACKAGE_LOCAL_CONSTANT: 2
+  GO_PACKAGE_LOCAL_VARIABLE: 2
+  GO_SCOPE_VARIABLE: 25
+  GO_SHADOWING_VARIABLE: 8
+  GO_STRUCT_EXPORTED_MEMBER: 15
+  GO_STRUCT_LOCAL_MEMBER: 6
+  GO_SYNTAX_UPDATE: 1
+  GO_TAG_COLON: 4
+  GO_TAG_KEY: 4
+  GO_TAG_VALUE: 4
+  GO_TYPE_REFERENCE: 3
+  GO_TYPE_SPECIFICATION: 1
+  GO_VALID_STRING_ESCAPE: 8
+  INFORMATION_ATTRIBUTES: 56
+  NOT_USED_ELEMENT_ATTRIBUTES: 15
+  REGEXP.META: 1
+  STICKY_LINE_MARKER: 30
+  go:INJECTED_LANGUAGE_FRAGMENT: 3
+##### inline inlays: 13
+  23:7  InlineInlayRenderer «= 0»
+  24:6  InlineInlayRenderer «= 1»
+  25:6  InlineInlayRenderer «= 2»
+  33:30  ParameterHintsPresentationManager$MyRenderer «text:»
+  48:54  ParameterHintsPresentationManager$MyRenderer «format:»
+  128:22  ParameterHintsPresentationManager$MyRenderer «format:»
+  164:25  ParameterHintsPresentationManager$MyRenderer «format:»
+  175:27  ParameterHintsPresentationManager$MyRenderer «str:»
+  176:29  ParameterHintsPresentationManager$MyRenderer «layout:»
+  177:21  ParameterHintsPresentationManager$MyRenderer «format:»
+  179:22  ParameterHintsPresentationManager$MyRenderer «n:»
+  185:38  ParameterHintsPresentationManager$MyRenderer «n:»
+  192:37  ParameterHintsPresentationManager$MyRenderer «target:»
+##### after-line-end inlays: 34
+  17:22  InlineCodeVisionInlayRenderer
+  20:15  InlineCodeVisionInlayRenderer
+  23:20  InlineCodeVisionInlayRenderer
+  24:6  InlineCodeVisionInlayRenderer
+  25:6  InlineCodeVisionInlayRenderer
+  29:20  InlineCodeVisionInlayRenderer
+  31:19  InlineCodeVisionInlayRenderer
+  33:49  InlineCodeVisionInlayRenderer
+  36:23  InlineCodeVisionInlayRenderer
+  37:16  InlineCodeVisionInlayRenderer
+  38:15  InlineCodeVisionInlayRenderer
+  42:19  InlineCodeVisionInlayRenderer
+  48:68  InlineCodeVisionInlayRenderer
+  51:21  InlineCodeVisionInlayRenderer
+  57:69  InlineCodeVisionInlayRenderer
+  59:49  InlineCodeVisionInlayRenderer
+  62:21  InlineCodeVisionInlayRenderer
+  66:59  InlineCodeVisionInlayRenderer
+  68:51  InlineCodeVisionInlayRenderer
+  71:24  InlineCodeVisionInlayRenderer
+  76:31  InlineCodeVisionInlayRenderer
+  85:32  InlineCodeVisionInlayRenderer
+  89:28  InlineCodeVisionInlayRenderer
+  96:51  InlineCodeVisionInlayRenderer
+  99:28  InlineCodeVisionInlayRenderer
+  106:28  InlineCodeVisionInlayRenderer
+  114:33  InlineCodeVisionInlayRenderer
+  125:30  InlineCodeVisionInlayRenderer
+  138:56  InlineCodeVisionInlayRenderer
+  153:41  InlineCodeVisionInlayRenderer
+  161:68  InlineCodeVisionInlayRenderer
+  200:109  InlineCodeVisionInlayRenderer
+  211:50  InlineCodeVisionInlayRenderer
+  220:21  InlineCodeVisionInlayRenderer
+##### block inlays: 6
+  20:1  BlockCodeVisionInlayRenderer
+  42:1  BlockCodeVisionInlayRenderer
+  51:1  BlockCodeVisionInlayRenderer
+  62:1  BlockCodeVisionInlayRenderer
+  85:1  BlockCodeVisionInlayRenderer
+  220:1  BlockCodeVisionInlayRenderer
+

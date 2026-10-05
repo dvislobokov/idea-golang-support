@@ -1,0 +1,119 @@
+##### document markup: 82 highlighters
+  3:9-3:13  [GO_PACKAGE] layer 3000  «main»
+  13:6-13:12  [GO_LOCAL_FUNCTION] layer 3000  «byName»
+  13:6-22:2  [STICKY_LINE_MARKER] layer 0  «byName() {⏎	report.Summary(&store.Order{⏎		Currenc»
+  14:2-14:8  [GO_PACKAGE] layer 3000  «report»
+  14:9-14:16  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Summary»
+  14:9-14:16  [INFORMATION_ATTRIBUTES] layer 3000  «Summary»  TIP: Unused result: 'report.Summary(&store.Order{ Currency: "", }, report.Options{ Title: "", Currency: "", L...'
+  14:18-14:23  [GO_PACKAGE] layer 3000  «store»
+  14:24-14:29  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Order»
+  15:3-15:11  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Currency»
+  16:5-16:11  [GO_PACKAGE] layer 3000  «report»
+  16:12-16:19  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «Options»
+  17:3-17:8  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Title»
+  18:3-18:11  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Currency»
+  19:3-19:8  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Lines»
+  20:3-20:10  [GO_STRUCT_EXPORTED_MEMBER] layer 3000  «Verbose»
+  20:13-20:18  [GO_BUILTIN_CONSTANT] layer 3000  «false»
+  25:6-27:2  [STICKY_LINE_MARKER] layer 0  «literal() {⏎⏎}»
+  25:6-25:13  [GO_LOCAL_FUNCTION] layer 3000  «literal»
+  30:6-34:2  [STICKY_LINE_MARKER] layer 0  «fits(title string, lines int, verbose bool) string»
+  30:6-30:10  [GO_LOCAL_FUNCTION] layer 3000  «fits»
+  30:11-30:16  [GO_FUNCTION_PARAMETER] layer 3000  «title»
+  30:17-30:23  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  30:25-30:30  [GO_FUNCTION_PARAMETER] layer 3000  «lines»
+  30:31-30:34  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  30:36-30:43  [GO_FUNCTION_PARAMETER] layer 3000  «verbose»
+  30:44-30:48  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «bool»
+  30:50-30:56  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  31:2-31:7  [GO_LOCAL_VARIABLE] layer 3000  «width»
+  32:9-32:14  [GO_LOCAL_VARIABLE] layer 3000  «width»
+  32:16-32:23  [GO_FUNCTION_PARAMETER] layer 3000  «verbose»
+  33:9-33:17  [GO_LOCAL_FUNCTION_CALL] layer 3000  «describe»
+  33:18-33:23  [GO_FUNCTION_PARAMETER] layer 3000  «title»
+  33:25-33:30  [GO_FUNCTION_PARAMETER] layer 3000  «lines»
+  36:6-41:2  [STICKY_LINE_MARKER] layer 0  «describe(title string, lines int) string {⏎	if lin»
+  36:6-36:14  [GO_LOCAL_FUNCTION] layer 3000  «describe»
+  36:15-36:20  [GO_FUNCTION_PARAMETER] layer 3000  «title»
+  36:21-36:27  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  36:29-36:34  [GO_FUNCTION_PARAMETER] layer 3000  «lines»
+  36:35-36:38  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «int»
+  36:40-36:46  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  37:5-37:10  [GO_FUNCTION_PARAMETER] layer 3000  «lines»
+  40:9-40:14  [GO_FUNCTION_PARAMETER] layer 3000  «title»
+  44:6-44:10  [GO_LOCAL_FUNCTION] layer 3000  «load»
+  44:6-50:2  [STICKY_LINE_MARKER] layer 0  «load(name string) (*os.File, error) {⏎	f, err := o»
+  44:11-44:15  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  44:16-44:22  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  44:26-44:28  [GO_PACKAGE] layer 3000  «os»
+  44:29-44:33  [GO_EXPORTED_STRUCT_REFERENCE] layer 3000  «File»
+  44:35-44:40  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «error»
+  45:2-45:3  [GO_LOCAL_VARIABLE] layer 3000  «f»
+  45:5-45:8  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  45:12-45:14  [GO_PACKAGE] layer 3000  «os»
+  45:15-45:19  [GO_EXPORTED_FUNCTION_CALL] layer 3000  «Open»
+  45:20-45:24  [GO_FUNCTION_PARAMETER] layer 3000  «name»
+  46:5-46:8  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  46:12-46:15  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  47:10-47:13  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  47:15-47:18  [GO_LOCAL_VARIABLE] layer 3000  «err»
+  49:9-49:10  [GO_LOCAL_VARIABLE] layer 3000  «f»
+  49:12-49:15  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  52:72-52:73  [GRAMMAR_ERROR] layer 3000  «}»  TIP: Unpaired symbol: '{' seems to be missing
+  53:6-53:12  [GO_LOCAL_FUNCTION] layer 3000  «sorted»
+  53:6-54:2  [STICKY_LINE_MARKER] layer 0  «sorted(names []string) {⏎}»
+  53:13-53:18  [GO_FUNCTION_PARAMETER] layer 3000  «names»
+  53:13-53:27  [NOT_USED_ELEMENT_ATTRIBUTES] layer 4000  «names []string»  TIP: Unused parameter 'names []string'
+  53:21-53:27  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  56:30-56:36  [GO_COMMENT_REFERENCE] layer 3000  «layout»
+  57:6-60:2  [STICKY_LINE_MARKER] layer 0  «layout() string {⏎⏎	return ""⏎}»
+  57:6-57:12  [GO_LOCAL_FUNCTION] layer 3000  «layout»
+  57:15-57:21  [GO_BUILTIN_TYPE_REFERENCE] layer 3000  «string»
+  62:6-62:10  [] layer 3000  «main» GUTTER[RunLineMarkerProvider$RunLineMarkerInfo$1: Run Application Ctrl+Shift+F10]
+  62:6-62:10  [GO_LOCAL_FUNCTION] layer 3000  «main»
+  62:6-69:2  [STICKY_LINE_MARKER] layer 0  «main() {⏎	byName()⏎	literal()⏎	_ = fits("check", 1»
+  63:2-63:8  [GO_LOCAL_FUNCTION_CALL] layer 3000  «byName»
+  64:2-64:9  [GO_LOCAL_FUNCTION_CALL] layer 3000  «literal»
+  65:6-65:10  [GO_LOCAL_FUNCTION_CALL] layer 3000  «fits»
+  65:23-65:28  [GO_BUILTIN_CONSTANT] layer 3000  «false»
+  66:9-66:13  [GO_LOCAL_FUNCTION_CALL] layer 3000  «load»
+  66:9-66:13  [WARNING_ATTRIBUTES] layer 4000  «load»  TIP: Potential resource leak: ensure the resource is closed on all execution paths STRIPE
+  67:2-67:8  [GO_LOCAL_FUNCTION_CALL] layer 3000  «sorted»
+  67:9-67:12  [GO_BUILTIN_VARIABLE] layer 3000  «nil»
+  68:6-68:12  [GO_LOCAL_FUNCTION_CALL] layer 3000  «layout»
+##### editor markup: 4 highlighters
+##### keys: count
+  : 1
+  GO_BUILTIN_CONSTANT: 2
+  GO_BUILTIN_TYPE_REFERENCE: 11
+  GO_BUILTIN_VARIABLE: 4
+  GO_COMMENT_REFERENCE: 1
+  GO_EXPORTED_FUNCTION_CALL: 2
+  GO_EXPORTED_STRUCT_REFERENCE: 3
+  GO_FUNCTION_PARAMETER: 13
+  GO_LOCAL_FUNCTION: 8
+  GO_LOCAL_FUNCTION_CALL: 7
+  GO_LOCAL_VARIABLE: 7
+  GO_PACKAGE: 6
+  GO_STRUCT_EXPORTED_MEMBER: 5
+  GRAMMAR_ERROR: 1
+  INFORMATION_ATTRIBUTES: 1
+  NOT_USED_ELEMENT_ATTRIBUTES: 1
+  STICKY_LINE_MARKER: 8
+  WARNING_ATTRIBUTES: 1
+##### inline inlays: 5
+  65:11  ParameterHintsPresentationManager$MyRenderer «title:»
+  65:20  ParameterHintsPresentationManager$MyRenderer «lines:»
+  65:23  ParameterHintsPresentationManager$MyRenderer «verbose:»
+  66:14  ParameterHintsPresentationManager$MyRenderer «name:»
+  67:9  ParameterHintsPresentationManager$MyRenderer «names:»
+##### after-line-end inlays: 7
+  13:16  InlineCodeVisionInlayRenderer
+  25:17  InlineCodeVisionInlayRenderer
+  30:58  InlineCodeVisionInlayRenderer
+  36:48  InlineCodeVisionInlayRenderer
+  44:43  InlineCodeVisionInlayRenderer
+  53:30  InlineCodeVisionInlayRenderer
+  57:23  InlineCodeVisionInlayRenderer
+##### block inlays: 0
+

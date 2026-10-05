@@ -1,0 +1,1638 @@
+
+=================== 1 fields and methods after '.' (value, embedded Base)
+typed: [	c|.] AUTO
+line:   | 	c.<caret>
+items: 16
+  created → Base  : time.Time
+  ID → Base  : int
+  Label → Circle  : string
+  Radius → Circle  : float64
+  Area() → Circle  : float64
+  Describe() → Base  : string
+  Name() → Circle  : string
+  Base  : Base
+  p  : &expr {template}
+  panic  : panic() {template}
+  par  : (expr) {template}
+  pointer  : &expr {template}
+  print  : print() {template}
+  println  : println() {template}
+  return  : return expr {template}
+  var  : var name = expr {template}
+
+
+=================== 2 pointer receiver methods after '.'
+typed: [	sq|.] AUTO
+line:   | 	sq.<caret>
+items: 16
+  Side → Square  : float64
+  Area() → *Square  : float64
+  Name() → *Square  : string
+  d  : *expr {template}
+  dereference  : *expr {template}
+  nil  : if expr == nil {template}
+  nn  : if expr != nil {template}
+  notnil  : if expr != nil {template}
+  p  : &expr {template}
+  panic  : panic() {template}
+  par  : (expr) {template}
+  pointer  : &expr {template}
+  print  : print() {template}
+  println  : println() {template}
+  return  : return expr {template}
+
+
+=================== 3 interface value after '.'
+typed: [	shapes[0]|.] AUTO
+line:   | 	shapes[0].<caret>
+items: 13
+  Area() → interface {...}  : float64
+  Name() → interface {...}  : string
+  nil  : if expr == nil {template}
+  nn  : if expr != nil {template}
+  notnil  : if expr != nil {template}
+  p  : &expr {template}
+  panic  : panic() {template}
+  par  : (expr) {template}
+  pointer  : &expr {template}
+  print  : print() {template}
+
+
+=================== 4 embedded struct after '.'
+typed: [	c.Base|.] AUTO
+line:   | 	c.Base.<caret>
+items: 11
+  created → Base  : time.Time
+  ID → Base  : int
+  Describe() → Base  : string
+  p  : &expr {template}
+  panic  : panic() {template}
+  par  : (expr) {template}
+  pointer  : &expr {template}
+  print  : print() {template}
+  println  : println() {template}
+  return  : return expr {template}
+
+
+=================== 5 error value after '.'
+typed: [	err|.] AUTO
+line:   | 	err.<caret>
+items: 16
+  Error() → interface {...}  : string
+  as  : errors.As() {template}
+  is  : errors.Is() {template}
+  nil  : if expr == nil {template}
+  nn  : if expr != nil {template}
+  notnil  : if expr != nil {template}
+  p  : &expr {template}
+  panic  : panic() {template}
+  par  : (expr) {template}
+  pointer  : &expr {template}
+
+
+=================== 6 empty statement, Ctrl+Space
+typed: [	|] BASIC
+line:   | 	<caret>
+items: 104
+  return err
+  return
+  errors {package}
+  err  : error
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  c  : Circle
+  ch  : chan int
+  Circle
+  classify(x any)  : string
+  counter()  : func() int
+  Debug = iota  : Level
+  ErrNotFound  : error
+  Factorial(n int)  : int
+  find(grid [][]int, target int)  : (int, int, error)
+  Holder
+  Info = iota  : Level
+  Level
+  load(name string)  : (string, error)
+  lvl  : Level
+  MaxItems = 10  : untyped int
+  minItems = 1  : untyped int
+  min[T cmp.Ordered](x T, y ...T)  : T
+  names  : []string
+
+
+=================== 7 empty statement, smart
+typed: [	|] SMART
+line:   | 	<caret>
+items: 0
+
+
+=================== 8 auto-popup on letters
+typed: [	|cl] AUTO
+line:   | 	cl<caret>
+items: 95
+  classify(x any)  : string
+  clear[T interface{ ~[]Type | ~map[Type]Type1 }](t T)  : 
+  close(c chan<- Type)  : 
+  http.Client net/http
+  ast.CompositeLit go/ast
+  strings.Clone(s string) strings  : string
+  strings.CutLast(s string, sep string) strings  : (before string, after string, found bool)
+  os.Clearenv() os  : 
+  io.Closer io
+  syscall.Close(fd Handle) syscall  : (err error)
+  http.ClientConn net/http
+  tls.Client(conn net.Conn, config *Config) crypto/tls  : *Conn
+  rpc.Client net/rpc
+  smtp.Client net/smtp
+  http.CloseNotifier net/http
+
+
+=================== 9 imported package members
+typed: [	strings|.] AUTO
+line:   | 	strings.<caret>
+items: 63
+  Builder
+  Clone(s string)  : string
+  Compare(a string, b string)  : int
+  Contains(s string, substr string)  : bool
+  ContainsAny(s string, chars string)  : bool
+  ContainsFunc(s string, f func(rune) bool)  : bool
+  ContainsRune(s string, r rune)  : bool
+  Count(s string, substr string)  : int
+  Cut(s string, sep string)  : (before string, after string, found bool)
+  CutLast(s string, sep string)  : (before string, after string, found bool)
+  CutPrefix(s string, prefix string)  : (after string, found bool)
+  CutSuffix(s string, suffix string)  : (before string, found bool)
+  EqualFold(s string, t string)  : bool
+  Fields(s string)  : []string
+  FieldsFunc(s string, f func(rune) bool)  : []string
+
+
+=================== 10 package not imported: json.
+typed: [	json|.] AUTO
+line:   | 	json.<caret>
+items: 134
+  json.Marshal(v any) encoding/json  : ([]byte, error)
+  json.Marshaler encoding/json
+  json.Marshal(in any, opts ...Options) encoding/json/v2  : (out []byte, err error)
+  json.Options encoding/json
+  json.Unmarshal(data []byte, v any) encoding/json  : error
+  json.CallMethodsWithLegacySemantics(v bool) encoding/json  : Options
+  json.Compact(dst *bytes.Buffer, src []byte) encoding/json  : error
+  json.Decoder encoding/json
+  json.DefaultOptionsV1() encoding/json  : Options
+  json.Delim encoding/json
+  json.Encoder encoding/json
+  json.FormatByteArrayAsArray(v bool) encoding/json  : Options
+  json.FormatBytesWithLegacySemantics(v bool) encoding/json  : Options
+  json.FormatDurationAsNano(v bool) encoding/json  : Options
+  json.HTMLEscape(dst *bytes.Buffer, src []byte) encoding/json  : 
+
+
+
+=================== 10b package not imported: pick json.Marshal (import added?)
+typed: [	json.Mar|] BASIC
+line:   | 	json.Mar<caret>
+items: 14
+  json.Marshal(v any) encoding/json  : ([]byte, error)
+  json.Marshaler encoding/json
+  json.Marshal(in any, opts ...Options) encoding/json/v2  : (out []byte, err error)
+  json.MarshalerError encoding/json
+  json.Marshaler encoding/json/v2
+  json.MarshalIndent(v any, prefix string, indent string) encoding/json  : ([]byte, error)
+  json.MarshalEncode(out *jsontext.Encoder, in any, opts ...Options) encoding/json/v2  : (err error)
+  json.Marshalers encoding/json/v2
+  json.MarshalerTo encoding/json/v2
+  json.MarshalFunc[T any](fn func(T) ([]byte, error)) encoding/json/v2  : *Marshalers
+picked: json.Marshal
+  | 	var total int
+  | 	// PROBE:body
+  | 	json.Marshal(<caret>)
+  | 	// PROBE:body2
+  h| // Package probe is the GoLand analysis probe file (docs/goland-analysis): every construct the reference IDE may color, mark or complete.
+  h| // Lines "// PROBE:<name>" are anchors: the line right after each one stays empty, probes type there and restore the file.
+  h| package probe
+  h| 
+  h| import (
+  h| 	_ "embed"
+  h| 	"encoding/json"
+  h| 	"errors"
+  h| 	"fmt"
+  h| 	"regexp"
+  h| 	"strings"
+  h| 	"time"
+  h| )
+  h| 
+
+
+=================== 11 bare name of a symbol from another package
+typed: [	Marsh|] BASIC
+line:   | 	Marsh<caret>
+items: 25
+  json.Marshal(v any) encoding/json  : ([]byte, error)
+  json.Marshaler encoding/json
+  xml.Marshal(v any) encoding/xml  : ([]byte, error)
+  asn1.Marshal(val any) encoding/asn1  : ([]byte, error)
+  elliptic.Marshal(curve Curve, x *big.Int, y *big.Int) crypto/elliptic  : []byte
+  json.Marshal(in any, opts ...Options) encoding/json/v2  : (out []byte, err error)
+  json.MarshalerError encoding/json
+  xml.Marshaler encoding/xml
+  json.Marshaler encoding/json/v2
+  json.MarshalIndent(v any, prefix string, indent string) encoding/json  : ([]byte, error)
+  asn1.MarshalWithParams(val any, params string) encoding/asn1  : ([]byte, error)
+  elliptic.MarshalCompressed(curve Curve, x *big.Int, y *big.Int) crypto/elliptic  : []byte
+  x509.MarshalECPrivateKey(key *ecdsa.PrivateKey) crypto/x509  : ([]byte, error)
+  x509.MarshalPKCS1PrivateKey(key *rsa.PrivateKey) crypto/x509  : []byte
+  x509.MarshalPKCS1PublicKey(key *rsa.PublicKey) crypto/x509  : []byte
+
+
+=================== 11b bare name: pick (import added?)
+typed: [	NewReplac|] BASIC
+line:   | 	strings.NewReplacer(<caret>)
+items: 0
+no lookup to pick from
+  | 	// PROBE:body
+  | 	strings.NewReplacer(<caret>)
+  | 	// PROBE:body2
+  | 
+  h| // Package probe is the GoLand analysis probe file (docs/goland-analysis): every construct the reference IDE may color, mark or complete.
+  h| // Lines "// PROBE:<name>" are anchors: the line right after each one stays empty, probes type there and restore the file.
+  h| package probe
+  h| 
+  h| import (
+  h| 	_ "embed"
+  h| 	"errors"
+  h| 	"fmt"
+  h| 	"regexp"
+  h| 	"strings"
+  h| 	"time"
+  h| )
+  h| 
+  h| //go:generate stringer -type=Level
+
+
+=================== 11c bare name of imported package symbol
+typed: [	ToUpp|] BASIC
+line:   | 	ToUpp<caret>
+items: 5
+  strings.ToUpper(s string) strings  : string
+  strings.ToUpperSpecial(c unicode.SpecialCase, s string) strings  : string
+  bytes.ToUpper(s []byte) bytes  : []byte
+  unicode.ToUpper(r rune) unicode  : rune
+  bytes.ToUpperSpecial(c unicode.SpecialCase, s []byte) bytes  : []byte
+
+
+=================== 12 smart argument (int)
+typed: [	Factorial(|] SMART
+line:   | 	Factorial(<caret>
+items: 19
+  Factorial(n int)  : int
+  MaxItems = 10  : untyped int
+  minItems = 1  : untyped int
+  total  : int
+  strings.Compare(a string, b string)  : int
+  strings.Count(s string, substr string)  : int
+  strings.Index(s string, substr string)  : int
+  strings.IndexAny(s string, chars string)  : int
+  strings.IndexByte(s string, c byte)  : int
+  strings.IndexFunc(s string, f func(rune) bool)  : int
+  strings.IndexRune(s string, r rune)  : int
+  strings.LastIndex(s string, substr string)  : int
+
+
+=================== 12b smart argument (any)
+typed: [	classify(|] SMART
+line:   | 	classify(<caret>
+items: 251
+  strings.NewReplacer(oldnew ...string)  : *Replacer
+  errors.New(text string)  : error
+  string
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  c  : Circle
+  ch  : chan int
+  Circle
+  classify(x any)  : string
+  counter()  : func() int
+  Debug = iota  : Level
+  err  : error
+
+
+=================== 13 smart assignment to interface var
+typed: [	var s Shape = |] SMART
+line:   | 	var s Shape = <caret>
+items: 6
+  &Square
+  c  : Circle
+  Circle
+  sq  : *Square
+  Shape
+  nil  : Type
+
+
+=================== 13b smart: var _ Shape = &
+typed: [	var _ Shape = &|] SMART
+line:   | 	var _ Shape = &<caret>
+items: 6
+  &Square
+  c  : Circle
+  Circle
+  sq  : *Square
+  Shape
+  nil  : Type
+
+
+=================== 14 smart assignment int
+typed: [	total = |] SMART
+line:   | 	total = <caret>
+items: 19
+  Factorial(n int)  : int
+  MaxItems = 10  : untyped int
+  minItems = 1  : untyped int
+  total  : int
+  strings.Compare(a string, b string)  : int
+  strings.Count(s string, substr string)  : int
+  strings.Index(s string, substr string)  : int
+  strings.IndexAny(s string, chars string)  : int
+  strings.IndexByte(s string, c byte)  : int
+  strings.IndexFunc(s string, f func(rune) bool)  : int
+  strings.IndexRune(s string, r rune)  : int
+  strings.LastIndex(s string, substr string)  : int
+
+
+=================== 15 smart: error value
+typed: [	err = |] SMART
+line:   | 	err = <caret>
+items: 11
+  err  : error
+  ErrNotFound  : error
+  Probes(c Circle, sq *Square, shapes []Shape, names []string, ch chan int, err error, lvl Level)  : error
+  fmt.Errorf(format string, a ...any)  : (err error)
+  errors.ErrUnsupported  : error
+  error
+  errors.Join(errs ...error)  : error
+  errors.New(text string)  : error
+  errors.Unwrap(err error)  : error
+  &time.ParseError
+  nil  : Type
+
+
+=================== 16 smart: Level comparison
+typed: [	_ = lvl == |] SMART
+line:   | 	_ = lvl == <caret>
+items: 7
+  Debug = iota  : Level
+  Info = iota  : Level
+  lvl  : Level
+  MaxItems = 10  : untyped int
+  minItems = 1  : untyped int
+  Warn = iota  : Level
+  Level
+
+
+=================== 16b switch on Level: case
+typed: [	switch lvl {
+	case |] BASIC
+line:   | 	switch lvl {
+items: 86
+  Debug = iota  : Level
+  Info = iota  : Level
+  lvl  : Level
+  Warn = iota  : Level
+  make(t Type, size ...IntegerType)  : Type
+  recover()  : any
+  Level
+  Number
+  any
+  comparable
+  c  : Circle
+  errors {package}
+
+
+=================== 17 errors.Is second argument
+typed: [	_ = errors.Is(err, |] SMART
+line:   | 	_ = errors.Is(err, <caret>
+items: 11
+  err  : error
+  ErrNotFound  : error
+  Probes(c Circle, sq *Square, shapes []Shape, names []string, ch chan int, err error, lvl Level)  : error
+  fmt.Errorf(format string, a ...any)  : (err error)
+  errors.ErrUnsupported  : error
+  error
+  errors.Join(errs ...error)  : error
+  errors.New(text string)  : error
+  errors.Unwrap(err error)  : error
+  &time.ParseError
+
+
+=================== 18 struct literal: fields
+typed: [	h := Holder{|] BASIC
+line:   | 	h := Holder{<caret>
+items: 86
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  c  : Circle
+  ch  : chan int
+  Circle
+  classify(x any)  : string
+  counter()  : func() int
+  Debug = iota  : Level
+  err  : error
+  ErrNotFound  : error
+  Factorial(n int)  : int
+  find(grid [][]int, target int)  : (int, int, error)
+
+
+=================== 18b struct literal: remaining fields
+typed: [	h := Holder{Name: "x", |] BASIC
+line:   | 	h := Holder{Name: "x", <caret>
+items: 86
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  c  : Circle
+  ch  : chan int
+  Circle
+  classify(x any)  : string
+  counter()  : func() int
+  Debug = iota  : Level
+  err  : error
+  ErrNotFound  : error
+  Factorial(n int)  : int
+  find(grid [][]int, target int)  : (int, int, error)
+
+
+=================== 18c struct literal: pick field
+typed: [	h := Holder{|] BASIC
+line:   | 	h := Holder{<caret>
+items: 86
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  c  : Circle
+  ch  : chan int
+  Circle
+  classify(x any)  : string
+  counter()  : func() int
+  Debug = iota  : Level
+  err  : error
+  ErrNotFound  : error
+  Factorial(n int)  : int
+  find(grid [][]int, target int)  : (int, int, error)
+item not found: Count
+  | 	// PROBE:body
+  | 	h := Holder{<caret>
+  | 	// PROBE:body2
+
+
+=================== 19 type name pick: Circle
+typed: [	x := Cir|] BASIC
+line:   | 	x := Cir<caret>
+items: 6
+  Circle
+  syscall.CERT_TRUST_IS_REVOKED = 0x00000004 syscall  : untyped int
+  cipher.StreamReader crypto/cipher
+  syscall.CERT_TRUST_IS_OFFLINE_REVOCATION = 0x01000000 syscall  : untyped int
+  syscall.CERT_TRUST_IS_UNTRUSTED_ROOT = 0x00000020 syscall  : untyped int
+  cipher.NewGCMWithRandomNonce(cipher Block) crypto/cipher  : (AEAD, error)
+picked: Circle
+  | 	// PROBE:body
+  | 	x := Circle{<caret>}
+  | 	// PROBE:body2
+
+
+=================== 19b &Squ
+typed: [	x := &Squ|] BASIC
+line:   | 	x := &Squ<caret>
+items: 2
+  Square
+  driver.StmtQueryContext database/sql/driver
+
+
+=================== 20 method value (no parens?)
+typed: [	f := c.Ar|] BASIC
+line:   | 	f := c.Area()<caret>
+items: 0
+no lookup to pick from
+  | 	// PROBE:body
+  | 	f := c.Area()<caret>
+  | 	// PROBE:body2
+
+
+=================== 21 builtin len pick
+typed: [	n := le|] BASIC
+line:   | 	n := le<caret>
+items: 51
+  len(v Type)  : int
+  Level
+  store.Leak() example.com/playground/store  : 
+  cmp.Less[T Ordered](x T, y T) cmp  : bool
+  unicode.Lepcha unicode  : *RangeTable
+  unicode.Letter unicode  : *RangeTable
+  bits.LeadingZeros(x uint) math/bits  : int
+  bits.LeadingZeros8(x uint8) math/bits  : int
+  bits.LeadingZeros16(x uint16) math/bits  : int
+  bits.LeadingZeros32(x uint32) math/bits  : int
+picked: len
+  | 	// PROBE:body
+  | 	n := len(<caret>)
+  | 	// PROBE:body2
+
+
+=================== 21b append pick
+typed: [	names = app|] BASIC
+line:   | 	names = app<caret>
+items: 31
+  append(slice []Type, elems ...Type)  : []Type
+  fmt.Append(b []byte, a ...any) fmt  : []byte
+  fmt.Appendf(b []byte, format string, a ...any) fmt  : []byte
+  reflect.Append(s Value, x ...Value) reflect  : Value
+  binary.Append(buf []byte, order ByteOrder, data any) encoding/binary  : ([]byte, error)
+  fmt.Appendln(b []byte, a ...any) fmt  : []byte
+  reflect.AppendSlice(s Value, t Value) reflect  : Value
+  slices.AppendSeq[Slice interface{ ~[]E }, E any](s Slice, seq iter.Seq[E]) slices  : Slice
+  strconv.AppendBool(dst []byte, b bool) strconv  : []byte
+  strconv.AppendFloat(dst []byte, f float64, fmt byte, prec int, bitSize int) strconv  : []byte
+picked: append
+  | 	// PROBE:body
+  | 	names = append(<caret>)
+  | 	// PROBE:body2
+
+
+=================== 21c make(
+typed: [	m := make(|] BASIC
+line:   | 	m := make(<caret>
+items: 41
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Holder
+  Level
+  Number
+
+
+=================== 22 generic function call
+typed: [	Sum[|] BASIC
+line:   | 	Sum[<caret>
+items: 42
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Holder
+
+
+=================== 22b generic type instantiation
+typed: [	var st Set[|] BASIC
+line:   | 	var st Set[<caret>
+items: 0
+
+
+=================== 23 keywords: go
+typed: [	go|] BASIC
+line:   | 	go<caret>
+items: 41
+  go
+  fmt.GoStringer fmt
+  gob.CommonType encoding/gob
+  gob.Decoder encoding/gob
+  gob.Encoder encoding/gob
+  gob.GobDecoder encoding/gob
+  gob.GobEncoder encoding/gob
+  gob.NewDecoder(r io.Reader) encoding/gob  : *Decoder
+  gob.NewEncoder(w io.Writer) encoding/gob  : *Encoder
+  gob.Register(value any) encoding/gob  : 
+
+
+=================== 23b keywords: def
+typed: [	def|] BASIC
+line:   | 	def<caret>
+items: 40
+  unify.Def simd/archsimd/_gen/unify
+  defer
+  http.DefaultClient net/http  : *Client
+  log.Default() log  : *Logger
+  build.Default go/build  : Context
+  importer.Default() go/importer  : types.Importer
+  slog.Default() log/slog  : *Logger
+  types.Default(t Type) go/types  : Type
+  http.DefaultMaxHeaderBytes = 1 << 20 net/http  : untyped int
+  http.DefaultMaxHeaderValueCount = 500 net/http  : untyped int
+
+
+=================== 23c keywords: sel
+typed: [	sel|] BASIC
+line:   | 	sel<caret>
+items: 40
+  selfSource  : string
+  select
+  reflect.Select(cases []SelectCase) reflect  : (chosen int, recv Value, recvOK bool)
+  reflect.SelectCase reflect
+  reflect.SelectDefault = iota reflect  : SelectDir
+  reflect.SelectDir reflect
+  reflect.SelectRecv = iota reflect  : SelectDir
+  reflect.SelectSend = iota reflect  : SelectDir
+  ast.SelectorExpr go/ast
+  ast.SelectStmt go/ast
+
+
+=================== 23d keywords: range
+typed: [	for _, n := ra|] BASIC
+line:   | 	for _, n := ra<caret>
+items: 435
+  range
+  strings.ReplaceAll(s string, old string, new string) strings  : string
+  rand.ExpFloat64() math/rand  : float64
+  rand.Float32() math/rand  : float32
+  rand.Float64() math/rand  : float64
+  rand.Int() math/rand  : int
+  rand.Int(rand io.Reader, max *big.Int) crypto/rand  : (n *big.Int, err error)
+  rand.Int31() math/rand  : int32
+  rand.Int() math/rand/v2  : int
+  rand.Int31n(n int32) math/rand  : int32
+
+
+=================== 23e keywords: fallthrough in case
+typed: [	switch total {
+	case 1:
+		fallth|] BASIC
+line:   | 	switch total {
+items: 2
+  fallthrough
+  token.FALLTHROUGH = iota go/token  : Token
+
+
+=================== 24 channel send (smart)
+typed: [	ch <- |] SMART
+line:   | 	ch <- <caret>
+items: 19
+  Factorial(n int)  : int
+  MaxItems = 10  : untyped int
+  minItems = 1  : untyped int
+  total  : int
+  strings.Compare(a string, b string)  : int
+  strings.Count(s string, substr string)  : int
+  strings.Index(s string, substr string)  : int
+  strings.IndexAny(s string, chars string)  : int
+  strings.IndexByte(s string, c byte)  : int
+  strings.IndexFunc(s string, f func(rune) bool)  : int
+
+
+=================== 24b channel receive
+typed: [	v := <-|] BASIC
+line:   | 	v := <-<caret>
+items: 89
+  make(chan interface{})  : chan interface{}
+  nil  : Type
+  errors {package}
+  err  : error
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+
+
+=================== 25 select case
+typed: [	select {
+	case |] BASIC
+line:   | 	select {
+items: 86
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  c  : Circle
+  ch  : chan int
+  Circle
+  classify(x any)  : string
+  counter()  : func() int
+  Debug = iota  : Level
+  err  : error
+  ErrNotFound  : error
+
+
+=================== 26 type switch case
+typed: [	switch v := err.(type) {
+	case |] BASIC
+line:   | 	switch v := err.(type) {
+items: 40
+  error
+  errors {package}
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Level
+  Number
+  Set[K comparable]
+
+
+=================== 27 variable name after var
+typed: [	var |] BASIC
+line:   | 	var <caret>
+items: 0
+
+
+=================== 27b variable name for type (var  Circle)
+typed: [	var c2 Circle; var |] BASIC
+line:   | 	var c2 Circle; var <caret>
+items: 0
+
+
+=================== 28 Printf verbs
+typed: [	fmt.Printf("%|] BASIC
+line:   | 	fmt.Printf("%<caret>
+items: 0
+
+
+=================== 29 time layout in Format
+typed: [	_ = time.Now().Format("|] BASIC
+line:   | 	_ = time.Now().Format("<caret>
+items: 0
+
+
+=================== 30 regexp in MustCompile
+typed: [	_ = regexp.MustCompile(`\|] BASIC
+line:   | 	_ = regexp.MustCompile(`\<caret>
+items: 187
+  *  : literal *, for any punctuation character *
+  A  : at beginning of text
+  a  : bell (== )
+  B  : not at ASCII word boundary
+  b  : at ASCII word boundary (\w on one side and \W, \A, or \z on the other)
+  D  : not digits (== [^0-9])
+  d  : digits (== [0-9])
+  E  : nothing, but ends quoting started by \Q
+  f  : form feed (== )
+  n  : newline (== 
+)
+  p{Ahom}  :  {property}
+  p{Anatolian_Hieroglyphs}  :  {property}
+  p{Arabic}  :  {property}
+  p{Armenian}  :  {property}
+  p{Avestan}  :  {property}
+
+
+=================== 31 postfix list after expression
+typed: [	names.fo|] BASIC
+line:   | 	names.fo<caret>
+items: 2
+  for  : for index := range expr {template}
+  forr  : for index, elem := range expr {template}
+
+
+=================== 31b postfix .forr
+typed: [	names.forr|] BASIC
+line:   | 	names.forr<caret>
+items: 1
+  forr  : for index, elem := range expr {template}
+picked: .forr
+  | 	// PROBE:body
+  | 	for i<caret>, name := range names {
+  | 		
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 31c postfix .for
+typed: [	names.for|] BASIC
+line:   | 	names.for<caret>
+items: 2
+  for  : for index := range expr {template}
+  forr  : for index, elem := range expr {template}
+picked: .for
+  | 	// PROBE:body
+  | 	for i<caret> := range names {
+  | 		
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 31d postfix .nn on error
+typed: [	err.nn|] BASIC
+line:   | 	err.nn<caret>
+items: 1
+  nn  : if expr != nil {template}
+picked: .nn
+  | 	// PROBE:body
+  | 	if err != nil {
+  | 		<caret>
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 31e postfix .nil
+typed: [	err.nil|] BASIC
+line:   | 	err.nil<caret>
+items: 1
+  nil  : if expr == nil {template}
+picked: .nil
+  | 	// PROBE:body
+  | 	if err == nil {
+  | 		<caret>
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 31f postfix .rr on call returning error
+typed: [	load("x").rr|] BASIC
+line:   | 	load("x").rr<caret>
+items: 1
+  rr  : if err := f(); err != nil { return } {template}
+picked: .rr
+  | 	// PROBE:body
+  | 	if _, err := load("x"); err != nil {
+  | 		return err<caret>
+  | 	}
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+  | 	return nil
+
+
+=================== 31g postfix .varCheckError
+typed: [	load("x").varCheckError|] BASIC
+line:   | 	load("x").varCheckError<caret>
+items: 1
+  varCheckError  : err := f(); if err != nil { return } {template}
+picked: .varCheckError
+  | 	// PROBE:body
+  | 	err<caret>, err := load("x")
+  | 	if err != nil {
+  | 		return err
+  | 	}
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+
+
+=================== 31h postfix .var
+typed: [	c.Area().var|] BASIC
+line:   | 	c.Area().var<caret>
+items: 1
+  var  : var name = expr {template}
+picked: .var
+  | 	// PROBE:body
+  | 	area<caret> := c.Area()
+  | 	// PROBE:body2
+  | 
+
+
+=================== 31i postfix .return
+typed: [	err.return|] BASIC
+line:   | 	err.return<caret>
+items: 1
+  return  : return expr {template}
+picked: .return
+  | 	// PROBE:body
+  | 	return err<caret>
+  | 	// PROBE:body2
+  | 
+
+
+=================== 31j postfix .if on bool
+typed: [	(total > 0).if|] BASIC
+line:   | 	(total > 0).if<caret>
+items: 1
+  if  : if (expr) {template}
+picked: .if
+  | 	// PROBE:body
+  | 	if (total > 0) {
+  | 		<caret>
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 31k postfix .sort variants
+typed: [	names.sort|] BASIC
+line:   | 	names.sort<caret>
+items: 1
+  sort  : sort.Strings() {template}
+
+
+=================== 31l postfix .print
+typed: [	total.print|] BASIC
+line:   | 	total.print<caret>
+items: 2
+  print  : print() {template}
+  println  : println() {template}
+picked: .print
+  | 	// PROBE:body
+  | 	print(total)<caret>
+  | 	// PROBE:body2
+  | 
+
+
+=================== 32 live template forr
+typed: [	forr|] BASIC
+line:   | 	forr<caret>
+items: 1
+  forr  : For range loop {template}
+picked: forr
+  | 	// PROBE:body
+  | 	for i, i2 := range collection<caret> {
+  | 		
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 32b live template fori
+typed: [	fori|] BASIC
+line:   | 	fori<caret>
+items: 4
+  fori  : Indexed for loop {template}
+  strconv.FormatInt(i int64, base int) strconv  : string
+  fs.FormatFileInfo(info FileInfo) io/fs  : string
+  syscall.FORMAT_MESSAGE_IGNORE_INSERTS = 512 syscall  : untyped int
+picked: fori
+  | 	// PROBE:body
+  | 	for i<caret> := 0; i < ; i++ {
+  | 		
+  | 	}
+  | 	// PROBE:body2
+  | 
+
+
+=================== 32c live template err
+typed: [	err|] BASIC
+line:   | 	err<caret>
+items: 319
+  err  : error
+  err  : If error {template}
+  errors {package}
+  error
+  errors.As(err error, target any) errors  : bool
+  errors.AsType[E error](err error) errors  : (E, bool)
+  errors.ErrUnsupported errors  : error
+  errors.Is(err error, target error) errors  : bool
+  errors.Join(errs ...error) errors  : error
+  errors.New(text string) errors  : error
+picked: err
+  | 	// PROBE:body
+  | 	err<caret>
+  | 	// PROBE:body2
+  | 
+  | 	_ = total
+  | 	return nil
+
+
+=================== 32d live template printf
+typed: [	printf|] BASIC
+line:   | 	printf<caret>
+items: 5
+  printf  : printf {template}
+  fmt.Printf(format string, a ...any) fmt  : (n int, err error)
+  log.Printf(format string, v ...any) log  : 
+  printer.Fprint(output io.Writer, fset *token.FileSet, node any) go/printer  : error
+  printer.RawFormat = 1 << iota go/printer  : Mode
+picked: printf
+  | 	// PROBE:body
+  | 	fmt.Printf("", <caret>)
+  | 	// PROBE:body2
+  | 
+
+
+=================== 33 live template meth (top level)
+typed: [meth|] BASIC
+line:   | meth<caret>
+items: 1
+  meth  : Method {template}
+picked: meth
+  | // PROBE:top
+  | func (b Base<caret>) name()  {
+  | 	
+  | }
+  | // Holder is a struct for literal and tag probes.
+  | type Holder struct {
+
+
+=================== 33b live template main
+typed: [main|] BASIC
+line:   | main<caret>
+items: 1
+  main  : Main function {template}
+picked: main
+  | // PROBE:top
+  | func main() {
+  | 	<caret>
+  | }
+  | // Holder is a struct for literal and tag probes.
+  | type Holder struct {
+
+
+=================== 33c live template test
+typed: [test|] BASIC
+line:   | test<caret>
+items: 1
+  test  : Test {template}
+picked: test
+  | 
+  | // PROBE:top
+  | func TestName<caret>(t *testing.T) {
+  | 	
+  | }
+  | // Holder is a struct for literal and tag probes.
+
+
+=================== 33d live template bench
+typed: [bench|] BASIC
+line:   | bench<caret>
+items: 1
+  bench  : Benchmark {template}
+picked: bench
+  | 
+  | // PROBE:top
+  | func BenchmarkName<caret>(b *testing.B) {
+  | 	for i := 0; i < b.N; i++ {
+  | 		
+  | 	}
+
+
+=================== 33e func keyword at top level
+typed: [fun|] BASIC
+line:   | fun<caret>
+items: 3
+  func
+  func (*T)  : Method
+  func  : Implement Interface... {realIntentionBulb}
+
+
+=================== 34 method declaration: receiver type
+typed: [func (h *Hol|] BASIC
+line:   | func (h *Hol<caret>
+items: 2
+  Holder
+  structs.HostLayout structs
+
+
+=================== 34b method name on a type (interface methods offered?)
+typed: [func (h *Holder) |] BASIC
+line:   | func (h *Holder) <caret>
+items: 0
+
+
+=================== 34c Stringer method
+typed: [func (h Holder) Str|] BASIC
+line:   | func (h Holder) Str<caret>
+items: 0
+
+
+=================== 35 generic constraint
+typed: [func G[T |] BASIC
+line:   | func G[T <caret>
+items: 40
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Level
+  Number
+  Set[K comparable]
+
+
+=================== 35b parameter name
+typed: [func g(|] BASIC
+line:   | func g(<caret>
+items: 41
+  errors {package}
+  err error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string2 string
+  time {package}
+  base Base
+  circle Circle
+  holder Holder
+
+
+=================== 36 return (smart) with several results
+typed: [	return |] SMART
+line:   | 	return <caret>
+items: 2
+  &Circle
+  nil  : Type
+
+
+=================== 36b return (basic)
+typed: [	return |] BASIC
+line:   | 	return <caret>
+items: 81
+  nil  : Type
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  Circle
+  classify(x any)  : string
+
+
+=================== 37 struct tag: backtick
+typed: [	Age int |`] AUTO
+line:   | 	Age int `<caret>`
+items: 6
+  Add tag key to all fields…
+  asn1
+  bson
+  json
+  xml
+  yaml
+
+
+=================== 37b struct tag key
+typed: [	Age int `|] BASIC
+line:   | 	Age int `<caret>
+items: 0
+
+
+=================== 37c struct tag json name
+typed: [	FullName string `json:"|] BASIC
+line:   | 	FullName string `json:"<caret>
+items: 0
+
+
+=================== 38 import path
+typed: [	"encoding/|] BASIC
+line:   | 	"encoding/<caret>	_ "embed"
+items: 13
+  encoding/ascii85 {package}
+  encoding/asn1 {package}
+  encoding/base32 {package}
+  encoding/base64 {package}
+  encoding/binary {package}
+  encoding/csv {package}
+  encoding/gob {package}
+  encoding/hex {package}
+  encoding/json {package}
+  encoding/pem {package}
+  encoding/xml {package}
+  encoding/json/jsontext {package}
+  encoding/json/v2 {package}
+
+
+=================== 38b import path, module
+typed: [	"github.com/|] BASIC
+line:   | 	"github.com/<caret>	_ "embed"
+items: 2
+  github.com/google/uuid {package}
+  github.com/google/uuid {package}
+
+
+=================== 39 test file: t.
+typed: [	t|.] AUTO
+line:   | 	t.<caret>
+items: 39
+  ArtifactDir() → *common  : string
+  Attr(key string, value string) → *common  : 
+  Chdir(dir string) → *T  : 
+  Cleanup(f func()) → *common  : 
+  Context() → *common  : context.Context
+  Deadline() → *T  : (deadline time.Time, ok bool)
+  Error(args ...any) → *common  : 
+  Errorf(format string, args ...any) → *common  : 
+  Fail() → *common  : 
+  Failed() → *common  : bool
+  FailNow() → *common  : 
+  Fatal(args ...any) → *common  : 
+  Fatalf(format string, args ...any) → *common  : 
+  Helper() → *common  : 
+  Log(args ...any) → *common  : 
+  Logf(format string, args ...any) → *common  : 
+  Name() → *common  : string
+  Output() → *common  : io.Writer
+  Parallel() → *T  : 
+  Run(name string, f func(t *T)) → *T  : bool
+
+
+=================== 39b test file: assert (no testify)
+typed: [	assert|] BASIC
+line:   | 	// PROBE:test
+items: 0
+
+
+=================== 39c test file: t.Run(
+typed: [	t.Run(|] BASIC
+line:   | 	t.Run(<caret>
+items: 83
+  classify(x any)  : string
+  selfSource  : string
+  string
+  fmt {package}
+  testing {package}
+  t  : *testing.T
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  Circle
+  counter()  : func() int
+
+
+=================== 40 go.mod: directives
+typed: [|] BASIC
+line:   | <caret>
+items: 10
+  exclude
+  go
+  godebug
+  ignore
+  module
+  replace
+  require
+  retract
+  tool
+  toolchain
+
+
+=================== 40b go.mod: require path
+typed: [require github.com/google/|] BASIC
+line:   | require github.com/google/uuid<caret>
+items: 0
+
+
+=================== 40c go.mod: module version
+typed: [require github.com/google/uuid |] BASIC
+line:   | require github.com/google/uuid <caret>
+items: 27
+  cmd {package}
+  std {package}
+  runtime/_mkmalloc {package}
+  crypto/md5/_asm {package}
+  crypto/sha1/_asm {package}
+  example.com/playground {package}
+  simd/archsimd/_gen {package}
+  example.com/playground/report {package}
+  example.com/playground/store {package}
+  compile/internal/ssa/_gen {package}
+
+
+######## SECOND PASS: closed brackets/quotes, caret at @@ (the first pass typed them open)
+
+=================== C1 struct literal fields (closed braces)
+typed: [	h := Holder{}|] BASIC
+line:   | 	h := Holder{<caret>}
+items: 93
+  Fill all fields… {realIntentionBulb}
+  Fill selected fields… {realIntentionBulb}
+  Count → Holder  : int
+  Enabled → Holder  : bool
+  Name → Holder  : string
+  classify(x any)  : string
+  c  : Circle
+  selfSource  : string
+  string
+  errors {package}
+  err  : error
+  error
+
+
+=================== C1b struct literal: remaining fields
+typed: [	h := Holder{Name: "x", }|] BASIC
+line:   | 	h := Holder{Name: "x", <caret>}
+items: 4
+  Fill all fields… {realIntentionBulb}
+  Fill selected fields… {realIntentionBulb}
+  Count → Holder  : int
+  Enabled → Holder  : bool
+
+
+=================== C1c struct literal: pick first field
+typed: [	h := Holder{}|] BASIC
+line:   | 	h := Holder{<caret>}
+items: 93
+  Fill all fields… {realIntentionBulb}
+  Fill selected fields… {realIntentionBulb}
+  Count → Holder  : int
+  Enabled → Holder  : bool
+  Name → Holder  : string
+  classify(x any)  : string
+  c  : Circle
+  selfSource  : string
+  string
+  errors {package}
+  err  : error
+  error
+picked: Fill all fields…
+  | 	// PROBE:body
+  | 	h := Holder{
+  | 		Name:    ""<caret>,
+
+
+=================== C1d struct literal smart
+typed: [	h := Holder{Name: }|] SMART
+line:   | 	h := Holder{Name: <caret>}
+items: 50
+  classify(x any)  : string
+  selfSource  : string
+  fmt.FormatString(state State, verb rune)  : string
+  fmt.Sprint(a ...any)  : string
+  fmt.Sprintf(format string, a ...any)  : string
+  fmt.Sprintln(a ...any)  : string
+  strings.Clone(s string)  : string
+  string
+  strings.Join(elems []string, sep string)  : string
+  strings.Map(mapping func(rune) rune, s string)  : string
+  strings.Repeat(s string, count int)  : string
+  strings.Replace(s string, old string, new string, n int)  : string
+
+
+=================== C2 select case (closed)
+typed: [	select {
+	case 
+	}|] BASIC
+line:   | 	select {
+items: 88
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  c  : Circle
+  ch  : chan int
+  Circle
+  classify(x any)  : string
+  counter()  : func() int
+  Debug = iota  : Level
+  err  : error
+  ErrNotFound  : error
+  Factorial(n int)  : int
+  find(grid [][]int, target int)  : (int, int, error)
+
+
+=================== C3 type switch case (closed)
+typed: [	switch v := err.(type) {
+	case 
+	}|] BASIC
+line:   | 	switch v := err.(type) {
+items: 41
+  error
+  errors {package}
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Holder
+  Level
+  Number
+
+
+=================== C3b switch on Level: case (closed)
+typed: [	switch lvl {
+	case 
+	}|] BASIC
+line:   | 	switch lvl {
+items: 88
+  Debug = iota  : Level
+  Info = iota  : Level
+  lvl  : Level
+  Warn = iota  : Level
+  make(t Type, size ...IntegerType)  : Type
+  recover()  : any
+  Level
+  Number
+  any
+  comparable
+  c  : Circle
+  errors {package}
+
+
+=================== C4 Printf verbs (closed string)
+typed: [	fmt.Printf("%", total)|] BASIC
+line:   | 	fmt.Printf("%<caret>", total)
+items: 0
+
+
+=================== C4b Printf verbs AUTO after typing %
+typed: [	fmt.Printf("", total)|%] AUTO
+line:   | 	fmt.Printf("%<caret>", total)
+items: 0
+
+
+=================== C5 time layout (closed string)
+typed: [	_ = time.Now().Format("")|] BASIC
+line:   | 	_ = time.Now().Format("<caret>")
+items: 14
+  YY  : Year (two-digit)
+  YYYY  : Year (four-digit)
+  MM  : Month (zero-padded)
+  DD  : Day of month (zero-padded)
+  hh  : 24-hour (zero-padded)
+  mm  : Minute (zero-padded)
+  ss  : Second (zero-padded)
+  year...
+  month...
+  day...
+  hour...
+  minute...
+  second...
+  zone...
+
+
+=================== C6 make( (closed)
+typed: [	m := make()|] BASIC
+line:   | 	m := make(<caret>)
+items: 41
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Holder
+  Level
+  Number
+
+
+=================== C6b make smart in typed var
+typed: [	var m map[string]int = make()|] SMART
+line:   | 	var m map[string]int = make(<caret>)
+items: 0
+
+
+=================== C7 generic function call Sum[ (closed)
+typed: [	_ = Sum[]|] BASIC
+line:   | 	_ = Sum[<caret>]
+items: 42
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Holder
+  Level
+  Number
+
+
+=================== C7b generic type Set[ (closed)
+typed: [	var st Set[]|] BASIC
+line:   | 	var st Set[<caret>]
+items: 41
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Holder
+  Level
+  Number
+
+
+=================== C8 struct tag key (closed backticks)
+typed: [	Age int ``|] BASIC
+line:   | 	Age int `<caret>`
+items: 6
+  Add tag key to all fields…
+  asn1
+  bson
+  json
+  xml
+  yaml
+
+
+=================== C8b struct tag json name (closed)
+typed: [	FullName string `json:""`|] BASIC
+line:   | 	FullName string `json:"<caret>"`
+items: 4
+  full-name
+  full_name
+  FullName
+  fullName
+
+
+=================== C9 method on a type: names (body closed)
+typed: [func (h *Holder) () {}|] BASIC
+line:   | func (h *Holder) <caret>() {}
+items: 0
+
+
+=================== C9b Stringer method (closed)
+typed: [func (h Holder) Str() {}|] BASIC
+line:   | func (h Holder) Str<caret>() {}
+items: 0
+
+
+=================== C10 generic constraint (closed)
+typed: [func G[T ]() {}|] BASIC
+line:   | func G[T <caret>]() {}
+items: 42
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Base
+  Circle
+  Holder
+  Level
+  Number
+
+
+=================== C11 variable name: var @@ Circle
+typed: [	var  Circle|] BASIC
+line:   | 	var <caret> Circle
+items: 0
+
+
+=================== C11b range names: for @@ := range shapes
+typed: [	for  := range shapes {}|] BASIC
+line:   | 	for <caret> := range shapes {}
+items: 0
+
+
+=================== C12 return zero values, BASIC on empty line before return
+typed: [	return |] BASIC
+line:   | 	return <caret>
+items: 81
+  nil  : Type
+  errors {package}
+  error
+  fmt {package}
+  regexp {package}
+  strings {package}
+  string
+  time {package}
+  Analysis(name string, timeout time.Duration)  : (string, error)
+  Base
+  Circle
+  classify(x any)  : string
+
+
+=================== C13 fallthrough in case (closed)
+typed: [	switch total {
+	case 1:
+		fallth
+	}|] BASIC
+line:   | 	switch total {
+items: 2
+  fallthrough
+  token.FALLTHROUGH = iota go/token  : Token
+
+
+=================== C14 go.mod: require path (closed)
+typed: [require github.com/|] BASIC
+line:   | require github.com/google/uuid<caret>
+items: 0
+
+
+=================== C15 if err != nil block: smart after if
+typed: [	if  {}|] SMART
+line:   | 	if <caret> {}
+items: 12
+  errors.As(err error, target any)  : bool
+  errors.Is(err error, target error)  : bool
+  strings.Contains(s string, substr string)  : bool
+  strings.ContainsAny(s string, chars string)  : bool
+  strings.ContainsFunc(s string, f func(rune) bool)  : bool
+  strings.ContainsRune(s string, r rune)  : bool
+  strings.EqualFold(s string, t string)  : bool
+  strings.HasPrefix(s string, prefix string)  : bool
+  strings.HasSuffix(s string, suffix string)  : bool
+  false = 0 != 0  : bool
+  true = 0 == 0  : bool
+  bool
+

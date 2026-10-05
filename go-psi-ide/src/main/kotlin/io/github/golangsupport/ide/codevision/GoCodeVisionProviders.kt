@@ -3,6 +3,7 @@ package io.github.golangsupport.ide.codevision
 import com.intellij.codeInsight.codeVision.CodeVisionAnchorKind
 import com.intellij.codeInsight.codeVision.CodeVisionEntry
 import com.intellij.codeInsight.codeVision.CodeVisionRelativeOrdering
+import com.intellij.codeInsight.codeVision.settings.CodeVisionGroupSettingProvider
 import com.intellij.codeInsight.codeVision.ui.model.ClickableTextCodeVisionEntry
 import com.intellij.codeInsight.hints.codeVision.DaemonBoundCodeVisionProvider
 import com.intellij.openapi.actionSystem.ActionManager
@@ -14,16 +15,21 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiWhiteSpace
+import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.navigation.GoImplementations
+import io.github.golangsupport.ide.refactoring.GoAddInterfaceMethod
+import io.github.golangsupport.ide.refactoring.GoAddInterfaceMethodIntention
+import io.github.golangsupport.ide.refactoring.GoSignatureHierarchy
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.lang.psi.GoFunctionDeclaration
 import io.github.golangsupport.lang.psi.GoInterfaceType
 import io.github.golangsupport.lang.psi.GoMethodSpec
 import io.github.golangsupport.lang.psi.GoNamedElement
+import io.github.golangsupport.lang.psi.GoTypeDeclaration
 import io.github.golangsupport.lang.psi.GoTypeSpec
 
 /**
@@ -146,3 +152,107 @@ class GoImplementationsCodeVisionProvider : GoCodeVisionProvider("GotoImplementa
     /** For interfaces and their methods only, and only when there is one: what a type implements is said by the icon in the gutter. */
     override fun text(element: GoNamedElement): String? = GoCodeVision.countImplementations(element)?.takeIf { it > 0 }?.let(GoCodeVision::implementationsText)
 }
+
+/**
+ * A code vision action above a declaration, as GoLand has them: its own group (Settings | Editor | Inlay Hints | Code vision, through
+ * [GoActionCodeVisionSettings]), above the declaration line by default. The usages / implementations hints keep [CodeVisionAnchorKind.Default]:
+ * where they go is the platform's setting (the group's position, else the default position), GoLand's "at the line end" is its product default.
+ */
+abstract class GoActionCodeVisionProvider : DaemonBoundCodeVisionProvider {
+    override val relativeOrderings: List<CodeVisionRelativeOrdering> = emptyList()
+    override val defaultAnchor: CodeVisionAnchorKind get() = CodeVisionAnchorKind.Top
+    override val groupId: String get() = id
+
+    /** The type specs a lens goes above, with the element whose range anchors it. */
+    protected abstract fun targets(file: GoFile): List<Pair<PsiElement, GoTypeSpec>>
+
+    protected abstract fun text(): String
+
+    protected abstract fun invoke(editor: Editor, spec: GoTypeSpec)
+
+    protected open fun enabled(file: GoFile): Boolean = GoIdeFeatureGate.enabled(GoIdeFeature.IMPLEMENTATION_MARKERS, file.project)
+
+    override fun computeForEditor(editor: Editor, file: PsiFile): List<Pair<TextRange, CodeVisionEntry>> {
+        if (file !is GoFile || !enabled(file) || DumbService.isDumb(file.project)) return emptyList()
+        return targets(file).take(GoCodeVision.MAX_DECLARATIONS).map { (anchor, spec) ->
+            ProgressManager.checkCanceled()
+            val pointer = SmartPointerManager.createPointer(spec)
+            GoCodeVision.anchorRange(anchor) to ClickableTextCodeVisionEntry(text(), id, { _, clicked -> pointer.element?.let { invoke(clicked, it) } }, null, text(), name, emptyList())
+        }
+    }
+}
+
+/**
+ * "Implement interface" above every type declaration with a non-interface type (structs, `type Level int`, generic types), once per
+ * `type ( … )` group as GoLand shows it: a click puts the caret on the type's name and runs Implement Methods (Ctrl+I), which the host
+ * answers with its interface chooser (`codeInsight.implementMethod` for Go).
+ */
+class GoImplementInterfaceCodeVisionProvider : GoActionCodeVisionProvider() {
+    override val id: String get() = ID
+    override val name: String get() = "Implement interface"
+
+    override fun targets(file: GoFile): List<Pair<PsiElement, GoTypeSpec>> = file.children.filterIsInstance<GoTypeDeclaration>().mapNotNull { declaration ->
+        declaration.typeSpecList.firstOrNull { !it.isAlias && it.type != null && !GoImplementations.isInterface(it) }?.let { declaration to it }
+    }
+
+    override fun text(): String = "Implement interface"
+
+    override fun invoke(editor: Editor, spec: GoTypeSpec) {
+        editor.caretModel.moveToOffset(spec.identifier.textRange.startOffset)
+        val action = ActionManager.getInstance().getAction(IMPLEMENT_METHODS) ?: return
+        ActionManager.getInstance().tryToExecute(action, null, editor.contentComponent, "GoCodeVision", true)
+    }
+
+    companion object {
+        const val ID = "go.psi.implement.interface"
+
+        /** Code | Implement Methods (Ctrl+I) of the platform. */
+        const val IMPLEMENT_METHODS = "ImplementMethods"
+    }
+}
+
+/**
+ * "Add method" above a package-level interface of the project that has an implementation in the project: a click opens Add Method to
+ * Interface ([GoAddInterfaceMethodIntention]: the method goes into the interface, stubs into every implementing type). Gated like that
+ * refactoring ([GoIdeFeature.RENAME]) and like the other hints ([GoIdeFeature.IMPLEMENTATION_MARKERS]).
+ */
+class GoAddInterfaceMethodCodeVisionProvider : GoActionCodeVisionProvider() {
+    override val id: String get() = ID
+    override val name: String get() = "Add method to interface and all its implementations"
+
+    override fun enabled(file: GoFile): Boolean = super.enabled(file) && GoIdeFeatureGate.enabled(GoIdeFeature.RENAME, file.project)
+
+    override fun targets(file: GoFile): List<Pair<PsiElement, GoTypeSpec>> {
+        if (GoSignatureHierarchy.isGenerated(file) || !GoImplementations.isInProject(file)) return emptyList()
+        val scope = GlobalSearchScope.projectScope(file.project)
+        return file.types.filter { spec ->
+            ProgressManager.checkCanceled()
+            GoAddInterfaceMethod.interfaceAt(spec.identifier) == spec && GoImplementations.implementingTypes(spec, scope, 1).isNotEmpty()
+        }.map { it to it }
+    }
+
+    override fun text(): String = "Add method"
+
+    override fun invoke(editor: Editor, spec: GoTypeSpec) {
+        val project = editor.project ?: return
+        editor.caretModel.moveToOffset(spec.identifier.textRange.startOffset)
+        GoAddInterfaceMethodIntention().invoke(project, editor, spec.identifier)
+    }
+
+    companion object {
+        const val ID = "go.psi.add.interface.method"
+    }
+}
+
+/** The names and descriptions of the groups of [GoActionCodeVisionProvider] in Settings | Editor | Inlay Hints | Code vision. */
+abstract class GoActionCodeVisionSettings(override val groupId: String, override val groupName: String, override val description: String) :
+    CodeVisionGroupSettingProvider
+
+class GoImplementInterfaceCodeVisionSettings : GoActionCodeVisionSettings(
+    GoImplementInterfaceCodeVisionProvider.ID, "Implement interface", "Above a Go type declaration: implement the methods of an interface for the type (Ctrl+I).",
+)
+
+class GoAddInterfaceMethodCodeVisionSettings : GoActionCodeVisionSettings(
+    GoAddInterfaceMethodCodeVisionProvider.ID, "Add method to interface and all its implementations",
+    "Above a Go interface with implementations in the project: add a method to it and a stub of it to every implementing type.",
+)

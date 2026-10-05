@@ -12,6 +12,7 @@ behaviour is PSI/semantic based (`GoSemanticService`, stub indices); no LSP. Cod
 | `lang.braceMatcher`, `lang.quoteHandler`, `lang.commenter`, `indexPatternBuilder` | `editor.*` | |
 | `lang.findUsagesProvider` | `editor.GoFindUsagesProvider` | words scanner + kind names |
 | `lang.foldingBuilder` | `folding.GoFoldingBuilder` | |
+| `codeFoldingOptionsProvider` | `folding.GoCodeFoldingOptionsProvider`, `GoFoldingSettings` | GoLand one-liners: `if x != nil { return … }` (one return / panic / break / continue / goto), function with one `return`, `case` with one statement, empty function, empty struct / interface fold to one line with their text (`{ return "", err }`, capped at 60 chars), replacing the `{...}` region of the same range; five Code Folding options (Go section), collapsed by default. Syntax only, no comment may get hidden. Tests: `GoFoldingTest` (`OneLine.go`) |
 | `lang.psiStructureViewFactory`, `breadcrumbsInfoProvider` | `structure.*` | |
 | `itemPresentationProvider`, `gotoSymbolContributor`, `gotoClassContributor` | `navigation.*` | stub-only presentations |
 | `lang.formatter`, `langCodeStyleSettingsProvider`, `codeStyleSettingsProvider`, `preFormatProcessor` | `formatter.*` | gofmt port, see `docs/FORMATTER.md` |
@@ -37,6 +38,7 @@ the closed gate; the other tests run against the default.
 | `targetElementEvaluator` | `GoTargetElementEvaluator` | Go to Implementation on an interface/method spec lists only implementations, not the interface itself. |
 | `codeInsight.gotoSuper` | `GoGotoSuperHandler` | Go to Super (Ctrl+U): method -> interface method specs it implements; concrete type -> interfaces it implements (project + libraries). |
 | `codeInsight.lineMarkerProvider` | `GoImplementationLineMarkerProvider` | Slow-pass gutters: "Is implemented by" on interfaces and their methods (implementations in project content), "Implements" on concrete types and "Implements method in" on methods (interfaces in project + libraries). Existence stops at the first hit and is cached per owner (`CachedValue<Boolean>`, deps: project out-of-block + library trackers, model, roots); targets are computed when the popup opens. Not DumbAware (indices). |
+| `codeInsight.lineMarkerProvider` | `GoRecursiveCallLineMarkerProvider` | Slow-pass "Recursive call" gutter (`AllIcons.Gutter.RecursiveMethod`) on the callee identifier of a call that resolves to the enclosing function / method (`f()`, `r.f()`, `T.f(r)`, `(*T).f(r)`, also from a function literal inside); name check before resolve, one marker per line; gate `IMPLEMENTATION_MARKERS`. Tests: `GoRecursiveCallLineMarkerTest`. |
 
 Implementation search (`GoImplementations`): candidates come from the stub indices
 (`GoMethodFingerprintIndex` by `name/arity` of the interface method with the fewest candidate
@@ -63,10 +65,16 @@ asserts that markers and search do not load the AST of the implementing file.
 |---|---|---|
 | `codeInsight.daemonBoundCodeVisionProvider` | `GoUsagesCodeVisionProvider` (group `references`) | "no usages" / "1 usage" / "N usages" / "100+ usages" above package-level functions (not `main`, `init` or the test functions of a `_test.go`), methods, type specs and the method specs of package-level interfaces: `ReferencesSearch` in the use scope, stopped after 100 references. A click runs `ShowUsages` with the caret on the name. |
 | `codeInsight.daemonBoundCodeVisionProvider` | `GoImplementationsCodeVisionProvider` (group `inheritors`) | "N implementations" above interfaces and their method specs when there is at least one (`GoImplementations` in project content, stubs only, stopped after 100); nothing on the concrete side, where the gutter icon already says "implements". A click runs `GotoImplementation`. |
+| `codeInsight.daemonBoundCodeVisionProvider` | `GoImplementInterfaceCodeVisionProvider` (group `go.psi.implement.interface`, Top) | "Implement interface" above every type declaration with a non-interface, non-alias type (structs, `type Level int`, generic types), once per `type ( … )` group, as GoLand shows it. A click puts the caret on the type name and runs the platform's `ImplementMethods` (Ctrl+I), which the host answers with its interface chooser. |
+| `codeInsight.daemonBoundCodeVisionProvider` | `GoAddInterfaceMethodCodeVisionProvider` (group `go.psi.add.interface.method`, Top) | "Add method" above a package-level, non-generic interface of the project with at least one implementation in the project (not in generated files). A click opens Add Method to Interface (`GoAddInterfaceMethodIntention`: the method into the interface, stubs into the implementing types). Also gated by `RENAME`, like that refactoring. |
+| `config.codeVisionGroupSettingProvider` | `GoImplementInterfaceCodeVisionSettings`, `GoAddInterfaceMethodCodeVisionSettings` | Names and descriptions of the two action groups in Settings \| Editor \| Inlay Hints \| Code vision. |
 
-The anchor is the declaration without its doc comment (the hint sits right above the `func`/`type` line). Both providers follow the
+The anchor is the declaration without its doc comment (the hint sits right above the `func`/`type` line). The providers follow the
 gate group `IMPLEMENTATION_MARKERS` and answer nothing in dumb mode; at most 300 declarations of a file are asked, with a
-cancellation check between them. `codevision.GoCodeVisionTest` (7) covers the anchors, the wording, the cap, the closed gate and that
+cancellation check between them. Position: usages and implementations keep `CodeVisionAnchorKind.Default` in the platform's groups, so
+`CodeVisionHost` places them by the group's position in Settings, else by the default position (`CodeVisionSettingsDefaults` of the
+product: line end in GoLand, top in IDEA); the plugin does not override it. `codevision.GoCodeVisionTest` (11) covers the anchors, the
+wording, the cap, the closed gate, the action lenses (which declarations, only with implementations, gates), positions and groups, and that
 counting implementations keeps the implementing file's AST unloaded.
 
 ### Rename (`ide.rename`)
@@ -248,6 +256,17 @@ local).
 | `completion.contributor` (chains) | `GoChainCandidates` | `x.F.M` / `x.F().M`: roots are locals, parameters and variables with a known type (30); first steps are fields with promotion and parameterless one-result methods (20 per root, 200 expansions); 50 chains. Lookup string is the whole chain; parentheses as for methods. In smart filtered by type, in basic from a 2-character prefix (restart at length 2). Level `UNIMPORTED`. |
 | `completion.contributor` (project members) | `GoProjectMemberCandidates` | Bare names to `pkg.Name` from `GoAllPublicNamesIndex` (project scope, prefix ≥ 2, ≤ 200 keys / ≤ 100 items). Import path from `GoPackageResolver.importPathOf(dir)`; skips the current package, `main`, `_test.go`, `vendor`/`testdata`, `internal` per the go rule, imported paths and taken names. Import through `GoImportInserter`; `expectedMatch` from stub declaration types. The host `GoCatalogueCompletionContributor` leaves project entries out when `GoFeatures.native(COMPLETION)`. |
 
+### GoLand's items (PLAN.md G3; `docs/goland-analysis/dumps/completion.txt`)
+
+| Where | Class | What |
+|---|---|---|
+| struct literal key | `GoFillStructCompletion` | **Fill all fields…** / **Fill selected fields…** first (priority) in a keyed or empty `T{}` / `&T{}` / `[]T{{}}` with fields left (not in a positional literal, not at a value, basic only). Text from `intentions.GoFillStruct` (the Fill intention's generator) with `align = true`: one field per line, values aligned as gofmt does (the run of one-line elements above is re-padded), blank lines before `}` replaced, caret after the first value. Fill selected opens `ChooseElementsDialog` (all ticked) after the insertion (`invokeLater`); `chooserForTests` picks in tests. |
+| constant rows | `GoScopeCandidates.constValueText` | `MaxItems = 10  untyped int`, `Info = iota  Level`: tail ` = <expression>` (a repeated row shows the one it repeats, whitespace collapsed, cut at 40), type text the type. Values from `GoConstSpecStub.values`, so no AST of other files. |
+| top level | `GoTopLevelTemplates` | `func (*T)` (type text `Method`): `func (r *T) <caret>() {\n}` for the type declared last above the caret (else the first of the file), receiver name and pointer-ness from its methods. `func` / `Implement Interface...`: deletes the prefix, puts the caret on that type's name and runs the host action `Go.Generate.Implement` (`invokeLater`; offered only when the action is registered; `actionRunnerForTests`). Not inside functions, not without a type in the file. |
+| struct tags (host) | `lang.GoStructTagKeyToAllFields`, `GoStructTagCompletion.nameStyles` / `styleFor` | At a key of a closed tag the first item **Add tag key to all fields…**: a popup of the name keys (`json yaml xml toml db mapstructure bson env form`), then `GoGenerateStructTagsAction.tagEdits` writes the key into every exported field that lacks it, named in the style the struct uses for that key. Names in a value: the style other fields use (only when one has the key), then GoLand's `full-name`, `full_name`, `FullName`, `fullName`, then `fullname`. |
+| parameter name | `GoNameCompletion.parameterItems`, `GoNameSuggestions.parameterName` | `func g(<caret>` / `func g(a int, <caret>` (a bare type of a function, method or literal parameter; not results, receivers, function types, `...T`, `pkg.`): the types become `name Type` items as in GoLand: `err error`, `string2 string` (reserved or taken name: next digit), `base Base`, `t T` for a type parameter, `set Set[<caret>]` for a generic type; packages stay, keywords and project members are left out. With a typed prefix the exported types of imported packages follow at level `UNIMPORTED` (`ctx context.Context`; GoLand offers none). Extra lookup strings: the name, the type name, the qualified type. |
+| variable / parameter name | `GoNameCompletion.variableNames`, `GoNameSuggestions` | At a name being declared (`var <caret> Circle`, `<caret> := c.Area()`, `for i, <caret> := range names`, `func g(<caret> Base)`; GoLand offers nothing here): from the right-hand side (callee without `Get`/`New`/`Parse`… → `area`, `name`, `server`; `len` → `n`; value → its name; `names[0]`, `<-names`, range value → singular), then from the declared type rendered qualified (well-known `ctx err t w r buf mu wg d f db`, lowercased name, last camel word, first letter; slices plural, `[]byte` → `data buf b`, maps `m`, channels `ch`, funcs `fn f`, basics `s str` / `i n` / `ok b`). Range index over a slice, array, string or int: `i` (then `j`, `k`). Unique against locals, parameters, package-level and import names (digit suffix); at most 6, in this order. |
+
 ### Tests
 
 `completion.GoSmartCompletionTest` (10), `GoProjectMemberCompletionTest` (6),
@@ -255,13 +274,17 @@ local).
 `GoKeywordCompletionTest` (19), `GoInsertCompletionTest` (11), `GoRankingCompletionTest` (9),
 `GoCompletionEnvironmentTest` (10: import paths from GOROOT and from an on-disk module copied
 from `testData/completion/module`, module auto-import, comments/strings, confidence, dumb mode,
-stub-only candidates, a 3000-line file with 500 package-level symbols under 300 ms).
+stub-only candidates, a 3000-line file with 500 package-level symbols under 300 ms),
+`GoGolandParityCompletionTest` (15: Fill items, constant values, top-level declarations), `GoNameSuggestionsTest` (7, pure name rules), `GoNameCompletionTest` (15: parameter and variable names); host `GoStructTagKeyCompletionTest` (4).
 
 ### Known gaps
 
 - Tail texts print `byte`/`rune` as `uint8`/`int32` (the type model does not keep aliases).
-- Method expressions on `(*T)`, completion of generic instantiation arguments by constraint,
-  postfix templates are not implemented. Smart literals are not offered for types of packages
+- Method expressions on `(*T)` and completion of generic instantiation arguments by constraint
+  are not implemented. Postfix templates live in the host plugin (`lang.GoPostfixTemplates`): the
+  platform's live template contributor puts the applicable keys into this list after `x.`, and the
+  host's `GoPostfixCompletionWeigher` (after `priority`, before `goCompletion`) keeps them behind
+  the members. Smart literals are not offered for types of packages
   the file does not import; chains go one level deep only.
 - `GoCompletionRanker` has no implementation; the ML module is planned (docs/ML.md).
 
@@ -315,6 +338,7 @@ implementations of a type switch's interface (stub indices, as Fill Switch). WAR
 | `GoTimeLayout` | weak warning: the layout literal of `Time.Format` / `AppendFormat` / `time.Parse` / `ParseInLocation` (found by resolve) in `yyyy-MM-dd` notation, with no time elements, or the ISO date with day before month `2006-02-01`; string literals only, stdlib constants never | Convert to Go layout; Swap to '2006-01-02' |
 | `GoEmbedDirective` | error, go's messages for `//go:embed`: no matching files found, invalid pattern syntax, directory with no embeddable files, misplaced directive (not above a package-level `var`), file does not import `embed` | Add import "embed" (blank import for string/[]byte vars, plain for `embed.FS`) |
 | `GoBuildConstraint` | vet `buildtag`: `invalid //go:build expression: …`, `misplaced //go:build comment` (after the package clause, or no blank line before it), `multiple //go:build comments` (errors); `// +build is deprecated; use //go:build` and `unknown GOOS/GOARCH 'linx'` for a tag one edit from a known one (weak warnings; `cgo`, `unix`, `ignore`, `go1.*`, `goexperiment.*`, tags under 3 characters never) | Add //go:build line (converts `+build`, Go's printing: `(a && !b) \|\| c`); Replace with 'linux' |
+| `GoShadowedVar` | GoLand's "Shadowing variable" (weak warning, name painted with `GO_SHADOWING_VARIABLE` through `ProblemDescriptorBase.setTextAttributes`): `Declaration of 'x' shadows declaration at line N` (`at b.go:N` for another file) for a local variable (`:=`, `var`, `if`/`for`/`switch` header, range, type-switch guard, `select` receive) whose name `GoScopes.resolveName` finds outside its own scope as a variable, constant, parameter, result or receiver, or a package-level var/const of the same package. Quiet: `_`, a `:=` reusing its own scope's variable (incl. the body's parameters, a type-case guard), parameters themselves, `x := x`, `switch x := x.(type)`, imports, builtins | Navigate to shadowed declaration; Rename variable (platform rename handler at the name) |
 | `GoErrorsPackage` | vet `errorsas` (`second argument to errors.As must be a non-nil pointer …`, `… should not be *error`; `any` targets accepted); `err == ErrX` / `!=` with a package-level `error` variable (weak warning; not `nil`, not inside `Is` methods) | Take the address of target; Replace with errors.Is(err, ErrX) (imports `errors`) |
 
 ### Data-flow inspections (wave 4 of FEATURES.md §11)
@@ -438,6 +462,74 @@ Editing intentions (FEATURES.md section 11, wave 2 G), the same base and gate, t
   Convert to 'var' declaration (`x := v` → `var x T = v`, `T` through `GoSourceText`, not for unexported types of other packages);
   Convert to short variable declaration (`var x = v`, or `var x T = v` when the types agree).
 
+GoLand parity G4 (texts and behaviour after GoLand's intention list and descriptions), the same base and gate:
+
+- Expressions (`GoExpressionIntentions.kt`): Flip binary operator (innermost binary expression at the caret; "Flip '>=' to '<='" for
+  ordering comparisons, "Flip '+'" for commutative operators, "Flip '-' (changes semantics)" for the rest and string `+`; the old left
+  operand parenthesized when it binds as tight, not in `&&`/`||` chains; the blanks around the operator kept). Negate expression /
+  Negate expression recursively / Negate topmost expression / Negate topmost expression recursively (`GoNegateIntentionBase`; texts
+  "Negate '||' to '&&'", "Negate topmost '&&' to '||' recursively"): the current (innermost) or the outermost (through `&&`, `||`,
+  parentheses and `!`) boolean binary expression becomes `!(negation)`, or loses the `!` already around it, so the value is unchanged;
+  De Morgan one level or into every `&&`/`||` operand; ordering comparisons only for integer/string operands (float orderings are not
+  offered). Topmost and recursive variants appear only when they write something different. Specify type explicitly
+  (`GoSpecifyTypeIntention`): `var x = v` / `const c = v` without a type → `var x T = v`, the default type for untyped constants, several
+  names only with one type, `GoSourceText` qualifies and imports; not for untyped `nil` or unexported types of other packages.
+- Literals (`GoLiteralIntentions.kt`): Remove keys from struct literal (all elements keyed → values in field order, omitted fields as
+  zero values, multi-line literals stay one value per line; not for structs of other packages with unexported fields, nor elided-type
+  literals `[]T{{A: 1}}`); Move field assignment to struct initialization (caret on `s.F = v`; the consecutive `s.X = …` statements after
+  `s := T{…}` / `var s = T{…}` / `&T{…}` up to the caret's one fold into the literal; not when a value reads `s`, a field repeats or is
+  keyed already, or is promoted).
+- Signatures (`GoSignatureIntentions.kt`, caret on the header of a function, method or literal, or in a function type): Expand signature
+  types (`a, b T` → `a T, b T` in parameters and named results); Reuse signature types (adjacent named, non-variadic declarations with the
+  same type text → `a, b T`).
+- Declarations (`GoDeclarationMergeIntentions.kt`): Merge declaration up (into the previous adjacent declaration of the same kind, a group
+  is created or extended; not across comments, not for `iota` / implicit const specs); Merge declaration up via comma (`var a T` + `var b T`,
+  `var a = 1` + `var b = "s"`, two specs of one group, `a := 1` + `b := 2`; same type text, one value per name or none, the second's values
+  must not read the first's names); Split declarations into two groups (a group split before the spec at the caret; not for `iota` /
+  implicit specs after it). GoLand's "Split all declarations" and "Split declarations by comma" are the existing Split into separate
+  declarations. Export (`GoExportIntentions.kt`, `GoRefactoringIntention`): on the name of a package-level function, type, var or const,
+  a method or a field → `RenameProcessor` to the upper-case name; not for `init` / `main` or a taken name (package scope through
+  `GoPackageModel`, fields and methods through `lookupFieldOrMethod`). Migrate function parameter to method receiver
+  (`GoMigrateParameterToReceiverIntention`): first named parameter of a named, non-generic, non-interface type of the same package;
+  declaration rewritten, calls found with `ReferencesSearch` → `v.f(…)` (`&v` → `v`, composite literals parenthesized), function values →
+  `(*T).f`; a `nil` receiver, a multi-value argument or a call nested in the receiver argument stop it with an error hint.
+- Unresolved (`GoCreateFromUsageIntentions.kt`, `GoValueUsage`): Create global variable 'x' (inside a function body: `var x T` after the
+  imports; the callee of a call gets `func(params)`); Create parameter 'x' (appended to the enclosing function or literal, before a
+  variadic one; type parameters allowed; calls of a declared function in the project get the zero value of `T` appended).
+
+GoLand parity G4 (texts as GoLand's Alt+Enter), the same gate:
+
+- Imports (`GoImportIntentions.kt`, caret on an import spec, not `"C"`): Import for side-effects (`_ "pkg"`, only when the file does not use
+  the package); Add import alias (the package name as the alias, then a template over the alias and the qualifiers of its uses, so typing
+  renames them together); Add dot import alias (`. "pkg"`, qualifiers dropped; not offered when a name would then resolve to something
+  else); Remove dot import alias (uses of the package's names get `pkg.`; not offered when `pkg` is taken at a use).
+- Layout (`GoArgumentLayoutIntentions.kt`, `GoListLayout`): Put arguments / elements on separate lines (innermost call arguments or
+  composite literal elements around the caret with two or more items, not beyond the enclosing block; gofmt layout with a trailing comma,
+  lines inside an item move with it, `...` kept) and Put … on one line (multi-line list of single-line items, no trailing comma). Lists with
+  comments are left alone.
+- Join concatenated string literals (`GoStringIntentions.kt`): every run of adjacent literals in the `+` chain at the caret; interpreted
+  bodies glued as written, raw parts of a mixed run quoted (`GoStringQuotes.quote`), all-raw runs stay raw.
+- Printf (`GoFormatIntentions.kt`): Add format string argument (caret inside the format string of a printf-like call: input dialog for the
+  expression, `%v` at the caret, the argument after the arguments of the verbs before it; not with `%[n]` indexes or `args...`); Exclude /
+  Mark as string formatting function edit the application-level `inspections.printf.GoPrintfFunctions` (vet full names, `excluded` /
+  `extra`), which `GoPrintfCalls` consults first (a marked function is Printf-like when a `string` precedes `...any`).
+- errcheck: quick fix "Do not report this method/function anymore" (`GoDoNotReportCalleeFix`) on `GoUncheckedErrorInspection` and the
+  errcheck rule adds `path.Func` / `path.Type.Method` to the inspection's `excludedFunctions` (options panel `OptPane.stringList`); both
+  read the current profile's list through `isUnchecked`.
+- Tags (`GoTagIntentions.kt`): Change field name style in tags (on a tag, the type name or the `struct` keyword; popup `full-name` /
+  `full_name` / `FullName` / `fullName`, test hook `GoChangeTagNameStyleIntention.chooser`; rewrites the name of the key at the caret or the
+  first name-like key in every single-name field, options kept, raw and interpreted tags); Update key value in tags (field whose name in
+  a key differs from its field name in the style the other fields use, `detectStyle`).
+
+Navigation intentions (GoLand parity G4, `GoNavigationIntentions.kt`, same gate, `LowPriorityAction`, no preview, not in a write action):
+Go to Implementations (`GoGotoImplementationsIntention`: interface type spec header or interface method name → implementing types /
+methods in project content), Go to Interfaces (`GoGotoInterfacesIntention`: concrete type spec header → interfaces in project and
+libraries), Go to Method Specifications (`GoGotoMethodSpecificationsIntention`: method header up to `{` → interface method specs).
+Targets from `GoImplementations` (the gutter's lookup); availability asks for one target, `invoke` collects all under a modal progress,
+opens a single one, several in `PsiTargetNavigator`. The host adds Run go generate on comment / file / package
+(`build.GoGenerateIntentions`) and the go.mod intentions (`mod.GoModIntentions`: Merge a group of directives / all directives / directive up
+over the pure `GoModDirectiveEdits`, Update dependencies… over `GoModUpdates`).
+
 Known gaps: values in filled literals are not aligned until the file is formatted.
 
 ### Suppression (`GoInspectionSuppressor`, `lang.inspectionSuppressor`)
@@ -455,19 +547,23 @@ gets the id appended.
 An `Annotator` that colours identifiers by declaration kind and by what references resolve to,
 using only the cached resolve (`GoResolver`; struct literal keys through `resolveFieldKey`),
 never expression typing directly. Keys (`lang.GoColors` in go-psi-core, the palette of the root module's `GoSyntaxHighlighter` and
-colour page): `GO_PACKAGE`, `GO_TYPE_DECLARATION` (the name of a type spec), `GO_TYPE_REFERENCE` (other types, type parameters),
-`GO_FUNCTION_DECLARATION`, `GO_FUNCTION_CALL` (functions and methods alike),
-`GO_FIELD`, `GO_PARAMETER` (also receivers and named results), `GO_LOCAL_VARIABLE`,
-`GO_PACKAGE_VARIABLE`, `GO_CONSTANT`, `GO_LABEL`, `GO_BUILTIN_TYPE`, `GO_BUILTIN_FUNCTION`,
-`GO_BUILTIN_CONSTANT` (`true`, `false`, `nil`, `iota`), each falling back to a
-`DefaultLanguageHighlighterColors` key. Unresolved identifiers keep the lexer colour. Not
-dumb-aware.
+colour page) are GoLand's (`docs/goland-analysis/dumps/color-keys-go.txt`, same external names and page groups, pinned by the root
+`GoColorSettingsPageTest`): exported / local function and call, builtin call, struct / interface / other type spec and reference,
+package exported / local and local constant, package exported / local, local, scope (declared in an `if` / `for` / `switch` header or a
+case clause) and reassigned-in-`:=` variable, receiver apart from parameter, exported / local field, calls of func-valued variables and
+fields, `nil` as `GO_BUILTIN_VARIABLE`, doc comment references (the first word naming the declaration, resolved `[Name]` links). Each new
+key falls back onto the older base key (`GO_FUNCTION_CALL`, `GO_FIELD`, ...) so tuned schemes keep their look. `GO_SHADOWING_VARIABLE`
+(for the shadowing inspection) and `GO_SYNTAX_UPDATE` (G5) are defined, nothing colours with them yet. Unresolved identifiers keep the
+lexer colour. Not dumb-aware. `GoStringContentAnnotator` (DumbAware) colours inside literals: struct tag key / colon / value / text
+(`GoStructTags.parse`), printf verbs `GO_FORMAT_VERB` in the format argument of the calls `GoPrintfCalls` knows (falls back onto the
+valid escape, as GoLand shows them), valid / invalid escapes of interpreted strings and runes (an annotator: the lexer keeps a literal
+one token for the quote handler). Directive parts (`go:generate` comment keyword, build tags / parens / operators) are the root's `GoIdentifierAnnotator`.
 
 ### Tests
 
 `inspections.GoInspectionsTest` (17), `inspections.GoQuickFixesTest` (14),
-`inspections.GoInspectionsGorootTest` (2), `annotator.GoSemanticHighlightingTest` (2, golden
-`testData/highlighting/semantic.txt`). Fixtures: `testData/inspections/*.go` (markup with the
+`inspections.GoInspectionsGorootTest` (2), `annotator.GoSemanticHighlightingTest` (3, goldens
+`testData/highlighting/semantic.txt`, `goland.txt`), `annotator.GoStringContentRangesTest`. Fixtures: `testData/inspections/*.go` (markup with the
 checker's messages), `testData/inspections/fixes/*.go` and `*_after.go`.
 
 ### Known gaps
@@ -516,9 +612,12 @@ Editing features over the PSI; none of them talks to gopls, and only inlay hints
   `lookupFieldOrMethod`; Rename rewrites the comment leaf. `GoDocHtml` renders the resolvable ones as `psi_element://` links; `GoDocLinkHandler` opens the target's documentation.
 
 ### Inlay hints (`ide.hints`, `go-psi-ide-hints.xml`; gate `INLAY_HINTS` for the gopls set, none for the struct size)
-- Declarative providers: `go.parameter.names`, `go.literal.fields`, `go.types` (options `assign`, `range`, `literal` off, `instantiation` off), `go.constant.values`,
-  `go.struct.size` (`24 bytes, 11 padding (16 if reordered)`, 64-bit GOARCH only, not for generic or empty structs). Parameter-name heuristics follow gopls (the
-  argument says the name, a one-parameter function says it, one-letter parameters, `f(g())` with a multi-value `g` gets nothing). Types are printed with the
+- Declarative providers: `go.parameter.names` (option `return`, "Show return parameters", on), `go.literal.fields`, `go.types` (options `assign`, `range`, `literal` off, `instantiation` off), `go.constant.values`,
+  `go.struct.size` (`24 bytes, 11 padding (16 if reordered)`, 64-bit GOARCH only, not for generic or empty structs). Parameter names follow GoLand (checked line by
+  line against its dumps of the probe files, `testParameterNamesAsInTheGoLandProbe`): a hint only at a literal argument — string, number, signed number, `nil`,
+  `true`, `false` — never at identifiers, selectors, calls, composite or function literals; one-letter names are shown (`produce(n: 3)`, `Println(a...: "x")`);
+  a one-parameter function whose name says the parameter gets nothing (`SetName("x")`). With `return`, the names of named results at the literal values of
+  `return` (`return n: 0, err: nil`; nothing for unnamed results or `return f()`). Types are printed with the
   import name of the file; `:=` types come from `declarationType` and the per-body caches, call signatures from `calleeSignature` (type arguments from `partialSubst`).
 - `go.time.layout` (0.2.34, VALUES_GROUP): `t.Format("2006-01-02 15:04"/*→ 2026-03-07 15:09*/)`, the layout argument (literal or string constant) rendered with the sample Saturday 2026-03-07 15:09:08.123456789 +03:00 MSK; only when the callee resolves to package `time` (`GoTimeLayout.render`, a port of `nextStdChunk`).
 - `GoInlayHintsBenchmark` (`net/http/server.go`, 688 hints): cold ≈ 139 ms, warm ≈ 15 ms, after a body edit ≈ 24 ms (`testData/benchmark/thresholds.json`).
@@ -545,6 +644,10 @@ Git Bash takes `C:` for a host — seen live). Tests: `GoSarifTest`, `GoInspectO
 Methods of `database/sql` `DB` / `Tx` / `Conn`, sqlx and pgx v5 / pgxpool, resolved through `GoSemanticService.resolve` to the receiver type and its
 package (embedded methods resolve to the embedded type: `sqlx.DB.Query` → `database/sql`); `GoSqlDetect` for `*Query` / `*SQL` / `*Sql` raw literals.
 Injected language is the SQL dialect of the platform mapping (`GenericSQL` by default). Tests: `GoSqlInjectionTest`.
+
+### Shell Script in `//go:generate` (`ide.injection.sh.GoGenerateShellInjector`, `go-psi-ide-injection-sh.xml`, optional `com.jetbrains.sh`; no gate)
+
+The command of a `//go:generate` line (after a `-command NAME` alias: the aliased command) is Shell Script, found by id. The host is `GoGenerateCommentImpl`, the only comment that is a `PsiLanguageInjectionHost` (go-psi-core `GoASTFactory`). Tests: `GoGenerateShellInjectionTest`, core `GoCommentImplTest`.
 
 ### String injections (`ide.injection`, `go-psi-ide-injection.xml`, `go-psi-ide-injection-json.xml`; gate `SEMANTIC_COLORS`; 0.2.50)
 

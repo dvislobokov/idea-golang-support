@@ -1,0 +1,262 @@
+package io.github.golangsupport.ide.inspections
+
+import io.github.golangsupport.ide.GoSemanticIdeTestBase
+
+/** "Shadowing variable" (GoLand's `GoShadowedVar`): what is reported, what is a reuse or an idiom, the message line, both fixes. */
+class GoShadowingVariableInspectionTest : GoSemanticIdeTestBase() {
+
+    private fun doHighlight(text: String, fileName: String = "a.go") {
+        myFixture.enableInspections(GoShadowingVariableInspection())
+        myFixture.configureByText(fileName, text.trimIndent() + "\n")
+        myFixture.checkHighlighting(false, false, true)
+    }
+
+    private fun shadows(name: String, line: Int) = "Declaration of '$name' shadows declaration at line $line"
+
+    fun testShortVarInIfBodyShadowsFunctionVariable() = doHighlight(
+        """
+        package p
+
+        func load(s string) (string, error) { return s, nil }
+
+        func f(name string) (string, error) {
+        	value, err := load(name)
+        	if err != nil {
+        		return "", err
+        	}
+        	if value != "" {
+        		<weak_warning descr="${shadows("value", 6)}">value</weak_warning>, <weak_warning descr="${shadows("err", 6)}">err</weak_warning> := load(value + "x")
+        		if err != nil {
+        			return "", err
+        		}
+        		_ = value
+        	}
+        	return value, nil
+        }
+        """
+    )
+
+    fun testRangeAndForAndIfInitAndSwitchAndSelect() = doHighlight(
+        """
+        package p
+
+        func f(ch chan int) {
+        	i, n := 0, 1
+        	for <weak_warning descr="${shadows("i", 4)}">i</weak_warning> := range 3 {
+        		_ = i
+        	}
+        	for <weak_warning descr="${shadows("n", 4)}">n</weak_warning> := 0; n < 2; n++ {
+        	}
+        	if <weak_warning descr="${shadows("i", 4)}">i</weak_warning> := 2; i > 0 {
+        	}
+        	switch <weak_warning descr="${shadows("n", 4)}">n</weak_warning> := 3; n {
+        	}
+        	select {
+        	case <weak_warning descr="${shadows("i", 4)}">i</weak_warning> := <-ch:
+        		_ = i
+        	}
+        	var x any = i + n
+        	switch <weak_warning descr="${shadows("n", 4)}">n</weak_warning> := x.(type) {
+        	default:
+        		_ = n
+        	}
+        }
+        """
+    )
+
+    fun testOnlyTheFreshNameShadows() = doHighlight(
+        """
+        package p
+
+        func load() (int, error) { return 0, nil }
+
+        func f() error {
+        	x, err := load()
+        	if x > 0 {
+        		var y int
+        		y, <weak_warning descr="${shadows("err", 6)}">err</weak_warning> := load()
+        		_ = y
+        		return err
+        	}
+        	_ = x
+        	return err
+        }
+        """
+    )
+
+    fun testRedeclarationInTheSameScopeIsNotShadowing() = doHighlight(
+        """
+        package p
+
+        func load() (int, error) { return 0, nil }
+
+        func f() error {
+        	x, err := load()
+        	y, err := load()
+        	_, _ = x, y
+        	return err
+        }
+
+        func g() (n int, err error) {
+        	n, err = load()
+        	m, err := load()
+        	_ = m
+        	return
+        }
+
+        func h(v any) {
+        	switch t := v.(type) {
+        	case int:
+        		t, u := 1, 2
+        		_, _ = t, u
+        	}
+        }
+        """
+    )
+
+    fun testPackageLevelVariableAndConstant() = doHighlight(
+        """
+        package p
+
+        var counter = 0
+
+        const limit = 10
+
+        func f() int {
+        	<weak_warning descr="${shadows("counter", 3)}">counter</weak_warning> := 1
+        	var <weak_warning descr="${shadows("limit", 5)}">limit</weak_warning> = 2
+        	return counter + limit
+        }
+        """
+    )
+
+    fun testPackageLevelInAnotherFile() {
+        myFixture.addFileToProject("b.go", "package p\n\nvar shared = 1\n")
+        doHighlight(
+            """
+            package p
+
+            func f() int {
+            	<weak_warning descr="Declaration of 'shared' shadows declaration at b.go:3">shared</weak_warning> := 2
+            	return shared
+            }
+            """
+        )
+    }
+
+    fun testParameterAndReceiverShadowedInNestedScope() = doHighlight(
+        """
+        package p
+
+        type T struct{}
+
+        func (t T) m(a int) (r int) {
+        	if a > 0 {
+        		<weak_warning descr="${shadows("a", 5)}">a</weak_warning> := 1
+        		<weak_warning descr="${shadows("r", 5)}">r</weak_warning> := a
+        		<weak_warning descr="${shadows("t", 5)}">t</weak_warning> := T{}
+        		_, _ = r, t
+        	}
+        	return a
+        }
+        """
+    )
+
+    fun testClosureShadowsEnclosingFunctionVariable() = doHighlight(
+        """
+        package p
+
+        func f() {
+        	v := 1
+        	g := func() {
+        		<weak_warning descr="${shadows("v", 4)}">v</weak_warning> := 2
+        		_ = v
+        	}
+        	g()
+        	_ = v
+        }
+        """
+    )
+
+    fun testQuietCases() = doHighlight(
+        """
+        package p
+
+        import "fmt"
+
+        var global = 1
+
+        func f(items []int, v any, global2 int) {
+        	fmt.Println()
+        	_, x := 1, 2
+        	if true {
+        		_, y := 3, 4
+        		_, _ = x, y
+        	}
+        	for _, it := range items {
+        		it := it
+        		_ = it
+        	}
+        	switch v := v.(type) {
+        	default:
+        		_ = v
+        	}
+        	fmt := "shadowing an import is another inspection"
+        	_ = fmt
+        	nil := 0
+        	_ = nil
+        	other := 1
+        	_ = other
+        }
+
+        func g(global int) int { return global }
+        """
+    )
+
+    fun testReportedInTestFiles() = doHighlight(
+        """
+        package p
+
+        import "testing"
+
+        func TestX(t *testing.T) {
+        	got := 1
+        	t.Run("sub", func(t *testing.T) {
+        		<weak_warning descr="${shadows("got", 6)}">got</weak_warning> := 2
+        		_ = got
+        	})
+        	_ = got
+        }
+        """,
+        "a_test.go",
+    )
+
+    fun testNamePaintedWithShadowingVariableKey() {
+        myFixture.enableInspections(GoShadowingVariableInspection())
+        myFixture.configureByText("a.go", "package p\n\nfunc f() {\n\tv := 1\n\t{\n\t\tv := 2\n\t\t_ = v\n\t}\n\t_ = v\n}\n")
+        val info = myFixture.doHighlighting().single { it.description?.startsWith("Declaration of 'v'") == true }
+        assertEquals("GO_SHADOWING_VARIABLE", info.forcedTextAttributesKey?.externalName)
+    }
+
+    fun testNavigateFixMovesCaretToShadowedDeclaration() {
+        myFixture.enableInspections(GoShadowingVariableInspection())
+        myFixture.configureByText(
+            "a.go",
+            """
+            package p
+
+            func f() {
+            	value := 1
+            	if value > 0 {
+            		val<caret>ue := 2
+            		_ = value
+            	}
+            }
+            """.trimIndent() + "\n"
+        )
+        val offered = myFixture.availableIntentions.map { it.text }
+        assertTrue(offered.toString(), "Rename variable" in offered)
+        myFixture.launchAction(myFixture.findSingleIntention("Navigate to shadowed declaration"))
+        assertEquals(myFixture.file.text.indexOf("value := 1"), myFixture.editor.caretModel.offset)
+    }
+}

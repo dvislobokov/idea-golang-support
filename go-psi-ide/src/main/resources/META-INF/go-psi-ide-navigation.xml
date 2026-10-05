@@ -11,6 +11,8 @@
     <codeInsight.gotoSuper language="Go" implementationClass="io.github.golangsupport.ide.navigation.GoGotoSuperHandler" order="first"/>
     <codeInsight.lineMarkerProvider language="Go"
                                     implementationClass="io.github.golangsupport.ide.navigation.GoImplementationLineMarkerProvider"/>
+    <codeInsight.lineMarkerProvider language="Go"
+                                    implementationClass="io.github.golangsupport.ide.navigation.GoRecursiveCallLineMarkerProvider"/>
     <referencesSearch implementation="io.github.golangsupport.ide.usages.GoReferencesSearch"/>
     <usageTypeProvider implementation="io.github.golangsupport.ide.usages.GoUsageTypeProvider"/>
     <readWriteAccessDetector implementation="io.github.golangsupport.ide.usages.GoReadWriteAccessDetector"/>

@@ -1,11 +1,17 @@
-<!-- go-psi-ide, code vision: the "N usages" / "N implementations" hints above the package-level declarations, from the PSI
+<!-- go-psi-ide, code vision: the "N usages" / "N implementations" hints at the package-level declarations, from the PSI
      (references in the use scope, implementations from the stub indices as the gutter markers). Included by the host plugin when the feature
-     moves to the PSI (MIGRATION.md, step 8i); the tests of go-psi-ide include every go-psi-ide-*.xml. Both providers ask
+     moves to the PSI (MIGRATION.md, step 8i); the tests of go-psi-ide include every go-psi-ide-*.xml. The providers ask
      io.github.golangsupport.ide.GoIdeFeatureGate (IMPLEMENTATION_MARKERS, the group of the gutters) first and stand down when it is off.
-     The group ids are the platform's ("references", "inheritors"), so Settings | Editor | Inlay Hints | Code vision switches them too. -->
+     The group ids of usages and implementations are the platform's ("references", "inheritors"), so Settings | Editor | Inlay Hints | Code vision
+     switches them and places them (top / line end) too. The action lenses of GoLand, "Implement interface" above a type declaration and
+     "Add method" above an interface with implementations, have groups of their own (named by the group setting providers below), above the line. -->
 <idea-plugin>
   <extensions defaultExtensionNs="com.intellij">
     <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.codevision.GoUsagesCodeVisionProvider"/>
     <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.codevision.GoImplementationsCodeVisionProvider"/>
+    <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.codevision.GoImplementInterfaceCodeVisionProvider"/>
+    <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.codevision.GoAddInterfaceMethodCodeVisionProvider"/>
+    <config.codeVisionGroupSettingProvider implementation="io.github.golangsupport.ide.codevision.GoImplementInterfaceCodeVisionSettings"/>
+    <config.codeVisionGroupSettingProvider implementation="io.github.golangsupport.ide.codevision.GoAddInterfaceMethodCodeVisionSettings"/>
   </extensions>
 </idea-plugin>

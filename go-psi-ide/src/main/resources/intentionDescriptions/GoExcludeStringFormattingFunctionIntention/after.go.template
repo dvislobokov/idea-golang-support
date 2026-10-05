@@ -1,0 +1,1 @@
+log.<spot>Infof</spot>("%d items", n) // not checked any more

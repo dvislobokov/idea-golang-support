@@ -11,6 +11,7 @@ import com.intellij.codeInsight.hints.declarative.SharedBypassCollector
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.documentation.GoDocSignature
@@ -19,16 +20,21 @@ import io.github.golangsupport.lang.psi.GoConstSpec
 import io.github.golangsupport.lang.psi.GoElement
 import io.github.golangsupport.lang.psi.GoExpression
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoFunctionDeclaration
+import io.github.golangsupport.lang.psi.GoFunctionLit
 import io.github.golangsupport.lang.psi.GoIndexOrSliceExpr
 import io.github.golangsupport.lang.psi.GoKey
 import io.github.golangsupport.lang.psi.GoLiteral
 import io.github.golangsupport.lang.psi.GoLiteralValue
+import io.github.golangsupport.lang.psi.GoMethodDeclaration
 import io.github.golangsupport.lang.psi.GoParenthesesExpr
 import io.github.golangsupport.lang.psi.GoRangeClause
 import io.github.golangsupport.lang.psi.GoReferenceExpression
+import io.github.golangsupport.lang.psi.GoReturnStatement
 import io.github.golangsupport.lang.psi.GoShortVarDeclaration
 import io.github.golangsupport.lang.psi.GoStringLiteral
 import io.github.golangsupport.lang.psi.GoTypeSpec
+import io.github.golangsupport.lang.psi.GoUnaryExpr
 import io.github.golangsupport.lang.psi.GoValue
 import io.github.golangsupport.lang.psi.GoVarDefinition
 import io.github.golangsupport.project.api.GoToolchainProvider
@@ -44,7 +50,6 @@ import io.github.golangsupport.semantic.types.GoPointerType
 import io.github.golangsupport.semantic.types.GoSignatureType
 import io.github.golangsupport.semantic.types.GoSliceType
 import io.github.golangsupport.semantic.types.GoStructType
-import io.github.golangsupport.semantic.types.GoTupleType
 import io.github.golangsupport.semantic.types.GoType
 import io.github.golangsupport.semantic.types.GoTypeParamType
 import io.github.golangsupport.lang.psi.GoStructType as PsiStructType
@@ -77,27 +82,55 @@ abstract class GoHintsProvider(private val gated: Boolean = true) : InlayHintsPr
     }
 }
 
-/** `f(/*name:*/ 1)`: the names of the parameters at the arguments of a call (gopls `parameterNames`), with the rules of [GoInlayHints.parameterLabel]. */
+/**
+ * `f(/*name:*/ 1)`: the names of the parameters at the literal arguments of a call, with the rules of [GoInlayHints.parameterLabel]; with
+ * the option [RETURN] (GoLand's "Show return parameters") also the names of named results at the literal values of `return`:
+ * `return /*n:*/ 0, /*err:*/ nil`.
+ */
 class GoParameterNameHintsProvider : GoHintsProvider() {
     override fun collector(file: GoFile, editor: Editor): InlayHintsCollector = object : SharedBypassCollector {
         private val semantic = GoSemanticService.getInstance(file.project)
 
         override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
-            val call = element as? GoCallExpr ?: return
+            when (element) {
+                is GoCallExpr -> arguments(element, sink)
+                is GoReturnStatement -> sink.whenOptionEnabled(RETURN) { results(element, sink) }
+            }
+        }
+
+        private fun arguments(call: GoCallExpr, sink: InlayTreeSink) {
             val arguments = call.arguments
-            if (arguments.isEmpty()) return
+            // the signature is resolved only for a call with a literal argument: most calls have none
+            if (arguments.none(::isLiteral)) return
             val signature = semantic.calleeSignature(call) ?: return
             val params = signature.params
             if (params.isEmpty()) return
-            // `f(g())` with `g` returning several values: one argument stands for all parameters
-            if (arguments.size == 1 && params.size > 1 && (arguments[0] as? GoExpression)?.let { semantic.typeOf(it) is GoTupleType } == true) return
             val callee = calleeName(call.expression)
             val last = params.lastIndex
             for ((i, argument) in arguments.withIndex()) {
                 if (i > last) break
+                if (!isLiteral(argument)) continue
                 val variadic = signature.variadic && i == last
-                val label = GoInlayHints.parameterLabel(params[i].name, argument.text, callee, params.size, variadic) ?: continue
+                val label = GoInlayHints.parameterLabel(params[i].name, callee, params.size, variadic) ?: continue
                 inline(sink, argument.textRange.startOffset, label, relatedToPrevious = false)
+            }
+        }
+
+        /** The values of `return` against the named results of the function or literal around it; nothing for `return f()` of a tuple. */
+        private fun results(statement: GoReturnStatement, sink: InlayTreeSink) {
+            val values = statement.expressionList
+            if (values.none(::isLiteral)) return
+            val signature = when (val owner = PsiTreeUtil.getParentOfType(statement, GoFunctionLit::class.java, GoFunctionDeclaration::class.java, GoMethodDeclaration::class.java)) {
+                is GoFunctionLit -> owner.signature
+                is GoFunctionDeclaration -> owner.signature
+                is GoMethodDeclaration -> owner.signature
+                else -> null
+            } ?: return
+            val names = signature.result?.parameters?.parameterDeclarationList?.flatMap { d -> d.paramDefinitionList.map { it.name } } ?: return
+            if (names.size != values.size) return
+            for ((i, value) in values.withIndex()) {
+                if (!isLiteral(value)) continue
+                inline(sink, value.textRange.startOffset, GoInlayHints.resultLabel(names[i]) ?: continue, relatedToPrevious = false)
             }
         }
     }
@@ -107,6 +140,18 @@ class GoParameterNameHintsProvider : GoHintsProvider() {
         is GoIndexOrSliceExpr -> calleeName(callee.expression)
         is GoParenthesesExpr -> calleeName(callee.inner as? GoExpression)
         else -> null
+    }
+
+    companion object {
+        const val RETURN = "return"
+
+        /** A basic literal, a signed number, or `nil` / `true` / `false`: the arguments GoLand puts a parameter hint at (seen live, docs/goland-analysis). */
+        fun isLiteral(element: PsiElement): Boolean = when (element) {
+            is GoLiteral, is GoStringLiteral -> true
+            is GoUnaryExpr -> (element.sub != null || element.add != null) && element.expression is GoLiteral
+            is GoReferenceExpression -> element.text in GoInlayHints.LITERAL_NAMES
+            else -> false
+        }
     }
 }
 

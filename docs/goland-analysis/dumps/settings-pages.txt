@@ -1,0 +1,950 @@
+
+################ Go (go)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+             [x] Suggest parameters name in completion
+             [x] Suggest variants that require additional imports as you type
+             [ ] Indent on Enter in raw strings
+             [ ] Show documentation in parameter info
+             [ ] Detect go packages from clipboard
+             [x] Ask before sharing in Go Playground
+             When directory is renamed
+             (o) Show options
+             ( ) Rename package
+             ( ) Do not rename package
+             When package is renamed
+             (o) Show options
+             ( ) Rename directory
+             ( ) Do not rename directory
+             When file is renamed
+             (o) Show options
+             ( ) Rename corresponding test or production file
+             ( ) Do not rename corresponding test or production file
+             When JSON is pasted
+             (o) Show options
+             ( ) Convert JSON to a Go type
+             ( ) Insert JSON as-is
+             When tag is renamed
+             (o) Show options
+             ( ) Rename a tag
+             ( ) Do not rename tag
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Go | GOROOT (go.sdk)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+             <combo: GoSdkImpl{myHomeUrl='C:/Program Files/Go', myVersion='1.27.1', myMajorVersion=1.27}> of {GoSdkImpl{myHomeUrl='C:/Program Files/Go', myVersion='1.27.1', myMajorVersion=1.27} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.8.windows-amd64', myVersion='1.26.8', myMajorVersion=1.26} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.5.windows-amd64', myVersion='1.26.5', myMajorVersion=1.26} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.4.windows-amd64', myVersion='1.26.4', myMajorVersion=1.26} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.25.13.windows-amd64', myVersion='1.25.13', myMajorVersion=1.25} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.25.12.windows-amd64', myVersion='1.25.12', myMajorVersion=1.25} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.25.11.windows-amd64', myVersion='1.25.11', myMajorVersion=1.25} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.25.5.windows-amd64', myVersion='1.25.5', myMajorVersion=1.25} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.25.0.windows-amd64', myVersion='1.25.0', myMajorVersion=1.25} / GoSdkImpl{myHomeUrl='C:/Users/dvislobokov/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.22.12.windows-amd64', myVersion='1.22.12', myMajorVersion=1.22} / GoSdk.NULL}
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']
+
+################ Go | GOPATH (com.goide.configuration.GoLibrariesConfigurableProvider)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+              Global GOPATH
+              Project GOPATH
+              [x] Use GOPATH that's defined in system environment
+              [ ] Index entire GOPATH
+              Module GOPATH
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Go | Go Modules (go.vgo)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+           [x] Enable Go modules integration
+           Environment:
+           GOPROXY, GOPRIVATE, and other environment variables
+           [x] Enable vendoring support automatically
+           Download Go module dependencies:
+           <combo: Enable for all projects> of {Enable for all projects / Disable for all projects / Enable for current project, disable for other projects / Disable for current project, enable for other projects}
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']
+
+################ Go | Build Tags (com.goide.configuration.GoProjectSettingsConfigurable)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+            OS
+            Arch
+            <combo: Default (windows)> of {Default (windows) / aix / android / darwin / dragonfly / freebsd / hurd / illumos / ios / js / linux / nacl …}
+            <combo: Default (amd64)> of {Default (amd64) / 386 / amd64 / amd64p32 / arm / arm64 / arm64be / armbe / loong64 / mips / mips64 / mips64le …}
+            Cgo support
+            Compiler
+            Custom tags
+            <combo: Any> of {Any / gc / gccgo}
+            <combo: Default (Enabled)> of {Default (Enabled) / Enabled / Disabled}
+            The following options describe the target system for the editor. The IDE uses these values to define files that are used in validation, resolution, and code completion. For more information about these options, see Go Constraints documentation.
+            Space-separated list of additional tags. Can be used in the 'go build' command.
+            Experiments
+            Enter Go experiment tags as a comma-separated list (for example, 'rangefunc,loopvar').
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']
+
+################ Go | Formatting Functions (go.custom.fmt.functions)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+              Excluded Formatting Functions
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Go | Imports (go.autoimport)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+               [x] Show import popup
+               [x] Add unambiguous imports on the fly
+               [x] Optimize imports on the fly
+               Exclude from import and completion:
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']
+
+################ Go | Linters (preference.GoLinterConfigurable)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+             [x] Execute 'golangci-lint run'
+             Warnings from golangci-lint will be shown in the editor and in the 'Problems' view.
+             [x] Execute 'golangci-lint fmt'
+             Code formatting from golangci-lint will be applied. Supported only for v2.
+             Executable:
+              <combo: VersionedLinter(path=C:\Users\dvislobokov\go\bin\golangci-lint.exe, version=2.13.2)>
+             Concurrency:
+             <combo: 3> of {1 / 2 / 3 / 4 / 5 / 6 / 7 / 8 / 9 / 10 / 11 / 12}
+             <button: Configure severity…>
+             [x] Only fast linters
+             [x] Use config:
+              C:\Users\dvislobokov\idea-golang-support\build\ui-robot\goland-playground\.golangci.yml
+             <button: Edit Config…>
+             Documentation
+              <tabs: *Linters | Formatters>
+                 <table rows 114>
+    true | errcheck | Errcheck is a program for checking for unchecked errors in Go code. These unchecked errors can be critical bugs in some cases.
+    true | govet | Vet examines Go source code and reports suspicious constructs. It is roughly the same as 'go vet' and uses its passes.
+    true | ineffassign | Detects when assignments to existing variables are not used.
+    true | staticcheck | It's the set of rules from staticcheck.
+    true | unused | Checks Go code for unused constants, variables, functions and types.
+    false | arangolint | Opinionated best practices for arangodb client.
+    false | asciicheck | Checks that all code identifiers does not have non-ASCII symbols in the name.
+    false | bidichk | Checks for dangerous unicode character sequences.
+    false | bodyclose | Checks whether HTTP response body is closed successfully.
+    false | canonicalheader | Canonicalheader checks whether net/http.Header uses canonical header.
+    false | clickhouselint | Detects common mistakes with the ClickHouse native Go driver API.
+    false | containedctx | Containedctx is a linter that detects struct contained context.Context field.
+    false | contextcheck | Check whether the function uses a non-inherited context.
+    false | copyloopvar | A linter detects places where loop variables are copied.
+    false | cyclop | Checks function and package cyclomatic complexity.
+    false | decorder | Check declaration order and count of types, constants, variables and functions.
+    false | depguard | Go linter that checks if package imports are in a list of acceptable packages.
+    false | dogsled | Checks assignments with too many blank identifiers (e.g. x, _, _, _, := f()).
+    false | dupl | Detects duplicate fragments of code.
+    false | dupword | Checks for duplicate words in the source code.
+    false | durationcheck | Check for two durations multiplied together.
+    false | embeddedstructfieldcheck | Embedded types should be at the top of the field list of a struct, and there must be an empty line separating embedded fields from regular fields.
+    false | err113 | Check errors handling expressions.
+    false | errchkjson | Checks types passed to the json encoding functions. Reports unsupported types and reports occurrences where the check for the returned error can be omitted.
+    false | errname | Checks that sentinel errors are prefixed with the `Err` and error types are suffixed with the `Error`.
+    false | errorlint | Find code that can cause problems with the error wrapping scheme introduced in Go 1.13.
+    false | exhaustive | Check exhaustiveness of enum switch statements.
+    false | exhaustruct_v5 | Checks if all structure fields are initialized.
+    false | exptostd | Detects functions from golang.org/x/exp/ that can be replaced by std functions.
+    false | fatcontext | Detects nested contexts in loops and function literals.
+    false | forbidigo | Forbids identifiers.
+    false | forcetypeassert | Find forced type assertions.
+    false | funcorder | Checks the order of functions, methods, and constructors.
+    false | funlen | Checks for long functions.
+    false | ginkgolinter | Enforces standards of using ginkgo and gomega.
+    false | gocheckcompilerdirectives | Checks that go compiler directive comments (//go:) are valid.
+    false | gochecknoglobals | Check that no global variables exist.
+    false | gochecknoinits | Checks that no init functions are present in Go code.
+    false | gochecksumtype | Run exhaustiveness checks on Go "sum types".
+    false | gocognit | Computes and checks the cognitive complexity of functions.
+    false | goconst | Finds repeated strings that could be replaced by a constant.
+    false | gocritic | Provides diagnostics that check for bugs, performance and style issues.
+    false | gocyclo | Computes and checks the cyclomatic complexity of functions.
+    false | godoclint | Checks Golang's documentation practice (godoc).
+    false | godot | Check if comments end in a period.
+    false | godox | Detects usage of FIXME, TODO and other keywords inside comments.
+    false | goheader | Check if file header matches to pattern.
+    false | gomoddirectives | Manage the use of 'replace', 'retract', and 'excludes' directives in go.mod.
+    false | gomodguard_v2 | Allow and blocklist linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations.
+    false | goprintffuncname | Checks that printf-like functions are named with `f` at the end.
+    false | gosec | Inspects source code for security problems.
+    false | gosmopolitan | Report certain i18n/l10n anti-patterns in your Go codebase.
+    false | grouper | Analyze expression groups.
+    false | iface | Detect the incorrect use of interfaces, helping developers avoid interface pollution.
+    false | importas | Enforces consistent import aliases.
+    false | inamedparam | Reports interfaces with unnamed method parameters.
+    false | interfacebloat | A linter that checks the number of methods inside an interface.
+    false | intrange | Intrange is a linter to find places where for loops could make use of an integer range.
+    false | iotamixing | Checks if iotas are being used in const blocks with other non-iota declarations.
+    false | ireturn | Accept Interfaces, Return Concrete Types.
+    false | lll | Reports long lines.
+    false | loggercheck | Checks key value pairs for common logger libraries (kitlog,klog,logr,slog,zap).
+    false | maintidx | Maintidx measures the maintainability index of each function.
+    false | makezero | Find slice declarations with non-zero initial length.
+    false | mirror | Reports wrong mirror patterns of bytes/strings usage.
+    false | misspell | Finds commonly misspelled English words.
+    false | mnd | An analyzer to detect magic numbers.
+    false | modernize | A suite of analyzers that suggest simplifications to Go code, using modern language and library features.
+    false | musttag | Enforce field tags in (un)marshaled structs.
+    false | nakedret | Checks that functions with naked returns are not longer than a maximum size (can be zero).
+    false | nestif | Reports deeply nested if statements.
+    false | nilerr | Find the code that returns nil even if it checks that the error is not nil.
+    false | nilnesserr | Reports constructs that checks for err != nil, but returns a different nil value error.
+    false | nilnil | Checks that there is no simultaneous return of `nil` error and an invalid value.
+    false | nlreturn | Checks for a new line before return and branch statements to increase code clarity.
+    false | noctx | Detects function and method with missing usage of context.Context.
+    false | noinlineerr | Disallows inline error handling (`if err := ...; err != nil {`).
+    false | nolintlint | Reports ill-formed or insufficient nolint directives.
+    false | nonamedreturns | Reports all named returns.
+    false | nosprintfhostport | Checks for misuse of Sprintf to construct a host with port in a URL.
+    false | paralleltest | Detects missing usage of t.Parallel() method in your Go test.
+    false | perfsprint | Checks that fmt.Sprintf can be replaced with a faster alternative.
+    false | prealloc | Find slice declarations that could potentially be pre-allocated.
+    false | predeclared | Find code that shadows one of Go's predeclared identifiers.
+    false | promlinter | Check Prometheus metrics naming via promlint.
+    false | protogetter | Reports direct reads from proto message fields when getters should be used.
+    false | reassign | Checks that package variables are not reassigned.
+    false | recvcheck | Checks for receiver type consistency.
+    false | revive | Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint.
+    false | rowserrcheck | Checks whether Rows.Err of rows is checked successfully.
+    false | sloglint | Ensures consistent code style when using log/slog.
+    false | spancheck | Checks for mistakes with OpenTelemetry/Census spans.
+    false | sqlclosecheck | Checks that sql.Rows, sql.Stmt, sqlx.NamedStmt, pgx.Query are closed.
+    false | tagalign | Check that struct tags are well aligned.
+    false | tagliatelle | Checks the struct tags.
+    false | testableexamples | Linter checks if examples are testable (have an expected output).
+    false | testifylint | Checks usage of github.com/stretchr/testify.
+    false | testpackage | Linter that makes you use a separate _test package.
+    false | thelper | Thelper detects tests helpers which do not start with the t.Helper() method.
+    false | tparallel | Tparallel detects inappropriate usage of t.Parallel() method in your Go test codes.
+    false | unconvert | Remove unnecessary type conversions.
+    false | unparam | Reports unused function parameters.
+    false | unqueryvet | Detects SELECT * in SQL queries and SQL builders, preventing performance issues and encouraging explicit column selection.
+    false | usestdlibvars | A linter that detect the possibility to use variables/constants from the Go standard library.
+    false | usetesting | Reports uses of functions with replacement inside the testing package.
+    false | varnamelen | Checks that the length of a variable's name matches its scope.
+    false | wastedassign | Finds wasted assignment statements.
+    false | whitespace | Whitespace is a linter that checks for unnecessary newlines at the start and end of functions, if, for, etc.
+    false | wrapcheck | Checks that errors returned from external packages are wrapped.
+    false | wsl_v5 | Add or remove empty lines.
+    false | zerologlint | Detects the wrong usage of `zerolog` that a user forgets to dispatch with `Send` or `Msg`.
+    false | exhaustruct | [DEPRECATED] Checks if all structure fields are initialized.
+    false | gomodguard | [DEPRECATED] Allow and blocklist linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations.
+    false | wsl | [DEPRECATED] Add or remove empty lines.
+                Linters
+                Formatters
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']
+
+################ Editor | Inlay Hints (inlay.hints)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+               <tree rows 7>
+    com.intellij.codeInsight.codeVision.settings.CodeVisionGlobalSettingsProvider@7e8950b2
+    PARAMETERS_GROUP
+    TYPES_GROUP
+    VALUES_GROUP
+    METHOD_CHAINS_GROUP
+    URL_PATH_GROUP
+    OTHER_GROUP
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']
+
+################ Editor | General | Code Completion (editor.preferences.completion)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+             Provides code suggestions while typing, displayed either in a popup or inline in the editor
+             <button: Popup>
+             <button: Inline>
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Editor | General | Auto Import (editor.preferences.import)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+              XML
+             [x] Show auto-import tooltip
+              TypeScript / JavaScript
+             [x] Add JavaScript imports automatically
+             Find more configuration options in Code Style
+             [x] On code completion
+             [x] With auto-import tooltip
+             [x] Add TypeScript imports automatically
+             Find more configuration options in Code Style
+             [x] On code completion
+             [x] With auto-import tooltip
+             [ ] Unambiguous imports on the fly
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Editor | General | Smart Keys (editor.preferences.smartKeys)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+             [x] Home moves caret to first non-whitespace character
+             [x] End on blank line moves caret to indent position
+             [x] Insert paired brackets (), [], {},
+             [x] Insert pair quote
+             [x] Reformat block on typing '}'
+             [ ] Use "CamelHumps" words
+             [x] Honor "CamelHumps" words settings when selecting on double click
+             [x] Surround selection on typing quote or brace
+             [x] Add multiple carets on double Ctrl with arrow keys
+             [x] Jump outside closing bracket/quote with Tab when typing
+              Enter
+             [x] Smart indent
+             [x] Insert pair '}'
+             [x] Close block comment
+             [x] Insert documentation comment stub
+             Unindent on Backspace:
+             <combo: AUTOINDENT> of {OFF / AUTOINDENT / INDENT}
+             Reformat on paste:
+             <combo: 3> of {1 / 2 / 3 / 4}
+             [ ] Reformat again to remove custom line breaks
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']
+
+################ Editor | General | Postfix Completion (reference.settingsdialog.IDE.editor.postfix.templates)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+               [x] Enable postfix completion
+               Expand templates with
+               <combo: > of { /  / }
+                   <tree rows 86>
+    TypeScript
+      cast
+    JavaScript
+      !
+      arg
+      await
+      const
+      destruct
+      destructAll
+      dforof
+      else
+      fori
+      forin
+      forof
+      forr
+      if
+      instanceof
+      itin
+      let
+      log
+      not
+      notnull
+      null
+      par
+      return
+      switch
+      throw
+      typeof
+      typeofif
+      undef
+      var
+    Go
+      !
+      &
+      *
+      aappend
+      append
+      appendAssign
+      as
+      cap
+      close
+      complex
+      copy
+      d
+      delete
+      dereference
+      else
+      for
+      forr
+      if
+      imag
+      is
+      len
+      nil
+      nil
+      nn
+      nn
+      not
+      notnil
+      notnil
+      p
+      panic
+      par
+      parseFloat
+      parseInt
+      pointer
+      print
+      println
+      real
+      remove
+      reterr
+      return
+      rr
+      sort
+      sort
+      sort
+      sort
+      sort
+      var
+      varCheckError
+    SQL
+      afrom
+      cast
+      cfrom
+      from
+      join
+                  You have selected a postfix completion language group.By clicking the checkbox, you can enable or disable all postfix templates for this language.To show the details of a particular postfix template select it inside the group.
+                   Before:
+                         Sample code for the selected template will be shown here. A flashing rectangle shows where the template can be used.
+                   After:
+                         The result of the Postfix completion will be shown here.
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Editor | General | Gutter Icons (editor.preferences.gutterIcons)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+           [x] Show gutter icons
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Editor | General | Code Folding (editor.preferences.folding)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+             [x] Show code folding arrows
+             <combo: true> of {false / true}
+             [ ] Show bottom arrows
+             Fold by default:
+              General
+             [x] File header
+             [x] Imports
+             [ ] Documentation comments
+             [ ] Method bodies
+             [ ] Custom folding regions
+              Go
+             [x] One-line 'if' blocks for error handling
+             [x] One-line functions with a single 'return'
+             [x] One-line case clauses
+             [x] Empty functions
+             [x] Empty struct or interface type definitions
+             [ ] Formatted strings
+              JavaScript
+             [ ] One-line functions in JavaScript and TypeScript
+             [ ] Object literals
+             [ ] Array literals
+             [ ] XML literals
+              JSON
+             [x] Show key count in folded JSON
+             [ ] Show the first key in folded JSON
+             Always show the first key in a folded JSON object. Otherwise, &quot;id&quot; or &quot;name&quot; keys will be shown if present.
+              Kubernetes
+             [x] Value references in Helm templates
+             [x] EnvVar definitions in YAML files
+             [x] ExecAction definitions in YAML files
+              Markdown
+             [x] Collapse front matter
+             [x] Collapse links
+             [ ] Collapse tables
+             [ ] Collapse code fences
+             [x] Collapse table of contents
+              SQL
+             [ ] Put underscores inside numeric literals (6-digit or longer)
+              XML
+             [ ] XML tags
+             [x] HTML 'style' attribute
+             [x] XML entities
+             [x] Data URIs
+              YAML
+             [x] Limit folded keys and values to
+             <field: 20>
+             characters
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Editor | Intentions (preferences.intentionPowerPack)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+              <tree rows 355>
+    CSS
+      Apply width and height of background image
+      Change color
+      Convert color to #-hex
+      Convert color to hsl()
+      Convert color to hwb()
+      Convert color to lch()
+      Convert color to oklch()
+      Convert color to rgb()
+      Create selector
+      Expand shorthand property
+      Extract image
+      Extract inline CSS
+      Extract ruleset
+      Replace quotes
+      Replace var() with its fallback value
+      Replace with color name
+    Database
+      Run query in console
+    Dev Containers
+      Add currently modified settings from IDE
+    Docker
+      Pull Docker image
+    EditorConfig
+      Add declaration part
+      Invert option value
+    Flow JS
+      Specify variable type explicitly
+    GitLab CI
+      CD
+        Switch shell script injection
+    Go
+      Add dot import alias
+      Add format string argument
+      Add import alias
+      Add key to tags
+      Add method to interface and all its implementations
+      Associate file extension with Go template
+      Change field name style in tags
+      Convert to short var declaration
+      Convert to var declaration
+      Exclude string formatting function
+      Expand signature types
+      Export
+      Fill all fields
+      Fill all fields recursively
+      Fill fields…
+      Fill paragraph
+      Flip binary operator
+      Generate constructor
+      Generate getter
+      Generate getter and setter
+      Generate method
+      Generate setter
+      Generate struct fields from JSON
+      Generate type from JSON
+      Go to implementations
+      Go to interface
+      Implement interface
+      Invert if
+      Join concatenated string literals
+      Mark as string formatting function
+      Migrate function parameter to method receiver
+      Move field assignment to struct initialization
+      Negate expression
+      Negate expression recursively
+      Negate topmost expression
+      Negate topmost expression recursively
+      Remove dot import alias
+      Remove keys from struct literal
+      Remove method from interface and all its implementations
+      Replace 'if' with 'switch'
+      Reuse signature types
+      Run go generate on comment
+      Run go generate on file
+      Run go generate on package
+      Specify dot type
+      Specify type explicitly
+      Update key value in tags
+      Declarations
+        Add parens to declaration
+        Merge all declarations
+        Merge declaration up
+        Merge declaration up via comma
+        Remove parens from declaration
+        Split all declarations
+        Split declarations by comma
+        Split declarations into two groups
+    Go modules
+      Merge a group of directives
+      Merge all directives
+      Merge directive up
+      Update dependencies…
+    HTML
+      Convert entity
+      Update image size
+    HTTP Client
+      Acquire or refresh Auth token
+      Add GraphQL JSON variables block
+      Clear browser cookies
+      Convert to cURL and copy to clipboard
+      Force acquire Auth token
+      Generate request in HTTP Client
+      Move HTTP Requests
+      Put parameters on one line
+      Put parameters on separate lines
+      Set value for secured value
+      Switch environment
+    JavaScript
+      Convert 'for-in' to 'forEach' call
+      Convert anonymous function to named function
+      Convert indexed 'for' to 'forEach' call
+      Convert parameters to object
+      Convert parameters to object and introduce interface
+      Convert to function expression
+      Edit values of object literal properties
+      Infer parameter types from usages
+      Install @types for the package
+      Introduce local variable
+      Join subsequent variable declarations
+      Remove quotes from property names
+      Replace with indexer access
+      Replace with property access
+      Split declarations
+      Wrap property names in quotes
+      Boolean
+        De Morgan's laws
+        Flip comparison
+        Flip conjunction operands
+        Negate comparison
+        Remove boolean equality
+      Comments
+        Move comment to separate line
+        Replace with JSDoc comment
+        Replace with a multiline comment
+        Replace with a single-line comment
+      Conditional Operator
+        Flip 'if'
+        Flip conditional
+        Replace 'if...else' with conditional
+        Replace conditional with 'if...else'
+      Control Flow
+        Add braces
+        Merge 'else-if'
+        Merge equivalent 'if' statements to '||' condition
+        Merge nested 'if' statements to '&&' condition
+        Merge parallel 'if' statements
+        Remove braces
+        Replace 'if' with 'switch'
+        Replace 'switch' with 'if'
+        Split '&&' condition to nested 'if' statements
+        Split 'else-if'
+        Split '||' condition to equivalent 'if' statements
+        Unwrap 'else'
+      Declaration
+        Split declaration and initialization
+        Split declaration and move to scope start
+      ECMAScript 6
+        Add default export
+        Add export
+        Change ES6 import path
+        Convert arrow function to anonymous function
+        Convert default export to named
+        Convert function and its member declarations to class
+        Convert named export to default export
+        Convert template string to use visible line separators
+        Convert to async function
+        Convert to multi-line string template
+        Create derived class / Implement interface
+        Create getter
+        Create getter and setter
+        Create setter
+        Declare explicit class fields
+        Expand optional chaining or nullish coalescing to explicit checks
+        Generate destructuring pattern
+        Initialize new fields from parameters
+        Insert template string argument
+        Introduce object or array destructuring
+        Iterate with 'for..of'
+        Make 'public'
+        Make private using '#'
+        Move to a file with matching name
+        Propagate to destructuring declaration
+        Remove export
+        Remove numeric separators
+        Rename file to match type name
+        Replace 'for..of' with indexed 'for' loop
+        Replace 'forEach' with 'for..of' loop
+        Replace 'forEach' with indexed 'for' loop
+        Replace 'map' array call with 'for..of' loop
+        Replace destructuring with property and index access
+        Replace nested calls with pipeline expression
+        Replace pipe expression with nested calls
+        Replace with 'await Promise.all'
+        Replace with array destructuring
+        Replace with destructuring and short-hand properties
+        Replace with object destructuring
+        Separate digits
+        Use optional chaining or nullish coalescing
+      JSX
+        Unwrap attribute value
+        Wrap attribute value with {}
+      Language Injection
+        Annotate injection with comment
+        Disable formatting for injected content
+      Numbers
+        Convert to binary
+        Convert to decimal
+        Convert to hexadecimal
+        Convert to octal
+        Flip operands of an arithmetic operation
+      Other
+        Compute constant value
+        Compute constant value of sub-expression
+        Convert to operator assignment
+        Extract increment
+        Replace double-quoted string with single-quoted string
+        Replace single-quoted string with double-quoted string
+        Sort properties alphabetically
+      Shift Operation
+        Replace multiply with shift
+        Replace shift with multiply
+    JSON
+      Evaluate JSONPath Expression
+      Missing optional properties
+      Sort properties alphabetically
+    Kubernetes
+      Convert Helm repository URL to alias
+      Convert Helm repository alias to URL
+      Convert List to multi-document YAML
+      Convert multi-document YAML to List
+      Mark the file as a non-Kubernetes file
+      Update Helm chart dependencies
+      Update repository
+      Use this Custom Resource Definition as a validation schema
+    Language injection
+      Edit injected fragment
+      Edit injection settings
+      Inject language or reference
+      Uninject language or reference
+    LightEdit mode
+      Open file in project…
+    LSP
+      Apply code action
+    Markdown
+      Configure image
+      Fix cell alignment
+      Hide problems in code fences
+      Insert column
+      Reformat table
+      Remove column
+      Remove row
+      Set column alignment
+    Microservices
+      Open in web browser
+    Natural languages
+      Accept all writing suggestions…
+      Rephrase
+      Translate with Cloud
+    OpenAPI specifications
+      Extract model declaration
+    Other
+      Choose template data language
+      Convert absolute path to relative
+      Convert relative path to absolute
+      Create new scratch file from selection
+      Flip comma
+      Put elements on multiple lines
+      Put elements on one line
+    Qodana configuration
+      Qodana configuration
+    React
+      Convert to class component
+      Convert to function component
+    RegExp
+      Check RegExp
+      Explain regular expression
+      Flip elements
+    Shell script
+      Explain shell
+      Rename all occurrences
+    SQL
+      Add GROUP BY column to SELECT list
+      Convert to subquery
+      Expand column list
+      Extract subquery as CTE
+      Flip expression operands
+      Inject by Type
+      Inline CTE
+      Inline table alias
+      Introduce table alias
+      Merge INSERT statements
+      Preview delete
+      Preview update
+      Qualify identifier
+      Quote identifier
+      Remove column from INSERT statement
+      Replace BETWEEN expression with comparisons
+      Replace DISTINCT with GROUP BY
+      Replace GROUP BY with DISTINCT
+      Replace IN expression with equality checks
+      Replace NATURAL JOIN with ON clause
+      Replace NATURAL JOIN with USING clause
+      Replace ON with NATURAL JOIN
+      Replace ON with USING
+      Replace USING with NATURAL JOIN
+      Replace USING with ON
+      Replace column name with an ordinal number
+      Replace column number with a name
+      Replace comparison with BETWEEN expression
+      Replace equality checks with IN expression
+      Split INSERT statement
+      Split string literal
+      Store table relation
+      Unqualify identifier
+      Unquote identifier
+    Terraform template
+      Possible template file
+    TypeScript
+      Add enum values
+      Add string enum values
+      Convert field to parameter property
+      Convert import require to import from
+      Convert parameter property to field
+      Convert to parameter properties
+      Convert type alias to enum
+      Convert type alias to interface
+      Disable coloring of narrowed types
+      Generate reference path comment
+      Implement in derived classes
+      Make 'private'
+      Make 'protected'
+    XML
+      Add 'xsi:schemaLocation' attribute
+      Choose color
+      Collapse empty tag
+      Convert CDATA to text
+      Convert attribute to child tag
+      Convert tag to attribute
+      Convert text to CDATA
+      Expand empty tag
+      Fetch external resource
+      Insert namespace prefix
+      Manually set up external resource
+      Merge tags
+      Rearrange tag attributes
+      Remove attribute
+      Remove tag (preserves children)
+      Reset to default namespace
+      Split current tag
+    YAML
+      Expand all collections inside
+      Expand collection
+      Inline collection
+      Missing optional properties
+              You have selected the CSS intention group.By clicking the checkbox, you can enable or disable all intentions in this group.To show the details of a particular intention, select it inside the group.
+              Before:
+                    Sample code for the selected intention will be shown here. A flashing rectangle shows where the intention can be used.
+              After:
+                    The result of the intention will be shown here.
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Tools | Actions on Save (actions.on.save)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+             <table rows 9>
+    com.intellij.codeInsight.actions.onSave.FormatOnSaveActionInfo@7fc54129 | com.intellij.codeInsight.actions.onSave.FormatOnSaveActionInfo@7fc54129
+    com.intellij.codeInsight.actions.onSave.OptimizeImportsOnSaveActionInfo@6314a30f | com.intellij.codeInsight.actions.onSave.OptimizeImportsOnSaveActionInfo@6314a30f
+    com.intellij.codeInsight.actions.onSave.RearrangeCodeOnSaveActionInfo@5d0a0656 | com.intellij.codeInsight.actions.onSave.RearrangeCodeOnSaveActionInfo@5d0a0656
+    com.intellij.codeInsight.actions.onSave.CodeCleanupOnSaveActionInfo@4e591e11 | com.intellij.codeInsight.actions.onSave.CodeCleanupOnSaveActionInfo@4e591e11
+    com.maddyhome.idea.copyright.actions.CopyrightOnSaveInfoProvider$1@9af9736 | com.maddyhome.idea.copyright.actions.CopyrightOnSaveInfoProvider$1@9af9736
+    com.intellij.stylelint.onSave.StylelintOnSaveInfo@49a18e3 | com.intellij.stylelint.onSave.StylelintOnSaveInfo@49a18e3
+    com.intellij.lang.javascript.linter.eslint.EslintConfigurable$EsLintOnSaveActionInfo@12d9bdd7 | com.intellij.lang.javascript.linter.eslint.EslintConfigurable$EsLintOnSaveActionInfo@12d9bdd7
+    com.intellij.plugins.watcher.config.NoFileWatchersOnSaveInfo@1476900b | com.intellij.plugins.watcher.config.NoFileWatchersOnSaveInfo@1476900b
+    com.jetbrains.plugins.webDeployment.ui.UploadOnSaveActionInfo@6115b394 | com.jetbrains.plugins.webDeployment.ui.UploadOnSaveActionInfo@6115b394
+           <button: Configure autosave options…>
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']
+
+################ Build, Execution, Deployment | Debugger | Data Views | Go (dlv.dataViews)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+             Default integer format:
+             <combo: Decimal> of {Binary / Decimal / Hex}
+             [x] Show types
+             [x] Show pointer addresses
+             [ ] Enable String() view
+             [x] Show unreadable variables
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Build, Execution, Deployment | Profilers | Go Profiler: Applications (go.profiler.settings)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+              General
+             Default profile directory:
+              <field: C:\Users\dvislobokov\GoLandProfiles>
+             [x] Show notification when profiling results may be outdated
+              Profile Rates
+             Rate changes require profile session restart to take effect.
+             Memory profile rate:
+             <field: 512>
+             <combo: KB> of {bytes / KB / MB}
+             Block profile rate:
+             <field: 10000>
+             nanoseconds
+             Mutex profile fraction:
+             <field: 10>
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+
+################ Editor | Color Scheme | Go (reference.settingsdialog.IDE.editor.colors.com.goide.highlighting.GoColorsAndFontsPage)
+dialog: Settings – goland-playground
+   Settings – goland-playground
+                Scheme:
+                 <combo: com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@75edcacb> of {com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@75edcacb / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@3c6bee5 / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@6a3b7042 / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@4556fa9a / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@73b75b78 / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@45b0f27d / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@743823e9 / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@64885de / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@4fed62f4 / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@d0c526e / com.intellij.application.options.schemes.SchemesCombo$MySchemeListItem@389e0f4d}
+                 <button: Change IDE Theme…>
+                 <tree rows 10>
+    Bad character
+    Braces and operators
+    Comments
+    Declarations
+    Identifier
+    Keyword
+    Number
+    References
+    Semantic highlighting
+    String
+                 /* * Go highlight sample */ //go:build (linux || windows) && arm // +build linux,arm windows,arm // Package main package main import "fmt" import alias "fmt" //go:generate go tool yacc -o gopher.go -p parser gopher.y /* Semantic highlighting: Generated spectrum to pick colors for local variables and
+      <button: OK>
+      <button: Cancel>
+      <button: Apply>
+
+robot: nothing matches //div[@class='MyDialog']

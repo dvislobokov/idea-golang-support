@@ -1,0 +1,96 @@
+file analysis.go
+##### code vision
+  20: type Level int  ==> Implement interface [Implement interface]
+  42: type Base struct {  ==> Implement interface [Implement interface]
+  51: type Circle struct {  ==> Implement interface [Implement interface]
+  62: type Square struct {  ==> Implement interface [Implement interface]
+  85: type Set[K comparable] struct {  ==> Implement interface [Implement interface]
+  220: type Holder struct {  ==> Implement interface [Implement interface]
+##### code vision at line end
+  17: var selfSource string  ==> 1 usage [go.references]
+  20: type Level int  ==> 3 usages [go.references]
+  23: Debug Level = iota  ==> no usages [go.references]
+  24: Info  ==> no usages [go.references]
+  25: Warn  ==> no usages [go.references]
+  29: const MaxItems = 10  ==> 1 usage [go.references]
+  31: const minItems = 1  ==> 1 usage [go.references]
+  33: var ErrNotFound = errors.New("probe: not found")  ==> 2 usages [go.references]
+  36: type Shape interface {  ==> 6 usages [go.references]  |  2 implementations [go.inheritors]
+  37: Area() float64  ==> 2 implementations [go.inheritors]
+  38: Name() string  ==> 2 implementations [go.inheritors]
+  42: type Base struct {  ==> 4 usages [go.references]
+  48: func (b Base) Describe() string { return fmt.Sprintf("#%d", b.ID) }  ==> 1 usage [go.references]
+  51: type Circle struct {  ==> 10 usages [go.references]
+  57: func (c Circle) Area() float64 { return 3.14 * c.Radius * c.Radius }  ==> no usages [go.references]
+  59: func (c Circle) Name() string { return c.Label }  ==> 2 usages [go.references]
+  62: type Square struct {  ==> 6 usages [go.references]
+  66: func (s *Square) Area() float64 { return s.Side * s.Side }  ==> no usages [go.references]
+  68: func (s *Square) Name() string { return "square" }  ==> 2 usages [go.references]
+  71: type Number interface {  ==> 3 usages [go.references]
+  76: func Sum[T Number](xs []T) T {  ==> 3 usages [go.references]
+  85: type Set[K comparable] struct {  ==> 4 usages [go.references]
+  89: func (s *Set[K]) Add(k K) {  ==> 1 usage [go.references]
+  96: func (s *Set[K]) Len() int { return len(s.items) }  ==> no usages [go.references]
+  99: func Factorial(n int) int {  ==> 6 usages [go.references]
+  106: func counter() func() int {  ==> 1 usage [go.references]
+  114: func produce(n int) <-chan int {  ==> 1 usage [go.references]
+  125: func classify(x any) string {  ==> 1 usage [go.references]
+  138: func find(grid [][]int, target int) (int, int, error) {  ==> 1 usage [go.references]
+  153: func load(name string) (string, error) {  ==> 3 usages [go.references]
+  161: func Analysis(name string, timeout time.Duration) (string, error) {  ==> 1 usage [go.references]
+  200: func Probes(c Circle, sq *Square, shapes []Shape, names []string, ch c  ==> 1 usage [go.references]
+  211: func Returns(name string) (*Circle, int, error) {  ==> 1 usage [go.references]
+  220: type Holder struct {  ==> 1 usage [go.references]
+##### gutter icons
+  38: Name() string  ==> tooltip=Go to Implementations Click or press Ctrl+Alt+B to navigate acc=<html>Go to Implementations<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+Alt+B to navigate</font></div></html> icon=implementedMethod.svg) click=Go to Implementations
+  36: type Shape interface {  ==> tooltip=Go to Implementations Click or press Ctrl+Alt+B to navigate acc=<html>Go to Implementations<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+Alt+B to navigate</font></div></html> icon=implementedMethod.svg) click=Go to Implementations
+  14: //go:generate stringer -type=Level  ==> tooltip=Run go generate on comment acc=Run go generate on comment icon=run.svg)
+  37: Area() float64  ==> tooltip=Go to Implementations Click or press Ctrl+Alt+B to navigate acc=<html>Go to Implementations<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+Alt+B to navigate</font></div></html> icon=implementedMethod.svg) click=Go to Implementations
+  57: func (c Circle) Area() float64 { return 3.14 * c.Radius * c.Radius }  ==> tooltip=Go to Method Specifications Click or press Ctrl+U to navigate acc=<html>Go to Method Specifications<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Method Specifications
+  51: type Circle struct {  ==> tooltip=Go to Interfaces Click or press Ctrl+U to navigate acc=<html>Go to Interfaces<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Interfaces
+  62: type Square struct {  ==> tooltip=Go to Interfaces Click or press Ctrl+U to navigate acc=<html>Go to Interfaces<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Interfaces
+  59: func (c Circle) Name() string { return c.Label }  ==> tooltip=Go to Method Specifications Click or press Ctrl+U to navigate acc=<html>Go to Method Specifications<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Method Specifications
+  68: func (s *Square) Name() string { return "square" }  ==> tooltip=Go to Method Specifications Click or press Ctrl+U to navigate acc=<html>Go to Method Specifications<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Method Specifications
+  66: func (s *Square) Area() float64 { return s.Side * s.Side }  ==> tooltip=Go to Method Specifications Click or press Ctrl+U to navigate acc=<html>Go to Method Specifications<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Method Specifications
+  103: return n * Factorial(n-1)  ==> tooltip=Recursive call acc=Recursive call icon=recursiveMethod.svg)
+
+file analysis_test.go
+##### code vision
+##### code vision at line end
+##### gutter icons
+  22: {"empty", nil, 0},  ==> tooltip=Run Test&nbsp;&nbsp; Ctrl+Shift+F10 acc=<html>Run Test&nbsp;&nbsp;<font color='#9fa2a8'>Ctrl+Shift+F10</font></html> icon=run.svg)
+  8: func TestFactorial(t *testing.T) {  ==> tooltip=Run Test&nbsp;&nbsp; Ctrl+Shift+F10 acc=<html>Run Test&nbsp;&nbsp;<font color='#9fa2a8'>Ctrl+Shift+F10</font></html> icon=run.svg)
+  1: package probe  ==> tooltip=Run Test&nbsp;&nbsp; Ctrl+Shift+F10 acc=<html>Run Test&nbsp;&nbsp;<font color='#9fa2a8'>Ctrl+Shift+F10</font></html> icon=rerun.svg)
+  16: func TestSum(t *testing.T) {  ==> tooltip=Run Test&nbsp;&nbsp; Ctrl+Shift+F10 acc=<html>Run Test&nbsp;&nbsp;<font color='#9fa2a8'>Ctrl+Shift+F10</font></html> icon=run.svg)
+  34: func BenchmarkFactorial(b *testing.B) {  ==> tooltip=Run Test&nbsp;&nbsp; Ctrl+Shift+F10 acc=<html>Run Test&nbsp;&nbsp;<font color='#9fa2a8'>Ctrl+Shift+F10</font></html> icon=run.svg)
+  23: {"two", []int{1, 2}, 3},  ==> tooltip=Run Test&nbsp;&nbsp; Ctrl+Shift+F10 acc=<html>Run Test&nbsp;&nbsp;<font color='#9fa2a8'>Ctrl+Shift+F10</font></html> icon=run.svg)
+  40: func ExampleFactorial() {  ==> tooltip=Run Test&nbsp;&nbsp; Ctrl+Shift+F10 acc=<html>Run Test&nbsp;&nbsp;<font color='#9fa2a8'>Ctrl+Shift+F10</font></html> icon=run.svg)
+  45: func FuzzLoad(f *testing.F) {  ==> tooltip=Run Test&nbsp;&nbsp; Ctrl+Shift+F10 acc=<html>Run Test&nbsp;&nbsp;<font color='#9fa2a8'>Ctrl+Shift+F10</font></html> icon=run.svg)
+
+file order.go
+##### code vision
+  12: type (  ==> Implement interface [Implement interface]
+  27: type Order struct {  ==> Implement interface [Implement interface]
+  33: type Flags struct {  ==> Implement interface [Implement interface]
+  78: type Discounted struct {  ==> Implement interface [Implement interface]
+##### code vision at line end
+  10: var ErrEmpty = errors.New("store: empty order")  ==> 3 usages [go.references]
+  14: Item struct {  ==> 8 usages [go.references]
+  21: Priced interface {  ==> 3 usages [go.references]  |  2 implementations [go.inheritors]
+  22: Total() int  ==> 2 implementations [go.inheritors]
+  27: type Order struct {  ==> 9 usages [go.references]
+  33: type Flags struct {  ==> 1 usage [go.references]
+  40: func NewOrder(currency string) *Order {  ==> 5 usages [go.references]
+  44: func (o *Order) Add(item Item) {  ==> 4 usages [go.references]
+  49: func (o *Order) Total() int {  ==> 7 usages [go.references]
+  70: func (o *Order) Validate() error {  ==> 1 usage [go.references]
+  78: type Discounted struct {  ==> 3 usages [go.references]
+  83: func (d Discounted) Total() int {  ==> 1 usage [go.references]
+##### gutter icons
+  22: Total() int  ==> tooltip=Go to Implementations Click or press Ctrl+Alt+B to navigate acc=<html>Go to Implementations<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+Alt+B to navigate</font></div></html> icon=implementedMethod.svg) click=Go to Implementations
+  21: Priced interface {  ==> tooltip=Go to Implementations Click or press Ctrl+Alt+B to navigate acc=<html>Go to Implementations<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+Alt+B to navigate</font></div></html> icon=implementedMethod.svg) click=Go to Implementations
+  49: func (o *Order) Total() int {  ==> tooltip=Go to Method Specifications Click or press Ctrl+U to navigate acc=<html>Go to Method Specifications<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Method Specifications
+  27: type Order struct {  ==> tooltip=Go to Interfaces Click or press Ctrl+U to navigate acc=<html>Go to Interfaces<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Interfaces
+  78: type Discounted struct {  ==> tooltip=Go to Interfaces Click or press Ctrl+U to navigate acc=<html>Go to Interfaces<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Interfaces
+  83: func (d Discounted) Total() int {  ==> tooltip=Go to Method Specifications Click or press Ctrl+U to navigate acc=<html>Go to Method Specifications<br><div style='margin-top: 5px'><font size='2'>Click  or press Ctrl+U to navigate</font></div></html> icon=implementingMethod.svg) click=Go to Method Specifications
+

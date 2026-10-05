@@ -1,0 +1,5 @@
+var (
+	a string
+	b int
+	c int
+)

@@ -1,0 +1,1022 @@
+##### MainMenu
+[+] Main Menu  {MainMenu}  
+  [+] File  {FileMenu}  
+    [+] File Open Actions  {FileOpenGroup}  
+      [+] <no text>  {PlatformOpenProjectGroup}  
+        [+] New  {NewElementMenu}  
+      Open…  {OpenFile}  
+      Save As…  {SaveAs}  Ctrl+Shift+S
+      Attach Project…  {AttachProject}  
+      [+] Recent Projects  {$LRU}  
+        [+] <no text>  {RecentProjectListGroup}  
+        -----
+        Manage Projects…  {ManageRecentProjects}  
+      Close Project  {CloseProject}  
+      Close All Projects  {CloseAllProjects}  
+      Close Other Projects  {CloseOtherProjects}  
+      <no text>  {RenameProject}  
+    -----
+    [+] <no text>  {FileMenu.RemoteDevelopmentActions}  
+      [+] <no text>  {FileMenu.RemoteDevelopmentActions.Daemon}  
+        Remote Development…  {NewRemoteDevelopmentConnection}  
+      [+] <no text>  {FileMenu.RemoteDevelopmentActions.Gateway}  
+        <no text>  {OpenRemoteDevelopment}  
+      Remote Development  {ToolboxWelcomeRemdevAction}  
+      [+] Remote Development  {FileMenu.RemoteDevelopmentActions.Combined}  
+        Open the Toolbox App  {WelcomeOpenToolbox}  
+        Open JetBrains Gateway  {WelcomeOpenGateway}  
+    -----
+    [+] Settings Actions  {FileMainSettingsGroup}  
+      <no text>  {ShowSettings}  Ctrl+Alt+S
+      Plugins…  {ShowPlugins}  
+    [+] File Properties  {FilePropertiesGroup}  
+      File Encoding  {ChangeFileEncodingAction}  
+      [+] <no text>  {RemoveBom.Group}  
+        Remove BOM  {RemoveBom}  
+      [+] <no text>  {AddBom.Group}  
+        Add BOM  {AddBom}  
+      Associate with File Type…  {AssociateWithFileType}  
+      Change Template Data Language  {ChangeTemplateDataLanguage}  
+      Toggle Read-Only Attribute  {ToggleReadOnlyAttribute}  
+      [+] Line Separators  {ChangeLineSeparators}  
+        <no text>  {ConvertToWindowsLineSeparators}  
+        <no text>  {ConvertToUnixLineSeparators}  
+        <no text>  {ConvertToMacLineSeparators}  
+    -----
+    [+] <no text>  {LocalHistory.MainMenuGroup}  
+      -----
+      [+] Local History  {LocalHistory}  
+        Show History…  {LocalHistory.ShowHistory}  
+        Show History for Selection…  {LocalHistory.ShowSelectionHistory}  
+        -----
+        Show Project History…  {LocalHistory.ShowProjectHistory}  
+        Recent Changes  {RecentChanges}  Alt+Shift+C
+        Put Label…  {LocalHistory.PutLabel}  
+      -----
+    Save All  {SaveAll}  Ctrl+S
+    Reload All from Disk  {Synchronize}  Ctrl+Alt+Y
+    [+] Cache Recovery  {CacheRecovery}  
+    Invalidate Caches…  {InvalidateCaches}  
+    -----
+    [+] Manage IDE Settings  {ExportImportGroup}  
+      Import Settings…  {ImportSettings}  
+      Export Settings…  {ExportSettings}  
+      -----
+      Restore Default Settings…  {RestoreDefaultSettings}  
+      Backup and Sync…  {SettingsSyncOpenSettingsAction}  
+    [+] New Projects Setup  {FileOtherSettingsGroup}  
+      <no text>  {TemplateProjectProperties}  
+      <no text>  {RunConfigurationTemplatesForNewProjects}  
+      [+] Settings Actions  {FileSettingsGroup}  
+    Save File as Template…  {SaveFileAsTemplate}  
+    -----
+    [+] Print/Export Actions  {PrintExportGroup}  
+      -----
+      [+] Export  {FileExportGroup}  
+        Export Files or Selection to HTML…  {ExportToHTML}  
+      Print…  {Print}  
+    [+] <no text>  {PowerSaveGroup}  
+      -----
+      Power Save Mode  {TogglePowerSave}  
+    -----
+    Exit  {Exit}  
+  [+] Edit  {EditMenu}  
+    Undo  {$Undo}  Ctrl+Z
+    Redo  {$Redo}  Ctrl+Shift+Z
+    -----
+    [+] Cut/Copy/Paste Actions  {CutCopyPasteGroup}  
+      Cut  {$Cut}  Ctrl+X
+      Copy  {$Copy}  Ctrl+C
+      Download File to Local Machine  {DownloadBackendFileToClient}  Ctrl+Shift+D
+      Copy Paths  {CopyPaths}  Ctrl+Shift+C
+      Copy as Plain Text  {CopyAsPlainText}  
+      Copy as Rich Text  {CopyAsRichText}  
+      [+] Copy Path/Reference…  {CopyReferencePopupGroup}  
+        [+] <no text>  {CopyFileReference}  
+          Absolute Path  {CopyAbsolutePath}  Ctrl+Shift+C
+          File Name  {CopyFileName}  
+          -----
+          Path with Line Number  {CopyPathWithLineNumber}  
+          Path from Content Root  {CopyContentRootPath}  
+          Path from Source Root  {CopySourceRootPath}  
+          Path From Repository Root  {CopyPathFromRepositoryRootProvider}  
+          [+] <no text>  {Git.Hosting.Copy.Link.Group}  
+            [+] Copy Link to GitLab Repository  {GitLab.Copy.Link}  
+            [+] Copy Link to GitHub Repository  {GitHub.Copy.Link}  
+        -----
+        [+] <no text>  {CopyExternalReferenceGroup}  
+          Toolbox URL  {CopyTBXReference}  
+      [+] Paste  {PasteGroup}  
+        Paste  {$Paste}  Ctrl+V
+        Paste from History…  {PasteMultiple}  Ctrl+Shift+V
+        Paste as Plain Text  {EditorPasteSimple}  Ctrl+Alt+Shift+V
+      Convert to cURL and Copy  {HTTPClientConvertToCurlAndCopy}  
+      Copy JSON Pointer  {JsonCopyPointer}  
+    [+] Editor Create/Delete Actions  {EditCreateDeleteGroup}  
+      Delete  {$Delete}  Delete
+    -----
+    Search in Selection Only  {ToggleFindInSelection}  Ctrl+Alt+E
+    [+] Find  {FindMenuGroup}  
+      Find…  {Find}  Ctrl+F
+      Replace…  {Replace}  Ctrl+R
+      Find Next / Move to Next Occurrence  {FindNext}  F3
+      Find Previous / Move to Previous Occurrence  {FindPrevious}  Shift+F3
+      Select All Occurrences  {SelectAllOccurrences}  Ctrl+Alt+Shift+J
+      Add Selection for Next Occurrence  {SelectNextOccurrence}  Alt+J
+      Unselect Occurrence  {UnselectPreviousOccurrence}  Alt+Shift+J
+      Search in Selection Only  {ToggleFindInSelection}  Ctrl+Alt+E
+      Scroll to Results During Typing  {ToggleScrollToResultsDuringTypingAction}  
+      -----
+      Next Occurrence of the Word at Caret  {FindWordAtCaret}  Ctrl+F3
+      Previous Occurrence of the Word at Caret  {FindPrevWordAtCaret}  Ctrl+Shift+F3
+      -----
+      Find in Files…  {FindInPath}  Ctrl+Shift+F
+      Replace in Files…  {ReplaceInPath}  Ctrl+Shift+R
+      [+] <no text>  {StructuralSearchActions}  
+        -----
+        Search Structurally…  {StructuralSearchPlugin.StructuralSearchAction}  
+        Replace Structurally…  {StructuralSearchPlugin.StructuralReplaceAction}  
+      Evaluate JSONPath Expression…  {JsonPathEvaluateAction}  
+    [+] Find Usages  {FindUsagesMenuGroup}  
+      Find Usages  {FindUsages}  Alt+F7
+      Find Usages Settings…  {ShowSettingsAndFindUsages}  Ctrl+Alt+Shift+F7
+      Show Usages  {ShowUsages}  Ctrl+Alt+F7
+      -----
+      Find Usages in File  {FindUsagesInFile}  Ctrl+F7
+      Highlight Usages in File  {HighlightUsagesInFile}  Ctrl+Shift+F7
+      Next Highlighted Usage  {GotoNextElementUnderCaretUsage}  
+      Previous Highlighted Usage  {GotoPrevElementUnderCaretUsage}  
+      [+] Recent Find Usages  {ShowRecentFindUsagesGroup}  
+    [+] <no text>  {Editor.Search.Filter.Results}  
+      Search In Changes  {Vcs.Diff.ToggleSearchInChanges}  
+    -----
+    Column Selection Mode  {EditorToggleColumnMode}  Alt+Shift+Insert
+    [+] Editor Select Actions  {EditSelectGroup}  
+      Select All  {$SelectAll}  Ctrl+A
+      Add Carets to Ends of Selected Lines  {EditorAddCaretPerSelectedLine}  Alt+Shift+G
+      [+] Select Word Actions  {EditSelectWordGroup}  
+        Extend Selection  {EditorSelectWord}  Ctrl+W
+        Shrink Selection  {EditorUnSelectWord}  Ctrl+Shift+W
+    -----
+    [+] Edit Code Actions  {EditSmartGroup}  
+      Toggle Case  {EditorToggleCase}  Ctrl+Shift+U
+      Join Lines  {EditorJoinLines}  Ctrl+Shift+J
+      Duplicate Line or Selection  {EditorDuplicate}  Ctrl+D
+      Fill Paragraph  {FillParagraph}  
+      Sort Lines  {EditorSortLines}  
+      Reverse Lines  {EditorReverseLines}  
+      Transpose  {EditorTranspose}  
+      -----
+      Indent Selection  {EditorIndentSelection}  Tab
+      Unindent Line or Selection  {EditorUnindentSelection}  Shift+Tab
+      [+] Convert Indents  {ConvertIndentsGroup}  
+        To Spaces  {ConvertIndentsToSpaces}  
+        To Tabs  {ConvertIndentsToTabs}  
+    -----
+    [+] Macros  {Macros}  
+      [+] Standard Macro Actions  {StandardMacroActions}  
+        Play Back Last Macro  {PlaybackLastMacro}  
+        Start/Stop Macro Recording  {StartStopMacroRecording}  
+        Edit Macros  {EditMacros}  
+        Play Saved Macros…  {PlaySavedMacrosAction}  
+      -----
+      [+] Macro Actions  {MacrosGroup}  
+    [+] Bookmarks  {EditBookmarksGroup}  
+      [+] <no text>  {popup@BookmarkContextMenu}  
+        Add Bookmark to Another List  {AddAnotherBookmark}  
+        Rename Bookmark…  {EditBookmark}  
+        Toggle Bookmark  {ToggleBookmark}  F11
+        Remove Mnemonic  {DeleteMnemonicFromBookmark}  
+        Toggle Bookmark Mnemonic…  {ToggleBookmarkWithMnemonic}  Ctrl+F11
+        -----
+      -----
+      Previous Line Bookmark  {GotoPreviousBookmark}  
+      Next Line Bookmark  {GotoNextBookmark}  
+      -----
+      Show Bookmarks…  {ShowBookmarks}  Shift+F11
+      Go to Mnemonic…  {ShowTypeBookmarks}  Ctrl+Shift+F11
+      -----
+    -----
+    Emoji & Symbols  {EmojiPicker.Open}  Ctrl+Alt+;
+    Emoji & Symbols  {EmojiAndSymbols}  
+    Encode XML/HTML Special Characters  {EscapeEntities}  
+    Edit as Table  {FileEditor.OpenDataEditor}  
+    View as Table  {FileEditor.OpenDataViewer}  
+  [+] View  {ViewMenu}  
+    [+] Tool Windows  {ToolWindowsGroup}  
+    [+] Appearance  {ViewAppearanceGroup}  
+      [+] <no text>  {ToggleFullScreenGroup}  
+        -----
+        Toggle Presentation Mode  {TogglePresentationMode}  
+        Toggle Distraction Free Mode  {ToggleDistractionFreeMode}  
+        Toggle Full Screen Mode  {ToggleFullScreen}  
+        Toggle Zen Mode  {ToggleZenMode}  
+        -----
+        Compact Mode  {ToggleCompactMode}  
+      Zoom IDE  {SwitchIdeScaleAction}  
+      [+] <no text>  {UIToggleActions}  
+        -----
+        Presentation Assistant  {TogglePresentationAssistantAction}  
+        -----
+        Main Menu  {ViewMainMenu}  
+        [+] Main Menu  {ChangeMainMenuModeActionGroup}  
+        Toolbar  {ViewNewToolbarAction}  
+        Toolbar Classic  {ViewObsoleteToolbarAction}  
+        Navigation Bar  {ViewObsoleteNavBarAction}  
+        [+] <no text>  {ViewToolbarActionsGroup}  
+          Toolbar  {ViewToolBar}  
+          Navigation Bar  {ViewNavigationBar}  
+          [+] Navigation Bar  {NavbarLocationGroup}  
+            Top  {NavBarLocationTop}  
+            In Status Bar  {NavBarLocationBottom}  
+            Don't Show  {NavBarLocationHide}  
+            -----
+            Show Members  {ShowMembersInNavigationBar}  
+        Tool Window Bars  {ViewToolButtons}  
+        Status Bar  {ViewStatusBar}  
+        [+] Status Bar Widgets  {ViewStatusBarWidgetsGroup}  
+          Status Text  {StatusTextModeAction}  
+        Members in Navigation Bar  {ViewMembersInNavigationBar}  
+    [+] <no text>  {QuickActions}  
+      -----
+      Quick Definition  {QuickImplementations}  Ctrl+Shift+I
+      Quick Type Definition  {QuickTypeDefinition}  
+      Quick Documentation  {QuickJavaDoc}  Ctrl+Q
+    [+] Code Editor View Actions  {CodeEditorBaseGroup}  
+      [+] Code View Actions  {CodeEditorViewGroup}  
+        External Documentation  {ExternalJavaDoc}  Shift+F1
+        Parameter Info  {ParameterInfo}  Ctrl+P
+        Type Info  {ExpressionTypeInfo}  Ctrl+Shift+P
+        Context Info  {EditorContextInfo}  Alt+Q
+        Error Description  {ShowErrorDescription}  Ctrl+F1
+      -----
+    Jump to Source  {EditSource}  F4
+    Open in Right Split  {OpenInRightSplit}  Shift+Enter
+    Show Source  {ViewSource}  Ctrl+Enter
+    [+] <no text>  {OpenInBrowserGroup}  
+    -----
+    [+] View Recent Actions Group  {ViewRecentActions}  
+      Recent Files  {RecentFilesFallback}  Ctrl+E
+      Toggle Changed Only Files  {SwitcherRecentEditedChangedToggleCheckBoxFallback}  Ctrl+E
+      Iterate Recent Files  {SwitcherIterateItemsFallback}  Ctrl+E
+      Recently Changed Files  {RecentChangedFilesFallback}  
+      Recent Locations  {RecentLocations}  Ctrl+Shift+E
+      Toggle Changed Only Files  {SwitcherRecentEditedChangedToggleCheckBox}  Ctrl+E
+      Iterate Recent Files  {SwitcherIterateItems}  Ctrl+E
+      Recent Files  {RecentFiles}  Ctrl+E
+      Recently Changed Files  {RecentChangedFiles}  
+      Recent Changes  {RecentChanges}  Alt+Shift+C
+    -----
+    [+] <no text>  {CompareActions}  
+      [+] Actions on Pairs of Files  {PairFileActions}  
+        Compare Files  {CompareTwoFiles}  Ctrl+D
+        Compare File with Editor  {CompareFileWithEditor}  
+      Compare with Clipboard  {CompareClipboardWithSelection}  
+    -----
+    Quick Switch Scheme…  {QuickChangeScheme}  Ctrl+`
+    [+] Active Editor  {EditorToggleActions}  
+      Soft-Wrap  {EditorToggleUseSoftWraps}  
+      -----
+      Show Whitespaces  {EditorToggleShowWhitespaces}  
+      Show Line Numbers  {EditorToggleShowLineNumbers}  
+      Show Gutter Icons  {EditorToggleShowGutterIcons}  
+      Show Indent Guides  {EditorToggleShowIndentLines}  
+      Show Import Popups  {ViewImportPopups}  
+      Show Breadcrumbs  {EditorToggleShowBreadcrumbs}  
+      -----
+      Increase Font Size  {EditorIncreaseFontSize}  
+      Decrease Font Size  {EditorDecreaseFontSize}  
+    -----
+    Increase Font Size in All Editors  {EditorIncreaseFontSizeGlobal}  Alt+Shift+.
+    Decrease Font Size in All Editors  {EditorDecreaseFontSizeGlobal}  Alt+Shift+Comma
+    Reset Font Size in All Editors  {EditorResetFontSizeGlobal}  
+    -----
+    [+] Bidi Text Base Direction  {EditorBidiTextDirection}  
+      Content-Based  {EditorSetContentBasedBidiTextDirection}  
+      Left-to-Right  {EditorSetLtrBidiTextDirection}  
+      Right-to-Left  {EditorSetRtlBidiTextDirection}  
+    -----
+  [+] Navigate  {GoToMenu}  
+    Back  {Back}  Ctrl+Alt+Left
+    Forward  {Forward}  Ctrl+Alt+Right
+    -----
+    Search Everywhere  {SearchEverywhere}  
+    -----
+    [+] Goto by Name Actions  {GoToTargetEx}  
+      Go to Class…  {GotoClass}  Ctrl+N
+      Go to File…  {GotoFile}  Ctrl+Shift+N
+      Go to Symbol…  {GotoSymbol}  Ctrl+Alt+Shift+N
+      Text…  {TextSearchAction}  Ctrl+Alt+Shift+E
+      Go To Database Object  {GotoDatabaseObject}  
+    Row…  {GotoRow}  Ctrl+G
+    Open File URI  {Console.TableResult.OpenLocalFileAction}  F4
+    Open URL  {Console.TableResult.OpenWebUrlAction}  F4
+    Related Rows  {Console.TableResult.NavigateAction}  F4
+    Go to Line:Column…  {GotoLine}  Ctrl+G
+    Go to Endpoint…  {GotoUrlAction}  Ctrl+Shift+\
+    -----
+    [+] Goto Error/Bookmark Actions  {GoToErrorGroup}  
+      Next Highlighted Error  {GotoNextError}  F2
+      Previous Highlighted Error  {GotoPreviousError}  Shift+F2
+    [+] <no text>  {GoToEditPointGroup}  
+      -----
+      Next Emmet Edit Point  {EmmetNextEditPoint}  Alt+Shift+]
+      Previous Emmet Edit Point  {EmmetPreviousEditPoint}  Alt+Shift+[
+    Last Edit Location  {JumpToLastChange}  Ctrl+Shift+Backspace
+    Next Edit Location  {JumpToNextChange}  
+    -----
+    [+] Navigate in File  {NavigateInFileGroup}  
+      Next Method  {MethodDown}  Alt+Down
+      Previous Method  {MethodUp}  Alt+Up
+      Move Caret to Matching Brace  {EditorMatchBrace}  Ctrl+Shift+M
+      -----
+      [+] <no text>  {TemplateParametersNavigation}  
+        Next Live Template Parameter  {NextTemplateParameter}  
+        Previous Live Template Parameter  {PrevTemplateParameter}  
+      Custom Folding…  {GotoCustomRegion}  Ctrl+Alt+.
+      [+] Change Navigation Actions  {GoToChangeMarkerGroup}  
+        -----
+        Next Change  {VcsShowNextChangeMarker}  Ctrl+Alt+Shift+Down
+        Previous Change  {VcsShowPrevChangeMarker}  Ctrl+Alt+Shift+Up
+    [+] Goto by Reference Actions  {GoToCodeGroup}  
+      -----
+      Select In…  {SelectIn}  Alt+F1
+      Jump to Navigation Bar  {ShowNavBar}  Alt+Home
+      -----
+      Go to Declaration or Usages  {GotoDeclaration}  Ctrl+B
+      Go to Implementation(s)  {GotoImplementation}  Ctrl+Alt+B
+      Go to Type Declaration  {GotoTypeDeclaration}  Ctrl+Shift+B
+      Go to Super Method  {GotoSuperMethod}  Ctrl+U
+      Go to Test  {GotoTest}  Ctrl+Shift+T
+      Related Symbol…  {GotoRelated}  Ctrl+Alt+Home
+      -----
+      File Structure  {FileStructurePopup}  Ctrl+F12
+      File Path  {ShowFilePath}  Ctrl+Alt+F12
+      [+] Hierarchy Actions  {HierarchyGroup}  
+        Type Hierarchy  {TypeHierarchy}  Ctrl+H
+        Method Hierarchy  {MethodHierarchy}  Ctrl+Shift+H
+        Call Hierarchy  {CallHierarchy}  Ctrl+Alt+H
+      -----
+    Previous Occurrence  {PreviousOccurence}  Ctrl+Alt+Up
+    Next Occurrence  {NextOccurence}  Ctrl+Alt+Down
+    -----
+  [+] Code  {CodeMenu}  
+    Override Methods…  {OverrideMethods}  Ctrl+O
+    Implement Methods…  {ImplementMethods}  Ctrl+I
+    Generate…  {Generate}  Alt+Insert
+    -----
+    [+] Code Completion  {CodeCompletionGroup}  
+      Basic  {CodeCompletion}  Ctrl+Space
+      Type-Matching  {SmartTypeCompletion}  Ctrl+Shift+Space
+      -----
+      Complete Current Statement  {EditorCompleteStatement}  Ctrl+Shift+Enter
+      -----
+      Cyclic Expand Word  {HippieCompletion}  Alt+/
+      Cyclic Expand Word (Backward)  {HippieBackwardCompletion}  Alt+Shift+/
+      -----
+      Call Inline Completion  {CallInlineCompletionAction}  Alt+Shift+\
+      Insert Inline Proposal  {InsertInlineCompletionAction}  Tab
+      Insert Inline Proposal's Word  {InsertInlineCompletionWordAction}  Ctrl+Right
+      Insert Inline Proposal's Line  {InsertInlineCompletionLineAction}  End
+      Enable Command Completion  {EnableCommandCompletion}  
+    [+] <no text>  {InspectCodeInCodeMenuGroup}  
+      -----
+      [+] Inspect Code Actions  {InspectCodeGroup}  
+        Inspect Code…  {InspectCode}  
+        Code Cleanup…  {CodeCleanup}  
+      [+] Analyze Code  {AnalyzeActionsPopup}  
+        [+] <no text>  {AnalyzeActions}  
+          Silent Code Cleanup  {SilentCodeCleanup}  
+          <no text>  {RunInspection}  Ctrl+Alt+Shift+I
+          Configure Current File Analysis…  {PopupHector}  Ctrl+Alt+Shift+H
+          View Offline Inspection Results…  {ViewOfflineInspection}  
+          Locate Duplicates…  {DupLocate}  
+          -----
+          Analyze Data Flow to Here…  {SliceBackward}  
+          Analyze Data Flow from Here…  {SliceForward}  
+          [+] <no text>  {PackageChecker.AnalyzeActions}  
+            -----
+            Vulnerable Dependencies…  {PCAnalyzeVulnerableDependencies}  
+      [+] <no text>  {AnalyzePlatformMenu}  
+        Analyze Stack Trace or Thread Dump…  {Unscramble}  
+    -----
+    Insert Live Template…  {InsertLiveTemplate}  Ctrl+J
+    Save as Live Template…  {SaveAsTemplate}  
+    -----
+    Surround With…  {SurroundWith}  Ctrl+Alt+T
+    Unwrap/Remove…  {Unwrap}  Ctrl+Shift+Delete
+    -----
+    [+] Folding  {FoldingGroup}  
+      Expand  {ExpandRegion}  Ctrl+NumPad +
+      Expand Recursively  {ExpandRegionRecursively}  Ctrl+Alt+NumPad +
+      Expand All  {ExpandAllRegions}  Ctrl+Shift+NumPad +
+      -----
+      Collapse  {CollapseRegion}  Ctrl+NumPad -
+      Collapse Recursively  {CollapseRegionRecursively}  Ctrl+Alt+NumPad -
+      Collapse All  {CollapseAllRegions}  Ctrl+Shift+NumPad -
+      -----
+      [+] Expand to Level  {ExpandToLevel}  
+        1  {ExpandToLevel1}  Ctrl+NumPad *, 1
+        2  {ExpandToLevel2}  Ctrl+NumPad *, 2
+        3  {ExpandToLevel3}  Ctrl+NumPad *, 3
+        4  {ExpandToLevel4}  Ctrl+NumPad *, 4
+        5  {ExpandToLevel5}  Ctrl+NumPad *, 5
+      [+] Expand All to Level  {ExpandAllToLevel}  
+        1  {ExpandAllToLevel1}  Ctrl+Shift+NumPad *, 1
+        2  {ExpandAllToLevel2}  Ctrl+Shift+NumPad *, 2
+        3  {ExpandAllToLevel3}  Ctrl+Shift+NumPad *, 3
+        4  {ExpandAllToLevel4}  Ctrl+Shift+NumPad *, 4
+        5  {ExpandAllToLevel5}  Ctrl+Shift+NumPad *, 5
+      -----
+      [+] <no text>  {LanguageSpecificFoldingGroup}  
+        Expand Doc Comments  {ExpandDocComments}  
+        Collapse Doc Comments  {CollapseDocComments}  
+      -----
+      Toggle Folding  {ExpandCollapseToggleAction}  
+      -----
+      Fold Selection / Remove Region  {CollapseSelection}  Ctrl+.
+      Fold Code Block  {CollapseBlock}  Ctrl+Shift+.
+    -----
+    [+] Comment Actions  {CommentGroup}  
+      Comment with Line Comment  {CommentByLineComment}  Ctrl+/
+      Comment with Block Comment  {CommentByBlockComment}  Ctrl+Shift+/
+    [+] Code Formatting Actions  {CodeFormatGroup}  
+      Reformat Code  {ReformatCode}  Ctrl+Alt+L
+      Reformat JSON  {JsonJacksonReformatAction}  
+      Reformat File…  {ShowReformatFileDialog}  Ctrl+Alt+Shift+L
+      Auto-Indent Lines  {AutoIndentLines}  Ctrl+Alt+I
+      Optimize Imports  {OptimizeImports}  Ctrl+Alt+O
+      Rearrange Code  {RearrangeCode}  
+    -----
+    Move Statement Down  {MoveStatementDown}  Ctrl+Shift+Down
+    Move Statement Up  {MoveStatementUp}  Ctrl+Shift+Up
+    Move Element Left  {MoveElementLeft}  Ctrl+Alt+Shift+Left
+    Move Element Right  {MoveElementRight}  Ctrl+Alt+Shift+Right
+    Move Line Down  {MoveLineDown}  Alt+Shift+Down
+    Move Line Up  {MoveLineUp}  Alt+Shift+Up
+    -----
+    -----
+    Update Copyright…  {UpdateCopyright}  
+    [+] Terraform Tools  {TfTools}  
+      Initialize  {TfInitAction}  
+      Format Files  {TfFmtFileAction}  Ctrl+Alt+Shift+F
+      Generate Providers Metadata  {TfGenerateLocalMetadataAction}  
+    [+] OpenTofu Tools  {TofuTools}  
+      Initialize  {TfInitAction}  
+      Format Files  {TfFmtFileAction}  Ctrl+Alt+Shift+F
+      Generate Providers Metadata  {TfGenerateLocalMetadataAction}  
+    Inject Shell Script in GitLab CI/CD  {GitLabCiSwitchShellLanguageInjectionAction}  
+  [+] Refactor  {RefactoringMenu}  
+    Refactor This…  {Refactorings.QuickListPopupAction}  Ctrl+Alt+Shift+T
+    Rename…  {RenameElement}  Shift+F6
+    Change Signature…  {ChangeSignature}  Ctrl+F6
+    Modify Object…  {DatabaseView.Ddl.AlterObject}  Ctrl+F6
+    Convert to Function Component  {ReactClassToFunctionComponentAction}  
+    Convert to Class Component  {ReactFunctionToClassComponentAction}  
+    -----
+    [+] Extract/Introduce  {IntroduceActionsGroup}  
+      Introduce Variable…  {IntroduceVariable}  Ctrl+Alt+V
+      Extract Routine...  {sql.ExtractFunctionAction}  Ctrl+Alt+M
+      Table alias...  {sql.IntroduceAliasAction}  
+      Introduce Constant…  {IntroduceConstant}  Ctrl+Alt+C
+      Introduce Field…  {IntroduceField}  Ctrl+Alt+F
+      Introduce Parameter…  {IntroduceParameter}  Ctrl+Alt+P
+      -----
+      Introduce Parameter Object…  {IntroduceParameterObject}  
+      -----
+      Extract Method…  {ExtractMethod}  Ctrl+Alt+M
+      -----
+      Extract Delegate…  {ExtractClass}  
+      Include File…  {ExtractInclude}  
+      Extract Interface…  {ExtractInterface}  
+      Introduce Type…  {GoIntroduceTypeAction}  
+      Add Method…  {GoAddMethodToInterfaceAction}  
+      Extract Superclass…  {ExtractSuperclass}  
+      Extract Module…  {ExtractModule}  
+      Type Alias…  {TypeScriptExtractTypeAlias}  
+      Extract Component…  {ReactExtractComponentAction}  
+      Subquery as CTE  {sql.ExtractNamedQueryAction}  
+    Inline…  {Inline}  Ctrl+Alt+N
+    -----
+    Move…  {Move}  F6
+    Copy…  {CopyElement}  F5
+    Safe Delete…  {SafeDelete}  Alt+Delete
+    -----
+    Pull Members Up…  {MembersPullUp}  
+    Push Members Down…  {MemberPushDown}  
+    Invert Boolean…  {InvertBoolean}  
+    [+] XML Refactorings  {XMLRefactoringMenu}  
+      Rename Tag…  {RenameTagAction}  
+      Rename Attribute…  {RenameAttributeAction}  
+      Delete Tag…  {DeleteTagAction}  
+      Delete Attribute…  {DeleteAttributeAction}  
+      Add Attribute…  {AddAttributeAction}  
+      Add Subtag…  {AddSubtagAction}  
+      Change Attribute Value..  {ChangeAttributeValueAction}  
+      Unwrap Tag…  {UnwrapTagAction}  
+      Wrap Tag…  {WrapTagAction}  
+      Wrap Tag Contents…  {WrapTagContentsAction}  
+      Convert Tag Contents To Attribute…  {ConvertContentsToAttributeAction}  
+      Replace Tag with Attribute…  {ReplaceTagWithAttributeAction}  
+      Replace Attribute with Tag…  {ReplaceAttributeWithTagAction}  
+      Move Attribute In…  {MoveAttributeInAction}  
+      Move Attribute Out…  {MoveAttributeOutAction}  
+    Update Syntax…  {GoSyntaxUpdateAction}  
+  [+] Build  {BuildMenu}  
+  [+] Run  {RunMenu}  
+    [+] Run/Debug  {RunnerActions}  
+      Run 'go build example.com/playground/cmd/check'  {Run}  Shift+F10
+      Debug 'go build example.com/playground/cmd/check'  {Debug}  Shift+F9
+      Run 'go build example.com/playground/cmd/check' with Coverage  {Coverage}  
+      Record and Debug 'go build example.com/playground/cmd/check'  {DlvRecordAndDebug}   [hidden] [disabled]
+      [+] Run with Profiler  {Profiler}  
+        Profile 'go build example.com/playground/cmd/check' with 'CPU Profiler'  {ExecutorAction} [disabled]
+        Profile 'go build example.com/playground/cmd/check' with 'Memory Profiler'  {ExecutorAction} [disabled]
+        Profile 'go build example.com/playground/cmd/check' with 'Blocking Profiler'  {ExecutorAction} [disabled]
+        Profile 'go build example.com/playground/cmd/check' with 'Mutex Profiler'  {ExecutorAction} [disabled]
+        Profile 'go build example.com/playground/cmd/check' with 'GoLand Profiler'  {ExecutorAction}
+    -----
+    Run…  {ChooseRunConfiguration}  Alt+Shift+F10
+    Debug…  {ChooseDebugConfiguration}  Alt+Shift+F9
+    [+] <no text>  {XDebugger.AttachGroup}  
+      <no text>  {XDebugger.AttachToProcess}  Ctrl+Alt+F5
+    Open Core Dump…  {GoCoreDumpAction}  
+    Debug Saved Trace…  {GoReplayTraceAction}  
+    Edit Configurations…  {editRunConfigurations}  
+    <no text>  {ManageTargets}  
+    -----
+    Stop  {Stop}  Ctrl+F2
+    Stop Background Processes…  {StopBackgroundProcesses}  Ctrl+Shift+F2
+    Show Running List  {ShowLiveRunConfigurations}  
+    [+] Debugger Actions  {DebugMainMenu}  
+      -----
+      [+] Debugging Actions  {DebuggingActionsGroup}  
+        [+] <no text>  {DebugReloadGroup}  
+          Compile and Reload Modified Files  {XDebugger.Hotswap.Modified.Files}  
+          Update Running Application  {UpdateRunningApplication}  Ctrl+F10
+        -----
+        [+] <no text>  {StepOver.Ref}  
+          Step Over  {StepOver}  F8
+        Force Step Over  {ForceStepOver}  Alt+Shift+F8
+        Step Into  {StepInto}  F7
+        Force Step Into  {ForceStepInto}  Alt+Shift+F7
+        Smart Step Into  {SmartStepInto}  Shift+F7
+        Step Out  {StepOut}  Shift+F8
+        Run to Cursor  {RunToCursor}  Alt+F9
+        Force Run to Cursor  {ForceRunToCursor}  Ctrl+Alt+F9
+        Reset Frame  {Debugger.PopFrame}  
+        [+] <no text>  {Pause.Ref}  
+          Pause Program  {Pause}  
+        [+] <no text>  {Resume.Ref}  
+          Resume Program  {Resume}  F9
+        -----
+        Evaluate Expression…  {EvaluateExpression}  Alt+F8
+        Show Execution Point  {ShowExecutionPoint}  Alt+F10
+        -----
+        Dump Goroutines  {DlvDumpAction}  
+      [+] Toggle Breakpoint  {BreakpointActionsGroup}  
+        Restore Breakpoint  {Debugger.RestoreBreakpoint}  
+        Toggle Line Breakpoint  {ToggleLineBreakpoint}  Ctrl+F8
+        Toggle Temporary Line Breakpoint  {ToggleTemporaryLineBreakpoint}  Ctrl+Alt+Shift+F8
+        Toggle Breakpoint Enabled  {ToggleBreakpointEnabled}  
+      View Breakpoints…  {ViewBreakpoints}  Ctrl+Shift+F8
+      -----
+    [+] <no text>  {RunTestGroup}  
+      [+] <no text>  {SmRunTestGroup}  
+        -----
+        [+] <no text>  {ImportTests}  
+        <no text>  {ImportTestsFromFile}  
+      [+] <no text>  {CoveragePlatformMenu}  
+        [+] <no text>  {CoverageMenu}  
+          Manage Coverage Reports…  {SwitchCoverage}  Ctrl+Alt+F6
+          Generate Coverage Report…  {GenerateCoverageReport}  
+          Hide Coverage  {HideCoverage}  
+          -----
+    [+] <no text>  {ProfilerActions}  
+      <no text>  {AttachProfilerToLocalProcess}  
+      [+] <no text>  {ImportProfilerResultsFromHistory}  
+      [+] <no text>  {OpenPprofProfileGroup}  
+    Rewind  {DlvRewindAction}  
+  [+] Tools  {ToolsMenu}  
+    [+] <no text>  {Dev.PsiViewerActions}  
+      -----
+      View PSI Structure…  {PsiViewer}  
+      View PSI Structure of Current File…  {PsiViewerForContext}  
+      -----
+    [+] <no text>  {CodeWithMeMainMenuGroup}  
+      [+] Code With Me Popup  {CWMShowPopupActionGroup}  
+        Code With Me  {CWMHostShowPopupAction}  Ctrl+Shift+Y [hidden] [disabled]
+      -----
+    [+] Tools Basic Group  {ToolsBasicGroup}  
+      [+] <no text>  {Go.SaveFileAsTemplate}  
+        Save Project as Template…  {SaveProjectAsTemplate}  
+        Manage Project Templates…  {ManageProjectTemplates}  
+    Create Command Line Launcher…  {CreateLauncherScript}  
+    Create Desktop Entry…  {CreateDesktopEntry}  
+    -----
+    [+] <no text>  {OtherMenu}  
+    [+] Services  {ToolsMenu.Services}  
+      [+] Kubernetes  {Kubernetes.AddServiceActions}  
+        [+] Add Clusters  {Kubernetes.AddContexts}  
+          From Default Directory…  {Kubernetes.AddContext}  
+          From Custom kubeconfigs…  {Kubernetes.AttachContext}  
+          Paste kubeconfig Content…  {Kubernetes.PasteContextContent}  
+        -----
+        Open Kubernetes Settings…  {Kubernetes.ShowSettings}  
+      New Docker Registry  {Docker.AddDockerRegistry}  
+      [+] Docker  {Docker.Services.Add}  
+        Docker Connection  {Docker.AddDockerConnection}  
+        Connections From Contexts  {Docker.ImportContexts}  
+      [+] Dev Containers  {Tools.Services.DevContainers}  
+        New Dev Container Configuration…  {com.intellij.clouds.docker.gateway.actions.NewDevcontainerAction}  
+        Manage Dev Container Backends  {Dev.Container.ManageBackends}  
+        Show Dev Containers  {Dev.Container.ShowRecent}  
+    [+] Markdown  {Markdown.Tools}  
+      Import Word Document…  {Markdown.ImportFromDocx}  
+      Export Markdown File To…  {Markdown.Export}  
+      Configure Pandoc…  {Markdown.ConfigurePandoc}  
+    [+] XML Actions  {ToolsXmlGroup}  
+      Convert Schema...  {ConvertSchemaAction}  
+    [+] External Tools  {ExternalToolsGroup}  
+    Show MCP Tools  {com.intellij.mcpserver.actions.ShowMcpToolsAction}  
+    [+] Deployment  {PublishGroup}  
+      [+] <no text>  {PublishGroup.Base}  
+        Upload to Default Server  {PublishGroup.Upload}  
+        Upload To…  {PublishGroup.UploadTo}  Ctrl+Alt+Shift+X
+        Upload All Open Files to Default Server  {PublishGroup.UploadAllOpenFiles}  
+        Upload All Open Files To…  {PublishGroup.UploadAllOpenFilesTo}  
+        Download from Default Server  {PublishGroup.Download}  
+        Download From…  {PublishGroup.DownloadFrom}  
+        -----
+        Compare Local File with Deployed Version  {PublishGroup.CompareLocalVsRemote}  
+        Compare with Deployed To…  {PublishGroup.CompareLocalVsRemoteWith}  
+        Sync Local Subtree with Deployed  {PublishGroup.SyncLocalVsRemote}  
+        Sync with Deployed To…  {PublishGroup.SyncLocalVsRemoteWith}  
+      -----
+      Configuration…  {WebDeployment.Configuration}  
+      Options…  {WebDeployment.Options}  
+      Automatic Upload  {WebDeployment.ToggleAutoUpload}  
+      -----
+      Browse Remote Host  {WebDeployment.BrowseServers}  
+    Start SSH Session…  {com.jetbrains.plugins.remotesdk.console.RunSshConsoleAction}  
+    [+] <no text>  {RemoteExternalToolsGroup}  
+    [+] HTTP Client  {HTTPClientGroup}  
+      Create Request in HTTP Client  {HTTPClient.NewRequestInToolMenuAction}  
+      Open HTTP Requests Collection  {HTTPClient.OpenCollection}  
+      Show HTTP Requests History  {RESTClient.ShowHistory}  
+      Convert cURL to HTTP Request  {com.intellij.httpClient.actions.ConvertCurlToHttpRequestAction}  
+      [+] Add to HTTP Client…  {HttpClient.Add}  
+        Variable in Public File  {HttpClient.Add.Public.Variable}  
+        Variable in Private File  {HttpClient.Add.Private.Variable}  
+        Auth Configuration  {HttpClient.Add.AuthConfig}  
+      Import from Postman Collection File  {com.intellij.httpClient.postman.converter.action.ConvertPostmanToHttpFileAction}  
+      OpenAPI/Swagger Specification…  {ConvertSwaggerToHttpFileAction}  
+    Run Gulp/Grunt/npm Task  {RunJsbtTask}  Alt+F11
+    [+] Go Tools  {GoTools}  
+      Go Fmt File  {GoFmtFileAction}  Ctrl+Alt+Shift+F
+      Go Fmt Project  {GoFmtProjectAction}  Ctrl+Alt+Shift+P
+      Goimports File  {GoImportsFileAction}  
+      Go Generate File  {GoGenerateFileAction}  Ctrl+Alt+G
+      Go Vet File  {GoVetFileAction}  
+      Share in Playground  {GoShareInPlaygroundAction}  Ctrl+Alt+Shift+S
+    [+] Qodana  {Qodana.ShowReportGroup}  
+  [+] VCS  {VcsGroups}  
+    [+] <no text>  {Vcs.MainMenu}  
+      Enable Version Control Integration…  {Start.Use.Vcs}  
+      -----
+      [+] VCS Group  {VcsGlobalGroup}  
+        VCS Operations Popup…  {Vcs.QuickListPopupAction}  Alt+`
+        Commit…  {CheckinProject}  Ctrl+K
+        Toggle Commit UI…  {ChangesView.ToggleCommitUi}  Ctrl+K
+        Update Project  {Vcs.UpdateProject}  Ctrl+T
+        Integrate Project  {Vcs.IntegrateProject}  
+        Refresh  {ChangesView.Refresh}  
+        Show Local Changes as UML  {UML.ShowChanges}  Ctrl+Alt+Shift+D
+        -----
+        [+] <no text>  {Vcs.Specific}  
+        [+] Git  {Git.Menu}  
+          [+] <no text>  {Git.FileActions}  
+            Commit File  {CheckinFiles}  
+            Add  {Git.Add}  Ctrl+Alt+A
+            [+] <no text>  {Git.Ignore.File}  
+            -----
+            Annotate  {Annotate}  
+            Compare with Same Repository Version  {Compare.SameVersion}  Ctrl+D
+            Compare with Revision…  {Compare.Selected}  
+            Compare with Branch or Tag…  {Git.CompareWithBranch}  
+            Show History  {Vcs.ShowTabbedFileHistory}  
+            Show History for Selection…  {Vcs.ShowHistoryForBlock}  
+          -----
+          Rollback…  {ChangesView.Revert}  Ctrl+Alt+Z
+          -----
+          [+] <no text>  {GitRepositoryActions}  
+            Push…  {Vcs.Push}  Ctrl+Shift+K
+            Pull…  {Git.Pull}  
+            Fetch  {Git.Fetch}  
+            -----
+            Merge…  {Git.Merge}  
+            [+] Merge  {Git.MainMenu.MergeActions}  
+              Commit merge  {Git.Merge.Commit}  
+              Abort Merge  {Git.Merge.Abort}  
+            Rebase…  {Git.Rebase}  
+            [+] Rebase  {Git.MainMenu.RebaseActions}  
+              Abort Rebase  {Git.Rebase.Abort}  
+              Continue Rebase  {Git.Rebase.Continue}  
+              Skip Commit  {Git.Rebase.Skip}  
+            -----
+            Branches…  {Git.Branches}  Ctrl+Shift+`
+            New Branch…  {Git.CreateNewBranch}  Ctrl+Alt+N
+            New Tag…  {Git.Tag}  
+            Reset HEAD…  {Git.Reset}  
+            -----
+            Stash Changes…  {Git.Stash}  
+            Unstash Changes…  {Git.Unstash}  
+            -----
+            [+] GitHub  {GitHub.MainMenu}  
+              Create Pull Request…  {Github.Create.Pull.Request}  
+              View Pull Requests  {Github.View.Pull.Request}  
+              Sync Fork  {Github.Sync.Fork}  
+              Create Gist…  {Github.Create.Gist}  
+              [+] <no text>  {Github.Open.In.Browser}  
+              -----
+              Share Project on GitHub  {Github.Share}  
+              Clone Repository from GitHub…  {Github.Clone}  
+              -----
+              Manage GitHub Accounts…  {Github.Open.Settings}  
+            Manage Remotes…  {Git.Configure.Remotes}  
+            Clone…  {Git.Clone}  
+            -----
+            Abort Revert  {Git.Revert.Abort}  
+            Abort Cherry-Pick  {Git.CherryPick.Abort}  
+            Continue Cherry-Pick  {Git.CherryPick.Continue}  
+          Create Merge Request…  {GitLab.Merge.Request.Create}  
+          Sync Fork  {Github.Sync.Fork}  
+          Create Pull Request…  {Github.Create.Pull.Request}  
+          View Pull Requests  {Github.View.Pull.Request}  
+        -----
+        Create Patch from Local Changes…  {ChangesView.CreatePatch}  
+        Apply Patch…  {ChangesView.ApplyPatch}  
+        Apply Patch from Clipboard…  {ChangesView.ApplyPatchFromClipboard}  
+        Shelve Changes…  {ChangesView.Shelve}  
+      -----
+      Get from Version Control…  {Vcs.VcsClone}  
+      [+] Browse VCS Repository  {Vcs.Browse}  
+        Show Git Repository Log…  {Git.Log}  
+      -----
+      [+] Import into Version Control  {Vcs.Import}  
+        Create Git Repository…  {Git.Init}  
+        Share Project on GitLab  {GitLab.Share}  
+        Share Project on GitHub  {Github.Share}  
+    [+] <no text>  {Git.MainMenu}  
+      Commit…  {CheckinProject}  Ctrl+K
+      Commit…  {Git.Commit.Stage}  Ctrl+K
+      Push…  {Vcs.Push}  Ctrl+Shift+K
+      Update Project  {Vcs.UpdateProject}  Ctrl+T
+      Pull…  {Git.Pull}  
+      Fetch  {Git.Fetch}  
+      Unshallow repository  {Git.Unshallow}  
+      -----
+      Merge…  {Git.Merge}  
+      [+] Merge  {Git.MainMenu.MergeActions}  
+        Commit merge  {Git.Merge.Commit}  
+        Abort Merge  {Git.Merge.Abort}  
+      Rebase…  {Git.Rebase}  
+      [+] Rebase  {Git.MainMenu.RebaseActions}  
+        Abort Rebase  {Git.Rebase.Abort}  
+        Continue Rebase  {Git.Rebase.Continue}  
+        Skip Commit  {Git.Rebase.Skip}  
+      Resolve Conflicts…  {Git.ResolveConflicts}  
+      Revert Resolved  {Git.RevertResolved}  
+      -----
+      Branches…  {Git.Branches}  Ctrl+Shift+`
+      New Branch…  {Git.CreateNewBranch}  Ctrl+Alt+N
+      New Tag…  {Git.Tag}  
+      Reset HEAD…  {Git.Reset}  
+      -----
+      New Worktree…  {Git.CreateNewWorkingTree}  
+      Worktrees…  {Git.Show.WorkingTrees}  
+      -----
+      Show VCS Log  {Vcs.Show.Log}  
+      [+] Patch  {Patch.MainMenu}  
+        Create Patch from Local Changes…  {ChangesView.CreatePatch}  
+        Apply Patch…  {ChangesView.ApplyPatch}  
+        Apply Patch from Clipboard…  {ChangesView.ApplyPatchFromClipboard}  
+      [+] Uncommitted Changes  {Git.MainMenu.LocalChanges}  
+        Shelve Changes…  {ChangesView.Shelve}  
+        Show Shelf  {Vcs.Show.Shelf}  
+        Show Git Stash  {Git.Show.Stash}  
+        Stash Changes…  {Git.Stash}  
+        Unstash Changes…  {Git.Unstash}  
+        Rollback…  {ChangesView.Revert}  Ctrl+Alt+Z
+        [+] <no text>  {Vcs.UmlDiff}  
+          Show Local Changes as UML  {UML.ShowChanges}  Ctrl+Alt+Shift+D
+      [+] <no text>  {Git.MainMenu.FileActions}  
+        [+] <no text>  {Git.FileActions}  
+          Commit File  {CheckinFiles}  
+          Add  {Git.Add}  Ctrl+Alt+A
+          [+] <no text>  {Git.Ignore.File}  
+          -----
+          Annotate  {Annotate}  
+          Compare with Same Repository Version  {Compare.SameVersion}  Ctrl+D
+          Compare with Revision…  {Compare.Selected}  
+          Compare with Branch or Tag…  {Git.CompareWithBranch}  
+          Show History  {Vcs.ShowTabbedFileHistory}  
+          Show History for Selection…  {Vcs.ShowHistoryForBlock}  
+      -----
+      [+] GitLab  {GitLab.Main.Group}  
+        Create Merge Request…  {GitLab.Merge.Request.Create}  
+        View Merge Requests  {GitLab.Merge.Request.Show.List}  
+        Create Snippet…  {GitLab.Create.Snippet}  
+        -----
+        Share Project on GitLab  {GitLab.Share}  
+        Clone Repository from GitLab…  {GitLab.Clone}  
+        -----
+        Manage GitLab Accounts…  {GitLab.Open.Settings}  
+      [+] GitHub  {GitHub.MainMenu}  
+        Create Pull Request…  {Github.Create.Pull.Request}  
+        View Pull Requests  {Github.View.Pull.Request}  
+        Sync Fork  {Github.Sync.Fork}  
+        Create Gist…  {Github.Create.Gist}  
+        [+] <no text>  {Github.Open.In.Browser}  
+        -----
+        Share Project on GitHub  {Github.Share}  
+        Clone Repository from GitHub…  {Github.Clone}  
+        -----
+        Manage GitHub Accounts…  {Github.Open.Settings}  
+      Manage Remotes…  {Git.Configure.Remotes}  
+      Clone…  {Git.Clone}  
+      -----
+      VCS Operations Popup…  {Vcs.QuickListPopupAction}  Alt+`
+      -----
+      Abort Revert  {Git.Revert.Abort}  
+      Continue Cherry-Pick  {Git.CherryPick.Continue}  
+      Abort Cherry-Pick  {Git.CherryPick.Abort}  
+  [+] Window  {WindowMenu}  
+    Minimize  {MinimizeCurrentWindow}  
+    Zoom  {ZoomCurrentWindow}  
+    Move to Built-in Display  {MoveWindowBuiltinDisplayAction}  
+    [+] Tool Window Layouts  {LayoutsGroup}  
+      Default  {RestoreFactoryDefaultLayout}  
+      -----
+      [+] Tool Window Layout List  {CustomLayoutsGroup}  
+      -----
+      Restore Current Layout  {RestoreDefaultLayout}  Shift+F12
+      Save Changes in Current Layout  {StoreDefaultLayout}  
+      Save Current Layout as New…  {StoreNewLayout}  
+    -----
+    [+] Active Tool Window  {ActiveToolwindowGroup}  
+      Hide Active Tool Window  {HideActiveWindow}  Shift+Escape
+      Hide Side Tool Windows  {HideSideWindows}  
+      Hide Bottom Tool Windows  {HideBottomWindows}  
+      Hide All Tool Windows  {HideAllWindows}  Ctrl+Shift+F12
+      Open as Editor Tab  {MoveToolWindowTabToEditorAction}  
+      Pin Active Tool Window Tab  {PinToolwindowTab}  
+      Jump to Last Tool Window  {JumpToLastWindow}  F12
+      <no text>  {MaximizeToolWindow}  Ctrl+Shift+Quote
+      Dock  {DockToolWindow}  
+      -----
+      Select Next Tab  {NextTab}  Alt+Right
+      Select Previous Tab  {PreviousTab}  Alt+Left
+      Close Active Tab  {CloseActiveTab}  Ctrl+Shift+F4
+      Close Other Tabs  {TW.CloseOtherTabs}  
+      Close All Tabs  {TW.CloseAllTabs}  
+      -----
+      Split Right  {TW.SplitRight}  
+      Split and Move Right  {TW.SplitAndMoveRight}  
+      Split Down  {TW.SplitDown}  
+      Split and Move Down  {TW.SplitAndMoveDown}  
+      Unsplit  {TW.Unsplit}  
+      Go to Next Splitter  {TW.MoveToNextSplitter}  
+      Go to Previous Splitter  {TW.MoveToPreviousSplitter}  
+      -----
+      [+] View Mode  {TW.ViewModeGroup}  
+      [+] <no text>  {TW.MoveToGroup}  
+      Group Tabs  {ToggleContentUiTypeMode}  
+      Show List of Tabs  {ShowContent}  Alt+Down
+      [+] Resize  {ResizeToolWindowGroup}  
+        Stretch to Left  {ResizeToolWindowLeft}  Ctrl+Alt+Shift+Left
+        Stretch to Right  {ResizeToolWindowRight}  Ctrl+Alt+Shift+Right
+        Stretch to Top  {ResizeToolWindowUp}  Ctrl+Alt+Shift+Up
+        Stretch to Bottom  {ResizeToolWindowDown}  Ctrl+Alt+Shift+Down
+    [+] Editor Tabs  {EditorTabsGroup}  
+      Select Next Tab  {NextTab}  Alt+Right
+      Select Previous Tab  {PreviousTab}  Alt+Left
+      Pin Active Tab  {PinActiveEditorTab}  
+      Keep Tab Open  {KeepTabOpen}  
+      Show Hidden Tabs  {TabList}  
+      -----
+      [+] Editor Close Actions  {CloseEditorsGroup}  
+        Close Tab  {CloseContent}  Ctrl+F4
+        Close Other Tabs  {CloseAllEditorsButActive}  
+        Close All Tabs  {CloseAllEditors}  
+        Close Unmodified Tabs  {CloseAllUnmodifiedEditors}  
+        Close All but Pinned  {CloseAllUnpinnedEditors}  
+        Close Tabs to the Left  {CloseAllToTheLeft}  
+        Close Tabs to the Right  {CloseAllToTheRight}  
+        Close All Read-Only Tabs  {CloseAllReadonly}  
+        Open as Editor Tab  {MoveToolWindowTabToEditorAction}  
+      -----
+      Reopen Closed Tab  {ReopenClosedTab}  
+      Split Right  {SplitVertically}  
+      Split and Move Right  {MoveTabRight}  
+      Split Down  {SplitHorizontally}  
+      Split and Move Down  {MoveTabDown}  
+      Open in Split with Chooser…  {SplitChooser}  Alt+Shift+Enter
+      [+] Split with Chooser Navigation  {SplitChooser.Actions}  
+        Next Split  {SplitChooser.NextWindow}  Tab
+        Previous Split  {SplitChooser.PreviousWindow}  Shift+Tab
+        Exit Chooser  {SplitChooser.Exit}  Escape
+        Split  {SplitChooser.Split}  Enter
+        Duplicate  {SplitChooser.Duplicate}  Ctrl+Enter
+        Without Split  {SplitChooser.SplitCenter}  Space
+        Use Top Split or Switch Up  {SplitChooser.SplitTop}  Up
+        Use Left Split or Switch Left  {SplitChooser.SplitLeft}  Left
+        Use down Split or Switch Down  {SplitChooser.SplitDown}  Down
+        Use Right Split or Switch Right  {SplitChooser.SplitRight}  Right
+      Stretch Editor to Top  {StretchSplitToTop}  
+      Stretch Editor to Left  {StretchSplitToLeft}  
+      Stretch Editor to Bottom  {StretchSplitToBottom}  
+      Stretch Editor to Right  {StretchSplitToRight}  
+      Change Splitter Orientation  {ChangeSplitOrientation}  
+      <no text>  {MaximizeEditorInSplit}  
+      Unsplit  {Unsplit}  
+      Unsplit All  {UnsplitAll}  
+      Go to Next Splitter  {NextSplitter}  
+      Go to Previous Splitter  {PrevSplitter}  
+      -----
+      Configure Editor Tabs…  {ConfigureEditorTabs}  
+    [+] Notifications  {Notifications}  
+      Close First  {CloseFirstNotification}  
+      Close All  {CloseAllNotifications}  
+    [+] Processes  {BackgroundTasks}  
+      Show  {ShowProcessWindow}  
+      Auto Show  {AutoShowProcessWindow}  
+    -----
+    [+] Open Project Windows  {OpenProjectWindows}  
+      Next Project Window  {NextProjectWindow}  Ctrl+Alt+]
+      Previous Project Window  {PreviousProjectWindow}  Ctrl+Alt+[
+      Merge All Project Windows  {MergeAllWindowsAction}  
+      -----
+  [+] Help  {HelpMenu}  
+    Welcome  {OpenWelcome}  
+    Find Action…  {GotoAction}  Ctrl+Shift+A
+    -----
+    Help  {HelpTopics}  
+    -----
+    [+] <no text>  {LearnGroup}  
+      [+] <no text>  {ProductivityFeatures}  
+        Tip of the Day  {ShowTips}  
+        My Productivity  {ProductivityGuide}  
+      Learn IDE Features  {ShowLearnPanel}  
+    What's New  {WhatsNewAction}  
+    -----
+    Getting Started  {OnlineDocAction}  
+    Product on YouTube  {Help.JetBrainsTV}  
+    Keyboard Shortcuts PDF  {Help.KeymapReference}  
+    -----
+    Contact Support…  {TechnicalSupport}  
+    Submit a Bug Report…  {ReportProblem}  
+    Submit Feedback…  {SendFeedback}  
+    -----
+    Show Log in File Manager  {ShowLog}  
+    Show SQL Log  {ShowSQLLog}  
+    Collect Logs and Diagnostic Data  {CollectZippedLogs}  
+    Start CPU Usage Profiling  {CaptureCPUUsageData}  
+    Collect Host and Client Logs  {CodeWithMeBackendCollectZippedLogs}  
+    Capture Memory Snapshot  {CaptureMemorySnapShot}  
+    -----
+    [+] Diagnostic Tools  {HelpDiagnosticTools}  
+      Activity Monitor…  {Performance.ActivityMonitor}  
+      Dump Threads  {Performance.DumpThreads}  
+      Run Memory Tester…  {Performance.MemTester}  
+      -----
+      Debug Log Settings…  {LogDebugConfigure}  
+      Special Files and Folders…  {BrowseSpecialPaths}  
+      Restart Microsoft Defender Notification  {ResetWindowsDefenderNotification}  
+      [+] <no text>  {StartProfileGroup}  
+        [+] <no text>  {AsyncGroup}  
+          -----
+          Start CPU Usage Profiling  {CaptureCPUUsageData}  
+          Start Async Profiler  {performancePlugin.StartAsyncProfilerAction}  
+        Start Node.js Services Profiling  {NodeServicesProfilerAction}  
+      [+] <no text>  {DiagnosticGroup}  
+        -----
+        Capture Memory Snapshot  {CaptureMemorySnapShot}  
+        -----
+        [+] <no text>  {AsyncDiagnosticGroup}  
+          Profile Indexing  {performancePlugin.ProfileIndexingAction}  
+      [+] <no text>  {IndexingDiagnosticGroup}  
+        Open Indexing Diagnostics  {performancePlugin.OpenIndexingDiagnosticsAction}  
+    Change Memory Settings  {performancePlugin.ShowMemoryDialogAction}  
+    Edit Custom Properties…  {EditCustomProperties}  
+    Edit Custom VM Options…  {EditCustomVmOptions}  
+    Delete Leftover IDE Directories…  {DeleteOldAppDirs}  
+    -----
+    [+] Registration Actions  {RegistrationActions}  
+      Register…  {Register}  
+    Check for Updates…  {CheckForUpdate}  
+    About  {About}  
+    -----
+
+actions dumped: 868
+

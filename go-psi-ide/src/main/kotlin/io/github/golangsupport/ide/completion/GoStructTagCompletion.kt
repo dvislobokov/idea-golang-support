@@ -180,20 +180,36 @@ object GoStructTagCompletion {
         return position(before, whole)
     }
 
-    /** The names the field declaration of [tag] offers for [key], in the style the other fields of the struct use for it. */
-    fun namesFor(tag: GoTag, key: String): List<String> {
+    /**
+     * The names the field declaration of [tag] offers for [key], in the style the other fields of the struct use for it; with
+     * [observedOnly] nothing when no other field has the key (instead of the names in [defaultStyle]).
+     */
+    fun namesFor(tag: GoTag, key: String, observedOnly: Boolean = false): List<String> {
         val declaration = tag.parent as? GoFieldDeclaration ?: return emptyList()
         val struct = declaration.parent as? GoStructType ?: return emptyList()
+        val samples = samples(struct, key, declaration)
+        if (observedOnly && samples.isEmpty()) return emptyList()
+        val style = detectStyle(key, samples)
+        return fieldNames(declaration).map { style.apply(it) }.distinct()
+    }
+
+    /** GoLand's four names of a field in a tag value, in its order: `full-name`, `full_name`, `FullName`, `fullName`. */
+    fun nameStyles(field: String): List<String> = listOf(Style.KEBAB, Style.SNAKE, Style.AS_IS, Style.LOWER_FIRST).map { it.apply(field) }.distinct()
+
+    /** The style the fields of [struct] use for [key] ([defaultStyle] when none has it): what Add Tag Key to All Fields writes. */
+    fun styleFor(struct: GoStructType, key: String): Style = detectStyle(key, samples(struct, key, null))
+
+    /** (field name, name in the tag) of the fields of [struct] but [except] that have [key]. */
+    private fun samples(struct: GoStructType, key: String, except: GoFieldDeclaration?): List<Pair<String, String>> {
         val samples = ArrayList<Pair<String, String>>()
         for (other in struct.fieldDeclarationList) {
-            if (other === declaration) continue
+            if (other === except) continue
             val value = other.tag?.let { GoStructTagInspection.valueOf(it.stringLiteral) }?.let { GoStructTags.parse(it).lookup(key) } ?: continue
             val name = value.substringBefore(',')
             if (name.isEmpty() || name == "-") continue
             fieldNames(other).forEach { samples += it to name }
         }
-        val style = detectStyle(key, samples)
-        return fieldNames(declaration).map { style.apply(it) }.distinct()
+        return samples
     }
 
     private fun fieldNames(d: GoFieldDeclaration): List<String> =

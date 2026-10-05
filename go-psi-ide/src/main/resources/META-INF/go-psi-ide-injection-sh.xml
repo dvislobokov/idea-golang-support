@@ -1,0 +1,7 @@
+<!-- go-psi-ide, language injection: Shell Script into the command of a //go:generate line. The host loads this file through an optional
+     dependency on com.jetbrains.sh, so IDEs without the Shell Script plugin simply have no such injection. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <multiHostInjector implementation="io.github.golangsupport.ide.injection.sh.GoGenerateShellInjector"/>
+  </extensions>
+</idea-plugin>

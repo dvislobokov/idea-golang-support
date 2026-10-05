@@ -6,18 +6,26 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.inspections.GoDiagnosticsCache
+import io.github.golangsupport.ide.refactoring.GoInlineFunction
 import io.github.golangsupport.lang.psi.GoAssignmentStatement
 import io.github.golangsupport.lang.psi.GoCallExpr
 import io.github.golangsupport.lang.psi.GoCompositeLit
 import io.github.golangsupport.lang.psi.GoConstraintElem
 import io.github.golangsupport.lang.psi.GoExpression
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoFunctionLit
+import io.github.golangsupport.lang.psi.GoFunctionOrMethodDeclaration
+import io.github.golangsupport.lang.psi.GoImportList
 import io.github.golangsupport.lang.psi.GoLeftHandExprList
+import io.github.golangsupport.lang.psi.GoPackageClause
 import io.github.golangsupport.lang.psi.GoReferenceExpression
+import io.github.golangsupport.lang.psi.GoSignature
 import io.github.golangsupport.lang.psi.GoSpecType
 import io.github.golangsupport.lang.psi.GoStructType
 import io.github.golangsupport.lang.psi.GoType
@@ -28,6 +36,8 @@ import io.github.golangsupport.lang.psi.GoTypes
 import io.github.golangsupport.lang.psi.impl.GoTypeReferenceExpressionMixin
 import io.github.golangsupport.semantic.api.GoSemanticService
 import io.github.golangsupport.semantic.psi.GoPsiUtil
+import io.github.golangsupport.semantic.psi.GoPsiUtil.expressions
+import io.github.golangsupport.semantic.psi.GoPsiUtil.hasEllipsis
 import io.github.golangsupport.semantic.psi.GoPsiUtil.qualifier
 import io.github.golangsupport.semantic.types.GoBasicType
 import io.github.golangsupport.semantic.types.GoInterfaceType
@@ -254,6 +264,104 @@ class GoCreateTypeFromUsageIntention : GoCreateFromUsageIntention() {
         val declaration = "type ${usage.name} ${if (constraint) "interface{}" else "struct{}"}"
         val edit = placed(usage, target, declaration) ?: return null
         return GoCreatePlan(target, listOf(edit), emptyList(), "Create type '${usage.name}'")
+    }
+}
+
+/**
+ * An undefined plain name used as a value inside a function body, for the global variable and parameter intentions: its semantic type
+ * (assigned or expected) and the type text; the callee of a call `x(a)` gets the function type of the call (`func(a int)`).
+ */
+internal class GoValueUsage(val ref: GoReferenceExpression, val type: SemanticType?, val typeText: String) {
+    companion object {
+        fun of(usage: GoUsage, source: GoSourceText, typeParams: Boolean): GoValueUsage? {
+            if (usage.code != "undefined") return null
+            val ref = usage.identifier.parent as? GoReferenceExpression ?: return null
+            if (ref.qualifier != null || !GoPsiUtil.isInsideFunctionBody(ref)) return null
+            val parent = ref.parent
+            if (parent is GoReferenceExpression && parent.qualifier == ref) return null
+            if (PsiTreeUtil.getParentOfType(ref, GoTypeReferenceExpression::class.java, GoType::class.java) != null) return null
+            if (parent is GoCallExpr && parent.expression == ref) {
+                val signature = GoCreateText.callSignature(parent, source, emptySet()) ?: return null
+                return GoValueUsage(ref, null, "func$signature")
+            }
+            val type = GoCreateText.valueType(GoCreateUsages.valueTypeFor(ref)).takeUnless { !typeParams && GoCreateText.mentionsTypeParam(it) }
+            return GoValueUsage(ref, type, GoCreateText.type(source, type))
+        }
+    }
+}
+
+/** `x` undefined inside a function: `var x T` at package level, after the imports (also for the callee of a call: `var x func(a int)`). */
+class GoCreateGlobalVariableFromUsageIntention : GoCreateFromUsageIntention() {
+    override val defaultText: String = "Create global variable"
+
+    override fun plan(usage: GoUsage): GoCreatePlan? {
+        val source = GoSourceText(usage.file)
+        val value = GoValueUsage.of(usage, source, typeParams = false) ?: return null
+        val file = usage.file
+        val anchor = PsiTreeUtil.getChildOfType(file, GoImportList::class.java)?.importDeclarationList?.lastOrNull()
+            ?: PsiTreeUtil.getChildOfType(file, GoPackageClause::class.java) ?: return null
+        val end = anchor.textRange.endOffset
+        val edit = GoEditPlan.Edit(end, end, "\n\nvar ${usage.name} ${value.typeText}")
+        return GoCreatePlan(file, listOf(edit), source.imports, "Create global variable '${usage.name}'")
+    }
+}
+
+/**
+ * `x` undefined inside a function or function literal: `x T` appended to its parameters (before a variadic one); the calls of a
+ * declared function in the project pass the zero value of `T` for it, so they keep compiling.
+ */
+class GoCreateParameterFromUsageIntention : GoCreateFromUsageIntention() {
+    override val defaultText: String = "Create parameter"
+
+    override fun plan(usage: GoUsage): GoCreatePlan? {
+        val source = GoSourceText(usage.file)
+        val value = GoValueUsage.of(usage, source, typeParams = true) ?: return null
+        val parameters = signatureOf(value.ref)?.parameters ?: return null
+        val list = parameters.parameterDeclarationList
+        val param = "${usage.name} ${value.typeText}"
+        val last = list.lastOrNull()
+        val edit = when {
+            last == null -> GoEditPlan.Edit(parameters.lparen.textRange.endOffset, parameters.lparen.textRange.endOffset, param)
+            last.text.contains("...") -> GoEditPlan.Edit(last.textRange.startOffset, last.textRange.startOffset, "$param, ")
+            else -> GoEditPlan.Edit(last.textRange.endOffset, last.textRange.endOffset, ", $param")
+        }
+        return GoCreatePlan(usage.file, listOf(edit), source.imports, "Create parameter '${usage.name}'")
+    }
+
+    override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
+        if (editor == null || file !is GoFile) return
+        val usage = GoUsage.at(file, editor.caretModel.offset) ?: return
+        val plan = plan(usage) ?: return
+        val value = GoValueUsage.of(usage, GoSourceText(file), typeParams = true) ?: return
+        val calls = callEdits(value)
+        GoCreateEdits.apply(GoCreatePlan(plan.target, plan.edits + calls[file]?.first.orEmpty(), plan.imports + calls[file]?.second.orEmpty(), plan.text))
+        for ((target, edits) in calls) if (target != file) GoCreateEdits.apply(GoCreatePlan(target, edits.first, edits.second, plan.text))
+    }
+
+    private fun signatureOf(ref: PsiElement): GoSignature? = when (val owner = GoPsiUtil.functionOwner(ref)) {
+        is GoFunctionOrMethodDeclaration -> owner.signature
+        is GoFunctionLit -> owner.signature
+        else -> null
+    }
+
+    /** The zero value appended to every call of the declared function around [value], per file with the imports it needs. */
+    private fun callEdits(value: GoValueUsage): Map<GoFile, Pair<List<GoEditPlan.Edit>, Set<String>>> {
+        val function = GoPsiUtil.functionOwner(value.ref) as? GoFunctionOrMethodDeclaration ?: return emptyMap()
+        val out = LinkedHashMap<GoFile, Pair<MutableList<GoEditPlan.Edit>, GoSourceText>>()
+        for (reference in ReferencesSearch.search(function, GlobalSearchScope.projectScope(function.project)).findAll()) {
+            val ref = reference.element as? GoReferenceExpression ?: continue
+            val call = GoInlineFunction.callOf(ref) ?: continue
+            val list = call.argumentList ?: continue
+            if (list.hasEllipsis) continue
+            val file = call.containingFile as? GoFile ?: continue
+            val entry = out.getOrPut(file) { ArrayList<GoEditPlan.Edit>() to GoSourceText(file) }
+            val zero = value.type?.let { entry.second.zero(it) } ?: "nil"
+            val rparen = list.rparen ?: continue
+            val args = list.expressions
+            val offset = args.lastOrNull()?.textRange?.endOffset ?: rparen.textRange.startOffset
+            entry.first += GoEditPlan.Edit(offset, offset, if (args.isEmpty()) zero else ", $zero")
+        }
+        return out.mapValues { (_, v) -> v.first to v.second.imports }
     }
 }
 

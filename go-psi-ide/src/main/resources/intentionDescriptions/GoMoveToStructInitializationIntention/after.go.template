@@ -1,0 +1,1 @@
+s := Server{Host: "localhost", Port: 8080}

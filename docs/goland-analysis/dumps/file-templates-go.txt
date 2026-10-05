@@ -1,0 +1,17 @@
+[Internal] Go Application.go
+      package main⏎⏎func main() {#[[$END$]]#}⏎
+[Internal] Go Scratch.go
+      package main⏎⏎func main() {⏎	#[[$END$]]#⏎}⏎
+[Internal] Go File.go
+      package ${GO_PACKAGE_NAME}⏎
+[Code] Go Benchmark.go
+      func Benchmark#[[$NAME$]]#(${PARAM_NAME} ${PARAM_TYPE}) {⏎	for i := 0; i < ${PARAM_NAME}.N; i++ {⏎		#[[$END$]]#⏎	}⏎}⏎
+[Code] Go Example.go
+      func Example#[[$NAME$]]#() {⏎	#[[$END$]]#⏎}⏎
+[Code] Go Table Benchmark.go
+      func Benchmark#[[$NAME$]]#(${PARAM_NAME} ${PARAM_TYPE}) {⏎	benchmarks := []struct {⏎		name string⏎	}{⏎		// TODO: benchmarks⏎	}⏎	for _, bm := range benchmarks {⏎		${PARAM_NAME}.Run(bm.name, func(${PARAM_NAME} ${PARAM_TYPE}) {⏎			for i := 0; i < ${PARAM_NAME}.N; i++ {⏎				#[[$END$]]#⏎			}⏎		})⏎	}⏎}⏎
+[Code] Go Table Test.go
+      func Test#[[$NAME$]]#(${PARAM_NAME} ${PARAM_TYPE}) {⏎	tests := []struct {⏎		name string⏎	}{⏎		// TODO: test cases⏎	}⏎	for _, test := range tests {⏎		${PARAM_NAME}.Run(test.name, func(${PARAM_NAME} ${PARAM_TYPE}) {⏎			#[[$END$]]#⏎		})⏎	}⏎}⏎
+[Code] Go Test.go
+      func Test#[[$NAME$]]#(${PARAM_NAME} ${PARAM_TYPE}) {⏎	#[[$END$]]#⏎}⏎
+

@@ -29,6 +29,7 @@
   <xi:include href="/META-INF/go-psi-ide-injection.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <depends optional="true" config-file="go-psi-ide-injection-json.xml">com.intellij.modules.json</depends>
   <depends optional="true" config-file="go-psi-ide-injection-sql.xml">com.intellij.database</depends>
+  <depends optional="true" config-file="go-psi-ide-injection-sh.xml">com.jetbrains.sh</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <!-- The plugin's highlighter is the root module's; editor features under test need one over the PSI lexer. -->

@@ -1,0 +1,4 @@
+// go generate level.go
+<spot>//go:generate stringer -type=Level</spot>
+//go:generate mockgen -source=level.go -destination=level_mock.go
+type Level int

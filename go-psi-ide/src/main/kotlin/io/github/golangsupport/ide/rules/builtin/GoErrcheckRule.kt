@@ -1,7 +1,5 @@
 package io.github.golangsupport.ide.rules.builtin
 
-import io.github.golangsupport.ide.inspections.lint.GoAssignToBlankFix
-import io.github.golangsupport.ide.inspections.lint.GoHandleUncheckedErrorFix
 import io.github.golangsupport.ide.inspections.lint.GoLintPsi
 import io.github.golangsupport.ide.inspections.lint.GoUncheckedErrorInspection
 import io.github.golangsupport.ide.rules.GoCallRule
@@ -12,7 +10,7 @@ import io.github.golangsupport.lang.psi.GoCallExpr
 /**
  * errcheck: a call standing alone as a statement whose `error` result is dropped ([GoUncheckedErrorInspection.isUnchecked]: errcheck's
  * default excludes, `go` / `defer`, `_ = f()` left alone). While this rule runs, the old inspection `GoUncheckedError` stands down;
- * `//noinspection GoUncheckedError` still suppresses it.
+ * `//noinspection GoUncheckedError` still suppresses it, and the user's excludes of that inspection apply (Do not report this method/function anymore).
  */
 class GoErrcheckRule : GoCallRule() {
     override val id: String get() = ID
@@ -26,7 +24,7 @@ class GoErrcheckRule : GoCallRule() {
         if (!GoUncheckedErrorInspection.isUnchecked(call)) return
         val shown = GoLintPsi.calleeReference(call)?.text
         val message = if (shown != null) "Error return value of `$shown` is not checked" else "Error return value is not checked"
-        ctx.report(call, message, GoHandleUncheckedErrorFix(), GoAssignToBlankFix())
+        ctx.report(call, message, *GoUncheckedErrorInspection.fixes(call))
     }
 
     companion object {

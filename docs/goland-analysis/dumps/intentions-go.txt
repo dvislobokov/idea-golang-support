@@ -1,0 +1,61 @@
+Go :: Add dot import alias
+Go :: Add format string argument
+Go :: Add import alias
+Go :: Add key to tags
+Go :: Add method to interface and all its implementations
+Go :: Associate file extension with Go template
+Go :: Change field name style in tags
+Go :: Convert to short var declaration
+Go :: Convert to var declaration
+Go :: Exclude string formatting function
+Go :: Expand signature types
+Go :: Export
+Go :: Fill all fields
+Go :: Fill all fields recursively
+Go :: Fill fields…
+Go :: Fill paragraph
+Go :: Flip binary operator
+Go :: Generate constructor
+Go :: Generate getter
+Go :: Generate getter and setter
+Go :: Generate method
+Go :: Generate setter
+Go :: Generate struct fields from JSON
+Go :: Generate type from JSON
+Go :: Go to implementations
+Go :: Go to interface
+Go :: Implement interface
+Go :: Invert if
+Go :: Join concatenated string literals
+Go :: Mark as string formatting function
+Go :: Migrate function parameter to method receiver
+Go :: Move field assignment to struct initialization
+Go :: Negate expression
+Go :: Negate expression recursively
+Go :: Negate topmost expression
+Go :: Negate topmost expression recursively
+Go :: Remove dot import alias
+Go :: Remove keys from struct literal
+Go :: Remove method from interface and all its implementations
+Go :: Replace 'if' with 'switch'
+Go :: Reuse signature types
+Go :: Run go generate on comment
+Go :: Run go generate on file
+Go :: Run go generate on package
+Go :: Specify dot type
+Go :: Specify type explicitly
+Go :: Update key value in tags
+Go modules :: Merge a group of directives
+Go modules :: Merge all directives
+Go modules :: Merge directive up
+Go modules :: Update dependencies…
+Go | Declarations :: Add parens to declaration
+Go | Declarations :: Merge all declarations
+Go | Declarations :: Merge declaration up
+Go | Declarations :: Merge declaration up via comma
+Go | Declarations :: Remove parens from declaration
+Go | Declarations :: Split all declarations
+Go | Declarations :: Split declarations by comma
+Go | Declarations :: Split declarations into two groups
+intentions: 59
+

@@ -136,6 +136,60 @@
   `context.Context` не первым / подмена `ctx`, `errors.As` с не-указателем и `== ErrX` вместо `errors.Is`; intentions change quote, invert / early return / merge / split `if`,
   `if` ↔ `switch`, split / group объявлений, `var x T` + `x = v` → `x := v`, `:=` ↔ `var`.
 
+### Паритет с GoLand (`PLAN.md`, по живой разведке 2026-10-05; эталон — дампы `docs/goland-analysis/dumps/`)
+- [x] (2026-10-05, 0.2.103) G1: сворачивание однострочников как в GoLand — `if err != nil { return "", err }`, функция с одним `return`, `case` с одной инструкцией, пустые
+  функции и типы; пять галочек в Settings | Editor | General | Code Folding (Go), `GoFoldingSettings`; плейсхолдер — текст тела до 60 символов — тесты, вживую не проверено
+- [x] (2026-10-05, 0.2.104) G1: гаттер Recursive call (`GoRecursiveCallLineMarkerProvider`, в Gutter Icons «Go recursive call»); Shell Script в `//go:generate` (`GoGenerateShellInjector`,
+  опциональная зависимость `com.jetbrains.sh`; хостом инъекции стал только комментарий `//go:generate` — `GoGenerateCommentImpl`, остальные комментарии хостами не стали, цена reformat не вернулась)
+- [x] (2026-10-05, 0.2.105) G1: все 64 цветовых ключа GoLand с теми же id (`GoColors`), страница Color Scheme | Go в группах GoLand с демо-текстом GoLand, откат новых ключей на прежние
+  ключи плагина (пользовательские схемы не меняются); аннотатор различает exported/local функции и вызовы, struct/interface, константы, scope-переменные, переприсваивание в `:=`,
+  получатель, поля, вызовы func-значений, `nil`, ссылки в doc-комментариях; директивы разбиты на keyword / аргументы, `//go:build` — на теги / скобки / операторы.
+  Тест `GoColorSettingsPageTest` сверяет страницу с дампом `color-keys-go.txt`. Светлая схема — цвета подобраны, у GoLand сняты только тёмные
+- [x] (2026-10-05, 0.2.106) G1: подсветка частей тега структуры и глаголов printf в строке формата (`GoStringContentAnnotator`, список функций — у `GoPrintfInspection`), escape valid / invalid
+- [x] (2026-10-05, 0.2.107) G2: линзы «Implement interface» над типом (→ Ctrl+I) и «Add method» над интерфейсом с реализациями (→ Add Method to Interface); позиция usages /
+  implementations — настройка платформы (в GoLand по умолчанию Right, в IDEA Top — `CodeVisionSettingsDefaults` продукта). Не снято: когда GoLand показывает «Add method…» (над `Shape` в дампе её нет)
+- [x] (2026-10-05, 0.2.108) G2: имена параметров только у литералов (сверено построчно с дампами проб), однобуквенные тоже; опция «Show return parameters» — имена результатов у литералов в `return`
+  (по справке GoLand, вживую не снято)
+- [x] (2026-10-05, 0.2.109) G1: инспекция «Shadowing variable» (`GoShadowedVar`, ключ `GO_SHADOWING_VARIABLE`, weak warning «Declaration of 'x' shadows declaration at line N»),
+  Alt+Enter Navigate to shadowed declaration / Rename variable; молчит на `x := x`, переиспользовании в своей области, импортах, `_`. Использования затеняющей переменной GoLand тоже красит — у нас нет
+- [x] (2026-10-05, 0.2.110–0.2.113) G3: в lookup литерала первыми Fill all fields… / Fill selected fields… (`GoFillStructCompletion`, генератор общий с intention — `GoFillStruct`);
+  у констант хвост ` = значение` и тип из стаба; на верхнем уровне `func (*T)` и `func` · Implement Interface... (`GoTopLevelTemplates`, один пункт `func (*T)`, как в дампе);
+  в теге первым Add tag key to all fields… (`GoStructTagKeyToAllFields`), имя в четырёх стилях GoLand (`full-name full_name FullName fullName`, наш пятый `fullname` остался).
+  Не снято: что делает GoLand после выбора Implement Interface...; у нас список ключей шире (`asn1` нет, есть `db env form …`)
+- [x] (2026-10-05, 0.2.114–0.2.116) G3: postfix в общем списке после `.` (были и раньше — `LiveTemplateCompletionContributor`, в тестах включается `setShowTemplatesInTests`; weigher
+  `goPostfixLast` держит их за членами; у квалификатора пакета / типа ключей больше нет); все ключи GoLand (`! & * d p pointer dereference aappend appendAssign cap copy close delete
+  complex imag real println remove as is parseInt parseFloat`), `.sort` по типу, имена `.var` / `.forr` по выражению (`GoPostfixNames`); **`.forr` стал range-циклом GoLand (обратный — `.forrev`),
+  `.append` — выражением** ; страница описаний в Settings | Postfix Completion (`postfixTemplates/GoPostfixTemplate`). Live templates `map p imports consts vars types iota : xml`
+  (контекст `GO_TYPE`); Go Template — на уровне 4. Вживую (порядок с ML-ранжированием, символьные ключи `x.!`) не проверено
+- [x] (2026-10-05, 0.2.117) G3: имена параметров по типу в `func g(` (`err error`, `base Base`, `string2 string`, `ctx context.Context` по префиксу) и подсказки имён переменных
+  (`var _ Circle` → `circle`, `x := c.Area()` → `area`, range → `name` / `i`) — `GoNameSuggestions` / `GoNameCompletion`; порядок пунктов не один в один с GoLand (наш weigher),
+  импортированные типы — только по префиксу (в дампе их нет). Не сделано: платформенный `NameSuggestionProvider` для Rename / Introduce, `GoPostfixNames` ещё не переведён на `GoNameSuggestions`
+- [x] (2026-10-05, 0.2.118–0.2.122) G4: 17 intentions — Flip binary operator, Negate expression (4 вида, тексты из описаний GoLand), Specify type explicitly (`var`/`const`),
+  Remove keys from struct literal (как в GoLand: порядок полей, нули), Move field assignment to struct initialization, Expand / Reuse signature types, Export (rename),
+  Migrate function parameter to method receiver, Merge declaration up / via comma, Split declarations into two groups, Create global variable / parameter 'x'.
+  Не сделано: Specify dot type (Go templates), Fill all fields recursively, обратный Migrate receiver → parameter, Add/Remove parens to declaration, Merge all declarations
+- [x] (2026-10-05, 0.2.123–0.2.127) G4: 12 intentions — Import for side-effects, Add import alias (шаблон переименования квалификаторов), Add / Remove dot import alias;
+  Put arguments / elements on separate lines / on one line (gofmt-раскладка), Join concatenated string literals; Add format string argument, Exclude / Mark as string
+  formatting function (`GoPrintfFunctions`, application-level, имена в формате vet — страница настроек в G8); «Do not report this method/function anymore» у Unchecked error и
+  правила errcheck (свой `GoDoNotReportCalleeFix`: платформенный `AddToInspectionOptionListFix` в light-тестах не находит инструмент); Change field name style in tags,
+  Update key value in tags. Расхождения: тексты Convert to raw string и отказ на `\n` (у GoLand конвертирует); Update key value у GoLand шире (показывался и на совпадающем теге);
+  `nameStyles` продублирован в `GoTagText` — объединить с `GoStructTagCompletion`. Сохранение списка исключений после перезапуска IDE не проверено
+- [x] (2026-10-05, 0.2.128–0.2.130) G4: Go to Implementations / Interfaces / Method Specifications из Alt+Enter (`GoNavigationIntentions`, низкий приоритет, `PsiTargetNavigator`);
+  Run go generate on comment / file / package на строке `//go:generate` (`GoGenerateIntentions`, через `GoGenerateDirectives.run`; где GoLand показывает file / package — не снято);
+  go.mod: Merge a group / all / directive up (`GoModDirectiveEdits`, чистые строки → строки, все виды директив, go.mod и go.work), Update dependencies… (диалог по `GoModUpdates`,
+  `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
+  parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
+  линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05) Живая сверка G1–G4 роботом на песочнице (`TARGET=plugin`, те же скрипты, что снимали GoLand; результаты `build/ui-robot/parity-*.txt`):
+  подсветка `analysis.go` — 369 диапазонов `GO_*` против 367 у GoLand, расхождения: имена типов в тексте doc-комментария (`GO_COMMENT_REFERENCE` у GoLand, у нас только
+  первое слово и `[Name]`), использования затеняющей переменной (GoLand красит и их), `case n := <-ch` у нас `GO_SCOPE_VARIABLE`, у GoLand local, `GO_SYNTAX_UPDATE` — G5;
+  линзы Implement interface над теми же 7 типами, что в дампе; гаттер Recursive call на месте (приходит с медленным проходом); completion `c.` — поля, методы, затем postfix,
+  `err.` — `as is nil nn`, `Holder{` — Fill all / selected первыми; Alt+Enter — Create global variable / parameter, Do not report…, Change field name style, Navigate to shadowed
+  declaration, Exclude string formatting function, Put arguments on separate lines, Add import alias / dot import alias, Go to Implementations / Interfaces / Method Specifications,
+  Run go generate on comment / file / package. Не совпало: «Add format string argument» не показался внутри `Sprintf("%d %s …")` (у GoLand есть), у `//go:generate` теперь пять
+  пунктов запуска (старые Run go:generate / `go generate analysis.go` + три новых — объединить), «Add key to tags» и «Update key value in tags» на совпадающем теге у нас нет.
+  Не смотрел: страницы Settings (Code Folding Go, Color Scheme Go), Fill selected / Change style попапы, Update dependencies… диалог, сохранение исключений после перезапуска
+
 ## Модули
 - [x] go.mod / go.work: тип файла, подсветка, разбор (`GoModFile`)
 - [x] Folding блоков `require (…)`, `replace (…)` и остальных в go.mod / go.work (`GoModFoldingBuilder`) — робот

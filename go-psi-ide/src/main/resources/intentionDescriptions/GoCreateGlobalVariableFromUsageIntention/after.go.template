@@ -1,0 +1,5 @@
+var missing func(items []string)
+
+func f(items []string) {
+	missing(items)
+}

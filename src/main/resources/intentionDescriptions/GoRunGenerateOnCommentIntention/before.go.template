@@ -1,0 +1,2 @@
+<spot>//go:generate stringer -type=Level</spot>
+type Level int

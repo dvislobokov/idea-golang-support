@@ -1,0 +1,100 @@
+
+======== section: Tabs and Indents
+
+              Scheme:
+                   Tabs and Indents
+                      [x] Use tab character
+                      [ ] Smart tabs
+                      Tab size:
+                      <field: 4>
+                      Indent:
+                      <field: 4>
+                      Continuation indent:
+                      <field: 4>
+                      [ ] Keep indents on empty lines
+                       <field: package main import "fmt" func main() { fmt.Println("Hello") }>
+                   Wrapping and Braces
+                   Imports
+                   Other
+
+
+======== section: Wrapping and Braces
+    Hard wrap at: = -1
+    Wrap on typing = Default
+    Visual guides = []
+    Method call arguments = Do not wrap
+    New line after '(' = true
+    Place ')' on new line = true
+    Composite literals = Do not wrap
+    New line after '{' = true
+    Place '}' on new line = true
+    Function parameters = Do not wrap
+    New line after '(' = true
+    Place ')' on new line = true
+    Function result parameters = Do not wrap
+    New line after '(' = true
+    Place ')' on new line = true
+
+              Scheme:
+                   Wrapping and Braces
+                   Tabs and Indents
+                   Imports
+                   Other
+                    <table rows 15>
+    Hard wrap at: | -1
+    Wrap on typing | Default
+    Visual guides | []
+    Method call arguments | Do not wrap
+    New line after '(' | true
+    Place ')' on new line | true
+    Composite literals | Do not wrap
+    New line after '{' | true
+    Place '}' on new line | true
+    Function parameters | Do not wrap
+    New line after '(' | true
+    Place ')' on new line | true
+    Function result parameters | Do not wrap
+    New line after '(' | true
+    Place ')' on new line | true
+
+
+======== section: Imports
+
+              Scheme:
+                   Imports
+                   Wrapping and Braces
+                   Tabs and Indents
+                   Other
+                   [ ] Use backquotes for imports
+                   [ ] Add parentheses for a single import
+                   [ ] Remove redundant import aliases
+                   Sorting type
+                   <combo: GOIMPORTS> of {GOIMPORTS / GOFMT / NONE}
+                   [ ] Move all imports to a single declaration
+                   [ ] Group packages from Go SDK
+                   [ ] Move all packages to a single group (disabled)
+                   [ ] Group
+                   (o) Current project packages
+                   ( ) Imports starting with:
+                   a, a:link {color:#71a1fe;} a:visited {color:#71a1fe;} a:hover {color:#71a1fe;} a:active {color:#71a1fe;} Comma-separated list of prefixes, same as 'goimports -local'
+                    Comma-separated list of prefixes, same as 'goimports -local'
+                       <field: package main import ( "bytes" "fmt" "localPackage" "golang.org/x/tools/cmd/gotype" "appengine" "errors" ) import "github.com/dlsniper/go-metrics">
+         <button: Revert changes>
+
+
+======== section: Other
+
+              Scheme:
+                   Other
+                   Imports
+                   Wrapping and Braces
+                   Tabs and Indents
+                   [ ] Add a leading space to comments
+                   Column width for Fill paragraph:
+                   <field: 80>
+                     [x] On Reformat Code action
+                     a, a:link {color:#71a1fe;} a:visited {color:#71a1fe;} a:hover {color:#71a1fe;} a:active {color:#71a1fe;} Ctrl+Alt+L
+                      Ctrl+Alt+L
+                       <field: package foo import "fmt" //Foo docs func Foo() { fmt.Println("Hello") }>
+         <button: Revert changes>
+
