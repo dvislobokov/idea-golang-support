@@ -130,7 +130,8 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         GoSwitchMissingCasesForIotaConstsInspection(),
     )
 
-    fun testIotaSwitchSkipsFlags() = doHighlight(
+    // seen live: GoLand reports a switch over bit flags (`1 << iota`) too
+    fun testIotaSwitchReportsFlags() = doHighlight(
         """
         package p
 
@@ -143,7 +144,7 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         )
 
         func f(p Perm) {
-        	switch p {
+        	<warning descr="Missing 'case' statements for 'iota' consts in 'switch'">switch</warning> p {
         	case Read:
         	}
         }
@@ -214,13 +215,16 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         	}
         }
         """),
-        "Create 'case' clause for values",
+        "Create missing iota clauses",
         withColors("""
 
         func f(c Color) {
         	switch c {
         	case Green:
-        	case Red, Blue, Cyan, Magenta:
+        	case Red:
+        	case Blue:
+        	case Cyan:
+        	case Magenta:
         	}
         }
         """),
@@ -243,6 +247,7 @@ class GoAnalysisInspectionsTest : GoSemanticIdeTestBase() {
         	switch c {
         	case Green:
         	default:
+        		panic("unhandled default case")
         	}
         }
         """),

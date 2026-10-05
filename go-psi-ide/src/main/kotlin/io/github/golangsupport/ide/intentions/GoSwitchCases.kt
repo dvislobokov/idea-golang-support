@@ -68,7 +68,7 @@ object GoSwitchCases {
     }
 
     /** The edit adding an empty `default:` before the closing brace of [switch]; null when it has one. */
-    fun defaultPlan(file: GoFile, switch: PsiElement): GoEditPlan? {
+    fun defaultPlan(file: GoFile, switch: PsiElement, body: List<String> = emptyList()): GoEditPlan? {
         val rbrace = when (switch) {
             is GoExprSwitchStatement -> switch.rbrace.takeIf { switch.exprCaseClauseList.none { it.default != null } }
             is GoTypeSwitchStatement -> switch.rbrace.takeIf { switch.typeCaseClauseList.none { it.isDefault } }
@@ -76,7 +76,7 @@ object GoSwitchCases {
         } ?: return null
         val text = file.viewProvider.contents
         val indent = GoIntentionText.indentAt(text, switch.textRange.startOffset)
-        return GoEditPlan(listOf(GoIntentionText.insertBefore(text, rbrace.textRange.startOffset, indent, listOf("default:"))), emptyList())
+        return GoEditPlan(listOf(GoIntentionText.insertBefore(text, rbrace.textRange.startOffset, indent, listOf("default:") + body)), emptyList())
     }
 
     /** Applies [plan] to [file] in the current write action, then adds its imports (as the intentions do). */

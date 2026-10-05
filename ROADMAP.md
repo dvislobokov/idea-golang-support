@@ -184,8 +184,8 @@
   TEXT ATTRIBUTES; опция «Add a leading space to comments» работает и при Reformat Code (`GoCommentSpacePostFormatProcessor`). Доснято на GoLand
   (`analysis/intention_run.js`, `widget_status.js`, дамп `inspections-widget-fixprobe.txt`): виджет инспекций показывает «6 syntax updates» своим значком — у нас на
   песочнице тот же пункт и значок (`HighlightInfoType.Iconable`); Update key value на совпадающем теге у GoLand доступен и ничего не меняет (как у нас); Add key to tags у
-  GoLand без выбора вписывает `:"snake_case"` во все поля с шаблоном для ключа — у нас оставлен список ключей (сознательно). Не снято: как GoLand вставляет clause
-  в Create 'case' clause for values и куда ставит `default`; битовые флаги `1 << iota` у нас пропускаются.
+  GoLand без выбора вписывает `:"snake_case"` во все поля с шаблоном для ключа — у нас оставлен список ключей (сознательно). Доснято 0.2.179 (`probe2/sw.go`): исправления GoLand — «Create missing iota clauses» (по `case` на константу перед `}`) и «Create 'default' clause» с
+  `panic("unhandled default case")`; битовые флаги `1 << iota` GoLand тоже отмечает — сделано так же.
 - [x] (2026-10-05, 0.2.177) G10 проверен вживую на песочнике теми же пробами (`infos.js`, `highlights.js`, попапы): `style.go`, `other.go`, `iota3.go`, цвета строк
   120–136 и списки Alt+Enter (`Sprintf`, `//go:generate`, теги) совпали с GoLand построчно; `Plugin to blame: Go` за прогон — 0. Найдено и исправлено: CutPrefix на
   `name = strings.TrimPrefix(name, "go")`. Осталось расхождений: `for true` — текст S1006 вместо `Condition is redundant`; `GoShadowedVar` у GoLand TEXT ATTRIBUTES(11)

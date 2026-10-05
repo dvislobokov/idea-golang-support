@@ -30,6 +30,13 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.179] - 2026-10-05
+
+### Changed — iota switch fixes as seen live on GoLand
+- "Missing 'case' statements for 'iota' consts in 'switch'" reports switches over bit flags (`1 << iota`) too; its fixes are GoLand's
+  Create missing iota clauses (one `case X:` per missing constant before the closing brace) and Create 'default' clause, which now inserts
+  `default:` with `panic("unhandled default case")`.
+
 ## [0.2.178] - 2026-10-05
 
 ### Added — ML completion ranking, step 1: the shared engine and the offline dataset export (docs/ML.md ML-1)
@@ -50,7 +57,7 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
 - The exhaustive-switch inspection is now GoLand's "Missing 'case' statements for 'iota' consts in 'switch'" (`GoSwitchMissingCasesForIotaConsts`,
   Go | Probable bugs, warning; was `GoExhaustiveSwitch`, weak warning): an expression `switch` without `default` that leaves out constants of its type
   declared in a const block using `iota` (every constant of the block counts, even a spec without `iota`). Enums without `iota` and type switches over
-  interfaces are no longer reported (GoLand does not; Fill switch still covers them). Fixes: Create 'case' clause for values (one `case B, C:` clause)
+  interfaces are no longer reported (GoLand does not; Fill switch still covers them). Fixes: Create missing iota clauses (one `case` per missing constant)
   and Create 'default' clause.
 - The Printf inspection is GoLand's `GoPrintFunctions` ("Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions", Go | Probable bugs, weak
   warning; was `GoPrintf`, warning). A verb without an argument reads `No argument for verb: argument index = 2, arguments count = 1 (%s)`; the other

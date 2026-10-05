@@ -8,3 +8,10 @@ renderer com.intellij.go.linter.GoLinterTrafficLightRendererContributor$createRe
 # Add key to tags on `Email string` (struct with json:"user_name" and xml:"age"): no chooser; every field of the struct gets a new tag entry
 #   `:"<snake_case field name>"` with the key left to type in a live template (captured mid-template): json:"user_name" :"user_name", `:"email"`, xml:"age" :"age"
 # Update key value in tags on a matching tag `json:"value"`: available, invoked, document unchanged, no popup
+# 2026-10-05, later: probe2/sw.go (GoSwitchMissingCasesForIotaConsts, GoLand 2026.2.3)
+#   WARNING on `switch` of `Color` consts (Red = iota …) and ALSO on `switch f` of bit flags (FlagA Flag = 1 << iota; FlagB; FlagC); quiet with `default`.
+#   Alt+Enter fixes: «Create 'default' clause» | «Create missing iota clauses» (no "Create 'case' clause for values").
+#   Create missing iota clauses → one `case X:` per missing constant, appended before `}` (case Green: / case Blue: / case Cyan:).
+#   Create 'default' clause → `default:` + `panic("unhandled default case")` appended before `}`.
+# Add key to tags (probe2/sw.go Mixed, key typed as json): every field gets a tag entry, the typed key with `name,omitempty` style value
+#   (`json:"email,omitempty"`); the live template leaves `:"snake"` placeholders while typing — captured mid-template, final shape not clean.
