@@ -22,6 +22,6 @@ class GoImportsFileAction : GoFileToolAction() {
     }
 
     companion object {
-        fun arguments(fileName: String): List<String> = listOf("-w", fileName)
+        fun arguments(fileName: String): List<String> = listOf("-w", "./$fileName")  // `./`: a name starting with `-` must not become a flag
     }
 }

@@ -20,7 +20,8 @@ class GoToolsActionsTest {
 
     @Test
     fun goimportsRewritesTheFile() {
-        assertEquals(listOf("-w", "main.go"), GoImportsFileAction.arguments("main.go"))
+        assertEquals(listOf("-w", "./main.go"), GoImportsFileAction.arguments("main.go"))
+        assertEquals(listOf("-w", "./-x.go"), GoImportsFileAction.arguments("-x.go"))  // never a flag
     }
 
     @Test
