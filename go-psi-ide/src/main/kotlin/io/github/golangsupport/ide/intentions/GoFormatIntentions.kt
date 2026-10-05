@@ -38,7 +38,9 @@ internal object GoFormatText {
 /**
  * Add format string argument (GoLand's text): with the caret inside the format string of a printf-like call, asks for an expression,
  * inserts `%v` at the caret and passes the expression as the argument of that verb (after the arguments of the verbs before the caret).
- * Not offered in a format with explicit argument indexes (`%[2]d`), a malformed one, or a call spreading its arguments (`args...`).
+ * When a verb of the format has no argument yet (`Sprintf("%d %s", n)`), anywhere in the format: the expression becomes the argument of
+ * the first such verb, no verb is added. Not offered in a format with explicit argument indexes (`%[2]d`), a malformed one, or a call
+ * spreading its arguments (`args...`).
  */
 class GoAddFormatStringArgumentIntention : IntentionAction {
     override fun getText(): String = "Add format string argument"
@@ -61,14 +63,23 @@ class GoAddFormatStringArgumentIntention : IntentionAction {
         if (expression.isNullOrEmpty()) return
         WriteCommandAction.runWriteCommandAction(project, text, null, {
             val at = insertion(go, editor.caretModel.offset) ?: return@runWriteCommandAction
-            val edits = listOf(GoEditPlan.Edit(at.verbOffset, at.verbOffset, "%v"), GoEditPlan.Edit(at.argOffset, at.argOffset, at.argText(expression)))
-            GoEditText.apply(go, edits)
-            editor.caretModel.moveToOffset(at.verbOffset + 2)
+            val argument = GoEditPlan.Edit(at.argOffset, at.argOffset, at.argText(expression))
+            if (!at.newVerb) {
+                GoEditText.apply(go, listOf(argument))
+            } else {
+                GoEditText.apply(go, listOf(GoEditPlan.Edit(at.verbOffset, at.verbOffset, "%v"), argument))
+                editor.caretModel.moveToOffset(at.verbOffset + 2)
+            }
         }, go)
     }
 
-    /** Where `%v` goes ([verbOffset]) and where its argument goes ([argOffset]: before an argument, or after the last one). */
+    /**
+     * Where `%v` goes ([verbOffset]; -1 when the format has a verb without an argument, which gets it instead) and where the argument goes
+     * ([argOffset]: before an argument, or after the last one).
+     */
     class Insertion(val verbOffset: Int, val argOffset: Int, private val before: Boolean) {
+        val newVerb: Boolean get() = verbOffset >= 0
+
         fun argText(expression: String): String = if (before) "$expression, " else ", $expression"
     }
 
@@ -85,9 +96,11 @@ class GoAddFormatStringArgumentIntention : IntentionAction {
             val index = if (rel == value.closingQuote) value.value.length else (0 until value.value.length).firstOrNull { value.sourceRange(it, it + 1)?.first == rel } ?: return null
             val format = GoFormatString.parse(value.value)
             if (format.error != null || format.anyIndex) return null
+            val values = call.values
+            // a verb without its argument (`Sprintf("%d %s", n)`, GoLand offers it there, seen live): its argument goes after the last one
+            if (format.directives.sumOf { it.argNums.size } > values.size) return Insertion(-1, (values.lastOrNull() ?: literal).textRange.endOffset, false)
             if (format.directives.any { index > it.start && index < it.end }) return null
             val before = format.directives.filter { it.end <= index }.sumOf { it.argNums.size }
-            val values = call.values
             val next = values.getOrNull(before)
             if (next != null) return Insertion(offset, next.textRange.startOffset, true)
             val last = values.lastOrNull() ?: literal

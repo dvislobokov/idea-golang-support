@@ -9,6 +9,8 @@
     <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.inspections.gofix.GoModernizerWhatsNewCodeVisionProvider"/>
     <config.codeVisionGroupSettingProvider implementation="io.github.golangsupport.ide.inspections.gofix.GoBatchSyntaxUpdateCodeVisionSettings"/>
     <config.codeVisionGroupSettingProvider implementation="io.github.golangsupport.ide.inspections.gofix.GoModernizerWhatsNewCodeVisionSettings"/>
+    <!-- GoLand parity G10: the lenses are off by default (GoLand shows the count in the inspections widget, not in the file) -->
+    <postStartupActivity implementation="io.github.golangsupport.ide.inspections.gofix.GoSyntaxUpdateLensDefaults"/>
   </extensions>
   <actions>
     <action id="Go.UpdateSyntax" class="io.github.golangsupport.ide.inspections.gofix.GoUpdateSyntaxAction" text="Update Syntax..."

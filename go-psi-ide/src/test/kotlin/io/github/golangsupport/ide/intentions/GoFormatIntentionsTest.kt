@@ -76,6 +76,45 @@ class GoFormatIntentionsTest : GoIntentionTestSupport() {
         )
     }
 
+    // G10, seen live on GoLand 2026.2.3: offered with the caret on a verb that has no argument; the argument is added for it, no new verb
+    fun testAddFormatStringArgumentForAVerbWithoutOne() {
+        answer("name")
+        doTest(
+            """
+            package p
+
+            import "fmt"
+
+            func f(n int, name string) string {
+            	return fmt.Sprintf("%d %<caret>s", n)
+            }
+            """,
+            "Add format string argument",
+            """
+            package p
+
+            import "fmt"
+
+            func f(n int, name string) string {
+            	return fmt.Sprintf("%d %s", n, name)
+            }
+            """,
+        )
+    }
+
+    fun testPutArgumentsOnSeparateLinesInAFormatString() = assertOffered(
+        """
+        package p
+
+        import "fmt"
+
+        func f(n int) string {
+        	return fmt.Sprintf("%d %<caret>s", n)
+        }
+        """,
+        "Put arguments on separate lines",
+    )
+
     fun testNoFormatArgumentOutsideAFormatString() = assertNotOffered(
         """
         package p

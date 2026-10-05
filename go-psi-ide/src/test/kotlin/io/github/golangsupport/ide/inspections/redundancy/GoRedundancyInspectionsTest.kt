@@ -11,13 +11,13 @@ class GoRedundancyInspectionsTest : GoParityInspectionTestBase() {
         """
         package p
 
-        <warning descr="Empty 'import' declaration">import ()</warning>
+        <warning descr="Empty declaration 'import ()'">import ()</warning>
 
-        <warning descr="Empty 'var' declaration">var ()</warning>
+        <warning descr="Empty declaration 'var ()'">var ()</warning>
 
-        <warning descr="Empty 'const' declaration">const ()</warning>
+        <warning descr="Empty declaration 'const ()'">const ()</warning>
 
-        <warning descr="Empty 'type' declaration">type ()</warning>
+        <warning descr="Empty declaration 'type ()'">type ()</warning>
 
         var (
         	// kept: a comment inside
@@ -44,8 +44,8 @@ class GoRedundancyInspectionsTest : GoParityInspectionTestBase() {
         var pkg = []int{}
 
         func f() {
-        	s := <weak_warning descr="Empty slice declared using a literal">[]int{}</weak_warning>
-        	var t = <weak_warning descr="Empty slice declared using a literal">[]string{}</weak_warning>
+        	s := <weak_warning descr="Empty slice declaration using a literal">[]int</weak_warning>{}
+        	var t = <weak_warning descr="Empty slice declaration using a literal">[]string</weak_warning>{}
         	u := []int{1}
         	a := [2]int{}
         	var v []int = []int{}
@@ -58,14 +58,14 @@ class GoRedundancyInspectionsTest : GoParityInspectionTestBase() {
     )
 
     fun testPreferNilSliceShortVarFix() = doFix(
-        "package p\n\nfunc f() []int {\n\ts := []int{<caret>}\n\treturn s\n}",
+        "package p\n\nfunc f() []int {\n\ts := []<caret>int{}\n\treturn s\n}",
         "Replace with nil slice declaration",
         "package p\n\nfunc f() []int {\n\tvar s []int\n\treturn s\n}",
         GoPreferNilSliceInspection(),
     )
 
     fun testPreferNilSliceVarFix() = doFix(
-        "package p\n\nfunc f() []string {\n\tvar t = []string{<caret>}\n\treturn t\n}",
+        "package p\n\nfunc f() []string {\n\tvar t = []<caret>string{}\n\treturn t\n}",
         "Replace with nil slice declaration",
         "package p\n\nfunc f() []string {\n\tvar t []string\n\treturn t\n}",
         GoPreferNilSliceInspection(),
@@ -168,7 +168,7 @@ class GoRedundancyInspectionsTest : GoParityInspectionTestBase() {
         package p
 
         import (
-        	<weak_warning descr="Redundant alias 'fmt'">fmt</weak_warning> "fmt"
+        	<weak_warning descr="Redundant alias">fmt</weak_warning> "fmt"
         	str "strings"
         	_ "embed"
         )
@@ -194,12 +194,12 @@ class GoRedundancyInspectionsTest : GoParityInspectionTestBase() {
         type P struct{ X int }
 
         var (
-        	a = []P{<warning descr="Redundant type declaration">P</warning>{1}, {2}}
-        	b = []*P{<warning descr="Redundant type declaration">&P</warning>{1}}
-        	c = map[string]P{"k": <warning descr="Redundant type declaration">P</warning>{1}}
-        	d = map[P]int{<warning descr="Redundant type declaration">P</warning>{1}: 2}
+        	a = []P{<warning descr="Redundant type">P</warning>{1}, {2}}
+        	b = []*P{<warning descr="Redundant type">&P</warning>{1}}
+        	c = map[string]P{"k": <warning descr="Redundant type">P</warning>{1}}
+        	d = map[P]int{<warning descr="Redundant type">P</warning>{1}: 2}
         	e = []any{P{1}}
-        	f = [2]P{<warning descr="Redundant type declaration">P</warning>{1}}
+        	f = [2]P{<warning descr="Redundant type">P</warning>{1}}
         	g = []*P{{1}}
         )
         """,
@@ -255,7 +255,7 @@ class GoRedundancyInspectionsTest : GoParityInspectionTestBase() {
         """
         package p
 
-        func F[<warning descr="Unused type parameter 'T'">T</warning> any](x int) int { return x }
+        func F[<warning descr="Unused type parameter 'T any'">T any</warning>](x int) int { return x }
 
         func G[T any](x T) T { return x }
 
@@ -268,11 +268,13 @@ class GoRedundancyInspectionsTest : GoParityInspectionTestBase() {
 
         func J[T any, S ~[]T](s S) {}
 
-        type S[<warning descr="Unused type parameter 'T'">T</warning> any] struct{}
+        type S[<warning descr="Unused type parameter 'T any'">T any</warning>] struct{}
 
         type U[T any] struct{ v T }
 
         func K[_ any]() {}
+
+        func L[A, <warning descr="Unused type parameter 'B'">B</warning> any](a A) {}
         """,
         GoUnusedTypeParameterInspection(),
     )

@@ -102,7 +102,7 @@ class GoEmptyDeclarationInspection : GoAnalysisInspectionBase() {
             else -> return
         }
         if (!empty || PsiTreeUtil.findChildOfType(element, PsiComment::class.java) != null) return
-        holder.registerProblem(element, "Empty '$keyword' declaration", ProblemHighlightType.LIKE_UNUSED_SYMBOL, FIX)
+        holder.registerProblem(element, "Empty declaration '$keyword ()'", ProblemHighlightType.LIKE_UNUSED_SYMBOL, FIX)
     }
 
     private companion object {
@@ -128,8 +128,11 @@ class GoPreferNilSliceInspection : GoAnalysisInspectionBase() {
         if (names.size != 1 || values.size != 1 || GoPsiUtil.functionOwner(element) == null) return
         val lit = values[0] as? GoCompositeLit ?: return
         if (sliceTypeText(lit) == null) return
+        val type = lit.literalType ?: return
         val fixes = if (rewritable(element)) arrayOf<LocalQuickFix>(FIX) else emptyArray()
-        holder.registerProblem(lit, "Empty slice declared using a literal", *fixes)
+        // GoLand's text and range (the `[]T` of the literal), seen live.
+        holder.registerProblem(lit, "Empty slice declaration using a literal", ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
+            TextRange(type.startOffsetInParent, type.startOffsetInParent + type.textLength), *fixes)
     }
 
     companion object {
@@ -242,7 +245,7 @@ class GoRedundantParensInspection : GoAnalysisInspectionBase() {
             is GoParType -> redundantType(element)
             else -> false
         }
-        if (redundant) holder.registerProblem(element, "Redundant parentheses", ProblemHighlightType.LIKE_UNUSED_SYMBOL, FIX)
+        if (redundant) holder.registerProblem(element, "Redundant parentheses", FIX)
     }
 
     companion object {
@@ -310,7 +313,7 @@ class GoRedundantImportAliasInspection : GoAnalysisInspectionBase() {
         if (name == "_" || name == ".") return
         val packageName = GoPackageModel.getInstance(file.project).resolveImport(element.path, file)?.name ?: element.path.substringAfterLast('/')
         if (name != packageName) return
-        holder.registerProblem(element, "Redundant alias '$name'", ProblemHighlightType.LIKE_UNUSED_SYMBOL, TextRange(0, alias.textLength), FIX)
+        holder.registerProblem(element, "Redundant alias", ProblemHighlightType.LIKE_UNUSED_SYMBOL, TextRange(0, alias.textLength), FIX)
     }
 
     private companion object {
@@ -333,7 +336,7 @@ class GoRedundantTypeDeclInCompositeLitInspection : GoAnalysisInspectionBase() {
         if (element !is GoCompositeLit) return
         val range = redundantRange(element) ?: return
         val anchor = if (range.startOffset < element.textRange.startOffset) element.parent else element
-        holder.registerProblem(anchor, "Redundant type declaration", ProblemHighlightType.LIKE_UNUSED_SYMBOL, range.shiftLeft(anchor.textRange.startOffset), FIX)
+        holder.registerProblem(anchor, "Redundant type", ProblemHighlightType.LIKE_UNUSED_SYMBOL, range.shiftLeft(anchor.textRange.startOffset), FIX)
     }
 
     companion object {
@@ -409,7 +412,8 @@ class GoVarAndConstTypeMayBeOmittedInspection : GoAnalysisInspectionBase() {
 
 /**
  * GoLand's "Unused type parameter" (`GoUnusedTypeParameter`): a type parameter of a function or a type that nothing in its signature,
- * constraints, body or type mentions. Fix: rename it to `_`.
+ * constraints, body or type mentions. As GoLand (seen live: `Unused type parameter 'T any'`), a declaration of one name is reported with
+ * its constraint; a name of `[K, V any]` alone. Fix: rename it to `_`.
  */
 class GoUnusedTypeParameterInspection : GoAnalysisInspectionBase() {
 
@@ -419,7 +423,10 @@ class GoUnusedTypeParameterInspection : GoAnalysisInspectionBase() {
         if (name == "_") return
         val owner = PsiTreeUtil.getParentOfType(element, GoFunctionDeclaration::class.java, GoTypeSpec::class.java) ?: return
         if (used(owner, element, name)) return
-        holder.registerProblem(element.nameIdentifier ?: element, "Unused type parameter '$name'", ProblemHighlightType.LIKE_UNUSED_SYMBOL, FIX)
+        val declaration = element.parent
+        val single = declaration != null && PsiTreeUtil.getChildrenOfType(declaration, GoTypeParamDefinition::class.java)?.size == 1
+        val anchor = if (single) declaration else element
+        holder.registerProblem(anchor, "Unused type parameter '${anchor.text}'", ProblemHighlightType.LIKE_UNUSED_SYMBOL, FIX)
     }
 
     private fun used(owner: PsiElement, def: GoTypeParamDefinition, name: String): Boolean =
@@ -429,7 +436,9 @@ class GoUnusedTypeParameterInspection : GoAnalysisInspectionBase() {
         }
 
     private companion object {
-        val FIX = GoEditFix("Rename to '_'") { id ->
+        val FIX = GoEditFix("Rename to '_'") { e ->
+            val definition = e as? GoTypeParamDefinition ?: PsiTreeUtil.getChildOfType(e, GoTypeParamDefinition::class.java) ?: return@GoEditFix null
+            val id = definition.nameIdentifier ?: definition
             listOf(GoEditPlan.Edit(id.textRange.startOffset, id.textRange.endOffset, "_"))
         }
     }

@@ -1,10 +1,10 @@
 <html>
 <body>
-Reports an assignment to a method receiver (only the method's copy changes) and an assignment to a field of a value receiver in a method that never uses the receiver as a whole (the change is lost when the method returns).
-<pre><code>func (c Circle) SetRadius(r float64) {
-    c.Radius = r
+Reports assignments to method receivers (<code>c = …</code>, <code>c++</code>, <code>c += …</code>). On a value receiver the assignment does not propagate to
+other calls; on a pointer receiver it propagates only to callees but not to callers. Writes to fields (<code>c.Radius = r</code>) are not reported.
+<pre><code>func (c Circle) Reset() {
+    c = Circle{}
 }</code></pre>
-<p>Quick fixes: <b>Change receiver to pointer</b>.</p>
-<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+<!-- GoLand parity (PLAN.md G7, G10): GoLand's id, group and texts. -->
 </body>
 </html>

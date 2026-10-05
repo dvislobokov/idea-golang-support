@@ -4,14 +4,20 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.util.CachedValue
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import io.github.golangsupport.lang.psi.GoFieldDeclaration
 import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.ide.GoIdeFeature
 import io.github.golangsupport.ide.GoIdeFeatureGate
+import io.github.golangsupport.ide.documentation.GoDocLink
 import io.github.golangsupport.ide.documentation.GoDocLinks
+import io.github.golangsupport.semantic.scope.GoPackageModel
+import io.github.golangsupport.ide.inspections.GoShadowingVariableInspection
+import io.github.golangsupport.semantic.cache.GoBodyCache
 import io.github.golangsupport.lang.GoColors as C
 import io.github.golangsupport.lang.psi.GoAnonymousFieldDefinition
 import io.github.golangsupport.lang.psi.GoBlock
@@ -71,6 +77,15 @@ import io.github.golangsupport.semantic.scope.GoUniverse
  * inspection marks them). Stands down while [GoIdeFeature.SEMANTIC_COLORS] is off at the host's gate (another source colours then).
  */
 class GoSemanticHighlightingAnnotator : Annotator {
+    private companion object {
+        val SHADOWING = Key.create<CachedValue<Boolean>>("gopsi.highlighting.shadowing")
+
+        /** A word of a doc comment, optionally qualified once (`time.Duration`). */
+        val WORDS = Regex("""[\p{L}_][\p{L}\p{Nd}_]*(\.[\p{L}_][\p{L}\p{Nd}_]*)?""")
+
+        /** Comment directives (`//go:generate`, `//nolint:x`, `//line f:1`): not prose. */
+        val DIRECTIVE = Regex("""^//(line |extern |export |[a-z0-9]+:[a-z0-9])""")
+    }
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         val file = element.containingFile as? GoFile ?: return
@@ -104,6 +119,7 @@ class GoSemanticHighlightingAnnotator : Annotator {
             is GoVarDefinition -> when {
                 !GoPsiUtil.isInsideFunctionBody(e) -> if (exported(e)) C.PACKAGE_EXPORTED_VARIABLE else C.PACKAGE_LOCAL_VARIABLE
                 isReassignment(e) -> C.REASSIGNMENT_IN_SHORT_VAR_DECLARATION
+                isShadowing(e) -> C.SHADOWING_VARIABLE
                 isScopeVariable(e) -> C.SCOPE_VARIABLE
                 else -> C.LOCAL_VARIABLE
             }
@@ -161,6 +177,7 @@ class GoSemanticHighlightingAnnotator : Annotator {
                     if (call) C.PACKAGE_LOCAL_VARIABLE_CALL else C.PACKAGE_LOCAL_VARIABLE
                 }
                 call -> C.LOCAL_VARIABLE_CALL
+                isShadowing(target) -> C.SHADOWING_VARIABLE
                 isScopeVariable(target) -> C.SCOPE_VARIABLE
                 else -> C.LOCAL_VARIABLE
             }
@@ -207,15 +224,24 @@ class GoSemanticHighlightingAnnotator : Annotator {
     }
 
     /**
-     * A variable of an implicit block of the spec: declared in the header of an `if` / `for` / `switch` / `select` or in one of
-     * the case clauses, the nearest block of the function body not reached first.
+     * A local variable whose declaration shadows an outer one ([GoShadowingVariableInspection.shadowedBy]): GoLand paints the declaration
+     * and every use with `GO_SHADOWING_VARIABLE` (seen live 2026-10-05: `x := 2` in an `if` body and its `_ = x`; the outer `x` stays local).
+     * One scope lookup per variable, cached in its body store.
+     */
+    private fun isShadowing(v: GoVarDefinition): Boolean = GoBodyCache.cached(v, SHADOWING) { GoShadowingVariableInspection.shadowedBy(v) != null }
+
+    /**
+     * A variable of an implicit block of the spec: declared in the header of an `if` / `for` / `switch` or in one of the switch's
+     * case clauses, the nearest block of the function body not reached first. Not `case n := <-ch` of a `select`: GoLand paints it
+     * as a local variable (seen live 2026-10-05).
      */
     private fun isScopeVariable(v: GoVarDefinition): Boolean {
         var e: PsiElement? = v.parent
         while (e != null && e !is GoBlock && e !is GoFile) {
             when (e) {
-                is GoIfStatement, is GoForStatement, is GoSwitchStatement, is GoExprSwitchStatement, is GoTypeSwitchStatement, is GoSelectStatement,
-                is GoExprCaseClause, is GoTypeCaseClause, is GoCommClause -> return true
+                is GoCommClause, is GoSelectStatement -> return false
+                is GoIfStatement, is GoForStatement, is GoSwitchStatement, is GoExprSwitchStatement, is GoTypeSwitchStatement,
+                is GoExprCaseClause, is GoTypeCaseClause -> return true
             }
             e = e.parent
         }
@@ -251,24 +277,51 @@ class GoSemanticHighlightingAnnotator : Annotator {
     }
 
     /**
-     * Names a comment refers to: the first word of a doc comment when it is the name of the declaration (`// Run starts ...`), and the
-     * names of `[Name]` doc links that resolve. Only comments outside function bodies; links are resolved only in lines with `[`.
+     * Names a comment refers to: the first word of a doc comment when it is the name of the declaration (`// Run starts ...`), the
+     * names of `[Name]` doc links that resolve, and, as GoLand does (seen live 2026-10-05), every other word of a doc comment that names a
+     * package-level declaration of the file's package (`Probe2Config`, `Exported`) and both parts of a qualified name that resolves
+     * (`time.Duration`, `os.PathError`, `Circle.Area`). A bare import or predeclared name (`time`, `iota`) is not coloured, as in GoLand.
+     * Only comments outside function bodies; plain words only in doc comments, not in directive or indented (code) lines.
      */
     private fun commentReferences(comment: PsiComment, holder: AnnotationHolder) {
         val text = comment.text
         if (!text.startsWith("//") || PsiTreeUtil.getParentOfType(comment, GoBlock::class.java) != null) return
         val start = comment.textRange.startOffset
-        documentedName(comment)?.let { name ->
-            val content = if (text.startsWith("// ")) 3 else 2
+        val content = if (text.startsWith("// ")) 3 else 2
+        val documented = documentedName(comment)
+        documented?.let { name ->
             if (text.startsWith(name, content) && text.getOrNull(content + name.length)?.let { Character.isLetterOrDigit(it) || it == '_' } != true) {
                 annotate(holder, TextRange(start + content, start + content + name.length))
             }
         }
-        if ('[' !in text) return
-        for (link in GoDocLinks.linksIn(comment)) {
+        val links = if ('[' in text) GoDocLinks.linksIn(comment) else emptyList()
+        for (link in links) {
             val targets = GoDocLinks.resolve(comment, link)
             link.nameRanges.forEachIndexed { i, range -> if (targets.getOrNull(i) != null) annotate(holder, range.shiftRight(start)) }
         }
+        if (!isDocComment(comment) || DIRECTIVE.containsMatchIn(text) || text.startsWith("//\t") || text.startsWith("//  ")) return
+        val inLinks = links.flatMap { it.nameRanges }
+        val own = GoPackageModel.getInstance(comment.project).scopeOf(comment.containingFile as? GoFile ?: return)
+        for (m in WORDS.findAll(text, content)) {
+            val first = m.range.first
+            if (first > 0 && (text[first - 1].let { Character.isLetterOrDigit(it) || it == '_' || it == '.' })) continue
+            if (inLinks.any { it.startOffset <= first && first < it.endOffset }) continue
+            val names = m.value.split('.')
+            if (names.size == 1) {
+                if (first == content && names[0] == documented) continue
+                if (own.lookup(names[0]).isNotEmpty()) annotate(holder, TextRange(start + first, start + first + names[0].length))
+                continue
+            }
+            val ranges = listOf(TextRange(first, first + names[0].length), TextRange(first + names[0].length + 1, m.range.last + 1))
+            val targets = GoDocLinks.resolve(comment, GoDocLink(null, names, ranges))
+            if (targets.size == 2 && targets.all { it != null }) ranges.forEach { annotate(holder, it.shiftRight(start)) }
+        }
+    }
+
+    /** A comment bound into the declaration it documents (each line of a doc comment is one). */
+    private fun isDocComment(comment: PsiComment): Boolean = when (comment.parent) {
+        is GoNamedElement, is GoFieldDeclaration, is GoVarSpec, is GoConstSpec, is GoTypeDeclaration, is GoVarDeclaration, is GoConstDeclaration -> true
+        else -> false
     }
 
     private fun annotate(holder: AnnotationHolder, range: TextRange) {

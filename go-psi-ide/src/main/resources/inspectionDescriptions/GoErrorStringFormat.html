@@ -1,6 +1,6 @@
 <html>
 <body>
-Reports the literal message of <code>errors.New</code> and <code>fmt.Errorf</code> that starts with a capital letter or ends with punctuation or a newline (staticcheck ST1005): error strings are usually printed after other context. Initialisms (<code>URL</code>, <code>IPv4</code>) pass.
+Reports the literal message of <code>errors.New</code> and <code>fmt.Errorf</code> that starts with a capital letter or ends with punctuation (staticcheck ST1005): error strings are usually printed after other context. Initialisms (<code>URL</code>, <code>IPv4</code>) pass.
 <pre><code>errors.New("Something failed.")</code></pre>
 <p>Quick fixes: <b>Lowercase the first letter, Remove the trailing punctuation</b>.</p>
 <!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->

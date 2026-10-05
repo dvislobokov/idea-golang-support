@@ -30,6 +30,52 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.176] - 2026-10-05
+
+### Changed — GoLand parity G10: Alt+Enter on //go:generate, struct tags, Sprintf; semantic colours
+- Alt+Enter on a `//go:generate` line offers GoLand's three items in its order: Go Generate File, Go generate '<import path of the package>',
+  Go generate '<command of the directive>'. The gutter ▶ is a plain line marker with GoLand's tooltip "Run go generate on comment" (a click runs
+  the directive); its actions no longer duplicate the intentions in Alt+Enter.
+- Struct tags: new intention Add key to tags (popup of the name keys some field lacks; writes `key:"name"` into every such field in the struct's
+  style for that key). Add key / Change field name style / Update key value in tags are listed first, in GoLand's order, and are offered on a
+  matching tag (`json:"value"`) as well as on a differing one.
+- Add format string argument is offered inside `fmt.Sprintf("%d %s", n)`, also on `%s`: the expression becomes the argument of the first verb
+  that has none.
+- Shadowing variable: message as GoLand's, `Declaration of 'x' shadows declaration at style.go` (file name only; `builtin.go` for a predeclared
+  name), and predeclared names are reported too (`new := 2`).
+
+### Fixed
+- Semantic colours: every word of a doc comment that names a package-level declaration, and both parts of a resolving qualified name
+  (`time.Duration`, `os.PathError`), get GO_COMMENT_REFERENCE, not only the first word and `[Name]` links. The uses of a shadowing variable are
+  GO_SHADOWING_VARIABLE like its declaration; `case n := <-ch` of a `select` is GO_LOCAL_VARIABLE, not GO_SCOPE_VARIABLE.
+
+## [0.2.175] - 2026-10-05
+
+### Changed — GoLand parity G10: inspection texts, ranges and levels as captured on GoLand 2026.2.3
+- The G7 inspections use GoLand's own texts, ranges and levels (probe2 dumps): `Imports are not sorted` (every spec of an unsorted group),
+  `Redundant alias`, `Comment should have the following format 'Name ...' (with an optional leading article)` (also `//no space` and `/* */` docs),
+  `Use camel case instead of snake case`, `Exported variable 'B' should have its own declaration` (names after the first), `Name starts with the
+  package name`, `Redundant 'else' in 'if'`, `Redundant type`, `Empty declaration 'var ()'`, `Empty slice declaration using a literal` (on `[]T`),
+  `Error string should not be capitalized or end with punctuation mark` (whole literal, one finding), `defer should not call recover() directly` /
+  `go should not call panic() directly` (whole statement), `Variable 'new' collides with the 'builtin' function`, `Unit-specific suffix 'Seconds'`
+  (vars and consts only), `Unused type parameter 'T any'`, `Exported function F should have a comment or be unexported`. Redundant parentheses are
+  no longer greyed out.
+- GoReceiverNames compares receiver names across all files of the package (stubs): `Receiver names are different` on every named receiver of the
+  type when they differ, `Receiver has a generic name` on `this` / `self` / `me`.
+- GoMixedReceiverTypes: `Struct T has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.` on the
+  name of every method of the type.
+- GoStructInitializationWithoutFieldNames: types of the file's own package and anonymous structs are reported at INFORMATION level; the range is
+  the whole `T{…}`.
+- GoCommentLeadingSpace works only with the new Code Style | Go | Other option "Add a leading space to comments" (off by default).
+- SYNTAX_UPDATE severity is 20 as in GoLand (was 150), with a refresh icon for the inspections widget; the "Update syntax" and "What's New"
+  lenses are off by default (GoLand has no in-file lens: its count lives in the inspections widget).
+
+### Fixed
+- GoIrregularIota follows GoLand's semantics: a spec repeating an earlier `iota` list after only specs without a list (`a = iota; b; c = iota`)
+  is reported as `Irregular usage of 'iota'`; the false reports on `const x = iota` and on adjacent repeats are gone.
+- GoAssignmentToReceiver no longer reports field writes (`c.name = v`); `c = …` on a value receiver reads `Assignment to the method receiver
+  doesn't propagate to other calls`.
+
 ## [0.2.174] - 2026-10-05
 
 ### Fixed — review of the G5–G9 parity batches

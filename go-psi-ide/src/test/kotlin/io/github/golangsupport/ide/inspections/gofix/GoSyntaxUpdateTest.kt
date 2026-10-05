@@ -2,7 +2,11 @@ package io.github.golangsupport.ide.inspections.gofix
 
 import com.intellij.codeHighlighting.HighlightDisplayLevel
 import com.intellij.codeInsight.codeVision.ui.model.ClickableTextCodeVisionEntry
+import com.intellij.codeInsight.codeVision.settings.CodeVisionSettings
+import com.intellij.codeInsight.daemon.impl.HighlightInfoType
 import com.intellij.codeInsight.daemon.impl.SeverityRegistrar
+import com.intellij.icons.AllIcons
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.codeInsight.hints.codeVision.DaemonBoundCodeVisionProvider
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ex.InspectionProfileImpl
@@ -87,6 +91,38 @@ class GoSyntaxUpdateTest : GoIdeTestBase() {
         assertTrue(GoSyntaxUpdateSeverity.SEVERITY > HighlightSeverity.INFORMATION)
         assertEquals("Syntax update", GoSyntaxUpdateSeverity.SEVERITY.displayName)
         assertEquals("3 syntax updates", GoSyntaxUpdateSeverity.SEVERITY.getCountMessage(3))
+    }
+
+    /** GoLand's value (seen live): 20, between TEXT ATTRIBUTES (11) and WEAK WARNING (200), in the registrar's order too. */
+    fun testSeverityValueAndOrder() {
+        assertEquals(20, GoSyntaxUpdateSeverity.SEVERITY.myVal)
+        assertTrue(GoSyntaxUpdateSeverity.SEVERITY > HighlightSeverity.TEXT_ATTRIBUTES)
+        assertTrue(GoSyntaxUpdateSeverity.SEVERITY < HighlightSeverity.GENERIC_SERVER_ERROR_OR_WARNING)
+        val registrar = SeverityRegistrar.getSeverityRegistrar(project)
+        assertTrue(registrar.compare(GoSyntaxUpdateSeverity.SEVERITY, HighlightSeverity.INFORMATION) > 0)
+        assertTrue(registrar.compare(GoSyntaxUpdateSeverity.SEVERITY, HighlightSeverity.TEXT_ATTRIBUTES) > 0)
+        assertTrue(registrar.compare(GoSyntaxUpdateSeverity.SEVERITY, HighlightSeverity.WEAK_WARNING) < 0)
+        assertSame(AllIcons.Actions.Refresh, (GoSyntaxUpdateSeverity.INFO_TYPE as HighlightInfoType.Iconable).icon)
+    }
+
+    /** GoLand shows no lens in the file: the startup default turns both lenses off once, and a later choice of the user is kept. */
+    fun testLensesAreOffByDefault() {
+        val properties = PropertiesComponent.getInstance()
+        val settings = CodeVisionSettings.getInstance()
+        val ids = listOf(GoSyntaxUpdateLenses.BATCH_ID, GoSyntaxUpdateLenses.WHATS_NEW_ID)
+        val before = properties.getBoolean(GoSyntaxUpdateLensDefaults.APPLIED_KEY) to ids.map { settings.isProviderEnabled(it) }
+        try {
+            properties.unsetValue(GoSyntaxUpdateLensDefaults.APPLIED_KEY)
+            ids.forEach { settings.setProviderEnabled(it, true) }
+            GoSyntaxUpdateLensDefaults.apply()
+            assertEquals(listOf(false, false), ids.map { settings.isProviderEnabled(it) })
+            settings.setProviderEnabled(GoSyntaxUpdateLenses.BATCH_ID, true)
+            GoSyntaxUpdateLensDefaults.apply()
+            assertTrue(settings.isProviderEnabled(GoSyntaxUpdateLenses.BATCH_ID))
+        } finally {
+            properties.setValue(GoSyntaxUpdateLensDefaults.APPLIED_KEY, before.first)
+            ids.forEachIndexed { i, id -> settings.setProviderEnabled(id, before.second[i]) }
+        }
     }
 
     fun testSelectionKeepsTheEnabledGoFixTools() {

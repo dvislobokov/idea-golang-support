@@ -1,5 +1,6 @@
 package io.github.golangsupport.ide.inspections.style
 
+import io.github.golangsupport.ide.formatter.GoCodeStyleSettings
 import io.github.golangsupport.ide.inspections.GoParityInspectionTestBase
 
 /** GoLand's "Code style issues" group (PLAN.md G7, first line): what is reported, what stays quiet, every quick fix. */
@@ -7,29 +8,62 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
 
     // --- GoCommentLeadingSpace ---
 
-    fun testCommentLeadingSpace() = doHighlight(
-        """
-        package p
+    /** Runs [body] with Code Style | Go | Other "Add a leading space to comments" on (it is off by default, and so is the inspection). */
+    private fun withLeadingSpaceOption(body: () -> Unit) {
+        val settings = GoCodeStyleSettings.of(myFixture.configureByText("x.go", "package p\n"))
+        settings.ADD_LEADING_SPACE_TO_COMMENTS = true
+        try {
+            body()
+        } finally {
+            settings.ADD_LEADING_SPACE_TO_COMMENTS = false
+        }
+    }
 
-        <weak_warning descr="Line comment should have a space after '//'">//bad comment</weak_warning>
-        // good comment
-        //go:generate stringer -type=X
-        //nolint:errcheck
-        //lint:ignore U1000 reason
-        //export Foo
-        ////
-        //
-        func f() {} <weak_warning descr="Line comment should have a space after '//'">//trailing</weak_warning>
-        """,
-        GoCommentLeadingSpaceInspection(),
-    )
+    fun testCommentLeadingSpace() = withLeadingSpaceOption {
+        doHighlight(
+            """
+            package p
 
-    fun testCommentLeadingSpaceFix() = doFix(
-        "package p\n\n//<caret>bad\nfunc f() {}",
-        "Add a space after '//'",
-        "package p\n\n// bad\nfunc f() {}",
-        GoCommentLeadingSpaceInspection(),
-    )
+            <weak_warning descr="Line comment should have a space after '//'">//bad comment</weak_warning>
+            // good comment
+            //go:generate stringer -type=X
+            //nolint:errcheck
+            //lint:ignore U1000 reason
+            //export Foo
+            ////
+            //
+            func f() {} <weak_warning descr="Line comment should have a space after '//'">//trailing</weak_warning>
+            """,
+            GoCommentLeadingSpaceInspection(),
+        )
+    }
+
+    /** GoLand (seen live): without the Code Style option the inspection is quiet even on `//no space` in a function body. */
+    fun testCommentLeadingSpaceQuietWithoutTheCodeStyleOption() {
+        assertFalse(GoCodeStyleSettings.of(myFixture.configureByText("x.go", "package p\n")).ADD_LEADING_SPACE_TO_COMMENTS)
+        doHighlight(
+            """
+            package p
+
+            //bad comment
+            func f() {
+            	x := 1 //no space trailing
+            	//no space standalone
+            	_ = x
+            }
+            """,
+            GoCommentLeadingSpaceInspection(),
+        )
+    }
+
+    fun testCommentLeadingSpaceFix() = withLeadingSpaceOption {
+        doFix(
+            "package p\n\n//<caret>bad\nfunc f() {}",
+            "Add a space after '//'",
+            "package p\n\n// bad\nfunc f() {}",
+            GoCommentLeadingSpaceInspection(),
+        )
+    }
 
     // --- GoCommentStart ---
 
@@ -37,16 +71,16 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         """
         package p
 
-        <weak_warning descr="comment on exported function Foo should be of the form \"Foo ...\"">// Does things.</weak_warning>
+        <weak_warning descr="Comment should have the following format 'Foo ...' (with an optional leading article)">// Does things.</weak_warning>
         func Foo() {}
 
-        <weak_warning descr="comment on exported type Bar should be of the form \"Bar ...\"">// bar is a thing.</weak_warning>
+        <weak_warning descr="Comment should have the following format 'Bar ...' (with an optional leading article)">// bar is a thing.</weak_warning>
         type Bar struct{}
 
-        <weak_warning descr="comment on exported method Bar.Run should be of the form \"Run ...\"">// Starts it.</weak_warning>
+        <weak_warning descr="Comment should have the following format 'Run ...' (with an optional leading article)">// Starts it.</weak_warning>
         func (b Bar) Run() {}
 
-        <weak_warning descr="comment on exported var V should be of the form \"V ...\"">// Value of it.</weak_warning>
+        <weak_warning descr="Comment should have the following format 'V ...' (with an optional leading article)">// Value of it.</weak_warning>
         var V = 1
 
         func NoComment() {}
@@ -56,6 +90,20 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
 
         // Deprecated: use Foo.
         func Old() {}
+        """,
+        GoCommentStartInspection(),
+    )
+
+    /** GoLand (seen live) reports a doc comment without the leading space and a block doc comment too. */
+    fun testCommentStartOnNoSpaceAndBlockDocs() = doHighlight(
+        """
+        package p
+
+        <weak_warning descr="Comment should have the following format 'Snake ...' (with an optional leading article)">//no leading space here</weak_warning>
+        var Snake = 1
+
+        <weak_warning descr="Comment should have the following format 'BlockDoc ...' (with an optional leading article)">/*block comment*/</weak_warning>
+        func BlockDoc() {}
         """,
         GoCommentStartInspection(),
     )
@@ -74,7 +122,7 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
     )
 
     fun testCommentStartChecksMainButNotTests() {
-        doHighlight("package main\n\n<weak_warning descr=\"comment on exported function Foo should be of the form \\\"Foo ...\\\"\">// Does.</weak_warning>\nfunc Foo() {}", GoCommentStartInspection(), fileName = "main.go")
+        doHighlight("package main\n\n<weak_warning descr=\"Comment should have the following format 'Foo ...' (with an optional leading article)\">// Does.</weak_warning>\nfunc Foo() {}", GoCommentStartInspection(), fileName = "main.go")
         doHighlight("package p\n\n// Does.\nfunc Foo() {}", GoCommentStartInspection(), fileName = "a_test.go")
     }
 
@@ -113,9 +161,10 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         func Errorf(s string) error { return nil }
 
         var (
-        	e1 = errors.New("<weak_warning descr="Error string should not be capitalized">S</weak_warning>omething failed")
-        	e2 = fmt.Errorf("failed: %w<weak_warning descr="Error string should not end with punctuation or a newline">.</weak_warning>", e1)
-        	e3 = errors.New("failed<weak_warning descr="Error string should not end with punctuation or a newline">\n</weak_warning>")
+        	e1 = errors.New(<weak_warning descr="Error string should not be capitalized or end with punctuation mark">"Something failed"</weak_warning>)
+        	e2 = fmt.Errorf(<weak_warning descr="Error string should not be capitalized or end with punctuation mark">"failed: %w."</weak_warning>, e1)
+        	e3 = errors.New("failed\n")
+        	e9 = errors.New(<weak_warning descr="Error string should not be capitalized or end with punctuation mark">"Capitalized error."</weak_warning>)
         	e4 = errors.New("URL is bad")
         	e5 = errors.New("IPv4 missing")
         	e6 = errors.New("not found")
@@ -170,14 +219,16 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         """
         package p
 
-        var <weak_warning descr="Exported var A should have its own declaration">A</weak_warning>, B int
+        var A, <weak_warning descr="Exported variable 'B' should have its own declaration">B</weak_warning> int
 
-        var a, <weak_warning descr="Exported var C should have its own declaration">C</weak_warning> = 1, 2
+        var a, <weak_warning descr="Exported variable 'C' should have its own declaration">C</weak_warning> = 1, 2
 
         var d, e int
 
+        var First, second int
+
         const (
-        	<weak_warning descr="Exported const K should have its own declaration">K</weak_warning>, L = 1, 2
+        	K, <weak_warning descr="Exported constant 'L' should have its own declaration">L</weak_warning> = 1, 2
         )
 
         var One int
@@ -191,14 +242,14 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
     )
 
     fun testExportedOwnDeclarationSplitsSingleSpec() = doFix(
-        "package p\n\nvar A<caret>, B int",
+        "package p\n\nvar A, B<caret> int",
         "Split into separate declarations",
         "package p\n\nvar A int\nvar B int",
         GoExportedOwnDeclarationInspection(),
     )
 
     fun testExportedOwnDeclarationSplitsGroupSpec() = doFix(
-        "package p\n\nconst (\n\tK<caret>, L = 1, 2\n)",
+        "package p\n\nconst (\n\tK, L<caret> = 1, 2\n)",
         "Split into separate declarations",
         "package p\n\nconst (\n\tK = 1\n\tL = 2\n)",
         GoExportedOwnDeclarationInspection(),
@@ -210,9 +261,9 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         """
         package probe
 
-        type <weak_warning descr="type name will be used as probe.ProbeThing by other packages, and that stutters; consider calling this Thing">ProbeThing</weak_warning> struct{}
+        type <weak_warning descr="Name starts with the package name">ProbeThing</weak_warning> struct{}
 
-        func <weak_warning descr="func name will be used as probe.ProbeRun by other packages, and that stutters; consider calling this Run">ProbeRun</weak_warning>() {}
+        func <weak_warning descr="Name starts with the package name">ProbeRun</weak_warning>() {}
 
         type Prober interface{}
 
@@ -236,30 +287,62 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
 
     // --- GoReceiverNames ---
 
+    /** GoLand (seen live on probe2/style.go): when the names differ, every named receiver of the type is "different", generic ones also "generic". */
     fun testReceiverNames() = doHighlight(
         """
         package p
 
         type T struct{}
 
-        func (<weak_warning descr="Receiver name should be a reflection of its identity; don't use generic names such as 'this' or 'self'">this</weak_warning> T) A() {}
+        func (<weak_warning descr="Receiver names are different"><weak_warning descr="Receiver has a generic name">this</weak_warning></weak_warning> T) A() {}
 
-        func (t T) B() {}
+        func (<weak_warning descr="Receiver names are different">t</weak_warning> T) B() {}
 
-        func (<weak_warning descr="Receiver name x should be consistent with previous receiver name t for T">x</weak_warning> T) C() {}
+        func (<weak_warning descr="Receiver names are different">x</weak_warning> T) C() {}
 
-        func (<weak_warning descr="Receiver name should not be an underscore, omit the name if it is unused">_</weak_warning> T) D() {}
+        func (<weak_warning descr="Receiver names are different">_</weak_warning> T) D() {}
 
         func (T) E() {}
 
-        func (t *T) F() {}
+        func (<weak_warning descr="Receiver names are different">t</weak_warning> *T) F() {}
 
         type U struct{}
 
         func (u U) A() {}
+
+        func (u *U) B() {}
+
+        func (U) C() {}
+
+        type S struct{}
+
+        func (<weak_warning descr="Receiver has a generic name">self</weak_warning> S) A() {}
         """,
         GoReceiverNamesInspection(),
     )
+
+    /** The names are compared over the files of the package: `y` in another file makes every receiver of the type "different". */
+    fun testReceiverNamesAcrossFiles() {
+        myFixture.addFileToProject("other.go", "package p\n\nfunc (y Config) M6() {}\n")
+        myFixture.addFileToProject("ext_test.go", "package p_test\n\ntype Config struct{}\n\nfunc (z Config) M7() {}\n")
+        doHighlight(
+            """
+            package p
+
+            type Config struct{}
+
+            func (<weak_warning descr="Receiver names are different">c</weak_warning> Config) M1() {}
+
+            func (<weak_warning descr="Receiver names are different">c</weak_warning> *Config) M2() {}
+            """,
+            GoReceiverNamesInspection(),
+        )
+    }
+
+    fun testReceiverNamesSameNameEverywhereIsQuiet() {
+        myFixture.addFileToProject("other.go", "package p\n\nfunc (c Config) M6() {}\n")
+        doHighlight("package p\n\ntype Config struct{}\n\nfunc (c Config) M1() {}\n\nfunc (Config) M2() {}", GoReceiverNamesInspection())
+    }
 
     fun testReceiverNamesRenameThis() = doFix(
         "package p\n\ntype Circle struct{ r int }\n\nfunc (th<caret>is Circle) R() int { return this.r }",
@@ -268,10 +351,17 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         GoReceiverNamesInspection(),
     )
 
+    fun testReceiverNamesRenameToTheUsualName() = doFix(
+        "package p\n\ntype T struct{}\n\nfunc (t T) A() {}\n\nfunc (t T) B() {}\n\nfunc (<caret>x T) C() { _ = x }",
+        "Rename to 't'",
+        "package p\n\ntype T struct{}\n\nfunc (t T) A() {}\n\nfunc (t T) B() {}\n\nfunc (t T) C() { _ = t }",
+        GoReceiverNamesInspection(),
+    )
+
     fun testReceiverNamesRemoveUnderscore() = doFix(
-        "package p\n\ntype T struct{}\n\nfunc (<caret>_ T) D() {}",
+        "package p\n\ntype T struct{}\n\nfunc (t T) A() {}\n\nfunc (<caret>_ T) D() {}",
         "Remove the receiver name",
-        "package p\n\ntype T struct{}\n\nfunc (T) D() {}",
+        "package p\n\ntype T struct{}\n\nfunc (t T) A() {}\n\nfunc (T) D() {}",
         GoReceiverNamesInspection(),
     )
 
@@ -284,7 +374,7 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         func f(x int) int {
         	if x > 0 {
         		return 1
-        	} <weak_warning descr="'if' block ends with a 'return' statement, so drop this 'else' and outdent its block">else</weak_warning> {
+        	} <weak_warning descr="Redundant 'else' in 'if'">else</weak_warning> {
         		x++
         	}
         	if x > 1 {
@@ -305,12 +395,12 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         	for _, x := range xs {
         		if x < 0 {
         			continue
-        		} <weak_warning descr="'if' block ends with a 'continue' statement, so drop this 'else' and outdent its block">else</weak_warning> {
+        		} <weak_warning descr="Redundant 'else' in 'if'">else</weak_warning> {
         			println(x)
         		}
         		if x == 0 {
         			panic("zero")
-        		} <weak_warning descr="'if' block ends with a 'panic' statement, so drop this 'else' and outdent its block">else</weak_warning> {
+        		} <weak_warning descr="Redundant 'else' in 'if'">else</weak_warning> {
         			println(x)
         		}
         	}
@@ -451,12 +541,14 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         import "time"
 
         type C struct {
-        	<weak_warning descr="field TimeoutSecs is of type time.Duration; don't use unit-specific suffix \"Secs\"">TimeoutSecs</weak_warning> time.Duration
+        	TimeoutSecs time.Duration
         	RetrySecs   int
         }
 
-        func f(<weak_warning descr="parameter delayMs is of type time.Duration; don't use unit-specific suffix \"Ms\"">delayMs</weak_warning> time.Duration, timeout time.Duration) {
-        	<weak_warning descr="var timeoutSeconds is of type time.Duration; don't use unit-specific suffix \"Seconds\"">timeoutSeconds</weak_warning> := 2 * time.Second
+        const <weak_warning descr="Unit-specific suffix 'Ms'">delayMs</weak_warning> time.Duration = 5
+
+        func f(waitMs time.Duration, timeout time.Duration) {
+        	<weak_warning descr="Unit-specific suffix 'Seconds'">timeoutSeconds</weak_warning> := 2 * time.Second
         	countSecs := 3
         	_, _, _, _ = timeoutSeconds, countSecs, delayMs, timeout
         }
@@ -496,8 +588,9 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
         package p
 
         import (
-        	"os"
-        	<weak_warning descr="Import is not sorted">"fmt"</weak_warning>
+        	<weak_warning descr="Imports are not sorted">"os"</weak_warning>
+        	<weak_warning descr="Imports are not sorted">str "strings"</weak_warning>
+        	<weak_warning descr="Imports are not sorted">"fmt"</weak_warning>
 
         	"errors"
         	"strings"
@@ -549,12 +642,12 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
 
         var _x, y_ = 1, 2
 
-        func <weak_warning descr="Don't use underscores in Go names; func parse_url should be parseUrl">parse_url</weak_warning>(<weak_warning descr="Don't use underscores in Go names; parameter my_arg should be myArg">my_arg</weak_warning> int) {
-        	<weak_warning descr="Don't use underscores in Go names; var local_v should be localV">local_v</weak_warning> := my_arg
+        func <weak_warning descr="Use camel case instead of snake case">parse_url</weak_warning>(<weak_warning descr="Use camel case instead of snake case">my_arg</weak_warning> int) {
+        	<weak_warning descr="Use camel case instead of snake case">local_v</weak_warning> := my_arg
         	_ = local_v
         }
 
-        type <weak_warning descr="Don't use underscores in Go names; type Http_Server should be HttpServer">Http_Server</weak_warning> struct {
+        type <weak_warning descr="Use camel case instead of snake case">Http_Server</weak_warning> struct {
         	field_name int
         }
         """,
@@ -576,30 +669,61 @@ class GoCodeStyleInspectionsTest : GoParityInspectionTestBase() {
 
     // --- GoStructInitializationWithoutFieldNames ---
 
-    fun testStructInitializationWithoutFieldNames() = doHighlight(
-        """
-        package p
+    /** `range «text» severity` of the struct-literal findings of [text] (INFORMATION ones included, which highlighting markers skip). */
+    private fun structFindings(text: String): List<String> {
+        myFixture.enableInspections(GoStructInitializationWithoutFieldNamesInspection())
+        myFixture.configureByText("a.go", text.trimIndent() + "\n")
+        return myFixture.doHighlighting().filter { it.description == "Fields are assigned without explicit names" }.sortedBy { it.startOffset }
+            .map { "«${it.text}» ${it.severity.name}" }
+    }
 
-        type P struct{ X, Y int }
+    /** GoLand (seen live): its own package's types and anonymous structs only at INFORMATION level, over the whole `T{…}` when typed. */
+    fun testStructInitializationWithoutFieldNamesOfThisPackageIsInformation() = assertEquals(
+        listOf(
+            "«P{1, 2}» INFORMATION", "«{\"a\", 1}» INFORMATION", "«{3, 4}» INFORMATION", "«{5, 6}» INFORMATION", "«P{7, 8}» INFORMATION",
+        ),
+        structFindings(
+            """
+            package p
 
-        var (
-        	a = P<weak_warning descr="Fields are assigned without explicit names">{1, 2}</weak_warning>
-        	b = P{X: 1}
-        	c = P{}
-        	d = []struct {
-        		n string
-        		v int
-        	}{
-        		<weak_warning descr="Fields are assigned without explicit names">{"a", 1}</weak_warning>,
-        	}
-        	e = []int{1, 2}
-        	f = []*P{<weak_warning descr="Fields are assigned without explicit names">{3, 4}</weak_warning>}
-        	g = map[string]P{"k": <weak_warning descr="Fields are assigned without explicit names">{5, 6}</weak_warning>}
-        	h = &P<weak_warning descr="Fields are assigned without explicit names">{7, 8}</weak_warning>
-        )
-        """,
-        GoStructInitializationWithoutFieldNamesInspection(),
+            type P struct{ X, Y int }
+
+            var (
+            	a = P{1, 2}
+            	b = P{X: 1}
+            	c = P{}
+            	d = []struct {
+            		n string
+            		v int
+            	}{
+            		{"a", 1},
+            	}
+            	e = []int{1, 2}
+            	f = []*P{{3, 4}}
+            	g = map[string]P{"k": {5, 6}}
+            	h = &P{7, 8}
+            )
+            """,
+        ),
     )
+
+    fun testStructInitializationWithoutFieldNamesOfAnotherPackage() {
+        myFixture.addFileToProject("b.go", "package p\n\ntype Local struct{ A int }\n")
+        doHighlight(
+            """
+            package p
+
+            import "io"
+
+            var (
+            	a = <weak_warning descr="Fields are assigned without explicit names">io.LimitedReader{nil, 10}</weak_warning>
+            	b = []io.LimitedReader{<weak_warning descr="Fields are assigned without explicit names">{nil, 20}</weak_warning>}
+            	c = Local{5}
+            )
+            """,
+            GoStructInitializationWithoutFieldNamesInspection(),
+        )
+    }
 
     fun testStructInitializationAddFieldNames() = doFix(
         "package p\n\ntype P struct{ X, Y int }\n\nvar a = P{<caret>1, 2}",

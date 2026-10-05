@@ -3,9 +3,14 @@ package io.github.golangsupport.ide.inspections.style
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.CachedValue
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.semantic.cache.GoTrackers
 import io.github.golangsupport.ide.inspections.GoAnalysisInspectionBase
 import io.github.golangsupport.ide.inspections.GoAnalysisPsi
 import io.github.golangsupport.ide.inspections.GoAnalysisScope
@@ -54,9 +59,10 @@ internal object GoNaming {
 
 /**
  * GoLand's "Exported element should have its own declaration" (`GoExportedOwnDeclaration`, golint): a package-level `var A, B int` /
- * `const A, B = 1, 2` that declares an exported name together with others. Reported once per spec, at its first exported name. Fix:
- * split the spec into one per name (offered when the spec has no comments, has a value per name or none, and is not followed in a
- * `const (...)` group by specs that repeat it implicitly).
+ * `const A, B = 1, 2` where a name after the first is exported (the first one owns the spec, as golint has it: `var A, b` passes).
+ * Reported at every such name (GoLand: `B` of `var A, B`, `J1` of `J0, J1`), with GoLand's text (`Exported variable 'B' should have its own declaration`, seen
+ * live). Fix: split the spec into one per name (offered when the spec has no comments, has a value per name or none, and is not
+ * followed in a `const (...)` group by specs that repeat it implicitly).
  */
 class GoExportedOwnDeclarationInspection : GoAnalysisInspectionBase() {
 
@@ -67,10 +73,11 @@ class GoExportedOwnDeclarationInspection : GoAnalysisInspectionBase() {
             else -> return
         }
         if (names.size < 2 || !GoNaming.isTopLevel(element)) return
-        val first = names.firstOrNull { it.name?.let(GoNaming::isExported) == true } ?: return
-        val kind = if (element is GoVarSpec) "var" else "const"
+        val kind = if (element is GoVarSpec) "variable" else "constant"
         val fixes = if (splittable(element)) arrayOf<LocalQuickFix>(SPLIT) else emptyArray()
-        holder.registerProblem(first.nameIdentifier ?: first, "Exported $kind ${first.name} should have its own declaration", *fixes)
+        for (named in names.drop(1).filter { it.name?.let(GoNaming::isExported) == true }) {
+            holder.registerProblem(named.nameIdentifier ?: named, "Exported $kind '${named.name}' should have its own declaration", *fixes)
+        }
     }
 
     companion object {
@@ -119,31 +126,52 @@ class GoExportedOwnDeclarationInspection : GoAnalysisInspectionBase() {
 /**
  * GoLand's "Name starts with a package name" (`GoNameStartsWithPackageName`, golint stutter): an exported package-level func, type,
  * var or const of package `probe` named `ProbeThing` reads `probe.ProbeThing` at the use site. The rest must start with an upper-case
- * letter (`probe.Prober` is fine); `main` packages and `_test.go` files are skipped. Fix: rename to the rest (`Thing`).
+ * letter (`probe.Prober` is fine); `main` packages and `_test.go` files are skipped. GoLand's text (seen live). Fix: rename to the rest.
  */
 class GoNameStartsWithPackageNameInspection : GoAnalysisInspectionBase() {
 
     override fun visit(element: PsiElement, holder: ProblemsHolder, file: GoFile) {
-        if (element !is GoNamedElement || element is GoMethodDeclaration || element is GoFieldDefinition) return
-        val kind = when (element) {
-            is GoFunctionDeclaration, is GoTypeSpec, is GoVarDefinition, is GoConstDefinition -> GoNaming.kind(element)
-            else -> null
-        } ?: return
+        if (element !is GoFunctionDeclaration && element !is GoTypeSpec && element !is GoVarDefinition && element !is GoConstDefinition) return
+        element as GoNamedElement
         val pkg = file.packageName ?: return
         if (pkg == "main" || file.isTestFile || !GoNaming.isTopLevel(element)) return
         val name = element.name ?: return
         if (!GoNaming.isExported(name) || name.length <= pkg.length || !name.startsWith(pkg, ignoreCase = true)) return
         val rest = name.substring(pkg.length)
         if (!rest[0].isUpperCase()) return
-        holder.registerProblem(element.nameIdentifier ?: element,
-            "$kind name will be used as $pkg.$name by other packages, and that stutters; consider calling this $rest", GoRenameToFix(rest))
+        holder.registerProblem(element.nameIdentifier ?: element, "Name starts with the package name", GoRenameToFix(rest))
     }
 }
 
 /**
- * GoLand's "Receiver has a generic name" (`GoReceiverNames`, golint / revive `receiver-naming`): a receiver named `this` or `self`, a
- * receiver named `_` (omit the name instead), and a receiver whose name differs from the one the first method of the same type in the
- * file uses. Fixes: rename (to the first letter of the type, or to the name used before); remove the `_`.
+ * The receivers of the methods declared in the package of a file: the `.go` files of its directory with the same package clause, read
+ * through stubs (the receiver's name and pointer flag are stubbed, so the other files' ASTs stay unloaded). Shared by
+ * [GoReceiverNamesInspection] and `GoMixedReceiverTypesInspection`; cached per file until the package changes.
+ */
+internal object GoPackageReceivers {
+    /** One method's receiver: its name (null when omitted) and whether it is a pointer. */
+    data class Receiver(val name: String?, val pointer: Boolean)
+
+    private val KEY: Key<CachedValue<Map<String, List<Receiver>>>> = Key.create("go.g10.packageReceivers")
+
+    /** Receiver type name -> the receivers of its methods over the package of [file]. */
+    fun of(file: GoFile): Map<String, List<Receiver>> = CachedValuesManager.getCachedValue(file, KEY) {
+        val dir = file.originalFile.containingDirectory
+        val name = file.packageName
+        val others = dir?.files?.filterIsInstance<GoFile>()?.filter { it.packageName == name && it.virtualFile != file.originalFile.virtualFile }.orEmpty()
+        val map = (others + file).flatMap { it.methods }.mapNotNull { m ->
+            m.receiverTypeName?.let { it to Receiver(m.receiver?.name, m.isPointerReceiver) }
+        }.groupBy({ it.first }, { it.second })
+        val trackers = dir?.virtualFile?.let { arrayOf<Any>(GoTrackers.getInstance(file.project).forPackage(it)) } ?: arrayOf<Any>(file)
+        CachedValueProvider.Result.create(map, *trackers, file)
+    }
+}
+
+/**
+ * GoLand's "Receiver has a generic name" (`GoReceiverNames`), with GoLand's semantics seen live: when the named receivers of a type
+ * across the package (all its files) do not all have the same name, every one of them gets "Receiver names are different" (`_`
+ * included, unnamed receivers do not count); a receiver named `this`, `self` or `me` also gets "Receiver has a generic name". Fixes:
+ * rename to the most used plain name of the type (or the first letter of the type for a generic name); remove the `_`.
  */
 class GoReceiverNamesInspection : GoAnalysisInspectionBase() {
 
@@ -153,28 +181,17 @@ class GoReceiverNamesInspection : GoAnalysisInspectionBase() {
         val identifier = receiver.identifier ?: return
         val name = identifier.text
         val typeName = element.receiverTypeName ?: return
-        when (name) {
-            "this", "self" -> {
-                val suggested = previousName(element, file, typeName) ?: typeName.take(1).lowercase()
-                holder.registerProblem(identifier, "Receiver name should be a reflection of its identity; don't use generic names such as 'this' or 'self'",
-                    GoRenameToFix(suggested))
-            }
-            "_" -> holder.registerProblem(identifier, "Receiver name should not be an underscore, omit the name if it is unused", REMOVE_UNDERSCORE)
-            else -> {
-                val previous = previousName(element, file, typeName) ?: return
-                if (previous == name) return
-                holder.registerProblem(identifier, "Receiver name $name should be consistent with previous receiver name $previous for $typeName", GoRenameToFix(previous))
-            }
+        val names = GoPackageReceivers.of(file)[typeName].orEmpty().mapNotNull { it.name }
+        val usual = names.filter { it !in GENERIC && it != "_" }.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
+        if (names.toSet().size > 1) {
+            val fixes = listOfNotNull<LocalQuickFix>(usual?.takeIf { it != name }?.let(::GoRenameToFix), REMOVE_UNDERSCORE.takeIf { name == "_" })
+            holder.registerProblem(identifier, "Receiver names are different", *fixes.toTypedArray())
         }
+        if (name in GENERIC) holder.registerProblem(identifier, "Receiver has a generic name", GoRenameToFix(usual ?: typeName.take(1).lowercase()))
     }
 
-    /** The receiver name of the first method of [typeName] in [file] before [method]; null when [method] is the first named one. */
-    private fun previousName(method: GoMethodDeclaration, file: GoFile, typeName: String): String? =
-        file.methods.asSequence().takeWhile { it !== method }.filter { it.receiverTypeName == typeName }
-            .firstNotNullOfOrNull { it.receiver?.identifier?.text?.takeUnless { n -> n in GENERIC } }
-
     private companion object {
-        val GENERIC = setOf("this", "self", "_")
+        val GENERIC = setOf("this", "self", "me")
 
         val REMOVE_UNDERSCORE = GoEditFix("Remove the receiver name") { id ->
             val receiver = id.parent as? GoReceiver ?: return@GoEditFix null
@@ -199,23 +216,23 @@ class GoTypeParameterInLowerCaseInspection : GoAnalysisInspectionBase() {
 }
 
 /**
- * GoLand's "Unit-specific suffix for 'time.Duration'" (`GoUnitSpecificDurationSuffix`, staticcheck ST1011): a variable, constant,
- * parameter or field of type `time.Duration` named with a unit suffix (`timeoutSeconds`, `delayMs`): a Duration is not a number of
- * seconds. Fix: rename without the suffix.
+ * GoLand's "Unit-specific suffix for 'time.Duration'" (`GoUnitSpecificDurationSuffix`, golint / staticcheck ST1011): a variable or
+ * constant of type `time.Duration` named with a unit suffix (`timeoutSeconds`): a Duration is not a number of seconds. Parameters and
+ * struct fields are not checked, as in GoLand (its description says "constant and variable names"; a field `TimeoutMs time.Duration`
+ * stays quiet, seen live). GoLand's text. Fix: rename without the suffix.
  */
 class GoUnitSpecificDurationSuffixInspection : GoAnalysisInspectionBase() {
 
     override fun visit(element: PsiElement, holder: ProblemsHolder, file: GoFile) {
-        if (element !is GoVarDefinition && element !is GoConstDefinition && element !is GoParamDefinition && element !is GoFieldDefinition) return
+        if (element !is GoVarDefinition && element !is GoConstDefinition) return
         val named = element as GoNamedElement
         val name = named.name ?: return
         val suffix = SUFFIXES.firstOrNull { name.endsWith(it) && name.length > it.length } ?: return
         val type = GoSemanticService.getInstance(file.project).declarationType(named)
         if (!GoAnalysisPsi.isNamed(type, "time", "Duration")) return
-        val kind = if (element is GoFieldDefinition) "field" else GoNaming.kind(element) ?: "var"
         val rest = name.removeSuffix(suffix)
         val fixes = if (rest.isNotEmpty() && rest != "_") arrayOf<LocalQuickFix>(GoRenameToFix(rest)) else emptyArray()
-        holder.registerProblem(named.nameIdentifier ?: named, "$kind $name is of type time.Duration; don't use unit-specific suffix \"$suffix\"", *fixes)
+        holder.registerProblem(named.nameIdentifier ?: named, "Unit-specific suffix '$suffix'", *fixes)
     }
 
     private companion object {
@@ -234,15 +251,14 @@ class GoSnakeCaseUsageInspection : GoAnalysisInspectionBase() {
 
     override fun visit(element: PsiElement, holder: ProblemsHolder, file: GoFile) {
         if (element !is GoNamedElement) return
-        val kind = GoNaming.kind(element) ?: return
+        if (GoNaming.kind(element) == null) return
         val name = element.name ?: return
         val core = name.trim('_')
         if (!core.contains('_') || core.none { it.isLowerCase() } || name.startsWith("C_")) return
         if (file.isTestFile && (element is GoFunctionDeclaration || element is GoMethodDeclaration) && TEST_PREFIXES.any { name.startsWith(it) }) return
         if (GoAnalysisScope.isGenerated(file)) return
         val camel = GoInspectionText.camelCase(name)
-        holder.registerProblem(element.nameIdentifier ?: element, "Don't use underscores in Go names; $kind $name should be $camel",
-            ProblemHighlightType.GENERIC_ERROR_OR_WARNING, GoRenameToFix(camel))
+        holder.registerProblem(element.nameIdentifier ?: element, "Use camel case instead of snake case", ProblemHighlightType.GENERIC_ERROR_OR_WARNING, GoRenameToFix(camel))
     }
 
     private companion object {

@@ -14,7 +14,6 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.SmartPointerManager
@@ -59,7 +58,8 @@ import io.github.golangsupport.semantic.scope.GoUniverse
 /**
  * GoLand's "Shadowing variable" (`GoShadowedVar`): a local variable (`:=`, `var` in a body, `if` / `for` / `switch` header, range,
  * type-switch guard, `select` receive) whose name is already visible from an enclosing scope as a variable, constant, parameter,
- * result or receiver of the function (or an enclosing one), or as a package-level variable / constant of the same package.
+ * result or receiver of the function (or an enclosing one), as a package-level variable / constant of the same package, or as a
+ * predeclared name (`new`, `nil`, `len`; an import name is another inspection). Text as GoLand's: `Declaration of 'x' shadows declaration at style.go`.
  * A `:=` that reuses a variable of its own scope is not a declaration; parameters and results are not reported; `x := x` and
  * `switch x := x.(type)` are the usual idioms and stay quiet (as in vet's `shadow`). The name is painted with `GO_SHADOWING_VARIABLE`.
  * A scope lookup ([GoScopes.resolveName] from just outside the declaration's scope), not a flow analysis ([flow.GoShadowedErrorInspection]).
@@ -71,7 +71,7 @@ class GoShadowingVariableInspection : GoAnalysisInspectionBase() {
         val shadowed = shadowedBy(element) ?: return
         val name = element.name ?: return
         val anchor = element.nameIdentifier ?: element
-        val message = "Declaration of '$name' shadows declaration at ${location(shadowed, file)}"
+        val message = "Declaration of '$name' shadows declaration at ${location(shadowed)}"
         val pointers = SmartPointerManager.getInstance(file.project)
         val fixes = arrayOf<LocalQuickFix>(GoNavigateToShadowedFix(pointers.createSmartPsiElementPointer(shadowed)), GoRenameVariableFix())
         val descriptor = holder.manager.createProblemDescriptor(anchor, message, holder.isOnTheFly, fixes, ProblemHighlightType.GENERIC_ERROR_OR_WARNING)
@@ -89,7 +89,10 @@ class GoShadowingVariableInspection : GoAnalysisInspectionBase() {
             if (name == "_" || GoPsiUtil.functionOwner(def) == null) return null
             val lookupFrom = lookupPlace(def, name) ?: return null
             val target = GoScopes.resolveName(lookupFrom, name).firstNotNullOfOrNull { (it as? GoScopes.Target.Declaration)?.element } ?: return null
-            if (target === def || !isVariableLike(target) || GoUniverse.isBuiltinDeclaration(target)) return null
+            if (target === def) return null
+            // a predeclared name (`new := 2`, `nil := 0`): GoLand reports it "at builtin.go" (seen live 2026-10-05)
+            if (GoUniverse.isBuiltinDeclaration(target)) return target
+            if (!isVariableLike(target)) return null
             // Package level: only the same package (a dot import is another package's name, not a shadowed declaration).
             if (GoPsiUtil.functionOwner(target) == null && target.containingFile?.containingDirectory != def.containingFile?.containingDirectory) return null
             return target
@@ -149,14 +152,9 @@ class GoShadowingVariableInspection : GoAnalysisInspectionBase() {
 
         private fun isSameName(e: GoExpression?, name: String): Boolean = e is GoReferenceExpression && e.expression == null && e.identifier.text == name
 
-        /** `line N` in the same file, `file.go:N` in another one. */
-        fun location(target: GoNamedElement, file: GoFile): String {
-            val targetFile = target.containingFile ?: return "line ?"
-            val offset = (target.nameIdentifier ?: target).textRange.startOffset
-            val document = PsiDocumentManager.getInstance(targetFile.project).getDocument(targetFile)
-            val line = (document?.getLineNumber(offset) ?: StringUtil.offsetToLineNumber(targetFile.text, offset)) + 1
-            return if (targetFile == file) "line $line" else "${targetFile.name}:$line"
-        }
+        /** GoLand's text names the file of the shadowed declaration only (`style.go`, also for the same file), `builtin.go` for a predeclared name. */
+        fun location(target: GoNamedElement): String =
+            if (GoUniverse.isBuiltinDeclaration(target)) "builtin.go" else target.containingFile?.name ?: "builtin.go"
     }
 }
 

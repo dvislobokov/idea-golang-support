@@ -51,6 +51,28 @@ class GoG7FlowInspectionsTest : GoSemanticIdeTestBase() {
         GoConstantConditionInspection(),
     )
 
+    // G10: the probe of GoLand 2026.2.3 (probe2/style.go `shadow`), GoBoolExpressions WARNING "Condition 'x > 0' is always 'true'"
+    fun testConstantConditionOfTheShadowProbe() = doHighlight(
+        """
+        package p
+
+        func shadow(ch chan int) {
+        	x := 1
+        	if <warning descr="Condition 'x > 0' is always 'true'">x > 0</warning> {
+        		x := 2
+        		_ = x
+        	}
+        	_ = x
+        	select {
+        	case n := <-ch:
+        		_ = n
+        	default:
+        	}
+        }
+        """,
+        GoConstantConditionInspection(),
+    )
+
     fun testConstantConditionFromValues() = doHighlight(
         """
         package p

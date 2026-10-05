@@ -182,6 +182,7 @@ class GoCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() {
                     addIndentOptionsTab(settings)
                     addTab(GoWrappingCodeStyleTab(settings))
                     addTab(GoImportsCodeStyleTab(settings))
+                    addTab(GoOtherCodeStyleTab(settings))
                 }
             }
         }

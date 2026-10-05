@@ -1,8 +1,10 @@
 <html>
 <body>
-Reports a receiver named <code>this</code> or <code>self</code>, a receiver named <code>_</code> (omit the name instead), and a receiver whose name differs from the one the first method of the same type in the file uses.
-<pre><code>func (this Circle) Area() float64</code></pre>
+Reports receiver names like <code>me</code>, <code>this</code> or <code>self</code>, and receiver names that differ from the other receiver names of the same type
+in the package (all its files): when the receivers of a type do not all have the same name, each of them is reported.
+<pre><code>func (this Circle) Area() float64
+func (c Circle) Perimeter() float64</code></pre>
 <p>Quick fixes: <b>Rename to 'c', Remove the receiver name</b>.</p>
-<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+<!-- GoLand parity (PLAN.md G7, G10): GoLand's id, group and texts. -->
 </body>
 </html>

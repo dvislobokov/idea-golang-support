@@ -12,8 +12,9 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
         package p
 
         func f() {
-        	defer <weak_warning descr="'recover()' is called directly by 'defer' and does not stop a panic">recover()</weak_warning>
-        	go <weak_warning descr="'panic()' is called directly by 'go'">panic("x")</weak_warning>
+        	<weak_warning descr="defer should not call recover() directly">defer recover()</weak_warning>
+        	<weak_warning descr="go should not call panic() directly">go panic("x")</weak_warning>
+        	<weak_warning descr="defer should not call panic() directly">defer panic("y")</weak_warning>
         	defer func() { recover() }()
         }
 
@@ -69,15 +70,15 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
         package p
 
         func f() {
-        	<warning descr="Variable 'len' collides with the builtin function">len</warning> := 3
+        	<warning descr="Variable 'len' collides with the 'builtin' function">len</warning> := 3
         	_ = len
         }
 
-        type <warning descr="Type 'error' collides with the builtin type">error</warning> struct{}
+        type <warning descr="Type 'error' collides with the 'builtin' type">error</warning> struct{}
 
-        func g(<warning descr="Parameter 'new' collides with the builtin function">new</warning> int) {}
+        func g(<warning descr="Parameter 'new' collides with the 'builtin' function">new</warning> int) {}
 
-        const <warning descr="Constant 'true' collides with the builtin constant">true</warning> = 0
+        const <warning descr="Constant 'true' collides with the 'builtin' constant">true</warning> = 0
 
         type S struct{ len int }
 
@@ -88,60 +89,123 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
 
     // --- GoIrregularIota ---
 
+    /** GoLand's semantics (its description, and probe2/iota3.go seen live): the same list with `iota` after only specs without a list. */
     fun testIrregularIota() = doHighlight(
         """
         package p
 
-        const a = <weak_warning descr="'iota' in a single constant declaration is always 0">iota</weak_warning>
+        type Weekday int
 
         const (
-        	A = iota
-        	B <weak_warning descr="Redundant repetition of the previous constant expression with 'iota'">= iota</weak_warning>
-        	C
+        	a = iota
+        	b
+        	<weak_warning descr="Irregular usage of 'iota'">c = iota</weak_warning>
         )
 
         const (
-        	X = iota * 10
-        	Y = iota * 20
-        	Z = 5
+        	a1, aa1 = iota, iota
+        	b1, bb1
+        	<weak_warning descr="Irregular usage of 'iota'">c1, cc1 = iota, iota</weak_warning>
+        )
+
+        const (
+        	j Weekday = iota
+        	k
+        	<weak_warning descr="Irregular usage of 'iota'">l Weekday = iota</weak_warning>
+        )
+
+        const (
+        	M0 = iota
+        	_
+        	<weak_warning descr="Irregular usage of 'iota'">M2 = iota</weak_warning>
         )
         """,
         GoIrregularIotaInspection(),
     )
 
-    fun testIrregularIotaReplaceWithZero() = doFix(
-        "package p\n\nconst a = <caret>iota",
-        "Replace with 0",
-        "package p\n\nconst a = 0",
+    fun testIrregularIotaQuietForms() = doHighlight(
+        """
+        package p
+
+        const Single = iota
+
+        const (
+        	A0 = iota
+        	A1 = iota
+        	A2
+        )
+
+        const (
+        	d = iota * 2
+        	e = iota * 2
+        )
+
+        const (
+        	D0 = iota * 2
+        	D1
+        	D2 = iota * 2
+        )
+
+        const (
+        	f = 1 << iota
+        	g
+        	i = 1 << iota
+        )
+
+        const (
+        	H0 = iota
+        	H1 = 7
+        	H2
+        )
+
+        const (
+        	C0 = iota
+        	C1 = 10
+        	C2 = iota
+        )
+
+        const (
+        	x, xx = iota, iota
+        	y, yy
+        	z, zz = iota + 40, iota
+        )
+
+        const (
+        	t0 int = iota
+        	t1
+        	t2 = iota
+        )
+        """,
         GoIrregularIotaInspection(),
     )
 
     fun testIrregularIotaRemoveRepetition() = doFix(
-        "package p\n\nconst (\n\tA = iota\n\tB = <caret>iota\n)",
+        "package p\n\nconst (\n\tA = iota\n\tB\n\tC = <caret>iota\n)",
         "Remove the repeated expression",
-        "package p\n\nconst (\n\tA = iota\n\tB\n)",
+        "package p\n\nconst (\n\tA = iota\n\tB\n\tC\n)",
         GoIrregularIotaInspection(),
     )
 
     // --- GoMixedReceiverTypes ---
 
+    /** GoLand (seen live): the name of every method of the type is reported. */
     fun testMixedReceiverTypes() = doHighlight(
         """
         package p
 
         type T struct{}
 
-        func (t *T) A() {}
+        func (t *T) <weak_warning descr="$MIXED_T">A</weak_warning>() {}
 
-        func (t *T) B() {}
+        func (t *T) <weak_warning descr="$MIXED_T">B</weak_warning>() {}
 
-        func (t <weak_warning descr="Methods of 'T' have both value and pointer receivers">T</weak_warning>) C() {}
+        func (t T) <weak_warning descr="$MIXED_T">C</weak_warning>() {}
 
         type U struct{}
 
-        func (u <weak_warning descr="Methods of 'U' have both value and pointer receivers">U</weak_warning>) A() {}
+        func (u U) <weak_warning descr="$MIXED_U">A</weak_warning>() {}
 
-        func (u *U) B() {}
+        func (u *U) <weak_warning descr="$MIXED_U">B</weak_warning>() {}
 
         type V struct{}
 
@@ -154,11 +218,16 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
 
     fun testMixedReceiverTypesAcrossFiles() {
         myFixture.addFileToProject("b.go", "package p\n\nfunc (t *T) A() {}\n\nfunc (t *T) B() {}\n")
-        doHighlight("package p\n\ntype T struct{}\n\nfunc (t <weak_warning descr=\"Methods of 'T' have both value and pointer receivers\">T</weak_warning>) C() {}", GoMixedReceiverTypesInspection())
+        doHighlight("package p\n\ntype T struct{}\n\nfunc (t T) <weak_warning descr=\"$MIXED_T\">C</weak_warning>() {}", GoMixedReceiverTypesInspection())
+    }
+
+    fun testMixedReceiverNoFixOnTheMajority() {
+        val texts = offered("package p\n\ntype T struct{}\n\nfunc (t *T) <caret>A() {}\n\nfunc (t *T) B() {}\n\nfunc (t T) C() {}", GoMixedReceiverTypesInspection())
+        assertFalse(texts.toString(), texts.any { it.startsWith("Change receiver") })
     }
 
     fun testMixedReceiverToPointerFix() = doFix(
-        "package p\n\ntype T struct{}\n\nfunc (t *T) A() {}\n\nfunc (t <caret>T) C() {}",
+        "package p\n\ntype T struct{}\n\nfunc (t *T) A() {}\n\nfunc (t T) <caret>C() {}",
         "Change receiver to pointer",
         "package p\n\ntype T struct{}\n\nfunc (t *T) A() {}\n\nfunc (t *T) C() {}",
         GoMixedReceiverTypesInspection(),
@@ -277,6 +346,7 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
 
     // --- GoAssignmentToReceiver ---
 
+    /** GoLand (seen live): only assignments to the receiver itself; `c.name = v` is not reported. */
     fun testAssignmentToReceiver() = doHighlight(
         """
         package p
@@ -287,8 +357,9 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
         	m map[string]int
         }
 
-        func (c C) Set() {
-        	<weak_warning descr="Assignment to a field of value receiver 'c' is lost when the method returns">c.X</weak_warning> = 1
+        func (c C) Set(v int) {
+        	c.X = v
+        	<weak_warning descr="Assignment to the method receiver doesn't propagate to other calls">c</weak_warning> = C{}
         }
 
         func (c C) With(x int) C {
@@ -297,7 +368,7 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
         }
 
         func (c *C) Reset() {
-        	<weak_warning descr="Assignment to method receiver 'c' does not propagate to callers">c</weak_warning> = nil
+        	<weak_warning descr="Assignment to the method receiver propagates only to callees but not to callers">c</weak_warning> = nil
         }
 
         func (c C) Shared() {
@@ -309,14 +380,18 @@ class GoProbableBugInspectionsTest : GoParityInspectionTestBase() {
         	*c = C{}
         	c.X = 3
         }
+
+        type N int
+
+        func (n N) Inc() {
+        	<weak_warning descr="Assignment to the method receiver doesn't propagate to other calls">n</weak_warning>++
+        }
         """,
         GoAssignmentToReceiverInspection(),
     )
 
-    fun testAssignmentToReceiverPointerFix() = doFix(
-        "package p\n\ntype C struct{ X int }\n\nfunc (c C) Set() {\n\t<caret>c.X = 1\n}",
-        "Change receiver to pointer",
-        "package p\n\ntype C struct{ X int }\n\nfunc (c *C) Set() {\n\tc.X = 1\n}",
-        GoAssignmentToReceiverInspection(),
-    )
+    private companion object {
+        const val MIXED_T = "Struct T has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation."
+        const val MIXED_U = "Struct U has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation."
+    }
 }

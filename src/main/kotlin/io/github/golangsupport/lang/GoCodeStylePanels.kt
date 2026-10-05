@@ -92,6 +92,36 @@ class GoImportsCodeStyleTab(settings: CodeStyleSettings) : GoCustomCodeStyleTab(
 }
 
 /**
+ * Code Style | Go | Other, as GoLand's: "Add a leading space to comments" (off by default) turns on the inspection "Comment has no leading
+ * space" (GoLand's inspection works only with this option, seen live).
+ */
+class GoOtherCodeStyleTab(settings: CodeStyleSettings) : GoCustomCodeStyleTab(settings) {
+    private val leadingSpace = JBCheckBox(GoBundle.message("codeStyle.other.leadingSpace"))
+
+    private val component = panel {
+        row { cell(leadingSpace).comment(GoBundle.message("codeStyle.other.leadingSpace.comment")) }
+    }
+
+    init {
+        addPanelToWatch(component)
+    }
+
+    override fun getTabTitle(): String = GoBundle.message("codeStyle.other.tab")
+
+    override fun getPanel(): JComponent = component
+
+    override fun apply(settings: CodeStyleSettings) {
+        custom(settings).ADD_LEADING_SPACE_TO_COMMENTS = leadingSpace.isSelected
+    }
+
+    override fun isModified(settings: CodeStyleSettings): Boolean = custom(settings).ADD_LEADING_SPACE_TO_COMMENTS != leadingSpace.isSelected
+
+    override fun resetImpl(settings: CodeStyleSettings) {
+        leadingSpace.isSelected = custom(settings).ADD_LEADING_SPACE_TO_COMMENTS
+    }
+}
+
+/**
  * Code Style | Go | Wrapping and Braces: only what gofmt keeps, chopping a long one-line list down to one item per line (call arguments,
  * composite literal elements, function parameters). Applied by Reformat Code with the Built-in formatter; gofmt and goimports as the
  * formatter never break lines, so the options have no effect with them.

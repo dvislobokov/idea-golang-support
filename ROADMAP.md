@@ -180,6 +180,14 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.175–0.2.176) G10 (вторая разведка GoLand, `PLAN.md`): тексты, диапазоны и уровни 20 инспекций G7 как у GoLand (`GoParityProbeTest`
+  сверяет `probe2/*.go` с дампами построчно), `GoIrregularIota` по описанию GoLand, `GoReceiverNames` / `GoMixedReceiverTypes` по стабам всего пакета
+  (`GoPackageReceivers`), `GoCommentLeadingSpace` за опцией Code Style | Go | Other (`ADD_LEADING_SPACE_TO_COMMENTS`, вкладка `GoOtherCodeStyleTab`),
+  SYNTAX_UPDATE = 20 со значком, линзы Update syntax / What's New выключены по умолчанию (`GoSyntaxUpdateLensDefaults`, одноразовая запись настроек);
+  Alt+Enter на `//go:generate` — три пункта GoLand (`GoGenerate{File,Package,Directive}Intention`, гаттер `GoGenerateLineMarkerProvider` без действий),
+  `GoAddTagKeyIntention`, тег-интенции и на совпадающем теге, Add format string argument внутри строки формата, `GoShadowedVar` с текстом GoLand и
+  предобъявленными именами, `GO_COMMENT_REFERENCE` на всех резолвящихся именах doc-комментария, `GO_SHADOWING_VARIABLE` на использованиях, `select`-переменная
+  локальная (golden `testData/highlighting/g10.go`). Открытое — в PLAN под G10.
 - [x] (2026-10-05, 0.2.174) Ревью Opus всего диффа G5–G9 (235 файлов): 3 обязательных и 12 желательных замечаний исправлены двумя агентами с регрессионными тестами
   (см. CHANGELOG 0.2.174). Осталось из заметок ревью: Introduce Parameter переносит нечистое выражение (`time.Now()`) в точку вызова без предупреждения; Copy Declaration
   в другой файл не переносит алиасы и dot-импорты; String() view выполняет код программы на каждое значение (opt-in), точка внутри `String()` прервёт вызов;

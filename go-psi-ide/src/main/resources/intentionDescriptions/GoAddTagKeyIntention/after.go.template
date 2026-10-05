@@ -1,0 +1,4 @@
+type User struct {
+	FullName string `json:"fullName"`
+	UserID   int <spot>`json:"userID"`</spot>
+}

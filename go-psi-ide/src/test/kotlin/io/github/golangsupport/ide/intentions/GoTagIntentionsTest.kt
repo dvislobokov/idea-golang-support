@@ -1,11 +1,14 @@
 package io.github.golangsupport.ide.intentions
 
-/** G4 struct tags: Change field name style in tags (popup through the test hook), Update key value in tags. */
+import com.intellij.codeInsight.intention.PriorityAction
+
+/** G4 struct tags: Add key to tags, Change field name style in tags (popups through the test hooks), Update key value in tags. */
 class GoTagIntentionsTest : GoIntentionTestSupport() {
 
     override fun tearDown() {
         try {
             GoChangeTagNameStyleIntention.chooser = null
+            GoAddTagKeyIntention.chooser = null
         } catch (e: Throwable) {
             addSuppressedException(e)
         } finally {
@@ -124,7 +127,8 @@ class GoTagIntentionsTest : GoIntentionTestSupport() {
         """,
     )
 
-    fun testNoUpdateWhenTheValueMatches() = assertNotOffered(
+    // G10, seen live on GoLand 2026.2.3: offered on a matching tag too, where it changes nothing
+    fun testUpdateOnAMatchingValueChangesNothing() = doTest(
         """
         package p
 
@@ -134,5 +138,119 @@ class GoTagIntentionsTest : GoIntentionTestSupport() {
         }
         """,
         "Update key value in tags",
+        """
+        package p
+
+        type User struct {
+        	FullName string `json:"full_name"`
+        	Email    string `json:"email"`
+        }
+        """,
+    )
+
+    fun testNoUpdateWithoutANameKey() = assertNotOffered(
+        """
+        package p
+
+        type User struct {
+        	Email string `validate:"req<caret>uired"`
+        }
+        """,
+        "Update key value in tags",
+    )
+
+    private val tagIntentions = listOf("Add key to tags", "Change field name style in tags", "Update key value in tags")
+
+    private fun tagIntentionsAt(needle: String): List<String> {
+        val text = "package p\n\ntype Probe2Config struct {\n\tName  string `json:\"Name\"`\n\tValue int    `json:\"value\"`\n}\n"
+        val at = text.indexOf(needle)
+        myFixture.configureByText("a.go", text.substring(0, at) + "<caret>" + text.substring(at))
+        return myFixture.availableIntentions.map { it.text }.filter { it in tagIntentions }
+    }
+
+    // the probe of G10 (probe2/other.go): all three on the matching tag and on the other one; GoLand's order is all HIGH, then by text
+    fun testAllThreeOnMatchingAndNonMatchingTags() {
+        assertEquals(tagIntentions, tagIntentionsAt("value\"").sorted())
+        assertEquals(tagIntentions, tagIntentionsAt("Name\"").sorted())
+        for (intention in listOf(GoAddTagKeyIntention(), GoChangeTagNameStyleIntention(), GoUpdateTagKeyValueIntention())) {
+            assertEquals(PriorityAction.Priority.HIGH, (intention as PriorityAction).priority)
+        }
+    }
+
+    fun testAddKeyToAllFields() {
+        GoAddTagKeyIntention.chooser = { keys ->
+            assertEquals(listOf("json", "yaml", "xml", "toml", "db", "mapstructure", "bson", "env", "form"), keys)
+            "yaml"
+        }
+        doTest(
+            """
+            package p
+
+            type User struct {
+            	FullName string `json:"full<caret>Name"`
+            	UserID   int
+            	Raw      string "json:\"raw\""
+            	Empty    bool   ``
+            	A, B     int
+            	Embedded
+            }
+            """,
+            "Add key to tags",
+            """
+            package p
+
+            type User struct {
+            	FullName string `json:"fullName" yaml:"fullname"`
+            	UserID   int `yaml:"userid"`
+            	Raw      string "json:\"raw\" yaml:\"raw\""
+            	Empty    bool   `yaml:"empty"`
+            	A, B     int
+            	Embedded
+            }
+            """,
+        )
+    }
+
+    fun testAddKeyUsesTheStyleOfTheKey() {
+        GoAddTagKeyIntention.chooser = { "json" }
+        doTest(
+            """
+            package p
+
+            type User struct {
+            	FullName string `json:"full_name"`
+            	UserID   int    `yaml:"u<caret>serID"`
+            }
+            """,
+            "Add key to tags",
+            """
+            package p
+
+            type User struct {
+            	FullName string `json:"full_name"`
+            	UserID   int    `yaml:"userID" json:"user_id"`
+            }
+            """,
+        )
+    }
+
+    fun testAddKeyFromTheTypeName() = assertOffered(
+        """
+        package p
+
+        type Us<caret>er struct {
+        	Name string
+        }
+        """,
+        "Add key to tags",
+    )
+
+    fun testNoAddKeyOutsideAStruct() = assertNotOffered(
+        """
+        package p
+
+        func f() { x<caret> := 1; _ = x }
+        """,
+        "Add key to tags",
     )
 }

@@ -1,9 +1,10 @@
 <html>
 <body>
 Reports a line comment whose text starts right after <code>//</code>. Directives (<code>//go:generate</code>, <code>//nolint</code>, <code>//lint:ignore</code>, <code>//line</code>, <code>//export</code>, cgo <code>//#</code> lines, <code>//+build</code>) are not comments for this check.
+<p>The inspection works only when <b>Add a leading space to comments</b> is selected in <b>Settings | Editor | Code Style | Go</b>, tab <b>Other</b> (off by default).</p>
 <pre><code>//bad comment
 // good comment</code></pre>
 <p>Quick fixes: <b>Add a space after '//'</b>.</p>
-<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+<!-- GoLand parity (PLAN.md G7, G10): GoLand's id, group and Code Style option. -->
 </body>
 </html>

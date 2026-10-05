@@ -1,13 +1,15 @@
 <html>
 <body>
-Reports <code>iota</code> in a constant declaration without parentheses (it is always 0 there), and a spec of a <code>const (...)</code> group that repeats the type and the <code>iota</code> expression of the previous spec, which the implicit repetition already does.
-<pre><code>const x = iota
-
-const (
-    A = iota
-    B = iota
+Reports irregular usage of <code>iota</code> within a constant declaration: two constant specifications with a textually identical expression list
+containing <code>iota</code>, with only specifications without an expression list (at least one) between them. The implicit repetition already
+gives the later specification that value, so the repeated list reads as if it restarted or changed something.
+<pre><code>const (
+    a = iota // 0
+    b        // 1
+    c = iota // 2: the expression is redundant
 )</code></pre>
-<p>Quick fixes: <b>Replace with 0, Remove the repeated expression</b>.</p>
-<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+Adjacent repeats (<code>A0 = iota</code> right after <code>A1 = iota</code>) and lists that differ (<code>iota + 40, iota</code>) are not reported.
+<p>Quick fixes: <b>Remove the repeated expression</b>.</p>
+<!-- GoLand parity (PLAN.md G7, G10): GoLand's id, group and semantics. -->
 </body>
 </html>

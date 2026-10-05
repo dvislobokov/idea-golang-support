@@ -1,6 +1,9 @@
 package io.github.golangsupport.build
 
-import com.intellij.execution.lineMarker.RunLineMarkerContributor
+import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
+import com.intellij.codeInsight.daemon.LineMarkerInfo
+import com.intellij.codeInsight.daemon.LineMarkerProvider
+import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
@@ -56,19 +59,30 @@ object GoGenerateDirectives {
     }
 }
 
-/** ▶ on each `//go:generate` line of a Go file: this directive, or all directives of the file. Text only, so it works while indexing. */
-class GoGenerateLineMarkerContributor : RunLineMarkerContributor(), DumbAware {
-    override fun getInfo(element: PsiElement): Info? {
-        if (element !is PsiComment || element.elementType != GoTypes.LINE_COMMENT || !GoGenerateDirectives.isDirective(element.text) || !atLineStart(element)) return null
-        val file = element.containingFile?.virtualFile ?: return null
-        val pointer = SmartPointerManager.createPointer(element)
-        return Info(AllIcons.RunConfigurations.TestState.Run, arrayOf<AnAction>(GoGenerateDirectiveAction(pointer), GoGenerateFileAction(file))) { "Run go:generate" }
+/**
+ * ▶ on each `//go:generate` line of a Go file, as GoLand's: tooltip `Run go generate on comment`, a click runs this directive alone. A plain line
+ * marker without actions, not a run-line contributor: those actions would join Alt+Enter, where GoLand shows only its three intentions
+ * ([GoGenerateIntention]; seen live 2026-10-05, ours had five). Text only, so it works while indexing.
+ */
+class GoGenerateLineMarkerProvider : LineMarkerProvider, DumbAware {
+    override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
+        if (!isDirective(element)) return null
+        val pointer = SmartPointerManager.createPointer(element as PsiComment)
+        val handler = GutterIconNavigationHandler<PsiComment> { _, _ -> GoGenerateDirectiveAction.run(element.project, pointer) }
+        return LineMarkerInfo(element, element.textRange, AllIcons.RunConfigurations.TestState.Run, { TOOLTIP }, handler, GutterIconRenderer.Alignment.CENTER) { TOOLTIP }
     }
 
-    /** cmd/go reads a directive only at the start of a line. */
-    private fun atLineStart(element: PsiElement): Boolean {
-        val start = element.textRange.startOffset
-        return start == 0 || element.containingFile.viewProvider.contents[start - 1] == '\n'
+    companion object {
+        const val TOOLTIP = "Run go generate on comment"
+
+        fun isDirective(element: PsiElement): Boolean =
+            element is PsiComment && element.elementType == GoTypes.LINE_COMMENT && GoGenerateDirectives.isDirective(element.text) && atLineStart(element)
+
+        /** cmd/go reads a directive only at the start of a line. */
+        private fun atLineStart(element: PsiElement): Boolean {
+            val start = element.textRange.startOffset
+            return start == 0 || element.containingFile.viewProvider.contents[start - 1] == '\n'
+        }
     }
 }
 
@@ -77,12 +91,17 @@ class GoGenerateDirectiveAction(private val directive: SmartPsiElementPointer<Ps
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project ?: return
-        val (file, text) = ReadAction.compute<Pair<VirtualFile, String>?, Throwable> {
-            directive.element?.let { c -> c.containingFile?.virtualFile?.let { it to c.text } }
-        } ?: return
-        if (!GoGenerateDirectives.isDirective(text)) return
-        GoGenerateDirectives.run(project, file, GoGenerateDirectives.directiveArguments(text, file.name))
+        run(e.project ?: return, directive)
+    }
+
+    companion object {
+        fun run(project: Project, directive: SmartPsiElementPointer<PsiComment>) {
+            val (file, text) = ReadAction.compute<Pair<VirtualFile, String>?, Throwable> {
+                directive.element?.let { c -> c.containingFile?.virtualFile?.let { it to c.text } }
+            } ?: return
+            if (!GoGenerateDirectives.isDirective(text)) return
+            GoGenerateDirectives.run(project, file, GoGenerateDirectives.directiveArguments(text, file.name))
+        }
     }
 }
 

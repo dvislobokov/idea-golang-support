@@ -132,14 +132,13 @@ roots are off in unit-test mode), so library-side searches are covered with proj
 GoLand's ids, groups (`groupPath="Go"`, `groupName` as GoLand's) and levels from `docs/goland-analysis/dumps/inspections-go.txt`, all enabled
 by default, on `GoAnalysisInspectionBase` (gate `DIAGNOSTICS`). Inspections, not lint rules: they carry GoLand's ids for `//noinspection`
 and the profile, and need no `[id]` prefix. Shared fixes: `GoEditFix` (text edits computed at apply time), `GoRenameToFix` (platform
-`RenameProcessor`, references too), `GoRenameVariableFix("Rename")` (interactive). Messages GoLand shows verbatim in the dumps:
-"Fields are assigned without explicit names", "Comment should be meaningful or it should be removed"; the rest follow golint /
-staticcheck wording. GoLand checks that already existed under other names: `GoRedundantTrueInForCondition` = rule S1006,
+`RenameProcessor`, references too), `GoRenameVariableFix("Rename")` (interactive). Since G10 the messages, ranges and levels are GoLand's
+own (re-captured on GoLand 2026.2.3, dumps `highlight-internal-probe2-*.txt`; `GoParityProbeTest` compares the probe2 files with them). GoLand checks that already existed under other names: `GoRedundantTrueInForCondition` = rule S1006,
 `GoStringsReplaceCount` = SA1018, `GoLeadingWhitespaceInDirectiveComment` = SA9009, `GoBuildTag` = `GoBuildConstraint` (extended).
 
 | Short name (GoLand group, level) | Rules | Quick fixes |
 |---|---|---|
-| `GoCommentLeadingSpace` (Code style, weak) | `//text`: `Line comment should have a space after '//'`; directives (`//word:`, `//line`, `//export`, `//extern`, `//nolint`, `//noinspection`, regions, `//#`, `//+build`), `////`, bare `//` and generated files quiet | Add a space after '//' |
+| `GoCommentLeadingSpace` (Code style, weak) | only with Code Style \| Go \| Other "Add a leading space to comments" (`GoCodeStyleSettings.ADD_LEADING_SPACE_TO_COMMENTS`, off by default, as GoLand); `//text`: `Line comment should have a space after '//'`; directives (`//word:`, `//line`, `//export`, `//extern`, `//nolint`, `//noinspection`, regions, `//#`, `//+build`), `////`, bare `//` and generated files quiet | Add a space after '//' |
 | `GoCommentStart` (Code style, weak) | the form half of golint `exported` (split from `GoDocComment`): `comment on exported function Foo should be of the form "Foo ..."`; `Comment should be meaningful or it should be removed` for a `//` comment that is only the name (GoLand on `// NewOrder`); `_test.go` and generated files skipped, `main` checked | Start comment with 'Name'; Remove comment |
 | `GoErrorStringFormat` (Code style, weak) | ST1005 on the literal of `errors.New` / `fmt.Errorf` (resolved): `Error string should not be capitalized` (first letter; initialisms like `URL`, `IPv4` pass), `Error string should not end with punctuation or a newline` (`.`, `:`, `!`, `\n`) | Lowercase the first letter; Remove the trailing punctuation |
 | `GoExportedOwnDeclaration` (Code style, weak) | package-level `var A, B int` / `const A, B = …` with an exported name: `Exported var A should have its own declaration` (first exported name, once per spec) | Split into separate declarations (no comments, a value per name or none, no implicit repetition after it) |
@@ -148,25 +147,25 @@ staticcheck wording. GoLand checks that already existed under other names: `GoRe
 | `GoRedundantElseInIf` (Code style, weak) | `'if' block ends with a 'return' statement, so drop this 'else' and outdent its block` (also `break`, `continue`, `goto`, builtin `panic`); not for `else if` chains or an `if` that is an `else` branch | Remove redundant 'else' (no init statement, no comments in the else, no top-level declaration of the else that reuses a name visible at the `if` or mentioned after it) |
 | `GoStructInitializationWithoutFieldNames` (Code style, weak) | `Fields are assigned without explicit names` on the `{…}` of an unkeyed struct literal, also elided ones in slices / maps / `[]*T`, same-package and anonymous structs (GoLand on a test table) | Add field names (when every field is listed) |
 | `GoTypeParameterInLowerCase` (Code style, information) | `Type parameter 't' is declared in lowercase` | Rename to 'T' |
-| `GoUnitSpecificDurationSuffix` (Code style, weak) | ST1011: `var timeoutSeconds is of type time.Duration; don't use unit-specific suffix "Seconds"` (vars, consts, parameters, fields; ST1011's suffix list) | Rename to 'timeout' |
-| `GoUnsortedImport` (Code style, weak) | `Import is not sorted` at the first spec out of path order in an import group (blank or comment-only lines split groups) | Sort imports (each spec on its own line) |
-| `GoSnakeCaseUsage` (Code style, weak) | `Don't use underscores in Go names; func parse_url should be parseUrl` (funcs, methods, types, vars, consts, params, receivers, type params; not fields, `ALL_CAPS`, edge underscores, test functions, generated files) | Rename to camelCase |
-| `GoEmptyDeclaration` (Declaration redundancy, warning) | `Empty 'var' declaration` (also `const`, `type`, `import`; a comment inside keeps it) | Delete empty declaration |
-| `GoPreferNilSlice` (Declaration redundancy, weak) | `Empty slice declared using a literal` for a local `s := []T{}` / `var s = []T{}` | Replace with nil slice declaration (statement lists only) |
+| `GoUnitSpecificDurationSuffix` (Code style, weak) | ST1011: `Unit-specific suffix 'Seconds'` (vars and consts only, as GoLand; ST1011's suffix list) | Rename to 'timeout' |
+| `GoUnsortedImport` (Code style, weak) | `Imports are not sorted` on every spec of an import group out of path order (blank or comment-only lines split groups) | Sort imports (each spec on its own line) |
+| `GoSnakeCaseUsage` (Code style, weak) | `Use camel case instead of snake case` (funcs, methods, types, vars, consts, params, receivers, type params; not fields, `ALL_CAPS`, edge underscores, test functions, generated files) | Rename to camelCase |
+| `GoEmptyDeclaration` (Declaration redundancy, warning) | `Empty declaration 'var ()'` (also `const`, `type`, `import`; a comment inside keeps it) | Delete empty declaration |
+| `GoPreferNilSlice` (Declaration redundancy, weak) | `Empty slice declaration using a literal` on the `[]T` of a local `s := []T{}` / `var s = []T{}` | Replace with nil slice declaration (statement lists only) |
 | `GoRedundantComma` (Declaration redundancy, weak) | `Redundant comma` before `)` / `}` / `]` on the same line | Remove redundant comma |
-| `GoRedundantImportAlias` (Declaration redundancy, weak) | `Redundant alias 'fmt'` (alias = resolved package name, else the last path segment) | Remove redundant alias |
+| `GoRedundantImportAlias` (Declaration redundancy, weak) | `Redundant alias` on the alias (alias = resolved package name, else the last path segment) | Remove redundant alias |
 | `GoRedundantSemicolon` (Declaration redundancy, weak) | `Redundant semicolon` at the end of a line, before `}` / `)` / `;`; `for` clauses never | Remove redundant semicolon |
-| `GoRedundantTypeDeclInCompositeLit` (Declaration redundancy, warning) | `Redundant type declaration` for `[]T{T{…}}`, `[]*T{&T{…}}`, map keys and values (type text compared, gofmt -s) | Remove redundant type |
+| `GoRedundantTypeDeclInCompositeLit` (Declaration redundancy, warning) | `Redundant type` for `[]T{T{…}}`, `[]*T{&T{…}}`, map keys and values (type text compared, gofmt -s) | Remove redundant type |
 | `GoVarAndConstTypeMayBeOmitted` (Declaration redundancy, weak) | `Type can be omitted`: declared type identical to the values' types (default type of untyped constants for `var`; `const` keeps its type for untyped values) | Remove type |
-| `GoUnusedTypeParameter` (Declaration redundancy, warning) | `Unused type parameter 'T'` of a function or type (no unqualified mention in signature, constraints, body, type) | Rename to '_' |
-| `GoRedundantParens` (General, weak) | `Redundant parentheses` around primary operands, whole conditions / return values / assigned values / arguments, and named types in declarations; composite literals in `if` / `for` / `switch` headers kept | Remove redundant parentheses |
-| `GoDeferGo` (Probable bugs, weak) | `'recover()' is called directly by 'defer' and does not stop a panic`; `'panic()' is called directly by 'go'` (builtins only, resolved) | Wrap in a function literal |
+| `GoUnusedTypeParameter` (Declaration redundancy, warning) | `Unused type parameter 'T any'` (the declaration with its constraint; one name of `[K, V any]` alone: `'V'`) of a function or type (no unqualified mention in signature, constraints, body, type) | Rename to '_' |
+| `GoRedundantParens` (General, weak) | `Redundant parentheses` (ordinary weak-warning highlighting, not greyed out, as GoLand) around primary operands, whole conditions / return values / assigned values / arguments, and named types in declarations; composite literals in `if` / `for` / `switch` headers kept | Remove redundant parentheses |
+| `GoDeferGo` (Probable bugs, weak) | `defer should not call recover() directly`, `go should not call panic() directly` on the whole statement (builtins only, resolved) | Wrap in a function literal |
 | `GoImportUsedAsName` (Probable bugs, warning) | `Variable 'strings' collides with imported package name` (locals, params, receivers, type params, local types; blank / dot imports ignored) | Rename |
-| `GoIrregularIota` (Probable bugs, weak) | `'iota' in a single constant declaration is always 0`; `Redundant repetition of the previous constant expression with 'iota'` | Replace with 0; Remove the repeated expression |
-| `GoMixedReceiverTypes` (Probable bugs, weak) | `Methods of 'T' have both value and pointer receivers` at the minority receivers (value ones on a tie), across the package's files (stubs) | Change receiver to pointer / to value |
-| `GoReservedWordUsedAsName` (Probable bugs, warning) | `Variable 'len' collides with the builtin function` (type / constant / function; not fields, methods) | Rename |
+| `GoIrregularIota` (Probable bugs, weak) | `Irregular usage of 'iota'` on a whole spec whose type and expression list repeat the previous explicit spec's, with only (at least one) specs without a list between (`_` counts); the list must have a bare `iota` element (GoLand quiet on `iota * 2` / `1 << iota` with a gap); adjacent repeats and `const X = iota` quiet | Remove the repeated expression |
+| `GoMixedReceiverTypes` (Probable bugs, weak) | `Struct T has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.` on the name of every method of the type, across the package's files (stubs) | Change receiver to pointer / to value (minority methods, value ones on a tie) |
+| `GoReservedWordUsedAsName` (Probable bugs, warning) | `Variable 'new' collides with the 'builtin' function` (type / constant / function; not fields, methods) | Rename |
 | `GoTypeAssertionOnErrors` (Probable bugs, weak) | `Type assertion on errors fails on wrapped errors` for `x.(T)` with `x` of type `error`; `Is` / `As` / `Unwrap` methods skipped | Replace with 'errors.As' (`if e, ok := err.(*T); ok {` → `var e *T` + `if errors.As(err, &e) {`, imports `errors`) |
-| `GoAssignmentToReceiver` (Control flow, weak) | `Assignment to method receiver 'c' does not propagate to callers` (`c = …`, `c++`); `Assignment to a field of value receiver 'c' is lost when the method returns` (`c.X = …` through value fields, the receiver never used as a whole) | Change receiver to pointer |
+| `GoAssignmentToReceiver` (Control flow, weak) | `c = …`, `c++`, `c += …` on the receiver itself: `Assignment to the method receiver doesn't propagate to other calls` (value receiver), `… propagates only to callees but not to callers` (pointer); field writes `c.X = …` are not reported (as GoLand) | — |
 
 Tests: `GoCodeStyleInspectionsTest`, `GoRedundancyInspectionsTest`, `GoProbableBugInspectionsTest`, `GoBuildConstraintInspectionTest`;
 `GoParityProbeTest` runs all of them over the GoLand probe files and `playground/store/order.go` and compares with the dumps (only the
@@ -380,11 +379,11 @@ implementations of a type switch's interface (stub indices, as Fill Switch). WAR
 | `GoExhaustiveSwitch` | `switch` over an enum (constants of a named type in its package; equal values are one member, unexported constants of another package are not members, bit flags skipped) or a type switch over an interface of the project content (library interfaces skipped) without `default` (option: with `default` too): `Missing cases in switch of type Color: Red, Green, Blue and 2 more` on the `switch` keyword (weak warning) | Add missing cases (`GoSwitchCases`, the Fill Switch computation) |
 | `GoStructTag` | vet `structtag`: "struct field tag ‹tag› not compatible with reflect.StructTag.Get: ‹vet reason›"; `Duplicate key "json" in struct field tag`; `struct field B repeats json tag "id" also at field A` (`json`, `xml` with attributes apart and `XMLName` skipped, `yaml`, `db`; `-` and empty names skipped, embedded structs not descended into); `struct field x has json tag but is not exported` (`json`, `xml`) | Fix quoting (`GoStructTags.repaired`: bare value quoted, space after the colon, missing closing quote at the end, comma or nothing between pairs); Remove duplicate key |
 | `GoContextPlacement` | `context.Context should be the first parameter of a function` (declarations and methods; `testing` `*T`/`*B`/`*F`/`TB` may come first); `'ctx' is replaced/shadowed by context.Background(): …` inside the innermost function that has a context parameter; `context.Background() is passed where 'ctx' is available` (weak warning; function literals without their own context parameter are not reported) | Use ctx; Use ctx (remove the assignment) |
-| `GoDocComment` | golint `exported` (opt-in, weak warning, off by default): `exported function Foo should have comment or be unexported` (also method `T.Foo`, type, const, var; in a group without a group comment: `… should have comment (or a comment on this block) or be unexported`); only the first name of a spec is checked. Skipped: `_test.go`, `package main`, generated files, methods of unexported types. The form check (`comment on exported type Foo should be of the form "Foo ..."`) moved to GoLand's `GoCommentStart` (G7, below), a subclass sharing the walk | Add doc comment (`// Name ` above the declaration; caret after it when the file is open in the selected editor) |
+| `GoDocComment` | golint `exported` (opt-in, weak warning, off by default): GoLand's `GoExportedElementShouldHaveComment` text `Exported function Foo should have a comment or be unexported` (also `method Run`, `type`, `constant`, `variable`; the same in a group without a group comment); only the first name of a spec is checked. Skipped: `_test.go`, `package main`, generated files, methods of unexported types. The form check (`Comment should have the following format 'Foo ...' (with an optional leading article)`) moved to GoLand's `GoCommentStart` (G7, below), a subclass sharing the walk | Add doc comment (`// Name ` above the declaration; caret after it when the file is open in the selected editor) |
 | `GoTimeLayout` | weak warning: the layout literal of `Time.Format` / `AppendFormat` / `time.Parse` / `ParseInLocation` (found by resolve) in `yyyy-MM-dd` notation, with no time elements, or the ISO date with day before month `2006-02-01`; string literals only, stdlib constants never | Convert to Go layout; Swap to '2006-01-02' |
 | `GoEmbedDirective` | error, go's messages for `//go:embed`: no matching files found, invalid pattern syntax, directory with no embeddable files, misplaced directive (not above a package-level `var`), file does not import `embed` | Add import "embed" (blank import for string/[]byte vars, plain for `embed.FS`) |
 | `GoBuildConstraint` | vet `buildtag`: `invalid //go:build expression: …`, `misplaced //go:build comment` (after the package clause, or no blank line before it), `multiple //go:build comments` (errors); `unknown GOOS/GOARCH 'linx'` for a tag one edit from a known one, in `//go:build` and `// +build` lines, `misplaced +build comment` outside the header and `possible malformed +build comment` for a header comment that mentions `+build` without being one (GoLand `GoBuildTag`; weak warnings; the `+build` line itself is `GoFixPlusBuild`'s; `cgo`, `unix`, `ignore`, `go1.*`, `goexperiment.*`, tags under 3 characters never) | Replace with 'linux' |
-| `GoShadowedVar` | GoLand's "Shadowing variable" (weak warning, name painted with `GO_SHADOWING_VARIABLE` through `ProblemDescriptorBase.setTextAttributes`): `Declaration of 'x' shadows declaration at line N` (`at b.go:N` for another file) for a local variable (`:=`, `var`, `if`/`for`/`switch` header, range, type-switch guard, `select` receive) whose name `GoScopes.resolveName` finds outside its own scope as a variable, constant, parameter, result or receiver, or a package-level var/const of the same package. Quiet: `_`, a `:=` reusing its own scope's variable (incl. the body's parameters, a type-case guard), parameters themselves, `x := x`, `switch x := x.(type)`, imports, builtins | Navigate to shadowed declaration; Rename variable (platform rename handler at the name) |
+| `GoShadowedVar` | GoLand's "Shadowing variable" (weak warning, name painted with `GO_SHADOWING_VARIABLE` through `ProblemDescriptorBase.setTextAttributes`): `Declaration of 'x' shadows declaration at style.go` (GoLand's text: the file name of the shadowed declaration only, `builtin.go` for a predeclared name) for a local variable (`:=`, `var`, `if`/`for`/`switch` header, range, type-switch guard, `select` receive) whose name `GoScopes.resolveName` finds outside its own scope as a variable, constant, parameter, result or receiver, a package-level var/const of the same package, or a predeclared name (`new := 2`). Quiet: `_`, a `:=` reusing its own scope's variable (incl. the body's parameters, a type-case guard), parameters themselves, `x := x`, `switch x := x.(type)`, imports. The semantic annotator paints the uses too | Navigate to shadowed declaration; Rename variable (platform rename handler at the name) |
 | `GoErrorsPackage` | vet `errorsas` (`second argument to errors.As must be a non-nil pointer …`, `… should not be *error`; `any` targets accepted); `err == ErrX` / `!=` with a package-level `error` variable (weak warning; not `nil`, not inside `Is` methods) | Take the address of target; Replace with errors.Is(err, ErrX) (imports `errors`) |
 
 ### Go fix, second set (GoLand parity G5; package `ide.inspections.gofix2`)
@@ -634,24 +633,30 @@ GoLand parity G4 (texts as GoLand's Alt+Enter), the same gate:
 - Join concatenated string literals (`GoStringIntentions.kt`): every run of adjacent literals in the `+` chain at the caret; interpreted
   bodies glued as written, raw parts of a mixed run quoted (`GoStringQuotes.quote`), all-raw runs stay raw.
 - Printf (`GoFormatIntentions.kt`): Add format string argument (caret inside the format string of a printf-like call: input dialog for the
-  expression, `%v` at the caret, the argument after the arguments of the verbs before it; not with `%[n]` indexes or `args...`); Exclude /
+  expression, `%v` at the caret, the argument after the arguments of the verbs before it; when a verb has no argument yet,
+  `Sprintf("%d %s", n)`, anywhere in the format and the expression becomes that verb's argument, no verb added (G10); not with `%[n]`
+  indexes or `args...`); Exclude /
   Mark as string formatting function edit the application-level `inspections.printf.GoPrintfFunctions` (vet full names, `excluded` /
   `extra`), which `GoPrintfCalls` consults first (a marked function is Printf-like when a `string` precedes `...any`).
 - errcheck: quick fix "Do not report this method/function anymore" (`GoDoNotReportCalleeFix`) on `GoUncheckedErrorInspection` and the
   errcheck rule adds `path.Func` / `path.Type.Method` to the inspection's `excludedFunctions` (options panel `OptPane.stringList`); both
   read the current profile's list through `isUnchecked`.
-- Tags (`GoTagIntentions.kt`): Change field name style in tags (on a tag, the type name or the `struct` keyword; popup `full-name` /
-  `full_name` / `FullName` / `fullName`, test hook `GoChangeTagNameStyleIntention.chooser`; rewrites the name of the key at the caret or the
-  first name-like key in every single-name field, options kept, raw and interpreted tags); Update key value in tags (field whose name in
-  a key differs from its field name in the style the other fields use, `detectStyle`).
+- Tags (`GoTagIntentions.kt`, all three `PriorityAction.HIGH`, so they lead the list in GoLand's order): Add key to tags (on a tag, a field,
+  the type name or the `struct` keyword; popup of the name keys some single-name field lacks, test hook `GoAddTagKeyIntention.chooser`;
+  writes `key:"name"` into every such field, in the style the struct uses for that key, a raw tag for a field without one); Change field
+  name style in tags (popup `full-name` / `full_name` / `FullName` / `fullName`, test hook `GoChangeTagNameStyleIntention.chooser`;
+  rewrites the name of the key at the caret or the first name-like key in every single-name field, options kept, raw and interpreted
+  tags); Update key value in tags (any field with a named name-like key, as GoLand offers it on a matching tag too; rewrites the name when
+  it differs from the field name in the style the other fields use, `detectStyle`, otherwise changes nothing).
 
 Navigation intentions (GoLand parity G4, `GoNavigationIntentions.kt`, same gate, `LowPriorityAction`, no preview, not in a write action):
 Go to Implementations (`GoGotoImplementationsIntention`: interface type spec header or interface method name → implementing types /
 methods in project content), Go to Interfaces (`GoGotoInterfacesIntention`: concrete type spec header → interfaces in project and
 libraries), Go to Method Specifications (`GoGotoMethodSpecificationsIntention`: method header up to `{` → interface method specs).
 Targets from `GoImplementations` (the gutter's lookup); availability asks for one target, `invoke` collects all under a modal progress,
-opens a single one, several in `PsiTargetNavigator`. The host adds Run go generate on comment / file / package
-(`build.GoGenerateIntentions`) and the go.mod intentions (`mod.GoModIntentions`: Merge a group of directives / all directives / directive up
+opens a single one, several in `PsiTargetNavigator`. The host adds GoLand's three on a `//go:generate` line, ordered by `PriorityAction`:
+Go Generate File, Go generate '<import path of the package>', Go generate '<command>' (`build.GoGenerateIntentions`; families Run go generate
+on file / package / comment; the gutter ▶ is a plain line marker, tooltip `Run go generate on comment`, so it adds nothing to Alt+Enter) and the go.mod intentions (`mod.GoModIntentions`: Merge a group of directives / all directives / directive up
 over the pure `GoModDirectiveEdits`, Update dependencies… over `GoModUpdates`).
 
 Known gaps: values in filled literals are not aligned until the file is formatted.
@@ -674,10 +679,12 @@ never expression typing directly. Keys (`lang.GoColors` in go-psi-core, the pale
 colour page) are GoLand's (`docs/goland-analysis/dumps/color-keys-go.txt`, same external names and page groups, pinned by the root
 `GoColorSettingsPageTest`): exported / local function and call, builtin call, struct / interface / other type spec and reference,
 package exported / local and local constant, package exported / local, local, scope (declared in an `if` / `for` / `switch` header or a
-case clause) and reassigned-in-`:=` variable, receiver apart from parameter, exported / local field, calls of func-valued variables and
-fields, `nil` as `GO_BUILTIN_VARIABLE`, doc comment references (the first word naming the declaration, resolved `[Name]` links). Each new
-key falls back onto the older base key (`GO_FUNCTION_CALL`, `GO_FIELD`, ...) so tuned schemes keep their look. `GO_SHADOWING_VARIABLE`
-(for the shadowing inspection) and `GO_SYNTAX_UPDATE` (G5) are defined, nothing colours with them yet. Unresolved identifiers keep the
+switch case clause; `case n := <-ch` of a `select` is local, as in GoLand) and reassigned-in-`:=` variable, shadowing variable (declaration
+and every use, `GoShadowingVariableInspection.shadowedBy`, cached in the body store), receiver apart from parameter, exported / local
+field, calls of func-valued variables and fields, `nil` as `GO_BUILTIN_VARIABLE`, doc comment references (the first word naming the
+declaration, resolved `[Name]` links, and every word of a doc comment naming a package-level declaration or a resolving qualified name,
+both parts of `time.Duration`; a bare import or predeclared name is not coloured, G10). Each new key falls back onto the older base key
+(`GO_FUNCTION_CALL`, `GO_FIELD`, ...) so tuned schemes keep their look. `GO_SYNTAX_UPDATE` (G5) is defined, nothing colours with it yet. Unresolved identifiers keep the
 lexer colour. Not dumb-aware. `GoStringContentAnnotator` (DumbAware) colours inside literals: struct tag key / colon / value / text
 (`GoStructTags.parse`), printf verbs `GO_FORMAT_VERB` in the format argument of the calls `GoPrintfCalls` knows (falls back onto the
 valid escape, as GoLand shows them), valid / invalid escapes of interpreted strings and runes (an annotator: the lexer keeps a literal
@@ -869,8 +876,9 @@ gopls `Create …`, `Implement …` and `Declare missing methods …` actions th
 
 ### Go fix: severity, Update Syntax, lenses (`ide.inspections.gofix`, `go-psi-ide-gofix.xml`; PLAN.md G5)
 - `GoSyntaxUpdateSeverity` / `GoSyntaxUpdateSeveritiesProvider` (`severitiesProvider`): severity `SYNTAX_UPDATE` (GoLand's name, so its exported profiles keep
-  the level), value 150 — between SERVER PROBLEM (100) and WEAK WARNING (200), display name "Syntax update", colour `GoColors.SYNTAX_UPDATE`
-  (`GO_SYNTAX_UPDATE`, fallback weak warning). An inspection declares it as `level="SYNTAX_UPDATE"`; `HighlightDisplayLevel.find` resolves it by name.
+  the level), value 20 as GoLand's — above INFORMATION (10) and TEXT ATTRIBUTES (11), below WEAK WARNING (200), display name "Syntax update", colour
+  `GoColors.SYNTAX_UPDATE` (`GO_SYNTAX_UPDATE`, fallback weak warning), icon `AllIcons.Actions.Refresh` (`HighlightInfoType.Iconable`: the level's icon in
+  the profile and the inspections widget). An inspection declares it as `level="SYNTAX_UPDATE"`; `HighlightDisplayLevel.find` resolves it by name.
 - `GoSyntaxUpdate`: the tools of the group "Go fix" (`groupPath="Go" groupName="Go fix"` or short name `GoFix*`; `select` is the pure selection), a
   profile of just them built like Run Inspection by Name (`InspectionToolsSupplier.Simple` over the current profile), `run(project, scope)` —
   `GlobalInspectionContextImpl` with that external profile, results and batch fixes in Inspection Results.
@@ -880,7 +888,9 @@ gopls `Create …`, `Implement …` and `Declare missing methods …` actions th
   "Update syntax (N places)", click = `run` on the file without the dialog) and `GoModernizerWhatsNewCodeVisionProvider` (group `Go modernizer whats new`,
   "What's New", click = the host's `Go.HelpPage.GoFix`: the guide at `#go-fix`). The count runs the enabled local Go fix tools on the file
   (`LocalInspectionTool.processFile`, stopped at 100), cached on the file by document stamp and the set of enabled tools; the daemon's highlights would be
-  cheaper, but code vision and the inspection pass run in no fixed order. Tests: `inspections.gofix.GoSyntaxUpdateTest` (10, with a test-only `GoFixTestInspection`).
+  cheaper, but code vision and the inspection pass run in no fixed order. Both lenses are off by default (GoLand shows no lens in the file):
+  `GoSyntaxUpdateLensDefaults` (`postStartupActivity`) turns them off once per installation (`PropertiesComponent` flag), a later choice of the user is kept.
+  Tests: `inspections.gofix.GoSyntaxUpdateTest` (12, with a test-only `GoFixTestInspection`).
 
 ### Imports, code style, linked renames (PLAN.md G8, items 1–5)
 - `GoIdeOptions` (`go-psi-ide-editor.xml`, application service, `DefaultGoIdeOptions` in memory): the options of go-psi-ide that the host keeps; IGS overrides

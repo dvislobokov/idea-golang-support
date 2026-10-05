@@ -81,9 +81,9 @@ open class GoDocCommentInspection : GoAnalysisInspectionBase() {
 
     private fun missing(holder: ProblemsHolder, identifier: PsiElement, target: Target) {
         if (!checksMissing) return
-        val hint = if (target.grouped) " (or a comment on this block)" else ""
+        // GoLand's GoExportedElementShouldHaveComment text (seen live): "Exported function F should have a comment or be unexported".
         holder.registerProblem(
-            identifier, "exported ${target.kind} ${target.display} should have comment$hint or be unexported",
+            identifier, "Exported ${KIND_WORDS[target.kind] ?: target.kind} ${target.name} should have a comment or be unexported",
             ProblemHighlightType.WEAK_WARNING, GoAddDocCommentFix(target.name),
         )
     }
@@ -99,7 +99,7 @@ open class GoDocCommentInspection : GoAnalysisInspectionBase() {
         if (startsWithName(text, target.name)) return
         val fixes = if (comment.text.startsWith("//")) arrayOf<LocalQuickFix>(GoStartCommentWithNameFix(target.name)) else emptyArray()
         holder.registerProblem(
-            comment, "comment on exported ${target.kind} ${target.display} should be of the form \"${target.name} ...\"",
+            comment, "Comment should have the following format '${target.name} ...' (with an optional leading article)",
             ProblemHighlightType.WEAK_WARNING, *fixes,
         )
     }
@@ -108,6 +108,8 @@ open class GoDocCommentInspection : GoAnalysisInspectionBase() {
     private fun docText(element: GoNamedElement): String? = element.docText?.takeIf { it.isNotBlank() }
 
     companion object {
+        private val KIND_WORDS = mapOf("const" to "constant", "var" to "variable")
+
         fun isExported(name: String): Boolean = name.firstOrNull()?.isUpperCase() == true
 
         /** Whether [text] starts with [name], optionally after `A` / `An` / `The`; a `Deprecated:` first paragraph passes. */

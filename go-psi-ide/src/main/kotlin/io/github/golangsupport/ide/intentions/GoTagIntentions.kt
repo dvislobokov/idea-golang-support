@@ -1,6 +1,7 @@
 package io.github.golangsupport.ide.intentions
 
 import com.intellij.codeInsight.intention.IntentionAction
+import com.intellij.codeInsight.intention.PriorityAction
 import com.intellij.codeInsight.intention.preview.IntentionPreviewInfo
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
@@ -82,8 +83,11 @@ internal object GoTagText {
  * the field's name, keeping options such as `,omitempty`. The key is the one under the caret, otherwise the first name-like key
  * (json, yaml, xml, …) of the tag or of the struct.
  */
-class GoChangeTagNameStyleIntention : IntentionAction {
+class GoChangeTagNameStyleIntention : IntentionAction, PriorityAction {
     override fun getText(): String = "Change field name style in tags"
+
+    // GoLand lists the three tag intentions first, above Add parens / Convert raw string (seen live 2026-10-05)
+    override fun getPriority(): PriorityAction.Priority = PriorityAction.Priority.HIGH
 
     override fun getFamilyName(): String = text
 
@@ -144,12 +148,15 @@ class GoChangeTagNameStyleIntention : IntentionAction {
 }
 
 /**
- * Update key value in tags: on a field whose tag names it differently from what its name gives in the style the other fields of the
- * struct use for that key (`UserID string `json:"id"`` among camelCase fields → `json:"userID"`), rewrites that name, keeping the
- * options. The key under the caret first, otherwise the first name-like key that differs.
+ * Update key value in tags: on a field whose tag names it under a name-like key (json, yaml, …), rewrites that name from the field's name in
+ * the style the other fields of the struct use for that key (`UserID string `json:"id"`` among camelCase fields → `json:"userID"`), keeping
+ * the options. The key under the caret first, otherwise the first name-like key that differs. GoLand offers it on a matching tag too
+ * (`Radius float64 `json:"radius,omitempty"``, seen live 2026-10-05): there it changes nothing.
  */
-class GoUpdateTagKeyValueIntention : GoCodeActionIntention() {
+class GoUpdateTagKeyValueIntention : GoCodeActionIntention(), PriorityAction {
     override val defaultText: String = "Update key value in tags"
+
+    override fun getPriority(): PriorityAction.Priority = PriorityAction.Priority.HIGH
 
     override fun plan(file: GoFile, offset: Int): GoEditPlan? {
         val leaf = GoIntentionText.leafAt(file, offset) ?: return null
@@ -158,12 +165,98 @@ class GoUpdateTagKeyValueIntention : GoCodeActionIntention() {
         val name = GoTagText.fieldName(declaration) ?: return null
         val tag = declaration.tag ?: return null
         val keys = GoStructTags.parse(GoTagText.tagValue(declaration) ?: return null).pairs.map { it.key }.distinct().filter(GoTagText::nameKey)
+            .filter { GoTagText.namedPair(declaration, it) != null }
+        if (keys.isEmpty()) return null
         val atCaret = GoTagText.keyAt(tag, offset)
         for (key in keys.sortedByDescending { it == atCaret }) {
-            if (GoTagText.namedPair(declaration, key) == null) continue
             val edit = GoTagText.rename(declaration, key, GoTagText.styleFor(struct, key, declaration).apply(name)) ?: continue
             return GoEditPlan(listOf(edit))
         }
-        return null
+        return GoEditPlan(emptyList())
+    }
+}
+
+/**
+ * Add key to tags: on a struct tag (or a field, the struct's `type` name / `struct` keyword), a popup of the name-like keys (json, yaml, …)
+ * some field lacks; the chosen one is written into the tag of every field that lacks it, with the field's name in the style the struct uses
+ * for that key already (as the completion item "Add tag key to all fields…" of the host). A field without a tag gets a raw-string one.
+ */
+class GoAddTagKeyIntention : IntentionAction, PriorityAction {
+    override fun getText(): String = "Add key to tags"
+
+    override fun getFamilyName(): String = text
+
+    override fun getPriority(): PriorityAction.Priority = PriorityAction.Priority.HIGH
+
+    override fun startInWriteAction(): Boolean = false
+
+    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo = IntentionPreviewInfo.EMPTY
+
+    override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
+        if (editor == null || file !is GoFile || !GoIdeFeatureGate.enabled(GoIdeFeature.CODE_ACTIONS, project)) return false
+        return structAt(file, editor.caretModel.offset)?.let { keys(it).isNotEmpty() } == true
+    }
+
+    override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
+        if (editor == null || file !is GoFile) return
+        val offset = editor.caretModel.offset
+        val keys = structAt(file, offset)?.let(::keys)?.takeIf { it.isNotEmpty() } ?: return
+        fun apply(key: String) = WriteCommandAction.runWriteCommandAction(project, text, null, {
+            val struct = structAt(file, offset) ?: return@runWriteCommandAction
+            GoEditText.apply(file, edits(struct, key))
+        }, file)
+        chooser?.let { choose -> choose(keys)?.let(::apply); return }
+        JBPopupFactory.getInstance().createPopupChooserBuilder(keys)
+            .setTitle("Add Key to Tags")
+            .setItemChosenCallback { apply(it) }
+            .createPopup()
+            .showInBestPositionFor(editor)
+    }
+
+    companion object {
+        /** Test hook: picks the key (or null for Cancel) instead of the popup. */
+        @TestOnly @Volatile var chooser: ((List<String>) -> String?)? = null
+
+        /** The struct of the tag / field / `type` name / `struct` keyword at [offset]. */
+        fun structAt(file: GoFile, offset: Int): GoStructType? {
+            val leaf = GoIntentionText.leafAt(file, offset) ?: return null
+            PsiTreeUtil.getParentOfType(leaf, GoFieldDeclaration::class.java, false)?.let { return it.parent as? GoStructType }
+            return when {
+                leaf.parent is GoStructType && leaf == (leaf.parent as GoStructType).struct -> leaf.parent as GoStructType
+                leaf.parent is GoTypeSpec && leaf == (leaf.parent as GoTypeSpec).identifier -> (leaf.parent as GoTypeSpec).type as? GoStructType
+                else -> null
+            }
+        }
+
+        /** The fields of [struct] with one name (embedded ones and `A, B int` get no name tag). */
+        private fun named(struct: GoStructType): List<Pair<GoFieldDeclaration, String>> =
+            struct.fieldDeclarationList.mapNotNull { d -> d.fieldDefinitionList.singleOrNull()?.name?.let { d to it } }
+
+        /** The name-like keys some named field of [struct] lacks, in the order of the completion of keys. */
+        fun keys(struct: GoStructType): List<String> {
+            val fields = named(struct)
+            return GoStructTagCompletion.KEYS.filter { k -> k in GoStructTagCompletion.NAME_KEYS && fields.any { (d, _) -> !hasKey(d, k) } }
+        }
+
+        private fun hasKey(declaration: GoFieldDeclaration, key: String): Boolean =
+            GoTagText.tagValue(declaration)?.let { GoStructTags.parse(it).pairs.any { p -> p.key == key } } == true
+
+        fun edits(struct: GoStructType, key: String): List<GoEditPlan.Edit> {
+            val style = GoTagText.styleFor(struct, key, null)
+            return named(struct).mapNotNull { (d, name) -> if (hasKey(d, key)) null else addTo(d, key + ":\"" + style.apply(name) + "\"") }
+        }
+
+        /** The edit that appends [pair] (`json:"name"`) to the tag of [declaration], or gives it a raw-string tag. */
+        private fun addTo(declaration: GoFieldDeclaration, pair: String): GoEditPlan.Edit? {
+            val literal = declaration.tag?.stringLiteral ?: return declaration.textRange.endOffset.let { GoEditPlan.Edit(it, it, " `$pair`") }
+            val value = GoStructTagInspection.valueOf(literal) ?: return null
+            val range = literal.textRange
+            if (literal.rawString != null) {
+                val end = range.endOffset - 1
+                if (value.isBlank()) return GoEditPlan.Edit(range.startOffset + 1, end, pair)
+                return GoEditPlan.Edit(end, end, (if (value.endsWith(' ')) "" else " ") + pair)
+            }
+            return GoEditPlan.Edit(range.startOffset, range.endOffset, GoStructTags.quote(if (value.isBlank()) pair else value.trimEnd() + " " + pair))
+        }
     }
 }

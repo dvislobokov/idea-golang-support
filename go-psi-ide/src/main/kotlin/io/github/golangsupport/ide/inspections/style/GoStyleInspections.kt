@@ -1,6 +1,7 @@
 package io.github.golangsupport.ide.inspections.style
 
 import com.intellij.codeInspection.LocalQuickFix
+import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
@@ -45,6 +46,7 @@ import io.github.golangsupport.semantic.psi.GoPsiUtil.elseStatement
 import io.github.golangsupport.semantic.psi.GoPsiUtil.initStatement
 import io.github.golangsupport.semantic.types.GoArrayType
 import io.github.golangsupport.semantic.types.GoMapType
+import io.github.golangsupport.semantic.types.GoNamedType
 import io.github.golangsupport.semantic.types.GoPointerType
 import io.github.golangsupport.semantic.types.GoSliceType
 import io.github.golangsupport.semantic.types.GoStructType
@@ -53,8 +55,9 @@ import io.github.golangsupport.semantic.types.GoType
 /**
  * GoLand's "Error string should not be capitalized or end with punctuation" (`GoErrorStringFormat`, staticcheck ST1005): the literal
  * message of `errors.New("…")` / `fmt.Errorf("…", …)`. Capitalised: the first letter is upper-case and the rest of the first word has
- * no upper-case letters or digits (`URL not found`, `IPv4 …` are initialisms and pass). Punctuation: the text ends with `.`, `:`, `!`
- * or a newline. Fixes: lowercase the first letter; remove the trailing punctuation.
+ * no upper-case letters or digits (`URL not found`, `IPv4 …` are initialisms and pass). Punctuation: the text ends with `.`, `:` or `!`
+ * (a trailing newline is not reported: GoLand is quiet on `"another Error\n"`, seen live). One finding on the whole literal with
+ * GoLand's text. Fixes: lowercase the first letter; remove the trailing punctuation.
  */
 class GoErrorStringFormatInspection : GoAnalysisInspectionBase() {
 
@@ -68,10 +71,11 @@ class GoErrorStringFormatInspection : GoAnalysisInspectionBase() {
         val path = GoAnalysisPsi.packagePath(target)
         if (!(name == "New" && path == "errors" || name == "Errorf" && path == "fmt")) return
         val body = body(literal) ?: return
-        if (isCapitalized(body)) holder.registerProblem(literal, TextRange(1, 2), "Error string should not be capitalized", LOWERCASE)
-        val punct = trailingPunctuation(body, literal.text.startsWith("`"))
-        if (punct > 0) holder.registerProblem(literal, TextRange(literal.textLength - 1 - punct, literal.textLength - 1),
-            "Error string should not end with punctuation or a newline", REMOVE_PUNCTUATION)
+        val capitalized = isCapitalized(body)
+        val punctuated = trailingPunctuation(body) > 0
+        if (!capitalized && !punctuated) return
+        val fixes = listOfNotNull<LocalQuickFix>(LOWERCASE.takeIf { capitalized }, REMOVE_PUNCTUATION.takeIf { punctuated })
+        holder.registerProblem(literal, "Error string should not be capitalized or end with punctuation mark", *fixes.toTypedArray())
     }
 
     companion object {
@@ -84,13 +88,8 @@ class GoErrorStringFormatInspection : GoAnalysisInspectionBase() {
             return word.drop(1).none { it.isUpperCase() || it.isDigit() }
         }
 
-        /** The length of the trailing `.`, `:`, `!` or `\n` (escaped in an interpreted literal) of [body], or 0. */
-        fun trailingPunctuation(body: String, raw: Boolean): Int = when {
-            !raw && body.endsWith("\\n") && !body.endsWith("\\\\n") -> 2
-            body.isNotEmpty() && body.last() in ".:!" -> 1
-            raw && body.endsWith("\n") -> 1
-            else -> 0
-        }
+        /** The length of the trailing `.`, `:` or `!` of [body], or 0. */
+        fun trailingPunctuation(body: String): Int = if (body.isNotEmpty() && body.last() in ".:!") 1 else 0
 
         private val LOWERCASE = GoEditFix("Lowercase the first letter") { literal ->
             val start = literal.textRange.startOffset + 1
@@ -100,7 +99,7 @@ class GoErrorStringFormatInspection : GoAnalysisInspectionBase() {
 
         private val REMOVE_PUNCTUATION = GoEditFix("Remove the trailing punctuation") { literal ->
             val text = literal.text
-            val n = trailingPunctuation(text.substring(1, text.length - 1), text.startsWith("`")).takeIf { it > 0 } ?: return@GoEditFix null
+            val n = trailingPunctuation(text.substring(1, text.length - 1)).takeIf { it > 0 } ?: return@GoEditFix null
             val end = literal.textRange.endOffset - 1
             listOf(GoEditPlan.Edit(end - n, end, ""))
         }
@@ -121,11 +120,10 @@ class GoRedundantElseInIfInspection : GoAnalysisInspectionBase() {
         val elseStatement = element.elseStatement ?: return
         if (elseStatement.statement !is GoBlock || !inStatementList(element)) return
         val last = element.block?.statementList?.lastOrNull() ?: return
-        val what = terminator(last) ?: return
+        terminator(last) ?: return
         val safe = element.initStatement == null && !hasComments(elseStatement) && outdentKeepsNames(element, elseStatement.statement as GoBlock)
         val fixes = if (safe) arrayOf<LocalQuickFix>(FIX) else emptyArray()
-        holder.registerProblem(elseStatement, TextRange(0, elseStatement.`else`.textLength),
-            "'if' block ends with a '$what' statement, so drop this 'else' and outdent its block", *fixes)
+        holder.registerProblem(elseStatement, TextRange(0, elseStatement.`else`.textLength), "Redundant 'else' in 'if'", *fixes)
     }
 
     companion object {
@@ -184,18 +182,20 @@ class GoRedundantElseInIfInspection : GoAnalysisInspectionBase() {
 
 /**
  * GoLand's "Unsorted imports" (`GoUnsortedImport`): the specs of an `import (...)` group (specs between blank lines) not in the order of
- * their paths, as gofmt / goimports sort them. Reported once per group, at the first spec out of order. Fix: sort every group of the
- * declaration (offered when each spec of an unsorted group sits on its own line and no comment line separates them).
+ * their paths, as gofmt / goimports sort them. Every spec of an unsorted group is reported (GoLand, seen live: "Imports are not sorted"
+ * on each of the five specs, the one already in place included). Fix: sort every group of the declaration (offered when each spec of an
+ * unsorted group sits on its own line and no comment line separates them).
  */
 class GoUnsortedImportInspection : GoAnalysisInspectionBase() {
 
     override fun visit(element: PsiElement, holder: ProblemsHolder, file: GoFile) {
         if (element !is GoImportDeclaration || element.lparen == null) return
         val text = file.viewProvider.contents
-        for (group in groups(element, text)) {
-            val i = (1 until group.size).firstOrNull { key(group[it]) < key(group[it - 1]) } ?: continue
-            val fixes = if (groups(element, text).all { sortable(it, text) }) arrayOf<LocalQuickFix>(FIX) else emptyArray()
-            holder.registerProblem(group[i], "Import is not sorted", *fixes)
+        val all = groups(element, text)
+        for (group in all) {
+            if ((1 until group.size).none { key(group[it]) < key(group[it - 1]) }) continue
+            val fixes = if (all.all { sortable(it, text) }) arrayOf<LocalQuickFix>(FIX) else emptyArray()
+            for (spec in group) holder.registerProblem(spec, "Imports are not sorted", *fixes)
         }
     }
 
@@ -246,8 +246,9 @@ class GoUnsortedImportInspection : GoAnalysisInspectionBase() {
 /**
  * GoLand's "Struct initialization without field names" (`GoStructInitializationWithoutFieldNames`): a struct literal that lists values
  * without keys (`Point{1, 2}`, the elided `{"empty", nil, 0}` of a `[]struct{…}` table): adding a field breaks it and the reader has to
- * count. Unlike vet `composites` this includes types of the current package and anonymous structs, as GoLand does (seen live on a test
- * table). The message and range (the `{…}`) are GoLand's. Fix: add the field names.
+ * count. Like GoLand (seen live), types of other packages are reported at the profile's level, while types of the file's own package and
+ * anonymous structs only at INFORMATION level (no highlighting, Alt+Enter only; GoLand's inspection lowers it itself). The range is the
+ * whole literal `T{…}`, or the `{…}` of an elided element type; the message is GoLand's. Fix: add the field names.
  */
 class GoStructInitializationWithoutFieldNamesInspection : GoAnalysisInspectionBase() {
 
@@ -255,15 +256,27 @@ class GoStructInitializationWithoutFieldNamesInspection : GoAnalysisInspectionBa
         if (element !is GoLiteralValue) return
         val elements = element.elements
         if (elements.isEmpty() || elements.any { it.key != null }) return
+        val type = literalType(element) ?: return
         val struct = structOf(element) ?: return
         if (struct.fields.isEmpty()) return
         val fixes = if (elements.size == struct.fields.size && namable(struct)) arrayOf<LocalQuickFix>(FIX) else emptyArray()
-        holder.registerProblem(element, "Fields are assigned without explicit names", *fixes)
+        val anchor = element.parent as? GoCompositeLit ?: element
+        val highlight = if (foreign(type, file)) ProblemHighlightType.GENERIC_ERROR_OR_WARNING else ProblemHighlightType.INFORMATION
+        holder.registerProblem(anchor, "Fields are assigned without explicit names", highlight, *fixes)
     }
 
     companion object {
         /** Every field can be written as a key: a blank `_` field cannot (`_: x` does not compile). */
         private fun namable(struct: GoStructType): Boolean = struct.fields.none { it.name == "_" }
+
+        /** Whether [type] (through an elided pointer) is a named struct type declared in another package than [file]'s. */
+        private fun foreign(type: GoType, file: GoFile): Boolean {
+            val named = ((type as? GoPointerType)?.elem ?: type) as? GoNamedType ?: return false
+            val declaration = named.declaration
+            val declFile = declaration.containingFile as? GoFile ?: return false
+            if (declFile.originalFile == file.originalFile) return false
+            return declFile.originalFile.containingDirectory != file.originalFile.containingDirectory || declFile.packageName != file.packageName
+        }
 
         /** The struct type a literal value builds, through named types and an elided `&T` / `*T`; null for other literals. */
         fun structOf(value: GoLiteralValue): GoStructType? = literalType(value)?.let { t ->
@@ -288,7 +301,7 @@ class GoStructInitializationWithoutFieldNamesInspection : GoAnalysisInspectionBa
         }
 
         private val FIX = GoEditFix("Add field names") { e ->
-            val value = e as? GoLiteralValue ?: return@GoEditFix null
+            val value = (e as? GoCompositeLit)?.literalValue ?: e as? GoLiteralValue ?: return@GoEditFix null
             val fields = structOf(value)?.takeIf(::namable)?.fields ?: return@GoEditFix null
             val elements = value.elements
             if (elements.size != fields.size || elements.any { it.key != null }) return@GoEditFix null

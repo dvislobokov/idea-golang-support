@@ -107,7 +107,72 @@ class GoParityProbeTest : GoParityInspectionTestBase() {
         assertEquals(want, findings("store/order.go"))
     }
 
+    // --- G10: the second probe (tools/ui-robot/goland/probe/probe2), texts and ranges of GoLand 2026.2.3 ---
+
+    private fun addProbe2() {
+        for (name in listOf("style.go", "other.go", "iota.go", "iota2.go", "iota3.go")) {
+            myFixture.addFileToProject("probe2/$name", read("tools/ui-robot/goland/probe/probe2/$name"))
+        }
+    }
+
+    /** Our findings in [path] whose message is one GoLand gives too (by [G10_MESSAGES]): INFORMATION ones included, as the dumps list them. */
+    private fun probe2Findings(path: String): List<String> = findings(path).filter { line -> G10_MESSAGES.any { it.containsMatchIn(line.substringAfter("» ")) } }
+        .map { line -> // the dumps cut the highlighted text at 50 characters
+            val text = line.substringAfter("«").substringBeforeLast("»")
+            line.replace("«$text»", "«${text.take(50)}»")
+        }
+
+    /** The dump lines of [dump] with a message of [G10_MESSAGES]. */
+    private fun probe2Expected(dump: String): List<String> = read("docs/goland-analysis/dumps/$dump").lines().mapNotNull { line ->
+        val m = DUMP_LINE.find(line) ?: return@mapNotNull null
+        val message = m.groupValues[3].removeSuffix(" STRIPE").trim()
+        if (G10_MESSAGES.none { it.containsMatchIn(message) }) null else "${m.groupValues[1]} «${m.groupValues[2]}» $message"
+    }.distinct().sorted()
+
+    fun testProbe2StyleGoGivesGoLandsTextsAndRanges() {
+        addProbe2()
+        val want = probe2Expected("highlight-internal-probe2-style.txt")
+        assertTrue(want.toString(), want.size > 40)
+        assertEquals(want.joinToString("\n"), probe2Findings("probe2/style.go").joinToString("\n"))
+    }
+
+    fun testProbe2OtherGoComparesReceiversAcrossFiles() {
+        addProbe2()
+        assertEquals(probe2Expected("highlight-internal-probe2-other.txt").joinToString("\n"), probe2Findings("probe2/other.go").joinToString("\n"))
+    }
+
+    fun testProbe2IotaFilesGiveGoLandsFindings() {
+        addProbe2()
+        assertEquals(probe2Expected("highlight-internal-probe2-iota.txt").joinToString("\n"), probe2Findings("probe2/iota.go").joinToString("\n"))
+        assertEquals(probe2Expected("highlight-internal-probe2-iota2.txt").joinToString("\n"), probe2Findings("probe2/iota2.go").joinToString("\n"))
+    }
+
+    /** iota3.go has no dump; GoLand's findings there (PLAN.md G10): `c = iota`, `c1, cc1 = iota, iota`, `l Weekday = iota`. */
+    fun testProbe2Iota3GivesGoLandsFindings() {
+        addProbe2()
+        assertEquals(
+            listOf(
+                "6:2-6:10 «c = iota» Irregular usage of 'iota'",
+                "12:2-12:22 «c1, cc1 = iota, iota» Irregular usage of 'iota'",
+                "30:2-30:18 «l Weekday = iota» Irregular usage of 'iota'",
+            ).sorted(),
+            probe2Findings("probe2/iota3.go"),
+        )
+    }
+
     private companion object {
+        /** GoLand's texts of the G7 inspections re-captured in G10 (dumps `highlight-internal-probe2-*.txt`). */
+        val G10_MESSAGES = listOf(
+            "^Imports are not sorted$", "^Redundant alias$", "^Comment should have the following format '.*' \\(with an optional leading article\\)$",
+            "^Use camel case instead of snake case$", "^Exported (variable|constant) '.*' should have its own declaration$", "^Name starts with the package name$",
+            "^Receiver names are different$", "^Receiver has a generic name$", "^Struct \\w+ has methods on both value and pointer receivers\\.",
+            "^Assignment to the method receiver", "^Redundant parentheses$", "^Redundant 'else' in 'if'$", "^Redundant semicolon$", "^Type can be omitted$",
+            "^Empty slice declaration using a literal$", "^Redundant comma$", "^Redundant type$", "^Empty declaration '", "^Error string should not",
+            "^Type assertion on errors fails on wrapped errors$", "^(defer|go) should not call", "collides with imported package name$",
+            "collides with the 'builtin' ", "^Unit-specific suffix '", "^Unused type parameter '", "^Fields are assigned without explicit names$",
+            "^Irregular usage of 'iota'$",
+        ).map(::Regex)
+
         /** Messages our G7 inspections share verbatim with GoLand (seen in the dumps). */
         val GOLAND_MESSAGES = arrayOf("Fields are assigned without explicit names", "Comment should be meaningful or it should be removed")
 

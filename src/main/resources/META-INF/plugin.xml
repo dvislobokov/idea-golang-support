@@ -348,7 +348,7 @@
         <runConfigurationProducer implementation="io.github.golangsupport.run.GoRunConfigurationProducer"/>
         <runLineMarkerContributor language="Go" implementationClass="io.github.golangsupport.run.GoRunLineMarkerContributor"/>
         <!-- ▶ on //go:generate lines: this directive (go generate -run) or the whole file -->
-        <runLineMarkerContributor language="Go" implementationClass="io.github.golangsupport.build.GoGenerateLineMarkerContributor"/>
+        <codeInsight.lineMarkerProvider language="Go" implementationClass="io.github.golangsupport.build.GoGenerateLineMarkerProvider"/>
         <!-- "Check Go code" in the commit options: the native inspections over the changed Go files before a commit -->
         <checkinHandlerFactory implementation="io.github.golangsupport.ci.GoCheckinHandlerFactory"/>
         <formattingService implementation="io.github.golangsupport.format.GoFormattingService"/>
@@ -370,21 +370,21 @@
         <externalAnnotator language="Go" implementationClass="io.github.golangsupport.build.GoBuildProblemsAnnotator"/>
     </extensions>
 
-    <!-- GoLand parity G4: Alt+Enter Run go generate on a //go:generate line; go.mod Merge directives and Update dependencies -->
+    <!-- GoLand parity G4: Alt+Enter Go Generate File / package / directive on a //go:generate line; go.mod Merge directives and Update dependencies -->
     <extensions defaultExtensionNs="com.intellij">
         <intentionAction>
             <language>Go</language>
-            <className>io.github.golangsupport.build.GoRunGenerateOnCommentIntention</className>
+            <className>io.github.golangsupport.build.GoGenerateFileIntention</className>
             <category>Go</category>
         </intentionAction>
         <intentionAction>
             <language>Go</language>
-            <className>io.github.golangsupport.build.GoRunGenerateOnFileIntention</className>
+            <className>io.github.golangsupport.build.GoGeneratePackageIntention</className>
             <category>Go</category>
         </intentionAction>
         <intentionAction>
             <language>Go</language>
-            <className>io.github.golangsupport.build.GoRunGenerateOnPackageIntention</className>
+            <className>io.github.golangsupport.build.GoGenerateDirectiveIntention</className>
             <category>Go</category>
         </intentionAction>
         <intentionAction>

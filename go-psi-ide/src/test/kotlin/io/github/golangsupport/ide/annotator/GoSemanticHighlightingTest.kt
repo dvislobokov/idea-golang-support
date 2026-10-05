@@ -22,6 +22,12 @@ class GoSemanticHighlightingTest : GoSemanticIdeTestBase() {
      */
     fun testGoLandKeys() = checkGolden("goland")
 
+    /**
+     * G10, the second GoLand probe (`highlight-internal-probe2-style.txt`): every resolving word of a doc comment (`time` and `Duration`
+     * of `time.Duration`, not a bare `time` or `iota`), the shadowing variable's declaration and uses, `case n := <-ch` a local variable.
+     */
+    fun testGoLandProbe2() = checkGolden("g10")
+
     private fun checkGolden(name: String) {
         myFixture.configureByFile("$name.go")
         val document = myFixture.editor.document

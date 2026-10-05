@@ -5,6 +5,10 @@ import com.intellij.codeInsight.codeVision.CodeVisionAnchorKind
 import com.intellij.codeInsight.codeVision.CodeVisionEntry
 import com.intellij.codeInsight.codeVision.CodeVisionRelativeOrdering
 import com.intellij.codeInsight.codeVision.settings.CodeVisionGroupSettingProvider
+import com.intellij.codeInsight.codeVision.settings.CodeVisionSettings
+import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.codeInsight.codeVision.ui.model.ClickableTextCodeVisionEntry
 import com.intellij.codeInsight.hints.codeVision.DaemonBoundCodeVisionProvider
 import com.intellij.openapi.actionSystem.ActionManager
@@ -101,11 +105,35 @@ class GoModernizerWhatsNewCodeVisionProvider : GoSyntaxUpdateLensProvider() {
 class GoBatchSyntaxUpdateCodeVisionSettings : CodeVisionGroupSettingProvider {
     override val groupId: String get() = GoSyntaxUpdateLenses.BATCH_ID
     override val groupName: String get() = "Batch syntax update"
-    override val description: String get() = "At the top of a Go file with Go fix findings: run the Go fix inspections over the file and apply their fixes in batch."
+    override val description: String get() =
+        "At the top of a Go file with Go fix findings: run the Go fix inspections over the file and apply their fixes in batch. Off by default: the number of syntax updates is in the inspections widget."
 }
 
 class GoModernizerWhatsNewCodeVisionSettings : CodeVisionGroupSettingProvider {
     override val groupId: String get() = GoSyntaxUpdateLenses.WHATS_NEW_ID
     override val groupName: String get() = "What's New"
-    override val description: String get() = "Next to Batch syntax update: what the Go fix inspections modernize, in the plugin's guide."
+    override val description: String get() = "Next to Batch syntax update: what the Go fix inspections modernize, in the plugin's guide. Off by default."
+}
+
+/**
+ * Turns the two lenses off once per installation: GoLand shows no lens in the file (seen live: the provider is registered, but the count
+ * of syntax updates lives in the inspections widget). The platform has no per-provider "off by default" for a plugin
+ * (`CodeVisionSettingsDefaults` is a single application-wide extension), so the default is written into the settings once; a user who
+ * turns the lenses on later keeps them.
+ */
+class GoSyntaxUpdateLensDefaults : ProjectActivity {
+    override suspend fun execute(project: Project) = apply()
+
+    companion object {
+        const val APPLIED_KEY = "go.syntax.update.lenses.defaultOff"
+
+        fun apply() {
+            val properties = PropertiesComponent.getInstance()
+            if (properties.getBoolean(APPLIED_KEY)) return
+            properties.setValue(APPLIED_KEY, true)
+            val settings = CodeVisionSettings.getInstance()
+            settings.setProviderEnabled(GoSyntaxUpdateLenses.BATCH_ID, false)
+            settings.setProviderEnabled(GoSyntaxUpdateLenses.WHATS_NEW_ID, false)
+        }
+    }
 }

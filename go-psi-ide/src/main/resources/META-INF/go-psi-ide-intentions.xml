@@ -323,6 +323,12 @@
     </intentionAction>
     <intentionAction>
       <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoAddTagKeyIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoAddTagKeyIntention</descriptionDirectoryName>
+    </intentionAction>
+    <intentionAction>
+      <language>Go</language>
       <className>io.github.golangsupport.ide.intentions.GoChangeTagNameStyleIntention</className>
       <category>Go</category>
       <descriptionDirectoryName>GoChangeTagNameStyleIntention</descriptionDirectoryName>

@@ -23,15 +23,15 @@ class GoDocCommentInspectionTest : GoSemanticIdeTestBase() {
         """
         package p
 
-        func <weak_warning descr="exported function Foo should have comment or be unexported">Foo</weak_warning>() {}
+        func <weak_warning descr="Exported function Foo should have a comment or be unexported">Foo</weak_warning>() {}
 
-        type <weak_warning descr="exported type Bar should have comment or be unexported">Bar</weak_warning> struct{}
+        type <weak_warning descr="Exported type Bar should have a comment or be unexported">Bar</weak_warning> struct{}
 
-        func (b *Bar) <weak_warning descr="exported method Bar.Run should have comment or be unexported">Run</weak_warning>() {}
+        func (b *Bar) <weak_warning descr="Exported method Run should have a comment or be unexported">Run</weak_warning>() {}
 
-        var <weak_warning descr="exported var V should have comment or be unexported">V</weak_warning> = 1
+        var <weak_warning descr="Exported variable V should have a comment or be unexported">V</weak_warning> = 1
 
-        const <weak_warning descr="exported const C should have comment or be unexported">C</weak_warning> = 2
+        const <weak_warning descr="Exported constant C should have a comment or be unexported">C</weak_warning> = 2
 
         // Ok does things.
         func Ok() {}
@@ -55,7 +55,7 @@ class GoDocCommentInspectionTest : GoSemanticIdeTestBase() {
         )
 
         const (
-        	<weak_warning descr="exported const Blue should have comment (or a comment on this block) or be unexported">Blue</weak_warning> = iota
+        	<weak_warning descr="Exported constant Blue should have a comment or be unexported">Blue</weak_warning> = iota
         	// Cyan is cold.
         	Cyan
         )
@@ -63,7 +63,7 @@ class GoDocCommentInspectionTest : GoSemanticIdeTestBase() {
         var (
         	// Name is the name.
         	Name = "x"
-        	<weak_warning descr="exported var Other should have comment (or a comment on this block) or be unexported">Other</weak_warning> = "y"
+        	<weak_warning descr="Exported variable Other should have a comment or be unexported">Other</weak_warning> = "y"
         )
         """
     )

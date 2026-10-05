@@ -1,10 +1,10 @@
 <html>
 <body>
-Reports a struct literal that lists its values without field names, including types of the current package and anonymous structs (test tables): adding a field breaks it and the reader has to count.
-<pre><code>tests := []struct{ name string; want int }{
-    {"empty", 0},
-}</code></pre>
+Reports a struct literal that lists its values without field names: adding a field breaks it and the reader has to count.
+Types of other packages are reported at the level of the profile; types of the current package and anonymous structs (test tables) only at
+the information level (no highlighting, the fix is in Alt+Enter).
+<pre><code>_ = io.LimitedReader{nil, 10}</code></pre>
 <p>Quick fixes: <b>Add field names</b>.</p>
-<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+<!-- GoLand parity (PLAN.md G7, G10): GoLand's id, group and levels. -->
 </body>
 </html>

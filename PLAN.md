@@ -263,7 +263,7 @@
 ### G10. По второй разведке GoLand 2026-10-05 (спорное из G1–G9 переснято; дампы `highlight-internal-probe2-*.txt`, `inspections-go-run-probe2-style.txt`)
 Снято на GoLand 2026.2.3 пробами `tools/ui-robot/goland/probe/probe2/*.go` и `fixprobe/fix.go`; тексты — из `HighlightInfo.description` и прямого прогона
 инспекций (`analysis/infos.js`, `analysis/describe.js`: описание инспекции + `InspectionEngine.runInspectionOnFile`). Что расходится с нами:
-- [ ] **Тексты 20 инспекций G7 → как у GoLand** (наши — из golint / staticcheck). GoLand: `Imports are not sorted`; `Redundant alias`; `Comment should have the
+- [x] (2026-10-05, 0.2.175–0.2.176) **Тексты 20 инспекций G7 → как у GoLand** (наши — из golint / staticcheck). GoLand: `Imports are not sorted`; `Redundant alias`; `Comment should have the
   following format 'Name ...' (with an optional leading article)` (GoCommentStart, и на `//no space` доке, и на `/*block*/`); `Use camel case instead of snake case`;
   `Exported variable 'B' should have its own declaration` (constant / function…); `Name starts with the package name`; `Receiver names are different` и `Receiver has a
   generic name` (две находки на `this`); `Struct Probe2Config has methods on both value and pointer receivers. Such usage is not recommended by the Go Documentation.`
@@ -275,28 +275,33 @@
   и `Variable 'new' collides with the 'builtin' function` (WARNING, плюс отдельно `GoShadowedVar` TEXT ATTRIBUTES `Declaration of 'new' shadows declaration at builtin.go`);
   `Unit-specific suffix 'Seconds'`; `Unused type parameter 'T any'` (диапазон с ограничением); `Type parameter 't' is declared in lowercase` (INFORMATION, в подсветке не виден);
   `Exported function NoDocExported should have a comment or be unexported` (INFORMATION). Полный список с номерами строк — `inspections-go-run-probe2-style.txt`.
-- [ ] **`GoIrregularIota` — семантика GoLand** (описание инспекции): две спецификации с текстуально одинаковым списком выражений, содержащим `iota`, между которыми
+- [x] (2026-10-05, 0.2.175–0.2.176) **`GoIrregularIota` — семантика GoLand** (описание инспекции): две спецификации с текстуально одинаковым списком выражений, содержащим `iota`, между которыми
   **только** спецификации без выражений (минимум одна): `a = iota; b; c = iota` → находка на `c = iota`; `a1, aa1 = iota, iota; b1, bb1; c1, cc1 = iota, iota`;
   типизированная `l Weekday = iota` после `k`. Соседние `d = iota * 2; e = iota * 2`, `A0 = iota; A1 = iota`, `const Single = iota`, `H1 = 7; H2` — **не** находки.
   Наши «`iota` в одиночном объявлении всегда 0» и «повторение предыдущего выражения» без пропуска — лишние. Текст: `Irregular usage of 'iota'`.
-- [ ] **`GoReceiverNames` — по всем файлам пакета**: `func (y Probe2Config) M6()` в другом файле получает `Receiver names are different`; `_` тоже «different», отдельного
+- [x] (2026-10-05, 0.2.175–0.2.176) **`GoReceiverNames` — по всем файлам пакета**: `func (y Probe2Config) M6()` в другом файле получает `Receiver names are different`; `_` тоже «different», отдельного
   текста про подчёркивание нет.
-- [ ] **`GoCommentLeadingSpace` только при опции Code Style | Go | Other «Add a leading space to comments»** (по умолчанию выкл.; без неё молчит даже на `//no space` в теле).
+- [x] (2026-10-05, 0.2.175–0.2.176) **`GoCommentLeadingSpace` только при опции Code Style | Go | Other «Add a leading space to comments»** (по умолчанию выкл.; без неё молчит даже на `//no space` в теле).
   У нас опции нет — завести её (вкладка Other в `GoCodeStyleSettings`) и привязать инспекцию; по умолчанию выкл.
-- [ ] **`GoStructInitializationWithoutFieldNames` на структурах своего пакета — INFORMATION(10)** (`INFORMATION_ATTRIBUTES`, в профиле WEAK WARNING, прямой прогон даёт 0):
+- [x] (2026-10-05, 0.2.175–0.2.176) **`GoStructInitializationWithoutFieldNames` на структурах своего пакета — INFORMATION(10)** (`INFORMATION_ATTRIBUTES`, в профиле WEAK WARNING, прямой прогон даёт 0):
   уровень понижается в самой инспекции; у нас WEAK WARNING везде.
-- [ ] **Уровень `SYNTAX_UPDATE` = 20** (у нас 150), слой подсветки 3000 — как у нас. Линзы «Update syntax» **в файле нет** (code vision `go.syntax.update` «Batch syntax update»
+- [x] (2026-10-05, 0.2.175–0.2.176) **Уровень `SYNTAX_UPDATE` = 20** (у нас 150), слой подсветки 3000 — как у нас. Линзы «Update syntax» **в файле нет** (code vision `go.syntax.update` «Batch syntax update»
   включён, блок-инлеев 0 за 25 с); число обновлений — в виджете инспекций справа вверху своим значком (`⟳ 6` рядом с `⚠2 ⚠1 ✓1`), попап виджета снять не удалось. Нашу линзу
   над файлом либо убрать, либо оставить выключенной по умолчанию, а счётчик вынести в виджет (`TrafficLightRenderer` / `SeverityRegistrar` с иконкой для своей серьёзности).
-- [ ] **Alt+Enter на `//go:generate`**: три пункта — `Go Generate File  Ctrl+Alt+G`, `Go generate 'example.com/playground/internal/probe2'`, `Go generate 'echo hi'`
+- [x] (2026-10-05, 0.2.175–0.2.176) **Alt+Enter на `//go:generate`**: три пункта — `Go Generate File  Ctrl+Alt+G`, `Go generate 'example.com/playground/internal/probe2'`, `Go generate 'echo hi'`
   (у нас пять `Run go generate on …`). Гаттер: `Run go generate on comment`.
-- [ ] **Alt+Enter на теге**: `Add key to tags`, `Change field name style in tags`, `Update key value in tags` показываются и на совпадающем (`json:"value"`), и на
+- [x] (2026-10-05, 0.2.175–0.2.176) **Alt+Enter на теге**: `Add key to tags`, `Change field name style in tags`, `Update key value in tags` показываются и на совпадающем (`json:"value"`), и на
   несовпадающем (`json:"Name"`) теге; дальше `Add parens to declaration`, `Convert raw string to double-quoted string`, `Generate constructor`, `Generate struct fields from JSON`.
-- [ ] **Alt+Enter внутри `fmt.Sprintf("%d %s", n)`**: `Add format string argument`, `Convert double-quoted string to raw string`, `Exclude string formatting function`,
+- [x] (2026-10-05, 0.2.175–0.2.176) **Alt+Enter внутри `fmt.Sprintf("%d %s", n)`**: `Add format string argument`, `Convert double-quoted string to raw string`, `Exclude string formatting function`,
   `Do not show hints for current method`, `Put arguments on separate lines`; находка `GoPrintFunctions` WEAK WARNING `No argument for verb: argument index = 2, arguments count = 1 (%s)`.
-- [ ] **Подсветка**: `GO_COMMENT_REFERENCE` на каждом имени в doc-комментарии, которое резолвится (`Probe2Config`, `Exported`, `Generic`, `time`+`Duration`, `os`+`PathError`,
+- [x] (2026-10-05, 0.2.175–0.2.176) **Подсветка**: `GO_COMMENT_REFERENCE` на каждом имени в doc-комментарии, которое резолвится (`Probe2Config`, `Exported`, `Generic`, `time`+`Duration`, `os`+`PathError`,
   не только первое слово и `[Name]`); использования затеняющей переменной — `GO_SHADOWING_VARIABLE` (и объявление, и `_ = x` внутри блока); `case n := <-ch` — `GO_LOCAL_VARIABLE`.
   `GoBoolExpressions` WARNING `Condition 'x > 0' is always 'true'` после `x := 1` (у нас `GoDfaConstantCondition`).
+  Осталось после G10: `for true` → `Condition is redundant` (у нас это правило линта S1006 `GoForTrueRule` с текстом staticcheck); `GoIrregularIota`
+  сделана уже описания — только голый `iota` в повторённом списке (GoLand молчал на `D0 = iota * 2; D1; D2 = iota * 2`); текст
+  `GoAssignmentToReceiver` для pointer receiver взят из описания, не снят; значок SYNTAX_UPDATE в виджете и Ctrl+Alt+G у Go Generate File вживую не
+  проверены; «Add key to tags» и «Update key value» на совпадающем теге — поведение GoLand (попап? что пишет) не снято; опция Code Style у GoLand
+  ещё и ставит пробел при Reformat Code, у нас — только включает инспекцию.
 
 Не повторяем: rr (Record / Rewind / Debug Saved Trace) — только Linux, уйдёт вместе с Run Targets; Code author — платформа (VCS).
 

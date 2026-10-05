@@ -3,9 +3,9 @@ package io.github.golangsupport
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import io.github.golangsupport.build.GoGenerateLineMarkerContributor
+import io.github.golangsupport.build.GoGenerateLineMarkerProvider
 
-/** ▶ on each `//go:generate` line that `go generate` reads, nowhere else. */
+/** ▶ on each `//go:generate` line that `go generate` reads, nowhere else; GoLand's tooltip and no popup actions (they would join Alt+Enter). */
 class GoGenerateLineMarkerTest : BasePlatformTestCase() {
     fun testMarkersOnDirectivesOnly() {
         val file = myFixture.configureByText("gen.go", """
@@ -21,9 +21,11 @@ class GoGenerateLineMarkerTest : BasePlatformTestCase() {
             //go:generate inside a block comment
             */
         """.trimIndent())
-        val contributor = GoGenerateLineMarkerContributor()
-        val marked = PsiTreeUtil.collectElements(file) { it.firstChild == null }.filter { contributor.getInfo(it) != null }.map(PsiElement::getText)
+        val provider = GoGenerateLineMarkerProvider()
+        val marked = PsiTreeUtil.collectElements(file) { it.firstChild == null }.filter { provider.getLineMarkerInfo(it) != null }.map(PsiElement::getText)
         assertEquals(listOf("//go:generate stringer -type=Pill", "//go:generate\tmockgen -source=gen.go"), marked)
-        assertEquals(2, contributor.getInfo(file.findElementAt(0)!!)!!.actions.size)
+        val info = provider.getLineMarkerInfo(file.findElementAt(0)!!)!!
+        assertEquals("Run go generate on comment", info.lineMarkerTooltip)
+        assertNull(info.createGutterRenderer().popupMenuActions)
     }
 }
