@@ -124,6 +124,12 @@ class GoEditorConfigurable(project: Project) : GoSettingsPage(project, "page.edi
             row { checkBox(GoBundle.message("editor.idioms")).bindSelected(settings::inlineIdioms).comment(GoBundle.message("editor.idioms.comment")) }
             row { checkBox(GoBundle.message("editor.suggestions")).bindSelected(settings::inlineSuggestions).comment(GoBundle.message("editor.suggestions.comment")) }
             row { checkBox(GoBundle.message("editor.suggestionColors")).bindSelected(settings::inlineSuggestionColors).comment(GoBundle.message("editor.suggestionColors.comment")) }
+            row(GoBundle.message("editor.palette")) {
+                val palettes = io.github.golangsupport.lang.palette.GoPaletteService.getInstance()
+                comboBox(io.github.golangsupport.lang.palette.GoPaletteChoice.all(), SimpleListCellRenderer.create("") { it.name })
+                    .bindItem({ io.github.golangsupport.lang.palette.GoPaletteChoice.of(palettes.paletteId) }, { palettes.choose(it?.id ?: io.github.golangsupport.lang.palette.GoPalettes.DEFAULT_ID) })
+                    .comment(GoBundle.message("editor.palette.comment"))
+            }
             // Reformat block on typing '}' and Insert documentation comment stub are the platform's checkboxes, as in GoLand
             row {
                 link(GoBundle.message("editor.smartKeys")) { event ->

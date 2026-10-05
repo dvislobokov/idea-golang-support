@@ -476,6 +476,8 @@
         <separator/>
         <action id="Go.Environment" class="io.github.golangsupport.sdk.GoEnvironmentAction" text="Go on This Machine..."
                     description="The toolchain and the tools the plugin uses, the modules of the project, go env"/>
+            <action id="Go.ColorPalette" class="io.github.golangsupport.lang.palette.GoPaletteAction" text="Go Color Palette..."
+                    description="Color Go like GoLand, VS Code, Nord, Dracula, One Dark, Solarized or GitHub on top of the current color scheme; the background stays"/>
             <action id="Go.Optimize" class="io.github.golangsupport.sdk.GoDisablePluginsAction" text="Optimize IDE for Go..."
                     description="Switch off the bundled plugins a Go developer has no use for (Java, Maven, Python, Spring, GitHub, GitLab...) to keep the IDE light"/>
             <add-to-group group-id="MainMenu" anchor="after" relative-to-action="ToolsMenu"/>
@@ -614,6 +616,8 @@
         <!-- a saved Go file is linted again by golangci-lint / custom linters: a save does not change the document, so nothing else restarts the pass -->
         <listener class="io.github.golangsupport.lint.GoLintSaveListener" topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
         <listener class="io.github.golangsupport.lint.config.GolangciConfigListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+        <!-- the Go palette follows a switch of the color scheme or of the theme, in the variant of the new background (lang/palette) -->
+        <listener class="io.github.golangsupport.lang.palette.GoPaletteSchemeListener" topic="com.intellij.openapi.editor.colors.EditorColorsListener"/>
     </applicationListeners>
 
     <projectListeners>
@@ -623,5 +627,7 @@
         <listener class="io.github.golangsupport.lang.GoProjectPresence$Ui" topic="io.github.golangsupport.lang.GoProjectPresence$Listener"/>
         <listener class="io.github.golangsupport.testing.GoTestStatuses$Listener" topic="com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener"/>
         <listener class="io.github.golangsupport.monitor.GoProcessStartListener" topic="com.intellij.execution.ExecutionListener"/>
+        <!-- the Go palette: written again if the scheme lost it, and once a suggestion of the palettes (lang/palette) -->
+        <listener class="io.github.golangsupport.lang.palette.GoPalettePrompt" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </projectListeners>
 </idea-plugin>

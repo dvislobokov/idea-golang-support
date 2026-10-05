@@ -30,6 +30,17 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.185] - 2026-10-05
+
+### Added — Go color palettes (ported from the C# palettes of idea-dotnet-support 0.1.97)
+- GoLand, VS Code (Dark / Light Modern with the semantic tokens of the Go extension), Nord, Dracula, One Dark / One Light, Solarized
+  and GitHub colors for Go and go.mod on top of the color scheme you use: the background, the selection and every other language stay
+  as they are, and the dark or light variant follows the background of the scheme (also when the scheme or the theme is switched)
+- Choose it in Settings | Go | Editor ("Go color palette") or in Go → Go Color Palette…, which previews each palette in the open editors
+  while you move through the list (Esc puts the previous one back); "IDE default" returns the scheme's own Go colors, your own changes included
+- The first Go file opened with a scheme of the IDE offers the palettes once ("Don't Show Again" silences it); a scheme with Go colors of
+  its own (yours, or one written for GoLand) is left alone
+
 ## [0.2.184] - 2026-10-05
 
 ### Added — ML completion ranking, step 2: the ranker in the IDE, behind a build flag (docs/ML.md ML-1)
