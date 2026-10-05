@@ -5,6 +5,8 @@ import io.github.golangsupport.mod.GoModIssues
 import io.github.golangsupport.mod.GoModuleList
 import io.github.golangsupport.mod.GoModUpdates
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GoModUpdatesTest {
@@ -70,5 +72,13 @@ class GoModUpdatesTest {
         assertEquals(listOf("github.com/google/uuid@latest"), io.github.golangsupport.mod.GoModCodeVision.targets(requires, direct = true))
         assertEquals(4, io.github.golangsupport.mod.GoModCodeVision.anchorLine("module m\n\ngo 1.24\n\nrequire (\n\tx v1\n)\n"))
         assertEquals(2, io.github.golangsupport.mod.GoModCodeVision.anchorLine("module m\n// requirements\nrequire x v1\n"))
+    }
+
+    @Test fun flagLikeModulePathsAreNotPassedToGo() {
+        assertTrue(GoModUpdates.isModuleArgument("github.com/google/uuid@v1.6.0"))
+        assertFalse(GoModUpdates.isModuleArgument("-mod=mod"))
+        assertFalse(GoModUpdates.isModuleArgument("--exec=rm@v1"))
+        assertFalse(GoModUpdates.isModuleArgument("a b@v1"))
+        assertFalse(GoModUpdates.isModuleArgument(""))
     }
 }

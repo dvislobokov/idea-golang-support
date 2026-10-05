@@ -83,7 +83,7 @@ object GoModUpdates {
             // -e: a module the proxy does not know (private, removed) gets an Error field instead of failing the others;
             // -mod=readonly: with a vendor/ directory go defaults to -mod=vendor and refuses every query (seen live); readonly writes nothing;
             // -u: fills Deprecated (the comment of the latest go.mod) without changing the version a @latest query answers
-            val arguments = arrayOf("list", "-m", "-e", "-u", "-mod=readonly", "-json") + modules.map { "$it@latest" }
+            val arguments = arrayOf("list", "-m", "-e", "-u", "-mod=readonly", "-json") + modules.filter(::isModuleArgument).map { "$it@latest" }
             val output = runCatching { GoCli.execute(GoCli.commandLine(dir, *arguments), 120_000) }.getOrNull()
             val parsed = output?.takeIf { it.exitCode == 0 || it.stdout.isNotBlank() }?.let { GoModuleList.parse(it.stdout) }
             if (parsed == null) GoPluginLog.info("go", "No update check for $path: " + (output?.stderr?.lines()?.firstOrNull { it.isNotBlank() } ?: "go list has failed"))
@@ -99,15 +99,19 @@ object GoModUpdates {
 
     /** `path@version` -> rationales of the required versions that are retracted: `go list -m -retracted` on the exact versions. */
     private fun retracted(dir: String, key: String): Map<String, List<String>> {
-        val targets = key.split(',').filter { '@' in it && !it.endsWith("@") }.distinct()
+        val targets = key.split(',').filter { '@' in it && !it.endsWith("@") && isModuleArgument(it) }.distinct()
         if (targets.isEmpty()) return emptyMap()
         val arguments = arrayOf("list", "-m", "-e", "-retracted", "-mod=readonly", "-json") + targets
         val output = runCatching { GoCli.execute(GoCli.commandLine(dir, *arguments), 120_000) }.getOrNull() ?: return emptyMap()
         return GoModIssues.retracted(GoModuleList.parse(output.stdout))
     }
 
+    /** A go.mod path (with an optional `@version`) safe to pass to `go` as a positional argument: never flag-like, no whitespace. */
+    fun isModuleArgument(target: String): Boolean = target.isNotEmpty() && !target.startsWith("-") && target.none { it.isWhitespace() }
+
     /** `go get targets...` in the background, then `go mod vendor` when the module vendors: a stale vendor/ breaks the build. */
     fun goGet(project: Project, dir: String, title: String, targets: List<String>) {
+        if (targets.any { !isModuleArgument(it) }) return GoPluginLog.warn("go", "go get skipped: flag-like target in ${targets.filterNot(::isModuleArgument)}")
         if (targets.isEmpty()) return
         val vendored = File(dir, "vendor/modules.txt").isFile
         val commands = GoCli.commandLinesOrNotify(project, title) {
