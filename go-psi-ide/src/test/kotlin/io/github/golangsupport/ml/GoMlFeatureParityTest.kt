@@ -9,7 +9,7 @@ import io.github.golangsupport.ide.completion.api.GoCompletionRanker
 import io.github.golangsupport.ide.completion.api.GoCompletionRankingContext
 
 /**
- * Training/serving parity of the Go language block (`ml/docs/ADAPTER.md` §4): the features the offline export computes
+ * Training/serving parity of the Go language block (`https://github.com/dvislobokov/idea-ml-completion/blob/main/docs/ADAPTER.md` §4): the features the offline export computes
  * from the lookup elements of a headless completion must equal the features the IDE ranker computes from what the
  * `GoCompletionRanker` extension point receives during the same completion.
  */

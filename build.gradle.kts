@@ -128,6 +128,8 @@ if (mlEnabled) {
             into("ml/go")
         }
     }
+    // the ML build is a separate file next to the plain one: idea-golang-support-<version>-ml.zip
+    tasks.buildPlugin { archiveClassifier.set("ml") }
 }
 
 // delve (third_party/delve: a git submodule at a release tag, vendor/ included) ships as sources in delve/ of the plugin and is built with

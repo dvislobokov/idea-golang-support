@@ -231,7 +231,7 @@ footer a { color: var(--text-2); }
         <tr><td>Generate</td><td><kbd data-action="Generate">Alt+Insert</kbd></td><td>Конструктор, методы доступа, <code>String()</code>, теги, методы интерфейса, тест.</td></tr>
         <tr><td>Переименовать</td><td><kbd data-action="RenameElement">Shift+F6</kbd></td><td>По всему модулю: силами gopls или собственного анализа (Language features: Built-in), в том числе пакет. Остальные рефакторинги — в разделе «Рефакторинги».</td></tr>
         <tr><td>Переформатировать</td><td><kbd data-action="ReformatCode">Ctrl+Alt+L</kbd></td><td>Выбранным в настройках инструментом. По умолчанию выполняется и при сохранении.</td></tr>
-        <tr><td>Упорядочить импорты</td><td><kbd data-action="OptimizeImports">Ctrl+Alt+O</kbd></td><td>Убирает неиспользуемые, добавляет недостающие. Нужен gopls.</td></tr>
+        <tr><td>Упорядочить импорты</td><td><kbd data-action="OptimizeImports">Ctrl+Alt+O</kbd></td><td>Убирает неиспользуемые, добавляет недостающие. Работает и без gopls.</td></tr>
         <tr><td>Закомментировать</td><td><kbd data-action="CommentByLineComment">Ctrl+/</kbd>, <kbd data-action="CommentByBlockComment">Ctrl+Shift+/</kbd></td><td>Строку и выделенный блок.</td></tr>
       </tbody>
     </table></div>
@@ -253,7 +253,7 @@ footer a { color: var(--text-2); }
         <tr><td>Найти использования</td><td><kbd data-action="FindUsages">Alt+F7</kbd></td><td>Число использований над объявлением тоже открывает их список.</td></tr>
         <tr><td>Тип или символ по имени</td><td><kbd data-action="GotoClass">Ctrl+N</kbd>, <kbd data-action="GotoSymbol">Ctrl+Alt+Shift+N</kbd></td><td>Типы, функции, методы и поля проекта. Работает и без gopls.</td></tr>
         <tr><td>Структура файла</td><td><kbd data-action="FileStructurePopup">Ctrl+F12</kbd></td><td>Методы показаны под своим типом.</td></tr>
-        <tr><td>Документация</td><td><kbd data-action="QuickJavaDoc">Ctrl+Q</kbd></td><td>Нужен gopls.</td></tr>
+        <tr><td>Документация</td><td><kbd data-action="QuickJavaDoc">Ctrl+Q</kbd></td><td>Собственным анализом плагина; при Language features: gopls — ответом сервера.</td></tr>
         <tr><td>Параметры вызова</td><td><kbd data-action="ParameterInfo">Ctrl+P</kbd></td><td>После выбора функции из списка показываются сами.</td></tr>
       </tbody>
     </table></div>
@@ -357,10 +357,19 @@ footer a { color: var(--text-2); }
 <section class="band" id="completion">
   <div class="wrap">
     <h2>Подсказки</h2>
-    <p>Список собирается из ответа gopls и из того, что плагин знает сам. Возможности из этого раздела отключаются по отдельности в настройках.</p>
+    <p>Список собирает собственный анализ плагина (Built-in, по умолчанию); gopls выключен и не запускается, пока его не включить в Settings, Go, Language Server. Возможности из этого раздела отключаются по отдельности в настройках.</p>
     <div class="table"><table>
       <thead><tr><th>Что</th><th>Пример</th><th>Пояснение</th></tr></thead>
       <tbody>
+        <tr><td>Функциональный литерал по ожидаемому типу <span class="new">новое</span></td><td><code>fu</code> даёт <code>func(name string) error {}</code></td><td>Там, где ждут функцию: аргумент, <code>return</code>, присваивание, поле литерала. Курсор — в теле; после <code>go</code> / <code>defer</code> — <code>func() {}()</code>. Для сигнатуры без имён параметров (<code>http.HandleFunc</code>) имена берутся по типам: <code>func(w http.ResponseWriter, r *http.Request) {}</code>. Стоит выше каталожных имён вроде <code>ast.Fun</code>; раньше был только в Ctrl+Shift+Space.</td></tr>
+        <tr><td>Порядок по смыслу <span class="new">новое</span></td><td><code>fuel</code> выше <code>ast.Fun</code></td><td>Имена, найденные анализом кода, и каталог пакетов ранжируются одной шкалой: начало набранного слова и совпадение с ожидаемым типом (точное, присваиваемое) поднимают пункт.</td></tr>
+        <tr><td>Smart Completion (ML) <span class="new">новое</span></td><td>серая метка <code>ML</code> у пунктов</td><td>Необязательно: есть только в сборке плагина с моделями (Settings, Go, Smart Completion). Языковая модель кода Go и ранжировщик, обученные на реальных списках подсказок, упорядочивают кандидатов; без модели, при выключенной галочке и до загрузки моделей порядок обычный. Всё считается на вашей машине.</td></tr>
+        <tr><td>Fill all fields…, Fill selected fields… <span class="new">новое</span></td><td><code>T{</code> и первые два пункта списка</td><td>Поля, которых в литерале ещё нет, по одному в строке с нулевыми значениями; Fill selected спрашивает, какие. Не для позиционных литералов.</td></tr>
+        <tr><td>Метод и интерфейс на верхнем уровне <span class="new">новое</span></td><td><code>func (*T)</code>, <code>func</code> · Implement Interface...</td><td>Рядом с <code>func</code> в начале строки: заготовка метода ближайшего типа выше (получатель — как у его методов) и выбор интерфейса для типа.</td></tr>
+        <tr><td>Имена параметров и переменных <span class="new">новое</span></td><td><code>func g(</code> даёт <code>err error</code>, <code>ctx context.Context</code>; <code>:=</code> слева даёт <code>area</code></td><td>В списке параметров — пары «имя Тип». Имя переменной предлагается по правой части (<code>c.Area()</code> даёт <code>area</code>, цикл по <code>names</code> — <code>name</code>), затем по типу; занятые имена пропускаются или нумеруются.</td></tr>
+        <tr><td>Константы со значением <span class="new">новое</span></td><td><code>MaxItems = 10  untyped int</code></td><td>Значение и тип константы видны прямо в списке, как в GoLand.</td></tr>
+        <tr><td>Ключи тегов структуры <span class="new">новое</span></td><td>Add tag key to all fields…</td><td>Первым пунктом на ключе тега: окно с ключами (<code>json</code>, <code>yaml</code>, <code>db</code>…), выбранный добавляется ко всем полям в стиле, который в структуре уже есть. В <code>json:"…"</code> имя поля — в четырёх стилях: <code>full-name</code>, <code>full_name</code>, <code>FullName</code>, <code>fullName</code>.</td></tr>
+        <tr><td>Постфиксы в списке <span class="new">новое</span></td><td><code>err.</code> даёт <code>as</code>, <code>is</code>, <code>nil</code></td><td>После точки подходящие по типу постфиксные шаблоны идут за полями и методами; у пакета или типа-квалификатора их нет.</td></tr>
         <tr><td>Импорт при выборе</td><td><code>strings.ToUp</code> даёт <code>ToUpper</code></td><td>Пакет подключается сам.</td></tr>
         <tr><td>Функции и типы по имени <span class="new">новое</span></td><td><code>Printl</code> даёт <code>fmt.Println</code></td><td>Стандартная библиотека, прямые зависимости и пакеты проекта. Работает без gopls.</td></tr>
         <tr><td>Пакеты по имени <span class="new">новое</span></td><td><code>htt</code> даёт <code>http</code></td><td>Импорт добавляется при выборе.</td></tr>
@@ -404,6 +413,17 @@ footer a { color: var(--text-2); }
         <tr><td>Go Generate File, Go generate '<i>пакет</i>', Go generate '<i>команда</i>' <span class="new">новое</span></td><td>Строка <code>//go:generate</code></td><td>Как в GoLand, в этом порядке: все директивы файла (<code>go generate файл.go</code>), все директивы пакета по его import path (<code>go generate .</code>) или только эта директива (<code>go generate -run '^…$' файл.go</code>) в каталоге файла; вывод — в окне Build.</td></tr>
         <tr><td>Merge a group of directives, Merge all directives, Merge directive up <span class="new">новое</span></td><td><code>go.mod</code>, <code>go.work</code>: директива <code>require</code>, <code>replace</code>, <code>exclude</code>, <code>retract</code>, <code>tool</code>, <code>ignore</code>, <code>godebug</code>, <code>use</code></td><td>Подряд идущие однострочные директивы одного вида — в блок <code>( … )</code>; все директивы этого вида в файле — в один блок на месте первой; однострочная директива — в блок того же вида прямо над ней. Комментарии строк сохраняются.</td></tr>
         <tr><td>Update dependencies… <span class="new">новое</span></td><td><code>require</code> в <code>go.mod</code>, когда известны новые версии</td><td>Диалог с прямыми зависимостями, для которых у прокси модулей есть версия новее (все отмечены); Update выполняет <code>go get модуль@версия</code> для отмеченных в фоне, при <code>vendor/</code> затем <code>go mod vendor</code>.</td></tr>
+        <tr><td>Выражения: Flip, Negate, Specify type explicitly <span class="new">новое</span></td><td>Бинарное выражение; булево выражение; <code>var x = v</code>, <code>const c = v</code></td><td>Flip binary operator меняет операнды местами; Negate expression (recursively, topmost) переписывает булево выражение в эквивалентное отрицание по де Моргану, <code>&lt;</code> / <code>&gt;</code> у дробных не трогает (NaN); Specify type explicitly добавляет тип (<code>var i int = 1</code>) и импорт его пакета.</td></tr>
+        <tr><td>Импорты: Import for side-effects, Add import alias, Add / Remove dot import alias <span class="new">новое</span></td><td>Строка импорта</td><td><code>_ "pkg"</code> вместо неиспользуемого; псевдоним (новое имя переименовывает квалификаторы); точечный импорт и возврат к квалификаторам.</td></tr>
+        <tr><td>Сигнатуры и объявления <span class="new">новое</span></td><td>Функция, метод, литерал функции; <code>var</code> / <code>const</code></td><td>Expand signature types (<code>a, b int</code> в <code>a int, b int</code>) и обратно Reuse signature types; Merge declaration up (via comma), Split declarations into two groups.</td></tr>
+        <tr><td>Литералы и вызовы <span class="new">новое</span></td><td>Составной литерал, аргументы вызова, цепочка <code>+</code> строк</td><td>Remove keys from struct literal, Move field assignment to struct initialization, Put arguments / elements on separate lines (on one line), Join concatenated string literals.</td></tr>
+        <tr><td>Create global variable, Create parameter <span class="new">новое</span></td><td>Неопределённое имя внутри функции</td><td>Переменная уровня пакета (для вызова — типа <code>func(…)</code>) или новый параметр функции; вызовы функции в проекте получают нулевое значение, чтобы код собирался.</td></tr>
+        <tr><td>Export, Migrate function parameter to method receiver <span class="new">новое</span></td><td>Имя функции, типа, поля…; функция с параметром-типом проекта</td><td>Export переименовывает в экспортируемое имя со всеми использованиями; Migrate превращает <code>func f(t *T, x int)</code> в метод <code>(t *T) f(x int)</code> и переписывает вызовы.</td></tr>
+        <tr><td>Теги структур <span class="new">новое</span></td><td>Тег, имя типа или <code>struct</code></td><td>Add key to tags, Change field name style in tags (<code>full-name</code>, <code>full_name</code>, <code>FullName</code>, <code>fullName</code> для всех полей с этим ключом), Update key value in tags на поле, чей тег разошёлся со стилем остальных.</td></tr>
+        <tr><td>printf: Add format string argument, Mark as / Exclude string formatting function <span class="new">новое</span></td><td>Вызов <code>fmt.Sprintf("%d %s", n)</code>; функция с <code>...any</code></td><td>Выражение становится аргументом первого глагола без аргумента; функция входит в список проверяемых printf-подобных или выходит из него (Settings, Go, Linters).</td></tr>
+        <tr><td>Create missing iota clauses, Create 'default' clause <span class="new">новое</span></td><td>Предупреждение «Missing 'case' statements for 'iota' consts in 'switch'»</td><td>Недостающие <code>case</code> по константам типа (в том числе битовые флаги <code>1 &lt;&lt; iota</code>) или <code>default:</code> с <code>panic("unhandled default case")</code>.</td></tr>
+        <tr><td>Unchecked error: Do not report this function anymore <span class="new">новое</span></td><td>Предупреждение о непроверенной ошибке</td><td>Вызываемая функция попадает в список исключений инспекции (<code>path.Func</code>, <code>path.Type.Method</code>), список правится в параметрах инспекции.</td></tr>
+        <tr><td>Navigate to shadowed declaration, Rename variable <span class="new">новое</span></td><td>Локальная переменная, затеняющая имя из внешней области</td><td>К затенённому объявлению или переименование; такая переменная окрашена цветом Shadowing variable.</td></tr>
         <tr><td>Действия gopls <span class="new">новое</span></td><td>Курсор или выделение</td><td>Extract variable, Extract function, Inline call, Invert if, Add test и другие, под своими именами. Извлечение доступно при выделении. При Language features: Built-in вместо них работают рефакторинги плагина.</td></tr>
         <tr><td>Refactorings and actions of gopls…</td><td>Любое место</td><td>Те же действия отдельным списком. Стоит внизу.</td></tr>
         <tr><td>Исправления линтера</td><td>Замечание golangci-lint</td><td>Handle error, Ignore error explicitly, Suppress with <code>//nolint</code>.</td></tr>
@@ -426,7 +446,7 @@ footer a { color: var(--text-2); }
         <tr><td>Implement Interface…</td><td>Методы выбранного интерфейса (проект, stdlib, зависимости), которых у типа ещё нет: типы чужого пакета получают его имя, пакет импортируется, встроенные интерфейсы раскрываются. Также <kbd data-action="ImplementMethods">Ctrl+I</kbd>.</td></tr>
         <tr><td>Type from JSON… <span class="new">новое</span></td><td>Структуры с тегами <code>json</code> по документу из буфера обмена или из диалога.</td></tr>
         <tr><td>Copy JSON sample to clipboard <span class="new">новое</span></td><td>Alt+Enter на структуре: JSON-документ по её полям (теги <code>json</code>, встроенные структуры, примеры значений по типам) в буфер обмена.</td></tr>
-        <tr><td>Test</td><td>Тест для функции под курсором.</td></tr>
+        <tr><td>Test</td><td>Тест для функции под курсором. Для результатов-срезов, карт, функций и структур тест сравнивает через <code>reflect.DeepEqual</code>; параметры без имени получают <code>arg1</code>, <code>arg2</code>.</td></tr>
         <tr><td>Tests for Package… <span class="new">новое</span></td><td>Табличные тесты для всех экспортируемых функций и методов пакета, у которых теста ещё нет (<code>TestF</code>, <code>TestT_M</code> в любом <code>_test.go</code> каталога): список, все отмечены; каждый тест — в <code>_test.go</code> своего файла (создаётся при необходимости), импорт <code>testing</code> добавляется.</td></tr>
         <tr><td>Copyright <span class="new">новое</span></td><td>Пункт плагина Copyright (есть в IDE с этим плагином): уведомление о правах из профиля Settings, Editor, Copyright — над <code>package</code> строками <code>//</code>; Code, Update Copyright обновляет его в файлах Go.</td></tr>
       </tbody>
@@ -569,6 +589,25 @@ n := <span class="fn">next</span>()
       </tbody>
     </table></div>
 
+    <h3>Стиль, лишний код и вероятные ошибки <span class="new">новое</span></h3>
+    <p>Те же замечания, что у GoLand, с теми же группами, уровнями и текстами, поэтому профиль инспекций, выгруженный из GoLand, читается как есть. Все проверки встроены в плагин: внешние линтеры (golangci-lint, staticcheck, go vet) для них не нужны, их правила — часть собственного движка (Settings, Go, Linters, таблица проверок).</p>
+    <div class="table"><table>
+      <thead><tr><th>Проверка</th><th>Что находит</th><th>Исправление</th></tr></thead>
+      <tbody>
+        <tr><td>Missing 'case' statements for 'iota' consts in 'switch'</td><td>Выражение <code>switch</code> без <code>default</code>, в котором нет констант типа из блока с <code>iota</code> (в том числе <code>1 &lt;&lt; iota</code>). Перечисления без <code>iota</code> и type switch по интерфейсам не считаются.</td><td>Create missing iota clauses, Create 'default' clause</td></tr>
+        <tr><td>Constant condition</td><td>Условие с известным ответом: <code>x != nil</code> после <code>if x == nil { return }</code>; <code>&amp;T{}</code>, <code>new(T)</code>, <code>make(…)</code>, <code>[]T{}</code>, литерал функции никогда не равны nil; локальная с одним и тем же присвоенным литералом. Именованные константы и <code>runtime.GOOS</code> не считаются.</td><td></td></tr>
+        <tr><td>Division by zero</td><td><code>/</code>, <code>%</code> на локальную, которая заведомо ноль, или на нулевой литерал при неконстантном дробном делимом (целочисленные константы — ошибка компилятора).</td><td></td></tr>
+        <tr><td>Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions</td><td>Глагол без аргумента (<code>No argument for verb: argument index = 2, arguments count = 1</code>), несовпадение типа, лишние аргументы; обёртки пакета и список из Settings, Go, Linters.</td><td>Add format string argument</td></tr>
+        <tr><td>Shadowing variable</td><td>Локальная переменная затеняет переменную, константу, параметр, получатель внешней области или переменную пакета, в том числе предопределённое имя (<code>new := 2</code>).</td><td>Navigate to shadowed declaration, Rename variable</td></tr>
+        <tr><td>Defer / go на встроенную функцию, Irregular use of iota, Mixed receiver types, Assignment to receiver, Type assertion on errors, Build constraints</td><td><code>defer recover()</code> и <code>go panic()</code>; <code>iota</code> в одиночной константе; методы типа с получателем-значением и указателем; присваивание получателю; <code>err.(*T)</code> вместо <code>errors.As</code>; <code>// +build</code> не на месте.</td><td>Wrap in a function literal, Replace with 0, Change receiver to pointer / value, Replace with 'errors.As'</td></tr>
+        <tr><td>Unused function, type, constant, global variable (в том числе экспортируемые)</td><td>Объявление, которым никто не пользуется. Экспортируемые — в <code>internal</code> и в пакетах-приложениях; API библиотек и методы не отмечаются; находка показана серым.</td><td>Safe delete</td></tr>
+        <tr><td>Unused parameter</td><td>Параметр на всю запись <code>c Circle</code>; экспортируемые функции <code>internal</code> и приложений тоже, вызовы ищутся по проекту.</td><td>Remove unused parameter, Rename to _</td></tr>
+        <tr><td>Redundant: parentheses, comma, semicolon, import alias, type conversion, type in composite literal, else, type declaration</td><td>Лишнее в записи: <code>(x)</code>, <code>[]T{T{}}</code>, <code>var x T = T(v)</code>, <code>else</code> после <code>return</code>, <code>T(x)</code> при <code>x</code> уже типа <code>T</code>, пустое <code>var ()</code>, <code>[]T{}</code> вместо nil-среза.</td><td>Свои исправления: Remove redundant …, Remove else, Replace with nil slice</td></tr>
+        <tr><td>Стиль имён и комментариев</td><td>Snake case; <code>this</code> / <code>self</code> и разные имена получателей (по всем файлам пакета); имя, повторяющее пакет (<code>probe.ProbeThing</code>); экспортируемое объявление без комментария или с комментарием не по форме «Name …»; суффикс единицы у <code>time.Duration</code> (<code>timeoutSeconds</code>); строка ошибки с заглавной буквы или точкой; несколько экспортируемых имён в одном объявлении; неотсортированные импорты; строковые литералы структуры без имён полей; параметр типа в нижнем регистре; <code>//text</code> без пробела (только если включено «Add a leading space to comments» на странице Code Style, Go, Other).</td><td>Rename, Start comment with 'Name', Lowercase the first letter, Split into separate declarations, Sort imports, Add field names</td></tr>
+        <tr><td>Struct has methods on both value and pointer receivers; Receiver has a generic name</td><td>Разные виды получателей у методов одного типа (подчёркивается имя каждого метода); получатель <code>this</code>, <code>self</code>, <code>me</code>.</td><td>Change receiver to pointer / value, Rename</td></tr>
+      </tbody>
+    </table></div>
+
     <h3>Проект и go.mod</h3>
     <div class="table"><table>
       <thead><tr><th>Проверка</th><th>Что находит</th><th>Исправление</th></tr></thead>
@@ -582,6 +621,7 @@ n := <span class="fn">next</span>()
         <tr><td>Путь в <code>ignore</code> <span class="new">новое</span></td><td>Путь директивы <code>ignore</code> (Go 1.25), которого нет в модуле: <code>./x</code> ищется от корня модуля, путь без <code>./</code> — ещё и на любой глубине (в очень большом модуле такой путь не проверяется).</td><td>Remove the path (пустой блок <code>ignore ( )</code> тоже)</td></tr>
         <tr><td>Уязвимый импорт <span class="new">новое</span></td><td>Импорт пакета, в версии модуля которого govulncheck нашёл уязвимость: «Package 'x' of module m@v is affected by GO-…: описание»; у стандартной библиотеки — версия Go с исправлением. Нужен результат govulncheck: фоновая проверка (Settings, Go, Linters, «Check for vulnerabilities with govulncheck») или Go, Check Vulnerabilities.</td><td>Upgrade m to v: <code>go get m@v</code> в фоне</td></tr>
         <tr><td>Вызов уязвимой функции <span class="new">новое</span></td><td>По умолчанию выключена (инспекция GoVulnerableCodeUsages). Вызов в коде модуля, по которому govulncheck дошёл до уязвимой функции: «Call to vulnerable function pkg.F (GO-…)» или «Call to pkg.G reaches vulnerable function pkg.F». Место — из последнего прогона: если строка с тех пор изменилась и такого вызова на ней нет, ничего не показывается.</td><td></td></tr>
+        <tr><td>Устаревшая и отозванная зависимость <span class="new">новое</span></td><td>Модуль помечен в своём go.mod как <code>Deprecated</code>: «Module 'm' is deprecated: …» на <code>require</code> (из фонового <code>go list -m -u</code>); версия отозвана (<code>retract</code>): «Version v1.2.0 of 'm' is retracted: …» (проверка не чаще раза в час, нужна сеть).</td><td>Upgrade to vX.Y.Z, если новая версия известна</td></tr>
         <tr><td>Повтор и сам себя <span class="new">новое</span></td><td>Один модуль в <code>require</code> дважды; модуль требует или подменяет сам себя.</td><td>Remove duplicate require</td></tr>
         <tr><td>Пути <code>replace</code> и <code>use</code> <span class="new">новое</span></td><td><code>replace</code> на отсутствующий каталог или каталог без <code>go.mod</code>; <code>use</code> в <code>go.work</code> на каталог без <code>go.mod</code>.</td><td></td></tr>
         <tr><td>vendor <span class="new">новое</span></td><td><code>vendor/modules.txt</code> не совпадает с требованиями: модуля нет, другая версия, нет <code>## explicit</code>.</td><td>Копирует <code>go mod vendor</code> в буфер обмена</td></tr>
@@ -890,7 +930,7 @@ n := <span class="fn">next</span>()
   <div class="wrap">
     <h2>Настройки</h2>
     <p>Страницы настроек переведены на русский: язык берётся из языка IDE (русский языковой пакет) или задаётся полем «Язык этих страниц» на странице Go — новый язык виден при следующем открытии окна настроек. Остальной интерфейс плагина — меню, окна, действия — английский, как и в самой IDE.</p>
-    <p>Settings, Go — свой узел в корне дерева настроек, первым, над Appearance &amp; Behavior (как в GoLand). Настройки действуют на все проекты. Под ним страницы: GOROOT, GOPATH, Go Modules, Build Tags, Imports, Linters, Formatting, Editor and Completion, Language Server (под ней — gopls со всеми параметрами установленной версии сервера), Debugger, Tools. На самой странице Go — какой <code>go</code> используется, источник возможностей языка (переключается на странице Language Server), общие настройки и ссылки на все страницы. Поиск в окне настроек находит каждую настройку.</p>
+    <p>Settings, Go — свой узел в корне дерева настроек, первым, над Appearance &amp; Behavior (как в GoLand). Настройки действуют на все проекты. Под ним страницы: GOROOT, GOPATH, Go Modules, Build Tags, Imports, Linters, Formatting, Editor and Completion, Smart Completion (только в сборке с моделями), Language Server (под ней — gopls со всеми параметрами установленной версии сервера), Debugger, Tools. На самой странице Go — какой <code>go</code> используется, источник возможностей языка (переключается на странице Language Server), общие настройки и ссылки на все страницы. Поиск в окне настроек находит каждую настройку.</p>
 
     <h3>Go</h3>
     <div class="table"><table class="two">
@@ -899,6 +939,7 @@ n := <span class="fn">next</span>()
         <tr><td>Create run configurations for the programs of the project</td><td>Создаёт конфигурацию для каждого каталога с <code>func main</code>. Удалённая вручную не создаётся снова.</td></tr>
         <tr><td>Test arguments</td><td>Добавляются к каждому <code>go test</code>.</td></tr>
         <tr><td>Language of these pages</td><td>Язык страниц настроек: как в IDE, English или Русский.</td></tr>
+        <tr><td>Shared indexes URL <span class="new">новое</span></td><td>Адрес каталога с <code>index.json</code> (записи <code>key</code>, <code>ideBuild</code>, <code>url</code>, <code>sha256</code>), откуда в фоне скачивается готовый индекс стандартной библиотеки (GOROOT) для вашей версии Go: он подключается при следующем открытии проекта вместо индексации <code>$GOROOT/src</code>. Пусто — только индексы, построенные пунктом Go, Build Shared Index for GOROOT… на этой машине. Поле работает в IDE с плагином Shared Indexes; у самосборного Go (<code>devel</code>) индекса нет.</td></tr>
       </tbody>
     </table></div>
 
@@ -1004,8 +1045,21 @@ n := <span class="fn">next</span>()
         <tr><td>Offer the arguments of a completed call <span class="new">новое</span></td><td>Список для аргументов открывается сам.</td></tr>
         <tr><td>Reformat block on typing '}', Insert documentation comment stub <span class="new">новое</span></td><td>Настройки платформы, как в GoLand: Settings, Editor, General, Smart Keys (обе включены; ссылка со страницы Editor and Completion). Первая: <code>}</code>, закрывающая блок, переформатирует весь блок встроенным gofmt-совместимым форматтером (отступы, пробелы, выравнивание полей и комментариев), без неё выравнивается только сама скобка. Вторая: Enter сразу после <code>//</code> на строке над объявлением пишет <code>// Name </code> с кареткой после имени, а не новую строку; действует вместе с «Start a doc comment with the name of the declaration».</td></tr>
         <tr><td>Сворачивание в одну строку <span class="new">новое</span></td><td>Настройка платформы: Settings, Editor, General, Code Folding, раздел Go — One-line 'if' blocks for error handling, One-line functions with a single 'return', One-line case clauses, Empty functions, Empty struct or interface type definitions (все включены, как в GoLand). Свёрнутый блок показывает свой текст: <code>if err != nil { return "", err }</code>, <code>case 1: x--</code>, <code>struct {}</code>.</td></tr>
-              <tr><td>Rename <span class="new">новое</span></td><td>When a file / field / directory / package is renamed — Show options (флажок в диалоге), Rename или Do not rename: тестовый или основной файл (<code>store.go</code> ↔ <code>store_test.go</code>), теги структуры (<code>json:"user_name"</code> в том же стиле), пакет каталога, каталог пакета.</td></tr>
+              <tr><td>Цвета Go <span class="new">новое</span></td><td>Settings, Editor, Color Scheme, Go: 64 ключа в группах GoLand (экспортируемые и локальные функции и их вызовы, структуры и интерфейсы, константы и переменные пакета и области, получатель отдельно от параметров, поля, <code>nil</code>, Shadowing variable, ссылки в doc-комментариях, теги сборки, части структурного тега, глаголы printf). Схема, выгруженная из GoLand, читается как есть; новый ключ по умолчанию наследует цвет, которым элемент красился раньше.</td></tr>
+        <tr><td>Auto Import, Go: «Add unambiguous imports on the fly» и другие <span class="new">новое</span></td><td>См. страницу Imports: те же галочки, что у GoLand.</td></tr>
+        <tr><td>Rename <span class="new">новое</span></td><td>When a file / field / directory / package is renamed — Show options (флажок в диалоге), Rename или Do not rename: тестовый или основной файл (<code>store.go</code> ↔ <code>store_test.go</code>), теги структуры (<code>json:"user_name"</code> в том же стиле), пакет каталога, каталог пакета.</td></tr>
         <tr><td>When JSON is pasted <span class="new">новое</span></td><td>Show options (по умолчанию, с «Don't ask again»), Convert JSON to a Go type или Insert JSON as-is. Объект JSON между объявлениями становится типами (<code>type Generated struct</code> и вложенные), после <code>type Name </code> — типом структуры, внутри структуры — её полями (вложенные объекты — анонимные структуры).</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Smart Completion <span class="new">новое</span></h3>
+    <p>Страница есть только в сборке плагина с моделями (<code>-PmlEnabled=true</code>); в обычной сборке её и самого ранжирования нет. Модели лежат внутри плагина (<code>ml/go/lm.cml</code>, <code>rank.cml</code>), загружаются один раз в фоне при первом списке подсказок, и ничего не уходит с машины.</p>
+    <div class="table"><table class="two">
+      <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
+      <tbody>
+        <tr><td>Rank completion candidates with the ML model</td><td>Языковая модель кода Go и линейный ранжировщик упорядочивают список подсказок: учитывают тип ожидаемого значения, область видимости, расстояние до объявления и то, что набрано перед кареткой. Выключено — детерминированный порядок плагина (ожидаемый тип, область, имя); он же действует, пока модели не загрузились.</td></tr>
+        <tr><td>Mark the suggestions ordered by the model</td><td>Серая метка <code>ML</code> после каждой строки, которую оценила модель: видно, какой порядок — её. Выключено — без видимой разницы.</td></tr>
+        <tr><td>Models directory</td><td>Каталог с другими <code>lm.cml</code> и <code>rank.cml</code> (например, от нового обучения). Пусто — модели из плагина. Строка Models показывает, что загружено.</td></tr>
       </tbody>
     </table></div>
 
@@ -1088,6 +1142,11 @@ go-inspect: 48 inspections, 27 files, 92 findings (4 error, 61 warning, 27 note)
       </tbody>
     </table></div>
     <p>Пропускаются <code>vendor</code>, <code>testdata</code>, каталоги с <code>.</code> и <code>_</code> в начале, сгенерированные файлы (<code>// Code generated … DO NOT EDIT.</code>) и файлы, которые условия сборки исключают. Нужен <code>go</code> в PATH: без него не найти стандартную библиотеку.</p>
+
+    <h3>Проверка «наши находки не меньше, чем у go vet» <span class="new">новое</span></h3>
+    <p>Встроенные проверки заменяют <code>go vet</code>, и это можно проверять в CI. Скрипт <code>tools/vet/compare.py</code> запускает <code>go vet -json ./...</code> в модуле (<code>--module</code>) или читает сохранённый вывод (<code>--vet-json</code>) и сопоставляет его с отчётом go-inspect (<code>--sarif</code>) по файлу и строке через таблицу «анализатор vet — наша проверка». Он печатает находки только у vet, только у плагина и счётчики по анализаторам. Код выхода 1 — у vet есть находка по покрытому анализатору, которой нет у плагина; исключения (<code>путь:строка анализатор причина</code>) — в файле <code>--allow</code>. Анализаторы <code>asmdecl</code>, <code>cgocall</code> и <code>framepointer</code> не покрыты — скрипт говорит об этом отдельно. Пример запуска и подробности — <code>docs/CI.md</code>.</p>
+    <div class="term" role="img" aria-label="Пример запуска сверки с go vet"><span class="pr">$</span> tools/ci/go-inspect.sh playground build/vet/playground.sarif
+<span class="pr">$</span> uv run tools/vet/compare.py --module playground --sarif build/vet/playground.sarif --allow tools/vet/allow.txt</div>
   </div>
 </section>
 
@@ -1097,7 +1156,8 @@ go-inspect: 48 inspections, 27 files, 92 findings (4 error, 61 warning, 27 note)
     <div class="table"><table>
       <thead><tr><th>Что видно</th><th>Куда смотреть</th><th>Что сделать</th></tr></thead>
       <tbody>
-        <tr><td>Нет подсказок, навигации и ошибок</td><td>Значок gopls в статус-баре; меню Go, gopls, Show Log</td><td>Go, gopls, Restart. Если сервера нет, установить его в настройках, раздел Tools.</td></tr>
+        <tr><td>Нет подсказок, навигации и ошибок</td><td>Идёт ли индексация (полоса внизу окна); Go, Plugin Logs; Settings, Go, Language Server: источник возможностей</td><td>Дождаться индексации (пока она идёт, часть возможностей уступает gopls, если он включён); Go, Reanalyze Project. Это работа собственного анализа плагина: gopls по умолчанию выключен. Если вы его включили — значок gopls в статус-баре, Go, gopls, Restart, Show Log; нет сервера — установить его в настройках, раздел Tools.</td></tr>
+        <tr><td>Индексация стандартной библиотеки при каждом открытии долгая</td><td>Go, Build Shared Index for GOROOT…; Settings, Go, Shared indexes URL; Go, Plugin Logs, категория <code>index</code></td><td>Построить индекс GOROOT один раз или указать адрес готовых индексов. Нужен плагин Shared Indexes; у <code>devel</code>-сборки Go индекса нет.</td></tr>
         <tr><td>Уведомление Error loading workspace</td><td>Текст уведомления: это сообщение команды <code>go</code></td><td>Чаще всего помогает Go, Modules, Tidy или Download.</td></tr>
         <tr><td>Нет подсказок по имени из других пакетов</td><td>Help, Show Log: строка Go catalogue</td><td>Go, Read Packages Again. Проверить галочку в настройках, страница Imports.</td></tr>
         <tr><td>Отладка не начинается</td><td>Консоль сессии (команда delve, сборка, вывод компилятора), окно Build с ошибками по ссылкам, уведомление Debug has not started; Go, Debugger, Show Debugger Logs</td><td>Исправить ошибку сборки или обновить Delve под версию Go.</td></tr>
@@ -1116,8 +1176,8 @@ go-inspect: 48 inspections, 27 files, 92 findings (4 error, 61 warning, 27 note)
 
 <footer>
   <div class="wrap">
-    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.2.59</span>
-    <span>Редакция страницы 2026-10-03.1</span>
+    <span>Go Project Support, <code>io.github.golangsupport</code>, версия 0.2.184</span>
+    <span>Редакция страницы 2026-10-05.1</span>
     <a class="repo" href="demo.html">О плагине</a>
     <a class="repo" href="../COMPARE.md">Сравнение с GoLand</a>
     <a class="repo" href="../ROADMAP.md">Roadmap</a>

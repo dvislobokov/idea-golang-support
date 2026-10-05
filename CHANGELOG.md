@@ -48,6 +48,11 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
   scope level), scored candidates above unscored ones; without a ranker nothing changes.
 - `GoMlCompletionRankerTest`: with `-Dml.models=<dir>` (`-Pml.models` of `:go-psi-ide:test`) completes over the real models and
   checks that every Go candidate is scored and the expected parameter stays on top; without the models it checks the abstention.
+### Changed — two plugin files per version
+- The ML build is a separate file with the same version: `buildPlugin -PmlEnabled=true` writes `idea-golang-support-<version>-ml.zip`
+  (archive classifier `ml`) next to the plain `idea-golang-support-<version>.zip`; both are kept in `build/distributions/`.
+  `build.ps1` (JBR of the target IDE, submodule, `--offline`): `-NoTests`, `-Run`, `-Ml [-MlModels <dir>]`, `-IdePath`.
+
 ### Changed — the ML engine is a plain copy, not a subtree
 - `ml/` (the git subtree of idea-ml-completion with its training CLI, corpus tools and docs) is gone; `ml-core/` is a copy of that
   repository's pure-Kotlin `ml-core` module alone (`tools/ml/sync-ml-core.sh <checkout>` refreshes it). Nothing else of the engine
