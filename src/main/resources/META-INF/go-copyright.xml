@@ -1,0 +1,6 @@
+<!-- Go files for the Copyright plugin (an optional dependency of plugin.xml): Generate | Copyright, Code | Update Copyright -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <copyright.updater filetype="Go" implementationClass="io.github.golangsupport.lang.GoUpdateCopyrightsProvider"/>
+  </extensions>
+</idea-plugin>

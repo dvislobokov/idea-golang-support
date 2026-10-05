@@ -100,4 +100,23 @@ class GoBuildConstraintInspectionTest : GoSemanticIdeTestBase() {
         package p
         """,
     )
+
+    // GoLand parity G7 (`GoBuildTag`): +build lines go does not read.
+
+    fun testMisplacedAndMalformedPlusBuild() = doHighlight(
+        """
+        //go:build linux
+
+        <weak_warning descr="possible malformed +build comment">// see +build linux</weak_warning>
+
+        //+build linux
+
+        package p
+
+        <weak_warning descr="misplaced +build comment">// +build darwin</weak_warning>
+
+        // +building is just a word.
+        func f() {}
+        """,
+    )
 }

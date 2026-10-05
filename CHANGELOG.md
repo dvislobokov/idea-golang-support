@@ -30,6 +30,130 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.149] - 2026-10-05
+
+### Added — probable bugs and control flow inspections (GoLand parity G7)
+- "Defer / go on a builtin" (`GoDeferGo`): `'recover()' is called directly by 'defer' and does not stop a panic`, `'panic()' is called directly by 'go'`;
+  fix Wrap in a function literal.
+- "Name collides with an import" (`GoImportUsedAsName`): `Variable 'strings' collides with imported package name`; fix Rename.
+- "Builtin used as a name" (`GoReservedWordUsedAsName`): `Variable 'len' collides with the builtin function`; fix Rename.
+- "Irregular use of iota" (`GoIrregularIota`): `'iota' in a single constant declaration is always 0` (fix Replace with 0),
+  `Redundant repetition of the previous constant expression with 'iota'` (fix Remove the repeated expression).
+- "Mixed receiver types" (`GoMixedReceiverTypes`, package-wide through stubs): `Methods of 'T' have both value and pointer receivers`;
+  fixes Change receiver to pointer / to value.
+- "Type assertion on errors" (`GoTypeAssertionOnErrors`): `Type assertion on errors fails on wrapped errors`; fix Replace with 'errors.As' (if-ok form, imports `errors`).
+- Build constraints (`GoBuildConstraint`, GoLand `GoBuildTag`): `misplaced +build comment` outside the header, `possible malformed +build comment` for a header
+  comment that mentions `+build` without being one.
+- "Assignment to receiver" (`GoAssignmentToReceiver`, Control flow): `Assignment to method receiver 'c' does not propagate to callers`,
+  `Assignment to a field of value receiver 'c' is lost when the method returns`; fix Change receiver to pointer.
+- Already covered by the lint rules and not duplicated: `GoRedundantTrueInForCondition` (S1006), `GoStringsReplaceCount` (SA1018),
+  `GoLeadingWhitespaceInDirectiveComment` (SA9009).
+
+## [0.2.148] - 2026-10-05
+
+### Added — declaration redundancy inspections (GoLand parity G7)
+- "Empty declaration" (`GoEmptyDeclaration`): `Empty 'var' declaration` (also const / type / import); fix Delete empty declaration.
+- "Empty slice literal" (`GoPreferNilSlice`): `Empty slice declared using a literal`; fix Replace with nil slice declaration.
+- "Redundant comma" / "Redundant semicolon" (`GoRedundantComma`, `GoRedundantSemicolon`) with removal fixes.
+- "Redundant import alias" (`GoRedundantImportAlias`): `Redundant alias 'fmt'`; fix Remove redundant alias.
+- "Redundant type in composite literal" (`GoRedundantTypeDeclInCompositeLit`): `Redundant type declaration` for `[]T{T{}}`, `[]*T{&T{}}`, map keys and values; fix Remove redundant type.
+- "Type can be omitted" (`GoVarAndConstTypeMayBeOmitted`): `Type can be omitted` on `var x T = T(v)`; fix Remove type.
+- "Unused type parameter" (`GoUnusedTypeParameter`): `Unused type parameter 'T'`; fix Rename to '_'.
+- "Redundant parentheses" (`GoRedundantParens`, group General): operands, conditions, returned and assigned values, arguments, named types in declarations
+  (composite literals in control headers are kept); fix Remove redundant parentheses.
+
+## [0.2.147] - 2026-10-05
+
+### Added — code style inspections (GoLand parity G7; GoLand's ids, groups and levels, all enabled by default)
+- "Comment without a leading space" (`GoCommentLeadingSpace`): `Line comment should have a space after '//'` (directives, `//nolint`, `//line`, `//export`,
+  cgo `//#` and `//+build` exempt); fix Add a space after '//'.
+- "Comment start" (`GoCommentStart`): `comment on exported function Foo should be of the form "Foo ..."` and `Comment should be meaningful or it should be removed`
+  (as GoLand on `// NewOrder`); fixes Start comment with 'Name', Remove comment. The opt-in `GoDocComment` now reports only missing comments.
+- "Error string format" (`GoErrorStringFormat`, ST1005, `errors.New` / `fmt.Errorf`): `Error string should not be capitalized`,
+  `Error string should not end with punctuation or a newline`; fixes Lowercase the first letter, Remove the trailing punctuation.
+- "Exported names in one declaration" (`GoExportedOwnDeclaration`): `Exported var A should have its own declaration`; fix Split into separate declarations.
+- "Name starts with the package name" (`GoNameStartsWithPackageName`): `type name will be used as probe.ProbeThing by other packages, and that stutters;
+  consider calling this Thing`; fix Rename to 'Thing'.
+- "Receiver names" (`GoReceiverNames`): `this` / `self`, `_`, `Receiver name x should be consistent with previous receiver name t for T` (within a file);
+  fixes Rename to 'c', Remove the receiver name.
+- "Redundant else" (`GoRedundantElseInIf`): `'if' block ends with a 'return' statement, so drop this 'else' and outdent its block` (also break / continue /
+  goto / panic); fix Remove redundant 'else'.
+- "Struct literal without field names" (`GoStructInitializationWithoutFieldNames`): `Fields are assigned without explicit names` (same-package and anonymous
+  structs too, as GoLand on the probe's test table); fix Add field names.
+- "Lower-case type parameter" (`GoTypeParameterInLowerCase`, information): `Type parameter 't' is declared in lowercase`; fix Rename to 'T'.
+- "Unit-specific duration suffix" (`GoUnitSpecificDurationSuffix`, ST1011): `var timeoutSeconds is of type time.Duration; don't use unit-specific suffix "Seconds"`; fix Rename.
+- "Unsorted import" (`GoUnsortedImport`): `Import is not sorted`; fix Sort imports.
+- "Snake case" (`GoSnakeCaseUsage`): `Don't use underscores in Go names; func parse_url should be parseUrl`; fix Rename to camelCase.
+- Shared fixes `GoEditFix`, `GoRenameToFix` (rename with references through `RenameProcessor`) and `GoRenameVariableFix(text)`.
+
+## [0.2.146] - 2026-10-05
+
+### Added — Copy / Clone declaration (GoLand parity G6)
+- F5 / Refactor | Copy on the name of a top-level function, method, type, variable or constant: "Copy Declaration…" copies it under a new name into the same or
+  another file of the package (Clone: the same file); references to itself and the name in the doc comment follow the new name, imports are added.
+  Files and directories are still copied by the platform. Refused for a taken name and for a constant with `iota` or without a value in its group.
+
+## [0.2.145] - 2026-10-05
+
+### Added — Invert Boolean (GoLand parity G6)
+- Refactor | Invert Boolean… on a boolean variable, parameter, field or a function returning one `bool`: a dialog suggests the inverted name (`isEnabled` →
+  `isDisabled`, `ok` → `notOk`, `has…` → `lacks…`, `notX` → `x`, else a `not` prefix) and every value it gets or gives is negated: initializer, assignments,
+  keyed literals, call arguments, return values; reads become `!x`, `x == true` → `x == false`, `&&` / `||` by De Morgan. Non-boolean names get a hint.
+
+## [0.2.144] - 2026-10-05
+
+### Added — Introduce Parameter Object (GoLand parity G6)
+- Refactor | Extract/Introduce | Introduce Parameter Object… on a function with two or more parameters: the chosen ones move into `type NameParams struct { … }`
+  above it, the function takes `p NameParams`, the body uses `p.Field`, every call passes `NameParams{Field: arg, …}` (qualified from other packages). Dialog with
+  the struct name and the parameters; receiver, `_` and variadic parameters are not offered. Refused for generic functions, interface methods, functions used as values.
+
+## [0.2.143] - 2026-10-05
+
+### Added — Introduce Field (GoLand parity G6)
+- Refactor | Extract/Introduce | Introduce Field (Ctrl+Alt+F) in a method with a struct receiver: the selected expression becomes an unexported field of the struct
+  (name unique among fields and methods, struct re-aligned), replaced by `r.name`; a popup chooses "Initialize in current method" (`r.name = expr` before the
+  statement) or "Leave initialization to the caller".
+
+## [0.2.142] - 2026-10-05
+
+### Added — Introduce Parameter (GoLand parity G6)
+- Refactor | Extract/Introduce | Introduce Parameter (Ctrl+Alt+P): the selected expression of a function body becomes a new parameter (before a variadic one;
+  type from the semantics, name suggested, in-place rename, all occurrences on request); every call in the project passes the expression, interface methods
+  change with their implementations (through Change Signature, under a progress). Refused when the expression uses the function's parameters, receiver or locals,
+  or package names the callers from other packages cannot see.
+
+## [0.2.141] - 2026-10-05
+
+### Added — Generate: Method…, Tests for Package…, Copyright (GoLand parity G6)
+- Alt+Insert | Method…: a method of the type at the caret from a dialog (name, pointer receiver — default as the type's other methods, parameters, results),
+  body `panic("not implemented")`, placed after the type's last method.
+- Alt+Insert | Tests for Package…: table-driven tests for every exported function and method of the package that has no `TestF` / `TestT_M` yet, each in the
+  `_test.go` file of its source file (created when needed), `testing` imported; a pre-checked list chooses them.
+- Generate | Copyright and Code | Update Copyright work in Go files when the Copyright plugin is present (`copyright.updater` for Go): the notice goes above
+  `package` as `//` lines.
+
+## [0.2.140] - 2026-10-05
+
+### Added — Remove method from interface and all its implementations (GoLand parity G6)
+- Alt+Enter on a method of a project interface: "Remove method from interface and all its implementations" removes the spec and, after a chooser listing the
+  implementing types' methods, those methods with their doc comments; methods that are still called elsewhere are kept and named in a hint. Embedded, generated
+  and out-of-project implementations are left alone. One undo.
+
+## [0.2.139] - 2026-10-05
+
+### Added — Introduce Type (GoLand parity G6)
+- Refactor | Extract/Introduce | Introduce Type… on a type literal (`struct{…}`, `func(…)`, `map[K]V`, `[]T`, `chan`, the type of a composite literal) at the caret
+  or selected: `type Name …` goes above the enclosing top-level declaration and its comment; identical type expressions of the file are replaced too (by default),
+  the name — from the field, parameter or variable (`cfg` → `Cfg`), else by the kind (`Handler`, `Config`) — is edited in place. Not offered on a named type,
+  on the type's own declaration, or on a type with a type parameter or a local type.
+
+## [0.2.138] - 2026-10-05
+
+### Added — Override Methods (GoLand parity G6)
+- Code | Override Methods (Ctrl+O) on a struct with embedded fields: a chooser, grouped by embedded field, of the methods promoted from embedded structs and
+  interfaces (any package, pointer or not) that the struct does not declare; each becomes a wrapper `return s.Base.Close()` with the type's receiver style,
+  variadic arguments passed on, unnamed parameters named, imports added. Unavailable when nothing is promoted.
+
 ## [0.2.137] - 2026-10-05
 
 ### Added — Update Syntax and the Go fix lenses (GoLand parity G5)

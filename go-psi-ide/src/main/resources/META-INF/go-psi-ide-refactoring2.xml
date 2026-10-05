@@ -1,0 +1,10 @@
+<!-- go-psi-ide, GoLand-parity refactorings (G6): Invert Boolean, Introduce Parameter Object, Copy / Clone of a declaration.
+     Introduce Parameter and Introduce Field go through lang.refactoringSupport (go-psi-ide-refactoring.xml). Every handler answers only while
+     the RENAME gate is on. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <refactoring.invertBoolean language="Go" implementationClass="io.github.golangsupport.ide.refactoring.GoInvertBooleanDelegate"/>
+    <refactoring.introduceParameterObject language="Go" implementationClass="io.github.golangsupport.ide.refactoring.GoIntroduceParameterObjectDelegate"/>
+    <refactoring.copyHandler implementation="io.github.golangsupport.ide.refactoring.GoCopyDeclarationHandler" id="goCopyDeclaration" order="first"/>
+  </extensions>
+</idea-plugin>

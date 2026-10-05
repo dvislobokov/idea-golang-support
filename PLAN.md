@@ -214,15 +214,15 @@
   своего диалога предпросмотра, как у GoLand, нет) + линзы «Update syntax (N places)» и «What's New» в файле.
 
 ### G6. Рефакторинги и Generate (≈6 дней)
-- [ ] **Override Methods** (Ctrl+O): методы встроенных типов для переопределения. 0,5 дня.
-- [ ] **Extract Interface** — уровень 3, пункт уже есть. **Introduce Type** (тип из выражения / литерала). 1 день.
-- [ ] **Add Method** во интерфейс **и все реализации** (сейчас только в интерфейс) + **Remove method from interface and all its implementations**. 1 день.
-- [ ] **Introduce Parameter**, **Introduce Field**, **Introduce Parameter Object**. 2 дня.
-- [ ] **Invert Boolean**, **Copy** (файл / объявление). 1 день.
-- [ ] Generate: **Tests for package**, **Method** (диалог), **Copyright**. 0,5 дня.
+- [x] (2026-10-05, 0.2.138) **Override Methods** (Ctrl+O): методы встроенных типов для переопределения.
+- [x] (2026-10-05, 0.2.139) **Extract Interface** — уровень 3, пункт уже есть. **Introduce Type** (тип из выражения / литерала).
+- [x] (2026-10-05, 0.2.140) **Add Method** во интерфейс **и все реализации** (было с G4, `GoAddInterfaceMethodIntention`) + **Remove method from interface and all its implementations**.
+- [x] (2026-10-05, 0.2.142–0.2.144) **Introduce Parameter**, **Introduce Field**, **Introduce Parameter Object**.
+- [x] (2026-10-05, 0.2.145–0.2.146) **Invert Boolean**, **Copy** (файл — платформа, объявление — своё Copy Declaration…).
+- [x] (2026-10-05, 0.2.141) Generate: **Tests for package**, **Method** (диалог), **Copyright**.
 
 ### G7. Инспекции — недостающие (≈6 дней; `inspections-go.txt`)
-- [ ] Дёшево (синтаксис / локально), по часу–два: Code style — пробел после `//`, комментарий экспортируемого начинается не с имени (сверить с `GoDocComment`),
+- [x] (2026-10-05, 0.2.147–0.2.149; 28 инспекций, `for true` / `Replace(…, 0)` / пробел в директиве уже были правилами S1006 / SA1018 / SA9009) Дёшево (синтаксис / локально), по часу–два: Code style — пробел после `//`, комментарий экспортируемого начинается не с имени (сверить с `GoDocComment`),
   текст ошибки с заглавной / точкой, `var A, B int` у экспортируемых, имя начинается с имени пакета, имя получателя (`this`/`self`, разные имена), лишний `else`
   после `return`, `for true`, тип-параметр в нижнем регистре, `timeoutSeconds time.Duration`, несортированные импорты, snake_case, литерал без имён полей;
   Redundancy — пустое объявление, `[]T{}` → nil slice, лишние запятая / `;` / скобки / алиас импорта / тип в составном литерале / тип у `var`/`const`,

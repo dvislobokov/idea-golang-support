@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports a line comment whose text starts right after <code>//</code>. Directives (<code>//go:generate</code>, <code>//nolint</code>, <code>//lint:ignore</code>, <code>//line</code>, <code>//export</code>, cgo <code>//#</code> lines, <code>//+build</code>) are not comments for this check.
+<pre><code>//bad comment
+// good comment</code></pre>
+<p>Quick fixes: <b>Add a space after '//'</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

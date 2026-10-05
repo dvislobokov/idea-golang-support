@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports <code>defer</code> / <code>go</code> statements that call <code>recover</code> or <code>panic</code> directly: <code>defer recover()</code> does not stop a panic, <code>recover</code> works only when called by the deferred function itself.
+<pre><code>defer recover()</code></pre>
+<p>Quick fixes: <b>Wrap in a function literal</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

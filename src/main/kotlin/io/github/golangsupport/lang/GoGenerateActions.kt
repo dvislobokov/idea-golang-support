@@ -38,6 +38,7 @@ import io.github.golangsupport.lang.psi.GoStructType
 import io.github.golangsupport.lang.psi.GoTypeSpec
 import com.intellij.ui.CheckBoxList
 import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 import io.github.golangsupport.lang.psi.GoFile
@@ -381,6 +382,133 @@ class GoGenerateTestAction : GoGenerateAction() {
             }, context.file)
         }
     }
+}
+
+/**
+ * Generate | Method: a method of the type at the caret from a dialog (name, pointer receiver, parameters, results), written after the
+ * type's last method with the receiver name its methods use and a body that panics.
+ */
+class GoGenerateMethodAction : GoGenerateAction() {
+    override fun isAvailable(context: GenerateContext): Boolean = context.typeAtCaret?.let { it.kind != GoDeclarationKind.INTERFACE } == true
+
+    override fun perform(context: GenerateContext) {
+        val type = context.typeAtCaret ?: return context.hint("Put the caret inside a type declaration")
+        val spec = context.typeSpecAtCaret
+        val named = if (spec == null || DumbService.isDumb(context.project)) null else GoSemanticService.getInstance(context.project).declarationType(spec) as? GoNamedType
+        val receiver = named?.let(GoGenerateEnumStringAction::receiverOf) ?: GoGenerators.receiverName(type.name)
+        val pointer = spec?.takeIf { named != null }?.let(GoInterfaceChooser::pointerReceiver) ?: (type.kind == GoDeclarationKind.STRUCT)
+        val input = dialog?.invoke(type.name, pointer) ?: MethodDialog(context.project, type.name, pointer).takeIf { it.showAndGet() }?.input() ?: return
+        if (!Regex("""[\p{L}_][\p{L}\p{Nd}_]*""").matches(input.name) || input.name in GoNames.KEYWORDS) return context.hint("'${input.name}' is not a valid method name")
+        context.insertAfter(type, GoGenerators.method(type.name, receiver, input.pointer, input.name, input.parameters, input.results), "Generate Method")
+    }
+
+    /** What the dialog answers. */
+    class Input(val name: String, val pointer: Boolean, val parameters: String, val results: String)
+
+    companion object {
+        /** The dialog in tests: the type name and the pointer default in, the answer out (null: cancelled). */
+        @org.jetbrains.annotations.TestOnly
+        @JvmStatic
+        var dialog: ((String, Boolean) -> Input?)? = null
+    }
+}
+
+private class MethodDialog(project: Project, typeName: String, pointer: Boolean) : DialogWrapper(project) {
+    private val name = com.intellij.ui.components.JBTextField("newMethod")
+    private val pointer = JBCheckBox("Pointer receiver (*$typeName)", pointer)
+    private val parameters = com.intellij.ui.components.JBTextField()
+    private val results = com.intellij.ui.components.JBTextField()
+
+    init {
+        title = "Generate Method of $typeName"
+        init()
+    }
+
+    fun input(): GoGenerateMethodAction.Input = GoGenerateMethodAction.Input(name.text.trim(), pointer.isSelected, parameters.text.trim(), results.text.trim())
+
+    override fun createCenterPanel(): JComponent = panel {
+        row("Name:") { cell(name).columns(30) }
+        row { cell(pointer) }
+        row("Parameters:") { cell(parameters).columns(30).comment("ctx context.Context, id string") }
+        row("Results:") { cell(results).columns(30).comment("Item, error") }
+    }
+
+    override fun getPreferredFocusedComponent(): JComponent = name
+}
+
+/**
+ * Generate | Tests for Package: a table-driven test ([GoGenerators.testFunction]) for every exported function and method of the package
+ * of the file that has none yet, each in `<file>_test.go` next to its file (made when it is not there); the candidates are ticked in a
+ * dialog first.
+ */
+class GoGenerateTestsForPackageAction : GoGenerateAction() {
+    override fun isAvailable(context: GenerateContext): Boolean = context.file.virtualFile?.parent != null
+
+    override fun perform(context: GenerateContext) {
+        val candidates = candidates(context.file)
+        if (candidates.isEmpty()) return context.hint("Every exported function of the package has a test")
+        val chosen = chooser?.invoke(candidates) ?: TestsDialog(context.project, candidates).takeIf { it.showAndGet() }?.chosen() ?: return
+        if (chosen.isEmpty()) return
+        write(context.project, chosen)
+    }
+
+    /** A function without a test: [function] declared in [file]. */
+    class Candidate(val file: GoFile, val function: GoDeclarationInfo) {
+        override fun toString(): String = "${function.presentation}  ${file.name}"
+    }
+
+    companion object {
+        /** The dialog in tests: the candidates in, the ticked ones out. */
+        @org.jetbrains.annotations.TestOnly
+        @JvmStatic
+        var chooser: ((List<Candidate>) -> List<Candidate>)? = null
+
+        /** The functions of the package of [file] without a test in its `_test.go` files, by file and position. Read action, committed documents. */
+        fun candidates(file: GoFile): List<Candidate> {
+            val directory = file.containingDirectory ?: file.originalFile.containingDirectory ?: return emptyList()
+            val goFiles = directory.files.filterIsInstance<GoFile>()
+            val tests = goFiles.filter { it.isTestFile }.map { it.text }
+            return goFiles.filter { !it.isTestFile }.sortedBy { it.name }.flatMap { source ->
+                GoGenerators.untested(GoDeclarationInfo.topLevel(source), tests).map { Candidate(source, it) }
+            }
+        }
+
+        /** The tests of [chosen], appended to the `_test.go` file of each one's file, in one command. */
+        fun write(project: Project, chosen: List<Candidate>) {
+            WriteCommandAction.runWriteCommandAction(project, "Generate Tests for Package", null, {
+                for ((source, functions) in chosen.groupBy { it.file }) {
+                    val vf = source.virtualFile ?: continue
+                    val testName = vf.nameWithoutExtension + "_test.go"
+                    val packageName = source.packageName ?: "main"
+                    val target = vf.parent.findChild(testName) ?: vf.parent.createChildData(this, testName).also { VfsUtil.saveText(it, "package $packageName\n") }
+                    val document = com.intellij.openapi.fileEditor.FileDocumentManager.getInstance().getDocument(target) ?: continue
+                    val tests = functions.joinToString("\n") { GoGenerators.testFunction(it.function, packageName) }
+                    val text = document.text
+                    document.insertString(text.length, (if (text.endsWith("\n\n") || text.isEmpty()) "" else if (text.endsWith("\n")) "\n" else "\n\n") + tests)
+                    GoImports.add(document.immutableCharSequence, "testing")?.let { document.insertString(it.offset, it.text) }
+                    PsiDocumentManager.getInstance(project).commitDocument(document)
+                }
+            })
+        }
+    }
+}
+
+private class TestsDialog(project: Project, private val candidates: List<GoGenerateTestsForPackageAction.Candidate>) : DialogWrapper(project) {
+    private val list = CheckBoxList<GoGenerateTestsForPackageAction.Candidate>()
+
+    init {
+        title = "Generate Tests for Package"
+        candidates.forEach { list.addItem(it, it.toString(), true) }
+        init()
+    }
+
+    fun chosen(): List<GoGenerateTestsForPackageAction.Candidate> = candidates.filter { list.isItemSelected(it) }
+
+    override fun createCenterPanel(): JComponent = com.intellij.ui.ScrollPaneFactory.createScrollPane(list).apply {
+        preferredSize = java.awt.Dimension(com.intellij.util.ui.JBUI.scale(480), com.intellij.util.ui.JBUI.scale(300))
+    }
+
+    override fun getPreferredFocusedComponent(): JComponent = list
 }
 
 /** The fields to generate for: all ticked at the start. */

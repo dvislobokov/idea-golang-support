@@ -180,6 +180,20 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.138–0.2.146) G6: Override Methods (`GoOverrideMethods`, `codeInsight.overrideMethod`, `MemberChooser` по встроенным полям), Introduce Type
+  (`GoIntroduceType`, действие `Go.IntroduceType`, occurrences + in-place rename), Remove method from interface and all its implementations
+  (`GoRemoveInterfaceMethodIntention`, `GoPromotedMethods`), Generate Method… / Tests for Package… / Copyright (`copyright.updater`, optional depends `com.intellij.copyright`,
+  `bundledPlugin` в build.gradle.kts), Introduce Parameter / Field / Parameter Object (`GoIntroduceParameter|Field|ParameterObject`, через
+  `RefactoringSupportProvider` и `IntroduceParameterObjectDelegate`; Change Signature с `afterRefactoring`), Invert Boolean (`GoInvertBooleanDelegate`, свой диалог имени
+  из `adjustElement`), Copy Declaration… (`CopyHandlerDelegateBase`, `go-psi-ide-refactoring2.xml`). Открыто: удаление метода интерфейса не предупреждает о вызовах через сам
+  интерфейс; однострочный `interface{ M(); N() }` не тестирован; Introduce Field не проверяет value receiver; Invert Boolean не трогает неключевые литералы и реализации
+  интерфейса; Introduce Parameter не квалифицирует импортированные имена в вызовах из других пакетов.
+- [x] (2026-10-05, 0.2.147–0.2.149) G7, дешёвые инспекции: 28 классов на `GoAnalysisInspectionBase` в `ide.inspections.style|redundancy|bugs` с id, группами и уровнями
+  GoLand, общие фиксы `GoEditFixes` (`GoEditFix`, `GoRenameToFix`, `GoRenameVariableFix(text)`); `GoDocComment` — только отсутствие комментария, форма ушла в
+  `GoCommentStart`; `GoBuildConstraint` — misplaced / malformed `+build`. Пробный тест `GoParityProbeTest`: `analysis_test.go` и `store/order.go` совпадают с дампами GoLand,
+  на `analysis.go` / `broken.go` находок нет. Открыто: тексты GoLand известны только для двух сообщений (остальные — golint / staticcheck), семантика `GoIrregularIota`
+  угадана, `GoReceiverNames` сверяет только в файле, двойное сообщение на неключевом литерале чужого пакета (своё + `govet:composites`), интерактивные Rename без
+  `checkResult`.
 - [x] (2026-10-05, 0.2.131–0.2.137) G5: группа инспекций Go | Go fix — 23 модернизатора (`ide.inspections.gofix` и `gofix2`: базовые классы `GoFixInspectionBase`
   и `GoFix2InspectionBase` с гейтом по версии `go` из go.mod / `//go:build go1.N`), уровень `SYNTAX_UPDATE` (`GoSyntaxUpdateSeverity`, цвет `GO_SYNTAX_UPDATE`),
   Refactor | Update Syntax… (`GoSyntaxUpdate`: профиль только из Go fix, платформенный прогон по области, Fix all в Inspection Results), линзы «Update syntax (N places)» /

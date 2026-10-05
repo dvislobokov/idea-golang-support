@@ -1,0 +1,10 @@
+type Store interface {
+	Get(id string) (Item, error)
+	<spot>Delete</spot>(id string) error
+}
+
+type memStore struct{}
+
+func (m *memStore) Get(id string) (Item, error) { return Item{}, nil }
+
+func (m *memStore) Delete(id string) error { return nil }

@@ -13,6 +13,7 @@
   <xi:include href="/META-INF/go-psi-ide-formatter.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-navigation.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-refactoring.xml" xpointer="xpointer(/idea-plugin/*)"/>
+  <xi:include href="/META-INF/go-psi-ide-refactoring2.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-documentation.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-completion.xml" xpointer="xpointer(/idea-plugin/*)"/>
   <xi:include href="/META-INF/go-psi-ide-inspections.xml" xpointer="xpointer(/idea-plugin/*)"/>

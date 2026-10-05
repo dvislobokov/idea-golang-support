@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports methods of one type declared with both value and pointer receivers across the package; the receivers of the minority kind are reported.
+<pre><code>func (t *T) A() {}
+func (t T) B() {}</code></pre>
+<p>Quick fixes: <b>Change receiver to pointer / to value</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports a struct literal that lists its values without field names, including types of the current package and anonymous structs (test tables): adding a field breaks it and the reader has to count.
+<pre><code>tests := []struct{ name string; want int }{
+    {"empty", 0},
+}</code></pre>
+<p>Quick fixes: <b>Add field names</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

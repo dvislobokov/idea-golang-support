@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports an exported package-level name that starts with the package name: other packages will read it as <code>probe.ProbeThing</code>, which stutters. <code>main</code> packages and test files are skipped.
+<pre><code>package probe
+
+type ProbeThing struct{} // probe.ProbeThing</code></pre>
+<p>Quick fixes: <b>Rename to 'Thing'</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports parentheses that change nothing: around a name, literal, call, selector, index or type assertion, around a whole condition, return value, assigned value or argument, and around a named type in a declaration. Parentheses around a composite literal in an <code>if</code> / <code>for</code> / <code>switch</code> header are needed and not reported.
+<pre><code>if (x > 0) {
+    return (x)
+}</code></pre>
+<p>Quick fixes: <b>Remove redundant parentheses</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

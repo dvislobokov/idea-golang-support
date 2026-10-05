@@ -40,6 +40,8 @@ dependencies {
         bundledModule("intellij.platform.lsp")
         // JSON in Go strings (go-psi-ide-injection-json.xml, optional dependency of plugin.xml)
         bundledPlugin("com.intellij.modules.json")
+        // the copyright updater of Go files (go-copyright.xml, optional dependency of plugin.xml)
+        bundledPlugin("com.intellij.copyright")
         // SQL in Go strings (go-psi-ide-injection-sql.xml, optional dependency of plugin.xml): only for the tests, the code finds SQL by id;
         // IntelliJ IDEA Community has no Database plugin
         if (ideBundles(localIde?.takeIf { file(it).exists() }, "com.intellij.database")) bundledPlugin("com.intellij.database")

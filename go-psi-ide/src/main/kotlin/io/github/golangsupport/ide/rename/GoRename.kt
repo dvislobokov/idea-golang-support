@@ -15,6 +15,8 @@ import io.github.golangsupport.ide.GoIdeFeatureGate
 import io.github.golangsupport.ide.refactoring.GoChangeSignatureHandler
 import io.github.golangsupport.ide.refactoring.GoExtractFunctionHandler
 import io.github.golangsupport.ide.refactoring.GoIntroduceConstantHandler
+import io.github.golangsupport.ide.refactoring.GoIntroduceFieldHandler
+import io.github.golangsupport.ide.refactoring.GoIntroduceParameterHandler
 import io.github.golangsupport.ide.refactoring.GoIntroduceVariableHandler
 import io.github.golangsupport.ide.refactoring.GoSafeDeleteProcessor
 import io.github.golangsupport.lang.GoLanguage
@@ -95,6 +97,11 @@ class GoRefactoringSupportProvider : RefactoringSupportProvider() {
     override fun getIntroduceVariableHandler(element: PsiElement?): RefactoringActionHandler? = getIntroduceVariableHandler().takeIf { enabled(element) }
 
     override fun getIntroduceConstantHandler(): RefactoringActionHandler = GoIntroduceConstantHandler()
+
+    // Introduce Parameter (Ctrl+Alt+P) and Introduce Field (Ctrl+Alt+F): the platform's actions dispatch here.
+    override fun getIntroduceParameterHandler(): RefactoringActionHandler = GoIntroduceParameterHandler()
+
+    override fun getIntroduceFieldHandler(): RefactoringActionHandler = GoIntroduceFieldHandler()
 
     // Extract Function / Method (Ctrl+Alt+M); the handler itself does nothing while RENAME is off.
     override fun getExtractMethodHandler(): RefactoringActionHandler = GoExtractFunctionHandler()

@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports a type assertion on a value of type <code>error</code>: it fails for errors wrapped with <code>%w</code>; <code>errors.As</code> unwraps. <code>Is</code> / <code>As</code> / <code>Unwrap</code> methods are skipped.
+<pre><code>if e, ok := err.(*MyErr); ok {</code></pre>
+<p>Quick fixes: <b>Replace with 'errors.As' (for the if-ok form)</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

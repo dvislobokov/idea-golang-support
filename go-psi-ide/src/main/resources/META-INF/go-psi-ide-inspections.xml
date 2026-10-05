@@ -232,5 +232,90 @@
     <localInspection language="Go" shortName="GoFixMapsLoop" displayName="Map loop can be replaced with the 'maps' function"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixMapsLoopInspection"/>
+    <!-- GoLand parity G7: cheap inspections (PLAN.md G7, ids, groups and levels of docs/goland-analysis/dumps/inspections-go.txt). -->
+    <localInspection language="Go" shortName="GoCommentLeadingSpace" displayName="Comment has no leading space"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoCommentLeadingSpaceInspection"/>
+    <localInspection language="Go" shortName="GoCommentStart" displayName="Comment of exported element starts with the incorrect name"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoCommentStartInspection"/>
+    <localInspection language="Go" shortName="GoErrorStringFormat" displayName="Error string should not be capitalized or end with punctuation"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoErrorStringFormatInspection"/>
+    <localInspection language="Go" shortName="GoExportedOwnDeclaration" displayName="Exported element should have its own declaration"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoExportedOwnDeclarationInspection"/>
+    <localInspection language="Go" shortName="GoNameStartsWithPackageName" displayName="Name starts with a package name"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoNameStartsWithPackageNameInspection"/>
+    <localInspection language="Go" shortName="GoReceiverNames" displayName="Receiver has a generic name"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoReceiverNamesInspection"/>
+    <localInspection language="Go" shortName="GoRedundantElseInIf" displayName="Redundant &apos;else&apos; in &apos;if&apos;"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoRedundantElseInIfInspection"/>
+    <localInspection language="Go" shortName="GoStructInitializationWithoutFieldNames" displayName="Struct initialization without field names"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoStructInitializationWithoutFieldNamesInspection"/>
+    <localInspection language="Go" shortName="GoTypeParameterInLowerCase" displayName="Type parameter is declared in lowercase"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="INFORMATION"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoTypeParameterInLowerCaseInspection"/>
+    <localInspection language="Go" shortName="GoUnitSpecificDurationSuffix" displayName="Unit-specific suffix for &apos;time.Duration&apos;"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoUnitSpecificDurationSuffixInspection"/>
+    <localInspection language="Go" shortName="GoUnsortedImport" displayName="Unsorted imports"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoUnsortedImportInspection"/>
+    <localInspection language="Go" shortName="GoSnakeCaseUsage" displayName="Usage of Snake_Case"
+                     groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.style.GoSnakeCaseUsageInspection"/>
+    <localInspection language="Go" shortName="GoEmptyDeclaration" displayName="Empty declaration"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoEmptyDeclarationInspection"/>
+    <localInspection language="Go" shortName="GoPreferNilSlice" displayName="Empty slice declared using a literal"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoPreferNilSliceInspection"/>
+    <localInspection language="Go" shortName="GoRedundantComma" displayName="Redundant comma"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantCommaInspection"/>
+    <localInspection language="Go" shortName="GoRedundantImportAlias" displayName="Redundant import alias"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantImportAliasInspection"/>
+    <localInspection language="Go" shortName="GoRedundantSemicolon" displayName="Redundant semicolon"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantSemicolonInspection"/>
+    <localInspection language="Go" shortName="GoRedundantTypeDeclInCompositeLit" displayName="Redundant types in composite literals"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantTypeDeclInCompositeLitInspection"/>
+    <localInspection language="Go" shortName="GoVarAndConstTypeMayBeOmitted" displayName="Type can be omitted"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoVarAndConstTypeMayBeOmittedInspection"/>
+    <localInspection language="Go" shortName="GoUnusedTypeParameter" displayName="Unused type parameter"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoUnusedTypeParameterInspection"/>
+    <localInspection language="Go" shortName="GoRedundantParens" displayName="Redundant parentheses"
+                     groupPath="Go" groupName="General" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.redundancy.GoRedundantParensInspection"/>
+    <localInspection language="Go" shortName="GoDeferGo" displayName="Defer/go statement calls &apos;recover&apos; or &apos;panic&apos; directly"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.bugs.GoDeferGoInspection"/>
+    <localInspection language="Go" shortName="GoImportUsedAsName" displayName="Imported package name as a name identifier"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.bugs.GoImportUsedAsNameInspection"/>
+    <localInspection language="Go" shortName="GoIrregularIota" displayName="Irregular usage of &apos;iota&apos;"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.bugs.GoIrregularIotaInspection"/>
+    <localInspection language="Go" shortName="GoMixedReceiverTypes" displayName="Mixed value and pointer receivers"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.bugs.GoMixedReceiverTypesInspection"/>
+    <localInspection language="Go" shortName="GoReservedWordUsedAsName" displayName="Reserved word used as name"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.bugs.GoReservedWordUsedAsNameInspection"/>
+    <localInspection language="Go" shortName="GoTypeAssertionOnErrors" displayName="Type assertion on errors fails on wrapped errors"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.bugs.GoTypeAssertionOnErrorsInspection"/>
+    <localInspection language="Go" shortName="GoAssignmentToReceiver" displayName="Assignment to a receiver"
+                     groupPath="Go" groupName="Control flow issues" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.bugs.GoAssignmentToReceiverInspection"/>
   </extensions>
 </idea-plugin>

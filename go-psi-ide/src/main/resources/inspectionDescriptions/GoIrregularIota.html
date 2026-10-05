@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports <code>iota</code> in a constant declaration without parentheses (it is always 0 there), and a spec of a <code>const (...)</code> group that repeats the type and the <code>iota</code> expression of the previous spec, which the implicit repetition already does.
+<pre><code>const x = iota
+
+const (
+    A = iota
+    B = iota
+)</code></pre>
+<p>Quick fixes: <b>Replace with 0, Remove the repeated expression</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

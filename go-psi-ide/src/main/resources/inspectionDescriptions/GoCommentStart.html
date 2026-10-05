@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports a doc comment of an exported function, method, type, constant or variable that does not start with the declared name (<code>A</code> / <code>An</code> / <code>The</code> before it and a <code>Deprecated:</code> paragraph are accepted), and a comment that is nothing but the name. <code>_test.go</code> and generated files are skipped. The missing comment itself is reported by <b>Missing or malformed doc comment</b> (off by default).
+<pre><code>// Does things.     // should be "Foo ..."
+func Foo() {}
+
+// NewOrder          // should be meaningful or removed
+func NewOrder() *Order</code></pre>
+<p>Quick fixes: <b>Start comment with 'Name', Remove comment</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

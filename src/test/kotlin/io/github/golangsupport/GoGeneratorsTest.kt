@@ -5,6 +5,9 @@ import io.github.golangsupport.lang.GoDocComments
 import io.github.golangsupport.semantic.types.GoConstant
 import java.math.BigInteger
 import io.github.golangsupport.lang.GoGenerators
+import io.github.golangsupport.lang.GoDeclarationInfo
+import io.github.golangsupport.lang.GoDeclarationKind
+import com.intellij.openapi.util.TextRange
 import io.github.golangsupport.lang.GoPostfixExpressions
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -108,5 +111,44 @@ class GoGeneratorsTest {
         assertNull(GoDocComments.nameToComment(code, code.indexOf("//") + 2))
         val body = "package p\n\nfunc f() {\n\t//\n\tx := 1\n}\n"
         assertNull(GoDocComments.nameToComment(body, body.indexOf("//") + 2))
+    }
+
+    @Test fun delegatingMethods() {
+        assertEquals(
+            "func (s *Server) Close() error {\n\treturn s.Conn.Close()\n}\n",
+            GoGenerators.delegatingMethod("Server", "s", true, "Conn", "Close", "() error"),
+        )
+        // grouped names are kept as written; a variadic parameter is passed on with `...`; no results: no return
+        assertEquals(
+            "func (s Server) Log(level, format string, args ...any) {\n\ts.Logger.Log(level, format, args...)\n}\n",
+            GoGenerators.delegatingMethod("Server", "s", false, "Logger", "Log", "(level, format string, args ...any)"),
+        )
+        // unnamed and blank parameters get names; a parameter named like the receiver renames the receiver
+        assertEquals(
+            "func (recv *T) Write(arg0 []byte, s string) (n int, err error) {\n\treturn recv.W.Write(arg0, s)\n}\n",
+            GoGenerators.delegatingMethod("T", "s", true, "W", "Write", "(_ []byte, s string) (n int, err error)"),
+        )
+    }
+
+    @Test fun methods() {
+        val panic = " {\n\tpanic(\"not implemented\")\n}\n"
+        assertEquals("func (s *Server) Stop()$panic", GoGenerators.method("Server", "s", true, "Stop", "", ""))
+        assertEquals(
+            "func (s Server) Get(ctx context.Context, id string) (Item, error)$panic",
+            GoGenerators.method("Server", "s", false, "Get", "ctx context.Context, id string", "Item, error"),
+        )
+        assertEquals("func (s *S) N() (n int)$panic", GoGenerators.method("S", "s", true, "N", "", "n int"))
+        assertEquals("func (s *S) F() func() error$panic", GoGenerators.method("S", "s", true, "F", "", "func() error"))
+        assertEquals("func (s *S) P() (int, error)$panic", GoGenerators.method("S", "s", true, "P", "", "(int, error)"))
+    }
+
+    @Test fun untestedFunctions() {
+        fun f(name: String, receiver: String? = null) = GoDeclarationInfo(
+            if (receiver == null) GoDeclarationKind.FUNCTION else GoDeclarationKind.METHOD, name, TextRange(0, 0), TextRange(0, 0), receiver, "()",
+        )
+        val functions = listOf(f("Sum"), f("helper"), f("init"), f("Start", "Server"), f("Stop", "Server"), f("TestLike"))
+        val tests = listOf("package p\n\nfunc TestSum(t *testing.T) {}\n", "func TestServer_Stop(t *testing.T) {}")
+        assertEquals(listOf("Start"), GoGenerators.untested(functions, tests).map { it.name })
+        assertEquals("TestServer_Start", GoGenerators.testName(f("Start", "Server")))
     }
 }

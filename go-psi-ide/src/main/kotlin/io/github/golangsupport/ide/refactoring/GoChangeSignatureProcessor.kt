@@ -50,6 +50,12 @@ import io.github.golangsupport.semantic.types.GoStructType
  */
 class GoChangeSignatureProcessor(project: Project, private val target: PsiElement, private val options: GoChangeSignatureOptions) : BaseRefactoringProcessor(project) {
 
+    /** Runs at the end of [performRefactoring], in the same command and write action (Introduce Parameter replaces the expression there). */
+    var afterRefactoring: (() -> Unit)? = null
+
+    /** The command name when another refactoring drives this one (Introduce Parameter). */
+    var commandTitle: String? = null
+
     private val signature = GoChangeSignature.signatureOf(target)
     private val oldParameters = GoChangeSignature.parametersOf(signature)
     private val oldResults = GoChangeSignature.resultsOf(signature)
@@ -72,7 +78,7 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
         override fun getProcessedElementsHeader(): String = "Change signature of ${GoChangeSignature.displayName(target)}"
     }
 
-    override fun getCommandName(): String = "Change Signature of ${GoChangeSignature.displayName(target)}"
+    override fun getCommandName(): String = commandTitle ?: "Change Signature of ${GoChangeSignature.displayName(target)}"
 
     /** The references to every declaration of the hierarchy, each once; none inside generated files (regenerated, not edited). */
     override fun findUsages(): Array<UsageInfo> {
@@ -290,6 +296,7 @@ class GoChangeSignatureProcessor(project: Project, private val target: PsiElemen
             documents.commitDocument(document)
         }
         for ((file, text) in written) if (file is GoFile && text.isNotBlank()) GoMissingImports.add(file, text.toString())
+        afterRefactoring?.invoke()
     }
 
     /**

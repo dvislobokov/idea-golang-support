@@ -215,6 +215,81 @@ object GoGenerators {
             "\tfor _, tt := range tests {\n\t\tt.Run(tt.name, func(t *testing.T) {\n$body\t\t})\n\t}\n}\n"
     }
 
+    /**
+     * Override Methods: `func (s *Server) Close() error { return s.Conn.Close() }` for the method [name] promoted through the embedded
+     * [field]; [signature] is `(params) results` as the struct's file writes it. Unnamed and `_` parameters get names (`arg0`…) to be
+     * passed on, a variadic one is passed with `...`, a receiver named like a parameter becomes `recv`.
+     */
+    fun delegatingMethod(typeName: String, receiver: String, pointer: Boolean, field: String, name: String, signature: String): String {
+        val text = signature.trim()
+        val close = closingParen(text, 0)
+        if (!text.startsWith("(") || close < 0) return "func ($receiver ${if (pointer) "*" else ""}$typeName) $name$text {\n\tpanic(\"not implemented\")\n}\n"
+        val parameters = GoIdioms.splitSignature(text).first
+        val names = parameters.mapIndexed { i, p -> p.name?.takeIf { it != "_" } ?: "arg$i" }
+        val parameterText = if (parameters.all { it.name != null && it.name != "_" }) text.substring(1, close).trim()
+        else parameters.mapIndexed { i, p -> "${names[i]} ${p.type}" }.joinToString(", ")
+        val results = text.substring(close + 1).trim()
+        var recv = receiver
+        if (recv in names) {
+            recv = "recv"
+            while (recv in names) recv += "_"
+        }
+        val arguments = parameters.mapIndexed { i, p -> names[i] + if (p.type.trimStart().startsWith("...")) "..." else "" }.joinToString(", ")
+        val call = "$recv.$field.$name($arguments)"
+        return "func ($recv ${if (pointer) "*" else ""}$typeName) $name($parameterText)${if (results.isEmpty()) "" else " $results"} {\n\t${if (results.isEmpty()) "" else "return "}$call\n}\n"
+    }
+
+    /**
+     * Generate | Method: `func (t *T) Name(params) results { panic("not implemented") }`. [results] typed as one line: several or named
+     * ones (`int, error`, `n int`) are put in parentheses.
+     */
+    fun method(typeName: String, receiver: String, pointer: Boolean, name: String, parameters: String, results: String): String {
+        val r = results.trim().removeSuffix(",")
+        val needsParens = r.isNotEmpty() && !(r.startsWith("(") && closingParen(r, 0) == r.length - 1) &&
+            (hasTopLevelComma(r) || Regex("""^[A-Za-z_]\w*\s+\S""").find(r)?.let { r.substringBefore(' ') !in TYPE_KEYWORDS } == true)
+        val resultText = when {
+            r.isEmpty() -> ""
+            needsParens -> " ($r)"
+            else -> " $r"
+        }
+        return "func ($receiver ${if (pointer) "*" else ""}$typeName) ${name.trim()}(${parameters.trim()})$resultText {\n\tpanic(\"not implemented\")\n}\n"
+    }
+
+    private val TYPE_KEYWORDS = setOf("func", "map", "chan", "struct", "interface")
+
+    /** The name `TestXxx` the test of [function] has (`TestServer_Start` for a method), as [testFunction] writes it. */
+    fun testName(function: GoDeclarationInfo): String = "Test" + if (function.receiver != null) "${function.receiver}_${function.name}" else function.name
+
+    /**
+     * Tests for package: the exported functions and methods of [functions] (no `init`, `main` or test functions) whose test is in none of
+     * [testTexts] (the `_test.go` files of the package).
+     */
+    fun untested(functions: List<GoDeclarationInfo>, testTexts: Collection<String>): List<GoDeclarationInfo> = functions.filter { f ->
+        (f.kind == GoDeclarationKind.FUNCTION || f.kind == GoDeclarationKind.METHOD) && f.isExported &&
+            !Regex("""^(Test|Benchmark|Fuzz|Example)""").containsMatchIn(f.name) &&
+            testTexts.none { Regex("""func ${Regex.escape(testName(f))}\(""").containsMatchIn(it) }
+    }
+
+    private fun hasTopLevelComma(text: String): Boolean {
+        var depth = 0
+        for (c in text) {
+            when (c) {
+                '(', '[', '{' -> depth++
+                ')', ']', '}' -> depth--
+                ',' -> if (depth == 0) return true
+            }
+        }
+        return false
+    }
+
+    private fun closingParen(text: String, open: Int): Int {
+        var depth = 0
+        for (i in open until text.length) {
+            if (text[i] == '(') depth++ else if (text[i] == ')' && --depth == 0) return i
+        }
+        return -1
+    }
+
     /** `return 0, nil` for `(int, error)`; empty for a function without results. */
     fun returnStatement(signature: String?): String? {
         val results = GoIdioms.splitSignature(signature.orEmpty()).second

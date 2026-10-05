@@ -17,15 +17,23 @@ import io.github.golangsupport.project.api.GoBuildConstraintEvaluator
  * - a `//go:build` expression with a syntax error (error);
  * - a `//go:build` line outside the header (after the package clause, or not followed by a blank line before it), or a second one;
  * - the tags of a `// +build` line (the line itself is the Go fix inspection `GoFixPlusBuild`'s: it reports and converts it, so this one does not);
- * - a tag one edit away from a known GOOS/GOARCH (`linx`; weak warning; fix "Replace with 'linux'"). Custom tags stay quiet.
+ * - a tag one edit away from a known GOOS/GOARCH (`linx`; weak warning; fix "Replace with 'linux'"). Custom tags stay quiet;
+ * - (GoLand parity G7, `GoBuildTag`) a `// +build` line outside the header ("misplaced +build comment") and a comment above the package
+ *   clause that mentions `+build` but is not a `+build` line, e.g. `// see +build` ("possible malformed +build comment"), as vet does.
  */
 class GoBuildConstraintInspection : GoAnalysisInspectionBase() {
 
     override fun visit(element: PsiElement, holder: ProblemsHolder, file: GoFile) {
         if (element !is PsiComment) return
         val text = element.text
-        if (GoBuildConstraintEvaluator.isGoBuild(text)) checkGoBuild(element, text, holder, file)
-        else if (GoBuildConstraintEvaluator.isPlusBuild(text) && inHeader(element, file)) checkPlusBuild(element, text, holder)
+        when {
+            GoBuildConstraintEvaluator.isGoBuild(text) -> checkGoBuild(element, text, holder, file)
+            GoBuildConstraintEvaluator.isPlusBuild(text) ->
+                if (inHeader(element, file)) checkPlusBuild(element, text, holder)
+                else holder.registerProblem(element, "misplaced +build comment", ProblemHighlightType.WEAK_WARNING)
+            text.startsWith("//") && text.contains("+build") && beforePackage(element, file) ->
+                holder.registerProblem(element, "possible malformed +build comment", ProblemHighlightType.WEAK_WARNING)
+        }
     }
 
     private fun checkGoBuild(comment: PsiComment, text: String, holder: ProblemsHolder, file: GoFile) {
@@ -60,6 +68,10 @@ class GoBuildConstraintInspection : GoAnalysisInspectionBase() {
 
     companion object {
         private val BLANK_LINE = Regex("\n[ \t\r]*\n")
+
+        /** Whether [comment] ends before the package clause (vet reports malformed `+build` lines only there). */
+        private fun beforePackage(comment: PsiComment, file: GoFile): Boolean =
+            comment.parent === file && comment.textRange.endOffset <= (file.packageClause?.textRange?.startOffset ?: -1)
     }
 }
 

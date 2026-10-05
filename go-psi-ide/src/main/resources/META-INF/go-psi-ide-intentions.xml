@@ -352,5 +352,12 @@
       <category>Go</category>
       <descriptionDirectoryName>GoGotoMethodSpecificationsIntention</descriptionDirectoryName>
     </intentionAction>
+    <!-- GoLand parity G6: the counterpart of Add method to interface -->
+    <intentionAction>
+      <language>Go</language>
+      <className>io.github.golangsupport.ide.intentions.GoRemoveInterfaceMethodIntention</className>
+      <category>Go</category>
+      <descriptionDirectoryName>GoRemoveInterfaceMethodIntention</descriptionDirectoryName>
+    </intentionAction>
   </extensions>
 </idea-plugin>

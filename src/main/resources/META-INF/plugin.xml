@@ -25,6 +25,8 @@
     <depends optional="true" config-file="go-psi-ide-injection-sql.xml">com.intellij.database</depends>
     <!-- Shell Script injected into //go:generate commands (go-psi-ide-injection-sh.xml): only where the IDE has the Shell Script plugin -->
     <depends optional="true" config-file="go-psi-ide-injection-sh.xml">com.jetbrains.sh</depends>
+    <!-- Go files for the Copyright plugin (go-copyright.xml): Generate | Copyright, Code | Update Copyright -->
+    <depends optional="true" config-file="go-copyright.xml">com.intellij.copyright</depends>
 
     <!-- optional parts: a module is loaded only where its dependencies are (see the descriptor of the module next to META-INF) -->
     <content>
@@ -68,6 +70,8 @@
     <!-- rename over that PSI: element manipulators, names and rename-input validators (passive, every mode), in-place availability and the
          interface-method processor (MIGRATION.md step 8h; the gate follows GoFeature.RENAME) -->
     <xi:include href="/META-INF/go-psi-ide-refactoring.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- Invert Boolean, Introduce Parameter Object, Copy / Clone of a declaration (GoLand parity G6; the gate follows GoFeature.RENAME) -->
+    <xi:include href="/META-INF/go-psi-ide-refactoring2.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- the gofmt-compatible formatter over that PSI: formatting model, code style pages, import sorter, post-format processor
          (MIGRATION.md step 8j; chosen by the formatter setting, Built-in: with a tool chosen GoFormattingService claims the file and the
          platform never reaches this model; with None the language server formats) -->
@@ -168,6 +172,8 @@
         <!-- `x.`: the postfix keys the platform adds to the list go after the members, as in GoLand -->
         <weigher key="completion" id="goPostfixLast" order="after priority, before goCompletion" implementationClass="io.github.golangsupport.lang.GoPostfixCompletionWeigher"/>
         <codeInsight.implementMethod language="Go" implementationClass="io.github.golangsupport.lang.GoImplementMethodsHandler"/>
+        <!-- Ctrl+O: wrappers of the methods promoted from embedded fields -->
+        <codeInsight.overrideMethod language="Go" implementationClass="io.github.golangsupport.lang.GoOverrideMethodsHandler"/>
         <lang.smartEnterProcessor language="Go" implementationClass="io.github.golangsupport.lang.GoSmartEnterProcessor"/>
         <typedHandler implementation="io.github.golangsupport.lang.GoDocCommentTypedHandler"/>
         <!-- a Cyrillic letter typed in code is a key of the Russian layout left on: the handlers of the platform are given its Latin
@@ -425,6 +431,7 @@
         <group id="Go.GenerateGroup">
             <separator/>
             <action id="Go.Generate.Constructor" class="io.github.golangsupport.lang.GoGenerateConstructorAction" text="Constructor..." description="func NewT(...) *T for the struct at the caret"/>
+            <action id="Go.Generate.Method" class="io.github.golangsupport.lang.GoGenerateMethodAction" text="Method..." description="A method of the type at the caret: name, receiver, parameters and results from a dialog"/>
             <action id="Go.Generate.Getters" class="io.github.golangsupport.lang.GoGenerateGettersAction" text="Getters..."/>
             <action id="Go.Generate.Setters" class="io.github.golangsupport.lang.GoGenerateSettersAction" text="Setters..."/>
             <action id="Go.Generate.GettersSetters" class="io.github.golangsupport.lang.GoGenerateGettersAndSettersAction" text="Getters and Setters..."/>
@@ -436,9 +443,16 @@
             <action id="Go.Generate.Tags" class="io.github.golangsupport.lang.GoGenerateStructTagsAction" text="Struct Tags..."/>
             <action id="Go.Generate.Implement" class="io.github.golangsupport.lang.GoImplementInterfaceAction" text="Implement Interface..."/>
             <action id="Go.Generate.Test" class="io.github.golangsupport.lang.GoGenerateTestAction" text="Test"/>
+            <action id="Go.Generate.TestsForPackage" class="io.github.golangsupport.lang.GoGenerateTestsForPackageAction" text="Tests for Package..."
+                    description="A table-driven test for every exported function and method of the package that has none yet"/>
             <action id="Go.Generate.TypeFromJson" class="io.github.golangsupport.lang.GoTypeFromJsonAction" text="Type from JSON..." description="Structs with json tags for a JSON document: the clipboard or a dialog"/>
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </group>
+        <!-- GoLand parity G6: Refactor | Extract/Introduce | Introduce Type -->
+        <action id="Go.IntroduceType" class="io.github.golangsupport.ide.refactoring.GoIntroduceTypeAction" text="Introduce Type..."
+                description="A type literal becomes a named package-level type, its occurrences in the file replaced by the name">
+            <add-to-group group-id="IntroduceActionsGroup" anchor="last"/>
+        </action>
         <group id="Go.Logs">
             <separator/>
             <action id="Go.PluginLogs" class="io.github.golangsupport.cli.ShowGoPluginLogsAction" text="Plugin Logs" icon="AllIcons.Debugger.Console"

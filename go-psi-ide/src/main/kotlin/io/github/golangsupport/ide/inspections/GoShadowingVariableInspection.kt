@@ -175,9 +175,9 @@ class GoNavigateToShadowedFix(private val target: SmartPsiElementPointer<GoNamed
     }
 }
 
-/** "Rename variable": the platform's rename (in place for locals) on the shadowing declaration. */
-class GoRenameVariableFix : LocalQuickFix {
-    override fun getFamilyName(): String = "Rename variable"
+/** "Rename variable" (or [text]): the platform's rename (in place for locals) on the declaration at the problem. */
+class GoRenameVariableFix(private val text: String = "Rename variable") : LocalQuickFix {
+    override fun getFamilyName(): String = text
 
     override fun startInWriteAction(): Boolean = false
 

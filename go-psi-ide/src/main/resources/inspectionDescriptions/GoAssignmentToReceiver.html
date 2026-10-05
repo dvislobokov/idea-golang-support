@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports an assignment to a method receiver (only the method's copy changes) and an assignment to a field of a value receiver in a method that never uses the receiver as a whole (the change is lost when the method returns).
+<pre><code>func (c Circle) SetRadius(r float64) {
+    c.Radius = r
+}</code></pre>
+<p>Quick fixes: <b>Change receiver to pointer</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

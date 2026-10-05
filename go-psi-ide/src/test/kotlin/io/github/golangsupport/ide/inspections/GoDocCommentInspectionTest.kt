@@ -2,7 +2,7 @@ package io.github.golangsupport.ide.inspections
 
 import io.github.golangsupport.ide.GoSemanticIdeTestBase
 
-/** The doc comment inspection (golint `exported`): missing and malformed comments, groups, skipped files, both quick fixes. */
+/** The doc comment inspection (golint `exported`): missing comments, groups, skipped files, the quick fix (the form is GoCommentStart's). */
 class GoDocCommentInspectionTest : GoSemanticIdeTestBase() {
 
     private fun doHighlight(text: String, fileName: String = "a.go") {
@@ -68,21 +68,16 @@ class GoDocCommentInspectionTest : GoSemanticIdeTestBase() {
         """
     )
 
-    fun testWrongStart() = doHighlight(
+    /** The form check moved to GoCommentStart (style.GoCommentStartInspection); this inspection only reports missing comments now. */
+    fun testWrongStartIsGoCommentStarts() = doHighlight(
         """
         package p
 
-        <weak_warning descr="comment on exported function Foo should be of the form \"Foo ...\"">// Does things.</weak_warning>
+        // Does things.
         func Foo() {}
 
-        <weak_warning descr="comment on exported type Bar should be of the form \"Bar ...\"">// bar is a thing.</weak_warning>
+        // bar is a thing.
         type Bar struct{}
-
-        <weak_warning descr="comment on exported method Bar.Run should be of the form \"Run ...\"">// Starts it.</weak_warning>
-        func (b Bar) Run() {}
-
-        <weak_warning descr="comment on exported var V should be of the form \"V ...\"">// Value of it.</weak_warning>
-        var V = 1
         """
     )
 
@@ -170,38 +165,6 @@ class GoDocCommentInspectionTest : GoSemanticIdeTestBase() {
 
         // Run @@
         func (t T) Run() {}
-        """,
-    )
-
-    fun testStartCommentRewritesFirstWord() = doFix(
-        """
-        package p
-
-        // <caret>foo does things.
-        func Foo() {}
-        """,
-        "Start comment with 'Foo'",
-        """
-        package p
-
-        // Foo does things.
-        func Foo() {}
-        """,
-    )
-
-    fun testStartCommentPrependsName() = doFix(
-        """
-        package p
-
-        // <caret>Returns the answer.
-        func Answer() int { return 42 }
-        """,
-        "Start comment with 'Answer'",
-        """
-        package p
-
-        // Answer returns the answer.
-        func Answer() int { return 42 }
         """,
     )
 }

@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports a local <code>s := []T{}</code> or <code>var s = []T{}</code>: the nil slice <code>var s []T</code> works the same with <code>append</code>, <code>len</code> and <code>range</code> and allocates nothing.
+<pre><code>s := []string{}</code></pre>
+<p>Quick fixes: <b>Replace with nil slice declaration</b>.</p>
+<!-- GoLand parity (PLAN.md G7): GoLand's id and group. -->
+</body>
+</html>

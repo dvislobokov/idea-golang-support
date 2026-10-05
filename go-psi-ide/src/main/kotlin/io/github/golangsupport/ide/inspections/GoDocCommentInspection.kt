@@ -19,13 +19,23 @@ import io.github.golangsupport.lang.psi.GoTypes
 import io.github.golangsupport.lang.psi.GoVarDefinition
 
 /**
- * Doc comments of exported package-level declarations (golint / revive `exported`; opt-in, off by default):
- * - no doc comment on an exported function, method (of an exported receiver type), type, const or var;
- * - a doc comment that does not start with the name (`Name`, `A Name`, `An Name`, `The Name`; a `Deprecated:` paragraph is ignored).
+ * Doc comments of exported package-level declarations (golint / revive `exported`; opt-in, off by default): no doc comment on an exported
+ * function, method (of an exported receiver type), type, const or var. The form half (a doc comment that does not start with the name:
+ * `Name`, `A Name`, `An Name`, `The Name`; a `Deprecated:` paragraph is ignored) is GoLand's `GoCommentStart`, the subclass
+ * [io.github.golangsupport.ide.inspections.style.GoCommentStartInspection]; the two share this walk.
  * A comment on a `const (...)` / `var (...)` / `type (...)` group counts for its specs, which need none of their own; the group comment
  * itself is not checked for the form. Skipped: `_test.go` files, `main` packages, generated files (`// Code generated ... DO NOT EDIT.`).
  */
-class GoDocCommentInspection : GoAnalysisInspectionBase() {
+open class GoDocCommentInspection : GoAnalysisInspectionBase() {
+
+    /** Reports exported declarations without a doc comment. */
+    protected open val checksMissing: Boolean get() = true
+
+    /** Reports doc comments not of the form "Name ..." (and a comment that is only the name). */
+    protected open val checksForm: Boolean get() = false
+
+    /** Files not checked at all. */
+    protected open fun skipFile(file: GoFile): Boolean = file.isTestFile || file.packageName == "main" || GoAnalysisScope.isGenerated(file)
 
     override fun visit(element: PsiElement, holder: ProblemsHolder, file: GoFile) {
         val target = when (element) {
@@ -70,6 +80,7 @@ class GoDocCommentInspection : GoAnalysisInspectionBase() {
     }
 
     private fun missing(holder: ProblemsHolder, identifier: PsiElement, target: Target) {
+        if (!checksMissing) return
         val hint = if (target.grouped) " (or a comment on this block)" else ""
         holder.registerProblem(
             identifier, "exported ${target.kind} ${target.display} should have comment$hint or be unexported",
@@ -78,8 +89,13 @@ class GoDocCommentInspection : GoAnalysisInspectionBase() {
     }
 
     private fun checkForm(holder: ProblemsHolder, target: Target, comment: PsiComment?) {
+        if (!checksForm) return
         comment ?: return
         val text = docText(target.element) ?: return
+        if (text.trim().trimEnd('.') == target.name && comment.text.startsWith("//")) {
+            holder.registerProblem(comment, "Comment should be meaningful or it should be removed", ProblemHighlightType.WEAK_WARNING, GoRemoveCommentFix())
+            return
+        }
         if (startsWithName(text, target.name)) return
         val fixes = if (comment.text.startsWith("//")) arrayOf<LocalQuickFix>(GoStartCommentWithNameFix(target.name)) else emptyArray()
         holder.registerProblem(
@@ -93,8 +109,6 @@ class GoDocCommentInspection : GoAnalysisInspectionBase() {
 
     companion object {
         fun isExported(name: String): Boolean = name.firstOrNull()?.isUpperCase() == true
-
-        private fun skipFile(file: GoFile): Boolean = file.isTestFile || file.packageName == "main" || GoAnalysisScope.isGenerated(file)
 
         /** Whether [text] starts with [name], optionally after `A` / `An` / `The`; a `Deprecated:` first paragraph passes. */
         fun startsWithName(text: String, name: String): Boolean {
@@ -133,6 +147,20 @@ internal object GoDocFix {
         val spec = if (named is GoTypeSpec) named else named.parent ?: return null
         val declaration = spec.parent ?: return null
         return if (isGroup(declaration)) spec else declaration
+    }
+}
+
+/** Deletes a one-line `//` doc comment with its line. */
+class GoRemoveCommentFix : LocalQuickFix {
+    override fun getFamilyName(): String = "Remove comment"
+
+    override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
+        val comment = descriptor.psiElement as? PsiComment ?: return
+        val file = comment.containingFile
+        val document = GoImportEdits.document(file) ?: return
+        val range = GoInspectionText.wholeLines(document.charsSequence, comment.textRange.startOffset, comment.textRange.endOffset)
+        if (range != null) document.deleteString(range.first, range.last + 1) else document.deleteString(comment.textRange.startOffset, comment.textRange.endOffset)
+        GoImportEdits.commit(file, document)
     }
 }
 
