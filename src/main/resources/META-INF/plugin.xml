@@ -88,6 +88,8 @@
          and the struct size; with them on duty the hints of gopls stand down (MIGRATION.md step 11; the gate follows GoFeature.INLAY_HINTS,
          the struct size is not gated) -->
     <xi:include href="/META-INF/go-psi-ide-hints.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- Go fix (PLAN.md G5): the SYNTAX_UPDATE severity, Refactor | Update Syntax... and the lenses Batch syntax update / What's New (gate DIAGNOSTICS) -->
+    <xi:include href="/META-INF/go-psi-ide-gofix.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensionPoints>
         <!-- restarts the language server when its settings change: the module with gopls, where it is loaded -->
@@ -381,6 +383,7 @@
                     description="Run the enabled Go and go.mod inspections over the project (or the selected directory) and show the results in Inspection Results"/>
             <action id="Go.ExportSarif" class="io.github.golangsupport.ci.GoExportSarifAction" text="Export Inspections to SARIF..."
                     description="Run the enabled Go and go.mod inspections and write a SARIF 2.1.0 report, as go-inspect does for CI"/>
+            <reference ref="Go.UpdateSyntax"/>
             <action id="Go.ReanalyseProject" class="io.github.golangsupport.problems.GoReanalyseProjectAction" text="Reanalyse Project Problems"
                     description="Run the background analysis over every Go file of the project now: all problems in the Project Errors tab of the Problems tool window"/>
             <action id="Go.Generate" class="io.github.golangsupport.build.GoGenerateAction" text="Generate" description="go generate ./..."/>
@@ -449,6 +452,9 @@
             <add-to-group group-id="Go.MainMenu" anchor="last"/>
             <add-to-group group-id="HelpMenu" anchor="first"/>
         </action>
+        <!-- the What's New lens of Go fix (go-psi-ide-gofix.xml): the guide at its Go fix section; in no menu -->
+        <action id="Go.HelpPage.GoFix" class="io.github.golangsupport.help.ShowGoFixHelpAction" text="Go Fix: What's New"
+                description="What the Go fix inspections modernize, in the guide of the plugin"/>
         <action id="Go.Welcome" class="io.github.golangsupport.help.ShowGoWelcomePageAction" text="Welcome to Go Project Support"
                 description="What the plugin is for, with its features shown at work">
             <add-to-group group-id="Go.MainMenu" anchor="last"/>

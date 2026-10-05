@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports <code>wg.Add(1)</code> right before <code>go func() { defer wg.Done(); ... }()</code> (or with <code>wg.Done()</code> as the last statement)
+on a <code>sync.WaitGroup</code>: Go 1.25 does this with <code>wg.Go</code> (modernize <code>waitgroup</code>; needs <code>go 1.25</code> in go.mod).
+<pre><code>wg.Add(1)
+go func() {
+    defer wg.Done()
+    work()
+}()
+// wg.Go(func() { work() })</code></pre>
+<p>Quick fix: <b>Simplify by using WaitGroup.Go</b>.</p>
+</body>
+</html>

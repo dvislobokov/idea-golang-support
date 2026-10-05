@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports an unexported <code>//go:embed</code> variable that is converted at every use: a <code>string</code> used only as <code>[]byte(x)</code>,
+or a <code>[]byte</code> used only as <code>string(x)</code>. Embedding with the wanted type avoids a copy per use.
+Only conversions passed directly as call arguments are counted, and only when no other file of the package mentions the name.
+<pre><code>//go:embed schema.json
+var schema string
+
+json.Unmarshal([]byte(schema), &amp;v) // declare schema as []byte</code></pre>
+<p>Quick fix: <b>Declare 'x' as []byte</b> (or <b>string</b>) changes the type and removes the conversions.</p>
+</body>
+</html>

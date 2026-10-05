@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports the <code>omitempty</code> option of a <code>json</code> tag on a field of struct type (<code>time.Time</code> included): encoding/json
+never treats a struct as empty, so the option has no effect (modernize <code>omitzero</code>; needs <code>go 1.24</code> in go.mod).
+<pre><code>Created time.Time `json:"created,omitempty"`</code></pre>
+<p>Quick fixes: <b>Replace omitempty with omitzero (behavior change)</b> (the zero value is then omitted) and <b>Remove redundant omitempty tags</b>.</p>
+</body>
+</html>

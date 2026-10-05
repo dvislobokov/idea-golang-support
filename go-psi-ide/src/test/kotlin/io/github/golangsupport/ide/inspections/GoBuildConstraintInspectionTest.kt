@@ -62,9 +62,9 @@ class GoBuildConstraintInspectionTest : GoSemanticIdeTestBase() {
         """,
     )
 
-    fun testPlusBuildDeprecated() = doHighlight(
+    fun testPlusBuildLineIsLeftToGoFix() = doHighlight(
         """
-        <weak_warning descr="// +build is deprecated; use //go:build">// +build linux,amd64</weak_warning>
+        // +build linux,amd64
 
         package p
         """,
@@ -82,21 +82,6 @@ class GoBuildConstraintInspectionTest : GoSemanticIdeTestBase() {
     fun testUnknownOs() = doHighlight(
         """
         //go:build <weak_warning descr="unknown GOOS/GOARCH 'linx'">linx</weak_warning> || darwin
-
-        package p
-        """,
-    )
-
-    fun testAddGoBuildFix() = doFix(
-        """
-        // +build linux,!cgo darwin
-
-        package p
-        """,
-        "Add //go:build line",
-        """
-        //go:build (linux && !cgo) || darwin
-        // +build linux,!cgo darwin
 
         package p
         """,

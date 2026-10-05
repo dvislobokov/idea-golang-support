@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports <code>strings.HasPrefix</code> followed by <code>strings.TrimPrefix</code> with the same arguments (also the <code>Suffix</code> pair and package <code>bytes</code>): <code>strings.CutPrefix</code> checks and trims at once.
+<p>Before:</p>
+<pre><code>if strings.HasPrefix(s, "go") {
+    rest := strings.TrimPrefix(s, "go")
+    ...
+}</code></pre>
+<p>After the quick fix <b>Replace HasPrefix + TrimPrefix with CutPrefix</b>:</p>
+<pre><code>if after, ok := strings.CutPrefix(s, "go"); ok {
+    rest := after
+    ...
+}</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.20.</p>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports pointers that Go 1.26 can create with <code>new(expr)</code> (modernize <code>newexpr</code>; needs <code>go 1.26</code> in go.mod):
+<ul>
+  <li>a call of a pointer helper such as <code>func ptr[T any](x T) *T { return &amp;x }</code>;</li>
+  <li>an immediately called literal <code>func() *T { v := e; return &amp;v }()</code>;</li>
+  <li><code>x := e</code> right before <code>p := &amp;x</code> (or <code>p = &amp;x</code>, <code>return &amp;x</code>) when <code>x</code> is used nowhere else.</li>
+</ul>
+<pre><code>timeout := ptr(30 * time.Second) // new(30 * time.Second)</code></pre>
+<p>An untyped constant passed to a non-generic helper keeps the helper's type: <code>int64Ptr(5)</code> becomes <code>new(int64(5))</code>.</p>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports <code>// +build</code> lines of the file header (Go 1.17 reads <code>//go:build</code>; needs <code>go 1.17</code> in go.mod).
+With a <code>//go:build</code> line the old lines are no longer needed and <b>Remove obsolete +build lines</b> deletes them; without one,
+<b>Replace +build lines with //go:build</b> writes the equivalent expression (several lines are ANDed).
+<pre><code>//go:build linux &amp;&amp; amd64
+// +build linux,amd64</code></pre>
+</body>
+</html>

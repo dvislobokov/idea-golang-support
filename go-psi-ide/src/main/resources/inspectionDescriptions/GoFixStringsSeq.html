@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports a <code>for range</code> over <code>strings.Split</code> / <code>strings.Fields</code> (or the <code>bytes</code> ones) that does not use the
+index: the iterator variants <code>SplitSeq</code> / <code>FieldsSeq</code> do not build the slice (modernize <code>stringsseq</code>; needs
+<code>go 1.24</code> in go.mod). Also <code>parts := strings.Split(...)</code> right before <code>for _, p := range parts</code> when
+<code>parts</code> is used nowhere else.
+<pre><code>for _, line := range strings.Split(text, "\n") { ... }
+// for line := range strings.SplitSeq(text, "\n") { ... }</code></pre>
+</body>
+</html>

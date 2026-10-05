@@ -58,6 +58,15 @@ class GoPagesTest : BasePlatformTestCase() {
         assertEquals(emptyList<String>(), menu.map { it.removeSuffix("...") }.filter { !guide.contains(it) })
     }
 
+    fun testTheGuideOpensAtTheGoFixSection() {
+        val guide = page(GoPages.GUIDE)
+        assertTrue("the What's New lens of Go fix opens the guide there", guide.contains("id=\"go-fix\""))
+        assertFalse(guide.contains("scrollIntoView()"))
+        val atGoFix = GoPages.html(GoPages.GUIDE, dark = true, anchor = "go-fix")!!
+        assertTrue(atGoFix.contains("getElementById('go-fix')"))
+        assertNotNull(ActionManager.getInstance().getAction("Go.HelpPage.GoFix"))
+    }
+
     fun testShownOncePerVersion() {
         assertTrue("a new installation", GoPages.isNewFor(null, "0.1.0"))
         assertTrue("an update", GoPages.isNewFor("0.1.0", "0.2.0"))

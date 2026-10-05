@@ -531,6 +531,7 @@ n := <span class="fn">next</span>()
         <tr><td>Ввести переменную <span class="new">новое</span></td><td><kbd data-action="IntroduceVariable">Ctrl+Alt+V</kbd></td><td>Выражение становится <code>name := expr</code> перед оператором, который его вычисляет; «Replace all» заменяет одинаковые выражения функции. Имя — <code>err</code>, <code>ctx</code>, последнее слово вызова (<code>GetName()</code> → <code>name</code>) или по типу, правится на месте. Недоступно там, где перенос изменил бы порядок вычислений: правый операнд <code>&amp;&amp;</code> / <code>||</code>, условие <code>for</code>, <code>case</code>, вызов в <code>go</code> / <code>defer</code>.</td></tr>
         <tr><td>Ввести константу <span class="new">новое</span></td><td><kbd data-action="IntroduceConstant">Ctrl+Alt+C</kbd></td><td>Константное выражение становится <code>const name = expr</code> после импортов, для одного вхождения или всех в файле. Имя — из слов строки (<code>"r8 failed"</code> → <code>r8Failed</code>) или по типу.</td></tr>
         <tr><td>Убрать неиспользуемый параметр <span class="new">новое</span></td><td><kbd data-action="ShowIntentionActions">Alt+Enter</kbd></td><td>На подчёркнутом параметре: Remove unused parameter убирает его из сигнатуры и аргумент из каждого вызова, Rename to _ оставляет сигнатуру.</td></tr>
+        <tr><td>Обновить синтаксис <span class="new">новое</span></td><td>Refactor, Update Syntax…</td><td>Включённые проверки группы <a href="#go-fix">Go fix</a> по выбранной области (файл, каталог, модуль, проект, свой scope); находки — в окне Inspection Results, исправления применяются к одной находке, к файлу или ко всем сразу. Тот же пункт — в меню Go. Над файлом с такими находками — строка Update syntax (N places): то же для одного файла без диалога.</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -569,6 +570,30 @@ n := <span class="fn">next</span>()
         <tr><td>Версии <span class="new">новое</span></td><td>Неверная запись версии в <code>go</code>; <code>toolchain</code> старше <code>go</code>.</td><td></td></tr>
       </tbody>
     </table></div>
+
+    <h3 id="go-fix">Go fix: обновление синтаксиса <span class="new">новое</span></h3>
+    <p>Группа Go, Go fix в Settings, Editor, Inspections — аналоги модернизаторов <code>go fix</code> / gopls modernize: код, который в новых версиях Go и стандартной библиотеки пишется короче. Уровень находок — Syntax update (слабее предупреждения, свой цвет <code>GO_SYNTAX_UPDATE</code> на странице цветов). Все находки по области — Refactor, Update Syntax…; над файлом с находками — строки Update syntax (N places) и What's New (этот раздел). Проверки группы:</p>
+    <div class="table"><table class="two">
+      <thead><tr><th>Проверка</th><th>Что предлагает</th></tr></thead>
+      <tbody>
+        <tr><td><code>interface{}</code> → <code>any</code></td><td>'interface{}' can be replaced with 'any'</td></tr>
+        <tr><td><code>min</code> / <code>max</code></td><td>Conditional assignment can be replaced with 'min' or 'max'</td></tr>
+        <tr><td>range по числу</td><td>Counted loop can be replaced with range over integer</td></tr>
+        <tr><td>Переменная цикла</td><td>Redundant range variable shadowing (<code>v := v</code> с go 1.22)</td></tr>
+        <tr><td><code>slices</code></td><td>Slice search loop can be replaced with 'slices.Contains'; 'sort.Slice' can be replaced with 'slices.Sort'; Backward slice loop can use 'slices.Backward'</td></tr>
+        <tr><td><code>maps</code></td><td>Map loop can be replaced with the 'maps' function</td></tr>
+        <tr><td><code>strings</code></td><td>'strings.Index' and slicing can use 'strings.Cut'; 'HasPrefix' and 'TrimPrefix' can use 'strings.CutPrefix'; 'strings.Split' or 'strings.Fields' loop can use a 'Seq' variant; String concatenation can use 'strings.Builder'</td></tr>
+        <tr><td>Итераторы</td><td>'Len()'/'At()' loop can be replaced with iterator</td></tr>
+        <tr><td><code>new(expr)</code></td><td>Pointer helper call can be replaced with 'new()'</td></tr>
+        <tr><td>Теги и литералы</td><td>'omitempty' tag on a struct field can be changed; Nested embedded field literals can be removed</td></tr>
+        <tr><td>Сборка</td><td>Obsolete '+build' line; Invalid build constraint directive</td></tr>
+        <tr><td>Сеть и конкурентность</td><td>Address can be built with 'net.JoinHostPort'; WaitGroup goroutine pattern can use 'WaitGroup.Go'; Primitive atomic value can use typed wrapper</td></tr>
+        <tr><td>Тесты</td><td>Test context cancellation can use 't.Context()'</td></tr>
+        <tr><td><code>reflect</code>, <code>errors</code>, <code>unsafe</code></td><td>'reflect.TypeOf' can be replaced with ‘reflect.TypeFor’; 'errors.As' can be replaced with 'errors.AsType'; Pointer arithmetic can use 'unsafe.Add'</td></tr>
+        <tr><td><code>//go:fix inline</code></td><td>Declaration marked with '//go:fix inline' can be inlined</td></tr>
+      </tbody>
+    </table></div>
+    <p>Каждая проверка учитывает версию <code>go</code> в go.mod: замена, которой нет в этой версии, не предлагается. Набор проверок пополняется; какие уже есть — в списке группы Go fix в настройках.</p>
 
     <h3>Языки в строках</h3>
     <div class="table"><table>

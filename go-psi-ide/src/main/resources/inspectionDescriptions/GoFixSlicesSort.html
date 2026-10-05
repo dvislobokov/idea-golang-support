@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports <code>sort.Slice</code> with the natural ascending order of an integer, float or string slice: <code>slices.Sort</code> does the same without the comparison function. The <code>sort</code> import is removed when nothing else uses it.
+<p>Before:</p>
+<pre><code>sort.Slice(s, func(i, j int) bool { return s[i] &lt; s[j] })</code></pre>
+<p>After the quick fix <b>Replace sort.Slice with slices.Sort</b>:</p>
+<pre><code>slices.Sort(s)</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.21.</p>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports the copy <code>v := v</code> of a range variable in the loop body. Since Go 1.22 every iteration has its own loop variables, so the copy is not needed.
+<p>Before:</p>
+<pre><code>for _, v := range values {
+    v := v
+    go use(v)
+}</code></pre>
+<p>After the quick fix <b>Remove the redundant copy</b>:</p>
+<pre><code>for _, v := range values {
+    go use(v)
+}</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.22.</p>
+</body>
+</html>

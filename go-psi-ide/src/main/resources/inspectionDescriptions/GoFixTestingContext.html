@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports, in a <code>Test</code>, <code>Benchmark</code> or <code>Fuzz</code> function of a <code>_test.go</code> file, contexts the test can
+take from <code>t.Context()</code> (modernize <code>testingcontext</code>; needs <code>go 1.24</code> in go.mod):
+<ul>
+  <li><code>ctx, cancel := context.WithCancel(context.Background())</code> followed by <code>defer cancel()</code> becomes <code>ctx := t.Context()</code>;</li>
+  <li><code>context.Background()</code> / <code>context.TODO()</code> written directly in the test body becomes <code>t.Context()</code>
+    (not inside function literals, and not in tests that register <code>Cleanup</code>: the test context is cancelled before cleanups run).</li>
+</ul>
+</body>
+</html>

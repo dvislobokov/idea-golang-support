@@ -161,5 +161,76 @@
     <localInspection language="Go" shortName="GoUnusedExported" displayName="Unused exported declaration"
                      groupName="Go" enabledByDefault="false" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.project.GoUnusedExportedInspection"/>
+    <!-- GoLand parity G5 (second set): Go fix -->
+    <localInspection language="Go" shortName="GoFixNewExpr" displayName="Pointer helper call can be replaced with 'new()'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixNewExprInspection"/>
+    <localInspection language="Go" shortName="GoFixOmitZero" displayName="'omitempty' tag on a struct field can be changed"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixOmitZeroInspection"/>
+    <localInspection language="Go" shortName="GoFixPlusBuild" displayName="Obsolete '+build' line"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixPlusBuildInspection"/>
+    <localInspection language="Go" shortName="GoFixEmbedTyped" displayName="Embedded variable converted at every use"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixEmbedTypedInspection"/>
+    <localInspection language="Go" shortName="GoFixHostPort" displayName="Address can be built with 'net.JoinHostPort'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixHostPortInspection"/>
+    <localInspection language="Go" shortName="GoFixWaitGroup" displayName="WaitGroup goroutine pattern can use 'WaitGroup.Go'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixWaitGroupInspection"/>
+    <localInspection language="Go" shortName="GoFixTestingContext" displayName="Test context cancellation can use 't.Context()'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixTestingContextInspection"/>
+    <localInspection language="Go" shortName="GoFixReflectTypeFor" displayName="'reflect.TypeOf' can be replaced with 'reflect.TypeFor'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixReflectTypeForInspection"/>
+    <localInspection language="Go" shortName="GoFixErrorsAsType" displayName="'errors.As' can be replaced with 'errors.AsType'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixErrorsAsTypeInspection"/>
+    <localInspection language="Go" shortName="GoFixStringsSeq" displayName="'strings.Split' or 'strings.Fields' loop can use a 'Seq' variant"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixStringsSeqInspection"/>
+    <localInspection language="Go" shortName="GoFixStringsBuilder" displayName="String concatenation can use 'strings.Builder'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixStringsBuilderInspection"/>
+    <localInspection language="Go" shortName="GoFixAtomicTypes" displayName="Primitive atomic value can use typed wrapper"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixAtomicTypesInspection"/>
+    <localInspection language="Go" shortName="GoFixUnsafeFuncs" displayName="Pointer arithmetic can use 'unsafe.Add'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix2.GoFixUnsafeFuncsInspection"/>
+    <!-- GoLand parity G5: Go fix -->
+    <localInspection language="Go" shortName="GoFixAny" displayName="'interface{}' can be replaced with 'any'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixAnyInspection"/>
+    <localInspection language="Go" shortName="GoFixMinMax" displayName="Conditional assignment can be replaced with 'min' or 'max'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixMinMaxInspection"/>
+    <localInspection language="Go" shortName="GoFixRangeInt" displayName="Counted loop can be replaced with range over integer"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixRangeIntInspection"/>
+    <localInspection language="Go" shortName="GoFixForVar" displayName="Redundant range variable shadowing"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixForVarInspection"/>
+    <localInspection language="Go" shortName="GoFixSlicesContains" displayName="Slice search loop can be replaced with 'slices.Contains'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixSlicesContainsInspection"/>
+    <localInspection language="Go" shortName="GoFixSlicesSort" displayName="'sort.Slice' can be replaced with 'slices.Sort'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixSlicesSortInspection"/>
+    <localInspection language="Go" shortName="GoFixSlicesBackward" displayName="Backward slice loop can use 'slices.Backward'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixSlicesBackwardInspection"/>
+    <localInspection language="Go" shortName="GoFixStringsCut" displayName="'strings.Index' and slicing can use 'strings.Cut'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixStringsCutInspection"/>
+    <localInspection language="Go" shortName="GoFixStringsCutPrefix" displayName="'HasPrefix' and 'TrimPrefix' can use 'strings.CutPrefix'"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixStringsCutPrefixInspection"/>
+    <localInspection language="Go" shortName="GoFixMapsLoop" displayName="Map loop can be replaced with the 'maps' function"
+                     groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
+                     implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixMapsLoopInspection"/>
   </extensions>
 </idea-plugin>

@@ -1,0 +1,19 @@
+<!-- go-psi-ide, Go fix (PLAN.md G5): the SYNTAX_UPDATE severity of the modernizer inspections (level="SYNTAX_UPDATE" in their localInspection
+     tags), Refactor | Update Syntax... (the enabled inspections of the group "Go fix" over a scope, results in Inspection Results) and the lenses
+     "Batch syntax update" / "What's New" at the top of a file with Go fix findings (gate DIAGNOSTICS). The host adds the action to its Go menu
+     itself (Go.MainMenu is not there in the tests of go-psi-ide) and registers Go.HelpPage.GoFix, which the What's New lens runs. -->
+<idea-plugin>
+  <extensions defaultExtensionNs="com.intellij">
+    <severitiesProvider implementation="io.github.golangsupport.ide.inspections.gofix.GoSyntaxUpdateSeveritiesProvider"/>
+    <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.inspections.gofix.GoBatchSyntaxUpdateCodeVisionProvider"/>
+    <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.ide.inspections.gofix.GoModernizerWhatsNewCodeVisionProvider"/>
+    <config.codeVisionGroupSettingProvider implementation="io.github.golangsupport.ide.inspections.gofix.GoBatchSyntaxUpdateCodeVisionSettings"/>
+    <config.codeVisionGroupSettingProvider implementation="io.github.golangsupport.ide.inspections.gofix.GoModernizerWhatsNewCodeVisionSettings"/>
+  </extensions>
+  <actions>
+    <action id="Go.UpdateSyntax" class="io.github.golangsupport.ide.inspections.gofix.GoUpdateSyntaxAction" text="Update Syntax..."
+            description="Run the enabled Go fix inspections over a scope and apply their fixes in batch">
+      <add-to-group group-id="RefactoringMenu" anchor="last"/>
+    </action>
+  </actions>
+</idea-plugin>

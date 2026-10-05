@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports a <code>for range</code> loop that searches a slice for a value: <code>return true</code> / <code>return false</code> becomes <code>slices.Contains</code>, <code>return i</code> / <code>return -1</code> becomes <code>slices.Index</code>, and <code>if v == x { ...; break }</code> becomes <code>if slices.Contains(s, x) { ... }</code>.
+<p>Before:</p>
+<pre><code>for _, v := range names {
+    if v == name {
+        return true
+    }
+}
+return false</code></pre>
+<p>After the quick fix <b>Replace loop by call to slices.Contains</b>:</p>
+<pre><code>return slices.Contains(names, name)</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.21.</p>
+</body>
+</html>

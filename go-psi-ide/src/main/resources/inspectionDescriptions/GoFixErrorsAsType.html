@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports <code>var e *T</code> right before <code>if errors.As(err, &amp;e) { ... }</code> when <code>e</code> is used only in that <code>if</code>:
+Go 1.26 declares the target in the condition with <code>errors.AsType</code> (modernize <code>errorsastype</code>; needs <code>go 1.26</code> in go.mod).
+<pre><code>var pathErr *fs.PathError
+if errors.As(err, &amp;pathErr) { ... }
+// if pathErr, ok := errors.AsType[*fs.PathError](err); ok { ... }</code></pre>
+<p>Quick fix: <b>Replace errors.As with AsType[T]</b>.</p>
+</body>
+</html>

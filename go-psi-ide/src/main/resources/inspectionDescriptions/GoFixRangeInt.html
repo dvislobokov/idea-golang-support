@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports a counted loop <code>for i := 0; i &lt; n; i++</code> that can range over the integer: the loop variable is not changed in the body, and the limit is an <code>int</code> that the body does not change. An unused index becomes <code>for range n</code>.
+<p>Before:</p>
+<pre><code>for i := 0; i &lt; n; i++ {
+    ch &lt;- i
+}</code></pre>
+<p>After the quick fix <b>Replace with range over int</b>:</p>
+<pre><code>for i := range n {
+    ch &lt;- i
+}</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.22.</p>
+</body>
+</html>

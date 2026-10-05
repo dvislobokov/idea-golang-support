@@ -1,0 +1,18 @@
+<html>
+<body>
+Reports a conditional assignment that picks the smaller or the larger of two values: it can use the built-in <code>min</code> or <code>max</code>. Only integers and strings (for floats the built-ins differ on NaN and negative zero) and operands without side effects.
+<p>Before:</p>
+<pre><code>if a &lt; b {
+    x = a
+} else {
+    x = b
+}
+if limit &gt; maxLimit {
+    limit = maxLimit
+}</code></pre>
+<p>After the quick fix <b>Replace with 'min'</b>:</p>
+<pre><code>x = min(a, b)
+limit = min(limit, maxLimit)</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.21.</p>
+</body>
+</html>

@@ -205,11 +205,13 @@
 - [x] (2026-10-05) go.mod: Merge a group of directives / all directives / directive up, Update dependencies….
 
 ### G5. Go fix (modernize) нативно (≈4 дня)
-- [ ] Группа инспекций **Go fix** (уровень `SYNTAX_UPDATE`, с учётом версии `go` в go.mod), простые: `any` вместо `interface{}`, `min`/`max`, range over int, переменная цикла (go 1.22),
+- [x] (2026-10-05, 0.2.131–0.2.135) Группа инспекций **Go fix** (уровень `SYNTAX_UPDATE`, с учётом версии `go` в go.mod), простые: `any` вместо `interface{}`, `min`/`max`, range over int, переменная цикла (go 1.22),
   `slices.Contains` / `Sort` / `Backward`, `strings.Cut` / `CutPrefix`, `maps` вместо цикла, `new(expr)`, `omitzero`, `//go:build` вместо `// +build`, embed-литерал,
   `net.JoinHostPort`, `WaitGroup.Go`, `t.Context()`, `reflect.TypeFor`, `errors.AsType`. Каждое — инспекция + quick fix + тест. 2,5 дня.
-- [ ] С типами: итераторы stdlib, `strings.SplitSeq`, `strings.Builder` в цикле, `atomic.Int64` и т. п., `unsafe.*`; `//go:fix inline` (нужен inline). 1 день.
-- [ ] **Refactor | Update Syntax…**: все Go fix по области с предпросмотром (платформенный `RunInspection` по группе) + линза «Batch syntax update» + «What's New» в файле. 0,5 дня.
+- [x] (2026-10-05, 0.2.136) С типами: `strings.SplitSeq`, `strings.Builder` в цикле, `atomic.Int64` и т. п., `unsafe.*`. Не сделано: `//go:fix inline` (нужен inline),
+  итераторы stdlib сверх `slices.Backward` / `maps.Keys`, поля структур в `atomic.Int64` (нужна правка нескольких файлов).
+- [x] (2026-10-05, 0.2.137) **Refactor | Update Syntax…**: все Go fix по области (платформенный прогон инспекций группы, результаты и Fix all в Inspection Results;
+  своего диалога предпросмотра, как у GoLand, нет) + линзы «Update syntax (N places)» и «What's New» в файле.
 
 ### G6. Рефакторинги и Generate (≈6 дней)
 - [ ] **Override Methods** (Ctrl+O): методы встроенных типов для переопределения. 0,5 дня.

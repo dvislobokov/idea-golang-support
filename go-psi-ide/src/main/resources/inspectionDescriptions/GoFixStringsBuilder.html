@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports <code>s += x</code> inside loops on a local string declared empty (<code>s := ""</code>, <code>var s string</code>) that is read once
+after the loops and used nowhere else: every <code>+=</code> copies the string (modernize <code>stringsbuilder</code>).
+<pre><code>out := ""
+for _, w := range words {
+    out += w
+}
+return out</code></pre>
+<p>Quick fix: <b>Replace string += string with strings.Builder</b> (<code>var out strings.Builder</code>, <code>out.WriteString(w)</code>, <code>out.String()</code>).</p>
+</body>
+</html>

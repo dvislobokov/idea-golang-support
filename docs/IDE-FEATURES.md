@@ -337,9 +337,61 @@ implementations of a type switch's interface (stub indices, as Fill Switch). WAR
 | `GoDocComment` | golint `exported` (opt-in, weak warning, off by default): `exported function Foo should have comment or be unexported` (also method `T.Foo`, type, const, var; in a group without a group comment: `… should have comment (or a comment on this block) or be unexported`); `comment on exported type Foo should be of the form "Foo ..."` (`A`/`An`/`The Foo` and a `Deprecated:` paragraph accepted; the group comment is not checked for the form; only the first name of a spec is checked). Skipped: `_test.go`, `package main`, generated files, methods of unexported types | Add doc comment (`// Name ` above the declaration; caret after it when the file is open in the selected editor); Start comment with 'Name' (`//` comments only) |
 | `GoTimeLayout` | weak warning: the layout literal of `Time.Format` / `AppendFormat` / `time.Parse` / `ParseInLocation` (found by resolve) in `yyyy-MM-dd` notation, with no time elements, or the ISO date with day before month `2006-02-01`; string literals only, stdlib constants never | Convert to Go layout; Swap to '2006-01-02' |
 | `GoEmbedDirective` | error, go's messages for `//go:embed`: no matching files found, invalid pattern syntax, directory with no embeddable files, misplaced directive (not above a package-level `var`), file does not import `embed` | Add import "embed" (blank import for string/[]byte vars, plain for `embed.FS`) |
-| `GoBuildConstraint` | vet `buildtag`: `invalid //go:build expression: …`, `misplaced //go:build comment` (after the package clause, or no blank line before it), `multiple //go:build comments` (errors); `// +build is deprecated; use //go:build` and `unknown GOOS/GOARCH 'linx'` for a tag one edit from a known one (weak warnings; `cgo`, `unix`, `ignore`, `go1.*`, `goexperiment.*`, tags under 3 characters never) | Add //go:build line (converts `+build`, Go's printing: `(a && !b) \|\| c`); Replace with 'linux' |
+| `GoBuildConstraint` | vet `buildtag`: `invalid //go:build expression: …`, `misplaced //go:build comment` (after the package clause, or no blank line before it), `multiple //go:build comments` (errors); `unknown GOOS/GOARCH 'linx'` for a tag one edit from a known one, in `//go:build` and `// +build` lines (weak warning; the `+build` line itself is `GoFixPlusBuild`'s; `cgo`, `unix`, `ignore`, `go1.*`, `goexperiment.*`, tags under 3 characters never) | Replace with 'linux' |
 | `GoShadowedVar` | GoLand's "Shadowing variable" (weak warning, name painted with `GO_SHADOWING_VARIABLE` through `ProblemDescriptorBase.setTextAttributes`): `Declaration of 'x' shadows declaration at line N` (`at b.go:N` for another file) for a local variable (`:=`, `var`, `if`/`for`/`switch` header, range, type-switch guard, `select` receive) whose name `GoScopes.resolveName` finds outside its own scope as a variable, constant, parameter, result or receiver, or a package-level var/const of the same package. Quiet: `_`, a `:=` reusing its own scope's variable (incl. the body's parameters, a type-case guard), parameters themselves, `x := x`, `switch x := x.(type)`, imports, builtins | Navigate to shadowed declaration; Rename variable (platform rename handler at the name) |
 | `GoErrorsPackage` | vet `errorsas` (`second argument to errors.As must be a non-nil pointer …`, `… should not be *error`; `any` targets accepted); `err == ErrX` / `!=` with a package-level `error` variable (weak warning; not `nil`, not inside `Is` methods) | Take the address of target; Replace with errors.Is(err, ErrX) (imports `errors`) |
+
+### Go fix, second set (GoLand parity G5; package `ide.inspections.gofix2`)
+
+Group "Go fix" (`groupPath="Go"`), weak warnings, enabled by default; modelled on gopls `modernize`. Base `GoFix2InspectionBase`: the version
+gate (`GoFixGoVersion.atLeast`: the module's `go` directive from the project model's module graph, cached per file on `GoTrackers.projectModel`;
+no module or no directive reports everything) and quick fixes that re-detect the finding at apply time and apply text edits plus imports
+(`GoSourceText` + `GoImportInserter`). Exact shapes only; `GoFixProbeTest` runs the whole set over the GoLand probe files expecting nothing.
+
+| Short name | Go | Rules (message) | Quick fixes |
+|---|---|---|---|
+| `GoFixNewExpr` | 1.26 | pointer helper call `ptr(x)` (`func ptr[T any](x T) *T { return &x }`, non-generic too): `call of ptr(x) can be simplified to new(x)`; `func() *T { v := e; return &v }()`: `function literal can be simplified to new(e)`; `x := e` before `p := &x` / `p = &x` / `return &x`, `x` used nowhere else: `variable 'x' is used only for its address; …` | Simplify call of ptr to new (untyped constant to a typed helper: `new(int64(5))`); Simplify to new(expr) |
+| `GoFixOmitZero` | 1.24 | `json:",omitempty"` on a struct-typed field (`time.Time` included; raw-string tags; not pointers, not embedded): `Omitempty has no effect on nested struct fields` | Replace omitempty with omitzero (behavior change); Remove redundant omitempty tags |
+| `GoFixPlusBuild` | 1.17 | header `// +build`: `+build line is no longer needed` (with `//go:build`) / `+build line is obsolete; use //go:build` (without) | Remove obsolete +build lines; Replace +build lines with //go:build |
+| `GoFixEmbedTyped` | 1.16 | unexported `//go:embed` `string` used only as `[]byte(x)` call arguments (or `[]byte` only as `string(x)`), no other file of the directory mentions it: `Embedded variable 'x' is used only as []byte; …` | Declare 'x' as []byte / string |
+| `GoFixHostPort` | — | `fmt.Sprintf("%s:%d"\|"%s:%s", host, port)` / `host + ":" + port` reaching the address argument of `net.Dial`, `DialTimeout`, `Listen`, `ListenPacket`, `Dialer.Dial(Context)`, `ListenConfig.Listen(Packet)`, `Resolve{TCP,UDP}Addr` (directly or via a local used once): `address format "%s:%d" does not work with IPv6` | Replace with net.JoinHostPort (`strconv.Itoa` for `int`, `fmt.Sprint` for other integers) |
+| `GoFixWaitGroup` | 1.25 | `wg.Add(1)` right before `go func() { defer wg.Done(); … }()` (or `wg.Done()` last) on `sync.WaitGroup`: `Goroutine creation can be simplified using WaitGroup.Go` (on `go`) | Simplify by using WaitGroup.Go |
+| `GoFixTestingContext` | 1.24 | in `Test*`/`Benchmark*`/`Fuzz*` of a `_test.go` with a `*testing.T\|B\|F` parameter: `ctx, cancel := context.WithCancel(context.Background())` + `defer cancel()`: `context.WithCancel can be modernized using t.Context`; bare `context.Background()`/`TODO()` in the test body (not in literals, `go`/`defer`, tests with `Cleanup`): `context.Background() can be replaced by t.Context() in a test` | Replace context.WithCancel with t.Context; Replace with t.Context() |
+| `GoFixReflectTypeFor` | 1.22 | `reflect.TypeOf((*T)(nil)).Elem()`, `reflect.TypeOf(T{})`: `reflect.TypeOf call can be simplified using TypeFor` | Replace TypeOf by TypeFor |
+| `GoFixErrorsAsType` | 1.26 | `var e *T` right before `if errors.As(err, &e) {`, `e` used only in the `if`: `errors.As can be simplified using AsType[*T]` | Replace errors.As with AsType[*T] (`if e, ok := errors.AsType[*T](err); ok {`) |
+| `GoFixStringsSeq` | 1.24 | `for _, x := range strings.Split(…)` / `for range` (also `Fields`, `bytes.*`), or `parts := strings.Split(…)` right before `for … range parts` with `parts` used only there: `Ranging over SplitSeq is more efficient` | Replace Split with SplitSeq |
+| `GoFixStringsBuilder` | 1.10 | local `s := ""` / `var s string` growing only by `s += x` (string `x`) inside loops, read once after them: `using string += string in a loop is inefficient` (at the first `+=`) | Replace string += string with strings.Builder |
+| `GoFixAtomicTypes` | 1.19 | `int32`/`int64`/`uint32`/`uint64` var without initializer (local, or unexported package-level used only in its file) whose every use is `&n` to the matching `sync/atomic` function: `Variable 'n' is accessed only through sync/atomic functions; it can be declared as atomic.Int64` | Use atomic.Int64 (`n.Add(d)`, `n.Load()`, `n.Store(v)`, `n.Swap(v)`, `n.CompareAndSwap(o, n)`) |
+| `GoFixUnsafeFuncs` | 1.17 | `unsafe.Pointer(uintptr(p) + off)` (`p` an `unsafe.Pointer`): `pointer + integer can be simplified using unsafe.Add`; `(*[N]T)(unsafe.Pointer(p))[:n:n]` (`p` a `*T`): `slice conversion can be simplified using unsafe.Slice` | Simplify using unsafe.Add; Simplify using unsafe.Slice |
+
+Tests: `inspections.gofix2.*` (`GoFixCallShapesTest.kt`, `GoFixDeclarationShapesTest.kt`, `GoFixTypedShapesTest.kt`: markers, the fix result, negatives, the version gate).
+
+### Go fix inspections (`ide.inspections.gofix`, group "Go fix"; PLAN.md G5)
+
+GoLand's `Go | Go fix` group, with the Go team's `modernize` analyzers as the behavioural model. Base `GoFixInspectionBase` (on
+`GoAnalysisInspectionBase`, so gated by `DIAGNOSTICS`; its KDoc is the README of the conventions): each inspection declares `minGoVersion`
+and is skipped for files whose language version is older (`GoFixVersions`: the file's `//go:build go1.N`, else the `go` directive of the
+main module containing the file, cached per directory on `GoTrackers.packageDependencies` + the go.mod file; no go.mod, no gate). `plan(element)`
+is detection and rewrite at once (`GoFixPlan`: message, fix name, text edits, imports to add, imports to drop when unused, highlighted range);
+`GoFixQuickFix` (family "Go fix") recomputes it from the reported element, edits the document, drops unused imports, adds new ones through
+`GoImportInserter`; its preview is a text diff without the import changes. Weak warnings in XML for now (the SYNTAX_UPDATE severity comes with
+G5-c). Messages are gopls' (GoLand shows those: `for loop can be modernized using range over int`).
+
+| Short name | Go | Rewrites (exact shapes only) | Message |
+|---|---|---|---|
+| `GoFixAny` | 1.18 | `interface{}` (no elements, no comments) → `any`, where `any` is the predeclared one | `interface{} can be replaced by any` |
+| `GoFixMinMax` | 1.21 | `if a < b { x = a } else { x = b }` → `x = min(a, b)` (all four orders, `<=`/`>=`); `if x > y { x = y }` → `x = min(x, y)`; integers and strings only (floats differ on NaN / -0), pure operands, `x` of the operands' type | `if/else statement can be modernized using min` / `if statement can be modernized using max` |
+| `GoFixRangeInt` | 1.22 | `for i := 0; i < n; i++` → `for i := range n` (`for range n` when `i` is unused); `i` not written in the body; `n` an `int` or untyped integer constant: a constant, a local/parameter not written in the body and never address-taken in the function, or `len` of one. Highlight = the for clause, like GoLand | `for loop can be modernized using range over int` |
+| `GoFixForVar` | 1.22 | `v := v` / `k, v := k, v` at the top of a `range` body whose variables are declared with `:=` → removed | `copying variable is unneeded` |
+| `GoFixSlicesContains` | 1.21 | `for _, e := range s { if e == x { return true } }; return false` → `return slices.Contains(s, x)` (and the negated pair); `… return i …; return -1` → `slices.Index`; `if e == x { …; break }` → `if slices.Contains(s, x) { … }` (no other branch, no loop variable in `…`); `s` a slice, `x` pure and assignable to the element type | `Loop can be simplified using slices.Contains` / `slices.Index` |
+| `GoFixSlicesSort` | 1.21 | `sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })` → `slices.Sort(s)`, `s` pure, ordered basic element (integer, float, string); `sort` import removed when unused | `sort.Slice can be modernized using slices.Sort` |
+| `GoFixSlicesBackward` | 1.23 | `for i := len(s) - 1; i >= 0; i--` → `for i, v := range slices.Backward(s)`; `s` a local slice not written in the body; value reads of `s[i]` become `v` (`elem`/`item` when `v` is taken), the index stays only when used otherwise | `for loop can be modernized using slices.Backward` |
+| `GoFixStringsCut` | 1.18 | `i := strings.Index(s, sep)` (before the `if` or in its header) + `if i >= 0` / `!= -1` / `> -1` with `i` used only as `s[:i]` / `s[i+len(sep):]` (`s[i+1:]` for a one-byte literal) → `before, after, ok := strings.Cut(s, sep); if ok`; also `bytes` | `strings.Index can be simplified using strings.Cut` |
+| `GoFixStringsCutPrefix` | 1.20 | `if strings.HasPrefix(s, p) { … strings.TrimPrefix(s, p) … }` → `if after, ok := strings.CutPrefix(s, p); ok { … after … }`; `if r := strings.TrimPrefix(s, p); r != s` → `if r, ok := strings.CutPrefix(s, p); ok`; `Suffix` pair, `bytes` | `HasPrefix + TrimPrefix can be simplified to CutPrefix` |
+| `GoFixMapsLoop` | 1.21 / 1.23 | `for k, v := range src { dst[k] = v }` → `maps.Copy(dst, src)` (same key and value types); `for k := range m { keys = append(keys, k) }` → `keys = slices.AppendSeq(keys, maps.Keys(m))`, or `keys := slices.Collect(maps.Keys(m))` replacing `var keys []K` right before; values with `maps.Values` (1.23) | `Replace m[k]=v loop with maps.Copy` / `Replace append loop with slices.Collect` / `… slices.AppendSeq` |
+
+Tests: `inspections/gofix/*Test.kt` on `GoFixTestBase` (markers, all fixes of a name applied, `useGoVersion`); `GoFixProbeTest` runs every
+inspection of `GoFixInspections.ALL` over the GoLand probe files and expects only GoLand's finding (`analysis.go:118`).
 
 ### Data-flow inspections (wave 4 of FEATURES.md §11)
 
@@ -728,3 +780,18 @@ gopls `Create …`, `Implement …` and `Declare missing methods …` actions th
   placeholders; `%v` of an error in `Errorf` is an INFORMATION-level suggestion with "Replace %v with %w".
 - `GoFormatVerbCompletion`: typing `%` in the format string of a printf-like call opens the verb list (`GoFormatVerbTypedHandler` + confidence), ranked by the
   type of the argument the directive will read; `%w` only in Errorf-like calls; flags and width typed before the verb are kept. Nothing in non-printf calls.
+
+### Go fix: severity, Update Syntax, lenses (`ide.inspections.gofix`, `go-psi-ide-gofix.xml`; PLAN.md G5)
+- `GoSyntaxUpdateSeverity` / `GoSyntaxUpdateSeveritiesProvider` (`severitiesProvider`): severity `SYNTAX_UPDATE` (GoLand's name, so its exported profiles keep
+  the level), value 150 — between SERVER PROBLEM (100) and WEAK WARNING (200), display name "Syntax update", colour `GoColors.SYNTAX_UPDATE`
+  (`GO_SYNTAX_UPDATE`, fallback weak warning). An inspection declares it as `level="SYNTAX_UPDATE"`; `HighlightDisplayLevel.find` resolves it by name.
+- `GoSyntaxUpdate`: the tools of the group "Go fix" (`groupPath="Go" groupName="Go fix"` or short name `GoFix*`; `select` is the pure selection), a
+  profile of just them built like Run Inspection by Name (`InspectionToolsSupplier.Simple` over the current profile), `run(project, scope)` —
+  `GlobalInspectionContextImpl` with that external profile, results and batch fixes in Inspection Results.
+- `GoUpdateSyntaxAction` (`Go.UpdateSyntax`, Refactor | Update Syntax..., last; the host references it in `Go.MainMenu`): the platform's scope dialog
+  (`BaseAnalysisAction`), then `run`. GoLand's own preview of the rewritten code is not reproduced: the preview is the Inspection Results window.
+- Lenses at the package clause of a file with Go fix findings (gate `DIAGNOSTICS`, Top): `GoBatchSyntaxUpdateCodeVisionProvider` (group `go.syntax.update`,
+  "Update syntax (N places)", click = `run` on the file without the dialog) and `GoModernizerWhatsNewCodeVisionProvider` (group `Go modernizer whats new`,
+  "What's New", click = the host's `Go.HelpPage.GoFix`: the guide at `#go-fix`). The count runs the enabled local Go fix tools on the file
+  (`LocalInspectionTool.processFile`, stopped at 100), cached on the file by document stamp and the set of enabled tools; the daemon's highlights would be
+  cheaper, but code vision and the inspection pass run in no fixed order. Tests: `inspections.gofix.GoSyntaxUpdateTest` (10, with a test-only `GoFixTestInspection`).

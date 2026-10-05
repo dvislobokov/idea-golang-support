@@ -16,7 +16,7 @@ import io.github.golangsupport.project.api.GoBuildConstraintEvaluator
  * vet `buildtag` over the `//go:build` and `// +build` comments of a file, from comment text only:
  * - a `//go:build` expression with a syntax error (error);
  * - a `//go:build` line outside the header (after the package clause, or not followed by a blank line before it), or a second one;
- * - a `// +build` line in a file without `//go:build` (weak warning; fix "Add //go:build line" with the equivalent expression);
+ * - the tags of a `// +build` line (the line itself is the Go fix inspection `GoFixPlusBuild`'s: it reports and converts it, so this one does not);
  * - a tag one edit away from a known GOOS/GOARCH (`linx`; weak warning; fix "Replace with 'linux'"). Custom tags stay quiet.
  */
 class GoBuildConstraintInspection : GoAnalysisInspectionBase() {
@@ -25,7 +25,7 @@ class GoBuildConstraintInspection : GoAnalysisInspectionBase() {
         if (element !is PsiComment) return
         val text = element.text
         if (GoBuildConstraintEvaluator.isGoBuild(text)) checkGoBuild(element, text, holder, file)
-        else if (GoBuildConstraintEvaluator.isPlusBuild(text) && inHeader(element, file)) checkPlusBuild(element, text, holder, file)
+        else if (GoBuildConstraintEvaluator.isPlusBuild(text) && inHeader(element, file)) checkPlusBuild(element, text, holder)
     }
 
     private fun checkGoBuild(comment: PsiComment, text: String, holder: ProblemsHolder, file: GoFile) {
@@ -36,14 +36,8 @@ class GoBuildConstraintInspection : GoAnalysisInspectionBase() {
         checkTags(comment, text, GoBuildConstraints.GO_BUILD.length, holder)
     }
 
-    private fun checkPlusBuild(comment: PsiComment, text: String, holder: ProblemsHolder, file: GoFile) {
-        if (goBuildComments(file).isNotEmpty()) return
-        val lines = plusBuildComments(file)
-        val converted = GoBuildConstraints.plusBuildToGoBuild(lines.map { it.text })
-        val fixes = if (converted != null && lines.first() === comment) arrayOf<LocalQuickFix>(GoAddGoBuildFix(converted)) else emptyArray()
-        holder.registerProblem(comment, "// +build is deprecated; use //go:build", ProblemHighlightType.WEAK_WARNING, *fixes)
+    private fun checkPlusBuild(comment: PsiComment, text: String, holder: ProblemsHolder) =
         checkTags(comment, text, text.indexOf("+build") + "+build".length, holder)
-    }
 
     private fun checkTags(comment: PsiComment, text: String, from: Int, holder: ProblemsHolder) {
         for ((tag, offset) in GoBuildConstraints.tags(text, from)) {
@@ -54,7 +48,6 @@ class GoBuildConstraintInspection : GoAnalysisInspectionBase() {
 
     private fun comments(file: GoFile): Collection<PsiComment> = PsiTreeUtil.collectElementsOfType(file, PsiComment::class.java)
     private fun goBuildComments(file: GoFile) = comments(file).filter { GoBuildConstraintEvaluator.isGoBuild(it.text) && inHeader(it, file) }
-    private fun plusBuildComments(file: GoFile) = comments(file).filter { GoBuildConstraintEvaluator.isPlusBuild(it.text) && inHeader(it, file) }
 
     /** Whether [comment] is where go reads constraints: before the package clause, with a blank line between them. */
     private fun inHeader(comment: PsiComment, file: GoFile): Boolean {
@@ -86,14 +79,3 @@ class GoReplaceTagFix(private val replacement: String) : LocalQuickFix {
 }
 
 /** Adds `//go:build [expression]` above the first `// +build` line. */
-class GoAddGoBuildFix(private val expression: String) : LocalQuickFix {
-    override fun getFamilyName(): String = "Add //go:build line"
-
-    override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-        val comment = descriptor.psiElement ?: return
-        val file = comment.containingFile
-        val document = GoImportEdits.document(file) ?: return
-        document.insertString(comment.textRange.startOffset, "//go:build $expression\n")
-        GoImportEdits.commit(file, document)
-    }
-}

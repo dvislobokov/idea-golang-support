@@ -180,6 +180,14 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.131–0.2.137) G5: группа инспекций Go | Go fix — 23 модернизатора (`ide.inspections.gofix` и `gofix2`: базовые классы `GoFixInspectionBase`
+  и `GoFix2InspectionBase` с гейтом по версии `go` из go.mod / `//go:build go1.N`), уровень `SYNTAX_UPDATE` (`GoSyntaxUpdateSeverity`, цвет `GO_SYNTAX_UPDATE`),
+  Refactor | Update Syntax… (`GoSyntaxUpdate`: профиль только из Go fix, платформенный прогон по области, Fix all в Inspection Results), линзы «Update syntax (N places)» /
+  «What's New» (`GoSyntaxUpdateCodeVision`, счёт через `processFile` с кэшем по штампу документа). Пробный тест: на `analysis.go` ровно находка GoLand (строка 118).
+  Не сделано: `//go:fix inline`, `slices.ContainsFunc`, `maps.Insert`/`Clone`, `min`/`max` в форме `x := a; if a < b { x = b }`, `atomic.*` для полей структур,
+  `GoFixEmbedTyped` без эталона GoLand (своё описание), текст линзы у GoLand не снят (в дампе только имя группы), число в линзе после смены версии go.mod обновляется
+  только с правкой файла, превью quick fix не показывает правки импортов. Найдено попутно: StackOverflow в `GoInterfaceType.hasTypeTerms` на
+  `testData/types/goroot/check/decls0.go` (не из G5, открыто).
 - [x] (2026-10-05) Живая сверка G1–G4 роботом на песочнице (`TARGET=plugin`, те же скрипты, что снимали GoLand; результаты `build/ui-robot/parity-*.txt`):
   подсветка `analysis.go` — 369 диапазонов `GO_*` против 367 у GoLand, расхождения: имена типов в тексте doc-комментария (`GO_COMMENT_REFERENCE` у GoLand, у нас только
   первое слово и `[Name]`), использования затеняющей переменной (GoLand красит и их), `case n := <-ch` у нас `GO_SCOPE_VARIABLE`, у GoLand local, `GO_SYNTAX_UPDATE` — G5;

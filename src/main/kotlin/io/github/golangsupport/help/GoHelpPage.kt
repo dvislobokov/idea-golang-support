@@ -56,21 +56,26 @@ object GoPages {
     /**
      * The page as the IDE shows it: in the theme of the IDE, without the links that lead into the repository, and with the keys of the
      * keymap of this IDE instead of the ones the page was written with ([shortcut] gives the text of a key by the id of its action,
-     * null or nothing where the keymap has none: the key of the page stays then).
+     * null or nothing where the keymap has none: the key of the page stays then). With [anchor] the page scrolls to the element of that id
+     * once loaded: the editor tab is given the HTML itself, not a URL, so there is no `#fragment` to open it at.
      */
-    fun forIde(page: String, dark: Boolean, shortcut: (String) -> String? = { null }): String =
+    fun forIde(page: String, dark: Boolean, anchor: String? = null, shortcut: (String) -> String? = { null }): String =
         page.replaceFirst(OPENING, "<html lang=\"ru\" data-host=\"ide\" data-theme=\"${if (dark) "dark" else "light"}\">")
             .replace(KEY) { match -> match.groupValues[1] + (shortcut(match.groupValues[2])?.takeIf { it.isNotEmpty() }?.let(::escape) ?: match.groupValues[3]) + match.groupValues[4] }
+            .let { html -> if (anchor == null) html else html.replaceFirst("</body>", scrollTo(anchor) + "</body>") }
+
+    private fun scrollTo(anchor: String): String =
+        "<script>addEventListener('load', function () { var e = document.getElementById('$anchor'); if (e) e.scrollIntoView(); });</script>"
 
     private fun escape(text: String): String = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-    fun html(page: Page, dark: Boolean): String? {
+    fun html(page: Page, dark: Boolean, anchor: String? = null): String? {
         val text = GoPages::class.java.getResourceAsStream(page.resource)?.use { it.readBytes().toString(Charsets.UTF_8) } ?: return null
-        return forIde(text, dark) { id -> ActionManager.getInstance().getAction(id)?.let { KeymapUtil.getFirstKeyboardShortcutText(it) } }
+        return forIde(text, dark, anchor) { id -> ActionManager.getInstance().getAction(id)?.let { KeymapUtil.getFirstKeyboardShortcutText(it) } }
     }
 
-    fun open(project: Project, page: Page) {
-        val html = html(page, !JBColor.isBright())
+    fun open(project: Project, page: Page, anchor: String? = null) {
+        val html = html(page, !JBColor.isBright(), anchor)
         if (html == null) {
             LOG.warn("No ${page.resource} in the plugin")
             return
@@ -137,5 +142,22 @@ class ShowGoHelpPageAction : AnAction(), DumbAware {
 
     override fun actionPerformed(e: AnActionEvent) {
         GoPages.open(e.project ?: return, GoPages.GUIDE)
+    }
+}
+
+/** The guide at its Go fix section: the What's New lens of a file with Go fix findings runs it (go-psi-ide-gofix.xml); in no menu. */
+class ShowGoFixHelpAction : AnAction(), DumbAware {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    override fun update(e: AnActionEvent) {
+        e.presentation.isEnabled = e.project != null
+    }
+
+    override fun actionPerformed(e: AnActionEvent) {
+        GoPages.open(e.project ?: return, GoPages.GUIDE, GO_FIX_ANCHOR)
+    }
+
+    companion object {
+        const val GO_FIX_ANCHOR = "go-fix"
     }
 }

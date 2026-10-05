@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports an address built as <code>fmt.Sprintf("%s:%d", host, port)</code>, <code>fmt.Sprintf("%s:%s", host, port)</code> or
+<code>host + ":" + port</code> and passed to <code>net.Dial</code>, <code>net.Listen</code>, <code>(*net.Dialer).DialContext</code> and similar
+(directly, or through a local variable used only there): such an address does not work with IPv6 literals (modernize / vet <code>hostport</code>).
+<pre><code>conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
+// net.Dial("tcp", net.JoinHostPort(host, strconv.Itoa(port)))</code></pre>
+<p>Quick fix: <b>Replace with net.JoinHostPort</b>.</p>
+</body>
+</html>

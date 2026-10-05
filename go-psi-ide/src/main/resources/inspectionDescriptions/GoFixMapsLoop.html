@@ -1,0 +1,17 @@
+<html>
+<body>
+Reports a loop over a map that only copies it into another map (<code>maps.Copy</code>) or appends its keys or values to a slice (<code>slices.AppendSeq</code>, or <code>slices.Collect</code> right after <code>var keys []K</code>, over <code>maps.Keys</code> / <code>maps.Values</code>).
+<p>Before:</p>
+<pre><code>for k, v := range src {
+    dst[k] = v
+}
+var keys []string
+for k := range m {
+    keys = append(keys, k)
+}</code></pre>
+<p>After the quick fix <b>Replace loop with maps.Copy</b>:</p>
+<pre><code>maps.Copy(dst, src)
+keys := slices.Collect(maps.Keys(m))</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.21 (1.23 for keys and values).</p>
+</body>
+</html>

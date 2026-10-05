@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports the empty interface <code>interface{}</code>, which can be written as the predeclared alias <code>any</code>.
+<p>Before:</p>
+<pre><code>var values []interface{}</code></pre>
+<p>After the quick fix <b>Replace 'interface{}' with 'any'</b>:</p>
+<pre><code>var values []any</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.18.</p>
+</body>
+</html>

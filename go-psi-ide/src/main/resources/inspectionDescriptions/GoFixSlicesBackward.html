@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports a loop over the indices of a slice from the last one down to zero: it can range over <code>slices.Backward</code>. Reads of <code>s[i]</code> become the element variable.
+<p>Before:</p>
+<pre><code>for i := len(s) - 1; i &gt;= 0; i-- {
+    fmt.Println(s[i])
+}</code></pre>
+<p>After the quick fix <b>Replace with range over slices.Backward</b>:</p>
+<pre><code>for _, v := range slices.Backward(s) {
+    fmt.Println(v)
+}</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.23.</p>
+</body>
+</html>

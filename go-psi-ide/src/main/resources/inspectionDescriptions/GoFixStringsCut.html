@@ -1,0 +1,18 @@
+<html>
+<body>
+Reports <code>strings.Index</code> (or <code>bytes.Index</code>) whose result is only checked for a match and used to slice the text before and after the separator: <code>strings.Cut</code> returns both parts.
+<p>Before:</p>
+<pre><code>i := strings.Index(s, "=")
+if i &gt;= 0 {
+    key, value := s[:i], s[i+1:]
+    ...
+}</code></pre>
+<p>After the quick fix <b>Replace strings.Index with strings.Cut</b>:</p>
+<pre><code>before, after, ok := strings.Cut(s, "=")
+if ok {
+    key, value := before, after
+    ...
+}</code></pre>
+<p>Reported only when the <code>go</code> version of the module (or the <code>//go:build go1.N</code> line of the file) is at least 1.18.</p>
+</body>
+</html>

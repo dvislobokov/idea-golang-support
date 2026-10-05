@@ -20,9 +20,13 @@ abstract class GoAnalysisInspectionBase : LocalInspectionTool() {
     /** Called for every element of [file]. */
     protected abstract fun visit(element: PsiElement, holder: ProblemsHolder, file: GoFile)
 
+    /** Whether the inspection looks at [file] at all (checked once per pass, after the gate): the Go version gate of `gofix`. */
+    protected open fun isApplicable(file: GoFile): Boolean = true
+
     final override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         val file = holder.file as? GoFile ?: return PsiElementVisitor.EMPTY_VISITOR
         if (!GoIdeFeatureGate.enabled(GoIdeFeature.DIAGNOSTICS, file.project)) return PsiElementVisitor.EMPTY_VISITOR
+        if (!isApplicable(file)) return PsiElementVisitor.EMPTY_VISITOR
         return object : PsiElementVisitor() {
             override fun visitElement(element: PsiElement) = visit(element, holder, file)
         }

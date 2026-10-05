@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports a variable of type <code>int32</code>, <code>int64</code>, <code>uint32</code> or <code>uint64</code> without an initial value whose every use
+is <code>&amp;n</code> passed to the matching <code>sync/atomic</code> function (<code>AddInt64</code>, <code>LoadInt64</code>, <code>StoreInt64</code>,
+<code>SwapInt64</code>, <code>CompareAndSwapInt64</code>): the typed wrappers of Go 1.19 make a non-atomic access impossible.
+Locals and unexported package-level variables used only in their file; struct fields are not reported.
+<pre><code>var hits int64
+atomic.AddInt64(&amp;hits, 1)
+// var hits atomic.Int64; hits.Add(1)</code></pre>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports pointer arithmetic that Go 1.17 writes with the <code>unsafe</code> functions (modernize <code>unsafefuncs</code>; needs <code>go 1.17</code> in go.mod):
+<ul>
+  <li><code>unsafe.Pointer(uintptr(p) + off)</code> with <code>p</code> an <code>unsafe.Pointer</code> becomes <code>unsafe.Add(p, off)</code>;</li>
+  <li><code>(*[1 &lt;&lt; 30]T)(unsafe.Pointer(p))[:n:n]</code> with <code>p</code> a <code>*T</code> becomes <code>unsafe.Slice(p, n)</code>.</li>
+</ul>
+</body>
+</html>

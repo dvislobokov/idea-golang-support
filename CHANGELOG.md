@@ -30,6 +30,99 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.137] - 2026-10-05
+
+### Added — Update Syntax and the Go fix lenses (GoLand parity G5)
+- Refactor | Update Syntax... (also in the Go menu): runs the enabled inspections of the Go fix group over a chosen scope (file, directory, module, project,
+  custom scope); the findings open in Inspection Results, where their fixes apply to one finding, a file or all at once.
+- Code vision at the top of a Go file with Go fix findings: "Update syntax (N places)" applies Update Syntax to the file, "What's New" opens the Go fix
+  section of the help page. Both can be switched off in Settings | Editor | Inlay Hints | Code vision (Batch syntax update, What's New).
+
+## [0.2.136] - 2026-10-05
+
+### Added — typed Go fix inspections (GoLand parity G5)
+- "'strings.Split' or 'strings.Fields' loop can use a 'Seq' variant" (`GoFixStringsSeq`, Go 1.24, `strings` and `bytes`): `Ranging over SplitSeq is more efficient`,
+  also for `parts := strings.Split(…)` followed by `for range parts`.
+- "String concatenation can use 'strings.Builder'" (`GoFixStringsBuilder`): `using string += string in a loop is inefficient` for `s := ""` / `var s string`
+  appended in a loop; the fix adds the `strings` import.
+- "Primitive atomic value can use typed wrapper" (`GoFixAtomicTypes`, Go 1.19): `Variable 'n' is accessed only through sync/atomic functions; it can be
+  declared as atomic.Int64` for locals and unexported package variables of one file; the fix rewrites `atomic.XxxInt64(&n, …)` into `n.Xxx(…)`.
+- "Pointer arithmetic can use 'unsafe.Add'" (`GoFixUnsafeFuncs`, Go 1.17): `pointer + integer can be simplified using unsafe.Add`;
+  `slice conversion can be simplified using unsafe.Slice` for `(*[N]T)(unsafe.Pointer(p))[:n:n]`.
+
+## [0.2.135] - 2026-10-05
+
+### Added — Go fix inspections on calls (GoLand parity G5)
+- "Address can be built with 'net.JoinHostPort'" (`GoFixHostPort`): `address format "%s:%d" does not work with IPv6` for a `Sprintf` or `host + ":" + port`
+  that reaches `net.Dial`, `Listen` and the like directly or through a local used once; fix Replace with net.JoinHostPort (adds `strconv` when needed).
+- "WaitGroup goroutine pattern can use 'WaitGroup.Go'" (`GoFixWaitGroup`, Go 1.25): `Goroutine creation can be simplified using WaitGroup.Go` for
+  `wg.Add(1); go func() { defer wg.Done(); … }()`.
+- "Test context cancellation can use 't.Context()'" (`GoFixTestingContext`, Go 1.24): `context.WithCancel can be modernized using t.Context`
+  (`WithCancel` + `defer cancel()` → `ctx := t.Context()`) and `context.Background() can be replaced by t.Context() in a test` (not inside literals,
+  `go`, `defer` or tests with `Cleanup`).
+- "'reflect.TypeOf' can be replaced with 'reflect.TypeFor'" (`GoFixReflectTypeFor`, Go 1.22): `reflect.TypeOf call can be simplified using TypeFor`
+  for `TypeOf((*T)(nil)).Elem()` and `TypeOf(T{})`.
+- "'errors.As' can be replaced with 'errors.AsType'" (`GoFixErrorsAsType`, Go 1.26): `errors.As can be simplified using AsType[*T]` for
+  `var e *T` right before `if errors.As(err, &e)`; the fix produces `if e, ok := errors.AsType[*T](err); ok {`.
+
+## [0.2.134] - 2026-10-05
+
+### Added — Go fix inspections on declarations (GoLand parity G5)
+- "Pointer helper call can be replaced with 'new()'" (`GoFixNewExpr`, Go 1.26): `call of ptr(x) can be simplified to new(x)` for
+  `func ptr[T any](x T) *T { return &x }`-style helpers (`int64Ptr(5)` → `new(int64(5))`), `function literal can be simplified to new(e)` for
+  `func() *T { v := e; return &v }()`, `variable 'x' is used only for its address; it can be created with new(e)` for `x := e` + `&x`.
+- "'omitempty' tag on a struct field can be changed" (`GoFixOmitZero`, Go 1.24): `Omitempty has no effect on nested struct fields` on struct and
+  `time.Time` fields; fixes Replace omitempty with omitzero (behavior change) / Remove redundant omitempty tags.
+- "Obsolete '+build' line" (`GoFixPlusBuild`, Go 1.17): `+build line is no longer needed` (fix Remove obsolete +build lines) with a `//go:build` line
+  present, `+build line is obsolete; use //go:build` (fix Replace +build lines with //go:build) without one.
+- "Embedded variable converted at every use" (`GoFixEmbedTyped`, Go 1.16; no GoLand counterpart): `Embedded variable 'x' is used only as []byte; it can be
+  declared as []byte` (and the `string` case) for an unexported `//go:embed` variable whose every use is a conversion passed as an argument.
+
+### Changed
+- The build constraint inspection no longer reports a `// +build` line as deprecated and has no "Add //go:build line" fix: the Go fix inspection
+  reports and converts the line, the build constraint one checks only its tags.
+
+## [0.2.133] - 2026-10-05
+
+### Added — Go fix inspections on the standard library (GoLand parity G5)
+- "Loop can be replaced with 'slices.Contains' / 'slices.Index'" (`GoFixSlicesContains`, Go 1.21): `Loop can be simplified using slices.Contains` /
+  `slices.Index` for return true / return false loops, the `return i` / `return -1` pair and `if v == x { …; break }`; adds the `slices` import.
+- "'sort.Slice' can be replaced with 'slices.Sort'" (`GoFixSlicesSort`, Go 1.21): `sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })` →
+  `slices.Sort(s)`, message `sort.Slice can be modernized using slices.Sort`; the `sort` import goes when nothing else uses it.
+- "Backward loop can use 'slices.Backward'" (`GoFixSlicesBackward`, Go 1.23): `for i := len(s) - 1; i >= 0; i--` → `for _, v := range slices.Backward(s)`
+  with `s[i]` reads becoming `v`; message `for loop can be modernized using slices.Backward`.
+- "'strings.Index' and slicing can be replaced with 'strings.Cut'" (`GoFixStringsCut`, Go 1.18, also `bytes`): `i := strings.Index(s, sep); if i >= 0 { … }`
+  → `before, after, ok := strings.Cut(s, sep); if ok { … }`; message `strings.Index can be simplified using strings.Cut`.
+- "'HasPrefix' and 'TrimPrefix' can be replaced with 'strings.CutPrefix'" (`GoFixStringsCutPrefix`, Go 1.20, also Suffix and `bytes`):
+  `if strings.HasPrefix(s, p) { … strings.TrimPrefix(s, p) … }` → `if after, ok := strings.CutPrefix(s, p); ok { … after … }`, also the
+  `if r := strings.TrimPrefix(s, p); r != s` form; message `HasPrefix + TrimPrefix can be simplified to CutPrefix`.
+- "Map loop can use a 'maps' function" (`GoFixMapsLoop`): `for k, v := range src { dst[k] = v }` → `maps.Copy(dst, src)` (Go 1.21), key / value
+  appends → `slices.AppendSeq(…, maps.Keys(m))` or `keys := slices.Collect(maps.Keys(m))` after `var keys []K` (Go 1.23); messages
+  `Replace m[k]=v loop with maps.Copy`, `Replace append loop with slices.Collect` / `slices.AppendSeq`.
+
+## [0.2.132] - 2026-10-05
+
+### Added — Go fix inspections on the language (GoLand parity G5)
+- "'interface{}' can be replaced with 'any'" (`GoFixAny`, Go 1.18): `interface{} can be replaced by any`; fix Replace 'interface{}' with 'any';
+  quiet where `any` is redeclared.
+- "Conditional assignment can use 'min' / 'max'" (`GoFixMinMax`, Go 1.21): `if a < b { x = a } else { x = b }` → `x = min(a, b)`,
+  `if n > limit { n = limit }` → `n = min(n, limit)`; messages `if/else statement can be modernized using min` / `if statement can be modernized using max`;
+  integers and strings only (floats differ on NaN and -0).
+- "For loop can be replaced with range over int" (`GoFixRangeInt`, Go 1.22): `for i := 0; i < n; i++` → `for i := range n` (or `for range n` when `i` is
+  unused); message `for loop can be modernized using range over int` on the loop header, as in GoLand; only when neither `i` nor the limit changes
+  in the body and the limit is an `int` constant, local, parameter or `len` of one.
+- "Redundant range variable shadowing" (`GoFixForVar`, Go 1.22): removes `v := v` and `k, v := k, v` at the top of a range loop body;
+  message `copying variable is unneeded`.
+
+## [0.2.131] - 2026-10-05
+
+### Added — Go fix group and the "Syntax update" level (GoLand parity G5)
+- New inspection group Go | Go fix for the modernizers of the following versions: every inspection in it is skipped for files whose Go version is
+  older than it needs — the version comes from the file's `//go:build go1.N` line, else from the `go` directive of the module's go.mod; without a go.mod
+  everything is reported. Quick fixes have the family "Go fix" and show a preview.
+- New inspection level "Syntax update" (`SYNTAX_UPDATE`, GoLand's name, so a profile exported from GoLand keeps its levels) between weak warning and
+  information, coloured by Go | Syntax update (`GO_SYNTAX_UPDATE`); the Go fix inspections use it.
+
 ## [0.2.130] - 2026-10-05
 
 ### Added — go.mod intentions (GoLand parity G4)

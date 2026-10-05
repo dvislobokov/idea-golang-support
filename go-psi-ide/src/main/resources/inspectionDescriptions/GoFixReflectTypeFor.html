@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports <code>reflect.TypeOf((*T)(nil)).Elem()</code> and <code>reflect.TypeOf(T{})</code>: Go 1.22 spells the type directly with
+<code>reflect.TypeFor[T]()</code> (modernize <code>reflecttypefor</code>; needs <code>go 1.22</code> in go.mod).
+<pre><code>errType := reflect.TypeOf((*error)(nil)).Elem() // reflect.TypeFor[error]()</code></pre>
+<p>Quick fix: <b>Replace TypeOf by TypeFor</b>.</p>
+</body>
+</html>
