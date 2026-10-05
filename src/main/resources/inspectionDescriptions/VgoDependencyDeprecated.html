@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports a <code>require</code> of go.mod whose module is deprecated: the go.mod of its latest version carries a <code>// Deprecated:</code>
+comment, as <code>go list -m -u module@latest</code> answers. The message quotes the comment, which usually names the replacement module.
+<p>The check runs in the background together with the update check (<b>Newer version of a dependency</b>): when go.mod is opened and when its
+requires change, at most once an hour. It needs the network; turn this inspection off where the proxy must not be asked.</p>
+</body>
+</html>

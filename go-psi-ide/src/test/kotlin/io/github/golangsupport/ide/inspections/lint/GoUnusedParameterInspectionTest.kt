@@ -34,16 +34,16 @@ class GoUnusedParameterInspectionTest : GoSemanticIdeTestBase() {
 
         type S struct{}
 
-        func u9add(a, <weak_warning descr="Parameter 'b' is never used">b</weak_warning> int) int {
+        func u9add(a, <warning descr="Unused parameter 'b'">b</warning> int) int {
         	return a
         }
 
-        func (s S) u9method(<weak_warning descr="Parameter 'x' is never used">x</weak_warning> string, y int) int {
+        func (s S) u9method(<warning descr="Unused parameter 'x string'">x string</warning>, y int) int {
         	f := func() int { return y }
         	return f()
         }
 
-        func u9shadow(<weak_warning descr="Parameter 'v' is never used">v</weak_warning> int) {
+        func u9shadow(<warning descr="Unused parameter 'v int'">v int</warning>) {
         	v := 2
         	println(v)
         }
@@ -147,7 +147,7 @@ class GoUnusedParameterInspectionTest : GoSemanticIdeTestBase() {
 
         func BenchmarkU9(b *testing.B) { println() }
 
-        func u9helper(t *testing.T, <weak_warning descr="Parameter 'n' is never used">n</weak_warning> int) { t.Log() }
+        func u9helper(t *testing.T, <warning descr="Unused parameter 'n int'">n int</warning>) { t.Log() }
         """,
         "u9_test.go",
     )

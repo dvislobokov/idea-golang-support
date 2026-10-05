@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports an exported function, or an exported method of an exported type, whose result is an unexported
+type of its own package (<code>T</code> or <code>*T</code>): callers in other packages get a value whose type they cannot name.
+<pre><code>type store struct{}
+
+func NewStore() *store { return &amp;store{} }</code></pre>
+<p>Skipped: <code>package main</code> and test files.</p>
+</body>
+</html>

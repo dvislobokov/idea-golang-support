@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports a constant, package-level or local, that nothing refers to. Each name of an <code>iota</code> group is checked on its own.
+<pre><code>const (
+    Debug Level = iota // Unused constant 'Debug'
+    Info
+)</code></pre>
+<p>Exported names are checked only where every importer is project code: a package under an <code>internal/</code> directory or a
+package of an application module (one with a <code>package main</code>). Library API is never reported.</p>
+<p>A reference counts as a use anywhere in the project except inside the declaration itself (recursion). Skipped: methods, <code>init</code>,
+<code>main</code>, blank names, <code>Test*</code> / <code>Benchmark*</code> / <code>Example*</code> / <code>Fuzz*</code> functions of test files,
+functions without a body or marked <code>//export</code> / <code>//go:linkname</code>, generated files.</p>
+<p>Quick fix: <b>Safe delete</b>.</p>
+</body>
+</html>

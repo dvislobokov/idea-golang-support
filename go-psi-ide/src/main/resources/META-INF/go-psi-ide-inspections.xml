@@ -128,7 +128,7 @@
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.lint.GoTestingGoroutineInspection"/>
     <localInspection language="Go" shortName="GoUnusedParameter" displayName="Unused parameter"
-                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.lint.GoUnusedParameterInspection"/>
     <localInspection language="Go" shortName="GoErrNilReturned" displayName="Nil error returned where it is known to be nil"
                      groupName="Go" enabledByDefault="true" level="WEAK WARNING"
@@ -143,7 +143,7 @@
                      groupName="Go" enabledByDefault="true" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.flow.GoResultUsedBeforeErrorCheckInspection"/>
     <localInspection language="Go" shortName="GoImpossibleNilCheck" displayName="Impossible nil check"
-                     groupName="Go" enabledByDefault="true" level="WEAK WARNING"
+                     groupName="Go" enabledByDefault="false" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.flow.GoImpossibleNilCheckInspection"/>
     <localInspection language="Go" shortName="GoNilValueNilError" displayName="Nil value returned with a nil error"
                      groupName="Go" enabledByDefault="false" level="WEAK WARNING"
@@ -232,6 +232,37 @@
     <localInspection language="Go" shortName="GoFixMapsLoop" displayName="Map loop can be replaced with the 'maps' function"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"
                      implementationClass="io.github.golangsupport.ide.inspections.gofix.GoFixMapsLoopInspection"/>
+    <!-- GoLand parity G7: data flow, unused -->
+    <localInspection language="Go" shortName="GoDfaConstantCondition" displayName="Constant condition"
+                     groupPath="Go" groupName="Data flow analysis" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoConstantConditionInspection"/>
+    <localInspection language="Go" shortName="GoDivisionByZero" displayName="Division by zero"
+                     groupPath="Go" groupName="Probable bugs" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.flow.GoDivisionByZeroInspection"/>
+    <localInspection language="Go" shortName="GoExportedFuncWithUnexportedType" displayName="Unexported return type of the exported function"
+                     groupPath="Go" groupName="General" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.declarations.GoExportedFuncWithUnexportedTypeInspection"/>
+    <localInspection language="Go" shortName="GoRedundantConversion" displayName="Redundant type conversion"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WEAK WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.declarations.GoRedundantConversionInspection"/>
+    <localInspection language="Go" shortName="GoUnusedConst" displayName="Unused constant"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.unused.GoUnusedConstInspection"/>
+    <localInspection language="Go" shortName="GoUnusedExportedFunction" displayName="Unused exported function"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.unused.GoUnusedExportedFunctionInspection"/>
+    <localInspection language="Go" shortName="GoUnusedExportedType" displayName="Unused exported type"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.unused.GoUnusedExportedTypeInspection"/>
+    <localInspection language="Go" shortName="GoUnusedFunction" displayName="Unused function"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.unused.GoUnusedFunctionInspection"/>
+    <localInspection language="Go" shortName="GoUnusedGlobalVariable" displayName="Unused global variable"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.unused.GoUnusedGlobalVariableInspection"/>
+    <localInspection language="Go" shortName="GoUnusedType" displayName="Unused type"
+                     groupPath="Go" groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                     implementationClass="io.github.golangsupport.ide.inspections.unused.GoUnusedTypeInspection"/>
     <!-- GoLand parity G7: cheap inspections (PLAN.md G7, ids, groups and levels of docs/goland-analysis/dumps/inspections-go.txt). -->
     <localInspection language="Go" shortName="GoCommentLeadingSpace" displayName="Comment has no leading space"
                      groupPath="Go" groupName="Code style issues" enabledByDefault="true" level="WEAK WARNING"

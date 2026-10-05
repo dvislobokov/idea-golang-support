@@ -3,6 +3,7 @@ package io.github.golangsupport.ide.inspections.lint
 import com.intellij.codeInsight.intention.preview.IntentionPreviewInfo
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
+import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
@@ -13,6 +14,7 @@ import com.intellij.psi.search.GlobalSearchScopesCore
 import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.ide.inspections.GoAnalysisInspectionBase
 import io.github.golangsupport.ide.inspections.GoImportEdits
+import io.github.golangsupport.ide.inspections.project.GoProjectPackages
 import io.github.golangsupport.ide.navigation.GoImplementations
 import io.github.golangsupport.ide.refactoring.GoParameterRemoval
 import io.github.golangsupport.ide.refactoring.GoParameterRemoval.CallSite
@@ -42,9 +44,10 @@ class GoUnusedParameterInspection : GoAnalysisInspectionBase() {
         if (element !is GoFunctionDeclaration && element !is GoMethodDeclaration) return
         val decl = element as GoFunctionOrMethodDeclaration
         if (!GoUnusedParameters.signatureIsFree(decl, file)) return
-        // exported functions and methods: callers in other modules fix the signature (GOROOT reported 1004 parameters without this);
+        // exported functions and methods: callers in other modules fix the signature (GOROOT reported 1004 parameters without this),
+        // unless every importer of the package is project code (an internal or application package: GoLand reports those too);
         // `t *testing.T` and friends: test helpers keep the shape of their siblings
-        if (decl.name?.firstOrNull()?.isUpperCase() == true) return
+        if (decl.name?.firstOrNull()?.isUpperCase() == true && !GoUnusedParameters.closed(file)) return
         val unused = GoUnusedParameters.unused(decl).filter { def -> (def.parent as? GoParameterDeclaration)?.type?.text !in TESTING_TYPES }
         if (unused.isEmpty() || GoUnusedParameters.isHttpHandler(decl)) return
         if (decl is GoMethodDeclaration && GoImplementations.superMethods(decl, GlobalSearchScope.allScope(decl.project), limit = 1).isNotEmpty()) return
@@ -55,7 +58,10 @@ class GoUnusedParameterInspection : GoAnalysisInspectionBase() {
             val fixes = ArrayList<LocalQuickFix>()
             fixes += GoRenameParameterToBlankFix()
             if (GoUnusedParameters.removable(decl, def, calls)) fixes += GoRemoveUnusedParameterFix()
-            holder.registerProblem(def, "Parameter '$name' is never used", *fixes.toTypedArray())
+            // GoLand's text and range: the whole `name Type` when the declaration has one name, else the name alone
+            val declaration = def.parent as? GoParameterDeclaration
+            val single = declaration?.takeIf { GoParameterRemoval.definitions(decl.signature).count { it.parent === declaration } == 1 && it.type != null }
+            holder.registerProblem(single ?: def, "Unused parameter '${single?.text ?: name}'", ProblemHighlightType.LIKE_UNUSED_SYMBOL, *fixes.toTypedArray())
         }
     }
 }
@@ -112,7 +118,8 @@ internal object GoUnusedParameters {
 
     /** Every reference to [decl] in the project as a call, or null when one of them uses the function as a value. */
     fun callSites(decl: GoFunctionOrMethodDeclaration): List<CallSite>? {
-        // only unexported declarations get here: their references live in the files of their own directory, which also works for library
+        if (decl.name?.firstOrNull()?.isUpperCase() == true) return GoParameterRemoval.callSites(decl, GlobalSearchScope.projectScope(decl.project))
+        // unexported declarations: their references live in the files of their own directory, which also works for library
         // packages (GOROOT: `arch.LoadRegResult = loadRegResult` was missed by a project-scope search)
         val dir = decl.containingFile.originalFile.virtualFile?.parent
         val scope = if (dir != null) GlobalSearchScopesCore.directoryScope(decl.project, dir, false) else GlobalSearchScope.projectScope(decl.project)
@@ -134,8 +141,17 @@ internal object GoUnusedParameters {
     fun removal(decl: GoFunctionOrMethodDeclaration, def: GoParamDefinition, calls: List<CallSite>): Map<PsiFile, List<TextRange>>? =
         GoParameterRemoval.removal(decl, def, calls)
 
-    fun parameterOf(descriptor: ProblemDescriptor): GoParamDefinition? =
-        descriptor.psiElement?.let { it as? GoParamDefinition ?: PsiTreeUtil.getParentOfType(it, GoParamDefinition::class.java, false) }
+    fun parameterOf(descriptor: ProblemDescriptor): GoParamDefinition? = descriptor.psiElement?.let {
+        it as? GoParamDefinition ?: (it as? GoParameterDeclaration)?.let { d -> PsiTreeUtil.getChildOfType(d, GoParamDefinition::class.java) }
+            ?: PsiTreeUtil.getParentOfType(it, GoParamDefinition::class.java, false)
+    }
+
+    /** Whether every importer of the package of [file] is project code (an `internal/` or application package on disk). */
+    fun closed(file: GoFile): Boolean {
+        val vf = GoPsiUtil.originalVirtualFile(file)
+        val dir = vf.parent ?: return false
+        return vf.fileSystem.protocol == "file" && GoProjectPackages.isClosed(file.project, dir)
+    }
 
     fun declarationOf(def: GoParamDefinition): GoFunctionOrMethodDeclaration? =
         PsiTreeUtil.getParentOfType(def, GoFunctionDeclaration::class.java, GoMethodDeclaration::class.java) as? GoFunctionOrMethodDeclaration

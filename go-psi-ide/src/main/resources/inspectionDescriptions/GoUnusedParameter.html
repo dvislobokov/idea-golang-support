@@ -4,7 +4,7 @@ Reports a named parameter of a function or method declaration that its body neve
 <p>To avoid false positives the check stays quiet where the signature is dictated from outside: functions without a body, with an
 empty body or a body that only panics; <code>init</code> and <code>main</code>; test, benchmark, fuzz and example functions;
 functions marked <code>//export</code> or <code>//go:linkname</code>; HTTP handlers <code>(http.ResponseWriter, *http.Request)</code>;
-exported functions and methods (callers in other modules fix the signature); parameters of type <code>*testing.T</code>, <code>*testing.B</code>, <code>*testing.F</code>, <code>testing.TB</code>; methods that implement an interface method; functions used as values anywhere in the project (passed as a callback, assigned).
+exported functions and methods of a package that other modules may import (callers there fix the signature; packages under <code>internal/</code> and packages of an application module are checked); parameters of type <code>*testing.T</code>, <code>*testing.B</code>, <code>*testing.F</code>, <code>testing.TB</code>; methods that implement an interface method; functions used as values anywhere in the project (passed as a callback, assigned).
 Function literals and parameters named <code>_</code> are never reported.</p>
 <p>Quick fixes:</p>
 <ul>

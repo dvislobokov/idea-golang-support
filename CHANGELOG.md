@@ -30,6 +30,43 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.152] - 2026-10-05
+
+### Added — go.mod dependency issues (GoLand parity G7)
+- "Deprecated dependency" (`VgoDependencyDeprecated`, Go modules | Dependency issues (go list -m -u), warning): `Module 'm' is deprecated: <comment>` on the
+  require, from the background `go list -m -u` check (now run with `-u`).
+- "Retracted dependency version" (`VgoDependencyVersionRetracted`, warning): `Version v1.2.0 of 'm' is retracted: <rationale>` on the version, from a background
+  `go list -m -e -retracted -json` at most once an hour; fix "Upgrade to vX.Y.Z" when a newer version is known.
+
+## [0.2.151] - 2026-10-05
+
+### Added — unused declarations (GoLand parity G7)
+- Unused function / exported function / type / exported type / constant / global variable (`GoUnusedFunction`, `GoUnusedExportedFunction`, `GoUnusedType`,
+  `GoUnusedExportedType`, `GoUnusedConst`, `GoUnusedGlobalVariable`; Go | Declaration redundancy, warning, greyed out): `Unused function 'helper'`,
+  `Unused constant 'Debug'`, `Unused type 'node'`, `Unused global variable 'cache'`; fix "Safe delete". Exported names as GoLand reports them: functions,
+  constants and variables of `internal` and application packages, types only in `package main`; library API and methods are never reported. On the GoLand
+  probe files the plugin gives exactly GoLand's findings (constants at lines 23–25 and 29, functions at 161, 200, 211 of `analysis.go`, `Broken` in `broken.go`).
+
+### Changed
+- "Unused parameter" (`GoUnusedParameter`) matches GoLand: warning, greyed out, `Unused parameter 'c Circle'` on the whole parameter, exported functions of
+  `internal` and application packages checked too (call sites searched project-wide). The old opt-in `GoUnusedExported` stays as it was.
+
+## [0.2.150] - 2026-10-05
+
+### Added — data flow inspections (GoLand parity G7)
+- "Constant condition" (`GoDfaConstantCondition`, Go | Data flow analysis, warning): `Condition 'x != nil' is always 'true'` for nil comparisons known on every
+  path (after `if x == nil { return }`, `&T{}`, `make`, `x = nil`), for comparisons of a local whose every reaching assignment stores the same literal
+  (`n := 0 … if n == 0`) and for literal-only comparisons; named constants (`if debug`, `runtime.GOOS == "linux"`) and escaping locals never count.
+  "Impossible nil check" (`GoImpossibleNilCheck`) is now off by default: the new inspection reports the same comparisons with GoLand's text.
+- "Division by zero" (`GoDivisionByZero`, Go | Probable bugs, warning): `Division by zero` on `/`, `%`, `/=`, `%=` by a local the data flow proves zero, or by a
+  literal zero with a non-constant float / complex dividend (constant integer cases remain the compiler's error).
+- "Exported function with an unexported return type" (`GoExportedFuncWithUnexportedType`, Go | General, warning): `Exported function with the unexported return
+  type 'store'` (methods of exported types too; not `main`, not tests).
+- "Redundant type conversion" (`GoRedundantConversion`, Go | Declaration redundancy, weak warning): `T(x)` with `x` already of type `T`; fix "Remove redundant type conversion".
+- Already covered and not duplicated: nil dereference (`GoNilDereference`), error may be not nil (`GoResultUsedBeforeErrorCheck`), resource leaks
+  (`GoBodyNotClosed`, `GoRowsNotClosed`, `GoLockNotReleased`), shift / impossible assertion / nil func / bools (vet rules), unreachable code, missing return,
+  loop closure (go < 1.22), self-assignment, defer in loop, lost cancel, unused call result.
+
 ## [0.2.149] - 2026-10-05
 
 ### Added — probable bugs and control flow inspections (GoLand parity G7)

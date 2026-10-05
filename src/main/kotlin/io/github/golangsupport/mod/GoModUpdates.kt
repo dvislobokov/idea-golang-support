@@ -29,7 +29,7 @@ object GoModUpdates {
     private const val MAX_AGE_MS = 60 * 60 * 1000L
     private const val MIN_GAP_MS = 30 * 1000L
 
-    private class Entry(val requires: String, val at: Long, val updates: Map<String, String>?)
+    private class Entry(val requires: String, val at: Long, val updates: Map<String, String>?, val issues: GoModIssues = GoModIssues.NONE)
 
     private val cache = ConcurrentHashMap<String, Entry>()
     private val running = ConcurrentHashMap.newKeySet<String>()
@@ -71,22 +71,39 @@ object GoModUpdates {
         return entry?.updates
     }
 
+    /** Deprecated modules and retracted required versions of the go.mod at [path], from the last background check; null before it. */
+    fun issues(project: Project, path: String, requires: List<GoRequire>): GoModIssues? {
+        updates(project, path, requires)
+        return cache[path]?.takeIf { it.updates != null }?.issues
+    }
+
     private fun ask(project: Project, path: String, key: String, modules: List<String>) {
         try {
             val dir = File(path).parent
             // -e: a module the proxy does not know (private, removed) gets an Error field instead of failing the others;
-            // -mod=readonly: with a vendor/ directory go defaults to -mod=vendor and refuses every query (seen live); readonly writes nothing
-            val arguments = arrayOf("list", "-m", "-e", "-mod=readonly", "-json") + modules.map { "$it@latest" }
+            // -mod=readonly: with a vendor/ directory go defaults to -mod=vendor and refuses every query (seen live); readonly writes nothing;
+            // -u: fills Deprecated (the comment of the latest go.mod) without changing the version a @latest query answers
+            val arguments = arrayOf("list", "-m", "-e", "-u", "-mod=readonly", "-json") + modules.map { "$it@latest" }
             val output = runCatching { GoCli.execute(GoCli.commandLine(dir, *arguments), 120_000) }.getOrNull()
             val parsed = output?.takeIf { it.exitCode == 0 || it.stdout.isNotBlank() }?.let { GoModuleList.parse(it.stdout) }
             if (parsed == null) GoPluginLog.info("go", "No update check for $path: " + (output?.stderr?.lines()?.firstOrNull { it.isNotBlank() } ?: "go list has failed"))
-            val previous = cache[path]?.updates
+            val previous = cache[path]
             val updates = parsed?.mapNotNull { m -> m.version?.let { m.path to it } }?.toMap()
-            cache[path] = Entry(key, System.currentTimeMillis(), updates)
-            if (updates != null && updates != previous) rehighlight(project, path)
+            val issues = if (parsed == null) GoModIssues.NONE else GoModIssues(GoModIssues.deprecated(parsed), retracted(dir, key))
+            cache[path] = Entry(key, System.currentTimeMillis(), updates, issues)
+            if (updates != null && (updates != previous?.updates || issues != previous.issues)) rehighlight(project, path)
         } finally {
             running.remove(path)
         }
+    }
+
+    /** `path@version` -> rationales of the required versions that are retracted: `go list -m -retracted` on the exact versions. */
+    private fun retracted(dir: String, key: String): Map<String, List<String>> {
+        val targets = key.split(',').filter { '@' in it && !it.endsWith("@") }.distinct()
+        if (targets.isEmpty()) return emptyMap()
+        val arguments = arrayOf("list", "-m", "-e", "-retracted", "-mod=readonly", "-json") + targets
+        val output = runCatching { GoCli.execute(GoCli.commandLine(dir, *arguments), 120_000) }.getOrNull() ?: return emptyMap()
+        return GoModIssues.retracted(GoModuleList.parse(output.stdout))
     }
 
     /** `go get targets...` in the background, then `go mod vendor` when the module vendors: a stale vendor/ breaks the build. */
@@ -139,3 +156,58 @@ class UpgradeRequireFix(private val path: String, private val version: String) :
         GoModUpdates.goGet(project, dir, "Go Get $path@$version", listOf("$path@$version"))
     }
 }
+
+/** What `go list -m -u` / `-retracted` says about the requires of a go.mod beyond newer versions. */
+data class GoModIssues(val deprecated: Map<String, String>, val retracted: Map<String, List<String>>) {
+    companion object {
+        val NONE = GoModIssues(emptyMap(), emptyMap())
+
+        /** Module path -> deprecation comment. Pure, for the tests. */
+        fun deprecated(modules: List<GoModuleInfo>): Map<String, String> =
+            modules.mapNotNull { m -> m.deprecated?.trim()?.takeIf { it.isNotEmpty() }?.let { m.path to it } }.toMap()
+
+        /** `path@version` -> rationales, for the retracted versions only. Pure, for the tests. */
+        fun retracted(modules: List<GoModuleInfo>): Map<String, List<String>> =
+            modules.mapNotNull { m -> m.version?.takeIf { m.retracted.isNotEmpty() }?.let { "${m.path}@$it" to m.retracted } }.toMap()
+
+        /** The problems of [requires]: (require, true for the path / false for the version, message). Pure, for the tests. */
+        fun problems(requires: List<GoRequire>, issues: GoModIssues): List<Triple<GoRequire, Boolean, String>> = requires.flatMap { r ->
+            listOfNotNull(
+                issues.deprecated[r.path]?.let { Triple(r, true, "Module '${r.path}' is deprecated: $it") },
+                issues.retracted["${r.path}@${r.version}"]?.let { Triple(r, false, "Version ${r.version} of '${r.path}' is retracted: ${it.joinToString("; ")}") },
+            )
+        }
+    }
+}
+
+/**
+ * Base of GoLand's `go list -m -u` dependency inspections over [GoModIssues]: the path ([onPath]) or the version of the require, from the
+ * background check of [GoModUpdates] (nothing until it has answered, nothing offline).
+ */
+abstract class GoModIssuesInspectionBase(private val onPath: Boolean) : LocalInspectionTool() {
+    override fun checkFile(file: PsiFile, manager: InspectionManager, isOnTheFly: Boolean): Array<ProblemDescriptor>? {
+        if (file !is GoModPsiFile || file.name != GoModFileType.GO_MOD || !isOnTheFly) return null
+        val path = file.virtualFile?.path ?: return null
+        val document = PsiDocumentManager.getInstance(file.project).getDocument(file) ?: return null
+        val requires = GoModFile.parse(document.immutableCharSequence).requires
+        if (requires.isEmpty()) return null
+        val issues = GoModUpdates.issues(file.project, path, requires) ?: return null
+        val updates = GoModUpdates.updates(file.project, path, requires).orEmpty()
+        return GoModIssues.problems(requires, issues).filter { it.second == onPath }.mapNotNull { (require, _, message) ->
+            if (require.line >= document.lineCount) return@mapNotNull null
+            val start = document.getLineStartOffset(require.line)
+            val line = document.getText(TextRange(start, document.getLineEndOffset(require.line)))
+            val needle = if (onPath) require.path else require.version
+            val at = line.indexOf(needle).takeIf { it >= 0 } ?: return@mapNotNull null
+            val fixes = updates[require.path]?.takeIf { !onPath && GoModUpdates.newer(it, require.version) }?.let { arrayOf<LocalQuickFix>(UpgradeRequireFix(require.path, it)) }
+                ?: LocalQuickFix.EMPTY_ARRAY
+            manager.createProblemDescriptor(file, TextRange(start + at, start + at + needle.length), message, ProblemHighlightType.GENERIC_ERROR_OR_WARNING, true, *fixes)
+        }.toTypedArray()
+    }
+}
+
+/** GoLand's `VgoDependencyDeprecated`: a require of a module whose latest go.mod carries a `// Deprecated:` comment. */
+class GoModDeprecatedDependencyInspection : GoModIssuesInspectionBase(onPath = true)
+
+/** GoLand's `VgoDependencyVersionRetracted`: the required version is retracted by its module; Alt+Enter upgrades when a newer version is known. */
+class GoModRetractedVersionInspection : GoModIssuesInspectionBase(onPath = false)

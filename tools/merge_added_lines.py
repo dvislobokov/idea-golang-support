@@ -30,7 +30,8 @@ def merge(worktree: str, path: str) -> None:
                 while k < len(lines) and lines[k].startswith('+'): k += 1
                 minus, plus = [l[1:] for l in lines[i:j]], [l[1:] for l in lines[j:k]]
                 old, new = '\n'.join(minus), '\n'.join(plus)
-                if old and old in text: text = text.replace(old, new, 1); inserted += 1
+                if old and text.count(old) == 1: text = text.replace(old, new, 1); inserted += 1
+                elif old and old in text: print(f'  ambiguous replacement ({text.count(old)} matches), do it by hand: {old[:90]!r}')
                 elif new and new in text: skipped += 1
                 else: print(f'  unmatched replacement: {old[:90]!r}')
                 i = k

@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports a conversion <code>T(x)</code> where <code>x</code> already has the type <code>T</code>.
+<pre><code>var n int
+m := int(n) // Redundant type conversion</code></pre>
+<p>Conversions of untyped constants (<code>float64(1)</code>) give the constant its type and are not reported.</p>
+<p>Quick fix: <b>Remove redundant type conversion</b>.</p>
+</body>
+</html>

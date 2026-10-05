@@ -180,6 +180,12 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.150–0.2.152) G7, data flow / unused / go.mod: `GoDfaConstantCondition` (`flow.GoConstantConditionInspection` + `GoFlowConstants`: nil-факты и
+  reaching definitions с одним литералом; `GoImpossibleNilCheck` выключен по умолчанию), `GoDivisionByZero`, `GoExportedFuncWithUnexportedType`, `GoRedundantConversion`;
+  шесть unused-инспекций (`ide.inspections.unused`, Safe delete; экспортируемые — в закрытых пакетах `GoProjectPackages.isClosed`), `GoUnusedParameter` приведена к GoLand
+  (WARNING, весь параметр); `VgoDependencyDeprecated` / `VgoDependencyVersionRetracted` (`GoModUpdates`: `-u` и `-retracted`). Пробный тест `GoG7ProbeTest` совпадает с дампами
+  построчно. Открыто: `GoMaybeNil` (межпроцедурно), скорость unused на большом пакете (`ReferencesSearch` на каждое объявление файла), сеть для deprecated / retracted
+  вживую не проверена, старая `GoUnusedExported` оставлена (дубли при включении).
 - [x] (2026-10-05, 0.2.138–0.2.146) G6: Override Methods (`GoOverrideMethods`, `codeInsight.overrideMethod`, `MemberChooser` по встроенным полям), Introduce Type
   (`GoIntroduceType`, действие `Go.IntroduceType`, occurrences + in-place rename), Remove method from interface and all its implementations
   (`GoRemoveInterfaceMethodIntention`, `GoPromotedMethods`), Generate Method… / Tests for Package… / Copyright (`copyright.updater`, optional depends `com.intellij.copyright`,

@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports a comparison whose result the data flow knows, so the condition is always true or always false:
+<ul>
+  <li>a nil comparison of a variable whose nil-ness is known on every path: after <code>if x == nil { return }</code>, after
+  <code>&amp;T{}</code>, <code>new</code>, <code>make</code> or a literal, after <code>x = nil</code>;</li>
+  <li>a comparison of a local variable every reaching assignment of which stores the same literal, with a literal or another such variable;</li>
+  <li>a comparison of literals.</li>
+</ul>
+<pre><code>n := 0
+if n == 0 { // Condition 'n == 0' is always 'true'
+}</code></pre>
+<p>Named constants never make a condition constant here: <code>if debug</code> or <code>runtime.GOOS == "linux"</code> is configuration that
+build tags change. Variables whose address is taken or that a closure captures are not tracked.</p>
+</body>
+</html>

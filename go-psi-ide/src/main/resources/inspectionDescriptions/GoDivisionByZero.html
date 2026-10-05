@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports a division or remainder whose divisor is zero where the compiler does not reject it: a variable that the data flow
+proves zero (an integer division panics at run time), or a literal zero dividing a non-constant float or complex value (the result is
+&plusmn;Inf or NaN). A constant zero divisor of an integer division is a compile error and is reported as such.
+<pre><code>d := 0
+return n / d // Division by zero</code></pre>
+</body>
+</html>

@@ -457,7 +457,7 @@ WARNING and enabled by default unless the row says otherwise.
 | `GoShadowedError` | `err :=` in an inner block shadows an outer err read after the block; the inner one is only nil-checked and the branch does not leave | |
 | `GoResultUsedBeforeErrorCheck` | weak: a pointer / interface result of `v, err := f()` used before err is read; io.Reader methods and nil-checked results exempt | |
 | `GoNilDereference` | nilness: field, method, index or `*p` on a value nil on every path; `unsafe.Sizeof` operands exempt | |
-| `GoImpossibleNilCheck` | weak: `x == nil` / `x != nil` known on every path | |
+| `GoImpossibleNilCheck` | weak, off by default since G7 (`GoDfaConstantCondition` reports the same comparisons): `x == nil` / `x != nil` known on every path | |
 | `GoNilValueNilError` | nilnil, weak, off by default: `return nil, nil` in `(T, error)` with nilable T unless the doc comment says so | |
 | `GoIneffectualAssignment` | ineffassign: a value overwritten or never read; generated files and swaps exempt | Remove assignment to 'x' |
 | `GoUnreachableCode` | vet unreachable: first statement of each unreachable run; not after `os.Exit` / `log.Fatal` | Delete unreachable code |
@@ -479,6 +479,32 @@ Tests: `GoControlFlowTest`, `GoFlowAnalysesTest` (semantic), `GoFlowInspectionsT
 
 Struct tag parsing is pure (`GoStructTags`: vet's `validateStructTag`, reflect's `Lookup`, `strconv.Unquote`), tested by `GoStructTagsTest`;
 the inspections by `GoAnalysisInspectionsTest`.
+
+### Data flow, unused declarations, go.mod (GoLand parity G7)
+
+GoLand's ids and groups (`groupPath="Go"`, `docs/goland-analysis/dumps/inspections-go.txt`), enabled by default, registered at the end of
+`go-psi-ide-inspections.xml`. `GoG7ProbeTest` runs the whole set over the GoLand probe files laid out as GoLand saw them (`internal/probe`,
+`internal/probeerr` of an application module) and expects exactly GoLand's findings of these ids (the `highlight-internal-*.txt` dumps).
+
+| Short name (group, level) | Rules | Quick fixes |
+|---|---|---|
+| `GoDfaConstantCondition` (Data flow analysis, warning; `flow.GoConstantConditionInspection`) | `Condition 'x' is always 'true'/'false'`: nil comparisons known on every path (`GoImpossibleNilCheckInspection.nilChecks`), comparisons of a local whose every reaching definition stores the same literal (`var n int` = its zero value) with a literal or another such local, literal-only comparisons (`GoFlowConstants`); named constants never (`if debug`, `runtime.GOOS`), escaping locals never, `const` specs never | |
+| `GoDivisionByZero` (Probable bugs, warning; `flow.GoDivisionByZeroInspection`) | `/`, `%`, `/=`, `%=` by a local proven zero, or by a literal zero with a non-constant float / complex dividend; constant integer cases stay the checker's compile error | |
+| `GoExportedFuncWithUnexportedType` (General, warning; `declarations`) | exported function, or exported method of an exported type, returning `T` / `*T` of an unexported package-level type of its package; not `main`, not tests, not `error` | |
+| `GoRedundantConversion` (Declaration redundancy, weak warning; `declarations`) | `T(x)` / `[]T(x)` with `x` of an identical type (`byte(u8)` too); untyped constants, unknown types and `C.T(x)` skipped; highlighted as unused | Remove redundant type conversion (parenthesizes an operator operand inside another expression) |
+| `GoUnusedFunction` / `GoUnusedExportedFunction` / `GoUnusedType` / `GoUnusedExportedType` / `GoUnusedConst` / `GoUnusedGlobalVariable` (Declaration redundancy, warning; `unused`) | `Unused function / type / constant / global variable 'x'` on the name, highlighted as unused; `ReferencesSearch` in the use scope ∩ project, uses inside the declaration (and, for a type, inside its own methods) do not count. Unexported: always (types and constants local too). Exported, as on GoLand's probe: functions, constants and variables of an internal / application package (`GoProjectPackages.isClosed`; exported functions of `main` are `GoUnusedExportedFunction`'s), types only in `package main`. Skipped: methods, `init`, `main`, `_`, test entry points, bodyless and `//export` / `//go:linkname` functions, generated files | Safe delete |
+
+`GoUnusedParameter` follows GoLand since G7: warning, highlighted as unused, `Unused parameter 'name Type'` on the whole parameter (the name
+alone when the declaration has several), and exported functions of internal / application packages are checked too (call sites then searched in
+the project). The old `GoUnusedExported` (off by default) is superseded by the unused set above.
+
+go.mod (host `mod/GoModUpdates.kt`, `plugin.xml`, group "Go modules | Dependency issues (go list -m -u)"): `VgoDependencyDeprecated` (warning on the
+module path: `Module 'm' is deprecated: <comment>`, from `Deprecated` of the background `go list -m -e -u -json m@latest`) and
+`VgoDependencyVersionRetracted` (warning on the version: `Version v of 'm' is retracted: <rationale>`, from `go list -m -e -retracted -json m@v`
+in the same background run; fix "Upgrade to vX" when a newer version is known). Pure parts: `GoModuleList.parse` (`Deprecated`, `Retracted`),
+`GoModIssues.deprecated / retracted / problems`; tests in `GoModUpdatesTest`. `VgoUnusedDependency` is the existing `GoModUnused`.
+
+Tests: `inspections.unused.*` (`GoUnusedDeclarationInspectionsTest`, `GoG7ProbeTest`), `inspections.declarations.*`, `flow.GoG7FlowInspectionsTest`.
 
 ### Quick fixes
 
@@ -723,7 +749,7 @@ Editing features over the PSI; none of them talks to gopls, and only inlay hints
 
 ### Unused parameters (`ide.inspections.lint.GoUnusedParameterInspection`; gate `DIAGNOSTICS`; 0.2.49)
 
-gopls `unusedparams`, weak warning, unexported functions and methods only. Skips: no / empty / panic-only body, `init` / `main`, test functions,
+gopls `unusedparams`, weak warning, unexported functions and methods only (G7: warning, GoLand's text, exported ones of internal / application packages too — see "GoLand parity G7" above). Skips: no / empty / panic-only body, `init` / `main`, test functions,
 `//export`, `//go:linkname`, HTTP handler shape, `*testing.T`-like parameters, a method implementing an interface method (`GoImplementations.superMethods`),
 a function used as a value (`ReferencesSearch` in the package's directory). Fixes: "Rename to _", "Remove unused parameter" (signature + every call
 site, unused imports dropped; not with side-effect arguments, method expressions, multi-value arguments). The flow corpus cannot judge it (references

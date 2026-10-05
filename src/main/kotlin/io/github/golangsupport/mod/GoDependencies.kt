@@ -55,6 +55,10 @@ data class GoModuleInfo(
     val isMain: Boolean,
     val replacedBy: String?,
     val directory: String?,
+    /** The deprecation comment of the module (`// Deprecated:` in the go.mod of its latest version); with `-u` only. */
+    val deprecated: String? = null,
+    /** The rationales of the retraction of [version] (empty when it is not retracted); with `-u` or `-retracted` only. */
+    val retracted: List<String> = emptyList(),
 ) {
     /** `path@version`: what `go get` takes. */
     fun updateTarget(): String? = update?.let { "$path@$it" }
@@ -77,6 +81,8 @@ object GoModuleList {
                 isMain = module.get("Main")?.asBoolean == true,
                 replacedBy = replace?.let { listOfNotNull(it.string("Path"), it.string("Version")).joinToString(" ") },
                 directory = module.string("Dir"),
+                deprecated = module.string("Deprecated"),
+                retracted = module.getAsJsonArray("Retracted")?.mapNotNull { it.takeIf { e -> e.isJsonPrimitive }?.asString }.orEmpty(),
             )
         }
         return result

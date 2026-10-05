@@ -240,6 +240,13 @@
         <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.mod.GoModUpdateDirectCodeVisionProvider"/>
         <localInspection language="GoModule" shortName="GoModVersions" displayName="Go and toolchain versions" groupName="Go modules" enabledByDefault="true" level="WARNING"
                          implementationClass="io.github.golangsupport.mod.GoModVersionsInspection"/>
+        <!-- GoLand parity G7: go.mod inspections -->
+        <localInspection language="GoModule" shortName="VgoDependencyDeprecated" displayName="Deprecated dependency"
+                         groupPath="Go modules" groupName="Dependency issues (go list -m -u)" enabledByDefault="true" level="WARNING"
+                         implementationClass="io.github.golangsupport.mod.GoModDeprecatedDependencyInspection"/>
+        <localInspection language="GoModule" shortName="VgoDependencyVersionRetracted" displayName="Retracted dependency version"
+                         groupPath="Go modules" groupName="Dependency issues (go list -m -u)" enabledByDefault="true" level="WARNING"
+                         implementationClass="io.github.golangsupport.mod.GoModRetractedVersionInspection"/>
         <!-- the requirements of a module with their updates and vulnerabilities -->
         <toolWindow id="Go Dependencies" anchor="bottom" icon="/icons/goDependenciesToolWindow.svg" factoryClass="io.github.golangsupport.mod.GoDependenciesToolWindowFactory" doNotActivateOnStart="true"/>
         <!-- go.mod saved with other requirements than before: the banner with `go mod tidy` -->
