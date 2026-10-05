@@ -61,6 +61,8 @@
     <xi:include href="/META-INF/go-psi-ide-asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- code completion over that PSI: contributor, confidence, weighers (MIGRATION.md step 8e; the gate follows GoFeature.COMPLETION) -->
     <xi:include href="/META-INF/go-psi-ide-completion.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <!-- Smart Completion (ML ranking, docs/ML.md): go-ml.xml and the models exist only in a build with -PmlEnabled=true; without them nothing is registered -->
+    <xi:include href="/META-INF/go-ml.xml" xpointer="xpointer(/idea-plugin/*)"><xi:fallback/></xi:include>
     <!-- quick documentation, parameter info, expression type over the PSI (MIGRATION.md step 8f; the gate follows GoFeature.HOVER) -->
     <xi:include href="/META-INF/go-psi-ide-documentation.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <!-- diagnostics over that PSI: the inspections over the semantic check with their quick fixes, the suppressor and the import optimizer

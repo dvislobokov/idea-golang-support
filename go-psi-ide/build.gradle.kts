@@ -68,6 +68,8 @@ tasks.test {
         excludeTestsMatching(benchmarkPattern)
         excludeTestsMatching(mlDatasetPattern)
     }
+    // GoMlCompletionRankerTest completes over real models when told where they are (`-Pml.models=<dir>`); skipped otherwise
+    (providers.gradleProperty("ml.models").orNull ?: providers.systemProperty("ml.models").orNull)?.let { systemProperty("ml.models", it) }
 }
 
 /** Lazily resolves GOROOT: -Dgopsi.goroot / -Pgopsi.goroot, then `go env GOROOT`, then the default install path. */

@@ -110,6 +110,24 @@ tasks.processResources {
     }
 }
 
+// Smart Completion (docs/ML.md): `-PmlEnabled=true` (or MLENABLED=true in the environment) puts the ML ranker into the plugin —
+// META-INF/go-ml.xml (the completionRanker and the Settings | Go | Smart Completion page) and the trained models of `-Pml.models`
+// (a directory with lm.cml and rank.cml; default ../ml-data/go/models) under ml/go/. A build without the flag has no trace of it.
+val mlEnabled = providers.gradleProperty("mlEnabled").orElse(providers.environmentVariable("MLENABLED")).map { it.equals("true", ignoreCase = true) }.getOrElse(false)
+if (mlEnabled) {
+    val mlModels = providers.gradleProperty("ml.models").map { file(it) }.getOrElse(file("../ml-data/go/models"))
+    for (name in listOf("lm.cml", "rank.cml")) {
+        check(File(mlModels, name).isFile) { "mlEnabled: $name not found in $mlModels (set -Pml.models=<dir>)" }
+    }
+    tasks.processResources {
+        from("src/ml/resources")
+        from(mlModels) {
+            include("lm.cml", "rank.cml")
+            into("ml/go")
+        }
+    }
+}
+
 // delve (third_party/delve: a git submodule at a release tag, vendor/ included) ships as sources in delve/ of the plugin and is built with
 // the user's go in the background (GoBundledDelve): no network, no `go install`. SOURCE-HASH names the build, so changed sources give a new
 // hash and a rebuild after the plugin is updated. Tests and fixtures stay out of the ZIP.

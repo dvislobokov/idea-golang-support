@@ -23,6 +23,12 @@ interface GoCompletionRanker {
      */
     fun rank(context: GoCompletionRankingContext, candidates: List<GoCompletionCandidate>): List<Double>?
 
+    /**
+     * A short grey text appended to the rows this ranker scored (so that a user sees which order is the model's), or
+     * null for no mark. Read once per list, after a successful [rank].
+     */
+    val marker: String? get() = null
+
     companion object {
         @JvmField
         val EP_NAME: ExtensionPointName<GoCompletionRanker> = ExtensionPointName.create("io.github.golangsupport.completionRanker")

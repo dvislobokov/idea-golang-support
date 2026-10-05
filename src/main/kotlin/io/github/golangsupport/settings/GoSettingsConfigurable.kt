@@ -50,11 +50,15 @@ object GoSettingsTree {
     const val GOPLS = "$ROOT.gopls"
     const val DEBUGGER = "$ROOT.debugger"
     const val TOOLS = "$ROOT.tools"
+    /** Smart Completion: only in a build with the ML models (`-PmlEnabled=true`, META-INF/go-ml.xml), see [io.github.golangsupport.ml.GoMlModels.isBundled]. */
+    const val ML = "$ROOT.ml"
 
     /** The pages right under Go, in order: id -> the part of the GoBundle keys `page.X` (title) and `root.page.X` (its line on the Go page). */
     val PAGES: List<Pair<String, String>> = listOf(
         GOROOT to "goroot", GOPATH to "gopath", MODULES to "modules", BUILD_TAGS to "buildTags", IMPORTS to "imports", LINTERS to "linters",
-        FORMATTING to "formatting", EDITOR to "editor", LANGUAGE_SERVER to "languageServer", DEBUGGER to "debugger", TOOLS to "tools",
+        FORMATTING to "formatting", EDITOR to "editor",
+    ) + (if (io.github.golangsupport.ml.GoMlModels.isBundled) listOf(ML to "ml") else emptyList()) + listOf(
+        LANGUAGE_SERVER to "languageServer", DEBUGGER to "debugger", TOOLS to "tools",
     )
 
     /** Selects the page [id] in the Settings dialog [component] is in; false outside of it. */
