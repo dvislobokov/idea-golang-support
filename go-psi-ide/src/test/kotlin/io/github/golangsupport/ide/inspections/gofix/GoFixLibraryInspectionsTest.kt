@@ -521,6 +521,51 @@ class GoFixStringsCutInspectionTest : GoFixTestBase() {
 class GoFixStringsCutPrefixInspectionTest : GoFixTestBase() {
     override fun inspection(): LocalInspectionTool = GoFixStringsCutPrefixInspection()
 
+    // seen live: GoLand reports `name = strings.TrimPrefix(name, "go")` inside the `if` as well
+    fun testTrimAssignedBackToTheSubject() = doTest(
+        """
+        package p
+
+        import "strings"
+
+        func f(name string) string {
+            if ${warn("HasPrefix + TrimPrefix can be simplified to CutPrefix", "strings.HasPrefix(name, \"go\")")} {
+                name = strings.TrimPrefix(name, "go")
+            }
+            return name
+        }
+        """,
+        "Replace HasPrefix + TrimPrefix with CutPrefix",
+        """
+        package p
+
+        import "strings"
+
+        func f(name string) string {
+            if after, ok := strings.CutPrefix(name, "go"); ok {
+                name = after
+            }
+            return name
+        }
+        """
+    )
+
+    fun testOtherWritesOfTheSubjectStayQuiet() = highlight(
+        """
+        package p
+
+        import "strings"
+
+        func f(name string) string {
+            if strings.HasPrefix(name, "go") {
+                name = name + "x"
+                name = strings.TrimPrefix(name, "go")
+            }
+            return name
+        }
+        """
+    )
+
     fun testHasPrefixThenTrimPrefix() = doTest(
         """
         package p

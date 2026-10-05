@@ -180,6 +180,12 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.177) G10 проверен вживую на песочнике теми же пробами (`infos.js`, `highlights.js`, попапы): `style.go`, `other.go`, `iota3.go`, цвета строк
+  120–136 и списки Alt+Enter (`Sprintf`, `//go:generate`, теги) совпали с GoLand построчно; `Plugin to blame: Go` за прогон — 0. Найдено и исправлено: CutPrefix на
+  `name = strings.TrimPrefix(name, "go")`. Осталось расхождений: `for true` — текст S1006 вместо `Condition is redundant`; `GoShadowedVar` у GoLand TEXT ATTRIBUTES(11)
+  без подчёркивания, у нас weak warning; `switch` по iota-константам — у нас `GoExhaustiveSwitch` «Missing cases in switch of type Weekday: k, l», у GoLand
+  `GoSwitchMissingCasesForIotaConsts` «Missing 'case' statements for 'iota' consts in 'switch'» (WARNING); `%s` без аргумента — у нас `GoPrintf` WARNING с текстом vet,
+  у GoLand `GoPrintFunctions` WEAK WARNING «No argument for verb: argument index = 2, arguments count = 1 (%s)»; S1017 (lint) дублирует CutPrefix на той же строке.
 - [x] (2026-10-05, 0.2.175–0.2.176) G10 (вторая разведка GoLand, `PLAN.md`): тексты, диапазоны и уровни 20 инспекций G7 как у GoLand (`GoParityProbeTest`
   сверяет `probe2/*.go` с дампами построчно), `GoIrregularIota` по описанию GoLand, `GoReceiverNames` / `GoMixedReceiverTypes` по стабам всего пакета
   (`GoPackageReceivers`), `GoCommentLeadingSpace` за опцией Code Style | Go | Other (`ADD_LEADING_SPACE_TO_COMMENTS`, вкладка `GoOtherCodeStyleTab`),

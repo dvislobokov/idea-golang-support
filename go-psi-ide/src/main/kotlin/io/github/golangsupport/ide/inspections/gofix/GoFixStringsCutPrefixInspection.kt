@@ -3,6 +3,7 @@ package io.github.golangsupport.ide.inspections.gofix
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.ide.intentions.GoEditPlan
+import io.github.golangsupport.lang.psi.GoAssignmentStatement
 import io.github.golangsupport.lang.psi.GoCallExpr
 import io.github.golangsupport.lang.psi.GoConditionalExpr
 import io.github.golangsupport.lang.psi.GoExpression
@@ -41,12 +42,13 @@ class GoFixStringsCutPrefixInspection : GoFixInspectionBase() {
         val cond = GoFixPsi.unparen(statement.condition) as? GoCallExpr ?: return null
         val (pkg, kind) = call(cond, kinds.map { it.has }) ?: return null
         val (s, pre) = GoFixPsi.args(cond)?.takeIf { it.size == 2 } ?: return null
-        if (!invariant(s, statement) || !invariant(pre, statement)) return null
+        if (!invariant(pre, statement)) return null
         val block = statement.block ?: return null
         val trims = PsiTreeUtil.findChildrenOfType(block, GoCallExpr::class.java).filter { c ->
             call(c, listOf(kind.trim))?.first == pkg && GoFixPsi.args(c)?.let { it.size == 2 && GoFixPsi.same(it[0], s) && GoFixPsi.same(it[1], pre) } == true
         }
         if (trims.isEmpty()) return null
+        if (!invariant(s, statement) && !trimAssignedBack(s, trims, statement)) return null
         val result = GoFixPsi.freshName(statement, statement, kind.result, "rest") ?: return null
         val ok = GoFixPsi.freshName(statement, statement, "ok", "found") ?: return null
         val qualifier = (GoFixPsi.unparen(cond.expression) as GoReferenceExpression).expression!!.text
@@ -92,6 +94,21 @@ class GoFixStringsCutPrefixInspection : GoFixInspectionBase() {
     /** A string constant (literal or named) with at least one byte. */
     private fun nonEmptyConstant(e: GoExpression): Boolean =
         (GoSemanticService.getInstance(e.project).constantValue(e) as? GoConstant.Str)?.value?.isNotEmpty() == true
+
+    /**
+     * `s = strings.TrimPrefix(s, pre)` as the only write of `s` inside [statement] and the only trim (GoLand reports this form too): the
+     * assignment becomes `s = after`, and nothing else sees a changed `s` before the trim.
+     */
+    private fun trimAssignedBack(s: GoExpression, trims: List<GoCallExpr>, statement: GoIfStatement): Boolean {
+        if (!GoFixPsi.isPure(s) || trims.size != 1) return false
+        val def = (GoFixPsi.unparen(s) as? GoReferenceExpression)?.let { GoFixPsi.target(it) as? GoNamedElement } ?: return false
+        val assignment = trims[0].parent as? GoAssignmentStatement ?: return false
+        if (assignment.expressionList.singleOrNull() !== trims[0] || assignment.assignOp.assign == null) return false
+        val target = assignment.leftHandExprList.expressionList.singleOrNull() ?: return false
+        if (!GoFixPsi.same(target, s)) return false
+        val writes = GoFixPsi.references(statement, def).filter(GoFixPsi::isWrite)
+        return writes.size == 1 && GoFixPsi.unparen(writes[0]) === GoFixPsi.unparen(target)
+    }
 
     /** A pure expression whose variables are not written inside [statement]. */
     private fun invariant(e: GoExpression, statement: GoIfStatement): Boolean {

@@ -30,6 +30,12 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.177] - 2026-10-05
+
+### Fixed
+- Go fix "CutPrefix / CutSuffix": `if strings.HasPrefix(name, "go") { name = strings.TrimPrefix(name, "go") }` is reported and rewritten to
+  `if after, ok := strings.CutPrefix(name, "go"); ok { name = after }` (seen on GoLand); other writes of the subject inside the `if` still keep it quiet.
+
 ## [0.2.176] - 2026-10-05
 
 ### Changed — GoLand parity G10: Alt+Enter on //go:generate, struct tags, Sprintf; semantic colours
