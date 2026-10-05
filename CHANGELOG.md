@@ -40,6 +40,8 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
   the IDE's `dump-shared-index project` headless over a throwaway go.mod project (own config/system/log, the running IDE's plugins), moves
   the chunk there and notifies; journal category `index`. Settings | Go: "Shared indexes URL" (`<url>/index.json`, entries key / ideBuild /
   url / sha256) downloads a missing chunk in the background for the next open. Development GOROOTs get no key.
+  The file name of a downloaded chunk is the last url segment reduced to name characters: the index is a remote document, so a
+  backslash segment or a drive letter in it never reaches the file system.
 
 ### Fixed
 - The one-time "lenses off" default of the syntax-update code vision was written off EDT (a SEVERE "dropPsiCaches must be called in EDT" in
