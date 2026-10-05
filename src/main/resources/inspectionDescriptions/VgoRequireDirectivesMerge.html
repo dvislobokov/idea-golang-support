@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports go.mod files whose <code>require</code> directives are not laid out as <code>go mod tidy</code> writes them: one block of direct
+requires and one block of <code>// indirect</code> ones. Quiet when there is a single <code>require</code> directive, or two that each hold
+only one kind of requires.
+The quick fix <b>Merge 'require' directives</b> rewrites them into those two blocks where the first <code>require</code> stands; comments
+inside a block move with the require below them.
+</body>
+</html>

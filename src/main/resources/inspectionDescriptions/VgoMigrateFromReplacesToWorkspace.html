@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports a <code>replace</code> directive whose target is a local module directory (<code>=&gt; ../lib</code>, <code>=&gt; ./lib</code>, an
+absolute path with a go.mod) in a module that has no go.work in its directory or above it. A Go workspace says the same without
+changing go.mod for a local checkout.
+The quick fix <b>Create go.work</b> writes go.work next to go.mod (<code>go</code> of the module, at least 1.18; <code>use .</code> and a
+<code>use</code> for every such directory) and removes those <code>replace</code> lines from go.mod. No <code>go</code> command is run.
+</body>
+</html>

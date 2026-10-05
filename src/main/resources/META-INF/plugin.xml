@@ -240,6 +240,19 @@
         <codeInsight.daemonBoundCodeVisionProvider implementation="io.github.golangsupport.mod.GoModUpdateDirectCodeVisionProvider"/>
         <localInspection language="GoModule" shortName="GoModVersions" displayName="Go and toolchain versions" groupName="Go modules" enabledByDefault="true" level="WARNING"
                          implementationClass="io.github.golangsupport.mod.GoModVersionsInspection"/>
+        <!-- GoLand parity G7: the layout of go.mod, workspaces, Go 1.25 ignore paths (ids as in GoLand) -->
+        <localInspection language="GoModule" shortName="VgoRequireDirectivesMerge" displayName="Multiple 'require' directives can be merged in groups by dependency type" groupName="Go modules"
+                         enabledByDefault="true" level="INFORMATION" implementationClass="io.github.golangsupport.mod.GoModRequireDirectivesMergeInspection"/>
+        <localInspection language="GoModule" shortName="VgoMigrateFromReplacesToWorkspace" displayName="Migration to Go workspace is possible" groupName="Go modules"
+                         enabledByDefault="true" level="WARNING" implementationClass="io.github.golangsupport.mod.GoModMigrateToWorkspaceInspection"/>
+        <localInspection language="GoModule" shortName="VgoUnresolvedIgnorePath" displayName="Unresolved path in 'ignore' directive" groupName="Go modules"
+                         enabledByDefault="true" level="WARNING" implementationClass="io.github.golangsupport.mod.GoModUnresolvedIgnorePathInspection"/>
+        <!-- govulncheck results kept per module by GoVulnService (background runs while Settings | Go | Linters turns them on, Go | Check Vulnerabilities) -->
+        <localInspection language="Go" shortName="GoVulnerablePackageImport" displayName="Vulnerable API usage (imports)" groupPath="Go" groupName="Security"
+                         enabledByDefault="true" level="WARNING" implementationClass="io.github.golangsupport.lint.GoVulnerablePackageImportInspection"/>
+        <localInspection language="Go" shortName="GoVulnerableCodeUsages" displayName="Vulnerable API usage (calls)" groupPath="Go" groupName="Security"
+                         enabledByDefault="false" level="WARNING" implementationClass="io.github.golangsupport.lint.GoVulnerableCodeUsagesInspection"/>
+        <postStartupActivity implementation="io.github.golangsupport.lint.GoVulnService$Startup"/>
         <!-- GoLand parity G7: go.mod inspections -->
         <localInspection language="GoModule" shortName="VgoDependencyDeprecated" displayName="Deprecated dependency"
                          groupPath="Go modules" groupName="Dependency issues (go list -m -u)" enabledByDefault="true" level="WARNING"
@@ -401,6 +414,8 @@
             <action id="Go.Build" class="io.github.golangsupport.build.GoBuildAction" text="Build" icon="AllIcons.Actions.Compile"
                     description="go build ./... in every module of the project"/>
             <action id="Go.Vet" class="io.github.golangsupport.build.GoVetAction" text="Vet" description="go vet ./..."/>
+            <action id="Go.CheckVulnerabilities" class="io.github.golangsupport.lint.GoCheckVulnerabilitiesAction" text="Check Vulnerabilities"
+                    description="govulncheck ./... in every module: findings in the Build window and in the editor"/>
             <action id="Go.InspectProject" class="io.github.golangsupport.ci.GoInspectProjectAction" text="Inspect Project" icon="AllIcons.Actions.Find"
                     description="Run the enabled Go and go.mod inspections over the project (or the selected directory) and show the results in Inspection Results"/>
             <action id="Go.ExportSarif" class="io.github.golangsupport.ci.GoExportSarifAction" text="Export Inspections to SARIF..."

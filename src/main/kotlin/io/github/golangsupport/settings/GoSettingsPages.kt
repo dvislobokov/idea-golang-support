@@ -202,6 +202,9 @@ class GoLintersConfigurable(project: Project) : GoSettingsPage(project, "page.li
         group(GoBundle.message("quality.golangci.group")) {
             row { checkBox(GoBundle.message("quality.golangci")).bindSelected(settings::golangciLint).comment(GoBundle.message("quality.golangci.comment")) }
         }
+        group(GoBundle.message("quality.vulncheck.group")) {
+            row { checkBox(GoBundle.message("quality.vulncheck")).bindSelected(settings::vulnerabilityCheck).comment(GoBundle.message("quality.vulncheck.comment")) }
+        }
         group(GoBundle.message("quality.linters.group")) {
             row {
                 val decorated = ToolbarDecorator.createDecorator(table)

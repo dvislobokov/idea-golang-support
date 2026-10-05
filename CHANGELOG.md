@@ -30,6 +30,32 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.159] - 2026-10-05
+
+### Added — vulnerabilities with govulncheck (GoLand parity G7)
+- Settings | Tools | Go | Code Quality, group govulncheck: "Check for vulnerabilities with govulncheck" (off by default: it downloads the vulnerability database)
+  runs `govulncheck -json ./...` in the background for every module at project open, 10 s after a go.mod / go.sum change and when the result is older than an
+  hour; results are kept per module in the plugin data directory (`vulncheck/`, keyed by go.mod + go.sum); runs and failures go to Plugin Logs under `vulncheck`.
+- "Vulnerable API usage (imports)" (`GoVulnerablePackageImport`, Go | Security, warning, on): `Package 'x' of module m@v is affected by GO-…: summary` on the import
+  (standard library: `… (fixed in Go 1.x.y)`); fix "Upgrade m to v" (`go get m@v` in the background).
+- "Vulnerable API usage (calls)" (`GoVulnerableCodeUsages`, Go | Security, warning, off by default as in GoLand): `Call to vulnerable function pkg.F (GO-…)` /
+  `Call to pkg.G reaches vulnerable function pkg.F (GO-…)` on the callee of the call govulncheck traced.
+- Go | Check Vulnerabilities: govulncheck over every module now (offers Install when missing); findings as navigable warnings in the Build window (calls in the
+  code, vulnerable modules on their go.mod require line) and a balloon "N vulnerabilities reachable from the code, … more in imported packages, … more in required modules".
+
+## [0.2.158] - 2026-10-05
+
+### Added — go.mod layout inspections (GoLand parity G7)
+- "Multiple 'require' directives can be merged in groups by dependency type" (`VgoRequireDirectivesMerge`, information): more require directives than `go mod tidy`
+  lays out (one direct block and one `// indirect` block); fix "Merge 'require' directives".
+- "Migration to Go workspace is possible" (`VgoMigrateFromReplacesToWorkspace`, warning): a `replace` to a local module directory with no go.work in or above the
+  module; fix "Create go.work" writes go.work (`go` of the module, at least 1.18; `use .` + `use <dir>`) and removes those replaces.
+- "Unresolved path 'x' in 'ignore' directive" (`VgoUnresolvedIgnorePath`, warning; Go 1.25 `ignore`): `./x` from the module root, a bare path at any depth
+  (search capped at 20 000 entries); fix "Remove the path".
+
+### Fixed
+- go.mod intentions and fixes: an edit at the end of the file no longer leaves an extra line break (`GoModDirectiveIntention.replaceLines` shared by all).
+
 ## [0.2.156] - 2026-10-05
 
 ### Added — typing (GoLand parity G8)

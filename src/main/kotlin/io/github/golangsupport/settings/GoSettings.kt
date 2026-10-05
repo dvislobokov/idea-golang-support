@@ -218,6 +218,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
          * so never written down: nobody has an explicit "on" to carry over, and the new switch starts off for everyone.
          */
         var golangciLint by property(false)
+        /** govulncheck in the background (at project open, after go.mod / go.sum change, hourly at most): off by default, it downloads the vulnerability database. */
+        var vulnerabilityCheck by property(false)
 
         /** Linters of the user whose report is the JSON of golangci-lint or SARIF ([io.github.golangsupport.lint.GoCustomLinters]). */
         var customLinters by list<GoCustomLinter>()
@@ -468,6 +470,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var golangciLint: Boolean
         get() = state.golangciLint
         set(value) { state.golangciLint = value }
+
+    var vulnerabilityCheck: Boolean
+        get() = state.vulnerabilityCheck
+        set(value) { state.vulnerabilityCheck = value }
 
     /** Copies: the table of the settings page edits its own rows, and BaseState notices only a new list. */
     var customLinters: List<GoCustomLinter>

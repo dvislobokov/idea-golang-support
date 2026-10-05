@@ -232,8 +232,8 @@
   разыменование nil уже были). Не сделано: межпроцедурная nil-ность (`GoMaybeNil`) — нужна сводка по функциям.
 - [x] (2026-10-05, 0.2.151) Неиспользуемые **функции, глобальные переменные, константы, типы** (не только экспортируемое) — поиск ссылок по индексу; экспортируемые — как GoLand
   (internal / приложение; типы только в `main`).
-- [ ] go.mod: [x] (2026-10-05, 0.2.152) **deprecated** модуль, **retracted** версия (данные `go list -m -u -json`); [ ] миграция replace → go.work, неразрешённый путь в `ignore`, слияние `require`.
-- [ ] **Vulnerable API usage** в коде (результат govulncheck — подсветка вызова) и импорт уязвимого пакета. 1 день.
+- [x] (2026-10-05, 0.2.152, 0.2.158) go.mod: **deprecated** модуль, **retracted** версия (данные `go list -m -u -json`), миграция replace → go.work, неразрешённый путь в `ignore`, слияние `require`.
+- [x] (2026-10-05, 0.2.159) **Vulnerable API usage** в коде (результат govulncheck — подсветка вызова, выключена по умолчанию, как у GoLand) и импорт уязвимого пакета; Go | Check Vulnerabilities.
 
 ### G8. Настройки и помощь при наборе (≈4 дня)
 - [ ] Imports: **Add unambiguous imports on the fly**, **Optimize imports on the fly**, **Show import popup**, исключения из импорта / completion. 1 день.

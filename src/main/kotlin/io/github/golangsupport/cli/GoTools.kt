@@ -228,7 +228,7 @@ enum class GoTool(val command: String, val module: String, val purpose: String, 
     DELVE("dlv", "github.com/go-delve/delve/cmd/dlv", "Debugger behind the Debug button", "https://github.com/go-delve/delve"),
     GOLANGCI_LINT("golangci-lint", "github.com/golangci/golangci-lint/v2/cmd/golangci-lint", "Optional linter: warnings in the editor once turned on on the Linters page", "https://golangci-lint.run"),
     GOIMPORTS("goimports", "golang.org/x/tools/cmd/goimports", "Reformat Code that also fixes the imports", "https://pkg.go.dev/golang.org/x/tools/cmd/goimports"),
-    GOVULNCHECK("govulncheck", "golang.org/x/vuln/cmd/govulncheck", "Vulnerabilities: known issues reachable from the code, in the Go Dependencies window", "https://go.dev/blog/vuln");
+    GOVULNCHECK("govulncheck", "golang.org/x/vuln/cmd/govulncheck", "Vulnerabilities: known issues reachable from the code, in the editor and the Go Dependencies window", "https://go.dev/blog/vuln");
 
     /** The path set in the settings, when the file is there. */
     fun configured(): File? = GoSettings.getInstance().toolPath(command).takeIf { it.isNotEmpty() }?.let(::File)?.takeIf { it.isFile }

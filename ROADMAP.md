@@ -180,6 +180,11 @@
   `go get` в фоне). Ревью Opus по всему диффу: исправлены NPE в Negate topmost, `$` в `.not`, `first` в Fill fields, гейт аннотатора; открытые замечания — `ReferencesSearch` на EDT в Migrate
   parameter to receiver (нужен прогресс), `location` инспекции затенения грузит AST чужого файла, списки `GoPrintfFunctions` / `excludedFunctions` без синхронизации, смещение клика
   линзы Implement interface не `SmartPsiElementPointer`, Update key value in tags у GoLand шире
+- [x] (2026-10-05, 0.2.158–0.2.159) G7, go.mod и уязвимости: `VgoRequireDirectivesMerge` / `VgoMigrateFromReplacesToWorkspace` / `VgoUnresolvedIgnorePath` (`GoModLayout`,
+  `GoModLayoutInspections`, правки через `GoModDirectiveEdits.mergeRequires` / `removeEntries`), govulncheck как инспекции над результатом сервиса `GoVulnService`
+  (`GoVulnOutput` — разбор потокового JSON v1.0.0, кэш по go.mod + go.sum, фон при открытии / через 10 с после изменения / раз в час), `GoVulnerablePackageImport`,
+  `GoVulnerableCodeUsages` (выкл.), Go | Check Vulnerabilities → Build window. Открыто: JSON-образец написан по схеме, с настоящим выводом govulncheck не сверён
+  (относительность путей, колонка позиции); время прогона на большом модуле; вживую не проверено.
 - [x] (2026-10-05, 0.2.153–0.2.156) G8, пункты 6–8: Optimize imports on save (`GoOptimizeImportsOnSave`, `OptimizeImportsProcessor` → `GoImportOptimizer`, строка в Actions on Save),
   Go Modules: Environment / vendoring / download (`GoModulesEnvironment`, `GoCli.buildEnvironment(subcommand, workDirectory)`, `GoModDownloads`, `GoVendoring`), Data Views | Go
   (`GoDebuggerSettings` на `xdebugger.settings`, `GoDataViews`, String() view через `call` в верхнем кадре с кэшем на остановку), набор (`}` — платформенный `indentBrace`,

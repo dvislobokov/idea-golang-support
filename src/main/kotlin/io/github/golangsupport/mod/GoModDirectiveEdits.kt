@@ -79,6 +79,66 @@ object GoModDirectiveEdits {
         return edit(lines, setOf(line), mapOf(above.end to listOf("\t" + entry(lines[line], verb))))
     }
 
+    /**
+     * Whether the requires stand as `go mod tidy` lays them out: one directive (a line or a block), or two of which one holds only direct
+     * requires and the other only `// indirect` ones. What `VgoRequireDirectivesMerge` is quiet on.
+     */
+    fun requiresAreGrouped(lines: List<String>): Boolean {
+        val requires = directives(lines).filter { it.verb == "require" }
+        if (requires.size < 2) return true
+        if (requires.size > 2) return false
+        val kinds = requires.map { d -> requireEntries(lines, d).filter { code(it).isNotEmpty() }.map(::isIndirect).toSet() }
+        return kinds.all { it.size == 1 } && kinds[0] != kinds[1]
+    }
+
+    /**
+     * "Merge 'require' directives": every require in one block of direct requires where the first require stands, then one block of
+     * `// indirect` ones, as `go mod tidy` writes them. A comment line in a block goes with the require below it. Null when there is
+     * nothing to merge.
+     */
+    fun mergeRequires(lines: List<String>): List<String>? {
+        val requires = directives(lines).filter { it.verb == "require" }
+        if (requires.size < 2) return null
+        val direct = ArrayList<String>()
+        val indirect = ArrayList<String>()
+        for (d in requires) {
+            val comments = ArrayList<String>()
+            for (e in requireEntries(lines, d)) {
+                if (code(e).isEmpty()) { comments += e; continue }
+                (if (isIndirect(e)) indirect else direct).apply { addAll(comments); add(e) }
+                comments.clear()
+            }
+            direct += comments
+        }
+        val merged = buildList {
+            if (direct.isNotEmpty()) { add("require ("); addAll(direct); add(")") }
+            if (direct.isNotEmpty() && indirect.isNotEmpty()) add("")
+            if (indirect.isNotEmpty()) { add("require ("); addAll(indirect); add(")") }
+        }
+        return edit(lines, requires.flatMapTo(HashSet()) { it.start..it.end }, mapOf(requires.first().start to merged)).takeIf { it != lines }
+    }
+
+    /**
+     * [lines] without the entries at [targets] (lines inside blocks or one-line directives); a block left with nothing but comments goes
+     * whole. The fixes that drop a `replace` or an `ignore` path.
+     */
+    fun removeEntries(lines: List<String>, targets: Set<Int>): List<String> {
+        val removed = HashSet(targets)
+        for (d in directives(lines)) {
+            if (!d.block) continue
+            val inner = d.start + 1 until d.end
+            if (inner.any { it in targets } && inner.all { it in targets || code(lines[it]).isEmpty() }) removed += d.start..d.end
+        }
+        return edit(lines, removed, emptyMap())
+    }
+
+    /** The entries of a require directive, each with its leading tab; blank lines of a block are dropped. */
+    private fun requireEntries(lines: List<String>, d: Directive): List<String> =
+        if (!d.block) listOf("\t" + entry(lines[d.start], d.verb)) else lines.subList(d.start + 1, d.end).filter { it.isNotBlank() }
+
+    /** `// indirect` or `// indirect; comment`, as `modfile` reads it. */
+    private fun isIndirect(line: String): Boolean = line.substringAfter("//", "").trim().let { it == "indirect" || it.startsWith("indirect;") }
+
     /** The lines of the `require` directive (or block) at [line], or null when [line] is not in one. */
     fun requireAt(lines: List<String>, line: Int): Directive? = directives(lines).firstOrNull { it.verb == "require" && line in it.start..it.end }
 

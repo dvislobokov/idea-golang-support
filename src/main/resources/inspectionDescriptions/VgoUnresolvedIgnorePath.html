@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports a path of the <code>ignore</code> directive (Go 1.25) that names nothing in the module: <code>./x</code> is looked for from the
+module root, a path without <code>./</code> also at any depth of the module (in a very large module that search is skipped and the path
+is not reported).
+The quick fix <b>Remove the path</b> deletes the entry, and an <code>ignore ( )</code> block left empty.
+</body>
+</html>

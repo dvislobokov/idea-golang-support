@@ -39,18 +39,24 @@ abstract class GoModDirectiveIntention(private val title: String) : IntentionAct
     override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
         val document = document(project, file) ?: return
         if (editor == null) return
-        val old = document.immutableCharSequence.split('\n')
-        val new = edit(old, document.getLineNumber(editor.caretModel.offset)) ?: return
-        val (from, to, lines) = GoModDirectiveEdits.change(old, new)
-        if (from >= old.size) {
-            document.insertString(document.textLength, lines.joinToString("") { "\n" + it })
+        val new = edit(document.immutableCharSequence.split('\n'), document.getLineNumber(editor.caretModel.offset)) ?: return
+        replaceLines(project, document, new)
+    }
+
+    companion object {
+        /** Puts [new] lines into [document] by the smallest replacement ([GoModDirectiveEdits.change]); the intentions and the go.mod fixes share it. */
+        fun replaceLines(project: Project, document: Document, new: List<String>) {
+            val old = document.immutableCharSequence.split('\n')
+            val (from, to, lines) = GoModDirectiveEdits.change(old, new)
+            when {
+                from >= old.size -> document.insertString(document.textLength, lines.joinToString("") { "\n" + it })
+                to < old.size -> document.replaceString(document.getLineStartOffset(from), document.getLineStartOffset(to), lines.joinToString("") { it + "\n" })
+                // the tail of the file: from the break before the first changed line, or the last kept line keeps a break too many
+                from > 0 -> document.replaceString(document.getLineEndOffset(from - 1), document.textLength, lines.joinToString("") { "\n" + it })
+                else -> document.replaceString(0, document.textLength, lines.joinToString("\n"))
+            }
             PsiDocumentManager.getInstance(project).commitDocument(document)
-            return
         }
-        val start = document.getLineStartOffset(from)
-        if (to < old.size) document.replaceString(start, document.getLineStartOffset(to), lines.joinToString("") { it + "\n" })
-        else document.replaceString(start, document.textLength, lines.joinToString("\n"))
-        PsiDocumentManager.getInstance(project).commitDocument(document)
     }
 }
 

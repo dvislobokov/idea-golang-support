@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports a call in the module's code that govulncheck traced to a vulnerable function: <code>Call to vulnerable function pkg.F (GO-YYYY-NNNN)</code>,
+or <code>Call to pkg.G reaches vulnerable function pkg.F</code> when the vulnerable function is reached through other code.
+The positions come from the last govulncheck run (see <i>Vulnerable API usage (imports)</i>); a call is shown only where its line still
+calls that function. Off by default.
+</body>
+</html>

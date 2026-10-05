@@ -882,6 +882,31 @@ gopls `Create …`, `Implement …` and `Declare missing methods …` actions th
   (`LocalInspectionTool.processFile`, stopped at 100), cached on the file by document stamp and the set of enabled tools; the daemon's highlights would be
   cheaper, but code vision and the inspection pass run in no fixed order. Tests: `inspections.gofix.GoSyntaxUpdateTest` (10, with a test-only `GoFixTestInspection`).
 
+### go.mod layout, workspaces, ignore paths; govulncheck (host `mod/GoModLayout*.kt`, `lint/GoVuln*.kt`; PLAN.md G7 lines 4-5)
+- `VgoRequireDirectivesMerge` (`GoModRequireDirectivesMergeInspection`, INFORMATION): more `require` directives than `go mod tidy` lays out (one direct block +
+  one `// indirect` block; `GoModDirectiveEdits.requiresAreGrouped`). Fix "Merge 'require' directives" = `GoModDirectiveEdits.mergeRequires` (direct block where
+  the first require stands, indirect block below; a comment line goes with the require under it). The range is the whole directive.
+- `VgoMigrateFromReplacesToWorkspace` (`GoModMigrateToWorkspaceInspection`, WARNING): a `replace` to a local directory with a go.mod, no go.work in the module
+  directory or above. Fix "Create go.work" (`GoModLayout.migrateToWorkspace`): go.work next to go.mod (`go` of the module, at least 1.18; `use .` + `use dir`),
+  those replaces removed by `GoModDirectiveEdits.removeEntries` (an emptied block goes whole). Pure text, no `go work`.
+- `VgoUnresolvedIgnorePath` (`GoModUnresolvedIgnorePathInspection`, WARNING): an `ignore` path (Go 1.25; `GoModFileParser.directives` already knew the verb)
+  that is not there: `./x` from the module root, a bare path also at any depth (VFS walk capped at 20 000 entries, then not reported). Fix "Remove the path".
+- The go.mod intentions and fixes share `GoModDirectiveIntention.replaceLines` (smallest replacement); a change at the end of the file no longer leaves a
+  break too many.
+- govulncheck: `GoVulnOutput` parses the `-json` stream (pretty-printed `config` / `progress` / `osv` / `finding` objects, lenient Gson reader, a truncated
+  stream keeps what was read; null without `config`), derives imported vulnerable packages (`packages`), the module's call sites nearest to each vulnerable
+  symbol (`callSites`: the first trace frame of the module with a position, callee = the frame before it), counts by level (`summary`) and Build-window
+  lines (`describe`). `GoVulnCache`: key = SHA-256 of go.mod + go.sum, disk format `govulncheck-cache 1` + key + time + raw stdout.
+- `GoVulnService` (project): results per module root; runs in the background while `GoSettings.vulnerabilityCheck` is on (off by default; at project open,
+  10 s after a go.mod / go.sum VFS change, refreshed when older than an hour; a failed run or a missing tool is not retried for the same files within the
+  hour), kept in `GoPluginData.root()/vulncheck`, log category `vulncheck`. Inspections instead of an external annotator (as golangci-lint): one run covers a
+  module and takes minutes, and as inspections the checks have ids in the profile.
+- `GoVulnerablePackageImport` (WARNING, on) on the import string, fix "Upgrade m to v" (`go get` through `GoModUpdates.goGet`; none for stdlib);
+  `GoVulnerableCodeUsages` (WARNING, off) on the callee name of the call on the reported line (by name, so a changed line shows nothing).
+- Go | Check Vulnerabilities (`Go.CheckVulnerabilities`, `GoCheckVulnerabilitiesAction`): every module now, the JSON kept out of the Build window, navigable
+  `file:line:col:` warnings from `describe`, a balloon with the summary; the result goes to `GoVulnService`. Tests: `GoModLayoutTest`, `GoModLayoutInspectionsTest`,
+  `GoVulnOutputTest`, `GoVulnInspectionsTest`.
+
 ### Settings and typing help (host; PLAN.md G8, items 6–8)
 - Optimize imports on save: `lang.GoOptimizeImportsOnSave` (`actionOnSave`) runs `OptimizeImportsProcessor` (so `lang.importOptimizer` =
   `GoImportOptimizer`) over the Go files being saved when `GoSettings.optimizeImportsOnSave` (Settings | Go | Formatting, off) is on and the platform's

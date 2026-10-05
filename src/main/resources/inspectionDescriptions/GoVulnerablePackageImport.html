@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports an import of a package that govulncheck found vulnerable in the module version the project uses:
+<code>Package 'x' of module m@v is affected by GO-YYYY-NNNN: summary</code>.
+The quick fix <b>Upgrade m to v</b> runs <code>go get m@v</code> (the fixed version) in the background; for the standard library the
+message names the Go release with the fix.
+The results come from <code>govulncheck -json ./...</code>, run in the background when Settings | Tools | Go | Linters,
+<i>Check for vulnerabilities with govulncheck</i> is on (at project open, after go.mod / go.sum change, at most hourly otherwise),
+or by Go | Check Vulnerabilities. Nothing is reported before the first run.
+</body>
+</html>
