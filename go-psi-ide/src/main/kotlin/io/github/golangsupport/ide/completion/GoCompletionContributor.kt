@@ -170,7 +170,10 @@ private class GoSmartProvider : CompletionProvider<CompletionParameters>(), Dumb
         }
         GoScopeCandidates(context).collect(context.reference ?: context.typeReference ?: context.leaf, GoScopeCandidates.Filter.ALL, candidates)
         candidates.filterTo(out, fits)
-        GoSmartLiterals(context).collect(expected, out)
+        GoSmartLiterals(context).let {
+            it.collect(expected, out)
+            it.collectImplementations(expected, candidates, out)
+        }
         GoCompletionContributor.emit(out, context, result)
         GoBasicCompletion.later(context, result, candidates, typesOnly = false, accept = fits)
     }
