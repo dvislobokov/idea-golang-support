@@ -46,6 +46,7 @@ import io.github.golangsupport.problems.GoProjectProblems
 import io.github.golangsupport.run.GoRunConfigurationGenerator
 import io.github.golangsupport.sdk.GoFileTypeCheck
 import io.github.golangsupport.sdk.GoToolchainCheckActivity
+import io.github.golangsupport.cli.GoPluginLog
 import io.github.golangsupport.settings.GoSettings
 import java.util.concurrent.Callable
 
@@ -104,10 +105,17 @@ class GoProjectPresence(private val project: Project) : Disposable {
     private fun update(value: Boolean) {
         if (project.isDisposed) return
         val before = published ?: guess()
+        val first = computed == null
         computed = value
         published = value
+        // the menu Go, the tool windows and the widget hang on this answer: when a user reports no menu, the journal says what was decided and why
+        if (first || before != value) GoPluginLog.info("go", "Go presence of ${project.name}: $value (by $how; dumb: ${DumbService.isDumb(project)}; " +
+            "project dir: ${project.guessProjectDir()?.path}; .go files are of type '${FileTypeManager.getInstance().getFileTypeByExtension(GoFileType.defaultExtension).name}')")
         if (before != value) project.messageBus.syncPublisher(TOPIC).presenceChanged(value)
     }
+
+    /** How the last [compute] answered: the index, a walk of the content roots, or the guess from the project directory. For the journal. */
+    @Volatile private var how: String = "nothing yet"
 
     private fun guess(): Boolean = guessed ?: ReadAction.compute<Boolean, RuntimeException> { !project.isDisposed && guessFromDirectory(project.guessProjectDir()) }
         .also { guessed = it }
@@ -115,8 +123,10 @@ class GoProjectPresence(private val project: Project) : Disposable {
     /** Under a read action. In dumb mode the index is not there: the content roots are walked, or the answer known so far is kept. */
     private fun compute(): Boolean {
         if (project.isDisposed) return false
-        if (!DumbService.isDumb(project)) return indexed()
-        return computed ?: walk() ?: guess()
+        if (!DumbService.isDumb(project)) return indexed().also { how = "the index" }
+        computed?.let { how = "the earlier answer (dumb mode)"; return it }
+        walk()?.let { how = "a walk of the content roots (dumb mode)"; return it }
+        return guess().also { how = "the look at the project directory (dumb mode, too big to walk)" }
     }
 
     private fun indexed(): Boolean {
@@ -267,6 +277,15 @@ class GoProjectActionGroup : DefaultActionGroup(), DumbAware {
 
     override fun update(e: AnActionEvent) {
         val project = e.project
-        e.presentation.isVisible = project != null && GoProjectPresence.hasGoFiles(project)
+        val visible = project != null && GoProjectPresence.hasGoFiles(project)
+        e.presentation.isVisible = visible
+        // once per project and place: a hidden menu is what users report, and the journal then says the menu was asked and answered no
+        if (!visible && project != null && HIDDEN_LOGGED.add("${project.locationHash}:${e.place}")) {
+            GoPluginLog.info("go", "Menu group ${templatePresentation.text.orEmpty().ifEmpty { "Go" }} hidden in '${e.place}' of ${project.name}: no Go files known yet")
+        }
+    }
+
+    private companion object {
+        val HIDDEN_LOGGED: MutableSet<String> = java.util.concurrent.ConcurrentHashMap.newKeySet()
     }
 }

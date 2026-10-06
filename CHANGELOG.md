@@ -30,6 +30,15 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.194] - 2026-10-06
+
+### Added — the journal says why the Go menu is shown or hidden
+- Go | Plugin Logs (`~/idea-golang-logs/plugin/`) records the answer of the Go-presence check of a project when it is first computed and
+  whenever it changes: the answer, what gave it (the index, a walk of the content roots in dumb mode, the look at the project directory),
+  the project directory and which file type owns `.go`; and once per project and place, that the menu group Go was asked and hidden. For
+  a report "there is no Go menu" the journal now tells whether the plugin decided the project has no Go files or the menu is simply
+  folded into the main-menu button of the new UI
+
 ## [0.2.193] - 2026-10-06
 
 ### Fixed — a 14.6 s UI freeze at the first project open after an update (seen in a GIGA IDE log, Linux)
