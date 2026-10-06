@@ -48,7 +48,9 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
 - When programs cannot run in the default data directory (the IDE cache under `~/.cache` on a noexec mount or under an execution policy:
   the bundled delve was never built there), the data moves by itself to `/home/work/<user>@<domain>/.cache/go-support` when such a work
   home exists and allows running, with a notification; the work home is looked up both as `user.name` and with the swapped
-  `domain@user` / `user@domain` of a domain account. Without one, the old notification with the choice of a directory stays
+  `domain@user` / `user@domain` of a domain account, and only a work home owned by this user and not writable by the group or others is
+  taken (the name is guessed: a directory of that name made by someone else is no place to build and run delve from). Without one, the
+  old notification with the choice of a directory stays
 
 ## [0.2.192] - 2026-10-06
 

@@ -15,6 +15,7 @@ import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.settings.GoToolsConfigurable
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.attribute.PosixFilePermission
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -56,9 +57,21 @@ object GoPluginRelocation {
     /** The fallback directory inside the work home: `/home/work/<user>@<domain>/.cache/go-support`. */
     const val FALLBACK = ".cache/go-support"
 
-    /** [FALLBACK] under the first work home that exists ([workHomes]) and where programs can run; null elsewhere. */
-    fun suggestion(): Path? = workHomes(System.getProperty("user.name"), System.getProperty("user.home")).firstOrNull { Files.isDirectory(it) }
-        ?.resolve(FALLBACK)?.takeIf { GoExecutionProbe.check(it) == GoExecutionProbe.Result.OK }
+    /**
+     * [FALLBACK] under the first work home that exists ([workHomes]), belongs to this user ([ownedByMe]) and where programs can run; null
+     * elsewhere. The name is guessed from the account, so a directory of that name made by someone else must not become the place the
+     * plugin builds and runs delve from.
+     */
+    fun suggestion(): Path? = workHomes(System.getProperty("user.name"), System.getProperty("user.home")).firstOrNull { Files.isDirectory(it) && ownedByMe(it) }
+        ?.resolve(FALLBACK)?.takeIf { GoExecutionProbe.check(it) == GoExecutionProbe.Result.OK && ownedByMe(it) }
+
+    /** Owned by the user of this process and not writable by others; false when that cannot be told. */
+    fun ownedByMe(directory: Path): Boolean = runCatching {
+        val me = ProcessHandle.current().info().user().orElse(null) ?: return false
+        if (Files.getOwner(directory).name != me) return false
+        val permissions = Files.getPosixFilePermissions(directory)
+        PosixFilePermission.OTHERS_WRITE !in permissions && PosixFilePermission.GROUP_WRITE !in permissions
+    }.getOrDefault(false)
 
     /**
      * The work homes a machine may have, by the account: `/home/work/<user.name>` and, for domain accounts whose home is
