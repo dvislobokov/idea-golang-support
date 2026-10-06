@@ -12,16 +12,25 @@ import java.util.zip.GZIPOutputStream
 /** What a package gives to those who import it: a function, a type, a constant or a variable with an upper-case name. */
 data class GoSymbol(val name: String, val kind: GoDeclarationKind, val signature: String?)
 
-/** The exported names of one file; a file that exports nothing still votes for the name of the package of its directory. */
-data class GoFileExports(val packageName: String, val symbols: List<GoSymbol>)
+/** An exported method of an exported type: `(*Builder) WriteString(s string) (int, error)` is `Builder`, `WriteString`, the signature, a pointer receiver. */
+data class GoMethodSymbol(val receiver: String, val name: String, val signature: String?, val pointer: Boolean)
 
-class GoPackageSymbols(val importPath: String, val name: String, val symbols: List<GoSymbol>)
+/** The exported names of one file; a file that exports nothing still votes for the name of the package of its directory. */
+data class GoFileExports(val packageName: String, val symbols: List<GoSymbol>, val methods: List<GoMethodSymbol> = emptyList())
+
+class GoPackageSymbols(val importPath: String, val name: String, val symbols: List<GoSymbol>, val methods: List<GoMethodSymbol> = emptyList()) {
+    /** The methods of the type [receiver] of this package, by name. */
+    fun methodsOf(receiver: String): List<GoMethodSymbol> = methods.filter { it.receiver == receiver }
+}
 
 /**
  * The packages of a module of one version, or of the standard library of one version of Go: what never changes once it is there.
  * Or the packages of the project itself ([project]), which change and are kept by the index of the platform, not by a file.
+ * [indirect]: a module of the build list no go.mod of the project requires directly; not kept in the file (the same module is direct elsewhere).
  */
-class GoModuleSymbols(val key: String, val standard: Boolean, val packages: List<GoPackageSymbols>, val project: Boolean = false)
+class GoModuleSymbols(val key: String, val standard: Boolean, val packages: List<GoPackageSymbols>, val project: Boolean = false, val indirect: Boolean = false) {
+    fun asIndirect(): GoModuleSymbols = if (indirect) this else GoModuleSymbols(key, standard, packages, project, true)
+}
 
 /**
  * Reads the exported declarations of the packages under a directory, with [GoSourceScanner]: no compiler, no `go list`, no PSI.
@@ -67,7 +76,17 @@ object GoCatalogueScanner {
         val file = GoSourceScanner.scan(text)
         val symbols = file.declarations.filter { it.isExported && it.kind != GoDeclarationKind.METHOD }
             .map { GoSymbol(it.name, it.kind, it.signature?.take(MAX_SIGNATURE)) }
-        return GoFileExports(file.packageName ?: return null, symbols)
+        val methods = file.declarations.filter { it.kind == GoDeclarationKind.METHOD && it.isExported && it.receiver?.firstOrNull()?.isUpperCase() == true }
+            .map { GoMethodSymbol(it.receiver!!, it.name, it.signature?.take(MAX_SIGNATURE), isPointerReceiver(text, it.range.startOffset, it.nameRange.startOffset)) }
+        return GoFileExports(file.packageName ?: return null, symbols, methods)
+    }
+
+    /** `func (s *Server) Start`: a star between the brackets of the receiver; type parameters of a receiver are names only. */
+    private fun isPointerReceiver(text: CharSequence, from: Int, to: Int): Boolean {
+        val receiver = text.subSequence(from.coerceIn(0, text.length), to.coerceIn(0, text.length))
+        val open = receiver.indexOf('(')
+        val close = receiver.indexOf(')')
+        return open >= 0 && close > open && receiver.subSequence(open, close).contains('*')
     }
 
     /** The package the files of one directory make; null for a program and for a package that exports nothing. */
@@ -77,7 +96,12 @@ object GoCatalogueScanner {
         if (name == "main") return null
         val symbols = LinkedHashMap<String, GoSymbol>()
         for (file in files) if (file.packageName == name) for (symbol in file.symbols) symbols.putIfAbsent(symbol.name, symbol)
-        return if (symbols.isEmpty()) null else GoPackageSymbols(importPath, name, symbols.values.sortedBy { it.name })
+        if (symbols.isEmpty()) return null
+        // a method of a type the package does not export is out of reach of an importer by name; of one exported, it is reached through a value
+        val types = symbols.values.filter { GoCatalogueInsertion.isType(it) }.mapTo(HashSet()) { it.name }
+        val methods = LinkedHashMap<String, GoMethodSymbol>()
+        for (file in files) if (file.packageName == name) for (method in file.methods) if (method.receiver in types) methods.putIfAbsent(method.receiver + "." + method.name, method)
+        return GoPackageSymbols(importPath, name, symbols.values.sortedBy { it.name }, methods.values.sortedWith(compareBy({ it.receiver }, { it.name })))
     }
 
     /**
@@ -97,8 +121,8 @@ object GoCatalogueScanner {
 object GoCatalogueFiles {
     private const val MAGIC = 0x476F4361 // "GoCa"
 
-    // bump when the scanner starts to see declarations differently, or the format changes
-    const val VERSION = 2
+    // bump when the scanner starts to see declarations differently, or the format changes; 3: the methods of the exported types
+    const val VERSION = 3
 
     fun write(file: File, module: GoModuleSymbols) {
         file.parentFile?.mkdirs()
@@ -117,6 +141,13 @@ object GoCatalogueFiles {
                     out.writeUTF(symbol.name)
                     out.writeByte(symbol.kind.ordinal)
                     out.writeUTF(symbol.signature.orEmpty())
+                }
+                out.writeInt(pack.methods.size)
+                for (method in pack.methods) {
+                    out.writeUTF(method.receiver)
+                    out.writeUTF(method.name)
+                    out.writeUTF(method.signature.orEmpty())
+                    out.writeBoolean(method.pointer)
                 }
             }
         }
@@ -138,9 +169,9 @@ object GoCatalogueFiles {
                 val packages = List(input.readInt()) {
                     val importPath = input.readUTF()
                     val name = input.readUTF()
-                    GoPackageSymbols(importPath, name, List(input.readInt()) {
-                        GoSymbol(input.readUTF(), kinds[input.readByte().toInt()], input.readUTF().ifEmpty { null })
-                    })
+                    val symbols = List(input.readInt()) { GoSymbol(input.readUTF(), kinds[input.readByte().toInt()], input.readUTF().ifEmpty { null }) }
+                    val methods = List(input.readInt()) { GoMethodSymbol(input.readUTF(), input.readUTF(), input.readUTF().ifEmpty { null }, input.readBoolean()) }
+                    GoPackageSymbols(importPath, name, symbols, methods)
                 }
                 GoModuleSymbols(key, standard, packages)
             }
@@ -156,15 +187,38 @@ object GoCatalogueFiles {
  * read: a sorted array and a binary search, so that a list for every key typed costs nothing.
  */
 class GoSymbolIndex(modules: List<GoModuleSymbols>) {
-    class Entry(val symbol: GoSymbol, val pack: GoPackageSymbols, val standard: Boolean, val project: Boolean = false) {
+    class Entry(val symbol: GoSymbol, val pack: GoPackageSymbols, val standard: Boolean, val project: Boolean = false, val indirect: Boolean = false) {
         internal val key: String = symbol.name.lowercase()
 
-        /** The packages of the project are what its code is written with; then the standard library; then the modules. */
-        internal val origin: Int get() = if (project) 0 else if (standard) 1 else 2
+        /** The packages of the project are what its code is written with; then the standard library; then the modules required directly; then the rest of the build list. */
+        internal val origin: Int get() = originOf(project, standard, indirect)
     }
 
-    private val entries: Array<Entry> = modules.flatMap { module -> module.packages.flatMap { pack -> pack.symbols.map { Entry(it, pack, module.standard, module.project) } } }
+    private val entries: Array<Entry> = modules.flatMap { module -> module.packages.flatMap { pack -> pack.symbols.map { Entry(it, pack, module.standard, module.project, module.indirect) } } }
         .sortedWith(compareBy<Entry> { it.key }.thenBy { it.pack.importPath }).toTypedArray()
+
+    private val byPath: Map<String, GoPackageSymbols> by lazy { modules.flatMap { it.packages }.associateBy { it.importPath } }
+
+    /** The exported methods of the exported type [type] of the package [importPath]; empty for a package or a type the catalogue does not know. */
+    fun methodsOf(importPath: String, type: String): List<GoMethodSymbol> = byPath[importPath]?.methodsOf(type).orEmpty()
+
+    /** The functions, variables and constants by the key of the type of their value ([GoCatalogueSmart.resultKey]), built on the first smart list. */
+    private val byResult: Map<String, List<Entry>> by lazy {
+        val result = HashMap<String, MutableList<Entry>>()
+        for (entry in entries) GoCatalogueSmart.resultKey(entry.symbol, entry.pack.importPath)?.let { result.getOrPut(it) { ArrayList() } += entry }
+        result
+    }
+
+    /**
+     * What gives a value of one of the types [keys] ([GoCatalogueSmart.expectedKeys]), the best first: a package of [preferred] (imported
+     * by the file), then by origin, then by name; no more than [perPackage] of one package and [limit] in all.
+     */
+    fun fitting(keys: Collection<String>, limit: Int, perPackage: Int, preferred: Set<String> = emptySet(), visible: (Entry) -> Boolean = { true }): List<Entry> {
+        val all = keys.flatMap { byResult[it].orEmpty() }.distinct().filter(visible)
+            .sortedWith(compareBy<Entry> { it.pack.importPath !in preferred }.thenBy { it.origin }.thenBy { it.pack.importPath }.thenBy { it.symbol.name })
+        val perPack = HashMap<String, Int>()
+        return all.filter { perPack.merge(it.pack.importPath, 1, Int::plus)!! <= perPackage }.take(limit)
+    }
 
     val size: Int get() = entries.size
     val packages: Int = modules.sumOf { it.packages.size }
@@ -174,7 +228,7 @@ class GoSymbolIndex(modules: List<GoModuleSymbols>) {
 
     /** The packages by the names they are used by: of the project, of the standard library, of the modules; a shorter path before a longer one. */
     private val byName: Map<String, List<Pair<GoPackageSymbols, Set<String>>>> by lazy {
-        modules.flatMap { module -> module.packages.map { (if (module.project) 0 else if (module.standard) 1 else 2) to it } }
+        modules.flatMap { module -> module.packages.map { originOf(module.project, module.standard, module.indirect) to it } }
             .sortedWith(compareBy<Pair<Int, GoPackageSymbols>> { it.first }.thenBy { it.second.importPath.count { c -> c == '/' } }.thenBy { it.second.importPath })
             .groupBy({ it.second.name }) { it.second to it.second.symbols.mapTo(HashSet()) { s -> s.name } }
     }
@@ -225,5 +279,12 @@ class GoSymbolIndex(modules: List<GoModuleSymbols>) {
     companion object {
         val EMPTY = GoSymbolIndex(emptyList())
         private const val MAX_MATCHES = 2000
+
+        internal fun originOf(project: Boolean, standard: Boolean, indirect: Boolean): Int = when {
+            project -> 0
+            standard -> 1
+            indirect -> 3
+            else -> 2
+        }
     }
 }

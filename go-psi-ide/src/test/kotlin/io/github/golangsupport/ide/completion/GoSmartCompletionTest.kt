@@ -69,6 +69,40 @@ class GoSmartCompletionTest : GoCompletionTestBase() {
         assertTrue(items.toString(), items.indexOf("sh") < items.indexOf("sq"))
     }
 
+    private val shapes = """
+            package main
+
+            type Shape interface{ Area() float64 }
+            type Circle struct{ R float64 }
+            type Square struct{ S float64 }
+            type Plain struct{}
+
+            func (c Circle) Area() float64  { return c.R }
+            func (s *Square) Area() float64 { return s.S }
+
+    """
+
+    /** GoLand's probe 13: implementations of the expected interface as literals, `&` where the pointer has the methods. */
+    fun testSmartImplementationsOfTheExpectedInterface() {
+        val items = smart(shapes + """
+            func main() {
+                var c Circle
+                var sq Square
+                var s Shape = <caret>
+                _, _, _ = c, sq, s
+            }
+        """)
+        assertContainsAll(items, "Circle{}", "&Square{}", "&sq", "c", "nil")
+        assertContainsNone(items, "Square{}", "&Circle{}", "Plain{}", "&Plain{}", "sq", "&c")
+    }
+
+    fun testSmartPointerImplementationIsWrittenWithTheCaretInsideBraces() {
+        myFixture.configureByText("main.go", go(shapes + "func main() {\n    var s Shape = Squ<caret>\n    _ = s\n}\n"))
+        val items = myFixture.complete(CompletionType.SMART)
+        if (items != null) select("&Square{}")
+        myFixture.checkResult(go(shapes + "func main() {\n    var s Shape = &Square{<caret>}\n    _ = s\n}\n"))
+    }
+
     fun testSmartSynthesizedLiterals() {
         assertContainsAll(smart(types + "func main() {\n    var p *User = <caret>\n    _ = p\n}\n"), "&User{}", "nil")
         assertContainsAll(smart("package main\n\nfunc main() {\n    var m map[string]int = <caret>\n    _ = m\n}\n"), "make(map[string]int)", "nil")

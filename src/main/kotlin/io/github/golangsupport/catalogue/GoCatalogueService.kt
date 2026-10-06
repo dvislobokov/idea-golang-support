@@ -29,6 +29,8 @@ import io.github.golangsupport.cli.GoEnvironment
 import io.github.golangsupport.mod.GoModFileType
 import io.github.golangsupport.mod.GoModule
 import io.github.golangsupport.mod.GoModulesService
+import io.github.golangsupport.project.api.GoModuleGraphProvider
+import org.jetbrains.annotations.TestOnly
 import io.github.golangsupport.settings.GoSettings
 import io.github.golangsupport.view.GoDependencyNode
 import java.io.File
@@ -36,7 +38,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * The catalogue of what the project may import: the standard library and the modules its go.mod files require directly. A module of
+ * The catalogue of what the project may import: the standard library, the modules its go.mod files require directly and, ranked below
+ * them, the rest of the build list (the indirect dependencies, at most [MAX_INDIRECT] modules). A module of
  * a version never changes in the module cache, and the standard library changes with the version of Go, so each is read once, kept
  * as a file for every project of the machine ([GoCatalogueFiles]) and in memory for every project of the IDE.
  *
@@ -49,7 +52,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Service(Service.Level.PROJECT)
 class GoCatalogueService(private val project: Project) : Disposable {
     /** A directory of sources and the name its contents are kept by. */
-    private class Source(val key: String, val directory: File, val modulePath: String, val standard: Boolean)
+    private class Source(val key: String, val directory: File, val modulePath: String, val standard: Boolean, val indirect: Boolean = false)
+
+    /** A module of the build list no go.mod of the project requires directly. */
+    class BuildListModule(val path: String, val version: String, val directory: File)
 
     /** Everything there is, as it was put together last. */
     @Volatile var index: GoSymbolIndex = GoSymbolIndex.EMPTY
@@ -78,6 +84,13 @@ class GoCatalogueService(private val project: Project) : Disposable {
                 ownPackages = packages
                 assemble()
             }
+    }
+
+    /** The modules of the catalogue in a test, without a scan: the packages of the project are added as they are. */
+    @TestOnly
+    fun useModulesForTests(modules: List<GoModuleSymbols>) {
+        dependencies = modules
+        assemble()
     }
 
     @Synchronized
@@ -119,7 +132,7 @@ class GoCatalogueService(private val project: Project) : Disposable {
         object : Task.Backgroundable(project, "Reading Go packages", true) {
             override fun run(indicator: ProgressIndicator) {
                 val started = System.currentTimeMillis()
-                val sources = sources(modules)
+                val sources = sources(modules) + indirectSources(modules, indicator)
                 roots = sources
                 indicator.isIndeterminate = false
                 var scanned = 0
@@ -127,7 +140,7 @@ class GoCatalogueService(private val project: Project) : Disposable {
                     indicator.checkCanceled()
                     indicator.fraction = i.toDouble() / sources.size
                     indicator.text2 = source.key
-                    load(source, rescan) { scanned++ }
+                    load(source, rescan) { scanned++ }?.let { if (source.indirect) it.asIndirect() else it }
                 }
                 dependencies = loaded
                 assemble()
@@ -179,6 +192,17 @@ class GoCatalogueService(private val project: Project) : Disposable {
         return result.values.toList()
     }
 
+    /** The rest of the build list of every module of the project, from the module graph of the project model (go-psi): pure MVS or `go list -m all`. */
+    private fun indirectSources(modules: List<GoModule>, indicator: ProgressIndicator): List<Source> {
+        val direct = modules.flatMapTo(HashSet()) { module -> module.content.directRequires.map { it.path } } + modules.map { it.path }
+        val graphs = modules.mapNotNull { module ->
+            indicator.checkCanceled()
+            runCatching { ReadAction.compute<List<io.github.golangsupport.project.api.GoModule>, Exception> { GoModuleGraphProvider.getInstance(project).graphFor(module.root)?.modules.orEmpty() } }
+                .onFailure { if (it is ProcessCanceledException) throw it }.getOrNull()
+        }
+        return indirectModules(graphs.flatten(), direct, MAX_INDIRECT).map { Source("${it.path}=${it.path}@${it.version}", it.directory, it.path, false, indirect = true) }
+    }
+
     private fun load(source: Source, rescan: Boolean, onScan: () -> Unit): GoModuleSymbols? {
         if (!rescan) LOADED[source.key]?.let { return it }
         val file = File(DIRECTORY, GoCatalogueFiles.fileName(source.key))
@@ -202,6 +226,20 @@ class GoCatalogueService(private val project: Project) : Disposable {
     companion object {
         private val LOG = logger<GoCatalogueService>()
         private const val DELAY_MS = 2_000
+
+        /** Indirect modules kept in the catalogue: a big go.mod has hundreds; each is scanned once per version, in the background. */
+        const val MAX_INDIRECT = 200
+
+        /**
+         * The modules of [buildList] that are not main modules, not in [direct], downloaded, not replaced by a local directory: in build-list
+         * order, each path once, no more than [limit].
+         */
+        fun indirectModules(buildList: List<io.github.golangsupport.project.api.GoModule>, direct: Set<String>, limit: Int): List<BuildListModule> =
+            buildList.asSequence()
+                .filter { !it.isMain && it.path !in direct && it.version != null && it.dir != null && it.replacement.let { r -> r == null || r.version != null } }
+                .distinctBy { it.path }
+                .mapNotNull { m -> m.dir?.toFile()?.takeIf { it.isDirectory }?.let { BuildListModule(m.path, m.version!!, it) } }
+                .take(limit).toList()
 
         /** The modules read in this IDE, whatever the project: a second project with the same dependencies reads nothing. */
         private val LOADED = ConcurrentHashMap<String, GoModuleSymbols>()
