@@ -66,15 +66,12 @@ class GoChainCandidates(private val context: GoCompletionContext) {
             if (!names.add(field.name)) continue
             result += GoCandidate(
                 field.name, GoCandidateKind.FIELD, GoScopeLevel.UNIMPORTED + depth, field.declaration, valueType = field.type,
-                tailSupplier = { " " + GoLookupElementFactory.typeText(field.type) }, lookupString = "${step.text}.${field.name}", lookupStrings = listOf(field.name),
+                typeSupplier = { GoLookupElementFactory.typeText(field.type) }, lookupString = "${step.text}.${field.name}", lookupStrings = listOf(field.name),
             )
         }
         for (m in GoLookup.methodSet(methodSetType(type, step.addressable))) {
             if (!members.visible(m.isExported, m.pkgPath) || !names.add(m.name)) continue
-            result += GoCandidate(
-                m.name, GoCandidateKind.METHOD, GoScopeLevel.UNIMPORTED, m.declaration, valueType = m.signature,
-                tailSupplier = { GoLookupElementFactory.signatureTail(m.signature) }, lookupString = "${step.text}.${m.name}", lookupStrings = listOf(m.name),
-            )
+            result += members.methodCandidate(m, 0, GoScopeLevel.UNIMPORTED, lookupString = "${step.text}.${m.name}", lookupStrings = listOf(m.name))
         }
         return result
     }

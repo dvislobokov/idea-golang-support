@@ -229,8 +229,8 @@ class GoCompletionEnvironmentTest : GoCompletionTestBase() {
             }
         """)
         assertContainsAll(items, "Account", "Open", "Accounts", "defaultName", "Limit")
-        assertEquals("(name string) *Account", presentation("Open").tailText)
-        assertEquals(" string", presentation("defaultName").tailText)
+        assertEquals("(name string)" to "*Account", presentation("Open").let { it.tailText to it.typeText })
+        assertEquals("string", presentation("defaultName").typeText)
         assertNull("completion loaded decl.go's AST", (decl as PsiFileImpl).treeElement)
     }
 

@@ -3,6 +3,7 @@ package io.github.golangsupport.ml
 import io.github.golangsupport.ide.completion.GoCompletionTestBase
 import io.github.golangsupport.ide.completion.GoCompletionWeigher
 import io.github.golangsupport.ide.completion.api.GoCompletionRanker
+import com.intellij.testFramework.ExtensionTestUtil
 import java.io.File
 
 /**
@@ -32,7 +33,8 @@ class GoMlCompletionRankerTest : GoCompletionTestBase() {
     fun testAbstainsWithoutModels() {
         GoMlSettings.getInstance().modelDirectory = java.nio.file.Files.createTempDirectory("no-models").toFile().path
         GoMlModels.getInstance().reset()
-        GoCompletionRanker.EP_NAME.point.registerExtension(GoMlCompletionRanker(), testRootDisposable)
+        // the ML ranker alone: the heuristic ranker registered after it would score what the model abstains on
+        ExtensionTestUtil.maskExtensions(GoCompletionRanker.EP_NAME, listOf(GoMlCompletionRanker()), testRootDisposable)
         val items = complete(source) ?: error("a single candidate was inserted; the test needs a list")
         assertTrue(items.mapNotNull { GoCompletionWeigher.infoOf(it) }.all { it.rankerScore == null })
     }

@@ -184,11 +184,12 @@ two lines GoLand shows: the unkeyed rows of `analysis_test.go` and `// NewOrder`
 | EP | Class | Behaviour |
 |---|---|---|
 | `completion.contributor` (`order="first"`) | `GoCompletionContributor` | Basic completion. Providers by leaf pattern: the string of an import spec (`GoImportPathProvider`), a label reference (`GoLabelProvider`), the package clause name (`GoPackageClauseProvider`), any other identifier (`GoIdentifierProvider`). The dummy identifier is the trimmed one, so `x.<caret>(` and `T{<caret>}` parse like the final code. Contributor and providers are `DumbAware`: every source is index-free. |
-| `completion.confidence` | `GoCompletionConfidence` | No autopopup in comments, ordinary strings, runes and numbers (`1.` stays quiet); import path strings pop up. Explicit completion in comments is served by `GoCommentCompletionContributor` / `GoEmbedCompletionContributor` (below). |
+| `completion.confidence` | `GoCompletionConfidence` | No autopopup in comments, ordinary strings, runes and numbers (`1.` stays quiet); import path strings, a `%` directive of a call argument and the layout string of a `time` call (`GoTimeLayoutCalls`) pop up. |
 | `completion.contributor` (`goCommentCompletion`, `goEmbedCompletion`) | `GoCommentCompletionContributor`, `directives.GoEmbedCompletionContributor` | Package names in top-level comments, files after `//go:embed` (see "GoLand's items"). |
 | `weigher key="completion"` (`goCompletion`, after `priority`, before `prefix`) | `GoCompletionWeigher` | Expected-type match, then a `GoCompletionRanker` score, then scope distance. |
 | `weigher key="completion"` (`goAlphabetical`, after `proximity`) | `GoAlphabeticalWeigher` | Alphabetical tie-break for Go items. |
-| `io.github.golangsupport.completionRanker` (new EP) | `api.GoCompletionRanker` | Optional re-ranking (docs/ML.md section 2); no implementation in go-psi. |
+| `io.github.golangsupport.completionRanker` (new EP) | `api.GoCompletionRanker` | Optional re-ranking (docs/ML.md section 2). |
+| `completionRanker` (`goHeuristicRanker`, `order="last"`) | `GoHeuristicRanker` | The ranker without a model: score = expected-type match, then scope level (the deterministic order kept), then a bonus < 10 between ties: `ln(1 + 2·uses in the file + uses in the package)` (≤ 4; identifier tokens of the go-psi lexer, cached per file on its modification stamp, ≤ 50 sibling files, files over 300 000 chars skipped) and recency (≤ 5; `GoCompletionRecency`, an in-memory list of the last 100 lookup strings chosen in the project, fed by `GoCompletionRecencyListener` on `LookupManagerListener`; tests record only with `recordInTests`). Never abstains, no marker; the ML ranker of an ML build is registered before it and wins when it answers. |
 
 Tail and type texts of fields, methods, functions and variables are lazy (`GoCandidate.tailSupplier`/`typeSupplier`, rendered by a `LookupElementRenderer` when a row is shown); `GoImportPaths.modules` caches dependency packages on `GoProjectModelTracker` only.
 
@@ -257,10 +258,21 @@ of another file (`setAssertOnFileLoadingFilter`).
 
 ### Lookup elements and insertion (`GoLookupElementFactory`)
 
-- Presentation: `GoIdeIcons` icon (platform `AllIcons.Nodes.*` as the root module's `GoDeclarationIcons`, files `GoFileType.icon`), tail text `(a int, b string) error` for functions and methods,
-  ` T` for variables/constants/fields/parameters, ` struct`/` interface`/` func`/` type` for
-  types, ` (path)` for packages; type text: owning type for members, package for package
-  members, `import` for unimported packages. Keywords and `nil true false iota` are bold.
+- Presentation (GoLand's rows, dump probes 1, 2, 3, 6, 9, 10, C1c): `GoIdeIcons` icon (platform `AllIcons.Nodes.*` as the root module's
+  `GoDeclarationIcons`, files `GoFileType.icon`); functions and methods: tail `(a int, b string)` (type parameters included), type
+  text the results (`int`, `(string, error)`, `(err error)`; none without results; builtins split the same way: `len(v Type)  int`);
+  variables, parameters, fields: type text the type (`c  Circle`); fields, struct keys and methods end the tail with the declaring
+  type, ` → Base`, ` → *Square` (receiver from the method stub), ` → interface {...}` for interface methods (GoLand writes so for named
+  interfaces too); embedded fields have no owner. Members of another package shown unqualified by a bare name or after `pkg.` of a
+  package not imported yet (project members, dot imports, `strings.` without the import) add the import path to the tail
+  (`(v any) encoding/json`; types just ` encoding/json`); members after an imported `pkg.` have no path. ` struct`/` interface`/
+  ` func`/` type` for local types, ` (path)` for packages, `import` for unimported packages. `byte`/`rune` stay as written
+  (`GoBasicType.BYTE`/`RUNE`, docs/SEMANTIC.md). Keywords and `nil true false iota` are bold.
+- Types where a value goes (`x := Cir`, `return Cir`, `f(Cir`, `&Squ`, `strings.Build` in an expression; GoLand probe 19):
+  `Circle{<caret>}` for struct, map, slice and array types, decided at insertion (`typeKind` of the declaration, no type read while
+  the list is built), with the import for another package; not at a statement start, not in `make(`/`new(`, not in `f[...]`, not
+  before `{ ( . [`, not for generic types (they need type arguments) and not for other named types (`type MyInt int`: GoLand's dump
+  shows braces for struct types only).
 - Calls: `()` with the caret inside, after them when the callee has no parameters; an existing
   `(` is reused; no parentheses when a function value is expected (`apply(double)`).
 - Packages: `pkg.` and the member autopopup; unimported ones add the import.
@@ -299,7 +311,9 @@ local).
 | Where | Class | What |
 |---|---|---|
 | `completion.contributor` (BASIC, function literal) | `GoBasicCompletion.functionLiterals` + `GoSmartLiterals.collectFunctionLiteral` / `deferredCall` | The `func(a T) R {}` literal first wherever a function type is expected (argument, `return`, assignment, literal field; `fu` matches), `func() {}()` after `go` / `defer`; `GoLookupPriority` gives every emitted item the host catalogue's priority scheme (2.0 / 1.0 by prefix) plus the expected-type fit (+1.0 / +0.5) so fitting items outrank importable names; 0.2.182 |
-| `completion.contributor` (SMART) | `GoSmartProvider` + `GoSmartLiterals` | Smart completion (Ctrl+Shift+Space) in expressions and after `.`: candidates filtered by `GoLookupElementFactory.smartMatch` against `expectedTypeAt` (functions and methods by their first result; `len`/`cap`/`append`/`new` by rule), plus `LITERAL` items `T{}`, `&T{}`, `make(T)`, `make(T, 0)`, `func(...) R {}`, `""`, `0` written as the file sees the type (no literal for a type of an unimported package). No expected type: the basic set. |
+| `completion.contributor` (SMART) | `GoSmartProvider` + `GoSmartLiterals` | Smart completion (Ctrl+Shift+Space) in expressions and after `.`: candidates filtered by `GoLookupElementFactory.smartMatch` against `expectedTypeAt` (functions and methods by their first result; `len`/`cap`/`append`/`new` by rule), plus `LITERAL` items `T{}`, `&T{}`, `make(T)`, `make(T, 0)`, `func(...) R {}`, `""`, `0` written as the file sees the type (no literal for a type of an unimported package). Where an interface is expected (`var s Shape = `, GoLand probe 13): struct types of the scope that implement it — `Circle{}` by the value's method set, `&Square{}` when only the pointer has the methods (≤ 20 types, generic ones skipped) — and `&sq` for a variable whose type implements it through the pointer (`collectImplementations`). No expected type: the basic set. |
+| host `completion.contributor` (SMART) | `catalogue.GoCatalogueCompletionContributor.smart`, `GoCatalogueSmart` | Catalogue rows of the expected type (probes 12, 14, 24): functions (first result), typed variables and constants of the standard library and direct modules whose type key matches — basic types (`byte`→`uint8`), `error`, a named type with an optional `*` (`net/http.Request` in its own package, `@time.Duration` qualified elsewhere). Rows `strings.Count(…)` with the path as type text, insertion and import through `GoCatalogueInsertion`; priority 0.3 (imported package) / 0.2 (other) plus the prefix priority, so below go-psi's fitting items (≥ 0.5); ≤ 10 per package, ≤ 30 in all; project packages and indirect modules left out. Not matched: slices, maps, functions, generic functions, untyped constants, interfaces by implementation. |
+| host `completion.contributor` (BASIC, `pkg.` not imported) | `GoCatalogueCompletionContributor.unimportedPackage` | `json.` / `json.Mar` with no import of that name: the members of every catalogue package called `json` (`encoding/json/v2` next to `encoding/json`), path as type text, the chosen one imported (`GoCatalogueInsertion.replacedFrom` rewrites the typed qualifier). The package go-psi picks for that name (`GoImportPaths.all(...).first`) is left to its member completion. |
 | `completion.contributor` (chains) | `GoChainCandidates` | `x.F.M` / `x.F().M`: roots are locals, parameters and variables with a known type (30); first steps are fields with promotion and parameterless one-result methods (20 per root, 200 expansions); 50 chains. Lookup string is the whole chain; parentheses as for methods. In smart filtered by type, in basic from a 2-character prefix (restart at length 2). Level `UNIMPORTED`. |
 | `completion.contributor` (project members) | `GoProjectMemberCandidates` | Bare names to `pkg.Name` from `GoAllPublicNamesIndex` (project scope, prefix ≥ 2, ≤ 200 keys / ≤ 100 items). Import path from `GoPackageResolver.importPathOf(dir)`; skips the current package, `main`, `_test.go`, `vendor`/`testdata`, `internal` per the go rule, imported paths and taken names. Import through `GoImportInserter`; `expectedMatch` from stub declaration types. The host `GoCatalogueCompletionContributor` leaves project entries out when `GoFeatures.native(COMPLETION)`. |
 
@@ -309,6 +323,7 @@ local).
 |---|---|---|
 | struct literal key | `GoFillStructCompletion` | **Fill all fields…** / **Fill selected fields…** first (priority) in a keyed or empty `T{}` / `&T{}` / `[]T{{}}` with fields left (not in a positional literal, not at a value, basic only). Text from `intentions.GoFillStruct` (the Fill intention's generator) with `align = true`: one field per line, values aligned as gofmt does (the run of one-line elements above is re-padded), blank lines before `}` replaced, caret after the first value. Fill selected opens `ChooseElementsDialog` (all ticked) after the insertion (`invokeLater`); `chooserForTests` picks in tests. |
 | constant rows | `GoScopeCandidates.constValueText` | `MaxItems = 10  untyped int`, `Info = iota  Level`: tail ` = <expression>` (a repeated row shows the one it repeats, whitespace collapsed, cut at 40), type text the type. Values from `GoConstSpecStub.values`, so no AST of other files. |
+| time layout string | `GoTimeLayoutCompletion`, `GoTimeLayoutProvider` | In the layout argument of `Time.Format`, `Time.AppendFormat`, `time.Parse`, `time.ParseInLocation` (resolved by `inspections.GoTimeLayoutCalls` in the original file), GoLand's 14 rows (probe C5): `YY YYYY MM DD hh mm ss` with the description as the type (`YYYY  Year (four-digit)`), written as the reference element (`YYYY` → `2006`), then `year... month... day... hour... minute... second... zone...`; a group row is removed and reopens the list with its elements (`January Jan 01 1`, `.000 .999999999`, `MST Z07:00 -0700`…). Prefix: letters and digits before the caret. No `stopHere`: the host's whole layouts (`lang.GoTimeLayouts`, `2006-01-02`) join the list. `time.RFC3339`-style constants are not offered (GoLand's dump shows none). |
 | top level | `GoTopLevelTemplates` | `func (*T)` (type text `Method`): `func (r *T) <caret>() {\n}` for the type declared last above the caret (else the first of the file), receiver name and pointer-ness from its methods. `func` / `Implement Interface...`: deletes the prefix, puts the caret on that type's name and runs the host action `Go.Generate.Implement` (`invokeLater`; offered only when the action is registered; `actionRunnerForTests`). Not inside functions, not without a type in the file. |
 | struct tags (host) | `lang.GoStructTagKeyToAllFields`, `GoStructTagCompletion.nameStyles` / `styleFor` | At a key of a closed tag the first item **Add tag key to all fields…**: a popup of the name keys (`json yaml xml toml db mapstructure bson env form`), then `GoGenerateStructTagsAction.tagEdits` writes the key into every exported field that lacks it, named in the style the struct uses for that key. Names in a value: the style other fields use (only when one has the key), then GoLand's `full-name`, `full_name`, `FullName`, `fullName`, then `fullname`. |
 | parameter name | `GoNameCompletion.parameterItems`, `GoNameSuggestions.parameterName` | `func g(<caret>` / `func g(a int, <caret>` (a bare type of a function, method or literal parameter; not results, receivers, function types, `...T`, `pkg.`): the types become `name Type` items as in GoLand: `err error`, `string2 string` (reserved or taken name: next digit), `base Base`, `t T` for a type parameter, `set Set[<caret>]` for a generic type; packages stay, keywords and project members are left out. With a typed prefix the exported types of imported packages follow at level `UNIMPORTED` (`ctx context.Context`; GoLand offers none). Extra lookup strings: the name, the type name, the qualified type. |
@@ -319,24 +334,27 @@ local).
 
 ### Tests
 
-`completion.GoSmartCompletionTest` (10), `GoProjectMemberCompletionTest` (6),
+`completion.GoSmartCompletionTest` (12), `GoHeuristicRankerTest` (8), `GoProjectMemberCompletionTest` (6),
 `completion.GoScopeCompletionTest` (15), `GoMemberCompletionTest` (19),
 `GoKeywordCompletionTest` (19), `GoInsertCompletionTest` (11), `GoRankingCompletionTest` (9),
 `GoCompletionEnvironmentTest` (10: import paths from GOROOT and from an on-disk module copied
 from `testData/completion/module`, module auto-import, comments/strings, confidence, dumb mode,
 stub-only candidates, a 3000-line file with 500 package-level symbols under 300 ms),
-`GoGolandParityCompletionTest` (15: Fill items, constant values, top-level declarations), `GoNameSuggestionsTest` (7, pure name rules), `GoNameCompletionTest` (15: parameter and variable names), `GoCommentCompletionTest` (7), `GoEmbedCompletionTest` (4), `GoRegExpCompletionTest` (4); host `GoStructTagKeyCompletionTest` (4).
+`GoGolandParityCompletionTest` (15: Fill items, constant values, top-level declarations), `GoTypeLiteralCompletionTest` (11: `Circle{<caret>}`
+and where it stays a bare name), `GoTimeLayoutCompletionTest` (8: rows, aliases, groups, calls, confidence), `GoPresentationCompletionTest`
+(6: owners, parameters/results, import paths, `byte`/`rune`), `GoCommentCompletionTest` (7), `GoEmbedCompletionTest` (4), `GoRegExpCompletionTest` (4), `GoNameSuggestionsTest` (7, pure name rules), `GoNameCompletionTest` (15: parameter and variable names); host `GoStructTagKeyCompletionTest` (4), `GoCatalogueCompletionTest` (5: smart rows, `pkg.` of every package of a name), `GoCatalogueMembersTest` (8: methods, indirect modules, smart keys, a 5000-symbol index under 100 ms).
 
 ### Known gaps
 
-- Tail texts print `byte`/`rune` as `uint8`/`int32` (the type model does not keep aliases).
 - Method expressions on `(*T)` and completion of generic instantiation arguments by constraint
   are not implemented. Postfix templates live in the host plugin (`lang.GoPostfixTemplates`): the
   platform's live template contributor puts the applicable keys into this list after `x.`, and the
   host's `GoPostfixCompletionWeigher` (after `priority`, before `goCompletion`) keeps them behind
   the members. Smart literals are not offered for types of packages
   the file does not import; chains go one level deep only.
-- `GoCompletionRanker` has no implementation; the ML module is planned (docs/ML.md).
+- Recency of `GoHeuristicRanker` is not persisted between IDE sessions.
+- go-psi's unimported-package members (`GoMemberCandidates.unimportedPackageMembers`) show the package name, not the path, as type text, so its `encoding/json` rows and the catalogue's `encoding/json/v2` rows read differently.
+- Methods of catalogue types are recorded (`GoSymbolIndex.methodsOf`) but no list asks for them: member completion on a value of a stdlib or module type works through the stubs of the library roots (`GoRootsProvider`, default: standard library and dependencies).
 
 ## Phase 6d: inspections, quick fixes, semantic highlighting
 

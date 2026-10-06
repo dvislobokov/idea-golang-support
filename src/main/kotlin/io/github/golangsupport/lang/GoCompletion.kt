@@ -105,7 +105,10 @@ class GoReturnCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
         if (parameters.originalFile !is GoFile || !GoSettings.getInstance().completeReturnValues) return
         val text = parameters.editor.document.immutableCharSequence
-        if (!GoIdioms.typingReturn(text, parameters.offset)) return
+        if (!GoIdioms.typingReturn(text, parameters.offset)) {
+            if (atStatementStart(text, parameters.offset)) errorReturn(parameters, text, result)
+            return
+        }
         val psi = try {
             GoReturnValues.forReturn(parameters.position)
         } catch (_: IndexNotReadyException) {
@@ -116,6 +119,37 @@ class GoReturnCompletionContributor : CompletionContributor() {
         values.forEachIndexed { i, value ->
             val item = LookupElementBuilder.create(value).bold().withIcon(AllIcons.Actions.StepOut).withTypeText("return values", true)
             matching.addElement(PrioritizedLookupElement.withPriority(item, GoCompletionOrder.RETURN_VALUES - i))
+        }
+    }
+
+    /**
+     * GoLand's first row on an empty statement line (README §4, probe 6): `return err` when an error variable named `err` is in scope and the
+     * function returns an error; with several results the whole statement (`return nil, 0, err`).
+     */
+    private fun errorReturn(parameters: CompletionParameters, text: CharSequence, result: CompletionResultSet) {
+        val statement = try {
+            GoReturnValues.errorReturn(parameters.position)
+        } catch (_: IndexNotReadyException) {
+            null
+        } ?: return
+        val matching = result.withPrefixMatcher(GoPrefixMatcher(GoCompletionOrder.typed(text, parameters.offset)))
+        val item = LookupElementBuilder.create(statement).withIcon(AllIcons.Actions.StepOut).withTypeText("return values", true)
+        matching.addElement(PrioritizedLookupElement.withPriority(item, GoCompletionOrder.RETURN_VALUES))
+    }
+
+    companion object {
+        private val STATEMENT_START = Regex("""^[ \t]*[\w\p{L}]*$""")
+
+        /** The caret ends a line that holds at most a word that could still become `return` (empty, `re`), with nothing after it. */
+        fun atStatementStart(text: CharSequence, offset: Int): Boolean {
+            if (offset < 0 || offset > text.length) return false
+            var lineStart = offset
+            while (lineStart > 0 && text[lineStart - 1] != '\n') lineStart--
+            var lineEnd = offset
+            while (lineEnd < text.length && text[lineEnd] != '\n') lineEnd++
+            if (text.subSequence(offset, lineEnd).isNotBlank()) return false
+            val line = text.subSequence(lineStart, offset).toString()
+            return STATEMENT_START.matches(line) && "return".startsWith(line.trim())
         }
     }
 }

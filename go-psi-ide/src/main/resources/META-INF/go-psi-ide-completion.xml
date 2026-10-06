@@ -22,6 +22,13 @@
     <typedHandler implementation="io.github.golangsupport.ide.completion.GoStructTagTypedHandler" id="goStructTagTypedHandler"/>
 
   </extensions>
+  <extensions defaultExtensionNs="io.github.golangsupport">
+    <!-- The ranker without a model (frequency in the file and package, recency of choice); last, so that the ML ranker of a build with it wins. -->
+    <completionRanker id="goHeuristicRanker" order="last" implementation="io.github.golangsupport.ide.completion.GoHeuristicRanker"/>
+  </extensions>
+  <projectListeners>
+    <listener class="io.github.golangsupport.ide.completion.GoCompletionRecencyListener" topic="com.intellij.codeInsight.lookup.LookupManagerListener"/>
+  </projectListeners>
   <extensionPoints>
     <!-- Optional re-ranking of completion candidates (docs/ML.md section 2); no implementation in go-psi. -->
     <extensionPoint qualifiedName="io.github.golangsupport.completionRanker"

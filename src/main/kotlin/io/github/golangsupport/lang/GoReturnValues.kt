@@ -84,6 +84,21 @@ object GoReturnValues {
         return Values(plain, wrapped)
     }
 
+    /**
+     * `return err` / `return nil, 0, err` for a statement start at [position] (a leaf of the completion copy is fine), as GoLand's first row:
+     * only inside a function that returns an error, with an error variable named `err` in scope; the other results are zero values.
+     */
+    fun errorReturn(position: PsiElement): String? {
+        val file = position.containingFile as? GoFile ?: return null
+        if (DumbService.isDumb(file.project)) return null
+        if (PsiTreeUtil.getParentOfType(position, GoBlock::class.java) == null) return null
+        val service = GoSemanticService.getInstance(file.project)
+        val results = service.enclosingResultTypes(position)?.takeIf { it.isNotEmpty() } ?: return null
+        if (results.none(::isError)) return null
+        val err = localVariables(position).firstOrNull { it.name == "err" && isError(service.declarationType(it)) } ?: return null
+        return "return " + results.joinToString(", ") { if (isError(it)) err.name!! else zeroValue(it, file) }
+    }
+
     /** Nothing to offer: the function returns one value or none. */
     val NONE = Values("", null)
 

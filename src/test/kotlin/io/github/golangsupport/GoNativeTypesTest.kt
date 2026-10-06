@@ -11,6 +11,7 @@ import io.github.golangsupport.lang.GoIdioms
 import io.github.golangsupport.lang.GoIdiomTypes
 import io.github.golangsupport.lang.GoMakeCompletionContributor
 import io.github.golangsupport.lang.GoNativeSignatureProvider
+import io.github.golangsupport.lang.GoReturnCompletionContributor
 import io.github.golangsupport.lang.GoReturnValues
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.project.api.GoToolchainInfo
@@ -116,6 +117,31 @@ class GoNativeTypesTest : BasePlatformTestCase() {
         val labels = myFixture.lookupElements.orEmpty().map { LookupElementPresentation.renderElement(it).itemText ?: it.lookupString }
         assertTrue(labels.toString(), "0, err" in labels)
     }
+
+    /** GoLand's first row on an empty statement line (README §4): the return of the error in scope. */
+    fun testAnEmptyStatementLineStartsWithTheReturnOfErr() {
+        configure("package main\n\ntype Circle struct{}\n\nfunc f() (*Circle, int, error) {\n\terr := g()\n\t<caret>\n\treturn nil, 0, nil\n}\n\nfunc g() error { return nil }\n")
+        myFixture.completeBasic()
+        val labels = myFixture.lookupElements.orEmpty().map { LookupElementPresentation.renderElement(it).itemText ?: it.lookupString }
+        assertEquals(labels.toString(), "return nil, 0, err", labels.firstOrNull())
+    }
+
+    fun testTheReturnOfErrAfterATypedPrefixAndForASingleResult() {
+        configure("package main\n\nfunc f() error {\n\terr := g()\n\tre<caret>\n\treturn nil\n}\n\nfunc g() error { return nil }\n")
+        myFixture.completeBasic()
+        val labels = myFixture.lookupElements.orEmpty().map { LookupElementPresentation.renderElement(it).itemText ?: it.lookupString }
+        assertEquals(labels.toString(), "return err", labels.firstOrNull())
+    }
+
+    fun testNoReturnOfErrWithoutAnErrVariableOrAnErrorResult() {
+        assertNull(GoReturnValues.errorReturn(configure("package main\n\nfunc f() error {\n\tx := 1\n\t_ = x\n\tq\n\treturn nil\n}\n").findElementAt(caretOf("\tq") + 1)!!))
+        assertNull(GoReturnValues.errorReturn(configure("package main\n\nfunc f() int {\n\tvar err error\n\t_ = err\n\tq\n\treturn 0\n}\n").findElementAt(caretOf("\tq") + 1)!!))
+        assertFalse("an expression is being typed", GoReturnCompletionContributor.atStatementStart("\tx := re", 8))
+        assertFalse("not a beginning of return", GoReturnCompletionContributor.atStatementStart("\tfo", 3))
+        assertTrue(GoReturnCompletionContributor.atStatementStart("\t", 1))
+    }
+
+    private fun caretOf(text: String): Int = myFixture.file.text.indexOf(text)
 
     // --- grey idioms decided by the types ---
 

@@ -17,6 +17,8 @@ import io.github.golangsupport.semantic.types.GoSliceType
 import io.github.golangsupport.semantic.types.GoStructType
 import io.github.golangsupport.semantic.types.GoType
 import io.github.golangsupport.semantic.types.GoTypeParamType
+import io.github.golangsupport.semantic.types.GoTypePredicates
+import io.github.golangsupport.lang.psi.GoTypeSpec
 
 /**
  * Values smart completion writes for the expected type when no name in scope has it: `T{}` / `&T{}` for a struct, `make(T)` /
@@ -39,6 +41,40 @@ class GoSmartLiterals(private val context: GoCompletionContext) {
             underlying is GoSignatureType -> collectFunctionLiteral(expected, out)
             underlying is GoBasicType && underlying.kind.isString -> out += literal("\"\"", 1, expected, null)
             underlying is GoBasicType && underlying.kind.isNumeric -> out += literal("0", 0, expected, null)
+        }
+    }
+
+    /**
+     * Where an interface is expected (`var s Shape = `): the struct types of [scope] that implement it as literals — `Circle{}` for a
+     * type whose value has the methods, `&Square{}` for one whose methods take a pointer — and `&sq` for a variable of such a type
+     * (GoLand's dump probe 13). At most [MAX_IMPLEMENTATIONS] types; a generic type is left out (its arguments are not known).
+     */
+    fun collectImplementations(expected: GoType, scope: List<GoCandidate>, out: MutableList<GoCandidate>) {
+        val iface = expected.underlying() as? GoInterfaceType ?: return
+        if (expected is GoTypeParamType || iface.isEmpty || iface.typeTerms != null) return
+        var types = 0
+        for (candidate in scope) {
+            when (candidate.kind) {
+                GoCandidateKind.TYPE -> {
+                    if (types >= MAX_IMPLEMENTATIONS) continue
+                    val spec = candidate.element as? GoTypeSpec ?: continue
+                    val named = semantics.declarationType(spec) as? GoNamedType ?: continue
+                    if (named.isGeneric || named.underlying() !is GoStructType) continue
+                    val written = source(named) ?: continue
+                    when {
+                        GoTypePredicates.implements(named, iface) -> out += literal("$written{}", 1, named, written)
+                        GoTypePredicates.implements(GoPointerType(named), iface) -> out += literal("&$written{}", 1, GoPointerType(named), written)
+                        else -> continue
+                    }
+                    types++
+                }
+                GoCandidateKind.LOCAL, GoCandidateKind.PARAMETER, GoCandidateKind.VARIABLE -> {
+                    val named = candidate.valueType as? GoNamedType ?: continue
+                    if (named.isGeneric || named.underlying() is GoInterfaceType || GoTypePredicates.implements(named, iface)) continue
+                    if (GoTypePredicates.implements(GoPointerType(named), iface)) out += literal("&${candidate.name}", 0, GoPointerType(named), candidate.name)
+                }
+                else -> {}
+            }
         }
     }
 
@@ -120,6 +156,10 @@ class GoSmartLiterals(private val context: GoCompletionContext) {
         if (pkg == null || universe || pkg == semantics.packagePath) return type.name + args
         val spec = semantics.imports.firstOrNull { it.path == pkg && !it.isBlank } ?: return null
         return (if (spec.isDot) "" else semantics.importName(spec) + ".") + type.name + args
+    }
+
+    private companion object {
+        const val MAX_IMPLEMENTATIONS = 20
     }
 
     private fun caretHandler(caretFromEnd: Int): InsertHandler<LookupElement>? =

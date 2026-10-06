@@ -54,6 +54,11 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
             psiElement().withElementType(GoTokenSets.STRING_LITERALS).withSuperParent(2, GoArgumentList::class.java),
             GoFormatVerbProvider(),
         )
+        extend(
+            CompletionType.BASIC,
+            psiElement().withElementType(GoTokenSets.STRING_LITERALS).withSuperParent(2, GoArgumentList::class.java),
+            GoTimeLayoutProvider(),
+        )
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withParent(GoLabelRef::class.java), GoLabelProvider())
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withParent(GoPackageClause::class.java), GoPackageClauseProvider())
         extend(CompletionType.BASIC, psiElement(GoTypes.IDENTIFIER).withLanguage(GoLanguage), GoIdentifierProvider())
@@ -170,7 +175,10 @@ private class GoSmartProvider : CompletionProvider<CompletionParameters>(), Dumb
         }
         GoScopeCandidates(context).collect(context.reference ?: context.typeReference ?: context.leaf, GoScopeCandidates.Filter.ALL, candidates)
         candidates.filterTo(out, fits)
-        GoSmartLiterals(context).collect(expected, out)
+        GoSmartLiterals(context).let {
+            it.collect(expected, out)
+            it.collectImplementations(expected, candidates, out)
+        }
         GoCompletionContributor.emit(out, context, result)
         GoBasicCompletion.later(context, result, candidates, typesOnly = false, accept = fits)
     }
@@ -284,20 +292,15 @@ private object GoBasicCompletion {
      */
     private fun structKeys(context: GoCompletionContext, out: MutableList<GoCandidate>, result: CompletionResultSet): Boolean {
         val literal = context.literalValue ?: return false
-        val type = context.semantics.literalType(literal)?.let(GoCompletionSemantics::derefUnderlying) as? GoStructType ?: return false
+        val literalType = context.semantics.literalType(literal) ?: return false
+        if (GoCompletionSemantics.derefUnderlying(literalType) !is GoStructType) return false
         val elements = GoPsiUtil.children(literal, GoElement::class.java)
         val current = PsiTreeUtil.getParentOfType(context.leaf, GoElement::class.java)
         // Positional literals (`T{1, 2}`) take no keys.
         if (!context.keyOnly && elements.any { it !== current && it.key == null }) return true
         GoFillStructCompletion.collect(context, literal, current, result)
         val used = elements.filter { it !== current }.mapNotNull { (it.key?.expression as? GoReferenceExpression)?.identifier?.text }.toSet()
-        for ((field, depth) in GoMemberCandidates(context).fields(type)) {
-            if (field.name in used) continue
-            out += GoCandidate(
-                field.name, GoCandidateKind.STRUCT_KEY, GoScopeLevel.LOCAL + depth, field.declaration,
-                valueType = field.type, tailSupplier = { " " + GoLookupElementFactory.typeText(field.type) },
-            )
-        }
+        GoMemberCandidates(context).structKeys(literalType, used, out)
         return true
     }
 

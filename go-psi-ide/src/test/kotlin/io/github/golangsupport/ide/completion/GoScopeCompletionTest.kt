@@ -33,7 +33,7 @@ class GoScopeCompletionTest : GoCompletionTestBase() {
         """)
         // A single `value`: the inner string.
         assertEquals(1, items.count { it == "value" })
-        assertEquals(" string", presentation("value").tailText)
+        assertEquals("string", presentation("value").typeText)
     }
 
     fun testParametersResultsAndReceiver() {
@@ -143,7 +143,8 @@ class GoScopeCompletionTest : GoCompletionTestBase() {
             }
         """)
         assertContainsAll(items, "ToUpper", "ToUpperSpecial")
-        assertEquals("strings", presentation("ToUpper").typeText)
+        // GoLand's rows of another package's members: the import path after the parameters, the result as the type
+        assertEquals("(s string) strings" to "string", presentation("ToUpper").let { it.tailText to it.typeText })
     }
 
     fun testIotaOnlyInConstDeclarations() {
