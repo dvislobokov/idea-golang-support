@@ -51,7 +51,7 @@ class GoMemberCompletionTest : GoCompletionTestBase() {
         assertTrue("ranker was not consulted", candidatesSeen > 0)
         assertEquals("building the candidates must not render types", 0, renderedWhileBuilding)
         GoLookupElementFactory.lazyRenderCount.set(0)
-        assertEquals(" string", presentation("Name").tailText)
+        assertEquals("string", presentation("Name").typeText)
         assertEquals(1, GoLookupElementFactory.lazyRenderCount.get())
     }
 
@@ -63,9 +63,12 @@ class GoMemberCompletionTest : GoCompletionTestBase() {
             }
         """)
         assertContainsAll(items, "Name", "email", "Base", "ID", "Greet", "Rename", "Describe", "Reset")
-        assertEquals(" string", presentation("Name").tailText)
-        assertEquals("(n string)", presentation("Rename").tailText)
-        assertEquals("User", presentation("Greet").typeText)
+        // GoLand: `Name → User  string`, `Rename(n string) → *User`, `Greet() → User  string`, `Describe() → Base  string`
+        assertEquals(" → User" to "string", presentation("Name").let { it.tailText to it.typeText })
+        assertEquals("(n string) → *User" to null, presentation("Rename").let { it.tailText to it.typeText })
+        assertEquals("() → User" to "string", presentation("Greet").let { it.tailText to it.typeText })
+        assertEquals("() → Base", presentation("Describe").tailText)
+        assertEquals(" → Base", presentation("ID").tailText)
     }
 
     fun testNonAddressableValueHasOnlyValueReceiverMethods() {
@@ -113,8 +116,7 @@ class GoMemberCompletionTest : GoCompletionTestBase() {
             }
         """)
         assertContainsAll(items, "Read", "Close")
-        // The type model does not keep the `byte` alias.
-        assertEquals("(p []byte) (int, error)", presentation("Read").tailText)
+        assertEquals("(p []byte) → interface {...}" to "(int, error)", presentation("Read").let { it.tailText to it.typeText })
     }
 
     fun testMethodExpressionOnTypeName() {
@@ -140,8 +142,8 @@ class GoMemberCompletionTest : GoCompletionTestBase() {
         """)
         assertContainsAll(items, "Builder", "ToUpper", "NewReplacer", "Index")
         assertContainsNone(items, "WriteString", "Len", "indexFunc", "init")
-        assertEquals("strings", presentation("ToUpper").typeText)
-        assertEquals("(s string) string", presentation("ToUpper").tailText)
+        assertEquals("string", presentation("ToUpper").typeText)
+        assertEquals("(s string)", presentation("ToUpper").tailText)
     }
 
     fun testUnexportedFieldsOfOtherPackagesHidden() {

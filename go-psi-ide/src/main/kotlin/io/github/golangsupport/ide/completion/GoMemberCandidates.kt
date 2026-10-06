@@ -62,9 +62,12 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
             if (typesOnly && e !is GoTypeSpec) continue
             if (!seen.add(name)) continue
             val base = GoScopeCandidates.declarationCandidate(e, name, GoScopeLevel.IMPORTED, context)
+            // GoLand: `Clone(s string)  string` after `strings.`; a package not imported yet adds its path (`Marshal(v any) encoding/json`)
             out += GoCandidate(
                 base.name, base.kind, if (importPath != null) GoScopeLevel.UNIMPORTED else GoScopeLevel.LOCAL, e,
-                valueType = base.valueType, tailText = base.tailText, tailSupplier = base.tailSupplier, typeText = pkg.name, importPath = importPath,
+                valueType = base.valueType, tailText = base.tailText.takeIf { importPath == null },
+                tailSupplier = if (importPath != null) GoLookupElementFactory.foreignTail(base, importPath) else base.tailSupplier,
+                typeSupplier = base.typeSupplier, typeText = base.typeText, importPath = importPath,
             )
         }
     }
@@ -85,7 +88,7 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
         val type = semantics.service.declarationType(spec)
         for (m in GoLookup.methodSet(type)) {
             if (!visible(m.isExported, m.pkgPath)) continue
-            out += methodCandidate(m, depth = 0, owner = type)
+            out += methodCandidate(m, depth = 0)
         }
     }
 
@@ -96,12 +99,9 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
         if (type is GoUnknownType) return
         val seen = HashSet<String>()
         // Fields (with promotion depth) first, then methods.
-        for ((field, depth) in fields(type)) {
-            if (!seen.add(field.name)) continue
-            out += GoCandidate(
-                field.name, GoCandidateKind.FIELD, GoScopeLevel.LOCAL + depth, field.declaration,
-                valueType = field.type, tailSupplier = { " " + GoLookupElementFactory.typeText(field.type) }, typeSupplier = { ownerText(type) },
-            )
+        for (entry in fieldEntries(type)) {
+            if (!seen.add(entry.field.name)) continue
+            out += fieldCandidate(entry, GoCandidateKind.FIELD)
         }
         val methodSetType = if (type !is GoPointerType && type.underlying() !is GoInterfaceType && type !is GoTypeParamType && addressable(qualifier)) {
             GoPointerType(type)
@@ -111,55 +111,95 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
         for (m in GoLookup.methodSet(methodSetType)) {
             if (!visible(m.isExported, m.pkgPath)) continue
             if (!seen.add(m.name)) continue
-            out += methodCandidate(m, depth = 0, owner = type)
+            out += methodCandidate(m, depth = 0)
         }
     }
 
-    private fun methodCandidate(m: GoMethod, depth: Int, owner: GoType): GoCandidate =
-        GoCandidate(
-            m.name, GoCandidateKind.METHOD, GoScopeLevel.LOCAL + depth, m.declaration,
-            valueType = m.signature, tailSupplier = { GoLookupElementFactory.signatureTail(m.signature) }, typeSupplier = { ownerText(owner) },
+    /** A field (or struct literal key) row as GoLand shows it: `created → Base  time.Time`; an embedded field has no owner (`Base  Base`). */
+    fun fieldCandidate(entry: FieldEntry, kind: GoCandidateKind, level: Int = GoScopeLevel.LOCAL + entry.depth): GoCandidate {
+        val field = entry.field
+        val owner = entry.owner.takeIf { !field.embedded }
+        return GoCandidate(
+            field.name, kind, level, field.declaration, valueType = field.type,
+            tailText = GoLookupElementFactory.ownerTail(owner).ifEmpty { null }, typeSupplier = { GoLookupElementFactory.typeText(field.type) },
         )
-
-    private fun ownerText(type: GoType): String? = when (type) {
-        is GoPointerType -> ownerText(type.elem)?.let { "*$it" }
-        is GoNamedType -> type.name
-        else -> null
     }
 
+    /** Unused keys of a struct literal of [literalType] (named, pointer or plain struct): fields with promotion and their owners. */
+    fun structKeys(literalType: GoType, used: Set<String>, out: MutableList<GoCandidate>) {
+        for (entry in fieldEntries(literalType)) {
+            if (entry.field.name in used) continue
+            out += fieldCandidate(entry, GoCandidateKind.STRUCT_KEY)
+        }
+    }
+
+    /** A method row as GoLand shows it: `Area() → *Square  float64`, `Name() → interface {...}  string`. */
+    fun methodCandidate(m: GoMethod, depth: Int, level: Int = GoScopeLevel.LOCAL + depth, lookupString: String = m.name, lookupStrings: Collection<String> = emptyList()): GoCandidate {
+        val owner = methodOwner(m)
+        return GoCandidate(
+            m.name, GoCandidateKind.METHOD, level, m.declaration, valueType = m.signature,
+            tailSupplier = { GoLookupElementFactory.paramsTail(m.signature) + GoLookupElementFactory.ownerTail(owner) },
+            typeSupplier = { GoLookupElementFactory.resultText(m.signature) }, lookupString = lookupString, lookupStrings = lookupStrings,
+        )
+    }
+
+    /** One field with its promotion depth and the name of the struct type declaring it (null for an anonymous struct). */
+    class FieldEntry(val field: GoField, val depth: Int, val owner: String?)
+
     /** Visible fields of [type] by promotion depth (a shallower field hides deeper ones; same-depth duplicates are ambiguous and dropped). */
-    fun fields(type: GoType): List<Pair<GoField, Int>> {
-        val result = ArrayList<Pair<GoField, Int>>()
-        val start = GoCompletionSemantics.derefUnderlying(if (type is GoTypeParamType) type.coreType ?: type else type)
-        var level = listOf(start)
+    fun fields(type: GoType): List<Pair<GoField, Int>> = fieldEntries(type).map { it.field to it.depth }
+
+    /** [fields] with the declaring type of each field (the owner GoLand shows after `→`). */
+    fun fieldEntries(type: GoType): List<FieldEntry> {
+        val result = ArrayList<FieldEntry>()
+        val root = if (type is GoTypeParamType) type.coreType ?: type else type
+        var level = listOf(namedName(root) to GoCompletionSemantics.derefUnderlying(root))
         val seenNamed = HashSet<GoType>()
         val names = HashSet<String>()
         var depth = 0
         while (level.isNotEmpty() && depth < 8) {
-            val next = ArrayList<GoType>()
-            val levelFields = ArrayList<GoField>()
-            for (t in level) {
+            val next = ArrayList<Pair<String?, GoType>>()
+            val levelFields = ArrayList<Pair<GoField, String?>>()
+            for ((owner, t) in level) {
                 val struct = t as? GoStructType ?: continue
                 for (f in struct.fields) {
-                    if (visible(f.isExported, f.pkgPath)) levelFields += f
+                    if (visible(f.isExported, f.pkgPath)) levelFields += f to owner
                     if (f.embedded) {
                         val ft = if (f.type is GoPointerType) (f.type as GoPointerType).elem else f.type
                         if (ft is GoNamedType && !seenNamed.add(ft)) continue
-                        next += ft.underlying()
+                        next += namedName(ft) to ft.underlying()
                     }
                 }
             }
-            val counts = levelFields.groupingBy { it.name }.eachCount()
-            for (f in levelFields) {
+            val counts = levelFields.groupingBy { it.first.name }.eachCount()
+            for ((f, owner) in levelFields) {
                 if (f.name in names) continue
                 if ((counts[f.name] ?: 0) > 1) { names += f.name; continue }
                 names += f.name
-                result += f to depth
+                result += FieldEntry(f, depth, owner)
             }
             level = next
             depth++
         }
         return result
+    }
+
+    private fun namedName(type: GoType): String? = when (type) {
+        is GoPointerType -> namedName(type.elem)
+        is GoNamedType -> type.name
+        else -> null
+    }
+
+    companion object {
+        /**
+         * The receiver GoLand shows after `→`: `Base`, `*Square` (from the stub of the method declaration), `interface {...}` for a method
+         * of an interface (GoLand writes it so even for a named interface).
+         */
+        fun methodOwner(m: GoMethod): String? = when (val d = m.declaration) {
+            is GoMethodDeclaration -> d.receiverTypeName?.let { if (d.isPointerReceiver) "*$it" else it }
+            is GoMethodSpec -> "interface {...}"
+            else -> null
+        }
     }
 
     fun visible(exported: Boolean, memberPkg: String?): Boolean =

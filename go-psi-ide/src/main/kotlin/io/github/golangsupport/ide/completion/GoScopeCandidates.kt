@@ -94,7 +94,10 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
                     if (filter == Filter.TYPES && e !is GoTypeSpec) continue
                     val name = e.name
                     if (!accept(name)) continue
-                    out += declarationCandidate(e, name!!, GoScopeLevel.IMPORTED).also { it.typeText = pkg.name; it.typeSupplier = null }
+                    // GoLand's rows of another package's members: the import path after the parameters (`ToUpper(s string) strings`)
+                    val base = declarationCandidate(e, name!!, GoScopeLevel.IMPORTED)
+                    val tail = GoLookupElementFactory.foreignTail(base, spec.path)
+                    out += base.also { it.tailSupplier = tail; it.tailText = null }
                 }
                 continue
             }
@@ -128,7 +131,8 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
         }
         for (name in GoUniverse.FUNCTIONS.sorted()) {
             if (!accept(name)) continue
-            out += GoCandidate(name, GoCandidateKind.BUILTIN_FUNCTION, GoScopeLevel.UNIVERSE, declarations[name], tailText = BUILTIN_SIGNATURES[name])
+            val (tail, result) = builtinTexts(BUILTIN_SIGNATURES[name])
+            out += GoCandidate(name, GoCandidateKind.BUILTIN_FUNCTION, GoScopeLevel.UNIVERSE, declarations[name], tailText = tail, typeText = result)
         }
     }
 
@@ -236,6 +240,17 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
             "recover" to "() any",
         )
 
+        /** A builtin's documented signature split as GoLand shows it: the parameters as the tail, the result as the type (`(v Type)` / `int`). */
+        fun builtinTexts(signature: String?): Pair<String?, String?> {
+            if (signature == null) return null to null
+            var depth = 0
+            for ((i, c) in signature.withIndex()) {
+                if (c == '(') depth++
+                if (c == ')' && --depth == 0) return signature.substring(0, i + 1) to signature.substring(i + 1).trim().ifEmpty { null }
+            }
+            return signature to null
+        }
+
         /** Longest value text shown in a constant's row; longer expressions are cut with `…`. */
         private const val MAX_VALUE = 40
 
@@ -270,11 +285,20 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
             return when (e) {
                 is GoFunctionDeclaration -> {
                     val sig = semantics.declarationType(e) as? GoSignatureType
-                    GoCandidate(name, GoCandidateKind.FUNCTION, level, e, valueType = sig, tailSupplier = sig?.let { { GoLookupElementFactory.signatureTail(it) } })
+                    // GoLand: `classify(x any)  string` (parameters as the tail, results as the type)
+                    GoCandidate(
+                        name, GoCandidateKind.FUNCTION, level, e, valueType = sig,
+                        tailSupplier = sig?.let { { GoLookupElementFactory.paramsTail(it) } }, typeSupplier = sig?.let { { GoLookupElementFactory.resultText(it) } },
+                    )
                 }
                 is GoMethodDeclaration -> {
                     val sig = semantics.declarationType(e) as? GoSignatureType
-                    GoCandidate(name, GoCandidateKind.METHOD, level, e, valueType = sig, tailSupplier = sig?.let { { GoLookupElementFactory.signatureTail(it) } })
+                    val owner = e.receiverTypeName?.let { if (e.isPointerReceiver) "*$it" else it }
+                    GoCandidate(
+                        name, GoCandidateKind.METHOD, level, e, valueType = sig,
+                        tailSupplier = sig?.let { { GoLookupElementFactory.paramsTail(it) + GoLookupElementFactory.ownerTail(owner) } },
+                        typeSupplier = sig?.let { { GoLookupElementFactory.resultText(it) } },
+                    )
                 }
                 is GoTypeSpec -> GoCandidate(name, GoCandidateKind.TYPE, level, e, tailSupplier = { " " + GoLookupElementFactory.typeKind(e) })
                 is GoTypeParamDefinition -> GoCandidate(name, GoCandidateKind.TYPE_PARAMETER, level, e, tailText = " type parameter")
@@ -291,11 +315,12 @@ class GoScopeCandidates(private val context: GoCompletionContext) {
                     val typed = (e.parent as? GoVarSpec)?.type != null
                     val type = if (typed || GoLookupElementFactory.astAvailable(e, context)) semantics.declarationType(e) else null
                     val kind = if (level == GoScopeLevel.LOCAL) GoCandidateKind.LOCAL else GoCandidateKind.VARIABLE
-                    GoCandidate(name, kind, level, e, valueType = type, tailSupplier = type?.let { { " " + GoLookupElementFactory.typeText(it) } })
+                    // GoLand: `c  Circle` (the type in the type column)
+                    GoCandidate(name, kind, level, e, valueType = type, typeSupplier = type?.let { { GoLookupElementFactory.typeText(it) } })
                 }
                 is GoParamDefinition, is GoReceiver -> {
                     val type = semantics.declarationType(e)
-                    GoCandidate(name, GoCandidateKind.PARAMETER, level, e, valueType = type, tailSupplier = { " " + GoLookupElementFactory.typeText(type) })
+                    GoCandidate(name, GoCandidateKind.PARAMETER, level, e, valueType = type, typeSupplier = { GoLookupElementFactory.typeText(type) })
                 }
                 else -> GoCandidate(name, GoCandidateKind.VARIABLE, level, e)
             }

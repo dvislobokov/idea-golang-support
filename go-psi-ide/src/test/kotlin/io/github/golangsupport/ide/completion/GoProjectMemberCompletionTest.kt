@@ -71,8 +71,9 @@ class GoProjectMemberCompletionTest : GoCompletionTestBase() {
         val items = items()
         assertContainsAll(items, "api.Handler", "api.HandleAll", "api.HandlerCount", "api.HandlerLimit", "shared.HandleShared", "HandleLocal")
         assertContainsNone(items, "secret.HandleSecret", "api.HandleTest", "x.HandleIgnored", "main.HandleMain", "api.handleHidden", "main.HandleLocal")
-        assertEquals("(n int) string", presentation("api.HandleAll").tailText)
-        assertEquals("example.com/app/pkg/api", presentation("api.HandleAll").typeText)
+        // GoLand: `json.Marshal(v any) encoding/json  ([]byte, error)`
+        assertEquals("(n int) example.com/app/pkg/api", presentation("api.HandleAll").tailText)
+        assertEquals("string", presentation("api.HandleAll").typeText)
     }
 
     fun testInsertWritesQualifierAndImport() = inModule("""

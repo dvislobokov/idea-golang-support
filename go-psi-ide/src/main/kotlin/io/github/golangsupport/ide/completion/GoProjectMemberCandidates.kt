@@ -69,8 +69,8 @@ class GoProjectMemberCandidates(private val context: GoCompletionContext) {
                 if (packageName == "main" || packageName in taken) return@processElements true
                 val base = GoScopeCandidates.declarationCandidate(e, name, GoScopeLevel.UNIMPORTED, context)
                 out += GoCandidate(
-                    name, base.kind, GoScopeLevel.UNIMPORTED, e, valueType = base.valueType, tailSupplier = base.tailSupplier, tailText = base.tailText,
-                    typeText = path, importPath = path, lookupString = "$packageName.$name", lookupStrings = listOf(name),
+                    name, base.kind, GoScopeLevel.UNIMPORTED, e, valueType = base.valueType, tailSupplier = GoLookupElementFactory.foreignTail(base, path),
+                    typeSupplier = base.typeSupplier, typeText = base.typeText, importPath = path, lookupString = "$packageName.$name", lookupStrings = listOf(name),
                 )
                 out.size - start < MAX_ITEMS
             }

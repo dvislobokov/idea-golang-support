@@ -1,6 +1,7 @@
 package io.github.golangsupport.ide.completion
 
 import com.intellij.codeInsight.AutoPopupController
+import com.intellij.codeInsight.completion.CompletionUtil
 import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
@@ -15,6 +16,13 @@ import com.intellij.psi.impl.source.PsiFileImpl
 import io.github.golangsupport.ide.GoIdeIcons
 import io.github.golangsupport.ide.documentation.GoDocSignature
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.lang.psi.GoArgumentList
+import io.github.golangsupport.lang.psi.GoCallExpr
+import io.github.golangsupport.lang.psi.GoExpression
+import io.github.golangsupport.lang.psi.GoIndexOrSliceExpr
+import io.github.golangsupport.lang.psi.GoLeftHandExprList
+import io.github.golangsupport.lang.psi.GoReferenceExpression
+import io.github.golangsupport.lang.psi.GoSimpleStatement
 import io.github.golangsupport.lang.psi.GoSpecType
 import io.github.golangsupport.lang.psi.GoTypeSpec
 import io.github.golangsupport.semantic.types.GoBasicType
@@ -216,11 +224,54 @@ object GoLookupElementFactory {
             }
             GoCandidateKind.PACKAGE -> packageHandler(importPath)
             GoCandidateKind.STRUCT_KEY -> structKeyHandler
+            GoCandidateKind.TYPE -> if (candidate.element is GoTypeSpec && compositeLiteralPosition(context)) literalHandler(candidate.element, importPath) else importHandler(importPath)
             else -> importHandler(importPath)
         }
     }
 
     private val NO_ARG_BUILTINS = setOf("recover")
+
+    /**
+     * A type name typed where a value is expected (`x := Cir`, `return Cir`, `f(Cir`, `&Squ`, `json.Dec` in such a place): GoLand writes the
+     * composite literal (probe 19). Not at a statement start, not as the type argument of `make`/`new`, not inside `f[...]` (an instantiation).
+     */
+    fun compositeLiteralPosition(context: GoCompletionContext): Boolean {
+        val ref: PsiElement = when (context.kind) {
+            GoCompletionContext.Kind.EXPRESSION -> context.reference ?: context.typeReference ?: return false
+            GoCompletionContext.Kind.SELECTOR -> context.reference?.takeIf { !atStatementStart(it) } ?: return false
+            else -> return false
+        }
+        return when (val parent = ref.parent) {
+            is GoArgumentList -> ((parent.parent as? GoCallExpr)?.expression as? GoReferenceExpression)?.let { it.expression == null && it.identifier?.text in TYPE_ARGUMENT_BUILTINS } != true
+            is GoIndexOrSliceExpr -> false
+            else -> true
+        }
+    }
+
+    private val TYPE_ARGUMENT_BUILTINS = setOf("make", "new")
+
+    private fun atStatementStart(ref: PsiElement): Boolean {
+        val list = ref.parent as? GoLeftHandExprList ?: return false
+        return list.parent is GoSimpleStatement && list.parent.children.size == 1 && list.children.count { it is GoExpression } == 1
+    }
+
+    /**
+     * `Name{<caret>}` for a struct, map, slice or array type (decided at insertion, so building the list reads no type declaration); other
+     * types (`type MyInt int`, interfaces, generic types that need type arguments) stay a bare name. Nothing is added before `{`, `(`, `.` or `[`.
+     */
+    private fun literalHandler(spec: GoTypeSpec, importPath: String?): InsertHandler<LookupElement> = InsertHandler { ctx, _ ->
+        val tail = ctx.tailOffset
+        val chars = ctx.document.charsSequence
+        val next = if (tail < chars.length) chars[tail] else ' '
+        val decl = CompletionUtil.getOriginalOrSelf(spec)
+        if (next !in "{(.[" && decl.isValid && decl.typeParameters == null && typeKind(decl) in COMPOSITE_KINDS) {
+            ctx.document.insertString(tail, "{}")
+            ctx.editor.caretModel.moveToOffset(tail + 1)
+        }
+        if (importPath != null) GoImportInserter.addImport(ctx, importPath)
+    }
+
+    private val COMPOSITE_KINDS = setOf("struct", "map", "slice")
 
     private fun importHandler(importPath: String?): InsertHandler<LookupElement>? =
         if (importPath == null) null else InsertHandler { ctx, _ -> GoImportInserter.addImport(ctx, importPath) }
@@ -293,6 +344,28 @@ object GoLookupElementFactory {
 
     /** `(a int, b string) error` for a signature (gopls style, `any` for the empty interface). */
     fun signatureTail(signature: GoSignatureType): String = GoDocSignature.renderType(signature).removePrefix("func")
+
+    /** GoLand's tail of a function or method row: the type and value parameters only (`(s string, sep string)`); the results go to [resultText]. */
+    fun paramsTail(signature: GoSignatureType): String =
+        GoDocSignature.renderType(GoSignatureType(signature.params, emptyList(), signature.variadic, signature.typeParams)).removePrefix("func")
+
+    /** GoLand's type column of a function or method row: `int`, `(string, error)`, `(err error)`; null without results. */
+    fun resultText(signature: GoSignatureType): String? =
+        if (signature.results.isEmpty()) null else GoDocSignature.renderType(GoSignatureType(emptyList(), signature.results, false)).removePrefix("func() ")
+
+    /** GoLand's owner suffix of a member row: ` → Base`, ` → *Square`, ` → interface {...}`. */
+    fun ownerTail(owner: String?): String = if (owner == null) "" else " → $owner"
+
+    /** The tail of [base] (lazy or not) followed by [suffix]: the package path of a member of another package (`(v any) encoding/json`). */
+    fun tailWith(base: GoCandidate, suffix: String): () -> String? {
+        val tail = base.tailSupplier
+        val text = base.tailText
+        return { (tail?.invoke() ?: text).orEmpty() + suffix }
+    }
+
+    /** GoLand's tail of a member of another package: `(v any) encoding/json` for functions, just ` encoding/json` for types (no `struct`). */
+    fun foreignTail(base: GoCandidate, importPath: String): () -> String? =
+        if (base.kind == GoCandidateKind.TYPE) ({ " $importPath" }) else tailWith(base, " $importPath")
 
     fun typeText(type: GoType): String = GoDocSignature.renderType(type)
 
