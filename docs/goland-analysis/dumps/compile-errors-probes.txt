@@ -1,0 +1,275 @@
+# GoLand 2026.2.3 over tools/ui-robot/goland/probe/compile-errors (2026-10-06, build/gates/goland-check.sh): ERROR infos per probe next to the go/types text the plugin shows.
+# GoLand words every error its own way, so 'different' means a different text, not a missing error. GoLand reports nothing on: generics/go127_generic_method_no_instantiation, go127_generic_method_type_args, nil_argument_type_param, package-level/initcycle, nomain, and the constant-overflow / default-type-overflow / delete-key-types / new-package-name / ambiguous-selector probes of builtins-consts.
+
+## builtins-consts
+## internal/probe/compile-errors/builtins-consts/append-multi-value.go want=1 goland=2 
+   want: invalid append: argument must be a slice; have 1st function result (value of type int)
+   goland:   7  ERROR(400)  [null]  «_ = append(bcPair())»  Assignment count mismatch: 1 = 2
+   goland:   7  ERROR(400)  [null]  «bcPair»  Cannot use 'bcPair()' (type (int, string)) as the type []Type
+## internal/probe/compile-errors/builtins-consts/array-length-negative.go want=1 goland=1 
+   want: invalid array length -1 (untyped int constant)
+   goland:   4  ERROR(400)  [null]  «-1»  Invalid array bound '-1', must be non-negative
+## internal/probe/compile-errors/builtins-consts/array-length-not-constant.go want=1 goland=1 
+   want: array length bcFive() (value of type int) must be constant
+   goland:   6  ERROR(400)  [null]  «bcFive»  Invalid array bound 'bcFive()', must be a constant expression
+## internal/probe/compile-errors/builtins-consts/array-length-not-integer.go want=1 goland=1 
+   want: array length 1.5 (untyped float constant) must be integer
+   goland:   4  ERROR(400)  [null]  «1.5»  Invalid array bound '1.5', the value must be representable by the 'int' type
+## internal/probe/compile-errors/builtins-consts/array-length-overflow.go want=1 goland=0 
+   want: invalid array length 1 << 64 (untyped int constant 18446744073709551616)
+   goland: 
+## internal/probe/compile-errors/builtins-consts/array-length-unsafe.skipped.go want=1 goland=0 skipped
+   want: invalid array length -int(unsafe.Sizeof(int32(0))) (constant -4 of type int)
+   goland: 
+## internal/probe/compile-errors/builtins-consts/array-length-variable.go want=1 goland=1 
+   want: invalid array length bcN
+   goland:   6  ERROR(400)  [null]  «bcN»  Invalid array bound 'bcN', must be a constant expression
+## internal/probe/compile-errors/builtins-consts/blank-assign-default-overflow.go want=1 goland=0 
+   want: cannot use 1 << 100 (untyped int constant 1267650600228229401496703205376) as int value in assignment to _ identifier (overflows)
+   goland: 
+## internal/probe/compile-errors/builtins-consts/clear-type-param.go want=1 goland=1 
+   want: invalid argument: cannot clear x (variable of type T constrained by any): argument must be (or constrained by) map or slice
+   goland:   5  ERROR(400)  [null]  «clear»  Cannot use T as the type interface{ ~[]Type | ~map[Type]Type1 }Type does not implement constraint 'interface{ ~[]Type | ~map[Type]Type1 }' because type is not included in ty
+## internal/probe/compile-errors/builtins-consts/close-type-param-non-channel.go want=1 goland=1 
+   want: invalid operation: cannot close non-channel ch (variable of type T constrained by any)
+   goland:   5  ERROR(400)  [null]  «ch»  Cannot use 'ch' (type T) as the type chan<- TypeMust be a bidirectional or send-only channel
+## internal/probe/compile-errors/builtins-consts/close-type-param-receive-only.go want=1 goland=1 
+   want: invalid operation: cannot close receive-only channel ch (variable of type T constrained by chan int | <-chan int)
+   goland:   5  ERROR(400)  [null]  «ch»  Cannot use 'ch' (type T) as the type chan<- TypeMust be a bidirectional or send-only channel
+## internal/probe/compile-errors/builtins-consts/compare-interface-untyped.go want=1 goland=1 
+   want: invalid operation: i == 0 (mismatched types bcI and untyped int)
+   goland:   7  ERROR(400)  [null]  «i == 0»  Invalid operation: i == 0 (mismatched types bcI and untyped int)
+## internal/probe/compile-errors/builtins-consts/compare-struct-with-slice.go want=1 goland=1 
+   want: invalid operation: a == b (struct containing []int cannot be compared)
+   goland:   7  ERROR(400)  [null]  «a == b»  Invalid operation: a == b (the operator == is not defined on bcWithSlice)
+## internal/probe/compile-errors/builtins-consts/compare-type-param-incomparable.go want=1 goland=1 
+   want: invalid operation: x == y (incomparable types in type set)
+   goland:   5  ERROR(400)  [null]  «x == y»  Invalid operation: x == y (the operator == is not defined on T)
+## internal/probe/compile-errors/builtins-consts/complex-shift-declaration.skipped.go want=1 goland=0 skipped
+   want: cannot use complex(1 << bcShiftS, 0) (value of type complex128) as int value in variable declaration
+   goland: 
+## internal/probe/compile-errors/builtins-consts/const-complement-overflow.go want=1 goland=0 
+   want: constant bitwise complement overflow
+   goland: 
+## internal/probe/compile-errors/builtins-consts/const-invalid-type.go want=1 goland=2 
+   want: invalid constant type []int
+   goland:   4  ERROR(400)  [null]  «[]int»  Invalid constant type
+   goland:   4  ERROR(400)  [null]  «nil»  Const initializer 'nil' is not a constant
+## internal/probe/compile-errors/builtins-consts/const-literal-overflow.go want=1 goland=0 
+   want: constant overflow
+   goland: 
+## internal/probe/compile-errors/builtins-consts/const-repeated-overflow.go want=1 goland=0 
+   want: constant 256 overflows byte
+   goland: 
+## internal/probe/compile-errors/builtins-consts/const-untyped-float-remainder.go want=1 goland=1 
+   want: invalid operation: operator % not defined on 1 (untyped float constant)
+   goland:   4  ERROR(400)  [null]  «1 % 1.0»  Invalid operation: 1 % 1.0 (the operator % is not defined on untyped float)
+## internal/probe/compile-errors/builtins-consts/copy-destination-not-slice.go want=1 goland=1 
+   want: invalid copy: argument must be a slice; have "foo" (untyped string constant)
+   goland:   5  ERROR(400)  [null]  «"foo"»  Cannot use '"foo"' (type string) as the type []Type
+## internal/probe/compile-errors/builtins-consts/copy-different-element-types.go want=1 goland=1 
+   want: invalid copy: arguments b (variable of type []bcMyByte) and y (variable of type T constrained by ~[]byte) have different element types bcMyByte and byte
+   goland:   8  ERROR(400)  [null]  «y»  Cannot use 'y' (type T) as the type []bcMyByte
+## internal/probe/compile-errors/builtins-consts/copy-mismatched-slice-elements.go want=1 goland=1 
+   want: invalid copy: mismatched slice element types int and string in x (variable of type T constrained by ~[]int | ~[]string)
+   goland:   5  ERROR(400)  [null]  «x»  Cannot use 'x' (type T) as the type []Type
+## internal/probe/compile-errors/builtins-consts/copy-string-source.go want=1 goland=1 
+   want: invalid copy: arguments x (variable of type []int) and y (variable of type T constrained by ~string) have different element types int and byte
+   goland:   5  ERROR(400)  [null]  «y»  Cannot use 'y' (type T) as the type []int
+## internal/probe/compile-errors/builtins-consts/delete-key-types.go want=1 goland=0 
+   want: invalid argument: maps of m (variable of type T constrained by bcM3) must have identical key types
+   goland: 
+## internal/probe/compile-errors/builtins-consts/delete-type-param-not-map.go want=1 goland=1 
+   want: invalid argument: m (variable of type T constrained by any) is not a map
+   goland:   5  ERROR(400)  [null]  «m»  Cannot use 'm' (type T) as the type map[Type]Type1
+## internal/probe/compile-errors/builtins-consts/embedded-field-redeclared.go want=1 goland=2 
+   want: bcE redeclared
+   goland:   6  ERROR(400)  [null]  «bcE»  Duplicate field 'bcE'
+   goland:   8  ERROR(400)  [null]  «bcE»  Duplicate field 'bcE'
+## internal/probe/compile-errors/builtins-consts/init-missing-body.go want=1 goland=1 
+   want: func init must have a body
+   goland:   4  ERROR(400)  [null]  «init»  Missing function body
+## internal/probe/compile-errors/builtins-consts/iota-local-variable.skipped.go want=1 goland=1 skipped
+   want: iota (variable of type int) is not constant
+   goland:   8  ERROR(400)  [null]  «iota»  Const initializer 'iota' is not a constant
+## internal/probe/compile-errors/builtins-consts/main/main-signature.go want=1 goland=2 
+   want: func main must have no arguments and no return values
+   goland:   4  ERROR(400)  [null]  «(args []string)»  Function main must have no arguments and no return values
+   goland:   4  ERROR(400)  [null]  «int»  Function main must have no arguments and no return values
+## internal/probe/compile-errors/builtins-consts/max-mismatched-untyped.go want=1 goland=3 
+   want: invalid argument: mismatched types untyped int (previous argument) and untyped string (type of "x")
+   goland:   5  ERROR(400)  [null]  «max»  Cannot infer T
+   goland:   5  ERROR(400)  [null]  «1»  Cannot use '1' (type untyped int) as the type T
+   goland:   5  ERROR(400)  [null]  «"x"»  Cannot use '"x"' (type string) as the type T
+## internal/probe/compile-errors/builtins-consts/method-redeclared-alias.go want=1 goland=4 
+   want: method bcT0.m1 already declared at <position of the first m1> (the plugin omits the position)
+   goland:   7  ERROR(400)  [null]  «m1»  Method redeclared 'bcA0.m1'
+   goland:   7  ERROR(400)  [null]  «m1»  Method redeclared 'bcA0.m1'
+   goland:   10  ERROR(400)  [null]  «m1»  Method redeclared 'bcA0.m1'
+   goland:   10  ERROR(400)  [null]  «m1»  Method redeclared 'bcA0.m1'
+## internal/probe/compile-errors/builtins-consts/missing-function-body.skipped.go want=1 goland=1 skipped
+   want: missing function body
+   goland:   6  ERROR(400)  [null]  «bcNoBody»  Missing function body
+## internal/probe/compile-errors/builtins-consts/new-package-name.go want=1 goland=0 
+   want: use of package unsafe not in selector
+   goland: 
+## internal/probe/compile-errors/builtins-consts/new-untyped-nil.go want=1 goland=1 
+   want: use of untyped nil in argument to new
+   goland:   5  ERROR(400)  [null]  «nil»  Cannot use nil as a type argument to 'new'
+## internal/probe/compile-errors/builtins-consts/pointer-to-type-param-selector.go want=1 goland=1 
+   want: x.m undefined (type *T is pointer to type parameter, not type parameter)
+   goland:   5  ERROR(400)  [null]  «m»  Unresolved reference 'm'
+## internal/probe/compile-errors/builtins-consts/qualified-not-a-type.go want=1 goland=1 
+   want: math.Pi (untyped float constant 3.14159) is not a type
+   goland:   6  ERROR(400)  [null]  «math.Pi»  Pi is not a type
+## internal/probe/compile-errors/builtins-consts/receiver-alias-unnamed.go want=1 goland=1 
+   want: invalid receiver type bcA10
+   goland:   6  ERROR(400)  [null]  «bcA10»  Invalid receiver type '[10]int' ('[10]int' is an unnamed type)
+## internal/probe/compile-errors/builtins-consts/repeated-array-length.skipped.go want=1 goland=0 skipped
+   want: invalid array length 1 - iota (untyped int constant -1)
+   goland: 
+## internal/probe/compile-errors/builtins-consts/return-result-not-in-scope.go want=1 goland=1 
+   want: result parameter a not in scope at return
+   goland:   6  GRAMMAR_ERROR(16)  [GrazieInspectionRunner]  «a not»  The adverb "not" cannot be used like a noun.
+## internal/probe/compile-errors/builtins-consts/selector-ambiguous-defined-type.go want=1 goland=0 
+   want: ambiguous selector bcF5{}.X
+   goland: 
+## internal/probe/compile-errors/builtins-consts/selector-ambiguous-depth.go want=1 goland=0 
+   want: ambiguous selector bcE5{}.X
+   goland: 
+## internal/probe/compile-errors/builtins-consts/short-var-default-overflow.go want=1 goland=0 
+   want: cannot use 1 << 100 (untyped int constant 1267650600228229401496703205376) as int value in assignment (overflows)
+   goland: 
+## internal/probe/compile-errors/builtins-consts/string-shift-conversion.skipped.go want=1 goland=0 skipped
+   want: invalid operation: shifted operand 1 (type string) must be integer
+   goland: 
+## internal/probe/compile-errors/builtins-consts/struct-field-redeclared.go want=1 goland=2 
+   want: a redeclared
+   goland:   4  ERROR(400)  [null]  «a»  Duplicate field 'a'
+   goland:   6  ERROR(400)  [null]  «a»  Duplicate field 'a'
+## internal/probe/compile-errors/builtins-consts/var-default-overflow.go want=1 goland=0 
+   want: cannot use 1 << 100 (untyped int constant 1267650600228229401496703205376) as int value in variable declaration (overflows)
+   goland: 
+RESULT same=0 different=46 (skipped among them: 6)
+
+## generics (tail) and package-level
+   goland:   6  ERROR(400)  [null]  «grBox»  Use of generic type without instantiation
+## internal/probe/compile-errors/generics/go127_embedded_key_after_promoted.go want=1 goland=1 
+   want: cannot specify embedded field pbBar and enclosed promoted field Baz
+   goland:   9  ERROR(400)  [null]  «Baz: 1»  Cannot specify promoted field 'Baz' and enclosing embedded field 'pbBar'
+## internal/probe/compile-errors/generics/go127_generic_method_no_instantiation.go want=1 goland=0 
+   want: cannot use generic function l.Apply without instantiation
+   goland: 
+## internal/probe/compile-errors/generics/go127_generic_method_type_args.go want=1 goland=0 
+   want: got 2 type arguments but want 1
+   goland: 
+## internal/probe/compile-errors/generics/go127_promoted_key_after_embedded.go want=1 goland=1 
+   want: cannot specify promoted field Baz and enclosing embedded field paBar
+   goland:   9  ERROR(400)  [null]  «Baz: 1»  Cannot specify promoted field 'Baz' and enclosing embedded field 'paBar'
+## internal/probe/compile-errors/generics/go127_promoted_key_pointer.go want=1 goland=1 
+   want: invalid implicit pointer indirection to reach Baz
+   goland:   9  ERROR(400)  [null]  «Baz»  Unknown field 'Baz' in struct literal
+## internal/probe/compile-errors/generics/interface_method_type_params.go want=1 goland=1 
+   want: interface method must have no type parameters
+   goland:   5  ERROR(400)  [null]  «[Z any]»  Interface method must have no type parameters
+## internal/probe/compile-errors/generics/invalid_recursive_generic_interface.go want=1 goland=1 
+   want: invalid recursive type: irGen[A] refers to itself
+   goland:   4  ERROR(400)  [null]  «irGen»  Invalid recursive interface 'irGen'
+## internal/probe/compile-errors/generics/invalid_recursive_interface.go want=1 goland=1 
+   want: invalid recursive type: irSelf refers to itself
+   goland:   4  ERROR(400)  [null]  «irSelf»  Invalid recursive interface 'irSelf'
+## internal/probe/compile-errors/generics/map_key_slice.go want=1 goland=1 
+   want: invalid map key type []int
+   goland:   4  ERROR(400)  [null]  «[]int»  Invalid map key type: comparison operators == and != must be fully defined for the key type
+## internal/probe/compile-errors/generics/map_key_type_param.go want=1 goland=1 
+   want: invalid map key type T (missing comparable constraint)
+   goland:   4  ERROR(400)  [null]  «T»  Invalid map key type: comparison operators == and != must be fully defined for the key type
+## internal/probe/compile-errors/generics/nil_argument_type_param.go want=1 goland=0 
+   want: cannot use nil as Y value in argument to naEql
+   goland: 
+## internal/probe/compile-errors/generics/not_a_generic_type.go want=1 goland=1 
+   want: invalid operation: ngInt[int] (ngInt is not a generic type)
+   goland:   6  ERROR(400)  [null]  «[int]»  ngInt is not a generic type
+## internal/probe/compile-errors/generics/receiver_type_param_redeclared.go want=1 goland=2 
+   want: E redeclared in this block
+   goland:   9  ERROR(400)  [null]  «E»  Duplicate type parameter 'E'
+   goland:   9  ERROR(400)  [null]  «E»  Duplicate type parameter 'E'
+## internal/probe/compile-errors/generics/recursive_array_length.skipped.go want=1 goland=1 skipped
+   want: invalid recursive type: raZ refers to itself
+   goland:   6  ERROR(400)  [null]  «[]raZ{}[0][0]»  Invalid array bound '[]raZ{}[0][0]', must be a constant expression
+## internal/probe/compile-errors/generics/recursive_selector.skipped.go want=1 goland=1 skipped
+   want: invalid recursive type: rsT refers to itself
+   goland:   6  ERROR(400)  [null]  «p»  Unresolved type 'p'
+## internal/probe/compile-errors/generics/satisfy_chan_direction.go want=1 goland=1 
+   want: chan<- int does not satisfy chan int | <-chan int (chan<- int missing in chan int | <-chan int)
+   goland:   7  ERROR(400)  [null]  «sdF»  Cannot use chan chan int}}', '{ chan int}}')
+## internal/probe/compile-errors/generics/satisfy_comparable_terms.go want=1 goland=1 
+   want: P does not satisfy interface{interface{comparable; ~int | ~string}}
+   goland:   7  ERROR(400)  [null]  «P»  Cannot use P as the type interface {...}Type does not implement constraint 'interface {...}' because type is not included in type set ('~int', '~string')
+## internal/probe/compile-errors/generics/satisfy_composite_literal.go want=1 goland=1 
+   want: P does not satisfy interface{~uint}
+   goland:   7  ERROR(400)  [null]  «P»  Cannot use P as the type interface {...}Type does not implement constraint 'interface {...}' because type is not included in type set ('~uint')
+## internal/probe/compile-errors/generics/satisfy_partial_core_type.go want=1 goland=1 
+   want: S (type int) does not satisfy interface{~[]T}
+   goland:   7  ERROR(400)  [null]  «spApp[int]»  Cannot infer T
+## internal/probe/compile-errors/generics/satisfy_partial_method.go want=1 goland=3 
+   want: in call to smShow[int], A (type int) does not satisfy smStringer (missing method String)
+   goland:   9  ERROR(400)  [null]  «smShow[int]»  Cannot infer B
+   goland:   9  ERROR(400)  [null]  «1»  Cannot use '1' (type untyped int) as the type A
+   goland:   9  ERROR(400)  [null]  «"x"»  Cannot use '"x"' (type string) as the type B
+## internal/probe/compile-errors/generics/satisfy_partial_method_value.go want=1 goland=1 
+   want: A (type int) does not satisfy pvStringer (missing method String)
+   goland:   9  ERROR(400)  [null]  «pvShow[int]»  Cannot infer B
+## internal/probe/compile-errors/generics/satisfy_partial_type_set.go want=1 goland=1 
+   want: string does not satisfy psNumber (string missing in ~int | ~float64)
+   goland:   9  ERROR(400)  [null]  «string»  Cannot use string as the type psNumberType does not implement constraint 'psNumber' because type is not included in type set ('~int', '~float64')
+## internal/probe/compile-errors/generics/take_address_map_index_type_param.go want=1 goland=1 
+   want: invalid operation: cannot take address of m[i] (map index expression of type E constrained by any)
+   goland:   5  ERROR(400)  [null]  «&m[i]»  Cannot take the address of 'm[i]'
+## internal/probe/compile-errors/generics/term_type_param.go want=1 goland=1 
+   want: term cannot be a type parameter
+   goland:   4  ERROR(400)  [null]  «A»  Cannot embed a type parameter
+## internal/probe/compile-errors/generics/tilde_term_type_param.go want=1 goland=1 
+   want: type in term ~A cannot be a type parameter
+   goland:   4  ERROR(400)  [null]  «A»  Cannot embed a type parameter
+## internal/probe/compile-errors/generics/type_args_composite_literal.go want=1 goland=1 
+   want: not enough type arguments for type taPair: have 1, want 2
+   goland:   10  ERROR(400)  [null]  «[string]»  Got 1 arguments but 2 type parameters
+## internal/probe/compile-errors/generics/type_param_rhs.go want=1 goland=1 
+   want: cannot use a type parameter as RHS in type declaration
+   goland:   4  ERROR(400)  [null]  «P»  Cannot use a type parameter as RHS in type declaration
+## internal/probe/compile-errors/package-level/goversion/g.go want=7 goland=7 
+   want: type parameter requires go1.18 or later (-lang was set to go1.17; check go.mod)
+   want: generic method requires go1.27 or later (-lang was set to go1.17; check go.mod)
+   want: use of promoted field Bar.Baz in struct literal of type Foo requires go1.27 or later (-lang was set to go1.17; check go.mod)
+   want: clear requires go1.21 or later (-lang was set to go1.17; check go.mod)
+   want: built-in min requires go1.21 or later (-lang was set to go1.17; check go.mod)
+   want: cannot range over n (variable of type int): requires go1.22 or later (-lang was set to go1.17; check go.mod)
+   want: cannot range over seq (variable of type func(yield func(int) bool)): requires go1.23 or later (-lang was set to go1.17; check go.mod)
+   goland:   4  ERROR(400)  [null]  «[T, U any]»  Generics are supported starting with Go 1.18
+   goland:   15  ERROR(400)  [null]  «[P any]»  Generics are supported starting with Go 1.18
+   goland:   18  ERROR(400)  [null]  «Baz»  Promoted field names as keys in struct literals are supported starting with Go 1.27
+   goland:   22  ERROR(400)  [null]  «clear»  clear requires Go 1.21 or later
+   goland:   24  ERROR(400)  [null]  «min»  min requires Go 1.21 or later
+   goland:   29  ERROR(400)  [null]  «range n»  Cannot use a range-over-integer clause, use Go 1.22 and later.
+   goland:   32  ERROR(400)  [null]  «range seq»  Cannot use a range-over-function clause, use Go 1.22 and later.
+## internal/probe/compile-errors/package-level/importcycle/a/a.go want=1 goland=2 
+   want: import cycle not allowed
+   goland:   1  GRAMMAR_ERROR(16)  [GrazieInspectionRunner]  «a»  Use 'an' instead of 'a' if the following word starts with a vowel sound, e.g. 'an article', 'an hour'.
+   goland:   2  ERROR(400)  [GoCyclicImports]  «package a»  Cyclic imports are not allowed:example.com/playground/internal/probe/compile-errors/package-level/importcycle/a (in file a.go ) ->example.com/playground/inter
+## internal/probe/compile-errors/package-level/importcycle/b/b.go want=1 goland=1 
+   want: import cycle not allowed
+   goland:   1  ERROR(400)  [GoCyclicImports]  «package b»  Cyclic imports are not allowed:example.com/playground/internal/probe/compile-errors/package-level/importcycle/b (in file b.go ) ->example.com/playground/inter
+## internal/probe/compile-errors/package-level/initcycle/a.go want=1 goland=0 
+   want: initialization cycle for x
+   goland: 
+## internal/probe/compile-errors/package-level/nomain/helper.go want=1 goland=0 
+   want: function main is undeclared in the main package
+   goland: 
+## internal/probe/compile-errors/package-level/pkgname/x.go want=0 goland=1 
+   want: 
+   goland:   1  ERROR(400)  [null]  «package pkgname»  Multiple packages in the directory: pkgname, other
+## internal/probe/compile-errors/package-level/pkgname/y.go want=1 goland=1 
+   want: found packages pkgname (x.go) and other (y.go) in <dir>
+   goland:   2  ERROR(400)  [null]  «package other»  Multiple packages in the directory: pkgname, other
+RESULT same=4 different=99 (skipped among them: 9)
