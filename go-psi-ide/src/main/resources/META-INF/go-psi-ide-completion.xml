@@ -7,6 +7,11 @@
                             implementationClass="io.github.golangsupport.ide.completion.GoCompletionContributor"/>
     <completion.confidence language="Go" order="first"
                            implementationClass="io.github.golangsupport.ide.completion.GoCompletionConfidence"/>
+    <!-- Comments: package names in top-level comments (explicit completion; the confidence keeps the popup off), files after //go:embed. -->
+    <completion.contributor language="Go" id="goCommentCompletion"
+                            implementationClass="io.github.golangsupport.ide.completion.GoCommentCompletionContributor"/>
+    <completion.contributor language="Go" id="goEmbedCompletion"
+                            implementationClass="io.github.golangsupport.ide.directives.GoEmbedCompletionContributor"/>
     <weigher key="completion" id="goCompletion" order="after priority, before prefix"
              implementationClass="io.github.golangsupport.ide.completion.GoCompletionWeigher"/>
     <weigher key="completion" id="goAlphabetical" order="after proximity, before grouping"

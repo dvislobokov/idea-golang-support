@@ -33,12 +33,14 @@ class GoRegExpLanguageHost : RegExpLanguageHost {
     /** `\A` and `\z` exist; `\Z`, `\G`, `\K` and grapheme boundaries do not. */
     override fun supportsBoundary(boundary: RegExpBoundary): Boolean = boundary.type in BOUNDARIES
 
-    // `\p{Greek}`, `\pL`, `\p{^Lu}`: RE2 takes any Unicode class or script name; the list is not enumerated here, so nothing is flagged.
+    // `\p{Greek}`, `\pL`, `\p{^Lu}`: nothing is flagged (the script list follows the Unicode version of the toolchain).
     override fun isValidCategory(category: String): Boolean = true
     override fun isValidPropertyName(name: String): Boolean = true
-    override fun getAllKnownProperties(): Array<Array<String>> = emptyArray()
-    override fun getPropertyDescription(name: String?): String? = null
-    override fun getKnownCharacterClasses(): Array<Array<String>> = emptyArray()
+
+    // The platform's RegExp completion offers exactly these rows after `\` and `\p{` (empty tables gave 0 rows, seen live).
+    override fun getAllKnownProperties(): Array<Array<String>> = GoRegExpSyntax.PROPERTIES
+    override fun getPropertyDescription(name: String?): String? = GoRegExpSyntax.propertyDescription(name)
+    override fun getKnownCharacterClasses(): Array<Array<String>> = GoRegExpSyntax.CHARACTER_CLASSES
 
     private companion object {
         val NAMED: Set<RegExpGroup.Type> = EnumSet.of(RegExpGroup.Type.NAMED_GROUP, RegExpGroup.Type.PYTHON_NAMED_GROUP)
