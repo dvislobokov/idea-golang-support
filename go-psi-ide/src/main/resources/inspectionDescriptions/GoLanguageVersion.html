@@ -7,6 +7,8 @@ Reports language features newer than the Go version of the file: the <code>go</c
 <li><code>clear requires go1.21 or later</code>, <code>built-in min requires go1.21 or later</code>, <code>built-in max requires go1.21 or later</code></li>
 <li><code>cannot range over n (variable of type int): requires go1.22 or later</code> (range over an integer)</li>
 <li><code>cannot range over seq (variable of type func(yield func(int) bool)): requires go1.23 or later</code> (range over a function)</li>
+<li><code>generic method requires go1.27 or later</code> (a method with its own type parameters)</li>
+<li><code>use of promoted field Bar.Baz in struct literal of type Foo requires go1.27 or later</code> (a struct literal key reached through an embedded field)</li>
 </ul>
 <p>As with the compiler, each text ends with <code>(-lang was set to go1.17; check go.mod)</code>, or with
 <code>(file declares //go:build go1.21)</code> when the version comes from the file.</p>

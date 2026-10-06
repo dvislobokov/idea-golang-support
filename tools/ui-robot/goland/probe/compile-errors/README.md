@@ -66,4 +66,4 @@ Errors that need several files or packages; each case is a directory of its own 
 - `pkgname/` — `x.go` is `package pkgname`, `y.go` is `package other`: `found packages pkgname (x.go) and other (y.go) in <dir>` on `y.go`'s clause (`GoMultiplePackages`).
 - `buildtags/` — `//go:build linux` and `//go:build windows` files declare the same `Name` and `open`: no error in any file, also with `name_windows.go` open on linux (`GoDuplicateDeclaration`).
 - `initcycle/` — `var x = f()` in `a.go`, `f` in `b.go` reads `x`: `initialization cycle for x` (plugin text continues `; x refers to f; f refers to x`; `GoInitializationCycle`).
-- `goversion/` — own `go.mod` with `go 1.17`: type parameters, `clear`, `min`, range over int and over a function, each with go/types' `… requires go1.N or later (-lang was set to go1.17; check go.mod)` (`GoLanguageVersion`).
+- `goversion/` — own `go.mod` with `go 1.17`: type parameters, `clear`, `min`, range over int and over a function, a generic method, a promoted field as a struct literal key, each with go/types' `… requires go1.N or later (-lang was set to go1.17; check go.mod)` (`GoLanguageVersion`).

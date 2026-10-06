@@ -86,6 +86,56 @@ class GoLanguageVersionInspectionTest : GoFixTestBase() {
         )
     }
 
+    /** go/types testdata fixedbugs/issue50427a.go: a method's type parameters are "generic method" (go1.27), even below go1.18. */
+    fun testGenericMethodBefore127() {
+        use("1.26")
+        highlight(
+            """
+            package p
+
+            type S struct{}
+
+            func (S) m[${err("generic method requires go1.27 or later", "P")} any]() {}
+
+            func f[T any]() {}
+            """
+        )
+        use("1.17")
+        highlight("package p\n\ntype S struct{}\n\nfunc (S) m[${err("generic method requires go1.27 or later", "P")} any]() {}")
+    }
+
+    /** go/types testdata fixedbugs/issue79832.go, plus a two-level chain, a direct field and an elided literal. */
+    fun testPromotedFieldKeyBefore127() {
+        use("1.26")
+        highlight(
+            """
+            package p
+
+            type Foo struct {
+                Bar
+                Own int
+            }
+
+            type Bar struct {
+                Baz int
+                Qux
+            }
+
+            type Qux struct{ Deep int }
+
+            var _ = Foo{${err("use of promoted field Bar.Baz in struct literal of type Foo requires go1.27 or later", "Baz")}: 1, Own: 2}
+            var _ = &Foo{${err("use of promoted field Bar.Qux.Deep in struct literal of type Foo requires go1.27 or later", "Deep")}: 1}
+            var _ = Foo{Bar: Bar{Baz: 1}}
+            var _ = map[string]int{"Baz": 1}
+            """
+        )
+    }
+
+    fun testGo127IsQuiet() {
+        use("1.27")
+        highlight("package p\n\ntype S struct{ T }\n\ntype T struct{ X int }\n\nfunc (S) m[P any]() {}\n\nvar _ = S{X: 1}")
+    }
+
     fun testCurrentVersionIsQuiet() {
         use("1.23")
         highlight(

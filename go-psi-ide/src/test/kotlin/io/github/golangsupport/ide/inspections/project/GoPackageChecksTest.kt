@@ -138,6 +138,27 @@ class GoPackageChecksTest : GoSemanticIdeTestBase() {
         assertEquals(listOf("3: Twice: Twice redeclared in this block"), problems("tags/dup2.go", tool))
     }
 
+    /**
+     * Regression (gomodcache corpus, golang.org/x/arch `*spec/spec.go`): `//go:build ignore` programs are never given a context with
+     * `ignore` set, so each keeps the old scope (the default package plus itself) and its imports resolve as before.
+     */
+    fun testIgnoreFilesKeepTheDefaultScope() = inProject(mapOf(
+        mod,
+        "gen/lib.go" to "package gen\n\nfunc L() {}",
+        "gen/one.go" to "//go:build ignore\n\npackage main\n\nimport \"strings\"\n\nfunc main() { _ = strings.ToUpper(\"a\") }",
+        "gen/two.go" to "//go:build ignore\n\npackage main\n\nfunc main() {}",
+        "tags/x_windows.go" to "package tags\n\nconst Name = 1",
+        "tags/x_linux.go" to "package tags\n\nconst Name = 2",
+    )) {
+        val model = io.github.golangsupport.semantic.scope.GoPackageModel.getInstance(project)
+        val one = goFile("gen/one.go")
+        assertEquals(listOf("lib.go", "one.go"), model.scopeOf(one).files.map { it.name }.sorted())
+        assertNotNull(model.resolveImport("strings", one))
+        assertEquals(emptyList<String>(), problems("gen/one.go", GoDuplicateDeclarationInspection()))
+        // an OS-excluded file still gets the package of its own platform
+        assertEquals(listOf("x_windows.go"), model.scopeOf(goFile("tags/x_windows.go")).files.map { it.name })
+    }
+
     // ---- initialization cycles across files --------------------------------------------------------------------------------
 
     private val cycles = mapOf(
