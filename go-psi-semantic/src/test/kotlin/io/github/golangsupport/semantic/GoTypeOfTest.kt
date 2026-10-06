@@ -6,4 +6,5 @@ class GoTypeOfTest : GoSemanticTestBase() {
 
     fun testExprs() = checkFixture("exprs")
     fun testInference() = checkFixture("inference")
+    fun testGo127() = checkFixture("go127")
 }

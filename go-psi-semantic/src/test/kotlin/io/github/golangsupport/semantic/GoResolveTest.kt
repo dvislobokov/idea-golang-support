@@ -17,4 +17,5 @@ class GoResolveTest : GoSemanticTestBase() {
     fun testUniverse() = checkFixture("universe")
     fun testCgo() = checkFixture("cgo")
     fun testTestfiles() = checkFixture("testfiles")
+    fun testPromotedkeys() = checkFixture("promotedkeys")
 }

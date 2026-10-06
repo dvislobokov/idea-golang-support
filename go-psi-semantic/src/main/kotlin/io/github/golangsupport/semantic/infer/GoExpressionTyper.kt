@@ -230,7 +230,7 @@ class GoExpressionTyper(private val project: Project) {
             if (qualifier != null && isTypeExpression(qualifier)) {
                 val qt = typeOf(qualifier)
                 if (sel.method.pointerReceiver && qt !is GoPointerType && qt.underlying() !is GoInterfaceType) GoUnknownType
-                else GoSignatureType(listOf(GoParam(null, qt)) + sig.params, sig.results, sig.variadic)
+                else GoSignatureType(listOf(GoParam(null, qt)) + sig.params, sig.results, sig.variadic, sig.typeParams) // Go 1.27: a generic method keeps its own type parameters
             } else sig
         }
         is GoLookup.Selection.Ambiguous -> GoUnknownType

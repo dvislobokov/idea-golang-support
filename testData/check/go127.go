@@ -38,7 +38,24 @@ func useInference() {
 	var h func([]byte, func(byte) rune) []rune
 	h = Map
 	_ = h
+	m := map[string]func([]int, func(int) int) []int{"k": Map}
+	_ = m
+	type handler struct{ on func([]string, func(string) int) []int }
+	_ = handler{on: Map}
+	ch := make(chan func([]int, func(int) int) []int, 1)
+	ch <- Map
+	take(Map)
+	_ = give()
+	_ = l2.Apply[string]
+	var ap func(func(int) bool) List[bool] = l2.Apply
+	_ = ap
 }
+
+var l2 = List[int]{1}
+
+func take(f func([]int, func(int) float64) []float64) {}
+
+func give() func([]rune, func(rune) string) []string { return Map }
 
 // Promoted field keys in struct literals (Go 1.27).
 type Bar struct{ Baz int }

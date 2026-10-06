@@ -87,8 +87,10 @@ class GoTypeBuilder(private val project: Project) : GoTypeSource {
         val rhs = spec.type ?: return GoUnknownType
         var t = typeOf(rhs)
         if (spec.isAlias) return t.underlying()
+        // go/types typeDecl: a lone type parameter on the right (`type T[P any] P`) is an error; the type is invalid.
+        if (t is GoTypeParamType) return GoUnknownType
         // `type T U` where U is named: the underlying type of U.
-        if (t is GoNamedType || t is GoTypeParamType) t = t.underlying()
+        if (t is GoNamedType) t = t.underlying()
         return t
     }
 
@@ -119,8 +121,10 @@ class GoTypeBuilder(private val project: Project) : GoTypeSource {
         val decl = param.declaration.parent as? GoTypeParameterDeclaration ?: return GoUnknownType
         val t = constraintType(decl.constraintElem)
         // `[S ~[]E]`, `[T int | string]`, `[T int]`: shorthand for an interface with that type set.
-        return if (t is GoInterfaceType || t is GoNamedType || t is GoTypeParamType || t is GoUnknownType) t
-        else GoInterfaceType(emptyList(), listOf(t), implicit = true)
+        // A defined non-interface type (`[CC Chan]`) is a single-term type set as well.
+        return if (t is GoInterfaceType || t is GoTypeParamType || t is GoUnknownType || t is GoNamedType && t.underlying().let { it is GoInterfaceType || it is GoUnknownType }) t
+        // A named term is wrapped in a union: embedded named types are read as interfaces.
+        else GoInterfaceType(emptyList(), listOf(if (t is GoNamedType) GoUnionType(listOf(GoTerm(false, t))) else t), implicit = true)
     }
 
     override fun packagePathOf(named: GoNamedType): String? =

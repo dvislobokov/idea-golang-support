@@ -25,5 +25,9 @@ class GoCheckTest : GoErrorSiteTestBase() {
     fun testDeclarations() = check("declarations")
     fun testTypeParams() = check("typeparams")
     fun testControlFlow() = check("controlflow")
+    fun testInstantiation() = check("instantiation")
+    fun testSatisfaction() = check("satisfaction")
+    fun testInferUnknown() = check("inferunknown")
     fun testGo127() = check("go127")
+    fun testGo127Errors() = check("go127errors")
 }
