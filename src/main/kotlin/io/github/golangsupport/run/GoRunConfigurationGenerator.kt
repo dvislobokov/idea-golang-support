@@ -3,8 +3,9 @@ package io.github.golangsupport.run
 import io.github.golangsupport.lang.GoProjectPresence
 import com.intellij.execution.RunManager
 import com.intellij.ide.util.PropertiesComponent
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -14,7 +15,6 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.newvfs.RefreshQueue
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileVisitor
-import com.intellij.psi.PsiManager
 import io.github.golangsupport.lang.GoTestNames
 import io.github.golangsupport.lang.psi.GoFile
 import io.github.golangsupport.mod.GoModulesService
@@ -39,11 +39,12 @@ class GoRunConfigurationGenerator(private val project: Project) {
             .submit(AppExecutorUtil.getAppExecutorService())
             .onSuccess { roots ->
                 RefreshQueue.getInstance().refresh(true, true, {
-                    ApplicationManager.getApplication().executeOnPooledThread {
-                        if (project.isDisposed) return@executeOnPooledThread
-                        val targets = ReadAction.computeBlocking<List<Target>, RuntimeException> { if (project.isDisposed) emptyList() else collectTargets() }
-                        if (targets.isNotEmpty()) ApplicationManager.getApplication().invokeLater({ register(targets) }, project.disposed)
-                    }
+                    // cancellable: a blocking read action here kept a pending write action (and the EDT) waiting while the files were
+                    // being parsed (seen live 2026-10-06, a thread dump of a frozen GIGA IDE); the scan restarts after the write
+                    ReadAction.nonBlocking<List<Target>> { if (project.isDisposed) emptyList() else collectTargets() }
+                        .expireWhen { project.isDisposed }
+                        .finishOnUiThread(ModalityState.nonModal()) { targets -> if (targets.isNotEmpty()) register(targets) }
+                        .submit(AppExecutorUtil.getAppExecutorService())
                 }, *roots.toTypedArray())
             }
     }
@@ -56,8 +57,9 @@ class GoRunConfigurationGenerator(private val project: Project) {
                     if (file.isDirectory) return file.name !in SKIPPED_DIRECTORIES && !file.name.startsWith(".") && !file.name.startsWith("_")
                     val directory = file.parent ?: return true
                     if (file.extension != "go" || file.name.endsWith(GoTestNames.TEST_SUFFIX) || directory in programs || programs.size >= MAX_TARGETS) return true
-                    val psi = PsiManager.getInstance(project).findFile(file) as? GoFile ?: return true
-                    if (isProgram(psi)) programs += directory
+                    ProgressManager.checkCanceled()
+                    // the text, not the PSI: a stub tree built here parsed every file of the project under the read action (seen live)
+                    if (isProgramText(runCatching { VfsUtilCore.loadText(file) }.getOrDefault(""))) programs += directory
                     return true
                 }
             })
@@ -100,6 +102,12 @@ class GoRunConfigurationGenerator(private val project: Project) {
 
         /** A file of a program: `package main` with a `func main`, from its stubs. Read action. */
         fun isProgram(file: GoFile): Boolean = file.packageName == "main" && file.functions.any { it.name == "main" }
+
+        private val PACKAGE_MAIN = Regex("""^\s*package\s+main\s*(//.*|/\*.*)?$""", RegexOption.MULTILINE)
+        private val FUNC_MAIN = Regex("""^func\s+main\s*\(""", RegexOption.MULTILINE)
+
+        /** The same by the text alone, for the scan of a whole project: no PSI, no stubs, no parsing. Pure. */
+        fun isProgramText(text: CharSequence): Boolean = PACKAGE_MAIN.containsMatchIn(text) && FUNC_MAIN.containsMatchIn(text)
 
         fun getInstance(project: Project): GoRunConfigurationGenerator = project.service()
     }

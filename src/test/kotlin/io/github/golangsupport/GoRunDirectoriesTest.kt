@@ -35,3 +35,16 @@ class GoRunDirectoriesTest {
         assertEquals(pkg.path, GoRunDirectories.moduleRoot(pkg.path, null))
     }
 }
+
+/** The program scan of a project reads the text alone: no PSI, no stub building under a read action (a frozen IDE, seen live). */
+class GoProgramTextTest {
+    @Test fun aMainPackageWithAMainIsAProgram() = assertEquals(true, io.github.golangsupport.run.GoRunConfigurationGenerator.isProgramText("package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println()\n}\n"))
+
+    @Test fun aCommentAfterThePackageClauseIsFine() = assertEquals(true, io.github.golangsupport.run.GoRunConfigurationGenerator.isProgramText("// Command x.\npackage main // the program\n\nfunc main() {}\n"))
+
+    @Test fun anotherPackageIsNot() = assertEquals(false, io.github.golangsupport.run.GoRunConfigurationGenerator.isProgramText("package store\n\nfunc main() {}\n"))
+
+    @Test fun aMainPackageWithoutAMainIsNot() = assertEquals(false, io.github.golangsupport.run.GoRunConfigurationGenerator.isProgramText("package main\n\nfunc helper() {}\n\nvar mainCount int\n"))
+
+    @Test fun aMethodNamedMainIsNot() = assertEquals(false, io.github.golangsupport.run.GoRunConfigurationGenerator.isProgramText("package main\n\ntype t int\n\nfunc (t) main() {}\n"))
+}

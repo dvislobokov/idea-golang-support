@@ -30,6 +30,19 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.195] - 2026-10-06
+
+### Fixed — the Go menu vanished after indexing in a project without modules (GIGA IDE, seen in a log with the new journal lines)
+- A directory opened as a project in GIGA IDE got no module ("0 modules added"), so the project had no content roots, the project scope of
+  the index was empty and, once indexing ended, the plugin decided the project had no Go files: the menu Go, the tool windows and the
+  widget went away although the walk in dumb mode had found the files. Without content roots the project directory is walked instead
+  of asking the index; the journal line of the decision now also says how many content roots there are
+
+### Fixed — a frozen IDE while the run configurations of the programs were being collected (thread dump, seen live 2026-10-06)
+- The scan for `package main` directories parsed every `.go` file of the project (a stub tree built from the AST) under a blocking read
+  action, which a pending write action of another plugin could not interrupt: the EDT waited on it. The scan now reads the text alone
+  (`package main` and `func main(` by regular expressions, no PSI) in a cancellable non-blocking read action that restarts after a write
+
 ## [0.2.194] - 2026-10-06
 
 ### Added — the journal says why the Go menu is shown or hidden

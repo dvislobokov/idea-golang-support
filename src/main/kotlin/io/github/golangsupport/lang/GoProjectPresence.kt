@@ -110,7 +110,8 @@ class GoProjectPresence(private val project: Project) : Disposable {
         published = value
         // the menu Go, the tool windows and the widget hang on this answer: when a user reports no menu, the journal says what was decided and why
         if (first || before != value) GoPluginLog.info("go", "Go presence of ${project.name}: $value (by $how; dumb: ${DumbService.isDumb(project)}; " +
-            "project dir: ${project.guessProjectDir()?.path}; .go files are of type '${FileTypeManager.getInstance().getFileTypeByExtension(GoFileType.defaultExtension).name}')")
+            "content roots: ${ProjectRootManager.getInstance(project).contentRoots.size}; project dir: ${project.guessProjectDir()?.path}; " +
+            ".go files are of type '${FileTypeManager.getInstance().getFileTypeByExtension(GoFileType.defaultExtension).name}')")
         if (before != value) project.messageBus.syncPublisher(TOPIC).presenceChanged(value)
     }
 
@@ -120,13 +121,19 @@ class GoProjectPresence(private val project: Project) : Disposable {
     private fun guess(): Boolean = guessed ?: ReadAction.compute<Boolean, RuntimeException> { !project.isDisposed && guessFromDirectory(project.guessProjectDir()) }
         .also { guessed = it }
 
-    /** Under a read action. In dumb mode the index is not there: the content roots are walked, or the answer known so far is kept. */
+    /**
+     * Under a read action. In dumb mode the index is not there: the content roots are walked, or the answer known so far is kept. A project
+     * without modules (seen live 2026-10-06 in GIGA IDE: a directory opened as a project got no module, "0 modules added") has no content
+     * roots, so the project scope of the index is empty and would answer no: the project directory is walked instead.
+     */
     private fun compute(): Boolean {
         if (project.isDisposed) return false
-        if (!DumbService.isDumb(project)) return indexed().also { how = "the index" }
-        computed?.let { how = "the earlier answer (dumb mode)"; return it }
-        walk()?.let { how = "a walk of the content roots (dumb mode)"; return it }
-        return guess().also { how = "the look at the project directory (dumb mode, too big to walk)" }
+        val noRoots = ProjectRootManager.getInstance(project).contentRoots.isEmpty()
+        if (!DumbService.isDumb(project) && !noRoots) return indexed().also { how = "the index" }
+        val state = if (noRoots) "no content roots" else "dumb mode"
+        if (!noRoots) computed?.let { how = "the earlier answer ($state)"; return it }
+        walk()?.let { how = "a walk of the project directory ($state)"; return it }
+        return guess().also { how = "the look at the project directory ($state, too big to walk)" }
     }
 
     private fun indexed(): Boolean {
