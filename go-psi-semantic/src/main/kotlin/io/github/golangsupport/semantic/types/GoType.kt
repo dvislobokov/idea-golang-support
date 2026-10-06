@@ -219,7 +219,8 @@ class GoInterfaceType @JvmOverloads constructor(val methods: List<GoMethod>, val
 
     /** True when the interface has type terms (it is a constraint, not a basic interface). */
     val hasTypeTerms: Boolean get() = embedded.any { it !is GoInterfaceType && it !is GoNamedType && it !is GoTypeParamType } ||
-        embedded.any { it is GoNamedType && (it.underlying() as? GoInterfaceType)?.hasTypeTerms == true }
+        // `type I interface{ I }` embeds itself (an `invalid recursive type` the checker reports): seen live as a StackOverflowError in the daemon.
+        embedded.any { e -> e is GoNamedType && (e.underlying() as? GoInterfaceType)?.let { RecursionManager.doPreventingRecursion(it, false) { it.hasTypeTerms } } == true }
 
     /** The type terms of this constraint (flattened over embedded interfaces); null when there are none. */
     val typeTerms: List<GoTerm>? by lazy { computeTerms() }

@@ -29,5 +29,6 @@ class GoCheckTest : GoErrorSiteTestBase() {
     fun testSatisfaction() = check("satisfaction")
     fun testInferUnknown() = check("inferunknown")
     fun testGo127() = check("go127")
+    fun testRecursiveIface() = check("recursiveiface")
     fun testGo127Errors() = check("go127errors")
 }

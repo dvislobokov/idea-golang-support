@@ -47,6 +47,10 @@ Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, sma
 - Fixtures: `testData/check/go127.go` (valid Go 1.27, 0 diagnostics), `go127errors.go`, `testData/types/go127`, `testData/resolve/promotedkeys`;
   the parser accepted all three forms since the Go 1.27.1 re-baseline (`testData/parser/cases/Go127.go`)
 
+### Fixed
+- A self-embedding interface (`type I interface{ I }`, also generic) no longer overflows the stack in the daemon (`GoInterfaceType.hasTypeTerms`
+  guarded like `isComparableConstraint`; seen live on the probe files): the checker reports `invalid recursive type: I refers to itself` instead
+
 ## [0.2.188] - 2026-10-06
 
 ### Added — semantic checker: generics (go/types testdata 1753 of 1804 sites, allowlist 143 → 60 sites)
