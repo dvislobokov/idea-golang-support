@@ -33,6 +33,6 @@ class GoTypesTestdataTest : GoErrorSiteTestBase() {
     }
 
     private companion object {
-        const val MIN_COVERAGE_PERCENT = 94
+        const val MIN_COVERAGE_PERCENT = 97
     }
 }

@@ -147,6 +147,27 @@ func resultsOK() (a, b int) {
 	}
 }
 
+// `:=` in the outermost block reuses the named results (same scope as the parameters): no shadowing.
+func resultsReused(f func() (int, int)) (n int, err error) {
+	m, err := f()
+	n = m
+	return
+}
+
+func resultsReusedLit() (n int, err error) {
+	g := func() (k int, err error) {
+		m, err := 1, error(nil)
+		k = m
+		return
+	}
+	n, err = g()
+	{
+		n, err := g()
+		_, _ = n, err
+		return // ERROR "result parameter n not in scope at return"
+	}
+}
+
 type T0 struct{}
 
 type A0 = T0

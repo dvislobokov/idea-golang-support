@@ -2009,8 +2009,19 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             val name = def.name ?: continue
             if (name == "_") continue
             val found = GoScopes.resolveName(stmt, name).firstOrNull()?.element ?: continue
-            if (found != def && !found.isEquivalentTo(def)) { report(stmt, "result parameter $name not in scope at return", "return-scope"); return }
+            if (found == def || found.isEquivalentTo(def) || reusesResult(found, stmt)) continue
+            report(stmt, "result parameter $name not in scope at return", "return-scope"); return
         }
+    }
+
+    /**
+     * `m, err := w.Write(b)` in the outermost block of the function reuses the result `err`: parameters, results and that block are one
+     * scope (spec "Declarations and scope"), so `:=` there does not shadow (seen on GOROOT: 119 bare returns after such a `:=`).
+     */
+    private fun reusesResult(found: PsiElement, stmt: GoReturnStatement): Boolean {
+        val decl = PsiTreeUtil.getParentOfType(found, GoShortVarDeclaration::class.java, true, GoBlock::class.java) ?: return false
+        val block = PsiTreeUtil.getParentOfType(decl, GoBlock::class.java) ?: return false
+        return isOwnBody(block) && block.parent === GoPsiUtil.functionOwner(stmt)
     }
 
     /** go/types `collectObjects`: `func main` (package main) and `func init` take no arguments and return nothing; `init` needs a body. */

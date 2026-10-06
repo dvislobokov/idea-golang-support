@@ -30,6 +30,94 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.189] - 2026-10-06
+
+### Added — Go 1.27 in the semantic layer and the language-version inspection
+- Generic methods (`func (l List[E]) Apply[F any](f func(E) F) List[F]`): inferred calls `l.Apply(func(int) string {...})` are typed
+  `List[string]`; explicit `l.Apply[string]`, method values and method expressions `List[int].Apply[string]` keep the method's type
+  parameters; `cannot use generic function l.Apply without instantiation`, `got 2 type arguments but want 1`, `in call to l.Two, cannot infer B`
+- Function type inference in every assignment context (typed var, `=`, slice / map / struct-field elements, `ch <-`, argument, `return`)
+  gives no false diagnostics; the variable keeps its declared type
+- Promoted fields as keys of struct literals (`Foo{Baz: 1}` with `Baz` in the embedded `Bar`): resolve and the checker accept them at any
+  depth; `invalid implicit pointer indirection to reach Baz`, `cannot specify promoted field Baz and enclosing embedded field Mid`,
+  `cannot specify embedded field Bar and enclosed promoted field Baz`, `duplicate field name Baz in struct literal`; dotted keys stay
+  `invalid field name Bar.Baz in struct literal`. Every wording checked with `go build -gcflags=-e` on Go 1.27.1
+- `GoLanguageVersion` (go-psi-ide): `generic method requires go1.27 or later` on the first type parameter of a method, and
+  `use of promoted field Bar.Baz in struct literal of type Foo requires go1.27 or later` on the key, when the file's Go version is older
+- Fixtures: `testData/check/go127.go` (valid Go 1.27, 0 diagnostics), `go127errors.go`, `testData/types/go127`, `testData/resolve/promotedkeys`;
+  the parser accepted all three forms since the Go 1.27.1 re-baseline (`testData/parser/cases/Go127.go`)
+
+## [0.2.188] - 2026-10-06
+
+### Added — semantic checker: generics (go/types testdata 1753 of 1804 sites, allowlist 143 → 60 sites)
+- `cannot use generic function f without instantiation` (var / `:=` / `_ =`, non-function targets, operands of `==`, expression statements)
+  and `cannot use generic type List[T any] without instantiation` (type positions, `new`, method expressions, qualified types, composite literals)
+- `invalid operation: myInt[int, string] (myInt is not a generic type)`; `got 3 type arguments but want 2` (at the first extra argument)
+- `cannot use a type parameter as RHS in type declaration`; `term cannot be a type parameter` / `type in term ~T cannot be a type parameter`
+- `cannot use type comparable outside a type constraint: interface is (or embeds) comparable` / `... interface contains type constraints`
+  (var, param, result, field, pointer, map, chan, slice, array, `new`); `invalid map key type T (missing comparable constraint)` / `invalid map key type []int`
+- `invalid recursive type: X refers to itself` / `invalid recursive type A` with the `A refers to B` lines, also through embedded interface
+  elements and generic instantiations (`SelfGen[A] refers to itself`); no foreign AST is loaded
+- Partial instantiation `f[A]`: `A (type int) does not satisfy Stringer (missing method String)`, prefixed `in call to f[int], ` inside a
+  call; core-type and type-set failures
+- `in call to f, cannot infer T` with unknown argument types, only when T cannot be bound by anything else (untyped nil does not take part)
+- Assignability and conversions with type parameters as in go/types: untyped constants against every specific type (`cannot use 1 (untyped
+  int constant) as T value in ...`), nil to a type parameter, named ↔ type parameter, channel direction, float ↔ complex conversions,
+  `cannot assign to x[0] (neither addressable nor a map index expression)` for string elements of a type parameter
+- `E redeclared in this block` for duplicate receiver type parameters
+- Not reported on purpose (false-positive risk or parser-level): cycles through selectors and array lengths, `interface method must have no
+  type parameters` (parser), cascades after an invalid instantiation, `cannot infer` when the names do not resolve — `docs/SEMANTIC.md` "Generics gaps"
+
+## [0.2.187] - 2026-10-06
+
+### Added — semantic checker: builtins, constants, comparisons, declarations (40 diagnostics, go/types testdata 1712 of 1804 sites)
+- `clear` / `close` / `copy` / `delete` / `append` / `min` / `max` / `new` over type sets and odd arguments with the go/types texts:
+  `invalid argument: cannot clear x (variable of type T constrained by any): argument must be (or constrained by) map or slice`,
+  `invalid operation: cannot close non-channel ch (...)` / `cannot close receive-only channel ch (...)`, `invalid copy: argument must be a
+  slice; have "foo" (untyped string constant)` / `mismatched slice element types int and string in x (...)` / `arguments b (...) and y (...)
+  have different element types myByte and byte`, `invalid argument: m (...) is not a map` / `maps of m (...) must have identical key types`,
+  `invalid append: argument must be a slice; have 1st function result (value of type int)`, `invalid argument: mismatched types untyped int
+  (previous argument) and untyped string (type of "x")`, `use of untyped nil in argument to new`, `use of package unsafe not in selector`
+- Constants: `invalid constant type []int`; array lengths (`invalid array length -1 (untyped int constant)`, `invalid array length n`,
+  `invalid array length 1 << 64 (untyped int constant 18446744073709551616)`, `array length 1.5 (untyped float constant) must be integer`,
+  `array length f() (value of type int) must be constant`); `constant overflow` beyond 512 bits, `constant bitwise complement overflow`;
+  the default type of an untyped constant (`cannot use 1 << 100 (...) as int value in variable declaration (overflows)`, the same `in
+  assignment` for `:=` and `in assignment to _ identifier` for `_ =`); `constant 256 overflows byte` for an implicitly repeated typed
+  constant; `invalid operation: operator % not defined on 1 (untyped float constant)`
+- Comparisons: `invalid operation: i == 0 (mismatched types I and untyped int)`, `x == y (incomparable types in type set)` / `(empty type set)`
+- Declarations: `result parameter a not in scope at return`; `x.m undefined (type *T is pointer to type parameter, not type parameter)`;
+  `math.Pi (untyped float constant 3.14159) is not a type`; `a redeclared` for struct fields and embedded fields; `method T0.m1 already
+  declared` through an alias receiver; `invalid receiver type A10` (alias of an unnamed type); `func main must have no arguments and no
+  return values`, `func main must have no type parameters`, `func init must have a body`; ambiguous selectors at any embedding depth
+- Left out on purpose: array lengths through `unsafe` (sizes assume amd64), a local `iota`, shifts inside conversions, `missing function
+  body` for non-`init` functions (assembly-backed functions in GOROOT) — `docs/SEMANTIC.md`
+
+### Changed
+- Float constants in messages follow go/constant `%.6g` (`3.14159`, not `3.14159e+00`); `append` slice errors say `invalid append:`
+- `GoLookup`: "reached by several paths" propagates to nested embedded types, fields of `type S7 S6` differ by embedding path
+
+## [0.2.186] - 2026-10-06
+
+### Added — package-level build errors (go-psi-ide `ide.inspections.project`, group Go, ERROR)
+- `GoMissingMainFunction`: `function main is undeclared in the main package` on the package clause of every non-test file of a `package
+  main` whose buildable files (GOOS / GOARCH / tags of the toolchain) have no `func main`; from stubs, cached per directory
+- `GoMultiplePackages`: go/build's `found packages a (a.go) and b (b.go) in <dir>` on each file whose package clause differs from the
+  first buildable file's (`x_test` in a `_test.go` counts as `x`; files excluded by build constraints and `package documentation` do not count)
+- `GoInitializationCycle`: `initialization cycle for x; x refers to f; f refers to x` for package-level initialization cycles that go
+  through declarations of other files of the package (single-file cycles stay the checker's `init-cycle`); other files' bodies are read
+  only when the walk reaches them; off above 100 files, gives up after 2000 declarations
+- `GoLanguageVersion`: features newer than the file's Go version (`//go:build go1.N`, else the module's `go` directive; unknown → silent)
+  with the go/types + cmd/compile texts `type parameter requires go1.18 or later`, `clear requires go1.21 or later`, `built-in min|max
+  requires go1.21 or later`, `cannot range over n (variable of type int): requires go1.22 or later`, `cannot range over seq (...):
+  requires go1.23 or later`, each followed by `(-lang was set to go1.17; check go.mod)` or `(file declares //go:build go1.21)`
+- `tools/ui-robot/goland/probe/compile-errors/`: one probe Go file per diagnostic of 0.2.186–0.2.189 (`// want: <message>` above the
+  line; `*.skipped.go` for cases left out, with the reason), checked against `go build` 1.27.1, gopls and the sandbox; `README.md` lists them
+
+### Fixed
+- A file excluded by the project's build context (`x_windows.go` on linux) no longer reports `Name redeclared in this block` against the
+  files of another platform: its package scope is the package built for a context under which the file builds (`project.api.GoFileBuildContext`);
+  `ignore`, `cgo`, `test`, `unix` are never satisfied as custom tags, so `//go:build ignore` programs keep the previous scope
+
 ## [0.2.185] - 2026-10-05
 
 ### Added — Go color palettes (ported from the C# palettes of idea-dotnet-support 0.1.97)
