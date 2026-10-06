@@ -316,8 +316,16 @@ slice literal, map literal, map index, send), `assignment-mismatch` (`initVars` 
 context`; `assignVars` wording for `=`), `no-value`, `multiple-value`, `call-arity` (`not enough /
 too many arguments in call to f`, `have (...)` / `want (...)`), `spread`, `cannot-infer`,
 `inference` (`type Y of y does not match inferred type X for T`), `constraint`, `type-args`
-(`not enough type arguments for type T: have 1, want 2`, `got N type arguments but f has M type
-parameters`), `generic-no-instantiation`, `conversion` (incl. constant representability and
+(`not enough type arguments for type T: have 1, want 2`, `got N type arguments but want M` at the first
+extra argument, `invalid operation: T[int] (T is not a generic type)`, also in composite literal types
+`T[A]{}`), `generic-no-instantiation`
+(`cannot use generic function f without instantiation` for `var x = f`, `x := f`, `_ = f`, non-function targets, operands
+and expression statements; `cannot use generic type T without instantiation` for `new(T)` and `T.m`; in type positions,
+receivers and composite literals with the parameter list, `cannot use generic type List[T any] without instantiation`),
+`misplaced-type-param` (`cannot use a type parameter as RHS in type declaration`, `term cannot be a type parameter`, `type in
+term ~A cannot be a type parameter`), `misplaced-constraint` (`cannot use type comparable outside a type constraint: interface
+is (or embeds) comparable`, `... interface contains type constraints` in variable, parameter, result, field and element
+types and `new`), `map-key` (`invalid map key type T (missing comparable constraint)`, `invalid map key type []int`), `conversion` (incl. constant representability and
 tag-insensitive struct identity), `operator` (mismatched / undefined operators, shifts,
 `division by zero`, `negative shift count`, `cannot take address`, `cannot indirect`,
 receive/send on wrong channel kinds, `++` on non-numeric), `overflow` (`constant shift
@@ -336,12 +344,12 @@ Phase 5c added `missing-return`, `duplicate-case` / `duplicate-default`, `fallth
 (`cannot call pointer method p on T`), `field-selector`, `short-var`.
 
 Not implemented (documented per line in `testData/types/goroot/allowlist.txt` with the
-expected message): overlapping and >100 union terms, `comparable` outside constraints,
-interface-vs-concrete comparisons (`slice can only be compared to nil`), several generic
-instantiation errors (`cannot use generic function f without instantiation` in some positions,
-recursive constraint interfaces), `result parameter not in scope at return`, the go/types test
-builtins `assert`/`trace`, and parser-level errors go/parser reports but this grammar recovers
-from (`expected type argument list`, `expected type`).
+expected message): interface-vs-concrete comparisons (`slice can only be compared to nil`),
+invalid recursive types through expressions (a selector `t3.p` or an array length `[len(T{})]`),
+assignability between invalid instantiations, `result parameter not in scope at return`, the
+go/types test builtins `assert`/`trace`, and parser-level errors go/parser reports but this
+grammar recovers from (`expected type argument list`, `expected type`; `interface method must
+have no type parameters` is reported by the parser).
 
 ### Constants, shifts and conversions (Phase 5c)
 
@@ -403,11 +411,12 @@ line (otherwise it is a false positive). Files whose first line carries `-lang`/
 flags are skipped; `/* ERROR */` inside a `//` comment is not an annotation (as in go/types).
 `allowlist.txt` lists lines with known-unsupported sites (and tolerates divergent diagnostics on
 those lines); the test prints per-file percentages and stale entries, and fails when coverage
-drops below `MIN_COVERAGE_PERCENT` (91 since Phase 5c: 1650/1804 sites, 0 false positives;
-Phase 5b: 55%). The allowlist is regenerated from the report's "expected ERROR" / "no error
+drops below `MIN_COVERAGE_PERCENT` (94 since the generics gaps: 1713/1804 sites, 0 false positives;
+Phase 5c: 91%, Phase 5b: 55%). The allowlist is regenerated from the report's "expected ERROR" / "no error
 expected" lines. `GoCheckTest` runs the same protocol over hand-written fixtures in
 `testData/check/` with no allowlist (undefined, unused, assignability, calls, operators,
-literals, generics, statements, declarations, typeparams, controlflow, and a realistic
+literals, generics, statements, declarations, typeparams, controlflow, instantiation, satisfaction,
+inferunknown, and a realistic
 `clean.go` that must produce no diagnostics).
 
 Corpus gate: `GorootCheckCorpusTest` runs `check(file)` over every buildable non-test file of
@@ -435,16 +444,69 @@ GOROOT/src; every diagnostic is a false positive, counted by class in
   1651 -> 1672 of 1804 sites (92.7%), 0 false positives, floor 92%. `cannot-infer` is reported by
   default in the IDE.
 
+## Generics gaps
+
+- Assignability follows go/types `assignableTo` for type parameters: a value of a *named* type is
+  not assignable to a type parameter (and a type parameter not to a named type) even when every
+  specific type would accept it; untyped values (also `nil`) go through every specific type first, so
+  `nil` is not assignable to a method-only constraint and a constant not to `any`. The bidirectional
+  channel rule uses spec "named types". The `: cannot assign X to Y (in TP)` cause is added only when
+  the other side is unnamed.
+- Conversions: integer/float and complex types do not convert into each other (`cannot convert float32
+  (in X) to type complex64 (in T)`); typed numeric constants still convert by value.
+- Constraint satisfaction: `satisfies` keeps the type terms of an embedded `interface{ comparable;
+  ~int | ~string }`; a defined non-interface constraint (`[CC Chan]`) is a single-term type set;
+  type arguments of composite literal types are checked (count and constraints); parameters that
+  occur only in constraints are bound by core type unification before satisfaction (`chan<- int does
+  not satisfy chan int | <-chan int`); a partial instantiation `f[A]` checks the explicit arguments
+  (`S (type int) does not satisfy interface{~[]T}`).
+- Inference: an untyped `nil` argument does not bind a type parameter (`in call to f, cannot infer
+  A`). `cannot infer T` is also reported when some arguments are unknown, but only when no argument can
+  bind T: T occurs in no parameter type, its constraint has no core type or single term, no other
+  unbound parameter's constraint mentions it, it is the first unbound parameter, and every unknown
+  argument consists of names that resolve (go/types skips inference after an invalid argument).
+  `does not match` is still reported only when all argument types are known.
+- Declarations: `type T[P any] P` is reported and its underlying type is invalid (no follow-up
+  receiver errors); invalid recursive types follow embedded interface elements (`type I interface{ I }`,
+  `interface{ foo9[A] }`; unions are not followed, as in go/types `validType`); the cycle walk stops at
+  declarations of other packages. Duplicate receiver type parameters (`func (T[E, E]) m()`) are
+  redeclarations.
+- Partial instantiation `f[A]` follows go/types `infer` (wording checked against the 1.27.1 compiler):
+  core type unification or the constraint's methods for each explicit argument (`A (type int) does not
+  satisfy Stringer (missing method String)`, prefixed `in call to f[A], ` in a call); in a call whose
+  remaining parameters are inferred and whose arguments fit, the type set is verified as well.
+- Address and assignment: string elements (also through a type parameter with a string term) are not
+  addressable; `&x[i]` on a type-parameter-typed map index is reported.
+
+## Go 1.27
+
+- Generic methods: `GoTypeBuilder.methodOf` gives the method signature its own type parameters, so calls
+  infer them like generic functions (`l.Apply(func(int) string {...})` is `List[string]`), `l.Apply[T]` and
+  method expressions `List[int].Apply[string]` instantiate them (a method expression keeps the method's type
+  parameters). The checker reports `cannot use generic function l.Apply without instantiation` (go/types
+  says "function" for methods too), `got 2 type arguments but want 1` and `in call to l.Two, cannot infer B`.
+- Function type inference in assignment contexts: a generic function value assigned, passed, returned,
+  sent or stored (slice, map, struct field) into a function type is accepted (`checkAssignable` does not check a generic signature against a function-type target; the target keeps its declared type); no
+  diagnostics on valid code (`testData/check/go127.go`).
+- Promoted field keys in struct literals: `GoResolver.resolveFieldKey` and the checker accept promoted
+  fields at any depth; the checker reports `invalid implicit pointer indirection to reach Baz` (an embedded
+  pointer on the way), `cannot specify promoted field Baz and enclosing embedded field Mid` / `cannot
+  specify embedded field Bar and enclosed promoted field Baz` (whichever key comes second), `duplicate
+  field name Baz in struct literal`; dotted keys stay `invalid field name Bar.Baz in struct literal`.
+- Not here: the language-version errors (`generic method requires go1.27 or later`, `use of promoted
+  field Bar.Baz in struct literal of type Foo requires go1.27 or later`): the checker has no per-file
+  language version.
+
 ## Known gaps
 
 - Diagnostics listed above as not implemented.
 - `unsafe` sizes assume gc on amd64 regardless of GOARCH.
 - Initialization cycles through functions of other files of the package are not followed.
-- Inference failures are reported (`cannot infer T`, `does not match`) only when all argument
-  types are known.
-- Remaining go/types testdata allowlist (143 sites): invalid recursive types through instantiation
-  (issue39634), some generic instantiation and constraint-satisfaction messages, interface
-  comparison causes beyond slices/maps/funcs, parser-level errors our grammar recovers from
-  (`expected type`, `expected type argument list`), the testdata `assert` builtin, and one-off
-  builtin argument checks.
+- Inference failures with unknown argument types: `does not match` is not reported, `cannot infer T`
+  only when no argument could bind T (see "Generics gaps").
+- Remaining go/types testdata allowlist (102 sites, 89 lines): invalid recursive types through
+  expressions (issue39634), follow-up errors of invalid instantiations (issue50929 `does not match`,
+  issue51232), interface comparison causes beyond slices/maps/funcs, parser-level errors our grammar
+  recovers from (`expected type`, `expected type argument list`), the testdata `assert` builtin, and
+  one-off builtin argument checks.
 - `C.xxx` members are a sentinel; cgo files are skipped by the corpus gates.

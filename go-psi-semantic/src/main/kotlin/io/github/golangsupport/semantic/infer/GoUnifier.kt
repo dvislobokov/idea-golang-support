@@ -174,6 +174,8 @@ object GoInference {
             val p = paramTypeAt(sig, i, expanded.size, spread) ?: break
             if (a.isUntypedConstant) {
                 val k = (a.type as? GoBasicType)?.kind ?: continue
+                // go/types infer: an untyped nil argument does not take part in inference.
+                if (k == GoBasicKind.UNTYPED_NIL) continue
                 if (p is GoTypeParamType && p in all) untypedByParam.getOrPut(p) { ArrayList() } += k
                 continue
             }

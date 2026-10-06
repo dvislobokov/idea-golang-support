@@ -73,12 +73,13 @@ object GoTypePredicates {
         val vu = value.underlying()
         val tu = target.underlying()
         if (value is GoBasicType && value.isUntyped) {
+            // go/types: an untyped value is assignable to a type parameter when it is assignable to every specific type.
+            if (target is GoTypeParamType) return paramAccepts(target) { assignable(value, it) }
             if (value.kind == GoBasicKind.UNTYPED_NIL) {
                 return tu is GoPointerType || tu is GoSignatureType || tu is GoSliceType || tu is GoMapType || tu is GoChanType ||
-                    tu is GoInterfaceType || tu == GoBasicType.UNSAFE_POINTER || (target is GoTypeParamType && nilAssignableToParam(target))
+                    tu is GoInterfaceType || tu == GoBasicType.UNSAFE_POINTER
             }
-            if (tu is GoInterfaceType) return !tu.hasTypeTerms && tu.allMethods.isEmpty() || target is GoTypeParamType && paramAccepts(target) { assignable(value, it) }
-            if (target is GoTypeParamType) return paramAccepts(target) { assignable(value, it) }
+            if (tu is GoInterfaceType) return !tu.hasTypeTerms && tu.allMethods.isEmpty()
             val tb = tu as? GoBasicType ?: return false
             return representableKind(value.kind, tb.kind)
         }
@@ -87,16 +88,15 @@ object GoTypePredicates {
         // Interface satisfaction.
         if (tu is GoInterfaceType && target !is GoTypeParamType && implements(value, tu)) return true
         // Bidirectional channel to directional channel with identical element types.
-        if (vu is GoChanType && tu is GoChanType && vu.dir == GoChanDir.BOTH && identical(vu.elem, tu.elem) && (value !is GoNamedType || target !is GoNamedType)) return true
-        if (target is GoTypeParamType && value !is GoTypeParamType) return paramAccepts(target) { assignable(value, it) }
-        if (value is GoTypeParamType && target !is GoTypeParamType) return paramAccepts(value) { assignable(it, target) }
+        if (vu is GoChanType && tu is GoChanType && vu.dir == GoChanDir.BOTH && identical(vu.elem, tu.elem) && (!isNamed(value) || !isNamed(target))) return true
+        // V is not a named type and T is a type parameter / V is a type parameter and T is not a named type: every specific type.
+        if (target is GoTypeParamType && !isNamed(value)) return paramAccepts(target) { assignable(value, it) }
+        if (value is GoTypeParamType && !isNamed(target)) return paramAccepts(value) { assignable(it, target) }
         return false
     }
 
     /** Spec "named types": predeclared and defined types (and type parameters). */
     fun isNamed(t: GoType): Boolean = t is GoNamedType || t is GoBasicType || t is GoTypeParamType
-
-    private fun nilAssignableToParam(p: GoTypeParamType): Boolean = paramAccepts(p) { assignable(GoBasicType.UNTYPED_NIL, it) }
 
     /** True when every term of the parameter's constraint satisfies [check]; false without terms. */
     private fun paramAccepts(p: GoTypeParamType, check: (GoType) -> Boolean): Boolean {
@@ -161,10 +161,9 @@ object GoTypePredicates {
     fun satisfies(type: GoType, constraint: GoType): Boolean {
         if (type is GoUnknownType) return true
         val iface = constraint.underlying() as? GoInterfaceType ?: return true
-        if (iface.isComparableConstraint) {
-            if (!comparable(type)) return false
-            return implements(type, GoInterfaceType(iface.methods, iface.embedded.filter { (it.underlying() as? GoInterfaceType)?.isComparableConstraint != true }))
-        }
+        // `implements` already accepts non-strictly comparable types for `comparable`; type terms of an
+        // embedded `interface{ comparable; ~int | ~string }` still apply.
+        if (iface.isComparableConstraint && !comparable(type)) return false
         return implements(type, iface)
     }
 
@@ -255,7 +254,8 @@ object GoTypePredicates {
         // Spec: x's type and T are *unnamed* pointer types whose base types have identical underlying types.
         if (value is GoPointerType && target is GoPointerType && identicalIgnoreTags(value.elem.underlying(), target.elem.underlying())) return true
         if (vu is GoBasicType && tu is GoBasicType) {
-            if (vu.kind.isNumeric && tu.kind.isNumeric) return true
+            // Spec: both integer or floating-point types, or both complex types (untyped constants convert by value).
+            if (vu.kind.isNumeric && tu.kind.isNumeric && (vu.isUntyped || vu.kind.isComplex == tu.kind.isComplex)) return true
             if (vu.kind.isInteger && tu.kind.isString) return true
             if (vu.kind.isString && tu.kind.isString) return true
         }

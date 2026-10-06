@@ -31,9 +31,9 @@ func f() {
 	_ = Sum("a") // ERROR "string does not satisfy Number (string missing in ~int | ~float64)"
 	_ = Sum[string]("a") // ERROR "string does not satisfy Number (string missing in ~int | ~float64)"
 	_ = Map([]int{1}, func(i int) string { return "" })
-	_ = Map[int, string, bool](nil, nil) // ERROR "got 3 type arguments but Map has 2 type parameters"
+	_ = Map[int, string, bool /* ERROR "got 3 type arguments but want 2" */](nil, nil)
 	_ = Keys(map[string]int{})
-	_ = Keys(map[[]int]int{}) // ERROR "[]int does not satisfy comparable"
+	_ = Keys(map[[]int]int{}) /* ERROR "invalid map key type []int" */ // ERROR "[]int does not satisfy comparable"
 	_ = Show(S{})
 	_ = Show(1) // ERROR "int does not satisfy Stringer (missing method String)"
 	var p Pair[string, int]
@@ -42,7 +42,7 @@ func f() {
 	_ = q
 	var r Pair[string, int, bool] // ERROR "too many type arguments for type Pair: have 3, want 2"
 	_ = r
-	var l List // ERROR "cannot use generic type List without instantiation"
+	var l List // ERROR "cannot use generic type List[T any] without instantiation"
 	_ = l
 	var l2 List[int]
 	l2.Push(1)

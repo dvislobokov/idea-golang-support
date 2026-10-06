@@ -128,7 +128,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         private val KEEP_ALWAYS = setOf("unused-import", "unused-variable", "unused-label", "redeclared", "unused-value", "not-constant", "missing-return", "init-cycle")
 
         /** Classes that never cause an enclosing diagnostic to be dropped. */
-        private val NEVER_INNER = setOf("unused-variable", "unused-label")
+        private val NEVER_INNER = setOf("unused-variable", "unused-label", "map-key", "misplaced-constraint")
 
         /** Report order of the final list: by start offset, enclosing ranges first (a stable sort). */
         val ORDER: Comparator<GoDiagnostic> = compareBy({ it.range.startOffset }, { -it.range.endOffset })
@@ -442,6 +442,12 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             }
         }
         val ref = base.typeReferenceExpression ?: return
+        // Receiver type parameters declare names (`func (*T[e, e]) m()` redeclares e).
+        val seenParams = HashSet<String>()
+        base.typeArguments?.typeList?.forEach { a ->
+            val n = a.typeReferenceExpression?.takeIf { a.typeArguments == null && (it as? GoTypeReferenceExpressionMixin)?.qualifierName == null }?.identifier?.text ?: return@forEach
+            if (n != "_" && !seenParams.add(n)) report(a, "$n redeclared in this block", "redeclared")
+        }
         val target = resolver.resolveTypeReference(ref)
         val name = ref.text
         if (target == null) return
@@ -590,14 +596,24 @@ class GoChecker(private val project: Project, private val file: GoFile) {
     private fun checkTypeSpec(spec: GoTypeSpec) {
         // The universe declarations of builtin/builtin.go (`type bool bool`) are not recursive.
         if (GoUniverse.isBuiltinDeclaration(spec)) return
+        // go/types typeDecl (go.dev/issue/45639): `type T[P any] P` is not permitted.
+        val rhs = spec.type
+        if (!spec.isAlias && rhs != null && typer.builder.typeOf(rhs) is GoTypeParamType) {
+            report(rhs, "cannot use a type parameter as RHS in type declaration", "misplaced-type-param")
+            return
+        }
         val name = spec.name ?: return
         if (name == "_") return
         val path = ArrayList<GoTypeSpec>()
         if (refersToItself(spec, spec, HashSet(), path)) {
             // go/types reports a cycle once, at its first declaration in source order.
             if (path.any { it.containingFile == spec.containingFile && it.textOffset < spec.textOffset }) return
-            val chain = (listOf(spec) + path).joinToString("") { "\n\t${it.name} refers to " }.dropLast(" refers to ".length)
-            report(spec.nameIdentifier ?: spec, "invalid recursive type ${if (path.isEmpty()) name else name}$chain", "recursive-type")
+            // go/types cycleError: `T refers to itself` for a one-element cycle, else one `A refers to B` line per edge.
+            // A generic type refers to itself through its instance with its own parameters (`irGen[A]`, seen live in the compiler).
+            val self = spec.typeParameters?.let { tp -> GoScopes.typeParamDefinitions(tp).joinToString(", ", "$name[", "]") { it.name ?: "_" } } ?: name
+            val message = if (path.size == 1) "invalid recursive type: $self refers to itself"
+            else "invalid recursive type $name" + (listOf(spec) + path).zipWithNext().joinToString("") { (a, b) -> "\n\t${a.name} refers to ${b.name}" }
+            report(spec.nameIdentifier ?: spec, message, "recursive-type")
         }
     }
 
@@ -606,6 +622,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         return directTypeReferences(typeNode).any { ref ->
             val target = resolver.resolveTypeReference(ref) as? GoTypeSpec ?: return@any false
             if (target === root) { path += target; return@any true }
+            // A cycle returns to this package: declarations of other packages (no import cycles) cannot lead back.
+            if (target.containingFile?.containingDirectory != root.containingFile?.containingDirectory) return@any false
             if (!visited.add(target)) return@any false
             path += target
             if (refersToItself(root, target, visited, path)) true else { path.removeAt(path.size - 1); false }
@@ -620,7 +638,11 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 null -> {}
                 is GoTypeReferenceExpression -> out += e
                 is io.github.golangsupport.lang.psi.GoPointerType, is io.github.golangsupport.lang.psi.GoMapType, is io.github.golangsupport.lang.psi.GoChannelType,
-                is io.github.golangsupport.lang.psi.GoFunctionType, is io.github.golangsupport.lang.psi.GoInterfaceType -> {}
+                is io.github.golangsupport.lang.psi.GoFunctionType -> {}
+                // go/types validType: embedded interface elements (single non-tilde terms; unions are not followed).
+                is io.github.golangsupport.lang.psi.GoInterfaceType -> e.constraintElemList.forEach { c ->
+                    c.constraintTermList.singleOrNull()?.takeIf { it.tilde == null }?.let { walk(it.type) }
+                }
                 is io.github.golangsupport.lang.psi.GoArrayOrSliceType -> if (GoPsiUtil.children(e, GoExpression::class.java).isNotEmpty() || e.ellipsis != null) walk(e.type)
                 is io.github.golangsupport.lang.psi.GoStructType -> e.fieldDeclarationList.forEach { f -> walk(f.type); f.anonymousFieldDefinition?.let { if (it.mul == null) walk(it.typeReferenceExpression) } }
                 is PsiType -> { walk(e.typeReferenceExpression); e.children.forEach { c -> if (c is PsiType) walk(c) } }
@@ -646,6 +668,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             if (!isAssignmentTarget(ref)) report(ref, "cannot use _ as value", "blank-value")
             return
         }
+        // go/types `nonGeneric` on the operand of a selector: `T.m` with generic T.
+        if (qualifier is GoExpression) bareGenericType(qualifier)?.let { report(qualifier, "cannot use generic type ${it.name} without instantiation", "generic-no-instantiation"); return }
         val results = resolver.resolveReferenceExpression(ref)
         if (name == "iota" && qualifier == null && results.all { it.element is GoNamedElement && GoUniverse.isBuiltinDeclaration(it.element as GoNamedElement) }) {
             if (!isIotaInScope(ref)) report(ref, "cannot use iota outside constant declaration", "iota")
@@ -755,6 +779,11 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         if (qualifier != null) {
             val qRef = ref.referenceExpression
             val targets = GoScopes.resolveName(qRef ?: ref, qualifier)
+            val spec = (targets.singleOrNull() as? GoScopes.Target.Declaration)?.element as? GoTypeSpec
+            if (spec != null && spec.typeParameters != null && !GoUniverse.isBuiltinDeclaration(spec)) {
+                report(qRef ?: ref, "cannot use generic type ${spec.name} without instantiation", "generic-no-instantiation")
+                return
+            }
             val import = targets.firstOrNull() as? GoScopes.Target.Import ?: return
             usedImports += import.element
             if (import.element.path == "C") return
@@ -816,6 +845,13 @@ class GoChecker(private val project: Project, private val file: GoFile) {
      */
     private fun checkUnion(elem: io.github.golangsupport.lang.psi.GoConstraintElem) {
         val terms = elem.constraintTermList
+        // go/types parseTilde: a term must not be a type parameter (a lone `[P T]` constraint is reported by the bound instead).
+        val lone = terms.size == 1 && terms[0].tilde == null && elem.parent is io.github.golangsupport.lang.psi.GoTypeParameterDeclaration
+        if (!lone) for (t in terms) {
+            val node = t.type ?: continue
+            if (typer.builder.typeOf(node) !is GoTypeParamType) continue
+            report(node, if (t.tilde != null) "type in term ~${exprText(node)} cannot be a type parameter" else "term cannot be a type parameter", "misplaced-type-param")
+        }
         if (terms.size > MAX_UNION_TERMS) {
             report(terms[MAX_UNION_TERMS], "cannot handle more than $MAX_UNION_TERMS union terms", "union")
             return
@@ -856,28 +892,99 @@ class GoChecker(private val project: Project, private val file: GoFile) {
     private fun renderTerm(t: GoTerm): String = (if (t.tilde) "~" else "") + render(t.type)
 
     private fun checkTypeNode(node: PsiType) {
+        if (node is io.github.golangsupport.lang.psi.GoMapType) checkMapKey(node)
+        if (isVarTypePosition(node) && node !is io.github.golangsupport.lang.psi.GoParType) {
+            val t = typer.builder.typeOf(node)
+            constraintOnlyCause(t)?.let { report(node, it, "misplaced-constraint"); return }
+        }
         val ref = node.typeReferenceExpression ?: return
         val args = node.typeArguments?.typeList
         val target = resolver.resolveTypeReference(ref) as? GoTypeSpec ?: return
+        if (args != null && target.typeParameters == null) { reportNotGeneric(ref, target, args); return }
         val params = target.typeParameters?.let { GoScopes.typeParamDefinitions(it) } ?: return
         if (args == null) {
-            if (!isInstantiationContext(node)) report(ref, "cannot use generic type ${target.name} without instantiation", "generic-no-instantiation")
+            if (!isInstantiationContext(node)) report(ref, "cannot use generic type ${genericTypeName(target)} without instantiation", "generic-no-instantiation")
             return
         }
         checkTypeArgumentCount(ref, target.name ?: "", "type", params.size, args.size)
         checkConstraints(target, args.map { typer.builder.typeOf(it) }, args)
     }
 
+    /** go/types `instantiatedType`: type arguments on a type without type parameters. */
+    private fun reportNotGeneric(x: PsiElement, spec: GoTypeSpec, args: List<PsiElement>) {
+        val t = typer.builder.typeOfDeclaration(spec, x)
+        // An alias of an uninstantiated generic type is reported at the alias (`type A = List`).
+        if (!isKnown(t) || t is GoNamedType && t.isGeneric) return
+        val name = exprText(x)
+        report(x, "invalid operation: $name${args.joinToString(", ", "[", "]") { exprText(it) }} (${render(t)} is not a generic type)", "type-args")
+    }
+
+    /** go/types typexpr: the key of a map type must be comparable (`invalid map key type T (missing comparable constraint)`). */
+    private fun checkMapKey(node: io.github.golangsupport.lang.psi.GoMapType) {
+        val keyNode = node.typeList.firstOrNull() ?: return
+        val key = typer.builder.typeOf(keyNode)
+        if (!isKnown(key) || key is GoTypeParamType && !isKnown(key.bound)) return
+        if (key !is GoTypeParamType && key.underlying() is GoInterfaceType) return
+        if (comparable(key)) return
+        report(keyNode, "invalid map key type ${render(key)}${if (key is GoTypeParamType) " (missing comparable constraint)" else ""}", "map-key")
+    }
+
     /** A bare generic type is allowed where the parser attaches type arguments elsewhere (receivers, literals). */
     private fun isInstantiationContext(node: PsiType): Boolean {
         var e: PsiElement? = node.parent
         while (e is PsiType) e = e.parent
-        return e is GoReceiver || e is GoCompositeLit || e is GoIndexOrSliceExpr || node.parent is GoReceiver
+        return e is GoCompositeLit || e is GoIndexOrSliceExpr
+    }
+
+    /**
+     * go/types `nonGeneric`: a generic function named without instantiation where no function type
+     * drives its inference (`var f = F`, `_ = F`, `any(F)`, `F == nil`). Reports at the name; true when reported.
+     */
+    private fun checkNonGeneric(value: GoExpression): Boolean {
+        val x = unparen(value) as? GoReferenceExpression ?: return false
+        val t = typer.typeOf(x) as? GoSignatureType ?: return false
+        if (!t.isGeneric || !isKnown(t)) return false
+        // Only function and (Go 1.27 generic) method declarations: a variable of a generic function type is already an error at its declaration.
+        val decl = resolver.resolveReferenceExpression(x).singleOrNull()?.element
+        if (decl !is GoFunctionDeclaration && decl !is GoMethodDeclaration) return false
+        if (decl is GoFunctionDeclaration && GoUniverse.isBuiltinDeclaration(decl)) return false
+        report(x, "cannot use generic function ${exprText(x)} without instantiation", "generic-no-instantiation")
+        return true
+    }
+
+    /** A generic type named without type arguments in an expression (`T.m`, `new(T)`): its declaration. */
+    private fun bareGenericType(e: GoExpression): GoTypeSpec? {
+        val x = unparen(e) as? GoReferenceExpression ?: return null
+        if (x.qualifier != null) return null
+        val spec = resolver.resolveReferenceExpression(x).singleOrNull()?.element as? GoTypeSpec ?: return null
+        return spec.takeIf { it.typeParameters != null && !GoUniverse.isBuiltinDeclaration(it) }
+    }
+
+    /**
+     * go/types `validVarType`: an interface with type terms or `comparable` in its type set is only
+     * a constraint. Null for types usable as values (method-only interfaces, non-interfaces, type parameters).
+     */
+    private fun constraintOnlyCause(t: GoType): String? {
+        if (t is GoTypeParamType || !isKnown(t)) return null
+        val iface = t.underlying() as? GoInterfaceType ?: return null
+        val terms = iface.typeTerms
+        if (terms != null) return "cannot use type ${render(t)} outside a type constraint: interface contains type constraints"
+        if (iface.isComparableConstraint) return "cannot use type ${render(t)} outside a type constraint: interface is (or embeds) comparable"
+        return null
+    }
+
+    /** Type nodes in go/types `varType` positions: variable, parameter, result and field types and element types of composite types. */
+    private fun isVarTypePosition(node: PsiType): Boolean = when (node.parent) {
+        is GoVarSpec, is io.github.golangsupport.lang.psi.GoParameterDeclaration, is io.github.golangsupport.lang.psi.GoResult,
+        is io.github.golangsupport.lang.psi.GoFieldDeclaration, is io.github.golangsupport.lang.psi.GoPointerType, is io.github.golangsupport.lang.psi.GoMapType,
+        is io.github.golangsupport.lang.psi.GoChannelType -> true
+        is io.github.golangsupport.lang.psi.GoArrayOrSliceType -> true
+        else -> false
     }
 
     private fun checkTypeArgumentCount(at: PsiElement, name: String, kind: String, want: Int, have: Int) {
-        if (have < want) report(at, if (kind == "type") "not enough type arguments for type $name: have $have, want $want" else "got $have type arguments but $name has $want type parameters", "type-args")
-        else if (have > want) report(at, if (kind == "type") "too many type arguments for type $name: have $have, want $want" else "got $have type arguments but $name has $want type parameters", "type-args")
+        if (have < want) report(at, if (kind == "type") "not enough type arguments for type $name: have $have, want $want" else "got $have type arguments but want $want", "type-args")
+        else if (have > want) report(at, if (kind == "type") "too many type arguments for type $name: have $have, want $want" else "got $have type arguments but want $want", "type-args")
     }
 
     private fun checkConstraints(decl: GoTypeSpec, args: List<GoType>, at: List<PsiElement>) {
@@ -915,6 +1022,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             else if (values.size == 1) checkTupleAssignable(values[0], List(defs.size) { declared }, "variable declaration")
         } else {
             for (v in values) {
+                if (checkNonGeneric(v)) continue
                 if (isNilLiteral(v)) report(v, "use of untyped nil in variable declaration", "untyped-nil")
                 checkValueUsable(v, sole = values.size == 1)
             }
@@ -1036,6 +1144,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         if (values.isEmpty()) return
         checkArity(defs.size, values, decl, "variable", decl.define)
         for (v in values) {
+            if (checkNonGeneric(v)) continue
             if (isNilLiteral(v)) report(v, "use of untyped nil in assignment", "untyped-nil")
             checkValueUsable(v, sole = values.size == 1)
         }
@@ -1084,6 +1193,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                     checkValueUsable(value, sole = rhs.size == 1)
                     if (!checkAssignTarget(target)) continue
                     if (isBlank(target)) {
+                        if (checkNonGeneric(value)) continue
                         if (isNilLiteral(value)) report(value, "use of untyped nil in assignment", "untyped-nil")
                         continue
                     }
@@ -1237,6 +1347,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             checkConversion(call, typer.typeOf(callee), args)
             return
         }
+        // `T.m()` with generic T: reported at the selector (the operand is invalid).
+        if ((calleeRef as? GoReferenceExpression)?.qualifier?.let { it is GoExpression && bareGenericType(it) != null } == true) return
         if (isUnsafeCall(calleeRef)) { checkUnsafeCall((calleeRef as GoReferenceExpression).referenceName ?: "", call); return }
         val calleeType = typer.typeOf(callee)
         if (calleeType is GoUnknownType) return
@@ -1283,7 +1395,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         }
         if (sig.isGeneric) {
             val unresolved = sig.typeParams.firstOrNull()
-            if (unresolved != null && argTypes.all { isKnown(it.second) }) {
+            if (unresolved != null && (argTypes.all { isKnown(it.second) } || isUninferable(sig, unresolved, argTypes))) {
                 report(call.argumentList?.rparen ?: call, "in call to $name, cannot infer ${unresolved.name}", "cannot-infer")
                 return
             }
@@ -1308,6 +1420,29 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         }
     }
 
+    /**
+     * Whether [p] (the first parameter inference left unbound) cannot be inferred whatever the
+     * unknown argument types are: it occurs in no parameter type, its constraint gives no core type
+     * or single term, and no other unbound parameter's constraint mentions it (constraint type
+     * inference could bind it from there). Generic function arguments may carry it: then not.
+     */
+    private fun isUninferable(sig: GoSignatureType, p: GoTypeParamType, args: List<Pair<PsiElement?, GoType>>): Boolean {
+        val only = setOf(p)
+        if (sig.params.any { GoInference.containsParams(it.type, only) }) return false
+        if (args.any { (_, t) -> t is GoSignatureType && t.isGeneric }) return false
+        // go/types skips inference when an argument is invalid: an unknown argument must come from a
+        // missing dependency, not from a name that does not resolve.
+        for ((arg, t) in args) {
+            if (isKnown(t)) continue
+            if (arg == null) return false
+            if (PsiTreeUtil.findChildrenOfType(arg, GoReferenceExpression::class.java).plus(listOfNotNull(arg as? GoReferenceExpression)).any { r ->
+                    r.referenceName != "_" && resolver.resolveReferenceExpression(r).isEmpty() && !(r.qualifier == null && GoUniverse.isBuiltin(r.referenceName ?: ""))
+                }) return false
+        }
+        if (!isKnown(p.bound) || p.coreType != null || p.singleExactTerm != null) return false
+        return sig.typeParams.none { it != p && GoInference.containsParams(it.bound, only) }
+    }
+
     /** `f[int](x)` / `F(x)` where `F` is generic: every inferred type argument must satisfy its constraint. */
     private fun checkCallConstraints(call: GoCallExpr, callee: GoExpression) {
         val generic = genericSignatureOf(callee) ?: return
@@ -1317,6 +1452,18 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         val u = io.github.golangsupport.semantic.infer.GoUnifier(generic.typeParams.toSet())
         generic.params.indices.forEach { i -> instantiated.params.getOrNull(i)?.let { u.unify(generic.params[i].type, it.type, exact = true) } }
         generic.results.indices.forEach { i -> instantiated.results.getOrNull(i)?.let { u.unify(generic.results[i].type, it.type, exact = true) } }
+        // Parameters that occur only in constraints (`[T any, C chan T | <-chan T](ch C)`): go/types core type unification.
+        val tset = generic.typeParams.toSet()
+        repeat(2) {
+            for (tp in generic.typeParams) {
+                val b = u.bindings[tp] ?: continue
+                val core = tp.coreType?.substitute(generic.partialSubst) ?: continue
+                if (!GoInference.containsParams(core, tset)) continue
+                val trial = io.github.golangsupport.semantic.infer.GoUnifier(tset)
+                trial.bindings.putAll(u.bindings)
+                if (trial.unify(core, b)) trial.bindings.forEach { (k, v) -> if (k !in u.bindings && isKnown(v) && !GoInference.containsParams(v, tset)) u.bindings[k] = v }
+            }
+        }
         val args = generic.typeParams.map { u.bindings[it] ?: GoUnknownType }
         val at = generic.typeParams.indices.map { explicitArgs.getOrNull(it) ?: call.argumentList ?: call }
         // Explicit type arguments (`f[int]`) are checked by the instantiation itself (checkIndex).
@@ -1428,7 +1575,10 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 if (ch == null) report(a, "invalid operation: cannot close non-channel ${describe(a)}", "builtin-arg")
                 else if (ch.dir == GoChanDir.RECV) report(a, "invalid operation: cannot close receive-only channel ${describe(a)}", "builtin-arg")
             }
-            "new" -> exprArg(0)?.let { a -> if (!typer.isTypeExpression(a) && typer.constantOf(a) != null && isUntyped(typer.typeOf(a))) {
+            "new" -> exprArg(0)?.let { a -> if (typer.isTypeExpression(a)) {
+                bareGenericType(a)?.let { report(a, "cannot use generic type ${it.name} without instantiation", "generic-no-instantiation") }
+                    ?: constraintOnlyCause(typer.typeOf(a))?.let { report(a, it, "misplaced-constraint") }
+            } else if (!typer.isTypeExpression(a) && typer.constantOf(a) != null && isUntyped(typer.typeOf(a))) {
                 val dt = GoTypePredicates.defaultType(typer.typeOf(a)) as? GoBasicType
                 val f = dt?.let { representabilityFailure(typer.constantOf(a)!!, it.kind) }
                 if (f != null) report(a, "cannot use ${describe(a)} as ${render(dt)} value in argument to new ($f)", "representability")
@@ -1684,7 +1834,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 val uk = (u as? GoBasicType)?.kind
                 when {
                     vk != null && vk.isString && u is GoSliceType && (u.elem.underlying() as? GoBasicType)?.kind.let { it == GoBasicKind.UINT8 || it == GoBasicKind.INT32 } -> null
-                    uk != null && (if (uk.isString && c is GoConstant.Int) null else representabilityFailure(c, uk)) == null && (GoTypePredicates.representableKind(vk ?: uk, uk) || vk != null && vk.isInteger && uk.isString || !isUntyped(vt) && GoTypePredicates.convertible(vt, u)) -> null
+                    uk != null && (if (uk.isString && c is GoConstant.Int) null else representabilityFailure(c, uk)) == null && (GoTypePredicates.representableKind(vk ?: uk, uk) || vk != null && vk.isInteger && uk.isString || !isUntyped(vt) && (vk?.isNumeric == true && uk.isNumeric || GoTypePredicates.convertible(vt, u))) -> null
                     vk != null && vk.isInteger && uk != null && uk.isInteger -> "constant ${c.render()} overflows ${render(u)} (in ${target.name})"
                     else -> "cannot convert ${describe(arg)} to type ${render(u)} (in ${target.name})"
                 }
@@ -1701,6 +1851,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 return
             }
         }
+        // A typed numeric constant converts to any numeric type that represents it (representability is not checked here).
+        if (c != null && (vt.underlying() as? GoBasicType)?.kind?.isNumeric == true && (target.underlying() as? GoBasicType)?.kind?.isNumeric == true) return
         val cause = conversionCause(vt, target)
         if (cause != null) report(arg, "cannot convert ${describe(arg)} to type ${render(target)}${if (cause.isEmpty()) "" else ": $cause"}", "conversion")
     }
@@ -1788,6 +1940,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
     }
 
     private fun checkBinaryOperands(left: GoExpression, right: GoExpression, op: String, at: PsiElement) {
+        if (checkNonGeneric(left) or checkNonGeneric(right)) return
         val lt = typer.typeOf(left)
         val rt = typer.typeOf(right)
         for ((e, t) in listOf(left to lt, right to rt)) if (t is GoTupleType) {
@@ -2098,6 +2251,10 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             else report(operand, "multiple-value ${exprText(operand)} (value of type ${render(t)}) in single-value context", "multiple-value")
             return
         }
+        if (expr.operator === GoTypes.AND && t is GoTypeParamType) {
+            if (!typer.isTypeExpression(operand) && unparen(operand) !is GoCompositeLit && !isAddressable(operand)) report(expr, "invalid operation: cannot take address of ${describe(operand)}", "operator")
+            return
+        }
         if (!isKnown(t) || t is GoTypeParamType) return
         val b = t.underlying() as? GoBasicType
         when (expr.operator) {
@@ -2147,10 +2304,16 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 xt is GoNamedType -> typer.builder.typeParams(xt.declaration.typeParameters).size
                 else -> return
             }
+            if (xt is GoNamedType && xt.declaration.typeParameters == null && xt.typeArgs.isEmpty()) {
+                (unparen(x) as? GoReferenceExpression)?.let { r -> resolver.resolveReferenceExpression(r).singleOrNull()?.element }
+                    .let { it as? GoTypeSpec }?.let { reportNotGeneric(x, it, indices); return }
+            }
             val have = indices.size
             if (xt is GoSignatureType) {
-                if (have > params) report(expr, "got $have type arguments but ${x.text} has $params type parameters", "type-args")
-                else checkConstraints(xt.typeParams, indices.map { if (it is PsiType) typer.builder.typeOf(it) else typer.typeOf(it as GoExpression) }, indices)
+                val targs = indices.map { if (it is PsiType) typer.builder.typeOf(it) else typer.typeOf(it as GoExpression) }
+                if (have > params) report(indices[params], "got $have type arguments but want $params", "type-args")
+                else if (have < params) checkPartialInstantiation(expr, xt, targs, indices)
+                else checkConstraints(xt.typeParams, targs, indices)
             } else if (xt is GoNamedType) {
                 checkTypeArgumentCount(x, xt.name, "type", params, have)
                 checkConstraints(xt.declaration, indices.map { if (it is PsiType) typer.builder.typeOf(it) else typer.typeOf(it as GoExpression) }, indices)
@@ -2177,6 +2340,65 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             else -> null
         } ?: return
         if (c >= BigInteger.valueOf(length)) report(index, "invalid argument: index $c out of bounds [0:$length]", "index")
+    }
+
+    /**
+     * `f[A]` with fewer type arguments than parameters (go/types `funcInst` + `infer`, checked live
+     * against the compiler). Inference first unifies each explicit argument with the core type of its
+     * constraint (`S (type int) does not satisfy interface{~[]T}`) or, without a core type, requires
+     * the constraint's methods (`A (type int) does not satisfy Stringer (missing method String)`); in a
+     * call both carry the prefix `in call to f[A], `. As the callee of a call whose remaining parameters
+     * are all inferred and whose arguments all fit, the final verification also checks the type set
+     * (`string does not satisfy Number (string missing in ~int | ~float64)`). Without a call the
+     * remaining parameters cannot be inferred (go/types `cannot infer B (declared at ...)`): left out.
+     */
+    private fun checkPartialInstantiation(expr: GoIndexOrSliceExpr, sig: GoSignatureType, targs: List<GoType>, at: List<PsiElement>) {
+        val tparams = sig.typeParams
+        val tset = tparams.toSet()
+        val call = (expr.parent as? GoCallExpr)?.takeIf { it.expression === expr }
+        val prefix = if (call != null) "in call to ${exprText(expr)}, " else ""
+        val verify = call != null && callFitsInstantiation(call)
+        val u = io.github.golangsupport.semantic.infer.GoUnifier(tset)
+        for ((i, t) in targs.withIndex()) if (isKnown(t) && i < tparams.size) u.bindings[tparams[i]] = t
+        for ((i, arg) in targs.withIndex()) {
+            val p = tparams.getOrNull(i) ?: break
+            if (!isKnown(arg) || GoInference.containsParams(arg, tset) || arg is GoTypeParamType) continue
+            if (!isKnown(p.bound)) continue
+            val terms = p.terms
+            val core = p.coreType
+            if (terms != null && core != null) {
+                if (terms.any { !isKnown(it.type) }) continue
+                val tx = if (terms.all { it.tilde }) arg.underlying() else arg
+                val trial = io.github.golangsupport.semantic.infer.GoUnifier(tset)
+                trial.bindings.putAll(u.bindings)
+                if (!trial.unify(tx, core)) { report(at[i], "$prefix${p.name} (type ${render(arg)}) does not satisfy ${render(p.bound)}", "constraint"); continue }
+            } else {
+                // go/types hasAllMethods: only a method missing on the type and on its pointer gives a plain cause here.
+                val methods = (p.bound.underlying() as? GoInterfaceType)?.allMethods.orEmpty()
+                val set = GoLookup.methodSet(arg)
+                val ptrSet = if (arg is GoPointerType) set else GoLookup.methodSet(GoPointerType(arg))
+                val missing = methods.firstOrNull { m -> set.none { it.name == m.name } && ptrSet.none { it.name == m.name } }
+                if (missing != null) { report(at[i], "$prefix${p.name} (type ${render(arg)}) does not satisfy ${render(p.bound)} (missing method ${missing.name})", "constraint"); continue }
+            }
+            if (!verify) continue
+            val bound = p.bound.substitute(sig.partialSubst)
+            if (!isKnown(bound) || GoInference.containsParams(bound, tset)) continue
+            GoTypePredicates.satisfactionFailure(arg, bound, ::render)?.let { report(at[i], it, "constraint") }
+        }
+    }
+
+    /** The call's type arguments are all inferred and every argument is assignable to its parameter. */
+    private fun callFitsInstantiation(call: GoCallExpr): Boolean {
+        val sig = typer.calleeSignature(call) ?: return false
+        if (sig.isGeneric) return false
+        val args = call.arguments.filterIsInstance<GoExpression>()
+        if (args.size != call.arguments.size) return false
+        val spread = call.argumentList?.hasEllipsis == true
+        return args.withIndex().all { (i, a) ->
+            val at = typer.typeOf(a)
+            val pt = GoInference.paramTypeAt(sig, i, args.size, spread) ?: return false
+            isKnown(at) && isKnown(pt) && at !is GoTupleType && assignable(at, pt)
+        }
     }
 
     /**
@@ -2278,12 +2500,18 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         val x = unparen(target)
         if (isBlank(x)) return true
         val t = typer.typeOf(x)
+        // `x[i] = v` where a specific type of x is a string (`[T []byte | string]`): the element type has no core type, the index is still a value.
+        val stringIndex = x is GoIndexOrSliceExpr && !x.isSlice && (typer.typeOf(x.expression ?: x) as? GoTypeParamType)?.terms?.let { ts ->
+            ts.all { isKnown(it.type) && it.type.underlying() !is GoMapType } && ts.any { t -> t.type.underlying().let { it is GoBasicType && it.kind.isString } }
+        } == true
+        if (stringIndex) { report(target, "cannot assign to ${exprText(x)} (neither addressable nor a map index expression)", "unassignable"); return false }
         if (t is GoUnknownType || t is GoTupleType || typer.isTypeExpression(x)) return true // reported as a value/type misuse elsewhere
         if (isAddressable(x)) return true
         if (x is GoIndexOrSliceExpr && !x.isSlice) {
             val xt = typer.typeOf(x.expression ?: return true)
             val u = (if (xt is GoTypeParamType) xt.coreType else null) ?: xt.underlying()
-            if (u is GoMapType || xt is GoTypeParamType && xt.coreType == null || !isKnown(xt)) return true
+            if (u is GoMapType || !isKnown(xt)) return true
+            if (xt is GoTypeParamType && xt.coreType == null && xt.terms?.none { t -> t.type.underlying().let { it is GoBasicType && it.kind.isString } } != false) return true
         }
         if (x is GoReferenceExpression) {
             val r = resolver.resolveReferenceExpression(x).firstOrNull() ?: return true
@@ -2317,7 +2545,9 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 when {
                     u is GoMapType -> false
                     u is GoSliceType || u is GoPointerType -> true
-                    xt is GoTypeParamType && xt.coreType == null -> xt.terms?.all { (it.type.underlying() as? GoMapType) == null } ?: true
+                    // A string index is a value, never a variable (also when one specific type is a string).
+                    u is GoBasicType && u.kind.isString -> false
+                    xt is GoTypeParamType && xt.coreType == null -> xt.terms?.all { t -> t.type.underlying().let { it !is GoMapType && !(it is GoBasicType && it.kind.isString) } } ?: true
                     else -> isAddressable(x.expression!!)
                 }
             }
@@ -2382,6 +2612,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             else if (isUnsafeCall(c)) pendingUnused += expr
             return
         }
+        if (checkNonGeneric(x)) return
         if (x is GoReferenceExpression) {
             val r = resolver.resolveReferenceExpression(x)
             val builtinFn = x.qualifier == null && (r.isEmpty() && (x.referenceName ?: "") in GoUniverse.FUNCTIONS || r.any { it.element is GoFunctionDeclaration && GoUniverse.isBuiltinDeclaration(it.element as GoFunctionDeclaration) })
@@ -2531,11 +2762,52 @@ class GoChecker(private val project: Project, private val file: GoFile) {
     // --- composite literals ---
 
     private fun checkCompositeLit(lit: GoCompositeLit) {
+        if (!checkCompositeLitTypeArgs(lit)) return
         val value = lit.literalValue ?: return
         val t = typer.typeOf(lit)
         if (!isKnown(t)) return
         checkLiteralValue(value, t)
     }
+
+    /**
+     * `T[A, B]{...}`: the parser keeps the type arguments of a composite literal type as direct
+     * children of the literal (no TypeArguments node). Checks their count and constraints, and a bare
+     * generic type (`T{}`); false when the literal type is invalid.
+     */
+    private fun checkCompositeLitTypeArgs(lit: GoCompositeLit): Boolean {
+        val ref = GoPsiUtil.children(lit, GoTypeReferenceExpression::class.java).firstOrNull() ?: return true
+        val spec = resolver.resolveTypeReference(ref) as? GoTypeSpec ?: return true
+        if (spec.typeParameters == null || GoUniverse.isBuiltinDeclaration(spec)) return true
+        val params = typer.builder.typeParams(spec.typeParameters)
+        val hasArgs = lit.node.findChildByType(GoTypes.LBRACK) != null
+        if (!hasArgs) {
+            report(ref, "cannot use generic type ${genericTypeName(spec)} without instantiation", "generic-no-instantiation")
+            return false
+        }
+        val args = GoPsiUtil.children(lit, PsiType::class.java)
+        if (args.size != params.size) { checkTypeArgumentCount(ref, spec.name ?: "", "type", params.size, args.size); return false }
+        checkConstraints(params, args.map { typer.builder.typeOf(it) }, args)
+        return true
+    }
+
+    /** go/types prints an uninstantiated generic type with its type parameter list: `Pair[K comparable, V any]`. */
+    private fun genericTypeName(spec: GoTypeSpec): String {
+        val params = typer.builder.typeParams(spec.typeParameters)
+        if (params.isEmpty()) return spec.name ?: ""
+        val parts = ArrayList<String>()
+        var i = 0
+        while (i < params.size) {
+            val b = constraintText(params[i])
+            var j = i
+            while (j + 1 < params.size && constraintText(params[j + 1]) == b) j++
+            parts += params.subList(i, j + 1).joinToString(", ") { it.name } + " " + b
+            i = j + 1
+        }
+        return "${spec.name}[${parts.joinToString(", ")}]"
+    }
+
+    /** The constraint of [p] as go/types prints it (`any` for the empty interface). */
+    private fun constraintText(p: GoTypeParamType): String = p.bound.let { b -> val u = b.underlying(); if (u is GoInterfaceType && u.allMethods.isEmpty() && u.typeTerms == null && !u.isComparableConstraint && b !is GoNamedType) "any" else render(b) }
 
     private fun checkLiteralValue(value: GoLiteralValue, t: GoType) {
         val u = (if (t is GoTypeParamType) t.coreType else null) ?: t.underlying()
@@ -2554,13 +2826,20 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                     }
                 } else {
                     val seen = HashSet<String>()
+                    // Go 1.27: keys may name promoted fields. Key -> names of the embedded fields traversed to reach it.
+                    val given = LinkedHashMap<String, List<String>>()
                     for (e in elems) {
                         val kx = e.key?.expression ?: continue
                         if (kx !is GoReferenceExpression || kx.qualifier != null) { report(kx, "invalid field name ${exprText(kx)} in struct literal", "struct-literal"); continue }
                         val k = kx
                         val name = k.referenceName ?: continue
-                        if (!seen.add(name)) report(k, "duplicate field name $name in struct literal", "struct-literal")
+                        if (!seen.add(name)) { report(k, "duplicate field name $name in struct literal", "struct-literal"); continue }
                         val f = GoLookup.lookupFieldOrMethod(t, name, packages.packagePathOf(file)) as? GoLookup.Selection.Field ?: continue
+                        if (f.path.any { it.type is GoPointerType }) { report(k, "invalid implicit pointer indirection to reach $name", "struct-literal"); continue }
+                        val path = f.path.map { it.name }
+                        path.firstOrNull { it in given }?.let { report(k, "cannot specify promoted field $name and enclosing embedded field $it", "struct-literal"); continue }
+                        given.entries.firstOrNull { name in it.value }?.let { report(k, "cannot specify embedded field $name and enclosed promoted field ${it.key}", "struct-literal"); continue }
+                        given[name] = path
                         checkElementValue(e.value, f.member.type, "struct literal")
                     }
                 }
@@ -2623,6 +2902,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
     private fun checkAssignable(value: GoExpression, target: GoType, context: String) {
         val vt = typer.typeOf(value)
         if (vt is GoUnknownType || !isKnown(vt) || !isKnown(target)) return
+        // A type parameter whose constraint is not resolved may accept anything.
+        if (target is GoTypeParamType && !isKnown(target.bound) || vt is GoTypeParamType && !isKnown(vt.bound)) return
         if (isUnresolvedGenericCall(value)) return
         (unparen(value) as? GoBinaryExpr)?.let { b -> if ((opText(b.operator) == "/" || opText(b.operator) == "%") && b.right?.let { typer.constantOf(it)?.toBigDecimal()?.signum() == 0 } == true) return }
         if (vt is GoTupleType) {
@@ -2637,7 +2918,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             if (tu != null) {
                 val u = io.github.golangsupport.semantic.infer.GoUnifier(vt.typeParams.toSet())
                 if (u.unify(vt, tu)) return
-            }
+            } else if (target !is GoTypeParamType && checkNonGeneric(value)) return
         }
         if (vt is GoBasicType && vt.kind == GoBasicKind.UNTYPED_NIL) {
             if (!assignable(vt, target)) report(value, "cannot use nil as ${render(target)} value in $context", "assignability")
@@ -2645,8 +2926,10 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         }
         val c = typer.constantOf(value)
         if (c != null && isUntyped(vt) && target is GoTypeParamType) {
-            // The constant must be representable by every specific type of the type set.
-            val bad = specificTypes(target)?.firstOrNull { term ->
+            // The constant must be representable by every specific type of the type set (and there must be some).
+            val specific = specificTypes(target)
+            if (specific == null) { report(value, "cannot use ${describe(value)} as ${render(target)} value in $context", "assignability"); return }
+            val bad = specific.firstOrNull { term ->
                 val k = (term.underlying() as? GoBasicType)?.kind ?: return@firstOrNull false
                 !GoTypePredicates.representableKind((vt as GoBasicType).kind, k) || representabilityFailure(c, k) != null
             }
@@ -2670,8 +2953,9 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         }
         if (assignable(vt, target)) return
         val tpDetail = when {
-            target is GoTypeParamType -> target.terms?.firstOrNull { !assignable(vt, it.type) }?.let { ": cannot assign ${render(vt)} to ${render(it.type)} (in ${render(target)})" }
-            vt is GoTypeParamType -> vt.terms?.firstOrNull { !assignable(it.type, target) }?.let { ": cannot assign ${render(it.type)} (in ${render(vt)}) to ${render(target)}" }
+            // go/types names the failing specific type only when the other side is not a named type.
+            target is GoTypeParamType && !GoTypePredicates.isNamed(vt) -> target.terms?.firstOrNull { !assignable(vt, it.type) }?.let { ": cannot assign ${render(vt)} to ${render(it.type)} (in ${render(target)})" }
+            vt is GoTypeParamType && !GoTypePredicates.isNamed(target) -> vt.terms?.firstOrNull { !assignable(it.type, target) }?.let { ": cannot assign ${render(it.type)} (in ${render(vt)}) to ${render(target)}" }
             else -> null
         }
         val detail = tpDetail ?: (target.underlying() as? GoInterfaceType)?.takeIf { target !is GoTypeParamType }?.let { ": ${render(vt)} does not implement ${render(target)} ${implementsDetail(vt, it)}" } ?: ""
@@ -2842,7 +3126,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         if (t is GoTupleType) return if (t.types.isEmpty()) "$text (no value)" else "$text (value of type ${render(t)})"
         if (isUntyped(t)) return "$text (${t} value)"
         val kind = when {
-            x is GoIndexOrSliceExpr && !x.isSlice && typer.typeOf(x.expression ?: x).underlying() is GoMapType -> "map index expression"
+            x is GoIndexOrSliceExpr && !x.isSlice && typer.typeOf(x.expression ?: x).let { xt -> (if (xt is GoTypeParamType) xt.coreType else null) ?: xt.underlying() } is GoMapType -> "map index expression"
             x is GoUnaryExpr && x.operator === GoTypes.ARROW -> "comma, ok expression"
             isVariable(x) -> "variable"
             else -> "value"
@@ -2864,7 +3148,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             if (what.isNotEmpty()) sb.append(what).append(' ')
         }
         sb.append("type ").append(render(t))
-        if (t is GoTypeParamType) sb.append(" constrained by ").append(t.bound.let { b -> val u = b.underlying(); if (u is GoInterfaceType && u.allMethods.isEmpty() && u.typeTerms == null && b !is GoNamedType) "any" else render(b) })
+        if (t is GoTypeParamType) sb.append(" constrained by ").append(constraintText(t))
         return sb.toString()
     }
 
