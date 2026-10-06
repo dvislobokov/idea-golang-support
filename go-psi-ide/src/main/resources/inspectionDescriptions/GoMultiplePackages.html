@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports files of one directory that declare different packages (the go command's
+<code>found packages a (a.go) and b (b.go) in &lt;dir&gt;</code>).
+<p>As in <code>go/build</code>: the files that match the build context, test files included, are taken in name order; the first one names
+the package, and every later file with another package clause is reported. An external test package (<code>package a_test</code> in a
+<code>_test.go</code> file) belongs to package <code>a</code>; files excluded by build constraints and <code>package documentation</code>
+do not count.</p>
+</body>
+</html>

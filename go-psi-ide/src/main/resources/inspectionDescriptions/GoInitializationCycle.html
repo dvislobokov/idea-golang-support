@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports package-level variables whose initialization depends on themselves through declarations in other files of the package
+(the compiler's <code>initialization cycle for x</code>, followed by <code>; x refers to f</code> parts).
+<p>Cycles inside one file are reported by the compiler checks; this inspection only reports the cycles that go through another file,
+once, at the cycle's first variable in package order. Function bodies and initializers of other files are read when the walk reaches them,
+so packages of more than 100 files are skipped.</p>
+</body>
+</html>

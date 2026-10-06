@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports language features newer than the Go version of the file: the <code>go</code> directive of its module, or a
+<code>//go:build go1.N</code> line of the file. Texts as the compiler's:
+<ul>
+<li><code>type parameter requires go1.18 or later</code></li>
+<li><code>clear requires go1.21 or later</code>, <code>built-in min requires go1.21 or later</code>, <code>built-in max requires go1.21 or later</code></li>
+<li><code>cannot range over n (variable of type int): requires go1.22 or later</code> (range over an integer)</li>
+<li><code>cannot range over seq (variable of type func(yield func(int) bool)): requires go1.23 or later</code> (range over a function)</li>
+</ul>
+<p>As with the compiler, each text ends with <code>(-lang was set to go1.17; check go.mod)</code>, or with
+<code>(file declares //go:build go1.21)</code> when the version comes from the file.</p>
+<p>Nothing is reported when the version is unknown (no go.mod or no <code>go</code> directive).</p>
+</body>
+</html>

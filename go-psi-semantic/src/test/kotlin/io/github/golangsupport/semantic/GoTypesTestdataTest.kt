@@ -26,13 +26,13 @@ class GoTypesTestdataTest : GoErrorSiteTestBase() {
         if (stale.isNotEmpty()) println("stale allowlist entries (now matched or file skipped): $stale")
         assertTrue("false positives:\n" + fps.joinToString("\n"), fps.isEmpty())
         assertTrue("unmatched ERROR sites (add to the allowlist with a reason or fix the checker):\n" + missed.joinToString("\n"), missed.isEmpty())
-        // Coverage may only improve (Phase 5c reached 91%, 0.0.9 reached 92.7%).
+        // Coverage may only improve (Phase 5c reached 91%, 0.0.9 reached 92.7%, builtin/constant checks 94.9%).
         val sites = results.sumOf { it.sites }
         val matched = results.sumOf { it.matched }
         assertTrue("ERROR-site coverage dropped to $matched/$sites", matched * 100 >= sites * MIN_COVERAGE_PERCENT)
     }
 
     private companion object {
-        const val MIN_COVERAGE_PERCENT = 92
+        const val MIN_COVERAGE_PERCENT = 94
     }
 }

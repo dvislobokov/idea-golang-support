@@ -247,6 +247,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 return
             }
             safely { checkElement(element) }
+            safely { checkElementMore(element) }
             if (element is GoFile) fileLevelCount = diagnostics.size
             super.visitElement(element)
         }
@@ -463,6 +464,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             if (cause != null) report(ref, "invalid receiver type $name ($cause)", "receiver")
             else if (t == GoBasicType.UNSAFE_POINTER) report(ref, "invalid receiver type $name (cannot be unsafe.Pointer)", "receiver")
             else if (t is GoBasicType) report(ref, "cannot define new methods on non-local type ${render(t)}", "receiver")
+            // go/types `validRecv`: an alias of any other unnamed type (`type A = [10]int`).
+            else if (target.isAlias) report(ref, "invalid receiver type $name", "receiver")
             return
         }
         when (val u = t.underlying()) {
@@ -945,6 +948,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             }
             return
         }
+        // go/types `constDecl` stops at an invalid constant type (checkConstType) before evaluating the values.
+        if (declared != null && isKnown(declared) && !isConstType(declared)) return
         for (v in spec.expressionList) {
             val c = typer.constantOf(v)
             if (c == null) {
@@ -1382,6 +1387,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             else report(args[2], "too many arguments for ${exprText(call)} (expected 2, found $count)", "builtin-arity")
             return
         }
+        if (name == "append" && count != args.size) { checkAppendTupleOperand(call); return }
         if (count != args.size) return // a spread tuple argument: types are checked by the callee rules below only for plain arguments
         when (name) {
             "len", "cap" -> {
@@ -1402,11 +1408,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 val a = exprArg(0) ?: return
                 val t = typer.typeOf(a)
                 if (!isKnown(t)) return
-                if (t is GoBasicType && t.kind == GoBasicKind.UNTYPED_NIL) { report(a, "invalid argument: argument must be a slice; have untyped nil", "builtin-arg"); return }
-                if (t is GoTypeParamType && t.coreType == null) return
                 if (t is GoTupleType) return
-                val elem = ((if (t is GoTypeParamType) t.coreType else t.underlying()) as? GoSliceType)?.elem
-                if (elem == null) { report(a, "invalid argument: argument must be a slice; have ${describe(a)}", "builtin-arg"); return }
+                val elem = when (val r = sliceElem(a, t)) { is SliceElem.Elem -> r.type; is SliceElem.Error -> { report(a, "invalid append: ${r.message}", "builtin-arg"); return }; null -> return }
                 if (call.argumentList?.hasEllipsis == true) return
                 for (i in 1 until args.size) exprArg(i)?.let { if (isKnown(elem)) checkAssignable(it, elem, "argument to append") }
             }
@@ -1414,21 +1417,16 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 val m = exprArg(0) ?: return
                 val mt = typer.typeOf(m)
                 if (!isKnown(mt)) return
-                if (mt is GoTypeParamType && mt.coreType == null) return
-                val map = (if (mt is GoTypeParamType) mt.coreType else mt.underlying()) as? GoMapType
-                if (map == null) { report(m, "invalid argument: ${describe(m)} is not a map", "builtin-arg"); return }
-                exprArg(1)?.let { if (isKnown(map.key)) checkAssignable(it, map.key, "argument to delete") }
+                val key = deleteKeyType(m, mt) ?: return
+                exprArg(1)?.let { if (isKnown(key)) checkAssignable(it, key, "argument to delete") }
             }
             "close" -> {
                 val a = exprArg(0) ?: return
                 val t = typer.typeOf(a)
                 if (!isKnown(t)) return
-                if (t is GoTypeParamType && t.coreType == null) return
-                val ch = (if (t is GoTypeParamType) t.coreType else t.underlying()) as? GoChanType
-                if (ch == null) report(a, "invalid operation: cannot close non-channel ${describe(a)}", "builtin-arg")
-                else if (ch.dir == GoChanDir.RECV) report(a, "invalid operation: cannot close receive-only channel ${describe(a)}", "builtin-arg")
+                checkClose(a, t)
             }
-            "new" -> exprArg(0)?.let { a -> if (!typer.isTypeExpression(a) && typer.constantOf(a) != null && isUntyped(typer.typeOf(a))) {
+            "new" -> exprArg(0)?.let { a -> if (checkNewOperand(a) && !typer.isTypeExpression(a) && typer.constantOf(a) != null && isUntyped(typer.typeOf(a))) {
                 val dt = GoTypePredicates.defaultType(typer.typeOf(a)) as? GoBasicType
                 val f = dt?.let { representabilityFailure(typer.constantOf(a)!!, it.kind) }
                 if (f != null) report(a, "cannot use ${describe(a)} as ${render(dt)} value in argument to new ($f)", "representability")
@@ -1453,8 +1451,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 val a = exprArg(0) ?: return
                 val t = typer.typeOf(a)
                 if (!isKnown(t)) return
-                val u = if (t is GoTypeParamType) t.coreType ?: return else t.underlying()
-                if (u !is GoMapType && u !is GoSliceType) report(a, "invalid argument: cannot clear ${describe(a)}: argument must be (or constrained by) map or slice", "builtin-arg")
+                val us = typeSetUnderlying(t) ?: return
+                if (us.any { it !is GoMapType && it !is GoSliceType }) report(a, "invalid argument: cannot clear ${describe(a)}: argument must be (or constrained by) map or slice", "builtin-arg")
             }
             "min", "max" -> {
                 var previous: GoType? = null
@@ -1466,6 +1464,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                     // All arguments must have the same type after untyped conversion.
                     val p = previous
                     if (p != null && !isUntyped(t) && !isUntyped(p) && !identical(t, p)) { report(a, "invalid argument: mismatched types ${render(p)} (previous argument) and ${render(t)} (type of ${exprText(a)})", "mismatched-types"); return }
+                    if (p != null && untypedKindsMismatch(p, t)) { report(a, "invalid argument: mismatched types $p (previous argument) and $t (type of ${exprText(a)})", "mismatched-types"); return }
                     // An untyped constant argument converts to the typed argument's type (every term of a type parameter's type set must accept it).
                     fun convertUntyped(arg: GoExpression, ut: GoType, target: GoType): Boolean {
                         val uk = (ut as GoBasicType).kind
@@ -1521,13 +1520,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 val src = exprArg(1) ?: return
                 val dt = typer.typeOf(dst)
                 val st = typer.typeOf(src)
-                if (!isKnown(dt) || !isKnown(st) || dt is GoTypeParamType || st is GoTypeParamType) return
-                fun have(e: GoExpression) = if (isNilLiteral(e)) "untyped nil" else describe(e)
-                val ds = dt.underlying() as? GoSliceType
-                if (ds == null) { report(dst, "invalid copy: argument must be a slice; have ${have(dst)}", "builtin-arg"); return }
-                val su = st.underlying()
-                val ok = su is GoSliceType && identical(ds.elem, su.elem) || su is GoBasicType && su.kind.isString && (ds.elem.underlying() as? GoBasicType)?.kind == GoBasicKind.UINT8
-                if (!ok) report(src, if (su is GoSliceType || su is GoBasicType && su.kind.isString) "invalid copy: arguments ${describe(dst)} and ${describe(src)} have different element types ${render(ds.elem)} and ${render((su as? GoSliceType)?.elem ?: GoBasicType.BYTE)}" else "invalid copy: argument must be a slice; have ${have(src)}", "builtin-arg")
+                if (!isKnown(dt) || !isKnown(st)) return
+                checkCopy(dst, dt, src, st)
             }
         }
     }
@@ -1587,6 +1581,339 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 (args[1] as? GoExpression)?.let { checkIntegerArgument(it, "int") }
             }
         }
+    }
+
+    // --- builtins over type sets (go/types `typeset`, `underIs`, `sliceElem`) ---
+
+    /**
+     * go/types `typeset`: the underlying types of the specific types of [t]'s type set; a type
+     * parameter without specific types yields a single null (go/types calls the predicate with nil).
+     * Null when a part of the type set is not known.
+     */
+    private fun typeSetUnderlying(t: GoType): List<GoType?>? {
+        if (t !is GoTypeParamType) return listOf(t.underlying())
+        if (!isKnown(t.bound)) return null
+        val types = specificTypes(t) ?: return listOf(null)
+        if (types.any { it is GoTypeParamType || !isKnown(it) }) return null
+        return types.map { it.underlying() }
+    }
+
+    /** Untyped operands of different categories (go/types `matchTypes`: numeric, boolean and string constants never convert to each other). */
+    private fun untypedKindsMismatch(a: GoType, b: GoType): Boolean {
+        val x = (a as? GoBasicType)?.takeIf { it.isUntyped }?.kind ?: return false
+        val y = (b as? GoBasicType)?.takeIf { it.isUntyped }?.kind ?: return false
+        if (x == GoBasicKind.UNTYPED_NIL || y == GoBasicKind.UNTYPED_NIL) return false
+        return x.isNumeric != y.isNumeric || x.isBoolean != y.isBoolean || x.isString != y.isString
+    }
+
+    private sealed class SliceElem {
+        class Elem(val type: GoType) : SliceElem()
+        class Error(val message: String) : SliceElem()
+    }
+
+    /** go/types `sliceElem`: the element type shared by the slices of [x]'s type set, or the error text; null when not sure. */
+    private fun sliceElem(x: GoExpression, t: GoType, desc: String = describe(x)): SliceElem? {
+        var elem: GoType? = null
+        for (u in typeSetUnderlying(t) ?: return null) {
+            val s = u as? GoSliceType
+                ?: return SliceElem.Error(if ((t as? GoBasicType)?.kind == GoBasicKind.UNTYPED_NIL) "argument must be a slice; have untyped nil" else "argument must be a slice; have $desc")
+            val prev = elem
+            if (prev == null) elem = s.elem
+            else if (!identical(prev, s.elem)) return if (isKnown(prev) && isKnown(s.elem)) SliceElem.Error("mismatched slice element types ${render(prev)} and ${render(s.elem)} in $desc") else null
+        }
+        return elem?.let { SliceElem.Elem(it) }
+    }
+
+    /** `append(f())` with a multi-value `f`: the first result is the slice operand. */
+    private fun checkAppendTupleOperand(call: GoCallExpr) {
+        val a = call.arguments.singleOrNull() as? GoExpression ?: return
+        val first = (typer.typeOf(a) as? GoTupleType)?.types?.firstOrNull() ?: return
+        if (!isKnown(first)) return
+        val r = sliceElem(a, first, "1st function result (value of type ${render(first)})")
+        if (r is SliceElem.Error) report(a, "invalid append: ${r.message}", "builtin-arg")
+    }
+
+    /** go/types `_Close`: every type of the operand's type set must be a channel that is not receive-only. */
+    private fun checkClose(a: GoExpression, t: GoType) {
+        for (u in typeSetUnderlying(t) ?: return) {
+            if (u !is GoChanType) { report(a, "invalid operation: cannot close non-channel ${describe(a)}", "builtin-arg"); return }
+            if (u.dir == GoChanDir.RECV) { report(a, "invalid operation: cannot close receive-only channel ${describe(a)}", "builtin-arg"); return }
+        }
+    }
+
+    /** go/types `_Delete`: the key type shared by the maps of the operand's type set; null after an error or when not sure. */
+    private fun deleteKeyType(m: GoExpression, t: GoType): GoType? {
+        var key: GoType? = null
+        for (u in typeSetUnderlying(t) ?: return null) {
+            val map = u as? GoMapType
+            if (map == null) { report(m, "invalid argument: ${describe(m)} is not a map", "builtin-arg"); return null }
+            val k = key
+            if (k != null && !identical(map.key, k)) {
+                if (isKnown(k) && isKnown(map.key)) report(m, "invalid argument: maps of ${describe(m)} must have identical key types", "builtin-arg")
+                return null
+            }
+            key = map.key
+        }
+        return key
+    }
+
+    /** go/types `_Copy`: slices with identical element types, or the `[]byte` / string special case. */
+    private fun checkCopy(dst: GoExpression, dt: GoType, src: GoExpression, st: GoType) {
+        val dstE = when (val r = sliceElem(dst, dt)) { is SliceElem.Elem -> r.type; is SliceElem.Error -> { report(dst, "invalid copy: ${r.message}", "builtin-arg"); return }; null -> return }
+        val srcSet = typeSetUnderlying(st) ?: return
+        val special = assignable(dt, GoSliceType(GoBasicType.BYTE)) &&
+            srcSet.all { u -> u is GoSliceType && identical(u.elem, GoBasicType.BYTE) || u is GoBasicType && u.kind.isString }
+        if (special) return
+        val srcE = when (val r = sliceElem(src, st)) {
+            is SliceElem.Elem -> r.type
+            // A string source: go/types goes on with the element type byte for a better message.
+            is SliceElem.Error -> if (srcSet.all { it is GoBasicType && it.kind.isString }) GoBasicType.BYTE else { report(src, "invalid copy: ${r.message}", "builtin-arg"); return }
+            null -> return
+        }
+        if (!isKnown(dstE) || !isKnown(srcE)) return
+        if (!identical(dstE, srcE)) report(dst, "invalid copy: arguments ${describe(dst)} and ${describe(src)} have different element types ${render(dstE)} and ${render(srcE)}", "builtin-arg")
+    }
+
+    /** `new(x)` operands that are neither types nor values: untyped nil, a package name. False after an error. */
+    private fun checkNewOperand(a: GoExpression): Boolean {
+        if (isNilLiteral(a)) { report(a, "use of untyped nil in argument to new", "untyped-nil"); return false }
+        return true
+    }
+
+    // --- builtins, constants, comparisons and declarations not covered by checkElement ---
+
+    /** Checks dispatched next to [checkElement] (kept apart so they stay independent of the generic checks). */
+    private fun checkElementMore(e: PsiElement) {
+        when (e) {
+            is GoReferenceExpression -> { checkPackageNotInSelector(e); checkPointerToTypeParamSelector(e) }
+            is GoTypeReferenceExpression -> checkQualifiedNonType(e)
+            is GoConstSpec -> { checkConstType(e); checkRepeatedConstOverflow(e) }
+            is GoVarSpec -> if (e.type == null && e.expressionList.size == e.varDefinitionList.size) e.expressionList.forEach { checkDefaultTypeOverflow(it, "variable declaration") }
+            is GoShortVarDeclaration -> if (e.expressionList.size == e.varDefinitionList.size)
+                e.varDefinitionList.forEachIndexed { i, d -> if (d.name == "_" || !isRedeclaredInSameScope(d)) checkDefaultTypeOverflow(e.expressionList[i], "assignment") }
+            is GoAssignmentStatement -> {
+                val lhs = e.leftHandExprList?.expressionList.orEmpty()
+                if (e.assignOp?.assign != null && lhs.size == e.expressionList.size) lhs.forEachIndexed { i, l -> if (isBlank(l)) checkDefaultTypeOverflow(e.expressionList[i], "assignment to _ identifier") }
+            }
+            is GoLiteral -> (typer.constantOf(e) as? GoConstant.Int)?.let { if (it.value.abs().bitLength() > UNTYPED_INT_PRECISION) report(e, "constant overflow", "overflow") }
+            is GoUnaryExpr -> checkComplementOverflow(e)
+            is io.github.golangsupport.lang.psi.GoArrayOrSliceType -> checkArrayLength(e)
+            is io.github.golangsupport.lang.psi.GoStructType -> checkDuplicateFields(e)
+            is GoReturnStatement -> checkResultsInScope(e)
+            is GoFunctionDeclaration -> checkMainSignature(e)
+            is GoFile -> checkMethodRedeclarationsThroughAliases(e)
+        }
+    }
+
+    /** go/types: a package name is only usable as the qualifier of a selector (`new(unsafe)`, `f(fmt)`). */
+    private fun checkPackageNotInSelector(ref: GoReferenceExpression) {
+        if (ref.qualifier != null || ref.parent !is GoArgumentList) return
+        val import = resolver.resolveReferenceExpression(ref).singleOrNull() as? GoResolver.Result.Import ?: return
+        report(ref, "use of package ${import.element.let { GoScopes.importName(it) }} not in selector", "not-expression")
+    }
+
+    /** go/types `interfacePtrError`: `*T` with T a type parameter has no fields or methods (`x.m` with `x *T`). */
+    private fun checkPointerToTypeParamSelector(ref: GoReferenceExpression) {
+        val qualifier = ref.qualifier as? GoExpression ?: return
+        if (typer.isTypeExpression(qualifier)) return
+        val qt = typer.typeOf(qualifier)
+        if (qt !is GoPointerType || qt.elem !is GoTypeParamType) return
+        if (resolver.resolveReferenceExpression(ref).none { it is GoResolver.Result.Selection }) return
+        report(ref.identifier ?: ref, "${exprText(ref)} undefined (type ${render(qt)} is pointer to type parameter, not type parameter)", "undefined-member")
+    }
+
+    /** `var x math.Pi`: a qualified name used as the type of a variable, field or parameter must denote a type. */
+    private fun checkQualifiedNonType(ref: GoTypeReferenceExpression) {
+        val mixin = ref as? GoTypeReferenceExpressionMixin ?: return
+        val qualifier = mixin.qualifierName ?: return
+        val holder = ref.parent?.parent
+        if (holder !is GoVarSpec && holder !is io.github.golangsupport.lang.psi.GoFieldDeclaration && holder !is io.github.golangsupport.lang.psi.GoParameterDeclaration) return
+        val target = resolver.resolveTypeReference(ref) as? GoNamedElement ?: return
+        if (target !is io.github.golangsupport.lang.psi.GoConstDefinition && target !is GoVarDefinition && target !is GoFunctionDeclaration) return
+        val t = typer.declarationType(target, ref)
+        if (!isKnown(t)) return
+        val text = "$qualifier.${mixin.referenceName}"
+        // go/types operand.String of the qualified identifier.
+        val desc = when (target) {
+            is io.github.golangsupport.lang.psi.GoConstDefinition -> typer.constantValueOf(target)?.let { c -> if (isUntyped(t)) "$t constant $c" else "constant $c of type ${render(t)}" } ?: return
+            is GoVarDefinition -> "variable of ${typeDescription(t)}"
+            else -> "value of ${typeDescription(t)}"
+        }
+        report(ref, "$text ($desc) is not a type", "not-a-type")
+    }
+
+    /** Spec "Constant declarations": a typed constant must have a boolean, numeric or string type. */
+    private fun isConstType(t: GoType): Boolean =
+        t !is GoTypeParamType && (t.underlying() as? GoBasicType)?.kind?.let { it.isBoolean || it.isNumeric || it.isString } == true
+
+    /** go/types `constDecl`: `invalid constant type T`. */
+    private fun checkConstType(spec: GoConstSpec) {
+        val node = spec.type ?: return
+        val t = typer.builder.typeOf(node)
+        if (isKnown(t) && !isConstType(t)) report(node, "invalid constant type ${render(t)}", "const-type")
+    }
+
+    /** An implicitly repeated typed constant (`byte(iota + 253)` repeated) whose value overflows its type. */
+    private fun checkRepeatedConstOverflow(spec: GoConstSpec) {
+        if (spec.expressionList.isNotEmpty() || spec.type != null) return
+        val source = typer.repeatedConstSpec(spec)?.takeIf { it.expressionList.isNotEmpty() && it.type == null } ?: return
+        if (source.expressionList.size != spec.constDefinitionList.size) return
+        for (def in spec.constDefinitionList) {
+            val t = typer.declarationType(def, def)
+            val kind = (t.underlying() as? GoBasicType)?.kind ?: continue
+            if (!isKnown(t) || isUntyped(t) || !kind.isInteger) continue
+            val c = typer.constantValueOf(def) as? GoConstant.Int ?: continue
+            if (representabilityFailure(c, kind) == "overflows") report(def, "constant ${c.render()} overflows ${render(t)}", "representability")
+        }
+    }
+
+    /**
+     * go/types `assignment` with a nil or interface target: an untyped numeric constant takes its
+     * default type and must be representable (`var _ = 1 << 100`, `x := 1e1000`, `_ = 1 << 100`).
+     */
+    private fun checkDefaultTypeOverflow(v: GoExpression, context: String) {
+        val t = typer.typeOf(v) as? GoBasicType ?: return
+        if (!t.isUntyped || !t.kind.isNumeric) return
+        val c = typer.constantOf(v) ?: return
+        val dt = GoTypePredicates.defaultType(t) as? GoBasicType ?: return
+        val f = representabilityFailure(c, dt.kind) ?: return
+        if (f == "overflows" || f == "truncated") report(v, "cannot use ${describe(v)} as ${render(dt)} value in $context ($f)", "representability")
+    }
+
+    /** go/types `matchTypes` of two untyped numeric operands: both take the later kind of int, rune, float, complex (`1 % 1.0` is a float operation). */
+    private fun untypedNumericResult(a: GoType, b: GoType): GoType {
+        val x = (a as? GoBasicType)?.kind ?: return a
+        val y = (b as? GoBasicType)?.kind ?: return a
+        return if (x.isNumeric && y.isNumeric && y.ordinal > x.ordinal) b else a
+    }
+
+    /** [x] described after its untyped conversion to [t] (`1 (untyped float constant)` in `1 % 1.0`). */
+    private fun describeUntypedAs(x: GoExpression, t: GoType): String {
+        val text = exprText(x)
+        val v = typer.constantOf(x)?.toString() ?: return "$text ($t value)"
+        return "$text ($t constant${if (v == text) "" else " $v"})"
+    }
+
+    /** go/types `overflow`: `^x` of an untyped constant beyond the 512-bit precision. */
+    private fun checkComplementOverflow(expr: GoUnaryExpr) {
+        if (expr.operator !== GoTypes.XOR) return
+        val operand = expr.expression ?: return
+        val inner = typer.constantOf(operand) as? GoConstant.Int ?: return
+        if (!isUntyped(typer.typeOf(operand)) || inner.value.abs().bitLength() > UNTYPED_INT_PRECISION) return
+        if (inner.value.not().abs().bitLength() > UNTYPED_INT_PRECISION) report(expr, "constant bitwise complement overflow", "overflow")
+    }
+
+    /** go/types `arrayLength`: a constant non-negative integer representable as int. */
+    private fun checkArrayLength(node: io.github.golangsupport.lang.psi.GoArrayOrSliceType) {
+        val e = GoPsiUtil.children(node, GoExpression::class.java).firstOrNull() ?: return
+        val x = unparen(e)
+        if (x is GoReferenceExpression && x.qualifier == null) {
+            val d = resolver.resolveReferenceExpression(x).singleOrNull()?.element
+            if (d is GoVarDefinition || d is GoParamDefinition || d is GoReceiver || d is GoFunctionDeclaration) { report(e, "invalid array length ${exprText(e)}", "array-length"); return }
+        }
+        val t = typer.typeOf(e)
+        if (!isKnown(t) || t is GoTupleType || typer.isTypeExpression(e)) return
+        val c = typer.constantOf(e)
+        if (c == null) {
+            if (isDefinitelyNotConstant(e)) report(e, "array length ${describe(e)} must be constant", "array-length")
+            return
+        }
+        if (c is GoConstant.Int && c.value.abs().bitLength() > UNTYPED_INT_PRECISION) return // reported as a constant overflow
+        // Sizes are folded for gc/amd64 only (GoSizes): a padding length computed from them may differ on the real target.
+        val calls = PsiTreeUtil.findChildrenOfType(e, GoCallExpr::class.java) + listOfNotNull(e as? GoCallExpr)
+        if (calls.any { call -> call.expression?.let { isUnsafeCall(unparen(it)) } == true }) return
+        val kind = (t.underlying() as? GoBasicType)?.kind ?: return
+        val integer = kind.isInteger
+        if (isUntyped(t) || integer) {
+            val v = c.toBigInteger()
+            if (v != null && v.signum() >= 0 && v.bitLength() < 64) return
+        }
+        report(e, if (integer) "invalid array length ${describe(e)}" else "array length ${describe(e)} must be integer", "array-length")
+    }
+
+    /** go/types `structType`: field names (embedded fields by their type name) are unique. */
+    private fun checkDuplicateFields(struct: io.github.golangsupport.lang.psi.GoStructType) {
+        val seen = HashSet<String>()
+        for (decl in struct.fieldDeclarationList) {
+            val names: List<PsiElement> = decl.anonymousFieldDefinition?.let { listOf(it) } ?: decl.fieldDefinitionList
+            for (n in names) {
+                val name = (n as? GoNamedElement)?.name ?: continue
+                if (name == "_" || seen.add(name)) continue
+                // An embedded field: the whole field, as its own embedded-field errors (an inner range would drop them).
+                val at = if (n is GoAnonymousFieldDefinition) n else (n as? GoNamedElement)?.nameIdentifier ?: n
+                report(at, "$name redeclared", "redeclared")
+            }
+        }
+    }
+
+    /** Spec "Return statements": a bare return needs every named result in scope (`result parameter a not in scope at return`). */
+    private fun checkResultsInScope(stmt: GoReturnStatement) {
+        if (stmt.expressionList.isNotEmpty()) return
+        val sig = when (val owner = GoPsiUtil.functionOwner(stmt)) {
+            is GoFunctionDeclaration -> owner.signature
+            is GoMethodDeclaration -> owner.signature
+            is GoFunctionLit -> owner.signature
+            else -> null
+        } ?: return
+        for (d in sig.result?.parameters?.parameterDeclarationList.orEmpty()) for (def in d.paramDefinitionList) {
+            val name = def.name ?: continue
+            if (name == "_") continue
+            val found = GoScopes.resolveName(stmt, name).firstOrNull()?.element ?: continue
+            if (found != def && !found.isEquivalentTo(def)) { report(stmt, "result parameter $name not in scope at return", "return-scope"); return }
+        }
+    }
+
+    /** go/types `collectObjects`: `func main` (package main) and `func init` take no arguments and return nothing; `init` needs a body. */
+    private fun checkMainSignature(decl: GoFunctionDeclaration) {
+        val name = decl.name ?: return
+        if (name == "init" && decl.block == null) report(decl.nameIdentifier ?: decl, "func init must have a body", "init-signature")
+        if (name != "main" || file.packageName != "main") return
+        val sig = decl.signature ?: return
+        if (decl.typeParameters != null) report(decl.nameIdentifier ?: decl, "func main must have no type parameters", "init-signature")
+        if (sig.parameters?.parameterDeclarationList?.isNotEmpty() == true || sig.result != null) report(decl.nameIdentifier ?: decl, "func main must have no arguments and no return values", "init-signature")
+    }
+
+    /** Methods declared twice on one type through different alias names (`func (T) m()` and `func (A) m()` with `type A = T`). */
+    private fun checkMethodRedeclarationsThroughAliases(f: GoFile) {
+        val seen = HashMap<Pair<PsiElement, String>, GoMethodDeclaration>()
+        for (m in f.methods) {
+            val name = m.name ?: continue
+            if (name == "_") continue
+            val rt = m.receiver?.type?.let { typer.builder.typeOf(it) } ?: continue
+            val base = ((rt as? GoPointerType)?.elem ?: rt) as? GoNamedType ?: continue
+            val prev = seen.putIfAbsent(base.declaration to name, m) ?: continue
+            // Same spelling: reported by checkPackageRedeclarations.
+            if (prev.receiverTypeName == m.receiverTypeName) continue
+            report(m.nameIdentifier ?: m, "method ${base.declaration.name}.$name already declared", "redeclared")
+        }
+    }
+
+    /**
+     * go/types `comparison` with type parameters: `==` / `!=` of two operands of the same type
+     * parameter needs a comparable type set (`incomparable types in type set`, `empty type set`).
+     */
+    private fun checkTypeParamEquality(left: GoExpression, right: GoExpression, op: String, at: PsiElement, lt: GoType, rt: GoType) {
+        if (op != "==" && op != "!=") return
+        if (lt !is GoTypeParamType || !identical(lt, rt) || !isKnown(lt.bound) || comparable(lt)) return
+        val cause = if (lt.terms?.isEmpty() == true) "empty type set" else "incomparable types in type set"
+        report(at, "invalid operation: ${exprText(left)} $op ${exprText(right)} ($cause)", "operator")
+    }
+
+    /**
+     * An untyped constant against a non-empty interface (go/types `matchTypes` does not convert a
+     * numeric constant to an interface): `i == 0 (mismatched types interface{m() int} and untyped int)`.
+     */
+    private fun checkUntypedInterfaceOperand(untyped: GoType, typed: GoType, at: PsiElement): Boolean {
+        val bin = at as? GoBinaryExpr ?: return true
+        val uk = (untyped as? GoBasicType)?.kind ?: return true
+        if (typed is GoTypeParamType || !uk.isNumeric || assignable(untyped, typed)) return true
+        val l = bin.left ?: return true
+        val r = bin.right ?: return true
+        val op = opText(bin.operator) ?: return true
+        val (lt, rt) = if (isUntyped(typer.typeOf(l))) untyped.toString() to render(typed) else render(typed) to untyped.toString()
+        val comparison = op in setOf("==", "!=", "<", "<=", ">", ">=")
+        report(if (comparison) r else bin, "invalid operation: ${exprText(l)} $op ${exprText(r)} (mismatched types $lt and $rt)", "mismatched-types")
+        return false
     }
 
     /** An index, size or shift-count operand: untyped constants convert to [target]; typed operands must be integers. */
@@ -1800,7 +2127,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             val bad = listOf(lt, rt).firstOrNull { t -> t is GoTypeParamType && specificTypes(t)?.all { (it.underlying() as? GoBasicType)?.kind?.isOrdered == true } != true }
             if (bad != null) { report(at, "invalid operation: ${exprText(left)} $op ${exprText(right)} (type parameter ${render(bad)} cannot use operator $op)", "operator"); return }
         }
-        if (lt is GoTypeParamType || rt is GoTypeParamType) return
+        if (lt is GoTypeParamType || rt is GoTypeParamType) { checkTypeParamEquality(left, right, op, at, lt, rt); return }
         val text by lazy(LazyThreadSafetyMode.NONE) { "${exprText(left)} $op ${exprText(right)}" } // only for messages: exprText is linear in the subtree
         if (isUntyped(lt) && isUntyped(rt) && op != "<<" && op != ">>") {
             // Untyped constants of different categories never mix (`"" + 1`, `true == 0`).
@@ -1842,7 +2169,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         }
         if (lu && !ru) { if (!checkUntypedOperand(left, lt, rt, at)) return }
         if (ru && !lu) { if (!checkUntypedOperand(right, rt, lt, at)) return }
-        val t = if (!lu) lt else if (!ru) rt else lt
+        val t = if (!lu) lt else if (!ru) rt else untypedNumericResult(lt, rt)
         if ((op == "/" || op == "%") && typer.constantOf(right)?.let { c -> c.toBigDecimal()?.signum() == 0 } == true) {
             val k = (t.underlying() as? GoBasicType)?.kind
             if (k != null && (k.isInteger || op == "/" && (isUntyped(t) || typer.constantOf(left) != null))) {
@@ -1875,7 +2202,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             "%", "&", "|", "^", "&^" -> b != null && b.kind.isInteger
             else -> true
         }
-        if (!defined) { report(at, "invalid operation: operator $op not defined on ${describe(if (lu) right else left)}", "operator"); return }
+        if (!defined) { report(at, "invalid operation: operator $op not defined on ${if (lu && ru && t !== lt) describeUntypedAs(left, t) else describe(if (lu) right else left)}", "operator"); return }
         // A typed constant result must be representable in its type (`byte(0) - byte(1)`).
         if (folded != null && b != null && !isUntyped(t) && at is GoExpression) {
             val f = representabilityFailure(folded, b.kind)
@@ -2048,7 +2375,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         }
         val tb = typed.underlying() as? GoBasicType
         if (tb == null) {
-            if (typed.underlying() is GoInterfaceType) return true
+            if (typed.underlying() is GoInterfaceType) return checkUntypedInterfaceOperand(untyped, typed, at)
             report(at, "invalid operation: ${at.text} (mismatched types ${render(typed)} and ${untyped.toString()})".replace("${render(typed)} and", "${render(typed)} and"), "mismatched-types")
             return false
         }

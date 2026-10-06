@@ -86,7 +86,8 @@ object GoLookup {
                                 var ft = f.type
                                 var fi = ind
                                 if (ft is GoPointerType) { ft = ft.elem; fi = true }
-                                next += Entry(ft, fi, e.path + f, false)
+                                // go/types: an entry reached through several paths passes that on to its embedded types.
+                                next += Entry(ft, fi, e.path + f, e.multiples)
                             }
                         }
                     }
@@ -102,7 +103,8 @@ object GoLookup {
             }
             if (found.isNotEmpty()) {
                 // A method declared twice on the same type (via an alias receiver) is a redeclaration, not an ambiguity.
-                val distinct = found.distinctBy { s -> when (s) { is Selection.Field -> s.member.declaration ?: s; is Selection.Method -> s.receiver to s.method.name; else -> s } }
+                // A field is distinct per embedding path: `type S7 S6` shares S6's field declarations, yet S6.X and S7.X collide.
+                val distinct = found.distinctBy { s -> when (s) { is Selection.Field -> (s.member.declaration ?: s) to s.path.map { it.name }; is Selection.Method -> s.receiver to s.method.name; else -> s } }
                 // The same embedded type reached through several paths at this depth: go/types reports the member as ambiguous.
                 if (foundInMultiple) return Selection.Ambiguous(distinct + distinct[0])
                 return if (distinct.size == 1) distinct[0] else Selection.Ambiguous(distinct)

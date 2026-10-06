@@ -163,6 +163,19 @@
     <localInspection language="Go" shortName="GoUnusedExported" displayName="Unused exported declaration"
                      groupName="Go" enabledByDefault="false" level="WEAK WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.project.GoUnusedExportedInspection"/>
+    <!-- Package-level build errors of the go command (go build / go/build / go/types), on the project model and stubs. -->
+    <localInspection language="Go" shortName="GoMissingMainFunction" displayName="Missing 'func main' in package main"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.project.GoMissingMainFunctionInspection"/>
+    <localInspection language="Go" shortName="GoMultiplePackages" displayName="Different package names in one directory"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.project.GoMultiplePackagesInspection"/>
+    <localInspection language="Go" shortName="GoInitializationCycle" displayName="Initialization cycle across files"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.project.GoInitializationCycleInspection"/>
+    <localInspection language="Go" shortName="GoLanguageVersion" displayName="Language feature requires a newer Go version"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
+                     implementationClass="io.github.golangsupport.ide.inspections.project.GoLanguageVersionInspection"/>
     <!-- GoLand parity G5 (second set): Go fix -->
     <localInspection language="Go" shortName="GoFixNewExpr" cleanupTool="true" displayName="Pointer helper call can be replaced with 'new()'"
                      groupPath="Go" groupName="Go fix" enabledByDefault="true" level="SYNTAX_UPDATE"

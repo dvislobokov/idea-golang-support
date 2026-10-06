@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports <code>package main</code> without <code>func main</code> (the linker's <code>function main is undeclared in the main package</code>).
+<p>All non-test files of the directory that match the build context (GOOS, GOARCH, build tags) are looked at; the problem is shown on the
+package clause of each of them. Test files and files excluded by build constraints are not reported. A <code>main</code> that is not a
+function is reported by the compiler checks (<code>cannot declare main - must be func</code>).</p>
+</body>
+</html>
