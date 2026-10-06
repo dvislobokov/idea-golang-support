@@ -30,6 +30,67 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.192] - 2026-10-06
+
+### Added — completion in comments, `//go:embed` patterns and regular expressions (GoLand parity, checked live 2026-10-06)
+- Ctrl+Space in a top-level comment (file, package clause, doc comment of a package-level declaration) offers the package's types,
+  functions, methods (bare name), constants and variables, as GoLand does: the documented declaration's own name first (`// Circle` above
+  `type Circle`), then exported before unexported, current file first, source order; other files are read from stubs. No auto-popup in
+  comments; nothing inside function bodies or on `//go:` / `//line` / `// +build` directives (`GoCommentCompletionContributor`)
+- After `//go:embed ` (also inside quotes and after `all:`) the files, then directories, of the package directory or of the typed `dir/`,
+  with file-type icons; names go would not embed are left out (`.` / `_` names unless `all:`, names with `"*<>?`'|:\`, symlinks, directories
+  of another module); a prefix with glob characters, `..` or a leading `/` gets nothing (`GoEmbedCompletionContributor`)
+- Completion after `\` in the RegExp injected into `regexp.MustCompile` / `Compile` / `MatchString` / … lists the RE2 escapes with the
+  descriptions of `regexp/syntax` (`\d digits (== [0-9])`, `\A`, `\z`, `\b`, `\Q`/`\E`, `\x{10FFFF}`, …), `\p{…}` for the Unicode categories
+  and the scripts of `unicode.Scripts`, and script names after `\p{`. The RE2 language host used to give the platform's RegExp completion
+  empty tables, hence 0 rows (`GoRegExpSyntax`, `GoRegExpLanguageHost`)
+
+## [0.2.191] - 2026-10-06
+
+### Added — completion rows and insertions as in GoLand (dump probes 1, 2, 3, 6, 9, 10, 19, 39, C5; `return err` from README §4)
+- A type picked where a value goes becomes a composite literal: `x := Cir` / `return Cir` / `use(Cir` / `&Cir` → `Circle{<caret>}` for
+  struct, map, slice and array types, `strings.Build` → `strings.Builder{<caret>}` with the import; the kind is decided at insertion, so
+  building the list reads no type declarations. Stays a bare name in type positions (`var c Circle`, `[]Circle`, parameters), at a statement
+  start, in `make(` / `new(`, `f[...]`, before `{ ( . [`, for generic types and for other named types (`type MyInt int`, interfaces)
+- Time layout completion inside the layout argument of `Time.Format`, `Time.AppendFormat`, `time.Parse`, `time.ParseInLocation`: GoLand's
+  14 rows `YY YYYY MM DD hh mm ss` with their descriptions, written as the Go reference element (`YYYY` → `2006`, `hh` → `15`), then
+  `year... month... day... hour... minute... second... zone...` whose pick reopens the list (the group's elements `January Jan 01 1`,
+  `.000 … .999999999`, `MST Z07:00 -0700 …` are in it, among the whole layouts `2006-01-02`, … of the host: seen live, GoLand shows the group
+  alone and only its 14 rows at first — left for later); the popup opens by itself while typing in such strings
+- Rows rendered as GoLand renders them: fields, struct literal keys and methods show their declaring type after an arrow
+  (`created → Base  time.Time`, `Area() → *Square  float64`, `Run(…) → *T  bool`; embedded fields have no owner); functions and methods
+  carry the parameters in the tail and the results as the type (`Cut(s string, sep string)  (before string, after string, found bool)`,
+  builtins too); variables and parameters show their type; members of a package not imported yet, by a bare name, through a dot import or
+  after `pkg.` carry the import path in the tail (`Marshal(v any) encoding/json  ([]byte, error)`), members after an imported `pkg.` show the
+  result instead of the package name; catalogue rows use the same layout (path in the tail, result as the type, no ` struct` / ` interface`);
+  `byte` / `rune` are kept as written
+- `return err` first on an empty statement line (or while typing `ret`) in a function that returns an error, with an error variable named
+  `err` in scope: the whole statement, `return err` or `return nil, 0, err` with several results (zero values for the others); respects the
+  "complete return values" setting
+
+## [0.2.190] - 2026-10-06
+
+### Added — completion from the catalogue of importable packages, closer to GoLand (dump probes 10, 10b, 12, 13, 24)
+- Methods of catalogue types: the catalogue scanner records the exported methods of exported types (receiver, name, signature, pointer
+  receiver) in the catalogue file (format version 3, the cache is rebuilt once); `GoSymbolIndex.methodsOf(importPath, type)`. Member
+  completion on values of standard-library and module types keeps coming from the stubs of the library roots
+- Indirect dependencies: bare-name completion also offers the packages of the rest of the build list (the module graph of the project
+  model: pure MVS or `go list -m all`), below the standard library and the modules go.mod requires directly; at most 200 indirect modules,
+  scanned once per version in the background like the others
+- Smart completion (Ctrl+Shift+Space) after `x = `, `var i int = `, `ch <- `, `return ` or in an argument lists functions, variables and
+  constants of the standard library and of direct dependencies whose value has the expected type (`strings.Count(…)`, `utf8.RuneLen(…)`),
+  below the file's own items, the imported packages first; choosing one writes the call and the import. Basic types, `error` and named
+  types (with or without `*`); at most 10 per package and 30 in all
+- Implementations of an interface in smart completion: where an interface is expected (`var s Shape = `) the struct types that implement
+  it come as literals, `Circle{}` when the value has the methods, `&Square{}` when only the pointer does, and `&sq` for a variable of such
+  a type, as GoLand does
+- `json.` / `json.Mar` without an import of `json` lists the members of every package of that name (`encoding/json/v2` next to
+  `encoding/json`) with the import path in the row; choosing one imports that package
+- Completion ranking by use (`GoHeuristicRanker`, `completionRanker` with `order="last"`): without the ML ranker, equal candidates are
+  ordered by how often the name is used in the file and its package (identifier tokens of the lexer, cached on the file stamp, up to 50
+  neighbour files) and by what was chosen lately in the project (an in-memory list of the last 100 picks); the expected type and the scope
+  still decide first. The ML ranker, when built in, wins
+
 ## [0.2.189] - 2026-10-06
 
 ### Added — Go 1.27 in the semantic layer and the language-version inspection
