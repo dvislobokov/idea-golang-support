@@ -343,13 +343,42 @@ Phase 5c added `missing-return`, `duplicate-case` / `duplicate-default`, `fallth
 `cannot define new methods on non-local type int`), `embedded-field`, `pointer-method`
 (`cannot call pointer method p on T`), `field-selector`, `short-var`.
 
+Builtins, constants, comparisons and declarations (0.2.x, `GoChecker.checkElementMore` and the
+builtin helpers): `clear` / `close` / `copy` / `delete` / `append` follow go/types `typeset` /
+`sliceElem` over type parameters (`cannot clear x: argument must be (or constrained by) map or
+slice`, `cannot close non-channel`, `invalid copy: mismatched slice element types E and F in x`,
+`arguments x and y have different element types E and byte`, `maps of m must have identical key
+types`, `invalid append: argument must be a slice; have 1st function result (value of type int)`);
+`min`/`max` of untyped constants of different kinds; `use of untyped nil in argument to new`; `use of
+package p not in selector` (call arguments); `const-type` (`invalid constant type T`); `array-length`
+(`invalid array length -1 (untyped int constant)`, `array length f() (value of type int) must be
+constant`, `array length 1.5 (untyped float constant) must be integer`; lengths computed from
+`unsafe` sizes are skipped); `overflow` for integer literals beyond 512 bits (`constant overflow`) and
+`constant bitwise complement overflow`; untyped constants converted to their default type in `var x =`,
+`x :=` and `_ =` (`cannot use 1 << 100 (untyped int constant ...) as int value in variable declaration
+(overflows)`); implicitly repeated typed constants (`constant 256 overflows byte`); `1 % 1.0` as a float
+operation; comparisons of a non-empty interface with an untyped number (`mismatched types I and
+untyped int`) and of an incomparable type parameter (`incomparable types in type set`, `empty type
+set`); `return-scope` (`result parameter a not in scope at return`); `x.m undefined (type *T is pointer
+to type parameter, not type parameter)`; `math.Pi (untyped float constant 3.14159) is not a type` for
+qualified variable, field and parameter types; `a redeclared` for struct fields (embedded fields by
+type name); `method T.m already declared` through alias receivers; `invalid receiver type A` for an alias
+of an unnamed type; `func main must have no arguments and no return values` (package main), `func
+main must have no type parameters`, `func init must have a body`. Lookup passes the "reached through
+several paths" mark to embedded types (go/types `consolidateMultiples`, ambiguous selectors at any depth)
+and tells fields of `type S7 S6` apart from those of `S6`. Float constants render as `%.6g`
+(`3.14159`).
+
 Not implemented (documented per line in `testData/types/goroot/allowlist.txt` with the
 expected message): interface-vs-concrete comparisons (`slice can only be compared to nil`),
 invalid recursive types through expressions (a selector `t3.p` or an array length `[len(T{})]`),
-assignability between invalid instantiations, `result parameter not in scope at return`, the
-go/types test builtins `assert`/`trace`, and parser-level errors go/parser reports but this
-grammar recovers from (`expected type argument list`, `expected type`; `interface method must
-have no type parameters` is reported by the parser).
+assignability between invalid instantiations, the go/types test builtins `assert`/`trace`, and
+parser-level errors go/parser reports but this grammar recovers from (`expected type argument list`,
+`expected type`; `interface method must have no type parameters` is reported by the parser). Left out
+on purpose: `complex(1<<s, 0)` in a typed declaration (the typer keeps the result untyped), a local
+variable named `iota` in a constant declaration, array lengths that turn invalid only in an implicitly
+repeated spec (`len([1 - iota]int{})`), `string(1 << s)` (the count may be a constant the plugin cannot
+fold), `missing function body` for functions other than `init` (assembly).
 
 ### Constants, shifts and conversions (Phase 5c)
 
@@ -411,7 +440,7 @@ line (otherwise it is a false positive). Files whose first line carries `-lang`/
 flags are skipped; `/* ERROR */` inside a `//` comment is not an annotation (as in go/types).
 `allowlist.txt` lists lines with known-unsupported sites (and tolerates divergent diagnostics on
 those lines); the test prints per-file percentages and stale entries, and fails when coverage
-drops below `MIN_COVERAGE_PERCENT` (94 since the generics gaps: 1713/1804 sites, 0 false positives;
+drops below `MIN_COVERAGE_PERCENT` (94; after the generics, builtins/constants and Go 1.27 work: 1753/1804 sites, 0 false positives;
 Phase 5c: 91%, Phase 5b: 55%). The allowlist is regenerated from the report's "expected ERROR" / "no error
 expected" lines. `GoCheckTest` runs the same protocol over hand-written fixtures in
 `testData/check/` with no allowlist (undefined, unused, assignability, calls, operators,
@@ -500,13 +529,15 @@ GOROOT/src; every diagnostic is a false positive, counted by class in
 ## Known gaps
 
 - Diagnostics listed above as not implemented.
-- `unsafe` sizes assume gc on amd64 regardless of GOARCH.
+- `unsafe` sizes assume gc on amd64 regardless of GOARCH: the project model knows GOARCH
+  (`GoToolchainInfo.goarch`), but the sizes are folded by the typer (`infer.GoSizes`) into cached
+  constants; array-length checks skip lengths computed from `unsafe` sizes because of it.
 - Initialization cycles through functions of other files of the package are not followed.
 - Inference failures with unknown argument types: `does not match` is not reported, `cannot infer T`
   only when no argument could bind T (see "Generics gaps").
-- Remaining go/types testdata allowlist (102 sites, 89 lines): invalid recursive types through
+- Remaining go/types testdata allowlist (60 sites, 49 lines): invalid recursive types through
   expressions (issue39634), follow-up errors of invalid instantiations (issue50929 `does not match`,
   issue51232), interface comparison causes beyond slices/maps/funcs, parser-level errors our grammar
   recovers from (`expected type`, `expected type argument list`), the testdata `assert` builtin, and
-  one-off builtin argument checks.
+  the cases left out on purpose (see "Not implemented").
 - `C.xxx` members are a sentinel; cgo files are skipped by the corpus gates.

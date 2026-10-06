@@ -19,6 +19,12 @@ import io.github.golangsupport.project.api.GoImportResolution
 import io.github.golangsupport.project.api.GoPackage
 import io.github.golangsupport.project.api.GoPackageResolver
 import io.github.golangsupport.semantic.cache.GoTrackers
+import io.github.golangsupport.project.api.GoBuildContext
+import io.github.golangsupport.project.api.GoFileBuildContext
+import io.github.golangsupport.project.api.GoToolchainProvider
+import io.github.golangsupport.project.impl.DefaultGoToolchainProvider
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.vfs.VfsUtilCore
 
 /**
  * The package as a set of Go files, built on the project model. Every accessor is stub-first:
@@ -110,7 +116,8 @@ class GoPackageModel(private val project: Project) {
         val packageName = file.packageName
         val resolver = GoPackageResolver.getInstance(project)
         val dir = vf.parent
-        val pkg = if (dir != null && vf.fileSystem.protocol == "file") runCatching { resolver.packageOf(dir) }.getOrNull() else null
+        val built = if (dir != null && vf.fileSystem.protocol == "file") runCatching { resolver.packageOf(dir) }.getOrNull() else null
+        val pkg = built?.let { forExcludedFile(it, vf) }
         val files: List<GoFile> = if (pkg != null) {
             val isXTest = packageName != null && packageName.endsWith("_test") && packageName != pkg.name
             val selected = when {
@@ -120,7 +127,7 @@ class GoPackageModel(private val project: Project) {
             }
             // A regular file of the package sees exactly what an importer sees: share the directory
             // scope (one merged map per package) instead of building one per file.
-            if (!isXTest && !file.isTestFile && packageName == pkg.name && selected.any { it == vf }) return scopeOf(pkg)
+            if (pkg === built && !isXTest && !file.isTestFile && packageName == pkg.name && selected.any { it == vf }) return scopeOf(pkg)
             val list = selected.mapNotNull(::goFile).toMutableList()
             if (list.none { it.viewProvider.virtualFile == vf }) list += original // e.g. a file excluded by build tags: see its own package
             list
@@ -131,6 +138,22 @@ class GoPackageModel(private val project: Project) {
             if (siblings.isEmpty()) listOf(original) else siblings
         }
         return PackageScope(files, pkg?.importPath ?: packagePathOf(file), packageName)
+    }
+
+    /**
+     * For a file excluded by the project's build context (`x_windows.go` on linux), the package partitioned for a context under which
+     * it builds ([GoFileBuildContext]): its scope then holds the files of its own platform, so declarations of `x_linux.go` neither
+     * clash with its names (`redeclared`) nor satisfy its references. [pkg] itself when the file builds or no such context exists.
+     */
+    private fun forExcludedFile(pkg: GoPackage, vf: VirtualFile): GoPackage {
+        if (vf !in pkg.ignoredFiles) return pkg
+        val text = FileDocumentManager.getInstance().getCachedDocument(vf)?.immutableCharSequence
+            ?: runCatching { VfsUtilCore.loadText(vf) }.getOrNull() ?: return pkg
+        val base = GoToolchainProvider.getInstance().toolchainFor(project)?.buildContext
+            ?: GoBuildContext(DefaultGoToolchainProvider.hostOs(), DefaultGoToolchainProvider.hostArch())
+        val context = GoFileBuildContext.contextFor(vf.name, text, base)?.takeIf { it != base } ?: return pkg
+        val alt = GoPackageResolver.getInstance(project).packageOf(pkg.directory, context) ?: return pkg
+        return if (vf in alt.goFiles || vf in alt.testFiles || vf in alt.xTestFiles) alt else pkg
     }
 
     // a cached GoPackage may still hold a file deleted and created again at the same path (seen live: InvalidVirtualFileAccessException)

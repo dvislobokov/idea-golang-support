@@ -61,9 +61,19 @@ sealed class GoConstant {
             val exp = stripped.precision() - stripped.scale() - 1
             if (exp in -4..20 && plain.length <= 22) return plain
             val rounded = stripped.round(MathContext(6))
+            val e = rounded.precision() - rounded.scale() - 1
+            // `%.6g` prints exponents -4..5 in fixed notation (math.Pi -> 3.14159); a non-integer that would
+            // print without a dot switches to `%.6e` (go/constant floatVal.String).
+            if (e in -4..5) {
+                val fixed = rounded.stripTrailingZeros().toPlainString()
+                if (fixed.contains('.') || stripped.scale() <= 0) return fixed
+                val r7 = stripped.round(MathContext(7))
+                val d = r7.unscaledValue().abs().toString().padEnd(7, '0')
+                val e7 = r7.precision() - r7.scale() - 1
+                return (if (r7.signum() < 0) "-" else "") + d[0] + "." + d.substring(1, 7) + "e" + (if (e7 < 0) "-" else "+") + kotlin.math.abs(e7).toString().padStart(2, '0')
+            }
             val unscaled = rounded.unscaledValue().abs().toString().trimEnd('0').ifEmpty { "0" }
             val mantissa = if (unscaled.length > 1) unscaled[0] + "." + unscaled.substring(1) else unscaled
-            val e = rounded.precision() - rounded.scale() - 1
             return (if (rounded.signum() < 0) "-" else "") + mantissa + "e" + (if (e < 0) "-" else "+") + kotlin.math.abs(e).toString().padStart(2, '0')
         }
 

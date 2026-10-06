@@ -369,6 +369,24 @@ are joined with `; ` because problem descriptions are single-line.
 - Not dumb-aware (the checker resolves through stub indices); library sources are not
   inspected by the platform.
 
+### Package-level build errors (`ide.inspections.project`, group "Go", ERROR)
+
+Errors of the go command that no single-file check sees, on the project model (packages partitioned for the toolchain's build
+context) and stubs; project packages only (content, not `vendor/`), silent in dumb mode, gate `DIAGNOSTICS` (`GoAnalysisInspectionBase`).
+The import cycle (`GoImportCycle`) and `internal` (`GoInternalImport`) checks are the older neighbours (FEATURES.md §5).
+
+| Short name | Text | Limits |
+|---|---|---|
+| `GoMissingMainFunction` | `function main is undeclared in the main package` on the package clause of every non-test file of a `package main` whose buildable non-test files have no `func main` (stubs, cached on the directory with `ownPackageDependencies`) | test files and files excluded by build constraints quiet; a non-func `main` is the checker's `cannot declare main - must be func` |
+| `GoMultiplePackages` | `found packages a (a.go) and b (b.go) in <dir>` (`go/build` `MultiplePackageError`) on each file whose clause differs from the first buildable file's (name order, test files included, `x_test` in a `_test.go` = `x`) | files excluded by build constraints and `package documentation` do not count |
+| `GoInitializationCycle` | `initialization cycle for x; x refers to f; f refers to x` (go/types, functions included) for cycles through declarations of other files of the package, at the cycle's first variable by (file name, offset) | single-file cycles stay the checker's `init-cycle`; reads other files' bodies only when the walk reaches them; off above 100 files, gives up after 2000 declarations |
+| `GoLanguageVersion` | go/types `versionErrorf`: `type parameter requires go1.18 or later`, `clear requires go1.21 or later`, `built-in min/max requires go1.21 or later`, `cannot range over n (variable of type int): requires go1.22 or later`, `…: requires go1.23 or later` (range over func) | cmd/compile's hint appended: `(-lang was set to go1.17; check go.mod)` or `(file declares //go:build go1.21)`; the file's version (`//go:build go1.N`, else the module's `go`; `GoFixVersions`); unknown → silent; only these four features |
+
+Build constraints and redeclarations: a file excluded by the project's context (`x_windows.go` on linux) is checked against the
+package partitioned for a context under which it builds (`project.api.GoFileBuildContext`, used by `GoPackageModel.scopeOf(file)`), so
+`//go:build linux` and `//go:build windows` files may declare the same names. Tests: `inspections.project.GoPackageChecksTest`,
+`GoLanguageVersionInspectionTest`.
+
 ### Analysis inspections (wave 2 of FEATURES.md §11, part E)
 
 PSI walkers on `GoAnalysisInspectionBase` (a `buildVisitor` that returns the empty visitor while `GoIdeFeature.DIAGNOSTICS` is off,

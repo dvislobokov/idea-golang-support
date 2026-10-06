@@ -5,12 +5,7 @@
 
 
 # check/builtins0.go
-check/builtins0.go:80  # not implemented: ERROR "must be a slice"
 check/builtins0.go:231  # not implemented: ERRORx `cannot use .* in variable declaration`
-check/builtins0.go:531  # not implemented: ERROR "mismatched types"
-check/builtins0.go:585  # not implemented: ERROR "mismatched types"
-check/builtins0.go:616  # not implemented: ERROR "use of package unsafe not in selector"
-check/builtins0.go:655  # not implemented: ERROR "use of untyped nil in argument to new"
 check/builtins0.go:1065  # not implemented: ERROR "not enough arguments"
 check/builtins0.go:1066  # not implemented: ERROR "too many arguments"
 check/builtins0.go:1067  # not implemented: ERROR "boolean constant"
@@ -23,51 +18,22 @@ check/builtins0.go:1082  # not implemented: ERROR "boolean constant"
 check/builtins0.go:1093  # not implemented: ERROR "invalid use of ..."
 
 # check/builtins1.go
-check/builtins1.go:14  # not implemented: ERROR "cannot clear x"
-check/builtins1.go:22  # not implemented: ERROR "cannot clear x"
-check/builtins1.go:35  # not implemented: ERROR "cannot close non-channel"
-check/builtins1.go:65  # not implemented: ERROR "invalid copy: argument must be a slice; have x (variable of type T constrained by any)"
-check/builtins1.go:71  # not implemented: ERROR "argument must be a slice; have \"foo\" (untyped string constant)"
-check/builtins1.go:79  # not implemented: ERROR "different element types"
-check/builtins1.go:80  # not implemented: ERROR "different element types"
-check/builtins1.go:85  # not implemented: ERROR "arguments x (variable of type T constrained by ~[]E) and \"foo\" (untyped string constant) have different element types E and byte"
-check/builtins1.go:90  # not implemented: ERROR "arguments []int{} (value of type []int) and y (variable of type T constrained by ~string) have different element types int and byte"
-check/builtins1.go:91  # not implemented: ERROR "argument must be a slice; have y (variable of type T constrained by ~string)"
-check/builtins1.go:95  # not implemented: ERROR "argument must be a slice; have x (variable of type T constrained by ~[]byte | ~string)"
-check/builtins1.go:115  # not implemented: ERROR "not a map"
-check/builtins1.go:128  # not implemented: ERRORx `cannot use .* as string`
-check/builtins1.go:132  # not implemented: ERROR "must have identical key types"
-check/builtins1.go:140  # not implemented: ERROR "must have identical key types"
 
 # check/const0.go
-check/const0.go:16  # not implemented: ERROR "invalid constant type"
-check/const0.go:19  # not implemented: ERROR "invalid constant type"
-check/const0.go:55  # not implemented: ERROR "invalid operation"
 check/const0.go:137  # divergent diagnostic [mismatched-types]: invalid operation: ti2 ^ ti5 (mismatched types int64 and int8)
 check/const0.go:281  # not implemented: ERROR "is not constant"
-check/const0.go:382  # not implemented: ERROR "constant bitwise complement overflow"
 
 # check/constdecl.go
-check/constdecl.go:120  # not implemented: ERROR "overflows"
-check/constdecl.go:128  # not implemented: ERROR "overflows"
 check/constdecl.go:134  # not implemented: ERROR "invalid array length"
 check/constdecl.go:135  # not implemented: ERROR "invalid array length"
 
 # check/conversions1.go
 
 # check/decls1.go
-check/decls1.go:68  # not implemented: ERROR "not a type"
 
 # check/decls3.go
-check/decls3.go:47  # not implemented: ERROR "ambiguous selector t.X"
-check/decls3.go:102  # not implemented: ERROR "Pointer redeclared"
-check/decls3.go:104  # not implemented: ERROR "UP redeclared"
-check/decls3.go:231  # not implemented: ERROR "ambiguous selector S5{}.X"
 
 # check/decls4.go
-check/decls4.go:64  # not implemented: ERROR "already declared"
-check/decls4.go:67  # not implemented: ERROR "invalid receiver"
-check/decls4.go:98  # not implemented: ERROR "already declared"
 check/decls4.go:198  # not implemented: ERROR "ambiguous selector eD.xm"
 
 # check/errors.go
@@ -80,7 +46,6 @@ check/expr0.go:134  # divergent diagnostic [operator]: invalid operation: cannot
 check/expr1.go:126  # not implemented: ERROR "multiple-value f"
 
 # check/expr2.go
-check/expr2.go:204  # not implemented: ERROR "invalid operation: i == 0 (mismatched types interface{m() int} and untyped int)"
 
 # check/expr3.go
 check/expr3.go:106  # not implemented: ERROR "mismatched types int and untyped string"
@@ -88,8 +53,6 @@ check/expr3.go:460  # not implemented: ERRORx `use of .* outside type switch`
 check/expr3.go:508  # not implemented: ERROR "not enough arguments in call to f2\n\thave (func())\n\twant (float32, string)"
 
 # check/issues1.go
-check/issues1.go:34  # not implemented: ERROR "x.m undefined"
-check/issues1.go:39  # not implemented: ERROR "x.m undefined"
 check/issues1.go:249  # not implemented: ERROR "nil (untyped nil) is not a type"
 
 # check/labels.go
@@ -97,14 +60,12 @@ check/labels.go:44  # not implemented: ERROR "declared and not used"
 check/labels.go:160  # not implemented: ERROR "label L1 declared and not used"
 
 # check/shifts.go
-check/shifts.go:57  # not implemented: ERROR "overflows"
 check/shifts.go:385  # not implemented: ERRORx `shifted operand 1 .* must be integer`
 
 # check/stmt0.go
 check/stmt0.go:127  # not implemented: ERROR "not an expression"
 check/stmt0.go:215  # divergent diagnostic [undefined]: undefined: x; not implemented: ERROR "send or receive"
 check/stmt0.go:216  # divergent diagnostic [unused-variable]: declared and not used: a; not implemented: ERROR "send or receive"
-check/stmt0.go:397  # not implemented: ERROR "result parameter a not in scope at return"
 check/stmt0.go:607  # not implemented: ERROR "use of untyped nil"
 check/stmt0.go:684  # not implemented: ERROR "outside type switch"
 check/stmt0.go:733  # not implemented: ERROR "1 is not a type"
@@ -149,7 +110,6 @@ fixedbugs/issue50929.go:63  # divergent diagnostic [cannot-infer]: in call to NC
 fixedbugs/issue51232.go:27  # not implemented: ERRORx `cannot use .* as F\[RCT\]` (assignability between invalid instantiations)
 
 # fixedbugs/issue54280.go
-fixedbugs/issue54280.go:7  # not implemented: ERROR "constant overflow"
 
 # spec/assignability.go
 

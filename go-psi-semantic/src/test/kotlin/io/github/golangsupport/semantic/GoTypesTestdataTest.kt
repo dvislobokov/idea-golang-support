@@ -26,7 +26,7 @@ class GoTypesTestdataTest : GoErrorSiteTestBase() {
         if (stale.isNotEmpty()) println("stale allowlist entries (now matched or file skipped): $stale")
         assertTrue("false positives:\n" + fps.joinToString("\n"), fps.isEmpty())
         assertTrue("unmatched ERROR sites (add to the allowlist with a reason or fix the checker):\n" + missed.joinToString("\n"), missed.isEmpty())
-        // Coverage may only improve (Phase 5c reached 91%, 0.0.9 reached 92.7%, generics gaps 95%: 1713/1804).
+        // Coverage may only improve (Phase 5c reached 91%, 0.0.9 reached 92.7%, builtin/constant checks 94.9%, generics gaps and Go 1.27 on top).
         val sites = results.sumOf { it.sites }
         val matched = results.sumOf { it.matched }
         assertTrue("ERROR-site coverage dropped to $matched/$sites", matched * 100 >= sites * MIN_COVERAGE_PERCENT)
