@@ -19,8 +19,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Once a session, on the first project: can programs run from the plugin data directory ([GoPluginData])? When not (a `noexec` home,
- * an execution policy that allows only `/home/work/<user>`), a notification says so and offers a directory where they can, or the
- * settings page. The system temporary directory is probed too: [GoPluginData.goEnvironment] moves `go run` builds out of it when needed.
+ * an execution policy that allows only `/home/work/<user>`), the data moves by itself to the fallback directory where they can
+ * ([GoPluginRelocation.suggestion]; seen live 2026-10-06: the IDE cache under `~/.cache` was noexec and the bundled delve never got built),
+ * with a notification; without such a directory the notification offers the settings page. The system temporary directory is probed too:
+ * [GoPluginData.goEnvironment] moves `go run` builds out of it when needed.
  */
 class GoPluginDataCheck : ProjectActivity {
     override suspend fun execute(project: Project) {
@@ -32,6 +34,12 @@ class GoPluginDataCheck : ProjectActivity {
         val reason = GoExecutionProbe.reason(root).orEmpty()
         GoPluginLog.warn("notify", "Programs cannot run in the plugin data directory $root: $reason")
         val suggested = GoPluginRelocation.suggestion()
+        if (suggested != null && !GoPluginData.isCustom) {
+            // the default directory is unusable and a known good one exists: move there without asking (the setting records the move)
+            GoPluginLog.info("tools", "Plugin data moves to the fallback directory $suggested")
+            GoPluginRelocation.relocate(project, suggested.toString())
+            return
+        }
         val notification = NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
             .createNotification(GoBundle.message("pluginData.notExecutable.title"), GoBundle.message("pluginData.notExecutable.text", root.toString(), reason), NotificationType.WARNING)
         if (suggested != null) notification.addAction(NotificationAction.createSimpleExpiring(GoBundle.message("pluginData.use", suggested.toString())) { GoPluginRelocation.relocate(project, suggested.toString()) })
@@ -45,13 +53,29 @@ class GoPluginDataCheck : ProjectActivity {
 }
 
 object GoPluginRelocation {
-    /** `/home/work/<user>/.go-plugin` where that home exists and programs can run in it; null elsewhere. */
-    fun suggestion(): Path? {
-        val user = System.getProperty("user.name") ?: return null
-        val home = Path.of("/home/work", user)
-        if (!Files.isDirectory(home)) return null
-        val candidate = home.resolve(".go-plugin")
-        return candidate.takeIf { GoExecutionProbe.check(it) == GoExecutionProbe.Result.OK }
+    /** The fallback directory inside the work home: `/home/work/<user>@<domain>/.cache/go-support`. */
+    const val FALLBACK = ".cache/go-support"
+
+    /** [FALLBACK] under the first work home that exists ([workHomes]) and where programs can run; null elsewhere. */
+    fun suggestion(): Path? = workHomes(System.getProperty("user.name"), System.getProperty("user.home")).firstOrNull { Files.isDirectory(it) }
+        ?.resolve(FALLBACK)?.takeIf { GoExecutionProbe.check(it) == GoExecutionProbe.Result.OK }
+
+    /**
+     * The work homes a machine may have, by the account: `/home/work/<user.name>` and, for domain accounts whose home is
+     * `/home/<domain>@<user>` while the work home is `/home/work/<user>@<domain>` (seen live), the swapped name too. Pure, for tests.
+     */
+    fun workHomes(userName: String?, userHome: String?): List<Path> {
+        val names = LinkedHashSet<String>()
+        userName?.takeIf { it.isNotBlank() }?.let { names += it; names += swapped(it) }
+        userHome?.let { Path.of(it).fileName?.toString() }?.takeIf { it.isNotBlank() }?.let { names += it; names += swapped(it) }
+        return names.filter { !it.contains('/') }.map { Path.of("/home/work", it) }
+    }
+
+    /** `domain@user` ↔ `user@domain`; `DOMAIN\user` → `user@domain`; a name without either stays. */
+    private fun swapped(name: String): String = when {
+        name.count { it == '@' } == 1 -> name.substringAfter('@') + "@" + name.substringBefore('@')
+        name.count { it == '\\' } == 1 -> name.substringAfter('\\') + "@" + name.substringBefore('\\')
+        else -> name
     }
 
     /**

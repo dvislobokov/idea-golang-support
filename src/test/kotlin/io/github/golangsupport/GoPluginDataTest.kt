@@ -32,3 +32,19 @@ class GoPluginDataTest {
         assertTrue(Files.isDirectory(dir.resolve("bin")))
     }
 }
+
+/** The work homes the fallback directory is looked for in: `/home/work/<user>`, and the swapped `user@domain` of a domain account. */
+class GoPluginRelocationTest {
+    private fun homes(user: String?, home: String?) = io.github.golangsupport.cli.GoPluginRelocation.workHomes(user, home).map { it.toString().replace('\\', '/') }
+
+    @Test fun plainUserGivesOneHome() = assertEquals(listOf("/home/work/alice"), homes("alice", "/home/alice"))
+
+    @Test fun domainAccountGivesBothOrders() =
+        assertEquals(listOf("/home/work/sigma.sbrf.ru@22623094", "/home/work/22623094@sigma.sbrf.ru"), homes("sigma.sbrf.ru@22623094", "/home/sigma.sbrf.ru@22623094"))
+
+    @Test fun backslashAccountBecomesUserAtDomain() = assertEquals(listOf("/home/work/22623094@sigma.sbrf.ru"), homes("sigma.sbrf.ru\\22623094", null).filter { '@' in it })
+
+    @Test fun nothingKnownGivesNothing() = assertEquals(emptyList<String>(), homes(null, null))
+
+    @Test fun fallbackIsTheCacheDirectory() = assertEquals(".cache/go-support", io.github.golangsupport.cli.GoPluginRelocation.FALLBACK)
+}

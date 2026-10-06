@@ -12,18 +12,24 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.fileEditor.impl.HTMLEditorProvider
 import com.intellij.openapi.keymap.KeymapUtil
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.waitForSmartMode
 import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.ui.JBColor
 import com.intellij.ui.jcef.JBCefApp
 import io.github.golangsupport.cli.GoCli
 import java.nio.file.Files
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 /**
  * The pages of the plugin, shown in an editor tab: the one about it (docs/demo.html, packed as welcome/index.html by the build) and the
@@ -92,6 +98,12 @@ object GoPages {
     }
 }
 
+/**
+ * Shows the page about the plugin once per version. Not at project open: `HTMLEditorProvider.openEditor` blocks the EDT until the editor
+ * exists (`runBlocking` inside the platform), and at startup that wait met the first JCEF start, the scanning and the workspace model
+ * sync — a 14.6 s UI freeze with the plugin at the bottom of the EDT stack (seen live 2026-10-06, GIGA IDE on Linux). So the page waits
+ * for smart mode and a quiet moment ([SETTLE_MS]), JCEF is started off the EDT first, and only then the editor opens.
+ */
 class GoWelcomePageActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         val application = ApplicationManager.getApplication()
@@ -103,8 +115,13 @@ class GoWelcomePageActivity : ProjectActivity {
         if (!GoPages.isNewFor(properties.getValue(GoPages.SHOWN_VERSION_KEY), version)) return
         // recorded before it is shown: two projects opening together show it once
         properties.setValue(GoPages.SHOWN_VERSION_KEY, version)
-        application.invokeLater({
-            if (project.isDisposed) return@invokeLater
+        project.waitForSmartMode()
+        delay(SETTLE_MS)
+        if (project.isDisposed) return
+        // the first JCEF start takes seconds on Linux: done here, on a background thread, not inside the editor's open on the EDT
+        runCatching { if (JBCefApp.isSupported()) JBCefApp.getInstance() }.onFailure { logger<GoWelcomePageActivity>().warn("JCEF could not be started ahead", it) }
+        withContext(Dispatchers.EDT + ModalityState.nonModal().asContextElement()) {
+            if (project.isDisposed) return@withContext
             runCatching { GoPages.open(project, GoPages.WELCOME) }.onFailure { failure ->
                 logger<GoWelcomePageActivity>().warn("The welcome page could not be opened", failure)
                 NotificationGroupManager.getInstance().getNotificationGroup(GoCli.NOTIFICATION_GROUP)
@@ -112,7 +129,12 @@ class GoWelcomePageActivity : ProjectActivity {
                     .addAction(NotificationAction.createSimpleExpiring("Open") { GoPages.open(project, GoPages.WELCOME) })
                     .notify(project)
             }
-        }, ModalityState.nonModal())
+        }
+    }
+
+    companion object {
+        /** After smart mode: the first scanning and the workspace model sync of a fresh project are over by then. */
+        const val SETTLE_MS = 5_000L
     }
 }
 

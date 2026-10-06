@@ -97,7 +97,7 @@ class GoSettingsEditor(private val project: Project) : SettingsEditor<GoRunConfi
             row("Path substitutions:") { cell(JBScrollPane(pathSubstitutions)).align(AlignX.FILL).comment("<code>local=remote</code>, a line each: the sources here and the paths the binary was built with (<code>substitutePath</code> of delve)") }.visibleIf(withBinary)
             row("Go tool arguments:") { cell(goArguments).align(AlignX.FILL).comment("Flags of the go command: <code>-race</code>, <code>-count=1</code>, <code>-ldflags=...</code>. Build tags come from Settings | Go | Build Tags") }.visibleIf(goCommand)
             row("Program arguments:") { cell(programArguments).align(AlignX.FILL).comment("For <code>go test</code> they follow <code>-args</code>") }.visibleIf(runsAProgram)
-            row("Working directory:") { cell(workingDirectory).align(AlignX.FILL).comment("For <code>go run</code> and a binary; the package directory by default. Tests always run in the directory of their package") }.visibleIf(runsAProgram)
+            row("Working directory:") { cell(workingDirectory).align(AlignX.FILL).comment("For <code>go run</code> and a binary; by default the module root (the directory of go.mod), as in GoLand. Tests always run in the directory of their package") }.visibleIf(runsAProgram)
             row { cell(environment).align(AlignX.FILL) }.visibleIf(runsAProgram)
             row("Test pattern:") { cell(testPattern).align(AlignX.FILL).comment("For <code>go test</code>: the <code>-run</code> expression, e.g. <code>^TestOrder</code> or <code>^TestOrder$/^empty$</code>") }.visibleIf(test)
             row { cell(recursive) }.visibleIf(test)

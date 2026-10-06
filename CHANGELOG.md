@@ -30,6 +30,26 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.193] - 2026-10-06
+
+### Fixed — a 14.6 s UI freeze at the first project open after an update (seen in a GIGA IDE log, Linux)
+- The page about the plugin, shown once per version, was opened from the startup activity on the EDT while the project was still
+  scanning: `HTMLEditorProvider.openEditor` blocks the EDT until the editor exists, and that wait met the first JCEF start and the
+  workspace model sync — the plugin at the bottom of the EDT stack in both thread dumps. The page now waits for smart mode and five quiet
+  seconds, starts JCEF on a background thread first and only then opens the editor
+
+### Fixed — the working directory of a program is the module root, not its package
+- `go run` and Debug of a `Go` configuration without a working directory ran the program in the package directory (`cmd/<name>`), so a
+  program looking for `./config.yaml` next to go.mod did not find it. The default is now the root of the module (the nearest `go.mod`
+  upwards; the project directory without one), as GoLand's `$ProjectFileDir$`; tests keep running in their package directory, as `go test`
+  does. Delve starts in the package directory as before and gets the module root as `cwd` of the launch
+
+### Changed — plugin data directory: a fallback where programs may run
+- When programs cannot run in the default data directory (the IDE cache under `~/.cache` on a noexec mount or under an execution policy:
+  the bundled delve was never built there), the data moves by itself to `/home/work/<user>@<domain>/.cache/go-support` when such a work
+  home exists and allows running, with a notification; the work home is looked up both as `user.name` and with the swapped
+  `domain@user` / `user@domain` of a domain account. Without one, the old notification with the choice of a directory stays
+
 ## [0.2.192] - 2026-10-06
 
 ### Added — completion in comments, `//go:embed` patterns and regular expressions (GoLand parity, checked live 2026-10-06)

@@ -203,8 +203,14 @@ open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, n
 
     private fun isFileTarget(): Boolean = File(options.target.orEmpty()).isFile
 
-    /** `go` resolves the module from where it runs, so by default that is the package directory and the package is `.`. */
-    private fun goDirectory(): String = options.workingDirectory?.takeIf { it.isNotBlank() && options.command == GoCommand.RUN } ?: packageDirectory()
+    /**
+     * Where `go run` and the program run: the working directory of the configuration, else the module root ([GoRunDirectories.moduleRoot]:
+     * GoLand's default is the project directory, and a program looks for `./config.yaml` there, not in `cmd/<name>` — seen live
+     * 2026-10-06). Tests run in the package directory: `go test` changes into it itself, the field is hidden for them.
+     */
+    private fun goDirectory(): String = if (options.command == GoCommand.RUN) runDirectory() else packageDirectory()
+
+    private fun runDirectory(): String = options.workingDirectory?.takeIf { it.isNotBlank() } ?: GoRunDirectories.moduleRoot(packageDirectory(), project.basePath)
 
     private fun packageArgument(): String = when {
         isFileTarget() -> options.target.orEmpty()
@@ -318,7 +324,8 @@ open class GoRunConfiguration(project: Project, factory: ConfigurationFactory, n
             GoCommand.RUN, GoCommand.TEST -> GoLaunchArguments.build(
                 test = options.command == GoCommand.TEST, program = if (isFileTarget()) options.target.orEmpty() else packageDirectory(),
                 programArguments = programArguments, testPattern = options.testPattern, benchmark = options.benchmark,
-                workingDirectory = options.workingDirectory, environment = options.environment, buildFlags = goArgumentList(), settings = settings,
+                workingDirectory = if (options.command == GoCommand.RUN) runDirectory() else options.workingDirectory,
+                environment = options.environment, buildFlags = goArgumentList(), settings = settings,
                 // created here: go build does not make the directory of -o
                 binaryDirectory = settings.debugBinaryDirectory(packageDirectory())?.also { File(it).mkdirs() },
                 testFlags = GoTestFlags.forBinary(testFlags()),
@@ -335,6 +342,23 @@ object GoTestFlags {
 
     /** `-short` of `go test` is `-test.short` of the binary: what `go test` passes on, delve does not. */
     fun forBinary(flags: List<String>): List<String> = flags.map { "-test." + it.removePrefix("-") }
+}
+
+/** The default working directory of a program. Pure. */
+object GoRunDirectories {
+    /**
+     * The root of the module of [packageDirectory]: the nearest directory upwards with a `go.mod` (the package directory itself included),
+     * else [projectBase] when the package is under it, else the package directory. `go run` accepts the absolute package path from there.
+     */
+    fun moduleRoot(packageDirectory: String, projectBase: String?): String {
+        var directory: File? = File(packageDirectory).absoluteFile
+        while (directory != null) {
+            if (File(directory, "go.mod").isFile) return directory.path
+            directory = directory.parentFile
+        }
+        val base = projectBase?.takeIf { it.isNotBlank() }?.let { File(it).absoluteFile } ?: return packageDirectory
+        return if (File(packageDirectory).absoluteFile.startsWith(base)) base.path else packageDirectory
+    }
 }
 
 /**
