@@ -148,14 +148,16 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
     private fun visible(pack: GoPackageSymbols, own: String?, imported: Set<String>, excluded: List<String>): Boolean =
         pack.importPath != own && GoCatalogueScanner.isVisible(pack.importPath, own) && (pack.importPath in imported || !GoImportExclusions.excluded(pack.importPath, excluded))
 
-    private fun row(entry: GoSymbolIndex.Entry, insertion: GoCatalogueInsertion.Text): LookupElementBuilder =
-        LookupElementBuilder.create(entry, entry.symbol.name)
+    private fun row(entry: GoSymbolIndex.Entry, insertion: GoCatalogueInsertion.Text): LookupElementBuilder {
+        val (tail, type) = texts(entry.symbol.kind, entry.symbol.signature, entry.pack.importPath)
+        return LookupElementBuilder.create(entry, entry.symbol.name)
             .withLookupString(entry.pack.name + "." + entry.symbol.name)
             .withPresentableText(insertion.text.removeSuffix("()").removeSuffix("{}"))
-            .withTailText(tail(entry), true)
-            .withTypeText(entry.pack.importPath, true)
+            .withTailText(tail, true)
+            .withTypeText(type, true)
             .withIcon(icon(entry.symbol.kind))
             .withInsertHandler(INSERT)
+    }
 
     /**
      * Smart completion where a type is expected (`total = `, `var i int = `, `ch <- `, `return `, an argument): the functions, variables and
@@ -217,10 +219,33 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         return false
     }
 
-    private fun tail(entry: GoSymbolIndex.Entry): String? = when (entry.symbol.kind) {
-        GoDeclarationKind.FUNCTION -> entry.symbol.signature
-        GoDeclarationKind.STRUCT, GoDeclarationKind.INTERFACE -> " " + entry.symbol.kind.title
-        else -> entry.symbol.signature?.let { " $it" }
+    /**
+     * Tail and type of a catalogue row as GoLand writes a member of another package (dump probes 8, 11) and as the built-in rows do
+     * (`GoLookupElementFactory.foreignTail`): `(v any) encoding/json` + `([]byte, error)` for a function, ` encoding/json` for a type,
+     * ` strings` + `int` for a variable or constant (its type). The signature text is the catalogue's (`[T any](x T) (int, error)`).
+     */
+    fun texts(kind: GoDeclarationKind, signature: String?, importPath: String): Pair<String, String?> = when (kind) {
+        GoDeclarationKind.FUNCTION, GoDeclarationKind.METHOD -> {
+            val text = signature?.trim().orEmpty()
+            var end = 0
+            if (text.startsWith("[")) end = closing(text, 0) + 1
+            if (end < text.length && text[end] == '(') end = closing(text, end) + 1
+            text.substring(0, end.coerceIn(0, text.length)) + " $importPath" to text.substring(end.coerceIn(0, text.length)).trim().ifEmpty { null }
+        }
+        GoDeclarationKind.CONST, GoDeclarationKind.VAR -> " $importPath" to signature?.trim()?.ifEmpty { null }
+        else -> " $importPath" to null
+    }
+
+    /** The index of the bracket closing the one at [open] (the end of [text] when unbalanced). */
+    private fun closing(text: String, open: Int): Int {
+        var depth = 0
+        for (i in open until text.length) {
+            when (text[i]) {
+                '(', '[', '{' -> depth++
+                ')', ']', '}' -> if (--depth == 0) return i
+            }
+        }
+        return text.length - 1
     }
 
     private fun icon(kind: GoDeclarationKind): Icon = when (kind) {

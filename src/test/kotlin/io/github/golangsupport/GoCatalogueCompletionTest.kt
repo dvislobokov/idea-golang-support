@@ -51,7 +51,9 @@ class GoCatalogueCompletionTest : BasePlatformTestCase() {
         assertTrue(all.toString(), all.indexOf("total") in 0 until all.indexOf("Count"))
         val presentation = LookupElementPresentation.renderElement(myFixture.lookupElements!!.first { entry(it)?.symbol?.name == "Count" })
         assertEquals("strings.Count", presentation.itemText)
-        assertEquals("strings", presentation.typeText)
+        // GoLand's row of another package's member: the path after the parameters, the result as the type
+        // (the catalogue keeps the parameters as the source writes them: `s, substr string`)
+        assertEquals("(s, substr string) strings" to "int", presentation.tailText to presentation.typeText)
     }
 
     fun testSmartCatalogueRowWritesTheCallAndTheImport() {
@@ -77,7 +79,7 @@ class GoCatalogueCompletionTest : BasePlatformTestCase() {
         val rows = rows()
         assertTrue(rows.toString(), "example.test/jsonx/v2.Marshal" in rows && "example.test/jsonx/v2.MarshalWrite" in rows)
         val v2 = myFixture.lookupElements!!.first { entry(it)?.pack?.importPath == "example.test/jsonx/v2" && entry(it)?.symbol?.name == "Marshal" }
-        assertEquals("example.test/jsonx/v2", LookupElementPresentation.renderElement(v2).typeText)
+        assertTrue(LookupElementPresentation.renderElement(v2).tailText.orEmpty().endsWith(" example.test/jsonx/v2"))
         myFixture.lookup.currentItem = v2
         myFixture.finishLookup(Lookup.NORMAL_SELECT_CHAR)
         val text = myFixture.editor.document.text
