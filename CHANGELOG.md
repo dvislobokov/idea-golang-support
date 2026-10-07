@@ -30,6 +30,81 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.205] - 2026-10-07
+
+### Fixed — the completion list matches an exported name typed in lower case (`fmt.err` → `Errorf`)
+- The platform's prefix matcher keeps the case of the first letter by default (Match case: First letter) and Go exports by a capital,
+  so `fmt.err`, `u.gre` showed nothing (seen live). The basic and smart providers now match in any case, for the empty prefix of
+  the list that pops up after `.` too (the items keep the matcher they were added with, and typing `e` into that list closed it);
+  the platform setting is not needed. Robot: `fmt.err` → `Errorf`, `strings.toup` → `ToUpper`.
+  `GoMemberCompletionTest.testLowerCasePrefixMatchesExportedMembers` (Ctrl+Space and typing into the open list),
+  `GoAutoPopupCompletionTest` (the list that pops up after `.`, then `gre` typed with pauses, as live)
+
+## [0.2.204] - 2026-10-07
+
+### Added — the grey text guesses the text inside string literals (`fmt.Errorf("…")` as a whole line)
+- The confidence gate of the network counts the code tokens only: the words inside `"…"`, `` `…` `` and after `//` are free text, each
+  of them unlikely on its own, and the product over the line never reached the threshold (seen live: `fmt.` → `Errorf("store: no
+  items")` at 0.016 while `Errorf` alone is certain). The quotes are part of the guess too: `("` splits its probability with `(` + `"`
+  (0.73 at `return fmt.Errorf`), the closing `")` is as unsure as the message; without them the line is at 0.89, with them 0.64 / 0.18. Now such a line is shown with the message guessed from the file; inside
+  a string the caret gets the text up to the closing quote. Setting "Guess the text inside string literals" (on; off = the engine's
+  rule over the whole line). `GoNnInlineTest.codeConfidenceCountsTheCodeOnly`, `GoNnModelTest.guessesTheStringOfErrorf`
+
+## [0.2.203] - 2026-10-07
+
+### Changed — the engine's fixes from the first live run: a word being typed is healed, closers trimmed in the engine, gate 0.7
+- `ml-core` synced to the engine ac9b3fd: at `return le` the network now heals from the start of the word and answers `n(o.items)`
+  (0.52) instead of `(o.Total())` (0.05); the `)` the editor paired after the caret is dropped by the engine (`trimClosersAfterCaret`),
+  the plugin's own trimming is gone; the default confidence threshold is 0.7 like the engine's (~26 % of positions shown with 93 %
+  exact lines on the test fold; 0.8 showed ~20 % at 95 %). `GoNnModelTest` pins both live cases over the real model
+
+## [0.2.202] - 2026-10-07
+
+### Changed — the network's grey text also next to the completion list
+- The inline provider of the network answers the lookup events of the platform as the idioms provider does: when the completion list
+  opens or its selection moves, the suggestion is asked again and shown beside the list (seen live: `return le` with the list open
+  showed nothing until the list closed; GoLand shows both)
+
+## [0.2.201] - 2026-10-07
+
+### Changed — an unused variable is an error, with the red wave
+- `declared and not used: x` was a warning drawn as the grey "unused symbol" text, which in Darcula is barely distinguishable from code (a
+  colleague read it as "no highlighting at all"). In Go it is a compile error, so the inspection is now level ERROR with the ordinary
+  red wave like GoLand's; the fixes (remove, `_ = x`, rename to `_`) are unchanged. Platform test asserts the severity and the style
+
+## [0.2.200] - 2026-10-07
+
+### Changed — the ML build packs the transformer, the ranker became optional, grey-text settings (docs/ML.md)
+- `./gradlew.bat buildPlugin -PmlEnabled=true` now bundles the Go transformer `go-nn-31m-e2.cml` and its tokenizer `go-16384.bpe` from
+  `ml-models/go/` under `ml/go/` (both required). The ranker pair `lm.cml` / `rank.cml` of `-Pml.models` is optional: only the files that
+  exist are copied and the build no longer fails without them; the proxy ranker of `ml-models/go/` is never shipped
+- Settings | Tools | Go | Smart Completion got a "Grey text (inline completion)" group: a switch, the confidence threshold (0.50–0.99,
+  0.8 by default) and "Show suggestions that are only closing brackets", plus a Network status row (model, threads, kernels, shown / accepted
+  counters) next to the ranker status. Changing any of them or the models directory reloads the models. The guide and docs/ML.md describe
+  the options and the file list
+
+## [0.2.199] - 2026-10-07
+
+### Added — grey text from our own transformer in a Smart Completion build (ML_INLINE_TASK.md)
+- While typing in a Go file (or on an explicit call) the rest of the line suggested by `go-nn-31m-e2` (the engine's `NnCompletion`: token
+  healing at the caret, SPM prompt with the text after the line, greedy decoding to the end of the line) appears as inline completion and
+  Tab accepts it; only what the model's own policy shows (confidence ≥ the threshold; lone closers like `);` hidden unless enabled)
+- The idioms of the plugin (`if err != nil` after Enter, suggestions from the context) keep priority: the network provider is registered
+  first, asks the next enabled provider and fills only where it has nothing; the insert handler of whoever answered applies (imports of the idioms)
+- `GoMlModels` loads the network once per IDE in the background and warms it up when the first Go editor opens: the int8 weights are
+  memory-mapped from a copy under the IDE system directory (`go-plugin/ml/<sha256>/`, verified by SHA-256 before reuse, 0700 where the
+  file system has POSIX permissions), the model runs on its own thread with a KV-cache session per editor freed when the editor closes
+  (`GoNnEditorListener`), and the engine falls back to scalar kernels by itself when the native ones cannot load (`NativeLib.status` in the log).
+  A directory in the settings may hold another `*-nn-*.cml` + `*.bpe` instead of the bundled pair; with the switch off nothing is loaded
+- The closers the editor already paired after the caret are not repeated: `return len(` + `o.items)` from the model is shown as `o.items`
+  (seen live: accepted as `len(o.items))`)
+- Tests: `GoNnInlineTest` (pure: context bytes and limits incl. multi-byte UTF-8, relative path, show → text, otherwise nothing, paired
+  closers) and `GoNnModelTest` over the real model in `ml-models/go/` (skipped without it). Robot on the ML build: the network loads with
+  the native kernels (`libcmlkernels-windows-x64.dll`, avx512-vnni) in 0.4 s and answers in 2–60 ms; after `data, err := Load(s.Name)`
+  + Enter the idiom `if err != nil { return err }` comes through the network provider without a model call; the model's own lines
+  (`defer f.` → `Close()` 0.71, `return len(` → `o.items)` 0.72, `return o.items[` → `0]` 0.64) stayed under the 0.8 threshold on the
+  playground, at 0.6 the grey text appeared and the platform action accepted it (counters shown 1 / accepted 1); no `Plugin to blame: Go`
+
 ## [0.2.198] - 2026-10-07
 
 ### Fixed — the file type association dialog did not come (a colleague installed the plugin and .go stayed with another file type)

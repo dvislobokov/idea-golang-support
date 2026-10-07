@@ -29,6 +29,27 @@ class GoMemberCompletionTest : GoCompletionTestBase() {
 
     """
 
+    fun testLowerCasePrefixMatchesExportedMembers() {
+        // the platform's matcher keeps the case of the first letter by default; `fmt.err` is typed for `Errorf` (seen live: nothing came)
+        val items = lookups(types + """
+            func main() {
+                var u User
+                u.re<caret>
+            }
+        """)
+        assertContainsAll(items, "Rename", "Reset")
+        // the list that popped up after `.` (empty prefix) narrowed by typing: the items keep a matcher of any case (seen live: the list closed at `e`)
+        lookups(types + """
+            func main() {
+                var u User
+                u.<caret>
+            }
+        """)
+        myFixture.type("gre")
+        assertContainsAll(myFixture.lookupElementStrings.orEmpty(), "Greet")
+        assertContainsNone(items, "Describe", "Name", "email")   // `Greet` matches too: the platform matcher lets a lower-case prefix start mid-word
+    }
+
     fun testPresentationTextsAreRenderedLazily() {
         // The ranker runs after the lookup elements are built and before the popup renders its rows.
         var renderedWhileBuilding = -1

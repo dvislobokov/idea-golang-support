@@ -15,7 +15,7 @@
                      groupName="Go" enabledByDefault="true" level="WARNING"
                      implementationClass="io.github.golangsupport.ide.inspections.GoUnusedImportInspection"/>
     <localInspection language="Go" shortName="GoUnusedVariable" displayName="Unused variable"
-                     groupName="Go" enabledByDefault="true" level="WARNING"
+                     groupName="Go" enabledByDefault="true" level="ERROR"
                      implementationClass="io.github.golangsupport.ide.inspections.GoUnusedVariableInspection"/>
     <localInspection language="Go" shortName="GoUnusedLabel" displayName="Unused label"
                      groupName="Go" enabledByDefault="true" level="WARNING"

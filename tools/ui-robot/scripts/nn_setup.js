@@ -1,0 +1,10 @@
+// Grey text of the network: debug log on, threshold __T__, inline on; prints the status of the service.
+importClass(com.intellij.openapi.application.ApplicationManager)
+importClass(com.intellij.openapi.diagnostic.Logger)
+importClass(com.intellij.openapi.diagnostic.LogLevel)
+Logger.getInstance("#io.github.golangsupport.ml.GoMlModels").setLevel(LogLevel.DEBUG)
+Logger.getInstance("#io.github.golangsupport.ml.GoNnInlineCompletionProvider").setLevel(LogLevel.DEBUG)
+var app = ApplicationManager.getApplication()
+var s = app.getService(cls("io.github.golangsupport.ml.GoMlSettings"))
+s.setInlineThreshold(java.lang.Double.parseDouble("__T__")); s.setInlineEnabled(true)
+"threshold " + s.getInlineThreshold() + " | " + app.getService(cls("io.github.golangsupport.ml.GoMlModels")).nnStatus("")

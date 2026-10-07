@@ -1,6 +1,7 @@
-<!-- Smart Completion: the ML ranking of completion candidates (docs/ML.md). Part of the plugin only when it is built with
-     -PmlEnabled=true (or MLENABLED=true in the environment): the build copies this file and the models ml/go/{lm.cml,rank.cml}
-     into the resources; plugin.xml includes it with an xi:fallback, so a build without it has no ranker and no settings page. -->
+<!-- Smart Completion: the ML ranking of completion candidates and the grey text of the transformer (docs/ML.md). Part of the plugin only
+     when it is built with -PmlEnabled=true (or MLENABLED=true in the environment): the build copies this file and the models
+     ml/go/{lm.cml,rank.cml,go-nn-31m-e2.cml,go-16384.bpe} into the resources; plugin.xml includes it with an xi:fallback, so a build
+     without it has no ranker, no grey text and no settings page. -->
 <idea-plugin>
   <extensions defaultExtensionNs="io.github.golangsupport">
     <completionRanker implementation="io.github.golangsupport.ml.GoMlCompletionRanker"/>
@@ -8,5 +9,8 @@
   <extensions defaultExtensionNs="com.intellij">
     <projectConfigurable parentId="io.github.golangsupport.settings" groupWeight="35" id="io.github.golangsupport.settings.ml" bundle="messages.GoSettingsTitles" key="page.ml"
                          instance="io.github.golangsupport.settings.GoMlConfigurable"/>
+    <!-- first: it asks the next enabled provider (the idioms of the host) before the network, see GoNnInlineCompletionProvider -->
+    <inline.completion.provider order="first" implementation="io.github.golangsupport.ml.GoNnInlineCompletionProvider"/>
+    <editorFactoryListener implementation="io.github.golangsupport.ml.GoNnEditorListener"/>
   </extensions>
 </idea-plugin>

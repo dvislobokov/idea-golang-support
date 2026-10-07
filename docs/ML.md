@@ -135,8 +135,9 @@ Status 2026-10-05 (0.2.184): `ml-core/` is a copy of the pure-Kotlin engine modu
 `io.github.golangsupport.ml.GoMlFeatures` and the headless dataset export `:go-psi-ide:mlDataset` exist, and so does the
 IDE side: `GoMlCompletionRanker` (the `completionRanker` EP), `GoMlModels` (bundled or user-chosen `lm.cml` + `rank.cml`,
 loaded in the background on the first completion) and Settings | Go | Smart Completion (`GoMlSettings`). All of it is
-opt-in at build time: `./gradlew.bat buildPlugin -PmlEnabled=true -Pml.models=<dir>` (or `MLENABLED=true`) copies
-`META-INF/go-ml.xml` and the models into the plugin; a plain build has neither the ranker nor the page. Measured offline
+opt-in at build time: `./gradlew.bat buildPlugin -PmlEnabled=true [-Pml.models=<dir>]` (or `MLENABLED=true`) copies
+`META-INF/go-ml.xml`, the transformer `go-nn-31m-e2.cml` + `go-16384.bpe` (from `ml-models/go/`, required; grey-text completion) and, if
+they exist in `-Pml.models`, the ranker pair `lm.cml` + `rank.cml` (optional) into the plugin under `ml/go/`; the proxy `e14-b-rank.cml` is never shipped; a plain build has neither the ranker nor the page. Measured offline
 (https://github.com/dvislobokov/idea-ml-completion/blob/main/docs/REPORT-GO-RU.md): MRR 0.783 vs 0.534 for the deterministic order on held-out repositories.
 - Offline dataset from GOROOT + golang.org/x: for each identifier/selector position, the
   candidate list our completion would produce (headless, via a `*CorpusTest`-style exporter)

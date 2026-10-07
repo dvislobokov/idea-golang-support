@@ -8,6 +8,7 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.CompletionUtil
 import com.intellij.codeInsight.completion.PrefixMatcher
+import com.intellij.codeInsight.completion.impl.CamelHumpMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementDecorator
 import com.intellij.codeInsight.lookup.LookupElementPresentation
@@ -93,6 +94,16 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
          */
         fun isCodeFragment(file: PsiFile): Boolean = file.virtualFile?.parent == null
 
+        /**
+         * [result] matching the prefix in any case: the platform's matcher keeps the case of the first letter by default (Match case:
+         * First letter), and Go exports by a capital — `fmt.err` is typed for `Errorf` (seen live, nothing came). The empty prefix of the
+         * list that pops up after `.` too: the items keep the matcher they were added with, and typing `e` into that list clones it.
+         */
+        fun anyCase(result: CompletionResultSet): CompletionResultSet {
+            val matcher = result.prefixMatcher
+            return if (matcher is CamelHumpMatcher) result.withPrefixMatcher(CamelHumpMatcher(matcher.prefix, false)) else result
+        }
+
         /** Converts candidates, lets a registered [GoCompletionRanker] score them, and adds them to [result]. */
         fun emit(candidates: List<GoCandidate>, context: GoCompletionContext, result: CompletionResultSet) {
             if (candidates.isEmpty()) return
@@ -140,8 +151,9 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
 
 /** Identifiers in expressions, types, selectors, struct literal keys, top-level and statement keywords. */
 private class GoIdentifierProvider : CompletionProvider<CompletionParameters>(), DumbAware {
-    override fun addCompletions(parameters: CompletionParameters, processing: ProcessingContext, result: CompletionResultSet) {
+    override fun addCompletions(parameters: CompletionParameters, processing: ProcessingContext, given: CompletionResultSet) {
         val context = GoCompletionContext.of(parameters) ?: return
+        val result = GoCompletionContributor.anyCase(given)
         if (context.kind == Kind.NONE && GoNameCompletion.variableNames(context, result)) return
         GoBasicCompletion.fill(context, result)
     }
@@ -154,8 +166,9 @@ private class GoIdentifierProvider : CompletionProvider<CompletionParameters>(),
  * Without an expected type (or outside an expression) it is the basic set: an empty list helps nobody.
  */
 private class GoSmartProvider : CompletionProvider<CompletionParameters>(), DumbAware {
-    override fun addCompletions(parameters: CompletionParameters, processing: ProcessingContext, result: CompletionResultSet) {
+    override fun addCompletions(parameters: CompletionParameters, processing: ProcessingContext, given: CompletionResultSet) {
         val context = GoCompletionContext.of(parameters) ?: return
+        val result = GoCompletionContributor.anyCase(given)
         val smartKind = context.isExpression || context.kind == Kind.SELECTOR
         val expected = if (smartKind) context.semantics.expectedType else null
         if (expected == null) {

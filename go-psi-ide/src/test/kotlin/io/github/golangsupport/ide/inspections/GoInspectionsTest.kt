@@ -61,6 +61,10 @@ class GoInspectionsTest : GoSemanticIdeTestBase() {
         myFixture.configureByText("a.go", "package a\n\nimport \"os\"\n\nfunc f() int {\n\tx := 1\n\t<caret>\n\treturn \"s\"\n}\n")
         val first = myFixture.doHighlighting().filter { it.description != null }.map { it.description }
         assertTrue(first.toString(), first.containsAll(listOf("\"os\" imported and not used", "declared and not used: x")))
+        // a compile error of Go: red wave, not the grey unused-symbol text (invisible in Darcula, seen live)
+        val unused = myFixture.doHighlighting().first { it.description == "declared and not used: x" }
+        assertEquals(com.intellij.lang.annotation.HighlightSeverity.ERROR, unused.severity)
+        assertNotSame(com.intellij.codeInsight.daemon.impl.HighlightInfoType.UNUSED_SYMBOL, unused.type)
         assertEquals(1, counting.checks.get())
         myFixture.doHighlighting()
         assertEquals("no modification, no new check", 1, counting.checks.get())

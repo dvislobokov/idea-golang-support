@@ -25,10 +25,12 @@ class GoUnusedImportInspection : GoDiagnosticsInspectionBase() {
     override fun fixes(d: GoDiagnostic, file: GoFile, element: PsiElement): List<LocalQuickFix> = listOf(GoRemoveImportFix(), GoOptimizeImportsFix())
 }
 
-/** `declared and not used: x`. Fixes: remove the declaration, `_ = expr`, or rename to `_`. */
+/**
+ * `declared and not used: x`. Fixes: remove the declaration, `_ = expr`, or rename to `_`. A compile error in Go, so an error with the
+ * red wave like GoLand's, not the grey "unused symbol" text (seen live: the grey was invisible in Darcula and read as "no highlighting").
+ */
 class GoUnusedVariableInspection : GoDiagnosticsInspectionBase() {
     override fun accepts(code: String) = code in GoDiagnosticClasses.UNUSED_VARIABLE
-    override fun highlightType(d: GoDiagnostic) = ProblemHighlightType.LIKE_UNUSED_SYMBOL
     override fun fixes(d: GoDiagnostic, file: GoFile, element: PsiElement): List<LocalQuickFix> = GoUnusedVariableFixes.forDefinition(element)
 }
 

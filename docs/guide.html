@@ -600,6 +600,7 @@ n := <span class="fn">next</span>()
         <tr><td>Incorrect usage of 'fmt.Printf' and 'fmt.Println' functions</td><td>Глагол без аргумента (<code>No argument for verb: argument index = 2, arguments count = 1</code>), несовпадение типа, лишние аргументы; обёртки пакета и список из Settings, Go, Linters.</td><td>Add format string argument</td></tr>
         <tr><td>Shadowing variable</td><td>Локальная переменная затеняет переменную, константу, параметр, получатель внешней области или переменную пакета, в том числе предопределённое имя (<code>new := 2</code>).</td><td>Navigate to shadowed declaration, Rename variable</td></tr>
         <tr><td>Defer / go на встроенную функцию, Irregular use of iota, Mixed receiver types, Assignment to receiver, Type assertion on errors, Build constraints</td><td><code>defer recover()</code> и <code>go panic()</code>; <code>iota</code> в одиночной константе; методы типа с получателем-значением и указателем; присваивание получателю; <code>err.(*T)</code> вместо <code>errors.As</code>; <code>// +build</code> не на месте.</td><td>Wrap in a function literal, Replace with 0, Change receiver to pointer / value, Replace with 'errors.As'</td></tr>
+        <tr><td>Unused variable, Unused import, Unused label</td><td>Ошибки компилятора Go: <code>declared and not used: x</code> (красная волна, как в GoLand; раньше — серый текст, в тёмной теме незаметный), <code>"os" imported and not used</code>, неиспользуемая метка.</td><td>Remove declaration, <code>_ = x</code>, Rename to _; Remove import, Optimize imports</td></tr>
         <tr><td>Unused function, type, constant, global variable (в том числе экспортируемые)</td><td>Объявление, которым никто не пользуется. Экспортируемые — в <code>internal</code> и в пакетах-приложениях; API библиотек и методы не отмечаются; находка показана серым.</td><td>Safe delete</td></tr>
         <tr><td>Unused parameter</td><td>Параметр на всю запись <code>c Circle</code>; экспортируемые функции <code>internal</code> и приложений тоже, вызовы ищутся по проекту.</td><td>Remove unused parameter, Rename to _</td></tr>
         <tr><td>Redundant: parentheses, comma, semicolon, import alias, type conversion, type in composite literal, else, type declaration</td><td>Лишнее в записи: <code>(x)</code>, <code>[]T{T{}}</code>, <code>var x T = T(v)</code>, <code>else</code> после <code>return</code>, <code>T(x)</code> при <code>x</code> уже типа <code>T</code>, пустое <code>var ()</code>, <code>[]T{}</code> вместо nil-среза.</td><td>Свои исправления: Remove redundant …, Remove else, Replace with nil slice</td></tr>
@@ -1061,13 +1062,17 @@ n := <span class="fn">next</span>()
     </table></div>
 
     <h3>Smart Completion <span class="new">новое</span></h3>
-    <p>Страница есть только в сборке плагина с моделями (<code>-PmlEnabled=true</code>); в обычной сборке её и самого ранжирования нет. Модели лежат внутри плагина (<code>ml/go/lm.cml</code>, <code>rank.cml</code>), загружаются один раз в фоне при первом списке подсказок, и ничего не уходит с машины.</p>
+    <p>Страница есть только в сборке плагина с моделями (<code>-PmlEnabled=true</code>); в обычной сборке её и самого ранжирования нет. Модели лежат внутри плагина (<code>ml/go/go-nn-31m-e2.cml</code>, <code>go-16384.bpe</code>, а если их положили при сборке — <code>lm.cml</code>, <code>rank.cml</code>), загружаются один раз в фоне при первом списке подсказок, и ничего не уходит с машины.</p>
     <div class="table"><table class="two">
       <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
       <tbody>
         <tr><td>Rank completion candidates with the ML model</td><td>Языковая модель кода Go и линейный ранжировщик упорядочивают список подсказок: учитывают тип ожидаемого значения, область видимости, расстояние до объявления и то, что набрано перед кареткой. Выключено — детерминированный порядок плагина (ожидаемый тип, область, имя); он же действует, пока модели не загрузились.</td></tr>
         <tr><td>Mark the suggestions ordered by the model</td><td>Серая метка <code>ML</code> после каждой строки, которую оценила модель: видно, какой порядок — её. Выключено — без видимой разницы.</td></tr>
-        <tr><td>Models directory</td><td>Каталог с другими <code>lm.cml</code> и <code>rank.cml</code> (например, от нового обучения). Пусто — модели из плагина. Строка Models показывает, что загружено.</td></tr>
+        <tr><td>Suggest the rest of the line as grey text</td><td>Встроенная модель Go предлагает конец строки после каретки серым текстом; Tab принимает. Работает только в сборке с моделями.</td></tr>
+        <tr><td>Confidence threshold</td><td>От 0.50 до 0.99: чем выше порог, тем реже появляется серый текст и тем увереннее подсказка.</td></tr>
+        <tr><td>Show suggestions that are only closing brackets</td><td>По умолчанию подсказка из одних <code>)</code>, <code>]</code>, <code>}</code> скрыта; флажок возвращает её.</td></tr>
+        <tr><td>Guess the text inside string literals</td><td>Порог уверенности считается только по коду: строка <code>fmt.Errorf("…")</code> показывается с угаданным сообщением (у текста в кавычках вероятность всегда мала). Выкл.: уверенной должна быть вся строка целиком.</td></tr>
+        <tr><td>Models directory</td><td>Каталог с другими <code>lm.cml</code> и <code>rank.cml</code> (например, от нового обучения). Пусто — модели из плагина. Строки Models и Network показывают, что загружено.</td></tr>
       </tbody>
     </table></div>
 

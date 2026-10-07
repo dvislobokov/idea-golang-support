@@ -240,7 +240,9 @@ class GoProjectProblemsTest : BasePlatformTestCase() {
         drain()
         settings.projectAnalysisWarnings = false
         service.settingsChanged()
-        assertEquals(listOf("lib/use.go:4: GoUnresolvedReference"), shown())
+        // unused variables are errors (a compile error of Go) and stay with "errors only"
+        assertEquals(listOf("app/app.go:6: GoUnusedVariable", "lib/lib.go:6: GoUnusedVariable", "lib/use.go:4: GoUnresolvedReference",
+            "other/o.go:4: GoUnusedVariable", "tools/gen/main.go:4: GoUnusedVariable"), shown())
         settings.projectAnalysis = false
         service.settingsChanged()
         assertEquals(emptyList<String>(), shown())

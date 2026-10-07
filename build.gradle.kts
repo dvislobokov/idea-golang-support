@@ -112,19 +112,26 @@ tasks.processResources {
     }
 }
 
-// Smart Completion (docs/ML.md): `-PmlEnabled=true` (or MLENABLED=true in the environment) puts the ML ranker into the plugin —
-// META-INF/go-ml.xml (the completionRanker and the Settings | Go | Smart Completion page) and the trained models of `-Pml.models`
-// (a directory with lm.cml and rank.cml; default ../ml-data/go/models) under ml/go/. A build without the flag has no trace of it.
+// Smart Completion (docs/ML.md): `-PmlEnabled=true` (or MLENABLED=true in the environment) puts the ML features into the plugin —
+// META-INF/go-ml.xml (the completionRanker, the grey-text inline provider and the Settings | Go | Smart Completion page), the transformer
+// go-nn-31m-e2.cml with its tokenizer go-16384.bpe from ml-models/go/ (required) and, if present, the ranker pair lm.cml / rank.cml of
+// `-Pml.models` (a directory; default ../ml-data/go/models) under ml/go/. The ranker files are optional: without them only the grey text works.
+// The proxy ranker e14-b-rank.cml is never shipped. A build without the flag has no trace of any of it.
 val mlEnabled = providers.gradleProperty("mlEnabled").orElse(providers.environmentVariable("MLENABLED")).map { it.equals("true", ignoreCase = true) }.getOrElse(false)
 if (mlEnabled) {
     val mlModels = providers.gradleProperty("ml.models").map { file(it) }.getOrElse(file("../ml-data/go/models"))
-    for (name in listOf("lm.cml", "rank.cml")) {
-        check(File(mlModels, name).isFile) { "mlEnabled: $name not found in $mlModels (set -Pml.models=<dir>)" }
-    }
+    val nnDir = file("ml-models/go")
+    val nnFiles = listOf("go-nn-31m-e2.cml", "go-16384.bpe")
+    for (name in nnFiles) check(File(nnDir, name).isFile) { "mlEnabled: $name not found in $nnDir" }
+    val rankerFiles = listOf("lm.cml", "rank.cml").filter { File(mlModels, it).isFile }
     tasks.processResources {
         from("src/ml/resources")
-        from(mlModels) {
-            include("lm.cml", "rank.cml")
+        from(nnDir) {
+            include(nnFiles)
+            into("ml/go")
+        }
+        if (rankerFiles.isNotEmpty()) from(mlModels) {
+            include(rankerFiles)
             into("ml/go")
         }
     }

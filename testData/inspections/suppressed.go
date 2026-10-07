@@ -18,7 +18,7 @@ func g() {
 	var y int = "a"
 	//noinspection ALL
 	z := 2
-	<warning descr="declared and not used: w">w</warning> := 3
+	<error descr="declared and not used: w">w</error> := 3
 L:
 	for {
 		break

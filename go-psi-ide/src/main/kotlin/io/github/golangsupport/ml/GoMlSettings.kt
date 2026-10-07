@@ -22,6 +22,14 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
         var modelDirectory by string("")
         /** Grey "ML" after the rows the model ordered. */
         var showMarker by property(true)
+        /** Grey text to the end of the line from the transformer ([GoNnInlineCompletionProvider]); off: the network is not even loaded. */
+        var inlineEnabled by property(true)
+        /** `confProd` the suggestion needs to be shown (the engine's default gate: 0.7 shows ~26 % of positions with 93 % exact lines, 0.8 ~20 % at 95 %). */
+        var inlineThreshold by property(0.7f)
+        /** Show suggestions that are punctuation only (`)`, `};`): off by default, the brackets of the editor do that already. */
+        var inlineShowClosers by property(false)
+        /** Gate on the confidence of the code tokens only, so a line with a string literal (`fmt.Errorf("…")`) is shown with the text guessed. */
+        var inlineGuessStrings by property(true)
     }
 
     var enabled: Boolean
@@ -35,6 +43,22 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
     var modelDirectory: String
         get() = state.modelDirectory ?: ""
         set(value) { state.modelDirectory = value }
+
+    var inlineEnabled: Boolean
+        get() = state.inlineEnabled
+        set(value) { state.inlineEnabled = value }
+
+    var inlineThreshold: Double
+        get() = state.inlineThreshold.toString().toDouble()
+        set(value) { state.inlineThreshold = value.toFloat() }
+
+    var inlineShowClosers: Boolean
+        get() = state.inlineShowClosers
+        set(value) { state.inlineShowClosers = value }
+
+    var inlineGuessStrings: Boolean
+        get() = state.inlineGuessStrings
+        set(value) { state.inlineGuessStrings = value }
 
     companion object {
         fun getInstance(): GoMlSettings = service()
