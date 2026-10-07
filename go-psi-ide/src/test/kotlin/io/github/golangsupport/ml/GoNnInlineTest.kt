@@ -122,6 +122,17 @@ class GoNnInlineTest {
         assertFalse(GoNnInline.blankLine("\treturn ".toByteArray()))
     }
 
+    @Test fun gateIsLowerAfterADotAndOnABlankLine() {
+        fun g(before: String) = GoNnInline.gate(before.toByteArray(), 0.7, 0.5, 0.25)
+        assertTrue(GoNnInline.afterDot("\treturn fmt.".toByteArray()))
+        assertFalse(GoNnInline.afterDot("\treturn fmt.Er".toByteArray()))
+        assertFalse(GoNnInline.afterDot("".toByteArray()))
+        assertEquals(0.5, g("\treturn fmt."), 0.0)
+        assertEquals(0.7, g("\treturn fmt.Er"), 0.0)
+        assertEquals(0.5, g("\tx := 1."), 0.0)   // a number's dot counts too: the measurement did not tell them apart
+        assertEquals(0.25, g("func f() {\n\t"), 0.0)
+    }
+
     @Test fun pathIsRelativeToTheProject() {
         assertEquals("internal/x/a.go", GoNnInline.relativePath("C:/work/proj/", "C:/work/proj/internal/x/a.go"))
         assertEquals("a.go", GoNnInline.relativePath("C:\\work\\proj", "C:/work/other/a.go"))

@@ -30,6 +30,27 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.207] - 2026-10-08
+
+### Added — the grey text is ready before the first keystroke; the 31 M / 50 M switch; the real-list ranker in the ML build
+- Preload at project open: `GoMlPreloadActivity` (ML build only) waits for smart mode, asks the file type index through `GoProjectPresence`
+  and, only in a project with Go files, loads and warms up the network (JIT, native kernels) and the ranker in the background. A project
+  without Go files pays nothing; nothing is loaded at the start of the application. `GoMlPreloadActivityTest`
+- Background prefill on file open: `GoNnFileOpenListener` snapshots the document of an opened Go file and `GoMlModels.prefill` fills the
+  editor's KV-cache session with the prompt at its caret on the model's thread (never on the EDT; skipped while the network is not loaded
+  or a completion is already waiting). The first grey text in the file finds its whole prompt in the cache: 6 ms instead of a cold prefill.
+  `GoNnModelTest.prefillOfTheCaretIsReusedByTheFirstCompletion`, `GoNnModelSwitchTest`
+- Big model: `-Pml.big=true` packs `go-nn-50m-e3-lr2e3.cml` next to the 31 M one; the setting "Big model (50 M)" (65.7 % exact lines vs
+  63.6 %, ~1.7× the latency) switches — `GoMlModels` loads the network by file name, the switch reloads it in the background and drops the
+  editor sessions. A build without it keeps the box disabled (a models directory with the file enables it). `GoNnModelTest.theBigModelLoadsByItsName`
+- Threshold after a dot: right after `.` the gate is the new setting "Confidence threshold after a dot" (0.5; measured on 3 000 positions:
+  0.7 shows 37 % of such positions at 96 %, 0.5 shows 51 % at 92 %) — one `NnCompletion` variant per gate (`Options.copy`), kept, not rebuilt
+  per call. `GoNnInlineTest.gateIsLowerAfterADotAndOnABlankLine`
+- Ranker in the ML build: a plain `-PmlEnabled=true` now ships `ml-models/go/e14-b.cml` as `lm.cml` and `e17b-rank.cml` (the ranker on the
+  re-exported real completion lists: MRR 0.799 / top-1 0.700 vs the rule order 0.513 / 0.380) as `rank.cml`; `-Pml.models=<dir>` still
+  takes a newer pair from a directory. `GoMlCompletionRankerTest` passes over that pair (the schema matches `GoMlFeatures`).
+- ML zip: `./gradlew buildPlugin -PmlEnabled=true [-Pml.big=true]` → `build/distributions/idea-golang-support-<version>-ml.zip`.
+
 ## [0.2.206] - 2026-10-07
 
 ### Added — grey text on a line where nothing is typed yet (after Enter)

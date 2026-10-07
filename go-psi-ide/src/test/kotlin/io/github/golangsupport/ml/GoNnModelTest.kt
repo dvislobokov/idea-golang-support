@@ -1,6 +1,8 @@
 package io.github.golangsupport.ml
 
 import io.github.completionml.core.nn.native.NativeLib
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
@@ -37,6 +39,48 @@ class GoNnModelTest {
             assertTrue("a call with a string: '${r.textString}'", r.textString.startsWith("Errorf(\"") && r.textString.endsWith("\")"))
             assertTrue("the code is certain, the string is not: $code vs ${r.confProd}", code > r.confProd && code >= 0.6)   // 0.69 on 2026-10-07 (0.89 with an `errors` import and `ErrEmpty` above: `Errorf` certain, the end of the line 0.89)
         } finally { nn.model.close() }
+    }
+
+    @Test fun prefillOfTheCaretIsReusedByTheFirstCompletion() {
+        assumeTrue("no ml-models/go/${GoMlModels.NN_MODEL}", dir != null)
+        val nn = checkNotNull(GoMlModels.loadNn(dir)) { "no network in $dir" }
+        try {
+            val head = "package store\n\nimport \"fmt\"\n\ntype Order struct {\n\titems []string\n}\n\nfunc (o *Order) Validate() error {\n\tif len(o.items) == 0 {\n\t\treturn fmt."
+            val tail = "\n\t}\n\treturn nil\n}\n"
+            nn.model.newSession(2048).use { s ->
+                // the file is opened with the caret after `fmt.`: the prompt of that caret goes into the cache in the background
+                val cached = GoNnInline.prefill(nn.completion, s, GoNnInline.context(head + tail, head.length, "store/order.go"))
+                assertTrue("nothing cached", cached > 10)
+                val before = s.tokens()
+                // the user types `Er`: the healed boundary is the same, the prompt is the cached one — nothing is prefilled again
+                val c = GoNnInline.context(head + "Er" + tail, head.length + 2, "store/order.go")
+                val started = System.nanoTime()
+                val r = nn.completion.complete(c.path, c.before, c.after, s)
+                val millis = (System.nanoTime() - started) / 1_000_000
+                var lcp = 0
+                while (lcp < before.size && lcp < r.prompt.size && before[lcp] == r.prompt[lcp]) lcp++
+                println("GoNnModelTest: prefill $cached tokens, prompt ${r.prompt.size}, common $lcp, completion '${r.textString}' in $millis ms")
+                assertArrayEquals("the prefilled prompt is the request's prompt", r.prompt, before)
+                assertTrue("typed `Er` continued: '${r.textString}'", r.textString.startsWith("rorf"))
+            }
+        } finally { nn.model.close() }
+    }
+
+    @Test fun theBigModelLoadsByItsName() {
+        assumeTrue("no ml-models/go/${GoMlModels.NN_MODEL_BIG}", dir != null && File(dir, GoMlModels.NN_MODEL_BIG).isFile)
+        val nn = checkNotNull(GoMlModels.loadNn(dir, model = GoMlModels.NN_MODEL_BIG)) { "no network in $dir" }
+        try {
+            assertEquals(GoMlModels.NN_MODEL_BIG.removeSuffix(".cml"), nn.name)
+            val before = "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Prin"
+            val c = GoNnInline.context(before + "\n}\n", before.length, "main.go")
+            val r = nn.model.newSession(2048).use { nn.completion.complete(c.path, c.before, c.after, it) }
+            println("GoNnModelTest: ${nn.name} 'fmt.Prin' -> '${r.textString}' confProd ${r.confProd}")
+            assertTrue("empty completion", r.text.isNotEmpty())
+        } finally { nn.model.close() }
+        // a directory without the big model falls back to the small one, the bundled choice too
+        assertEquals(GoMlModels.NN_MODEL, GoMlModels.nnModelName(big = true, modelDirectory = ""))
+        assertEquals(GoMlModels.NN_MODEL_BIG, GoMlModels.nnModelName(big = true, modelDirectory = dir!!.path))
+        assertEquals(GoMlModels.NN_MODEL, GoMlModels.nnModelName(big = false, modelDirectory = dir.path))
     }
 
     @Test fun healsAWordBeingTypedAndTrimsThePairedCloser() {

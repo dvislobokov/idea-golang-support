@@ -114,24 +114,33 @@ tasks.processResources {
 
 // Smart Completion (docs/ML.md): `-PmlEnabled=true` (or MLENABLED=true in the environment) puts the ML features into the plugin —
 // META-INF/go-ml.xml (the completionRanker, the grey-text inline provider and the Settings | Go | Smart Completion page), the transformer
-// go-nn-31m-e2.cml with its tokenizer go-16384.bpe from ml-models/go/ (required) and, if present, the ranker pair lm.cml / rank.cml of
-// `-Pml.models` (a directory; default ../ml-data/go/models) under ml/go/. The ranker files are optional: without them only the grey text works.
+// go-nn-31m-e2.cml with its tokenizer go-16384.bpe from ml-models/go/ (required), with `-Pml.big=true` the 50 M transformer
+// go-nn-50m-e3-lr2e3.cml too (the setting "Big model" switches), and the ranker pair lm.cml / rank.cml under ml/go/: by default the
+// n-gram e14-b.cml and the real-list ranker e17b-rank.cml of ml-models/go/ (MRR 0.799 vs rules 0.513), renamed; `-Pml.models=<dir>`
+// takes lm.cml / rank.cml from that directory instead (a newer training; missing there: no ranker, only the grey text works).
 // The proxy ranker e14-b-rank.cml is never shipped. A build without the flag has no trace of any of it.
 val mlEnabled = providers.gradleProperty("mlEnabled").orElse(providers.environmentVariable("MLENABLED")).map { it.equals("true", ignoreCase = true) }.getOrElse(false)
 if (mlEnabled) {
-    val mlModels = providers.gradleProperty("ml.models").map { file(it) }.getOrElse(file("../ml-data/go/models"))
+    val mlBig = providers.gradleProperty("ml.big").map { it.equals("true", ignoreCase = true) }.getOrElse(false)
+    val mlModels = providers.gradleProperty("ml.models").map { file(it) }.orNull
     val nnDir = file("ml-models/go")
-    val nnFiles = listOf("go-nn-31m-e2.cml", "go-16384.bpe")
+    val nnFiles = listOf("go-nn-31m-e2.cml", "go-16384.bpe") + (if (mlBig) listOf("go-nn-50m-e3-lr2e3.cml") else emptyList())
     for (name in nnFiles) check(File(nnDir, name).isFile) { "mlEnabled: $name not found in $nnDir" }
-    val rankerFiles = listOf("lm.cml", "rank.cml").filter { File(mlModels, it).isFile }
+    val bundledRanker = mapOf("e14-b.cml" to "lm.cml", "e17b-rank.cml" to "rank.cml")
+    val rankerFiles = if (mlModels != null) listOf("lm.cml", "rank.cml").filter { File(mlModels, it).isFile } else bundledRanker.keys.filter { File(nnDir, it).isFile }
     tasks.processResources {
         from("src/ml/resources")
         from(nnDir) {
             include(nnFiles)
             into("ml/go")
         }
-        if (rankerFiles.isNotEmpty()) from(mlModels) {
+        if (mlModels != null && rankerFiles.isNotEmpty()) from(mlModels) {
             include(rankerFiles)
+            into("ml/go")
+        }
+        if (mlModels == null && rankerFiles.size == bundledRanker.size) from(nnDir) {
+            include(rankerFiles)
+            rename { bundledRanker.getValue(it) }
             into("ml/go")
         }
     }

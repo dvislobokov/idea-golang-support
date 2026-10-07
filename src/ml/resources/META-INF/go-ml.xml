@@ -1,6 +1,6 @@
 <!-- Smart Completion: the ML ranking of completion candidates and the grey text of the transformer (docs/ML.md). Part of the plugin only
      when it is built with -PmlEnabled=true (or MLENABLED=true in the environment): the build copies this file and the models
-     ml/go/{lm.cml,rank.cml,go-nn-31m-e2.cml,go-16384.bpe} into the resources; plugin.xml includes it with an xi:fallback, so a build
+     ml/go/{lm.cml,rank.cml,go-nn-31m-e2.cml[,go-nn-50m-e3-lr2e3.cml],go-16384.bpe} into the resources; plugin.xml includes it with an xi:fallback, so a build
      without it has no ranker, no grey text and no settings page. -->
 <idea-plugin>
   <extensions defaultExtensionNs="io.github.golangsupport">
@@ -12,6 +12,12 @@
     <!-- first: it asks the next enabled provider (the idioms of the host) before the network, see GoNnInlineCompletionProvider -->
     <inline.completion.provider order="first" implementation="io.github.golangsupport.ml.GoNnInlineCompletionProvider"/>
     <editorFactoryListener implementation="io.github.golangsupport.ml.GoNnEditorListener"/>
-        <postStartupActivity implementation="io.github.golangsupport.settings.GoMlLogBridge"/>
+    <postStartupActivity implementation="io.github.golangsupport.settings.GoMlLogBridge"/>
+    <!-- after indexing, only in a project with Go files: loads and warms up the models before the first completion asks -->
+    <postStartupActivity implementation="io.github.golangsupport.settings.GoMlPreloadActivity"/>
   </extensions>
+  <projectListeners>
+    <!-- the KV cache of an opened Go file is prefilled in the background (GoNnFileOpenListener) -->
+    <listener class="io.github.golangsupport.ml.GoNnFileOpenListener" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+  </projectListeners>
 </idea-plugin>

@@ -44,6 +44,27 @@
 После `.` модель угадывает не хуже, но менее уверена: при пороге 0.7 показывается Go 37 % / C# 20 % позиций (точность 96 / 98 %), при 0.5 — Go 51 % / C# 30 % (92 / 96 %).
 В провайдере: `showThreshold = 0.5`, если байт перед кареткой — `.` (в C# также `?.`, `::`, `->`), иначе 0.7 — через `Options.copy(showThreshold = …)` на вызов.
 
+## Статус 2026-10-08 (0.2.207): четыре шага ниже сделаны
+1. `GoMlPreloadActivity` (`src/main/kotlin/.../settings/`, регистрация в `go-ml.xml`): после smart mode спрашивает `GoProjectPresence.recompute()`
+   (индекс типов файлов) и только в проекте с Go-файлами вызывает `GoMlModels.preload()` — сеть (JIT, нативные ядра) и ранкер грузятся в фоне.
+   Тест `GoMlPreloadActivityTest` (корневой модуль: проект без Go-файлов — 0 загрузок, с `main.go` — 1).
+2. `GoNnFileOpenListener` (`FileEditorManagerListener.fileOpened`, projectListeners в `go-ml.xml`): снимок документа + каретка → `GoMlModels.prefill(editor)`
+   на потоке модели (`GoNnInline.prefill` строит тот же промпт, что построит `complete`, с той же лечёной границей); пропускается, пока сеть не
+   загружена или уже ждёт completion. Первая подсказка в файле: 6 мс вместо холодного prefill (`GoNnModelTest.prefillOfTheCaretIsReusedByTheFirstCompletion`,
+   `GoNnModelSwitchTest` — prefill не блокирует вызывающего).
+3. `-Pml.big=true` кладёт `go-nn-50m-e3-lr2e3.cml`; настройка «Big model (50 M)» (`GoMlSettings.inlineBigModel`), `GoMlModels.loadNn(dir, options, model)`
+   по имени файла, ключ загрузки — каталог + имя; `reset()` теперь сразу перезагружает сеть в фоне и закрывает сессии редакторов. Без файла в сборке
+   флажок выключен (каталог моделей с файлом включает). Тест `GoNnModelSwitchTest` (31 M → 50 M → 31 M через сервис).
+4. Порог после точки: настройка «Confidence threshold after a dot» (0.5), `GoNnInline.gate(before, main, dot, empty)`; вариант `NnCompletion`
+   на порог хранится в `Nn.completionFor` (не пересобирается на каждый вызов). Тест `GoNnInlineTest.gateIsLowerAfterADotAndOnABlankLine`.
+5. Ранкер: `-PmlEnabled=true` без `-Pml.models` берёт `e14-b.cml` → `lm.cml` и `e17b-rank.cml` → `rank.cml` из `ml-models/go/` (processResources с
+   rename); `GoMlCompletionRankerTest` проходит на этой паре (схема e17b совпадает с `GoMlFeatures`).
+
+ML-сборка: `./gradlew buildPlugin -PmlEnabled=true [-Pml.big=true]` → `build/distributions/idea-golang-support-<version>-ml.zip` (на сервере
+`buildPlugin` не собирается из-за Ultimate-классов в `GoCommitCheck`/`GoSharedIndexFinder` — zip собирает пользователь на Windows).
+Не сделано: приоритет потока модели не понижается (prefill уступает только ожидающему completion); при префиксе длиннее `maxPrefix` (1024 токена)
+окно промпта движка сдвигается с каждым токеном и KV-кэш не переиспользуется — это вопрос к движку (`InlinePrompt.tail`), не к плагину.
+
 ## Следующие шаги для серого текста (2026-10-08, от пользователя)
 1. **Предзагрузка при открытии проекта**: `ProjectActivity` в фоне после индексации — если в проекте есть `.go`-файлы (проверка через индекс
    типов файлов), запустить загрузку `GoMlModels` + прогрев (JIT, нативная библиотека) с низким приоритетом. Не грузить при старте приложения.

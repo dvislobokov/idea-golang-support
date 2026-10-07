@@ -36,10 +36,11 @@ import java.util.concurrent.atomic.AtomicReference
  * [GoMlSettings.modelDirectory]:
  *  - the ranker pair — the n-gram language model (`lm.cml`) and the linear ranker (`rank.cml`) of [GoMlCompletionRanker]; loaded once,
  *    in the background, on the first completion; until then (and in a build without them) the ranker abstains;
- *  - the network pair — the transformer [NN_MODEL] and its vocabulary [NN_VOCAB] of the grey text ([GoNnInlineCompletionProvider]).
- *    One [NnModel] per application (~100 MB, the int8 weights memory-mapped from a copy of the resource in the system directory), loaded and warmed up on
- *    the first Go editor. The model is not reentrant, so everything that touches it — loading, `complete`, closing sessions — runs on one
- *    daemon thread of this service ([GoNnEngine.complete] switches to it); the KV-cache sessions are kept per editor on that thread.
+ *  - the network pair — the transformer [NN_MODEL] (or [NN_MODEL_BIG] with [GoMlSettings.inlineBigModel]) and its vocabulary [NN_VOCAB] of
+ *    the grey text ([GoNnInlineCompletionProvider]). One [NnModel] per application (~100 MB, the int8 weights memory-mapped from a copy of the
+ *    resource in the system directory), loaded and warmed up when a project with Go files is open ([preload]) or on the first Go editor.
+ *    The model is not reentrant, so everything that touches it — loading, `complete`, [prefill], closing sessions — runs on one daemon
+ *    thread of this service ([GoNnEngine.complete] switches to it); the KV-cache sessions are kept per editor on that thread.
  *    A directory setting without the network files falls back to the bundled network.
  */
 @Service(Service.Level.APP)
@@ -50,11 +51,15 @@ class GoMlModels : GoNnEngine, Disposable {
         val description: String get() = "$source: ${lm.vocab.size} words, ${ranker.schema.size} weights"
     }
 
-    /** The loaded network: [completion] is rebuilt (cheap, the model stays) when the show settings change. */
-    class Nn(@Volatile var completion: NnCompletion, val model: NnModel, val name: String) {
-        internal fun completionFor(threshold: Double, suppressPunctOnly: Boolean): NnCompletion = completion.takeIf {
-            it.options.showThreshold == threshold && it.options.suppressPunctOnly == suppressPunctOnly
-        } ?: NnCompletion(model, completion.tok, completion.options.copy(showThreshold = threshold, suppressPunctOnly = suppressPunctOnly)).also { completion = it }
+    /**
+     * The loaded network: [completion] with the options of the load; [completionFor] a variant per gate (`Options.copy` per call — the gate
+     * after a `.` differs from the main one, so the variants are kept, not rebuilt on every switch). On the model's thread only.
+     */
+    class Nn(val completion: NnCompletion, val model: NnModel, val name: String) {
+        private val variants = HashMap<Pair<Double, Boolean>, NnCompletion>()
+        internal fun completionFor(threshold: Double, suppressPunctOnly: Boolean): NnCompletion =
+            if (completion.options.showThreshold == threshold && completion.options.suppressPunctOnly == suppressPunctOnly) completion
+            else variants.getOrPut(threshold to suppressPunctOnly) { NnCompletion(model, completion.tok, completion.options.copy(showThreshold = threshold, suppressPunctOnly = suppressPunctOnly)) }
     }
 
     private sealed class State {
@@ -80,6 +85,8 @@ class GoMlModels : GoNnEngine, Disposable {
     private val dispatcher = executor.asCoroutineDispatcher()
     private val shown = AtomicInteger()
     private val accepted = AtomicInteger()
+    /** Completions waiting for the model's thread: a background prefill queued before them steps aside (the completion prefills itself). */
+    private val pending = AtomicInteger()
 
     /** Suggestions of the network shown since the start of the IDE (its own policy said `show`). */
     val shownCount: Int get() = shown.get()
@@ -105,8 +112,9 @@ class GoMlModels : GoNnEngine, Disposable {
      * call starts loading on the network's thread; never blocks, so it may be called on the EDT (the editor listener warms up this way).
      */
     fun nn(modelDirectory: String): Nn? {
-        if (!GoMlSettings.getInstance().inlineEnabled) return null
-        val key = modelDirectory.trim()
+        val settings = GoMlSettings.getInstance()
+        if (!settings.inlineEnabled) return null
+        val key = nnKey(modelDirectory, settings.inlineBigModel)
         val g = synchronized(this) {
             when (val s = nnState) {
                 is NnState.Ready -> if (s.key == key) return s.nn
@@ -128,20 +136,23 @@ class GoMlModels : GoNnEngine, Disposable {
     override suspend fun complete(editor: Any, context: GoNnInline.Context): GoNnInline.Answer? {
         val settings = GoMlSettings.getInstance()
         nn(settings.modelDirectory) ?: return null
+        pending.incrementAndGet()
         return withContext(dispatcher) {
+            pending.decrementAndGet()
             // a reset between the check and this task closed the model: [current] is null then
             val nn = current ?: return@withContext null
-            val completion = nn.completionFor(settings.inlineThreshold, !settings.inlineShowClosers)
+            // the gate of this caret: lower right after a `.` (the model is as right there, less sure) and on a line with nothing typed yet
+            // (the first word of a statement is one guess among a few); over the code tokens only, so a guessed string literal does not hide
+            // a certain line (see GoNnInline.codeConfidence)
+            val gate = GoNnInline.gate(context.before, settings.inlineThreshold, settings.inlineDotThreshold, settings.inlineEmptyLineThreshold)
+            val completion = nn.completionFor(gate, !settings.inlineShowClosers)
             val session = sessions.getOrPut(editor) { nn.model.newSession(SESSION_CAPACITY) }
             val started = System.nanoTime()
             val r = completion.complete(context.path, context.before, context.after, session)
-            // the gate over the code tokens only: a guessed string literal does not hide a certain line (see GoNnInline.codeConfidence);
-            // a line with nothing typed yet has its own, lower gate: the first word of a statement is one guess among a few
             val sound = r.text.isNotEmpty() && !r.repeated && !r.healMiss && !(r.punctOnly && !settings.inlineShowClosers)
             val code = if (settings.inlineGuessStrings && !r.show && sound)
                 GoNnInline.codeConfidence(GoNnInline.lineBefore(context.before, r.typed.size), r.tokens.map { completion.tok.tokenBytes(it) }, r.logProbs, r.stopLogProb)
             else r.confProd
-            val gate = if (GoNnInline.blankLine(context.before)) settings.inlineEmptyLineThreshold else settings.inlineThreshold
             var show = r.show || sound && code >= gate
             var text = r.textString
             // the whole line is not certain: its certain start may be (`len(o.items)` before a ` ==` the model is unsure of)
@@ -158,6 +169,33 @@ class GoMlModels : GoNnEngine, Disposable {
 
     override fun accepted() { accepted.incrementAndGet() }
 
+    /**
+     * Fills the KV cache of [editor]'s session with the prompt of [context] (the caret where the file was opened) on the model's thread, so the
+     * first grey text there reuses it instead of a cold prefill (~150 ms for 1 500 tokens). Never blocks; skipped while the network is not
+     * loaded (the load queued before it by [nn] runs first) and when a completion is already waiting — it prefills itself.
+     */
+    fun prefill(editor: Any, context: () -> GoNnInline.Context) {
+        if (executor.isShutdown) return
+        executor.execute {
+            val nn = current ?: return@execute
+            if (pending.get() > 0) return@execute
+            val session = sessions.getOrPut(editor) { nn.model.newSession(SESSION_CAPACITY) }
+            val started = System.nanoTime()
+            val n = GoNnInline.prefill(nn.completion, session, context())
+            LOG.debug { "NN prefill of $n tokens in ${(System.nanoTime() - started) / 1_000_000} ms" }
+        }
+    }
+
+    /**
+     * Loads and warms up what the settings ask for and the build carries — the network and the ranker — without a completion asking
+     * first: the project activity calls it once the project has Go files, the settings page after the network choice changed.
+     */
+    fun preload() {
+        val settings = GoMlSettings.getInstance()
+        if (settings.inlineEnabled && (isNnBundled || settings.modelDirectory.isNotBlank())) nn(settings.modelDirectory)
+        if (settings.enabled && (isRankerBundled || settings.modelDirectory.isNotBlank())) get(settings.modelDirectory)
+    }
+
     /** Frees the KV cache of a closed editor (native memory). */
     fun release(editor: Any) { if (!executor.isShutdown) executor.execute { sessions.remove(editor)?.close() } }
 
@@ -172,7 +210,7 @@ class GoMlModels : GoNnEngine, Disposable {
     fun nnStatus(modelDirectory: String): String = when (val s = synchronized(this) { nnState }) {
         NnState.Idle -> when {
             !GoMlSettings.getInstance().inlineEnabled -> "off"
-            isNnBundled || modelDirectory.isNotBlank() -> "not loaded yet (the first Go editor loads it)"
+            isNnBundled || modelDirectory.isNotBlank() -> "not loaded yet (the first Go project or editor loads it)"
             else -> "no bundled network"
         }
         NnState.Loading -> "loading…"
@@ -180,11 +218,18 @@ class GoMlModels : GoNnEngine, Disposable {
             ?: (s.error ?: "no network")
     }
 
-    /** Forgets the loaded models so that the next completion reads them again (after the directory setting changed). */
+    /** The name of the loaded network (`go-nn-31m-e2`, `go-nn-50m-e3-lr2e3`), or null while none is. */
+    val nnName: String? get() = (synchronized(this) { nnState } as? NnState.Ready)?.nn?.name
+
+    /**
+     * Forgets the loaded models and drops the editor sessions, so that the models of the settings are read again (after the directory or the
+     * network choice changed); what the settings still ask for is loaded again in the background right away.
+     */
     fun reset() {
         state.set(State.Idle)
         synchronized(this) { generation++; nnState = NnState.Idle }
         executor.execute { closeNn() }
+        preload()
     }
 
     override fun dispose() {
@@ -229,10 +274,12 @@ class GoMlModels : GoNnEngine, Disposable {
         return Loaded(NgramModel.read(lm), LinearRanker.read(rank), dir.path)
     }
 
-    /** On [executor]: reads, builds and warms up the network. */
+    /** On [executor]: reads, builds and warms up the network of [key] (see [nnKey]). */
     private fun loadNn(key: String): NnState.Ready = try {
-        val nn = loadNn(key.takeIf { it.isNotEmpty() }?.let(::File), GoMlSettings.getInstance().let { NnCompletion.Options(showThreshold = it.inlineThreshold, suppressPunctOnly = !it.inlineShowClosers) })
-        NnState.Ready(nn, key, if (nn == null) "no network in ${key.ifEmpty { "the plugin" }}" else null)
+        val dir = key.substringBefore(KEY_SEPARATOR)
+        val name = key.substringAfter(KEY_SEPARATOR)
+        val nn = loadNn(dir.takeIf { it.isNotEmpty() }?.let(::File), GoMlSettings.getInstance().let { NnCompletion.Options(showThreshold = it.inlineThreshold, suppressPunctOnly = !it.inlineShowClosers) }, name)
+        NnState.Ready(nn, key, if (nn == null) "no network $name in ${dir.ifEmpty { "the plugin" }}" else null)
     } catch (e: Throwable) {
         LOG.warn("ML inline completion network could not be loaded", e)
         NnState.Ready(null, key, e.message ?: e.toString())
@@ -245,7 +292,10 @@ class GoMlModels : GoNnEngine, Disposable {
         private const val RESOURCE_DIR = "ml/go"
         /** The bundled transformer and its BPE vocabulary (`ml-models/go`, copied by the ML build). */
         const val NN_MODEL = "go-nn-31m-e2.cml"
+        /** The big transformer (50 M, `-Pml.big=true` in the build; [GoMlSettings.inlineBigModel] chooses it). */
+        const val NN_MODEL_BIG = "go-nn-50m-e3-lr2e3.cml"
         const val NN_VOCAB = "go-16384.bpe"
+        private const val KEY_SEPARATOR = "\u0000"
         /** KV cache of an editor's session: the prompt (≤ 2000 tokens) and the generated line; capped by the model's context. */
         private const val SESSION_CAPACITY = 2048
         private const val WARM_UP = "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Prin"
@@ -259,16 +309,24 @@ class GoMlModels : GoNnEngine, Disposable {
 
         /** True when the build carries the grey-text network. */
         val isNnBundled: Boolean by lazy { resource(NN_MODEL) != null && resource(NN_VOCAB) != null }
+        /** True when the build carries the big network too (`-Pml.big=true`). */
+        val isNnBigBundled: Boolean by lazy { resource(NN_MODEL_BIG) != null && resource(NN_VOCAB) != null }
+
+        /** The network file [GoMlSettings.inlineBigModel] asks for: the big one only when the build (or a directory) can have it. */
+        fun nnModelName(big: Boolean, modelDirectory: String = ""): String = if (big && (isNnBigBundled || modelDirectory.isNotBlank())) NN_MODEL_BIG else NN_MODEL
+
+        /** The key of a network load: the directory and the model file. */
+        private fun nnKey(modelDirectory: String, big: Boolean): String = modelDirectory.trim().let { "$it$KEY_SEPARATOR${nnModelName(big, it)}" }
         /** True in a build that carries any of the models (and therefore shows the Smart Completion settings page). */
         val isBundled: Boolean by lazy { isRankerBundled || isNnBundled }
 
         /**
-         * Builds and warms up the network from [dir] (null: bundled). In a directory: [NN_MODEL] and [NN_VOCAB], or else the only `*.bpe`
+         * Builds and warms up the network [model] from [dir] (null: bundled). In a directory: [model] and [NN_VOCAB], or else the only `*.bpe`
          * with the first `*-nn-*.cml`; no such files there — the bundled network. Null when there is none at all. Blocking (a second).
          */
-        fun loadNn(dir: File?, options: NnCompletion.Options = NnCompletion.Options()): Nn? {
+        fun loadNn(dir: File?, options: NnCompletion.Options = NnCompletion.Options(), model: String = NN_MODEL): Nn? {
             val started = System.currentTimeMillis()
-            val (modelFile, vocab) = dir?.let(::directoryNn) ?: bundledNn() ?: return null
+            val (modelFile, vocab) = dir?.let { directoryNn(it, model) } ?: bundledNn(model) ?: return null
             val model = NnModel(NnFormat.read(modelFile), nThreads = minOf(8, Runtime.getRuntime().availableProcessors()))
             val nn = try {
                 Nn(NnCompletion(model, vocab, options), model, modelFile.name.removeSuffix(".cml"))
@@ -280,16 +338,16 @@ class GoMlModels : GoNnEngine, Disposable {
             return nn
         }
 
-        private fun directoryNn(dir: File): Pair<File, BpeTokenizer>? {
-            val model = File(dir, NN_MODEL).takeIf { it.isFile } ?: dir.listFiles { f -> f.isFile && f.name.endsWith(".cml") && "-nn-" in f.name }?.minByOrNull { it.name } ?: return null
+        private fun directoryNn(dir: File, name: String): Pair<File, BpeTokenizer>? {
+            val model = File(dir, name).takeIf { it.isFile } ?: dir.listFiles { f -> f.isFile && f.name.endsWith(".cml") && "-nn-" in f.name }?.minByOrNull { it.name } ?: return null
             val vocab = File(dir, NN_VOCAB).takeIf { it.isFile } ?: dir.listFiles { f -> f.isFile && f.name.endsWith(".bpe") }?.singleOrNull() ?: return null
             return model to BpeTokenizer.load(vocab.toPath())
         }
 
-        private fun bundledNn(): Pair<File, BpeTokenizer>? {
+        private fun bundledNn(name: String): Pair<File, BpeTokenizer>? {
             val cl = GoMlModels::class.java.classLoader
             val vocab = cl.getResourceAsStream("$RESOURCE_DIR/$NN_VOCAB")?.use { BpeTokenizer.load(it) } ?: return null
-            return (extract("$RESOURCE_DIR/$NN_MODEL") ?: return null) to vocab
+            return (extract("$RESOURCE_DIR/$name") ?: extract("$RESOURCE_DIR/$NN_MODEL") ?: return null) to vocab
         }
 
         /**

@@ -17,6 +17,12 @@ import com.intellij.openapi.components.serviceIfCreated
 import com.intellij.openapi.editor.event.EditorFactoryEvent
 import com.intellij.openapi.editor.event.EditorFactoryListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.FileEditorManagerListener
+import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.openapi.vfs.VirtualFile
+import io.github.completionml.core.nn.NnCompletion
+import io.github.completionml.core.nn.NnSession
 import com.intellij.psi.PsiFile
 import io.github.golangsupport.lang.GoFileType
 import io.github.golangsupport.lang.psi.GoFile
@@ -150,6 +156,26 @@ object GoNnInline {
         return c in 65..90 || c in 97..122 || c in 48..57 || c == 95 || c >= 128
     }
 
+    /** True right after a `.`: the model guesses the member as well as elsewhere but is less sure (measured: 0.7 shows 37 % of such positions at 96 %, 0.5 shows 51 % at 92 %). */
+    fun afterDot(before: ByteArray): Boolean = before.isNotEmpty() && before[before.size - 1] == '.'.code.toByte()
+
+    /** The gate of the caret at the end of [before]: [emptyLine] on a line with nothing typed yet, [dot] right after a `.`, else [main]. */
+    fun gate(before: ByteArray, main: Double, dot: Double, emptyLine: Double): Double = when {
+        blankLine(before) -> emptyLine
+        afterDot(before) -> dot
+        else -> main
+    }
+
+    /**
+     * Fills [session] with the prompt [completion] would build for [context] (the same healed boundary, so the first request at that caret
+     * finds its whole prompt in the cache and only decodes). Returns the number of tokens in the cache. On the model's thread.
+     */
+    fun prefill(completion: NnCompletion, session: NnSession, context: Context): Int {
+        val boundary = if (completion.options.heal) completion.healedBoundary(context.before, context.after) else context.before.size
+        session.prefill(completion.buildPrompt(context.path, context.before, boundary, context.after))
+        return session.length
+    }
+
     /** True when the caret's line has nothing but indentation before it: the line just opened by Enter, where the whole statement is a guess. */
     fun blankLine(before: ByteArray): Boolean {
         var i = before.size
@@ -249,6 +275,23 @@ class GoNnInlineCompletionProvider internal constructor(private val engine: () -
             DefaultInlineCompletionInsertHandler.INSTANCE.afterInsertion(environment, elements)
             engine().accepted()
         }
+    }
+}
+
+/**
+ * Prefills the KV cache of a Go editor's session with the prompt at its caret when the file is opened (after the caret is restored, so
+ * the first grey text in it only decodes). The document is snapshotted here, cut and tokenized on the model's thread; the EDT waits for nothing.
+ */
+class GoNnFileOpenListener : FileEditorManagerListener {
+    override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
+        if (file.fileType != GoFileType) return
+        val settings = GoMlSettings.getInstance()
+        if (!settings.inlineEnabled || !GoMlModels.isNnBundled && settings.modelDirectory.isBlank()) return
+        val editor = source.getEditors(file).filterIsInstance<TextEditor>().firstOrNull()?.editor ?: return
+        val text = editor.document.immutableCharSequence
+        val offset = editor.caretModel.offset
+        val path = GoNnInline.relativePath(source.project.basePath, file.path)
+        GoMlModels.getInstance().prefill(editor) { GoNnInline.context(text, minOf(offset, text.length), path) }
     }
 }
 

@@ -37,6 +37,14 @@ class GoMlConfigurable(@Suppress("UNUSED_PARAMETER") project: Project) : BoundCo
             row(GoBundle.message("ml.inline.threshold")) {
                 spinner(0.5..0.99, 0.05).bindValue(settings::inlineThreshold).comment(GoBundle.message("ml.inline.threshold.comment"))
             }
+            row(GoBundle.message("ml.inline.dotThreshold")) {
+                spinner(0.05..0.99, 0.05).bindValue(settings::inlineDotThreshold).comment(GoBundle.message("ml.inline.dotThreshold.comment"))
+            }
+            row {
+                checkBox(GoBundle.message("ml.inline.bigModel")).bindSelected(settings::inlineBigModel)
+                    .comment(GoBundle.message(if (GoMlModels.isNnBigBundled) "ml.inline.bigModel.comment" else "ml.inline.bigModel.absent"))
+                    .enabled(GoMlModels.isNnBigBundled || settings.modelDirectory.isNotBlank())
+            }
             row { checkBox(GoBundle.message("ml.inline.showClosers")).bindSelected(settings::inlineShowClosers).comment(GoBundle.message("ml.inline.showClosers.comment")) }
             row { checkBox(GoBundle.message("ml.inline.guessStrings")).bindSelected(settings::inlineGuessStrings).comment(GoBundle.message("ml.inline.guessStrings.comment")) }
             row(GoBundle.message("ml.inline.emptyLineThreshold")) {
@@ -53,11 +61,14 @@ class GoMlConfigurable(@Suppress("UNUSED_PARAMETER") project: Project) : BoundCo
     }
 
     override fun apply() {
-        val before = listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineThreshold, settings.inlineShowClosers, settings.inlineGuessStrings, settings.inlineEmptyLineThreshold)
+        val before = modelChoice()
         super.apply()
-        if (listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineThreshold, settings.inlineShowClosers, settings.inlineGuessStrings, settings.inlineEmptyLineThreshold) != before) GoMlModels.getInstance().reset()
+        // the models are read again in the background (the network switch 31 M / 50 M reloads the network and drops the editor sessions)
+        if (modelChoice() != before) GoMlModels.getInstance().reset()
         refreshStatus()
     }
+
+    private fun modelChoice() = listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineBigModel, settings.inlineThreshold, settings.inlineShowClosers)
 
     private fun refreshStatus() {
         val models = GoMlModels.getInstance()

@@ -32,6 +32,10 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
         var inlineGuessStrings by property(true)
         /** The gate on a line where nothing is typed yet (after Enter): the first word of a statement is a guess among a few, `return nil` after `if … {` is at ~0.3. */
         var inlineEmptyLineThreshold by property(0.25f)
+        /** The gate right after a `.`: the model is as right there but less sure (0.7 shows 37 % of such positions at 96 %, 0.5 shows 51 % at 92 %). */
+        var inlineDotThreshold by property(0.5f)
+        /** The big network ([GoMlModels.NN_MODEL_BIG], 50 M: 65.7 % exact lines vs 63.6 %, ~1.7× the latency) instead of the 31 M one; only in a build that carries it. */
+        var inlineBigModel by property(false)
         /** Every answer of the network (text, confidence, gate, shown or not) goes to the plugin log (Go | Plugin Logs, category `ml`). */
         var inlineDebugLog by property(false)
     }
@@ -67,6 +71,14 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
     var inlineEmptyLineThreshold: Double
         get() = state.inlineEmptyLineThreshold.toString().toDouble()
         set(value) { state.inlineEmptyLineThreshold = value.toFloat() }
+
+    var inlineDotThreshold: Double
+        get() = state.inlineDotThreshold.toString().toDouble()
+        set(value) { state.inlineDotThreshold = value.toFloat() }
+
+    var inlineBigModel: Boolean
+        get() = state.inlineBigModel
+        set(value) { state.inlineBigModel = value }
 
     var inlineDebugLog: Boolean
         get() = state.inlineDebugLog
