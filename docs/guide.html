@@ -840,6 +840,7 @@ n := <span class="fn">next</span>()
         <tr><td>Run, Attach to Process</td><td>Группа Go: отладка уже работающего процесса.</td></tr>
         <tr><td>Над <code>go.mod</code> после сохранения</td><td>Полоса с командами Run go mod tidy и Download, если изменились зависимости.</td></tr>
         <tr><td>В <code>go.mod</code> и над <code>//go:generate</code></td><td>Ссылки команд: tidy, vendor, проверка обновлений и уязвимостей, запуск генерации.</td></tr>
+        <tr><td>Над <code>.go</code>, <code>go.mod</code>, <code>go.work</code>, открытым не как Go <span class="new">новое</span></td><td>Полоса «This file opens as "Plain Text", not as Go» с кнопками Associate with Go и File Types Settings…: пользовательская ассоциация типа файла (остаток другого Go-плагина или файл, открытый как текст до установки плагина) перекрывает ассоциацию плагина, и без Go-типа нет подсветки, навигации и completion. То же предлагает модальный диалог «Go File Types Not Associated» — при открытии Go-проекта, когда проект распознан как Go уже после старта, и при открытии такого файла; «Don't ask again» убирает диалог, полоса остаётся.</td></tr>
       </tbody>
     </table></div>
   </div>

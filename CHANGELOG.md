@@ -30,6 +30,18 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.198] - 2026-10-07
+
+### Fixed — the file type association dialog did not come (a colleague installed the plugin and .go stayed with another file type)
+- The dialog "Go File Types Not Associated" ran once at startup and only when the project was already known to be Go; a project the
+  index tells about later, or a Go file opened before that, got none. It now also comes when the project turns out to be Go after
+  startup and when a `.go`, `go.mod` or `go.work` opens with another file type (no index needed: the file is the proof); one dialog
+  at a time, "Not Now" holds for the session
+
+### Added — a banner above a Go file that opens as another file type
+- "This file opens as "Plain Text", not as Go" with Associate with Go (claims the extension and the names back for the Go file types,
+  the open editors follow) and File Types Settings…; stays after "Don't ask again" of the dialog. Platform test: hijack, banner, claim back
+
 ## [0.2.197] - 2026-10-07
 
 ### Fixed — "Parent node is undefined" in the log while the tests pass (a colleague's log from GIGA IDE, 2026-10-07)

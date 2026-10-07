@@ -280,6 +280,8 @@
         <toolWindow id="Go Dependencies" anchor="bottom" icon="/icons/goDependenciesToolWindow.svg" factoryClass="io.github.golangsupport.mod.GoDependenciesToolWindowFactory" doNotActivateOnStart="true"/>
         <!-- go.mod saved with other requirements than before: the banner with `go mod tidy` -->
         <editorNotificationProvider implementation="io.github.golangsupport.mod.GoModNotificationProvider"/>
+        <!-- a .go / go.mod / go.work that opens as another file type (a user association shadows ours): the fix above the file -->
+        <editorNotificationProvider implementation="io.github.golangsupport.sdk.GoFileTypeNotificationProvider"/>
 
         <treeStructureProvider implementation="io.github.golangsupport.view.GoDependenciesTreeProvider"/>
         <notificationGroup id="Go" displayType="BALLOON"/>
@@ -625,6 +627,9 @@
         <listener class="io.github.golangsupport.sdk.GoProjectModelJournal" topic="io.github.golangsupport.project.impl.GoProjectModelTracker$Journal"/>
         <!-- Go files came or went: the tool windows, the widgets and the startup work of a Go project follow -->
         <listener class="io.github.golangsupport.lang.GoProjectPresence$Ui" topic="io.github.golangsupport.lang.GoProjectPresence$Listener"/>
+        <!-- the file type association dialog: when the project turns out to be Go after startup, and when a Go file opens as another type -->
+        <listener class="io.github.golangsupport.sdk.GoFileTypeCheckActivity$OnPresence" topic="io.github.golangsupport.lang.GoProjectPresence$Listener"/>
+        <listener class="io.github.golangsupport.sdk.GoFileTypeCheckActivity$OnOpen" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
         <listener class="io.github.golangsupport.testing.GoTestStatuses$Listener" topic="com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener"/>
         <listener class="io.github.golangsupport.monitor.GoProcessStartListener" topic="com.intellij.execution.ExecutionListener"/>
         <!-- the Go palette: written again if the scheme lost it, and once a suggestion of the palettes (lang/palette) -->
