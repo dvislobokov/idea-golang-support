@@ -61,12 +61,15 @@ sourceSets {
 val corpusTestPattern = "*CorpusTest"
 /** Offline ML dataset export (package io.github.golangsupport.ml, https://github.com/dvislobokov/idea-ml-completion/blob/main/docs/ADAPTER.md): runs only through `mlDataset`. */
 val mlDatasetPattern = "*MlDatasetExport"
+/** Offline PSI-context dump for the neural model (same package): runs only through `mlContext`. */
+val mlContextPattern = "*MlContextExport"
 
 tasks.test {
     filter {
         excludeTestsMatching(corpusTestPattern)
         excludeTestsMatching(benchmarkPattern)
         excludeTestsMatching(mlDatasetPattern)
+        excludeTestsMatching(mlContextPattern)
     }
     // GoMlCompletionRankerTest completes over real models when told where they are (`-Pml.models=<dir>`); skipped otherwise
     (providers.gradleProperty("ml.models").orNull ?: providers.systemProperty("ml.models").orNull)?.let { systemProperty("ml.models", it) }
@@ -180,6 +183,47 @@ intellijPlatformTesting {
                             "-Dgopsi.goroot=${goroot.get()}",
                             "-Dgopsi.gomodcache=${gomodcache.get()}",
                             // corpora contain generated files above the platform's default 2.5 MB PSI limit
+                            "-Didea.max.intellisense.filesize=20000",
+                        ) + mlProps
+                    },
+                )
+                testLogging {
+                    showStandardStreams = true
+                }
+            }
+        }
+
+        register("mlContext") {
+            // The installed IDE from localIdePath when it exists (nothing is downloaded), like the compile platform.
+            val localIde = providers.gradleProperty("localIdePath").orNull?.takeIf { file(it).exists() }
+            if (localIde != null) {
+                localPath = file(localIde)
+            } else {
+                type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea
+                version = libs.versions.intellijPlatform
+            }
+
+            task {
+                description = "Dumps the PSI context of sampled cursor positions (*MlContextExport) as JSONL: -Pml.repos=<list> [-Pml.data -Pml.out -Pml.positions -Pml.stride -Pml.maxFiles -Pml.seed -Pml.maxMembers]."
+                group = "verification"
+                val testSourceSet = sourceSets.test.get()
+                testClassesDirs = testSourceSet.output.classesDirs
+                classpath += tasks.test.get().classpath
+                useJUnit()
+                isScanForTestClasses = false
+                include("**/*MlContextExport.class")
+                filter {
+                    includeTestsMatching(mlContextPattern)
+                }
+                outputs.upToDateWhen { false }
+                maxHeapSize = providers.gradleProperty("ml.heap").orNull ?: "6g"
+                val mlProps = listOf("repos", "data", "out", "positions", "stride", "maxFiles", "seed", "maxMembers")
+                    .mapNotNull { k -> providers.gradleProperty("ml.$k").orNull?.let { "-Dml.$k=$it" } }
+                jvmArgumentProviders.add(
+                    CommandLineArgumentProvider {
+                        listOf(
+                            "-Dgopsi.goroot=${goroot.get()}",
+                            "-Dgopsi.gomodcache=${gomodcache.get()}",
                             "-Didea.max.intellisense.filesize=20000",
                         ) + mlProps
                     },
