@@ -202,11 +202,11 @@ class GoMlDatasetExport : GoSemanticIdeTestBase() {
             val prefixLen = when (rnd.nextInt(10)) { in 0..4 -> 0; in 5..7 -> 1; else -> 2 }.coerceAtMost(t.text.length)
             val prefix = t.text.substring(0, prefixLen)
             val caret = t.offset + prefixLen
-            val modified = text.substring(0, caret) + text.substring(t.offset + t.text.length)
             val started = System.currentTimeMillis()
             stats.positions++
             try {
-                setText(document, modified)
+                // only the identifier is replaced (not the whole text): an incremental reparse instead of a full one per position
+                replace(document, t.offset, t.offset + t.text.length, prefix)
                 myFixture.editor.caretModel.moveToOffset(caret)
                 if (t.offset > 0 && text[t.offset - 1] == '.') { stats.dot++; if (receiverResolved(myFixture.file, t.offset - 1)) stats.dotResolved++ }
                 val items = myFixture.completeBasic()
@@ -229,7 +229,11 @@ class GoMlDatasetExport : GoSemanticIdeTestBase() {
                 stats.lists++
             } finally {
                 LookupManager.getInstance(project).hideActiveLookup()
-                setText(document, text)
+                val cur = document.text
+                if (cur != text) {
+                    val untouched = cur.length == text.length - t.text.length + prefixLen && cur.regionMatches(0, text, 0, caret) && cur.regionMatches(caret, text, t.offset + t.text.length, text.length - t.offset - t.text.length)
+                    if (untouched) replace(document, t.offset, caret, t.text) else setText(document, text)   // completion may have inserted something
+                }
                 stats.millis += System.currentTimeMillis() - started
             }
         }
@@ -256,6 +260,11 @@ class GoMlDatasetExport : GoSemanticIdeTestBase() {
                 .any { it is GoResolver.Result.Import || it is GoResolver.Result.Package }) return true
         val expr = qualifier as? GoExpression ?: return false
         return GoSemanticService.getInstance(project).typeOf(expr) !is GoUnknownType
+    }
+
+    private fun replace(document: com.intellij.openapi.editor.Document, start: Int, end: Int, with: String) {
+        WriteCommandAction.runWriteCommandAction(project) { document.replaceString(start, end, with) }
+        PsiDocumentManager.getInstance(project).commitDocument(document)
     }
 
     private fun setText(document: com.intellij.openapi.editor.Document, text: String) {
