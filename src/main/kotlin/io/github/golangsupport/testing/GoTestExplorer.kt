@@ -49,6 +49,7 @@ import com.intellij.util.ui.tree.TreeUtil
 import io.github.golangsupport.GoIcons
 import io.github.golangsupport.lang.GoTestNames
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoFunctionDeclaration
 import io.github.golangsupport.mod.GoModulesService
 import io.github.golangsupport.run.GoRunLauncher
 import java.awt.event.MouseEvent
@@ -172,7 +173,8 @@ private class GoTestExplorerPanel(private val project: Project, toolWindow: Tool
         object : DoubleClickListener() {
             override fun onDoubleClick(event: MouseEvent): Boolean {
                 val test = (tree.lastSelectedPathComponent as? DefaultMutableTreeNode)?.userObject as? DiscoveredGoTest ?: return false
-                val function = (PsiManager.getInstance(project).findFile(test.file) as? GoFile)?.functions?.firstOrNull { it.name == test.name }
+                // PSI on the EDT needs an explicit read action since 2026.1 (seen live: "Read access is allowed from inside read-action only")
+                val function = ReadAction.compute<GoFunctionDeclaration?, RuntimeException> { (PsiManager.getInstance(project).findFile(test.file) as? GoFile)?.functions?.firstOrNull { it.name == test.name } }
                 function?.navigate(true) ?: OpenFileDescriptor(project, test.file).navigate(true)
                 return true
             }

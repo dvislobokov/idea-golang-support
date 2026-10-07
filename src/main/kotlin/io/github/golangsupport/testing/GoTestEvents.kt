@@ -47,6 +47,8 @@ class GoTestEvents(
 ) {
     private val startedPackages = LinkedHashSet<String>()
     private val startedTests = HashSet<String>()
+    /** The platform forgets a node once it is finished: a subtest starting after that (seen live) goes under the nearest ancestor still open. */
+    private val finishedTests = HashSet<String>()
 
     /** Started and not finished yet, by package: a benchmark gets no `pass` of its own (seen live), the package ends it. */
     private val openTests = HashMap<String, LinkedHashMap<String, String>>()
@@ -71,13 +73,8 @@ class GoTestEvents(
 
     private fun testEvent(action: String, packagePath: String, test: String, event: JsonObject, result: MutableList<String>) {
         val id = "$packagePath|$test"
-        fun ensureStarted() {
-            if (!startedTests.add(id)) return
-            val parent = if ('/' in test) "$packagePath|${test.substringBeforeLast('/')}" else packagePath
-            result += ServiceMessageBuilder.testStarted(test.substringAfterLast('/')).id(id, parent).hint(locationHint(packagePath, test)).toString()
-            openTests.getOrPut(packagePath, ::LinkedHashMap)[id] = test.substringAfterLast('/')
-        }
-        if (action == "pass" || action == "fail" || action == "skip" || action == "bench") openTests[packagePath]?.remove(id)
+        fun ensureStarted() = ensureStarted(packagePath, test, result)
+        if (action == "pass" || action == "fail" || action == "skip" || action == "bench") { openTests[packagePath]?.remove(id); finishedTests += id }
         when (action) {
             "run" -> ensureStarted()
             "output" -> {
@@ -106,6 +103,22 @@ class GoTestEvents(
         }
     }
 
+    /**
+     * The node of [test], started once. Its parent is the nearest ancestor subtest that is started and not finished yet (a parent Go has
+     * not reported `run` for is started first), else the package; the name is the part of the path below that parent.
+     */
+    private fun ensureStarted(packagePath: String, test: String, result: MutableList<String>) {
+        val id = "$packagePath|$test"
+        if (!startedTests.add(id)) return
+        var parentTest: String? = test.substringBeforeLast('/', "").takeIf { it.isNotEmpty() }
+        while (parentTest != null && "$packagePath|$parentTest" in finishedTests) parentTest = parentTest.substringBeforeLast('/', "").takeIf { it.isNotEmpty() }
+        if (parentTest != null) ensureStarted(packagePath, parentTest, result)
+        val parent = if (parentTest != null) "$packagePath|$parentTest" else packagePath
+        val name = if (parentTest != null) test.removePrefix("$parentTest/") else test
+        result += ServiceMessageBuilder.testStarted(name).id(id, parent).hint(locationHint(packagePath, test)).toString()
+        openTests.getOrPut(packagePath, ::LinkedHashMap)[id] = name
+    }
+
     private fun packageEvent(action: String, packagePath: String, event: JsonObject, result: MutableList<String>) {
         when (action) {
             "output", "build-output" -> {
@@ -116,6 +129,7 @@ class GoTestEvents(
             "pass", "fail", "skip", "build-fail" -> {
                 // what is still open when the package ends (a benchmark, a test the package died in) ends with it: passed with the package, failed otherwise
                 openTests.remove(packagePath)?.forEach { (id, name) ->
+                    finishedTests += id
                     if (action != "pass") result += ServiceMessageBuilder.testFailed(name).addAttribute("nodeId", id).addAttribute("message", "").toString()
                     result += ServiceMessageBuilder.testFinished(name).addAttribute("nodeId", id).toString()
                 }

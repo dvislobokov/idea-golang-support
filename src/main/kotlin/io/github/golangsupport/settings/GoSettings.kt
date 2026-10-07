@@ -294,6 +294,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         var downloadDependencies by property(true)
         /** `GOPROXY=…;GOPRIVATE=…`: added to the environment of the go commands of the plugin (Settings | Go | Go Modules). */
         var modulesEnvironment by string("")
+        /** The Go Dependencies window lists the direct requirements above the indirect ones; off: the order of `go list -m` (by path). */
+        var dependenciesDirectFirst by property(true)
         /** Share / Run in Playground asks before the code leaves the machine; "Don't ask again" in that dialog clears it. On, as in GoLand. */
         var askBeforePlayground by property(true)
         /** Go Optimization: `-d=ssa/check_bce/debug=1` next to `-m=2`, the bounds checks the compiler kept. */
@@ -315,6 +317,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var vendoring: GoVendoring
         get() = state.vendoring
         set(value) { state.vendoring = value }
+
+    var dependenciesDirectFirst: Boolean
+        get() = state.dependenciesDirectFirst
+        set(value) { state.dependenciesDirectFirst = value }
 
     var downloadDependencies: Boolean
         get() = state.downloadDependencies

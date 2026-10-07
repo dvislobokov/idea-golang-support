@@ -37,6 +37,7 @@ import io.github.golangsupport.build.BuildViewCommandOutput
 import io.github.golangsupport.cli.CommandOutput
 import io.github.golangsupport.cli.GoCli
 import io.github.golangsupport.cli.GoTool
+import io.github.golangsupport.settings.GoSettings
 import java.awt.BorderLayout
 import java.awt.event.MouseEvent
 import java.io.File
@@ -87,6 +88,9 @@ object GoModuleList {
         }
         return result
     }
+
+    /** The rows of the Go Dependencies window: the direct requirements first (the order of `go list -m` kept within each half), or as listed. */
+    fun ordered(modules: List<GoModuleInfo>, directFirst: Boolean): List<GoModuleInfo> = if (directFirst) modules.sortedBy { it.indirect } else modules
 
     /** `Found in: golang.org/x/text@v0.3.7` of the text report of govulncheck: the modules a vulnerability reaches through. */
     fun vulnerableModules(govulncheckOutput: String): Map<String, String> =
@@ -210,7 +214,7 @@ class GoDependenciesPanel(private val project: Project) : SimpleToolWindowPanel(
                     status.text = "go list has failed: " + (output.exceptionOrNull()?.message ?: output.getOrNull()?.stderr?.lines()?.firstOrNull { it.isNotBlank() }).orEmpty()
                     return@invokeLater
                 }
-                rows = parsed.filter { !it.isMain }
+                rows = GoModuleList.ordered(parsed.filter { !it.isMain }, GoSettings.getInstance().dependenciesDirectFirst)
                 model.fireTableDataChanged()
                 val updates = rows.count { it.update != null }
                 status.text = "${rows.size} requirements, ${rows.count { !it.indirect }} direct; " + if (updates == 0) "all up to date" else "$updates with a newer version"

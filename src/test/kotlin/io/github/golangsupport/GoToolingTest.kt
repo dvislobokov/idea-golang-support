@@ -264,8 +264,43 @@ class GoToolingTest {
         assertNull(modules[2].update)
         assertTrue(modules[2].indirect)
         assertEquals("../text", modules[2].replacedBy)
+        // the window: direct first keeps the go list order within each half, off keeps it as is
+        val listed = listOf(modules[2], modules[1], modules[2].copy(path = "golang.org/x/sys"), modules[1].copy(path = "rsc.io/quote"))
+        assertEquals(listOf("github.com/google/uuid", "rsc.io/quote", "golang.org/x/text", "golang.org/x/sys"), GoModuleList.ordered(listed, directFirst = true).map { it.path })
+        assertEquals(listed, GoModuleList.ordered(listed, directFirst = false))
         val report = "Vulnerability #1: GO-2024-1234\n    Module: golang.org/x/text\n      Found in: golang.org/x/text@v0.3.7\n      Fixed in: golang.org/x/text@v0.3.8\n"
         assertEquals(mapOf("golang.org/x/text" to "v0.3.7"), GoModuleList.vulnerableModules(report))
+    }
+
+    /** The platform drops a finished node: a subtest that starts afterwards hangs under the nearest open ancestor, named by the rest of its path. */
+    @Test fun goTestEventsSubtestAfterItsParentFinished() {
+        val events = GoTestEvents()
+        events.convert("""{"Action":"start","Package":"x"}""")
+        events.convert("""{"Action":"run","Package":"x","Test":"TestContains"}""")
+        events.convert("""{"Action":"run","Package":"x","Test":"TestContains/\"abc\""}""")
+        events.convert("""{"Action":"pass","Package":"x","Test":"TestContains/\"abc\"","Elapsed":0}""")
+        val late = events.convert("""{"Action":"run","Package":"x","Test":"TestContains/\"abc\"/\"\""}""")!!.single()
+        assertTrue(late, late.startsWith("##teamcity[testStarted name='\"abc\"/\"\"' nodeId='x||TestContains/\"abc\"/\"\"' parentNodeId='x||TestContains'"))
+        // the whole chain is finished: the package is the parent
+        events.convert("""{"Action":"pass","Package":"x","Test":"TestContains","Elapsed":0}""")
+        val later = events.convert("""{"Action":"run","Package":"x","Test":"TestContains/\"abc\"/\"z\""}""")!!.single()
+        assertTrue(later, later.contains("name='TestContains/\"abc\"/\"z\"' nodeId='x||TestContains/\"abc\"/\"z\"' parentNodeId='x'"))
+    }
+
+    /** A subtest whose parent never reported `run`: the parent node is made first, so the tree has a parent for it. */
+    @Test fun goTestEventsSubtestWithoutParentRun() {
+        val events = GoTestEvents()
+        events.convert("""{"Action":"start","Package":"x"}""")
+        val started = events.convert("""{"Action":"run","Package":"x","Test":"TestA/case/deep"}""")!!
+        assertEquals(
+            listOf("##teamcity[testStarted name='TestA' nodeId='x||TestA' parentNodeId='x']",
+                "##teamcity[testStarted name='case' nodeId='x||TestA/case' parentNodeId='x||TestA']",
+                "##teamcity[testStarted name='deep' nodeId='x||TestA/case/deep' parentNodeId='x||TestA/case']"),
+            started,
+        )
+        // the parents, started by the plugin, end with the package like everything still open
+        val done = events.convert("""{"Action":"pass","Package":"x","Elapsed":0}""")!!
+        assertEquals(3, done.count { it.startsWith("##teamcity[testFinished") })
     }
 
     @Test fun goModCompletionContexts() {

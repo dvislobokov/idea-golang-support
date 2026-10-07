@@ -30,6 +30,22 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.197] - 2026-10-07
+
+### Fixed — "Parent node is undefined" in the log while the tests pass (a colleague's log from GIGA IDE, 2026-10-07)
+- A subtest whose `run` arrives after its parent subtest was reported finished (the platform forgets a finished node) had no parent
+  in the test tree and the platform logged an error for every such subtest. The node now goes under the nearest ancestor still open
+  (else the package), named by the rest of its path; a subtest whose parent never reported `run` gets the parent made first
+
+### Fixed — "Read access is allowed from inside read-action only" on a double click in the Go Tests window (the same log)
+- The double click looked the function up in the PSI on the EDT without a read action, which 2026.1 forbids; it is read under one now
+
+## [0.2.196] - 2026-10-07
+
+### Added — direct dependencies first in the Go Dependencies window (a user's proposal)
+- The table lists the direct requirements of the module above the indirect ones (within each half the order of `go list -m` stays).
+  Settings | Go | Go Modules | Direct dependencies first, on by default; off: the order of `go list -m`, by module path. Takes effect on the next Refresh
+
 ## [0.2.195] - 2026-10-06
 
 ### Fixed — the Go menu vanished after indexing in a project without modules (GIGA IDE, seen in a log with the new journal lines)

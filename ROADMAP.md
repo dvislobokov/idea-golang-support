@@ -292,7 +292,8 @@
 - [x] Меню Go → Modules: Tidy, Download, Vendor
 - [x] Окно **Go Dependencies** (Go | Modules | Dependencies…): требования модуля из `go list -m -u -json all` (`GoModuleList`, юнит-тест) — версия, новее, direct / indirect,
   замена; Upgrade Selected / Upgrade All (`go get path@version`), Tidy, Check Vulnerabilities (`govulncheck ./...`, инструмент предлагается поставить; модули из `Found in:` помечаются),
-  Open go.mod, двойной клик — строка require — робот (uuid v1.6.0, «all up to date»; upgrade и govulncheck проверены пользователем (2026-09-30))
+  Open go.mod, двойной клик — строка require — робот (uuid v1.6.0, «all up to date»; upgrade и govulncheck проверены пользователем (2026-09-30));
+  прямые зависимости в списке первыми (настройка Direct dependencies first на странице Go Modules, по умолчанию включена; `GoModuleList.ordered`, юнит-тест) — 0.2.196
 - [x] Completion в go.mod / go.work (`GoModCompletionContributor`, контексты — юнит-тест): директивы в начале строки; после `require` / `replace` / `exclude` / `tool` (и в их блоках) —
   пути модулей из `GOMODCACHE/cache/download`; после пути — версии из `@v/list` кэша и с GOPROXY (один запрос на модуль, таймаут 3 с, только при явном вызове);
   после `go` / `toolchain` — установленная версия — робот (пути `github.com/google/…`, версии uuid v1.0.0…v1.6.0, `go1.24.7`)
