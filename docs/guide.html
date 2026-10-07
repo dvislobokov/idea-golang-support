@@ -1072,6 +1072,8 @@ n := <span class="fn">next</span>()
         <tr><td>Confidence threshold</td><td>От 0.50 до 0.99: чем выше порог, тем реже появляется серый текст и тем увереннее подсказка.</td></tr>
         <tr><td>Show suggestions that are only closing brackets</td><td>По умолчанию подсказка из одних <code>)</code>, <code>]</code>, <code>}</code> скрыта; флажок возвращает её.</td></tr>
         <tr><td>Guess the text inside string literals</td><td>Порог уверенности считается только по коду: строка <code>fmt.Errorf("…")</code> показывается с угаданным сообщением (у текста в кавычках вероятность всегда мала). Выкл.: уверенной должна быть вся строка целиком.</td></tr>
+        <tr><td>Confidence threshold on an empty line</td><td>Отдельный, более низкий порог для строки, на которой ещё ничего не набрано (сразу после Enter): первое слово инструкции — одна догадка из нескольких, <code>return nil</code> после <code>if … {</code> даёт около 0.3. По умолчанию 0.25.</td></tr>
+        <tr><td>Log every answer of the network</td><td>Каждый вызов сети пишется в журнал плагина (Go | Plugin Logs, категория <code>ml</code>): текст, уверенность по строке и по коду, порог и показана ли подсказка. Для разбора «почему здесь ничего не предложило».</td></tr>
         <tr><td>Models directory</td><td>Каталог с другими <code>lm.cml</code> и <code>rank.cml</code> (например, от нового обучения). Пусто — модели из плагина. Строки Models и Network показывают, что загружено.</td></tr>
       </tbody>
     </table></div>

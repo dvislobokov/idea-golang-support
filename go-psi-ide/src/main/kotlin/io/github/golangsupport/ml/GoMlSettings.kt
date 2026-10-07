@@ -30,6 +30,10 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
         var inlineShowClosers by property(false)
         /** Gate on the confidence of the code tokens only, so a line with a string literal (`fmt.Errorf("…")`) is shown with the text guessed. */
         var inlineGuessStrings by property(true)
+        /** The gate on a line where nothing is typed yet (after Enter): the first word of a statement is a guess among a few, `return nil` after `if … {` is at ~0.3. */
+        var inlineEmptyLineThreshold by property(0.25f)
+        /** Every answer of the network (text, confidence, gate, shown or not) goes to the plugin log (Go | Plugin Logs, category `ml`). */
+        var inlineDebugLog by property(false)
     }
 
     var enabled: Boolean
@@ -59,6 +63,14 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
     var inlineGuessStrings: Boolean
         get() = state.inlineGuessStrings
         set(value) { state.inlineGuessStrings = value }
+
+    var inlineEmptyLineThreshold: Double
+        get() = state.inlineEmptyLineThreshold.toString().toDouble()
+        set(value) { state.inlineEmptyLineThreshold = value.toFloat() }
+
+    var inlineDebugLog: Boolean
+        get() = state.inlineDebugLog
+        set(value) { state.inlineDebugLog = value }
 
     companion object {
         fun getInstance(): GoMlSettings = service()

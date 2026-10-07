@@ -39,6 +39,10 @@ class GoMlConfigurable(@Suppress("UNUSED_PARAMETER") project: Project) : BoundCo
             }
             row { checkBox(GoBundle.message("ml.inline.showClosers")).bindSelected(settings::inlineShowClosers).comment(GoBundle.message("ml.inline.showClosers.comment")) }
             row { checkBox(GoBundle.message("ml.inline.guessStrings")).bindSelected(settings::inlineGuessStrings).comment(GoBundle.message("ml.inline.guessStrings.comment")) }
+            row(GoBundle.message("ml.inline.emptyLineThreshold")) {
+                spinner(0.05..0.99, 0.05).bindValue(settings::inlineEmptyLineThreshold).comment(GoBundle.message("ml.inline.emptyLineThreshold.comment"))
+            }
+            row { checkBox(GoBundle.message("ml.inline.debugLog")).bindSelected(settings::inlineDebugLog).comment(GoBundle.message("ml.inline.debugLog.comment")) }
             row(GoBundle.message("ml.nnStatus")) { cell(nnStatus) }
         }
     }
@@ -49,9 +53,9 @@ class GoMlConfigurable(@Suppress("UNUSED_PARAMETER") project: Project) : BoundCo
     }
 
     override fun apply() {
-        val before = listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineThreshold, settings.inlineShowClosers, settings.inlineGuessStrings)
+        val before = listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineThreshold, settings.inlineShowClosers, settings.inlineGuessStrings, settings.inlineEmptyLineThreshold)
         super.apply()
-        if (listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineThreshold, settings.inlineShowClosers, settings.inlineGuessStrings) != before) GoMlModels.getInstance().reset()
+        if (listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineThreshold, settings.inlineShowClosers, settings.inlineGuessStrings, settings.inlineEmptyLineThreshold) != before) GoMlModels.getInstance().reset()
         refreshStatus()
     }
 

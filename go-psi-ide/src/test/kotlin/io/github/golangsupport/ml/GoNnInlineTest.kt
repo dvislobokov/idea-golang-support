@@ -4,9 +4,11 @@ import com.intellij.codeInsight.inline.completion.suggestion.InlineCompletionSug
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** The pure part of the grey text of the network: what it is given and what of its answer is shown (a fake engine, no platform). */
@@ -19,7 +21,21 @@ class GoNnInlineTest {
     private fun shown(answer: GoNnInline.Answer?, text: String = "fmt.Prin)\n", offset: Int = 8): String? = runBlocking {
         val engine = FakeEngine(answer)
         val context = GoNnInline.context(text, offset, "main.go")
-        GoNnInline.text(engine.complete(Any(), context))
+        GoNnInline.text(engine.complete(Any(), context), context.after)
+    }
+
+    @Test fun whatTheLineAlreadyHasAfterTheCaretIsNotRepeated() {
+        // `Validate() (int⟨⟩) {`: the model writes `, error) {` to the end of the line, the `) {` is there (seen live, accepted as `(int, error) {) {`)
+        val line = "func (o *Order) Validate() (int) {\n"
+        assertEquals(", error", shown(GoNnInline.Answer(", error) {", show = true, confProd = 0.86), text = line, offset = line.indexOf(") {")))
+        assertEquals(", error", GoNnInline.trimOverlap(", error) {", ") {"))
+        assertEquals("o.items", GoNnInline.trimOverlap("o.items)", ")\n}"))     // the engine's case: a closer
+        assertEquals("f(x)", GoNnInline.trimOverlap("f(x)", ""))
+        assertEquals("a)", GoNnInline.trimOverlap("a)", "b"))
+        assertEquals("", GoNnInline.trimOverlap(") {", ") {"))
+        assertNull(shown(GoNnInline.Answer(") {", show = true, confProd = 0.9), text = "f() {\n", offset = 2))
+        assertEquals(") {", GoNnInline.restOfLine(") {\n}\n".toByteArray()))
+        assertEquals("", GoNnInline.restOfLine("\n}".toByteArray()))
     }
 
     @Test fun shownAnswerGivesItsText() = assertEquals("tln(\"hi\"", shown(GoNnInline.Answer("tln(\"hi\"", show = true, confProd = 0.93)))
@@ -71,6 +87,39 @@ class GoNnInlineTest {
         assertEquals(Math.exp(-0.6), conf("	return ", listOf("len", "(o.items)"), floatArrayOf(-0.2f, -0.3f), -0.1f), 1e-6)
         assertArrayEquals(b("\treturn fmt."), GoNnInline.lineBefore(b("func f() error {\n\treturn fmt.Err"), 3))
         assertArrayEquals(b("x"), GoNnInline.lineBefore(b("x"), 0))
+    }
+
+    @Test fun certainStartOfAnUncertainLineIsShown() {
+        fun b(s: String) = s.toByteArray()
+        fun lp(vararg p: Double) = FloatArray(p.size) { Math.log(p[it]).toFloat() }
+        fun prefix(tokens: List<String>, probs: FloatArray, typed: Int, gate: Double = 0.7) = GoNnInline.certainPrefix(tokens.map(::b), probs, typed, gate)?.let { String(it) }
+        // `if le` → ` len(o.items) == 0 {`: every token ≥ 0.96 but ` ==` 0.53 (seen live); typed `le` is inside the first token
+        val tokens = listOf(" len", "(", "o", ".", "items", ")", " ==", " 0", " {")
+        val probs = lp(1.0, 1.0, 1.0, 1.0, 0.97, 1.0, 0.53, 0.98, 0.96)
+        assertEquals("n(o.items)", prefix(tokens, probs, typed = 3))
+        assertEquals("en(o.items)", prefix(tokens, probs, typed = 2))
+        // nothing certain, or only the typed part, or punctuation: nothing
+        assertNull(prefix(tokens, lp(0.5, 1.0, 1.0, 1.0, 0.97, 1.0, 0.53, 0.98, 0.96), typed = 3))
+        assertNull(prefix(listOf(" len", " =="), lp(1.0, 0.5), typed = 4))
+        assertNull(prefix(listOf(")", " x"), lp(1.0, 0.5), typed = 0))
+        // a fresh line: a lone `if` is no suggestion, `return 0` is one (`return 0,` loses its comma; seen in the log)
+        assertNull(prefix(listOf("if", " len", "("), lp(0.9, 0.2, 1.0), typed = 0, gate = 0.25))
+        assertEquals("return 0", prefix(listOf("return", " 0", ",", " ErrEmpty"), lp(0.8, 0.9, 0.9, 0.3), typed = 0, gate = 0.25))
+        // `for` + ` _, item := range o.items {` with `item` unsure: ` _,` is no suggestion (seen live: Tab inserted ` _,`)
+        assertNull(prefix(listOf(" _", ",", " item", " :=", " range"), lp(0.95, 0.95, 0.4, 1.0, 1.0), typed = 0))
+        // an open call is not finished: the longest finished cut before it; never cut inside an identifier (`o.Curr` + `ency`), `o.` alone is too little
+        assertEquals("mt.Errorf", prefix(listOf(" fmt", ".", "Errorf", "(", "\"x\""), lp(1.0, 1.0, 1.0, 1.0, 0.1), typed = 2))   // typed ` f`: the healed remainder starts at the pre-token boundary, with its space
+        assertEquals("mt.Errorf", prefix(listOf(" fmt", ".", "Errorf", "(\"", "x"), lp(1.0, 1.0, 1.0, 0.5, 0.1), typed = 2))
+        assertNull(prefix(listOf(" o", ".", "Curr", "ency", " =="), lp(1.0, 1.0, 1.0, 0.5, 1.0), typed = 1))
+        assertEquals("o.Count()", prefix(listOf(" o", ".", "Count", "()", " =="), lp(1.0, 1.0, 1.0, 1.0, 0.5), typed = 1))
+    }
+
+    @Test fun blankLineIsIndentationOnly() {
+        assertTrue(GoNnInline.blankLine("func f() {\n\t".toByteArray()))
+        assertTrue(GoNnInline.blankLine("".toByteArray()))
+        assertTrue(GoNnInline.blankLine("x\n".toByteArray()))
+        assertFalse(GoNnInline.blankLine("func f() {\n\tr".toByteArray()))
+        assertFalse(GoNnInline.blankLine("\treturn ".toByteArray()))
     }
 
     @Test fun pathIsRelativeToTheProject() {

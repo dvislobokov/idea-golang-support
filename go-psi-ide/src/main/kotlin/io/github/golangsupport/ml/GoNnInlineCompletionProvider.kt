@@ -62,8 +62,28 @@ object GoNnInline {
         return if (base != null && base.isNotEmpty() && path.startsWith("$base/")) path.substring(base.length + 1) else path.substringAfterLast('/')
     }
 
-    /** The grey text of [answer]: only what the model's own policy shows (the engine already drops the closers the editor paired after the caret). */
-    fun text(answer: Answer?): String? = answer?.takeIf { it.show }?.text?.takeIf { it.isNotEmpty() }
+    /**
+     * The grey text of [answer]: only what the model's own policy shows, without the tail that the line already has after the caret.
+     * The model writes the line to its end and sees what is there: at `Validate() (int⟨⟩) {` it answered `, error) {` (seen live, accepted
+     * as `(int, error) {) {`); the engine drops such a tail only when it is closers, `{` is not one.
+     */
+    fun text(answer: Answer?, after: ByteArray = ByteArray(0)): String? {
+        val text = answer?.takeIf { it.show }?.text?.takeIf { it.isNotEmpty() } ?: return null
+        return trimOverlap(text, restOfLine(after)).takeIf { it.isNotEmpty() }
+    }
+
+    /** [text] without its longest tail that is also the start of [rest] (whitespace included: `, error) {` before `) {` → `, error`). */
+    fun trimOverlap(text: String, rest: String): String {
+        for (n in minOf(text.length, rest.length) downTo 1) if (text.regionMatches(text.length - n, rest, 0, n)) return text.dropLast(n)
+        return text
+    }
+
+    /** The current line of [after] (what follows the caret up to the line end). */
+    fun restOfLine(after: ByteArray): String {
+        var n = 0
+        while (n < after.size && after[n] != '\n'.code.toByte()) n++
+        return String(after, 0, n, Charsets.UTF_8)
+    }
 
     /**
      * The model's confidence over its code only: the tokens inside a string literal or a line comment are free text, each word of it is
@@ -82,6 +102,59 @@ object GoNnInline {
         }
         if (!stopLogProb.isNaN() && !state.inText) sum += stopLogProb
         return Math.exp(sum)
+    }
+
+    /**
+     * The certain start of a suggestion whose whole line is not: the longest run of its tokens, cut at a word boundary, whose product
+     * of probabilities passes [gate] — without the [typed] bytes the first tokens reproduce. Null when nothing worth showing is left
+     * (a lone first word on a fresh line, fewer than three word bytes, an open bracket or a trailing comma). Seen live: `if le` → ` len(o.items) == 0 {` at 0.47 with every token ≥ 0.96 but
+     * ` ==` at 0.53 — `n(o.items)` is what the model knows, the comparison is the user's.
+     */
+    fun certainPrefix(tokens: List<ByteArray>, logProbs: FloatArray, typed: Int, gate: Double): ByteArray? {
+        var sum = 0.0
+        var best = -1
+        for (i in tokens.indices) {
+            sum += logProbs[i]
+            if (Math.exp(sum) < gate) break
+            best = i
+        }
+        // the longest cut that reads as a finished piece: at a word boundary, never inside an identifier, ending with a word or a
+        // closing bracket (not `for _,` — seen live, Tab inserted ` _,`), brackets balanced, at least three word bytes beyond what is typed
+        val raw = ByteArray(tokens.sumOf { it.size })
+        var n = 0
+        for (t in tokens) { System.arraycopy(t, 0, raw, n, t.size); n += t.size }
+        val ends = IntArray(tokens.size); var end = 0
+        for (i in tokens.indices) { end += tokens[i].size; ends[i] = end }
+        for (i in best downTo 0) {
+            if (typed == 0 && i == 0) break   // a lone first word is no suggestion (seen in the log: `if` alone for `if len(o.items) == 0 {`)
+            if (i < tokens.lastIndex && isWordByte(tokens[i + 1][0]) && isWordByte(tokens[i].last())) continue
+            if (ends[i] <= typed) break
+            if (finished(raw, typed, ends[i])) return raw.copyOfRange(typed, ends[i])
+        }
+        return null
+    }
+
+    private fun finished(raw: ByteArray, from: Int, to: Int): Boolean {
+        val last = raw[to - 1].toInt().toChar()
+        if (!isWordByte(raw[to - 1]) && last != ')' && last != ']' && last != '}') return false
+        var depth = 0; var words = 0
+        for (i in from until to) {
+            when (raw[i].toInt().toChar()) { '(', '[', '{' -> depth++; ')', ']', '}' -> depth-- }
+            if (isWordByte(raw[i])) words++
+        }
+        return depth == 0 && words >= 3
+    }
+
+    private fun isWordByte(b: Byte): Boolean {
+        val c = b.toInt() and 0xff
+        return c in 65..90 || c in 97..122 || c in 48..57 || c == 95 || c >= 128
+    }
+
+    /** True when the caret's line has nothing but indentation before it: the line just opened by Enter, where the whole statement is a guess. */
+    fun blankLine(before: ByteArray): Boolean {
+        var i = before.size
+        while (i > 0 && before[i - 1] != '\n'.code.toByte()) { val c = before[i - 1].toInt(); if (c != ' '.code && c != '\t'.code) return false; i-- }
+        return true
     }
 
     /** The current line of [before] without its last [typed] bytes (the healed remainder the model reproduced). */
@@ -163,7 +236,7 @@ class GoNnInlineCompletionProvider internal constructor(private val engine: () -
         }
         answered = null
         val context = readAction { GoNnInline.context(request.document.immutableCharSequence, request.endOffset, path(request.file)) }
-        return GoNnInline.suggestion(GoNnInline.text(engine().complete(request.editor, context)))
+        return GoNnInline.suggestion(GoNnInline.text(engine().complete(request.editor, context), context.after))
     }
 
     private fun path(file: PsiFile): String =

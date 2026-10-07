@@ -1,0 +1,5 @@
+importClass(com.intellij.openapi.project.ProjectManager)
+importClass(com.intellij.openapi.fileEditor.FileEditorManager)
+var projects = ProjectManager.getInstance().getOpenProjects()
+var ed = FileEditorManager.getInstance(projects[projects.length - 1]).getSelectedTextEditor()
+"" + ed.getDocument().getText()

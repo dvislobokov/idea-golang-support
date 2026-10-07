@@ -135,14 +135,24 @@ class GoMlModels : GoNnEngine, Disposable {
             val session = sessions.getOrPut(editor) { nn.model.newSession(SESSION_CAPACITY) }
             val started = System.nanoTime()
             val r = completion.complete(context.path, context.before, context.after, session)
-            // the gate over the code tokens only: a guessed string literal does not hide a certain line (see GoNnInline.codeConfidence)
-            val code = if (settings.inlineGuessStrings && !r.show && r.text.isNotEmpty() && !r.repeated && !r.healMiss && !(r.punctOnly && !settings.inlineShowClosers))
+            // the gate over the code tokens only: a guessed string literal does not hide a certain line (see GoNnInline.codeConfidence);
+            // a line with nothing typed yet has its own, lower gate: the first word of a statement is one guess among a few
+            val sound = r.text.isNotEmpty() && !r.repeated && !r.healMiss && !(r.punctOnly && !settings.inlineShowClosers)
+            val code = if (settings.inlineGuessStrings && !r.show && sound)
                 GoNnInline.codeConfidence(GoNnInline.lineBefore(context.before, r.typed.size), r.tokens.map { completion.tok.tokenBytes(it) }, r.logProbs, r.stopLogProb)
             else r.confProd
-            val show = r.show || code >= settings.inlineThreshold
+            val gate = if (GoNnInline.blankLine(context.before)) settings.inlineEmptyLineThreshold else settings.inlineThreshold
+            var show = r.show || sound && code >= gate
+            var text = r.textString
+            // the whole line is not certain: its certain start may be (`len(o.items)` before a ` ==` the model is unsure of)
+            if (!show && sound && r.tokens.isNotEmpty()) {
+                val prefix = GoNnInline.certainPrefix(r.tokens.map { completion.tok.tokenBytes(it) }, r.logProbs, r.typed.size, gate)
+                if (prefix != null) { text = String(prefix, Charsets.UTF_8); show = true }
+            }
             if (show) shown.incrementAndGet()
-            LOG.debug { "NN completion ${(System.nanoTime() - started) / 1_000_000} ms, confProd ${"%.3f".format(r.confProd)}, code ${"%.3f".format(code)}, show $show: ${r.textString}" }
-            GoNnInline.Answer(r.textString, show, maxOf(r.confProd, code))
+            val line = "NN completion ${(System.nanoTime() - started) / 1_000_000} ms, confProd ${"%.3f".format(r.confProd)}, code ${"%.3f".format(code)}, gate $gate, show $show: $text${if (text != r.textString) " (of: ${r.textString})" else ""}"
+            if (settings.inlineDebugLog) debugSink?.invoke(line) ?: LOG.info(line) else LOG.debug(line)
+            GoNnInline.Answer(text, show, maxOf(r.confProd, code))
         }
     }
 
@@ -244,6 +254,9 @@ class GoMlModels : GoNnEngine, Disposable {
 
         private fun resource(name: String) = GoMlModels::class.java.classLoader.getResource("$RESOURCE_DIR/$name")
         private val isRankerBundled: Boolean by lazy { resource("rank.cml") != null }
+        /** Where the debug lines go with [GoMlSettings.inlineDebugLog] on: the host's plugin log (set by its bridge), else idea.log at INFO. */
+        @Volatile var debugSink: ((String) -> Unit)? = null
+
         /** True when the build carries the grey-text network. */
         val isNnBundled: Boolean by lazy { resource(NN_MODEL) != null && resource(NN_VOCAB) != null }
         /** True in a build that carries any of the models (and therefore shows the Smart Completion settings page). */

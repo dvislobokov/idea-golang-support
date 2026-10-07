@@ -12,5 +12,6 @@
     <!-- first: it asks the next enabled provider (the idioms of the host) before the network, see GoNnInlineCompletionProvider -->
     <inline.completion.provider order="first" implementation="io.github.golangsupport.ml.GoNnInlineCompletionProvider"/>
     <editorFactoryListener implementation="io.github.golangsupport.ml.GoNnEditorListener"/>
+        <postStartupActivity implementation="io.github.golangsupport.settings.GoMlLogBridge"/>
   </extensions>
 </idea-plugin>

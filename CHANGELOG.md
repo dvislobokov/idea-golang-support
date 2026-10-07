@@ -30,6 +30,32 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.206] - 2026-10-07
+
+### Added — grey text on a line where nothing is typed yet (after Enter)
+- The network was asked on the fresh line already, but the first word of a statement is one guess among a few, so the whole line
+  stayed under the gate (seen live: `return nil` after `if len(o.items) == 0 {` + Enter at 0.28, after `r` at 0.81). A separate
+  setting "Confidence threshold on an empty line" (0.25) gates such lines; the main threshold stays for lines with a prefix.
+  `GoNnInlineTest.blankLineIsIndentationOnly`
+
+### Added — a setting that logs every answer of the network
+- "Log every answer of the network" (off) writes each call to the plugin log (Go | Plugin Logs, category `ml`): text, confidence over
+  the line and over the code, the gate and whether the grey text was shown — the lines that explained every "nothing here" of this
+  day without the debug level of idea.log. The ML build routes them through `GoMlLogBridge`
+
+### Added — the certain start of an uncertain line is shown
+- `if le` in `Validate()`: the model's ` len(o.items) == 0 {` had every token at ≥ 0.96 except ` ==` (0.53 — `> 0` and `!= 0` compete),
+  so the whole line stayed under 0.7 and nothing came (seen live, 31 M and 50 M alike). Now the longest start of the suggestion that
+  passes the gate is shown instead, cut only at a word boundary and never inside an identifier: `n(o.items)`; after Tab and `=` the
+  model finishes `= 0 {`. Only a finished piece is shown: ending with a word or a closing bracket, brackets balanced, at least three
+  word characters, never a lone first word on a fresh line (seen live: `if` alone, ` _,` of `for _, v := range …`).
+  `GoNnInlineTest.certainStartOfAnUncertainLineIsShown`
+
+### Fixed — the grey text repeated what the line already had after the caret
+- At `Validate() (int⟨⟩) {` the model answered `, error) {` and Tab made `(int, error) {) {`: the model writes the line to its end and
+  sees what is there, the engine drops such a tail only when it is closers (`{` is not one). The plugin now drops the longest tail
+  of the suggestion that the rest of the line starts with. `GoNnInlineTest.whatTheLineAlreadyHasAfterTheCaretIsNotRepeated`
+
 ## [0.2.205] - 2026-10-07
 
 ### Fixed — the completion list matches an exported name typed in lower case (`fmt.err` → `Errorf`)
