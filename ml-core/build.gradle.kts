@@ -40,3 +40,10 @@ tasks.withType<Test>().configureEach {
     maxHeapSize = "2g"
     testLogging { events("failed"); showStackTraces = true; exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL }
 }
+
+// Prints the runtime classpath for running the benchmark main (io.github.completionml.core.nn.NnBenchKt) with plain `java`.
+val printBenchClasspath by tasks.registering {
+    val cp = sourceSets.test.get().runtimeClasspath
+    dependsOn(tasks.named("testClasses"))
+    doLast { println("CP=" + cp.asPath) }
+}
