@@ -70,13 +70,14 @@ object GoFillStruct {
     /**
      * The edits that write the fields of [target] ([chosen] names only, when given) into its literal, one per line. With [align] the
      * values of consecutive one-line elements line up after their keys, as gofmt writes them (the lines already there are re-padded).
+     * The value of a field is its zero value, or what [valueOf] gives (the mapping items of completion write `src.Name`).
      */
-    fun plan(file: GoFile, target: Target, chosen: Collection<String>? = null, align: Boolean = false): GoEditPlan? {
+    fun plan(file: GoFile, target: Target, chosen: Collection<String>? = null, align: Boolean = false, valueOf: ((GoField) -> String)? = null): GoEditPlan? {
         val value = target.value
         val rbrace = value.rbrace ?: return null
         val fields = target.fields.filter { chosen == null || it.name in chosen }
         if (fields.isEmpty()) return null
-        val added = fields.map { Line(it.name, target.source.zero(it.type)) }
+        val added = fields.map { Line(it.name, valueOf?.invoke(it) ?: target.source.zero(it.type)) }
         val text = file.viewProvider.contents
         val indent = GoIntentionText.indentAt(text, value.lbrace.textRange.startOffset)
         val lbraceEnd = value.lbrace.textRange.endOffset

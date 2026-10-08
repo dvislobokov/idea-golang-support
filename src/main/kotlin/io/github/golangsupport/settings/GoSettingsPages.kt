@@ -34,6 +34,7 @@ import javax.swing.table.TableCellEditor
 import javax.swing.table.TableCellRenderer
 import io.github.golangsupport.GoBundle
 import io.github.golangsupport.ide.GoRenameChoice
+import io.github.golangsupport.ide.completion.GoCompletionAssistSettings
 import io.github.golangsupport.ide.inspections.printf.GoPrintfFunctions
 import io.github.golangsupport.lang.GoFeature
 import io.github.golangsupport.problems.GoProjectProblems
@@ -146,6 +147,8 @@ class GoEditorConfigurable(project: Project) : GoSettingsPage(project, "page.edi
             row { checkBox(GoBundle.message("completion.keywords")).bindSelected(settings::completionKeywordTemplates).comment(GoBundle.message("completion.keywords.comment")) }
             row { checkBox(GoBundle.message("completion.values")).bindSelected(settings::completionValues).comment(GoBundle.message("completion.values.comment")) }
             row { checkBox(GoBundle.message("completion.arguments")).bindSelected(settings::completionArguments).comment(GoBundle.message("completion.arguments.comment")) }
+            val assist = GoCompletionAssistSettings.getInstance()
+            row { checkBox(GoBundle.message("completion.mapping")).bindSelected(assist::mappingEnabled).comment(GoBundle.message("completion.mapping.comment")) }
         }
         // GoLand's "When ... is renamed" / "When JSON is pasted" of its Go page
         group(GoBundle.message("rename.group")) {

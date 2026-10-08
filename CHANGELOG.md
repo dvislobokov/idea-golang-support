@@ -30,6 +30,26 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.209] - 2026-10-08
+
+### Added — "mapping" completion: field-to-field copies
+- In a keyed or empty struct literal (`dst := Dto{<caret>}`, `return Dto{Name: src.Name, <caret>}`) and on a fresh line after assignments
+  `dst.Name = src.Name`, `GoMappingCompletion` offers one item per field of the target not written yet with the best expression in scope
+  for it — a local, parameter or receiver, their fields, and the receiver's fields one level deeper (`src.Name`, `u.Profile.Email`) — whose
+  type is assignable to the field, plus "Map all remaining fields from src" that writes every confident match at once in declaration order
+  (a literal: through `GoFillStruct.plan` with the values, aligned as gofmt writes them; a block: one assignment per line with the indentation).
+  Items carry the grey tail `map`; a single literal item gets the trailing comma when it ends its line.
+- Score of a (field, expression) pair: 0.6 × name similarity (1 equal, 0.9 ignoring case, 0.7 prefix / suffix like `UserID` ↔ `ID`, else
+  0.6 × Jaccard of the camel-case tokens) + 0.3 when the expression comes from the "mapping partner" (the variable the neighbouring elements or
+  assignments copy from) + 0.1 for an identical type; −0.2 for an expression named like another field of the target (`src.ID` is `ID`'s, not
+  `Age`'s). Offered from 0.4, "Map all" takes ≥ 0.7 (and needs two of them). The items go above the ordinary candidates (below the Fill items)
+  only when the context is clearly a mapping — a previous assignment to the same target, a neighbour copying from a partner, or an empty literal
+  with a confident match; otherwise after them. The target variable is never a source of its own fields.
+- Setting "Offer field-to-field copies" (Settings | Go | Editor and Completion, on; `GoCompletionAssistSettings`, `golang-support-completion.xml`);
+  off, nothing is computed. PSI and statistics only: works in the plain build, needs no model.
+- `GoMappingCompletionTest` (17 tests: the literal, the partner, type mismatch, written fields, the receiver's nested fields, the comma rules,
+  Map all in a literal and in a block, the block order, the target excluded, no items without an assignment above, the setting, the similarity).
+
 ## [0.2.208] - 2026-10-08
 
 ### Changed

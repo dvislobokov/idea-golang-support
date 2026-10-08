@@ -138,6 +138,7 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
             }
             return elements
         }
+
     }
 
     /** A scored element with the ranker's marker as grey tail text; everything else (insert, lookup strings, user data) is the delegate's. */
@@ -217,6 +218,7 @@ private object GoBasicCompletion {
         when (context.kind) {
             Kind.STATEMENT, Kind.EXPRESSION -> {
                 structKeys(context, out, result)
+                GoMappingCompletion.collectStatements(context, result)
                 scope = expression(context, result, out)
             }
             Kind.STRUCT_KEY -> {
@@ -313,6 +315,7 @@ private object GoBasicCompletion {
         if (!context.keyOnly && elements.any { it !== current && it.key == null }) return true
         GoFillStructCompletion.collect(context, literal, current, result)
         val used = elements.filter { it !== current }.mapNotNull { (it.key?.expression as? GoReferenceExpression)?.identifier?.text }.toSet()
+        GoMappingCompletion.collectLiteral(context, literal, literalType, current, used, result)
         GoMemberCandidates(context).structKeys(literalType, used, out)
         return true
     }
