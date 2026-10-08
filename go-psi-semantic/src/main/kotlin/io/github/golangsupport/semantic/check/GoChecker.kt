@@ -68,6 +68,10 @@ import io.github.golangsupport.semantic.api.GoDiagnostic
 import io.github.golangsupport.semantic.infer.GoExpressionTyper
 import io.github.golangsupport.semantic.infer.GoInference
 import io.github.golangsupport.semantic.psi.GoPsiUtil
+import io.github.golangsupport.project.api.GoImportResolution
+import io.github.golangsupport.project.api.GoModuleGraphProvider
+import io.github.golangsupport.project.api.GoPackageResolver
+import io.github.golangsupport.project.api.GoToolchainProvider
 import io.github.golangsupport.semantic.psi.GoPsiUtil.arguments
 import io.github.golangsupport.semantic.psi.GoPsiUtil.condition
 import io.github.golangsupport.semantic.psi.GoPsiUtil.elements
@@ -125,7 +129,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         private const val MAX_UNION_TERMS = 100
 
         /** Classes never dropped by the containment filter. */
-        private val KEEP_ALWAYS = setOf("unused-import", "unused-variable", "unused-label", "redeclared", "unused-value", "not-constant", "missing-return", "init-cycle")
+        private val KEEP_ALWAYS = setOf("missing-package", "unused-import", "unused-variable", "unused-label", "redeclared", "unused-value", "not-constant", "missing-return", "init-cycle")
 
         /** Classes that never cause an enclosing diagnostic to be dropped. */
         private val NEVER_INNER = setOf("unused-variable", "unused-label", "map-key", "misplaced-constraint")
@@ -351,7 +355,32 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             is PsiType -> checkTypeNode(e)
             is io.github.golangsupport.lang.psi.GoConstraintElem -> checkUnion(e)
             is GoLabelRef -> GoScopes.resolveLabel(e, e.identifier?.text ?: "")?.let { usedLabels += it }
+            is GoImportSpec -> checkImportSpec(e)
         }
+    }
+
+    // --- imports ---
+
+    /**
+     * `cannot find package "p"` on the path of an import no directory provides (go build: the package is not in GOROOT, the module
+     * graph or GOPATH). Conservative: needs a known GOROOT; a path outside the standard library needs a module graph (lone files and
+     * GOPATH-style code are not modelled); importers inside GOROOT or the module cache are not checked. go/types marks a failed import
+     * used, so no `imported and not used` follows; qualified uses of it stay silent (no cascade).
+     */
+    private fun checkImportSpec(spec: GoImportSpec) {
+        val path = spec.path
+        if (path.isEmpty() || path == "C") return
+        val vf = GoPsiUtil.originalVirtualFile(file)
+        val protocol = vf.fileSystem.protocol
+        if (protocol != "file" && protocol != "temp") return
+        val toolchain = GoToolchainProvider.getInstance().toolchainFor(project) ?: return
+        val goroot = toolchain.goroot ?: return
+        vf.fileSystem.getNioPath(vf)?.let { p -> if (p.startsWith(goroot) || toolchain.gomodcache?.let(p::startsWith) == true) return }
+        if (GoPackageResolver.getInstance(project).resolveImport(path, vf) !is GoImportResolution.Unresolved) return
+        val std = !path.substringBefore('/').contains('.')
+        if (!std && GoModuleGraphProvider.getInstance(project).graphFor(vf) == null) return
+        usedImports += spec
+        report(spec.stringLiteral, "cannot find package \"$path\"", "missing-package")
     }
 
     // --- control flow ---

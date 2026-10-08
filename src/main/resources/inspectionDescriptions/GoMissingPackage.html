@@ -1,0 +1,8 @@
+<html>
+<body>
+Reports an import whose package cannot be found: it is not in the standard library, in the modules required by <code>go.mod</code>
+or in the module cache (<code>cannot find package "p"</code>), a build error in Go.
+<p>Quick fixes: <b>Sync dependencies of &lt;module&gt;</b> runs <code>go get &lt;path&gt;</code> in the module root,
+<b>Run go mod tidy</b> runs <code>go mod tidy</code> there. A file outside any module gets no fixes.</p>
+</body>
+</html>

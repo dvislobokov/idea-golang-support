@@ -30,6 +30,29 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.215] - 2026-10-08
+
+- **Cannot find package** (seen live 2026-10-08: in `echo-sample` an import of `github.com/labstack/echo/v5` missing from go.mod was not
+  marked at all, and Alt+Enter offered nothing). The checker now reports `cannot find package "p"` (code `missing-package`) on the path
+  string of every import that no directory provides: not in GOROOT, the module graph or GOPATH. It is conservative: it needs a known
+  GOROOT; a path outside the standard library needs a module graph (lone files and GOPATH-style code are not checked); files inside
+  GOROOT or the module cache are not checked; `"C"` never. As in go/types, a failed import counts as used (no `imported and not used`
+  on top of it), and qualified uses such as `echo.New()` stay silent (no cascade). The check runs in the package-level pass of the
+  incremental checker; split equals monolithic.
+- New inspection **Cannot find package** (`GoMissingPackage`, group Go, ERROR, on by default). It lives in the host plugin because its
+  fixes run `go`: **Sync dependencies of <module>** runs `go get <path>` in the module root; **Run go mod tidy** runs `go mod tidy`
+  there. Both run in the background (Build window). On success the new module-cache directories are made known to the VFS, the project
+  model is bumped and the daemon restarts. A file outside any module gets no fixes. The Sync fix is offered only for a well-formed
+  import path (`isSafeImportPath`: non-empty, no leading `-`, only `[A-Za-z0-9._~/+-]`, no empty, `.` or `..` elements), because the
+  path is source text passed to `go get`.
+- `GoDiagnosticClasses.MISSING_PACKAGE` (in `CLAIMED`, so the catch-all `GoChecker` inspection does not repeat it); a row in
+  `docs/guide.html`.
+- Files: `go-psi-semantic/.../semantic/check/GoChecker.kt`, `go-psi-ide/.../ide/inspections/GoDiagnostics.kt`,
+  `src/main/kotlin/io/github/golangsupport/mod/GoMissingPackageInspection.kt` (new), `src/main/resources/META-INF/plugin.xml`,
+  `src/main/resources/inspectionDescriptions/GoMissingPackage.html` (new), `docs/guide.html`, fixture `testData/project/missingpkg/` (new).
+- Tests: `GoMissingPackageCheckTest` (go-psi-semantic), `GoMissingPackageInspectionTest` (root: fixes offered in a module, none outside,
+  flag-like path gets only tidy).
+
 ## [0.2.214] - 2026-10-08
 
 ### Added — import choice by corpus statistics (engine e20)

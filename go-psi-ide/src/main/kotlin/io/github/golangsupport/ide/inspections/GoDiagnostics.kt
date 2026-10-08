@@ -26,9 +26,11 @@ object GoDiagnosticClasses {
     val DUPLICATE = setOf("redeclared", "no-new-variables", "duplicate-case", "duplicate-default")
     val GENERICS = setOf("cannot-infer", "inference", "constraint", "type-args", "generic-no-instantiation")
     val MISSING_RETURN = setOf("missing-return")
+    /** `cannot find package "p"`: reported by the host plugin's inspection (its fixes run `go get` / `go mod tidy`). */
+    val MISSING_PACKAGE = setOf("missing-package")
 
     /** Every class owned by a specific inspection. */
-    val CLAIMED: Set<String> = UNRESOLVED + UNUSED_IMPORT + UNUSED_VARIABLE + UNUSED_LABEL + TYPE_MISMATCH + ARITY + DUPLICATE + GENERICS + MISSING_RETURN
+    val CLAIMED: Set<String> = UNRESOLVED + UNUSED_IMPORT + UNUSED_VARIABLE + UNUSED_LABEL + TYPE_MISMATCH + ARITY + DUPLICATE + GENERICS + MISSING_RETURN + MISSING_PACKAGE
 
     /**
      * Classes with known false positives in the GOROOT corpus gate

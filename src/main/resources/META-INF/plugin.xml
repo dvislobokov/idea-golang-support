@@ -263,6 +263,9 @@
                          enabledByDefault="true" level="WARNING" implementationClass="io.github.golangsupport.mod.GoModMigrateToWorkspaceInspection"/>
         <localInspection language="GoModule" shortName="VgoUnresolvedIgnorePath" displayName="Unresolved path in 'ignore' directive" groupName="Go modules"
                          enabledByDefault="true" level="WARNING" implementationClass="io.github.golangsupport.mod.GoModUnresolvedIgnorePathInspection"/>
+        <!-- the checker's "cannot find package" on an import path; fixes run go get / go mod tidy (GoCli), so the inspection is here, not in go-psi-ide -->
+        <localInspection language="Go" shortName="GoMissingPackage" displayName="Cannot find package" groupName="Go" enabledByDefault="true" level="ERROR"
+                         implementationClass="io.github.golangsupport.mod.GoMissingPackageInspection"/>
         <!-- govulncheck results kept per module by GoVulnService (background runs while Settings | Go | Linters turns them on, Go | Check Vulnerabilities) -->
         <localInspection language="Go" shortName="GoVulnerablePackageImport" displayName="Vulnerable API usage (imports)" groupPath="Go" groupName="Security"
                          enabledByDefault="true" level="WARNING" implementationClass="io.github.golangsupport.lint.GoVulnerablePackageImportInspection"/>
