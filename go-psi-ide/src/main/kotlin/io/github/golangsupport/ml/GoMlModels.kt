@@ -15,7 +15,8 @@ import io.github.completionml.core.nn.NnModel
 import io.github.completionml.core.nn.NnSession
 import io.github.completionml.core.nn.native.NativeLib
 import io.github.completionml.core.rank.FeatureExtractor
-import io.github.completionml.core.rank.LinearRanker
+import io.github.completionml.core.rank.Ranker
+import io.github.completionml.core.rank.Rankers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -46,9 +47,9 @@ import java.util.concurrent.atomic.AtomicReference
 @Service(Service.Level.APP)
 class GoMlModels : GoNnEngine, Disposable {
     /** Everything the ranker needs, built once per model set. */
-    class Loaded(val lm: NgramModel, val ranker: LinearRanker, val source: String) {
+    class Loaded(val lm: NgramModel, val ranker: Ranker, val source: String) {
         val extractor = FeatureExtractor(GoMlFeatures.schema, lm.vocab, lm, CACHE_LAMBDA)
-        val description: String get() = "$source: ${lm.vocab.size} words, ${ranker.schema.size} weights"
+        val description: String get() = "$source: ${lm.vocab.size} words, ${ranker.description}"
     }
 
     /**
@@ -265,13 +266,13 @@ class GoMlModels : GoNnEngine, Disposable {
         val cl = GoMlModels::class.java.classLoader
         val lm = cl.getResourceAsStream("$RESOURCE_DIR/lm.cml") ?: return null
         val rank = cl.getResourceAsStream("$RESOURCE_DIR/rank.cml") ?: return null
-        return Loaded(NgramModel.read(lm, "bundled lm.cml"), LinearRanker.read(rank, "bundled rank.cml"), "bundled")
+        return Loaded(NgramModel.read(lm, "bundled lm.cml"), Rankers.read(rank, "bundled rank.cml"), "bundled")
     }
 
     private fun loadDirectory(dir: File): Loaded? {
         val lm = File(dir, "lm.cml"); val rank = File(dir, "rank.cml")
         if (!lm.isFile || !rank.isFile) return null
-        return Loaded(NgramModel.read(lm), LinearRanker.read(rank), dir.path)
+        return Loaded(NgramModel.read(lm), Rankers.read(rank), dir.path)
     }
 
     /** On [executor]: reads, builds and warms up the network of [key] (see [nnKey]). */

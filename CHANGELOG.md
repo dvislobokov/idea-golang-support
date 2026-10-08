@@ -30,6 +30,14 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.211] - 2026-10-08
+
+### Changed — GBDT ranker (engine e19) in the ML build
+- `ml-models/go/e19-rank-gbdt.cml` (321 trees, 161 KB) ships as `rank.cml` instead of the linear `e17b-rank.cml`: on the 100 held-out
+  test repositories MRR 0.834 / top-1 0.750 vs 0.799 / 0.700 (plugin rules 0.513 / 0.380), 0.4 ms per list of 50 candidates on one core.
+  `GoMlModels` loads any ranker through `Rankers.read` (linear or tree, by the `.cml` kind), so `-Pml.models=<dir>` works with both.
+- ml-core synced to the engine 0bcfb9f (`Ranker` interface, `TreeRanker`).
+
 ## [0.2.210] - 2026-10-08
 
 ### Added — the ranker learns from what is accepted ("learns from me")
