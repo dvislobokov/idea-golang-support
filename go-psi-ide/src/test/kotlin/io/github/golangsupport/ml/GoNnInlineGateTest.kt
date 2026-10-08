@@ -94,4 +94,15 @@ class GoNnInlineGateTest : GoIdeTestBase() {
         assertFalse(GoNnInline.inStringOrComment("s := \"a\\\\\"", 10))  // an escaped backslash before the closing quote does
         assertTrue(GoNnInline.inStringOrComment("/* open", 7))
     }
+
+    fun testLiteralKindTellsStringsFromComments() {
+        // strings are allowed by default (log and error messages), comments are not: the kind decides which setting applies
+        assertEquals(GoNnInline.Literal.STRING, GoNnInline.literalAt("log.Printf(\"failed to ", 19))
+        assertEquals(GoNnInline.Literal.STRING, GoNnInline.literalAt("r := `raw", 9))
+        assertEquals(GoNnInline.Literal.COMMENT, GoNnInline.literalAt("// a note", 9))
+        assertEquals(GoNnInline.Literal.COMMENT, GoNnInline.literalAt("/* open", 7))
+        assertNull(GoNnInline.literalAt("s := \"a\"", 9))
+        assertTrue(GoMlSettings.getInstance().inlineInStrings)
+        assertFalse(GoMlSettings.getInstance().inlineInComments)
+    }
 }

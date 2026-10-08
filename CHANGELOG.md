@@ -30,6 +30,13 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.213] - 2026-10-08
+
+### Changed
+- Grey text inside string and rune literals is back ON by default (log and error messages, format strings: the model continues them like
+  code); only comments stay suppressed. The single setting of 0.2.212 became two: "Suggest inside string literals" (on) and "Suggest
+  inside comments" (off); `GoNnInline.literalAt` tells the kind (`STRING` / `COMMENT`) the provider gates on.
+
 ## [0.2.212] - 2026-10-08
 
 ### Changed — quick wins of the grey text

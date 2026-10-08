@@ -51,7 +51,8 @@ class GoMlConfigurable(@Suppress("UNUSED_PARAMETER") project: Project) : BoundCo
             }
             row { checkBox(GoBundle.message("ml.inline.showClosers")).bindSelected(settings::inlineShowClosers).comment(GoBundle.message("ml.inline.showClosers.comment")) }
             row { checkBox(GoBundle.message("ml.inline.guessStrings")).bindSelected(settings::inlineGuessStrings).comment(GoBundle.message("ml.inline.guessStrings.comment")) }
-            row { checkBox(GoBundle.message("ml.inline.inStringsAndComments")).bindSelected(settings::inlineInStringsAndComments).comment(GoBundle.message("ml.inline.inStringsAndComments.comment")) }
+            row { checkBox(GoBundle.message("ml.inline.inStrings")).bindSelected(settings::inlineInStrings).comment(GoBundle.message("ml.inline.inStrings.comment")) }
+            row { checkBox(GoBundle.message("ml.inline.inComments")).bindSelected(settings::inlineInComments).comment(GoBundle.message("ml.inline.inComments.comment")) }
             row(GoBundle.message("ml.inline.emptyLineThreshold")) {
                 spinner(0.05..0.99, 0.05).bindValue(settings::inlineEmptyLineThreshold).comment(GoBundle.message("ml.inline.emptyLineThreshold.comment"))
             }

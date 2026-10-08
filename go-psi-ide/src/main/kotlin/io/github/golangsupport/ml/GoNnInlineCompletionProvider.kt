@@ -102,38 +102,46 @@ object GoNnInline {
 
     /**
      * True when the caret stands inside a string, raw string or rune literal or in a comment (`// ⟨⟩` included), where the grey text is
-     * free text and off unless [GoMlSettings.inlineInStringsAndComments]; right after the closing quote or the end of a block comment it is code again.
+     * gated by [GoMlSettings.inlineInStrings] (on: log and error messages are code-like) and [GoMlSettings.inlineInComments] (off: prose); right after the closing quote or the end of a block comment it is code again.
      * From the PSI token at the caret while the document is committed, else from the lexer of go-psi over the text (the request of a
      * typing event comes with the cached PSI, which may be behind the document).
      */
-    fun inStringOrComment(file: PsiFile, document: Document, offset: Int): Boolean {
-        if (offset <= 0) return false
-        if (!PsiDocumentManager.getInstance(file.project).isCommitted(document)) return inStringOrComment(document.immutableCharSequence, offset)
-        val leaf = file.findElementAt(offset - 1) ?: return false
+    fun inStringOrComment(file: PsiFile, document: Document, offset: Int): Boolean = literalAt(file, document, offset) != null
+
+    /** [inStringOrComment] over the text alone: the token of the lexer that holds the byte before the caret. */
+    fun inStringOrComment(text: CharSequence, offset: Int): Boolean = literalAt(text, offset) != null
+
+    /** What the caret is inside of: a string / rune literal, a comment, or nothing (code). */
+    enum class Literal { STRING, COMMENT }
+
+    /** [Literal] at the caret, or null in code; the string kind is gated by [GoMlSettings.inlineInStrings], the comment kind by [GoMlSettings.inlineInComments]. */
+    fun literalAt(file: PsiFile, document: Document, offset: Int): Literal? {
+        if (offset <= 0) return null
+        if (!PsiDocumentManager.getInstance(file.project).isCommitted(document)) return literalAt(document.immutableCharSequence, offset)
+        val leaf = file.findElementAt(offset - 1) ?: return null
         val range = leaf.textRange
         return inText(leaf.node.elementType, range.endOffset, leaf.text, offset)
     }
 
-    /** [inStringOrComment] over the text alone: the token of the lexer that holds the byte before the caret. */
-    fun inStringOrComment(text: CharSequence, offset: Int): Boolean {
-        if (offset <= 0) return false
+    fun literalAt(text: CharSequence, offset: Int): Literal? {
+        if (offset <= 0) return null
         val lexer = GoLexer()
         lexer.start(text, 0, text.length, 0)
         while (true) {
-            val type = lexer.tokenType ?: return false
+            val type = lexer.tokenType ?: return null
             if (lexer.tokenEnd >= offset) return inText(type, lexer.tokenEnd, lexer.tokenSequence, offset)
             lexer.advance()
         }
     }
 
-    /** The token [type] that ends at [end] (its [text]) holds the byte before the caret at [offset]: is the caret in its text? */
-    private fun inText(type: IElementType, end: Int, text: CharSequence, offset: Int): Boolean = when (type) {
-        GoTypes.STRING -> offset < end || !closed(text, '"', escapes = true)
-        GoTypes.CHAR -> offset < end || !closed(text, '\'', escapes = true)
-        GoTypes.RAW_STRING -> offset < end || !closed(text, '`', escapes = false)
-        GoTypes.LINE_COMMENT -> text[offset - 1 - (end - text.length)] != '\n'   // to the end of its line (`// ⟨⟩` included), not the next line
-        GoTypes.BLOCK_COMMENT -> offset < end || !(text.length >= 4 && text.endsWith("*/"))
-        else -> false
+    /** The token [type] that ends at [end] (its [text]) holds the byte before the caret at [offset]: which literal is the caret in? */
+    private fun inText(type: IElementType, end: Int, text: CharSequence, offset: Int): Literal? = when (type) {
+        GoTypes.STRING -> Literal.STRING.takeIf { offset < end || !closed(text, '"', escapes = true) }
+        GoTypes.CHAR -> Literal.STRING.takeIf { offset < end || !closed(text, '\'', escapes = true) }
+        GoTypes.RAW_STRING -> Literal.STRING.takeIf { offset < end || !closed(text, '`', escapes = false) }
+        GoTypes.LINE_COMMENT -> Literal.COMMENT.takeIf { text[offset - 1 - (end - text.length)] != '\n' }   // to the end of its line (`// ⟨⟩` included), not the next line
+        GoTypes.BLOCK_COMMENT -> Literal.COMMENT.takeIf { offset < end || !(text.length >= 4 && text.endsWith("*/")) }
+        else -> null
     }
 
     /** True when the literal [text] ends with its closing [quote] (not an escaped one). */
@@ -296,7 +304,7 @@ object GoNnInline {
  * Grey text to the end of the line from our transformer ([GoMlModels], `NnCompletion` of the engine) while typing in a Go file or on an
  * explicit call; Tab accepts it. Only what the model's policy shows (`confProd ≥` [GoMlSettings.inlineThreshold], no lone closers unless
  * [GoMlSettings.inlineShowClosers]), otherwise nothing; nothing inside a string literal or a comment unless
- * [GoMlSettings.inlineInStringsAndComments] (the network is not even asked there).
+ * [GoMlSettings.inlineInStrings] / [GoMlSettings.inlineInComments] (the network is not even asked there).
  *
  * With the completion list open the platform arbitrates Tab itself: `InlineCompletionActionsPromoter` puts `InsertInlineCompletionAction`
  * first while the grey text is shown and `InlineCompletionHandler.insert()` hides the lookup, so one Tab inserts the grey text only (the
@@ -335,7 +343,9 @@ class GoNnInlineCompletionProvider internal constructor(private val engine: () -
         }
         answered = null
         val context = readAction {
-            if (!GoMlSettings.getInstance().inlineInStringsAndComments && GoNnInline.inStringOrComment(request.file, request.document, request.endOffset)) null
+            val settings = GoMlSettings.getInstance()
+            val literal = GoNnInline.literalAt(request.file, request.document, request.endOffset)
+            if (literal == GoNnInline.Literal.STRING && !settings.inlineInStrings || literal == GoNnInline.Literal.COMMENT && !settings.inlineInComments) null
             else GoNnInline.context(request.document.immutableCharSequence, request.endOffset, path(request.file))
         } ?: return InlineCompletionSuggestion.Empty
         return GoNnInline.suggestion(GoNnInline.text(engine().complete(request.editor, context), context.after, context.before))
