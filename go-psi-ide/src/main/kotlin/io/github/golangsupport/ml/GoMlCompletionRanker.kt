@@ -2,6 +2,7 @@ package io.github.golangsupport.ml
 
 import io.github.completionml.core.rank.FeatureSchema
 import io.github.completionml.core.rank.FileState
+import io.github.golangsupport.ide.completion.GoCompletionAssistSettings
 import io.github.golangsupport.ide.completion.api.GoCompletionCandidate
 import io.github.golangsupport.ide.completion.api.GoCompletionRanker
 import io.github.golangsupport.ide.completion.api.GoCompletionRankingContext
@@ -17,6 +18,9 @@ import io.github.golangsupport.ide.completion.api.GoCompletionRankingContext
 class GoMlCompletionRanker : GoCompletionRanker {
     /** "ML" after the rows the model ordered, while the setting asks for it (on by default: a tester must see what is the model's). */
     override val marker: String? get() = if (GoMlSettings.getInstance().showMarker) "ML" else null
+
+    /** The scores are logits: the acceptance memory adds `weight × ln(1 + count)` ([GoCompletionAssistSettings.acceptanceWeight], 0.3). */
+    override val acceptanceWeight: Double get() = GoCompletionAssistSettings.getInstance().acceptanceWeight
 
     override fun rank(context: GoCompletionRankingContext, candidates: List<GoCompletionCandidate>): List<Double>? {
         if (candidates.size < 2) return null

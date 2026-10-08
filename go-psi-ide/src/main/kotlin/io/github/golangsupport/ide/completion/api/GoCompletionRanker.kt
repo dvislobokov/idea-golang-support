@@ -29,6 +29,14 @@ interface GoCompletionRanker {
      */
     val marker: String? get() = null
 
+    /**
+     * How the acceptance memory of the project (`GoAcceptanceMemory`: what the user chose before in lists of the same context kind)
+     * joins this ranker's scores: a positive weight adds `weight × ln(1 + count)` to the score of every candidate (a model whose
+     * scores are logits); 0 means the score is tiered (expected-type match, scope level) and the `GoAcceptanceWeigher` orders by
+     * the count inside the tiers instead. Read once per list, after a successful [rank].
+     */
+    val acceptanceWeight: Double get() = 0.0
+
     companion object {
         @JvmField
         val EP_NAME: ExtensionPointName<GoCompletionRanker> = ExtensionPointName.create("io.github.golangsupport.completionRanker")

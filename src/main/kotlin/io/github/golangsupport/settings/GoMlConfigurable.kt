@@ -10,6 +10,7 @@ import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.bindValue
 import com.intellij.ui.dsl.builder.panel
 import io.github.golangsupport.GoBundle
+import io.github.golangsupport.ide.completion.GoCompletionAssistSettings
 import io.github.golangsupport.ml.GoMlModels
 import io.github.golangsupport.ml.GoMlSettings
 import javax.swing.JLabel
@@ -27,6 +28,9 @@ class GoMlConfigurable(@Suppress("UNUSED_PARAMETER") project: Project) : BoundCo
     override fun createPanel(): DialogPanel = panel {
         row { checkBox(GoBundle.message("ml.enabled")).bindSelected(settings::enabled).comment(GoBundle.message("ml.enabled.comment")) }
         row { checkBox(GoBundle.message("ml.showMarker")).bindSelected(settings::showMarker).comment(GoBundle.message("ml.showMarker.comment")) }
+        row(GoBundle.message("ml.acceptanceWeight")) {
+            spinner(0.0..2.0, 0.1).bindValue(GoCompletionAssistSettings.getInstance()::acceptanceWeight).comment(GoBundle.message("ml.acceptanceWeight.comment"))
+        }
         row(GoBundle.message("ml.modelDirectory")) {
             textFieldWithBrowseButton(FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(GoBundle.message("ml.modelDirectory")))
                 .align(AlignX.FILL).bindText(settings::modelDirectory).comment(GoBundle.message("ml.modelDirectory.comment"))

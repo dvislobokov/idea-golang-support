@@ -30,6 +30,22 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.210] - 2026-10-08
+
+### Added — the ranker learns from what is accepted ("learns from me")
+- `GoAcceptanceMemory` (project service, `$CACHE_FILE$`: the workspace cache of the project, not `.idea`, not roamed) counts every item
+  chosen from a Go completion list by context kind and lookup string (`dot|ToUpper`, `stmt|alphaStop`, `arg|…`, `key|…`, `type|…`, `top|…`,
+  `expr|…`; the kind is on `GoLookupInfo.contextKind`). The counts are halved once a month, capped at 1 000 per key and 5 000 keys. Fed by the
+  lookup listener that already keeps the in-session recency; nothing is recorded or read while the setting is off.
+- Ranking: a ranker with a model (`GoMlCompletionRanker`) gets `weight × ln(1 + count)` added to its score (`GoCompletionRanker.acceptanceWeight`,
+  the setting "Weight of accepted items" on the Smart Completion page, 0.3: three acceptances turn a close call, not a clear loss — the scores
+  are softmax logits). With the rankers without a model the new weigher `goAcceptedBefore` (before `goCompletion`) orders by the count inside
+  the deterministic buckets (expected-type match, scope level), so a count never beats a closer or better-typed candidate.
+- Settings | Go | Editor and Completion: "Learn from what I accept" (on) and the "Reset Memory" button. The counters are documented for the
+  engine side in `ML_ACCEPTANCE.md` (`GoAcceptanceMemory.snapshot()`), a future ranker feature.
+- `GoAcceptanceMemoryTest` (persistence, decay, cap, the weigher by kind, no effect across the deterministic order, the additive bonus of a
+  ranker with a model, off, the listener, the kind on the lookup info).
+
 ## [0.2.209] - 2026-10-08
 
 ### Added — "mapping" completion: field-to-field copies

@@ -8,11 +8,14 @@ class GoHeuristicRankerTest : GoCompletionTestBase() {
     override fun setUp() {
         super.setUp()
         GoCompletionRecency.getInstance(project).clear()
+        GoAcceptanceMemory.getInstance(project).clear()
     }
 
     override fun tearDown() {
         try {
             GoCompletionRecency.getInstance(project).clear()
+            // the chosen item of testAChosenItemIsRemembered is counted by the acceptance memory too (one light project for every test)
+            GoAcceptanceMemory.getInstance(project).clear()
         } finally {
             super.tearDown()
         }

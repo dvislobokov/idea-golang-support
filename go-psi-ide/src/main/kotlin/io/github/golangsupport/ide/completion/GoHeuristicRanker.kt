@@ -121,14 +121,17 @@ class GoCompletionRecency {
     }
 }
 
-/** Feeds [GoCompletionRecency] with the Go items chosen from a list (a project listener of the lookup manager). */
+/** Feeds [GoCompletionRecency] and [GoAcceptanceMemory] with the Go items chosen from a list (a project listener of the lookup manager). */
 class GoCompletionRecencyListener(private val project: Project) : LookupManagerListener {
     override fun activeLookupChanged(oldLookup: Lookup?, newLookup: Lookup?) {
         newLookup?.addLookupListener(object : LookupListener {
             override fun itemSelected(event: LookupEvent) {
                 val item = event.item ?: return
                 if (!recording()) return
-                if (GoCompletionWeigher.infoOf(item) != null && !project.isDisposed) GoCompletionRecency.getInstance(project).record(item.lookupString)
+                val info = GoCompletionWeigher.infoOf(item) ?: return
+                if (project.isDisposed) return
+                GoCompletionRecency.getInstance(project).record(item.lookupString)
+                if (GoCompletionAssistSettings.getInstance().acceptanceEnabled) GoAcceptanceMemory.getInstance(project).record(info.contextKind, item.lookupString)
             }
         })
     }

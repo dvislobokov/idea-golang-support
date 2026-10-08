@@ -12,6 +12,9 @@
                             implementationClass="io.github.golangsupport.ide.completion.GoCommentCompletionContributor"/>
     <completion.contributor language="Go" id="goEmbedCompletion"
                             implementationClass="io.github.golangsupport.ide.directives.GoEmbedCompletionContributor"/>
+    <!-- What the user accepted before in this kind of position (GoAcceptanceMemory) decides inside the buckets of goCompletion. -->
+    <weigher key="completion" id="goAcceptedBefore" order="after priority, before goCompletion"
+             implementationClass="io.github.golangsupport.ide.completion.GoAcceptanceWeigher"/>
     <weigher key="completion" id="goCompletion" order="after priority, before prefix"
              implementationClass="io.github.golangsupport.ide.completion.GoCompletionWeigher"/>
     <weigher key="completion" id="goAlphabetical" order="after proximity, before grouping"

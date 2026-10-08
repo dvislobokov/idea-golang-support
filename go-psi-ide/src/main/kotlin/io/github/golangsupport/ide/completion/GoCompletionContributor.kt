@@ -133,12 +133,31 @@ class GoCompletionContributor : CompletionContributor(), DumbAware {
                 } ?: continue
                 if (scores.size != candidates.size) continue
                 infos.forEachIndexed { i, info -> info.rankerScore = scores[i] }
+                applyAcceptance(infos, elements, ranker.acceptanceWeight, context)
                 val marker = ranker.marker ?: return elements
                 return elements.map { MarkedElement(it, marker) }
             }
             return elements
         }
 
+        /**
+         * The acceptance memory of the project on top of the ranker's scores: with a positive [weight] the bonus goes into the score
+         * ([GoAcceptanceMemory.bonus]), otherwise the count is left for [GoAcceptanceWeigher]. Nothing is read while the memory is off.
+         */
+        private fun applyAcceptance(infos: List<GoLookupInfo>, elements: List<LookupElement>, weight: Double, context: GoCompletionContext) {
+            if (!GoCompletionAssistSettings.getInstance().acceptanceEnabled) return
+            val memory = GoAcceptanceMemory.getInstance(context.file.project)
+            val kind = GoAcceptanceMemory.kindOf(context)
+            for ((i, info) in infos.withIndex()) {
+                val count = memory.count(kind, elements[i].lookupString)
+                if (weight > 0.0) {
+                    info.acceptanceInScore = true
+                    if (count > 0) info.rankerScore = (info.rankerScore ?: 0.0) + GoAcceptanceMemory.bonus(weight, count)
+                } else {
+                    info.acceptedCount = count
+                }
+            }
+        }
     }
 
     /** A scored element with the ranker's marker as grey tail text; everything else (insert, lookup strings, user data) is the delegate's. */

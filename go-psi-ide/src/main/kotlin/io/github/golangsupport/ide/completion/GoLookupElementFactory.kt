@@ -72,6 +72,18 @@ class GoLookupInfo(
     @Volatile
     var rankerScore: Double? = null
 
+    /** The context kind of the position ([GoAcceptanceMemory.kindOf]): the first half of the acceptance key. */
+    @Volatile
+    var contextKind: String = GoAcceptanceMemory.KIND_EXPRESSION
+
+    /** Acceptances of this lookup string in this context kind, when [GoAcceptanceWeigher] is to order by them; 0 otherwise. */
+    @Volatile
+    var acceptedCount: Int = 0
+
+    /** True when the ranker's score already carries the acceptance bonus (the weigher stays neutral then). */
+    @Volatile
+    var acceptanceInScore: Boolean = false
+
     companion object {
         val KEY: Key<GoLookupInfo> = Key.create("gopsi.completion.info")
     }
@@ -132,7 +144,9 @@ object GoLookupElementFactory {
         val handler = candidate.insertHandler ?: defaultInsertHandler(candidate, context, expected)
         if (handler != null) builder = builder.withInsertHandler(handler)
         if (candidate.kind == GoCandidateKind.KEYWORD) builder = builder.withCaseSensitivity(true)
-        builder.putUserData(GoLookupInfo.KEY, GoLookupInfo(candidate.name, candidate.kind, candidate.level, match, candidate.element))
+        val info = GoLookupInfo(candidate.name, candidate.kind, candidate.level, match, candidate.element)
+        info.contextKind = GoAcceptanceMemory.kindOf(context)
+        builder.putUserData(GoLookupInfo.KEY, info)
         return builder
     }
 
