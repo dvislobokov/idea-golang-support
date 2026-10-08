@@ -21,7 +21,7 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
         /** A directory with `lm.cml` and `rank.cml` to use instead of the bundled models (for trying a new training); empty: bundled. */
         var modelDirectory by string("")
         /** Grey "ML" after the rows the model ordered. */
-        var showMarker by property(true)
+        var showMarker by property(false)
         /** Grey text to the end of the line from the transformer ([GoNnInlineCompletionProvider]); off: the network is not even loaded. */
         var inlineEnabled by property(true)
         /** `confProd` the suggestion needs to be shown (the engine's default gate: 0.7 shows ~26 % of positions with 93 % exact lines, 0.8 ~20 % at 95 %). */

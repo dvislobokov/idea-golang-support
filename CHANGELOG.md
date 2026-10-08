@@ -30,6 +30,11 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.208] - 2026-10-08
+
+### Changed
+- The " ML" mark on the ranked completion items is off by default (`GoMlSettings.showMarker`); Settings | Go | Smart Completion turns it on.
+
 ## [0.2.207] - 2026-10-08
 
 ### Added — the grey text is ready before the first keystroke; the 31 M / 50 M switch; the real-list ranker in the ML build
