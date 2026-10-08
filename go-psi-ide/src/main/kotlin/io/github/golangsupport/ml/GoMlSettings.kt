@@ -38,6 +38,8 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
         var inlineBigModel by property(false)
         /** Every answer of the network (text, confidence, gate, shown or not) goes to the plugin log (Go | Plugin Logs, category `ml`). */
         var inlineDebugLog by property(false)
+        /** Grey text with the caret inside a string literal or a comment too (free text, the model guesses prose); off: the network is not asked there. */
+        var inlineInStringsAndComments by property(false)
     }
 
     var enabled: Boolean
@@ -83,6 +85,10 @@ class GoMlSettings : SimplePersistentStateComponent<GoMlSettings.Options>(Option
     var inlineDebugLog: Boolean
         get() = state.inlineDebugLog
         set(value) { state.inlineDebugLog = value }
+
+    var inlineInStringsAndComments: Boolean
+        get() = state.inlineInStringsAndComments
+        set(value) { state.inlineInStringsAndComments = value }
 
     companion object {
         fun getInstance(): GoMlSettings = service()

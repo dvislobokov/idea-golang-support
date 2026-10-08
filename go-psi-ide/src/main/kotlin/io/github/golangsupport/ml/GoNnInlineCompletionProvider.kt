@@ -21,11 +21,16 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.editor.Document
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.tree.IElementType
 import io.github.completionml.core.nn.NnCompletion
 import io.github.completionml.core.nn.NnSession
-import com.intellij.psi.PsiFile
 import io.github.golangsupport.lang.GoFileType
+import io.github.golangsupport.lang.lexer.GoLexer
 import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoTypes
 
 /** The network behind [GoNnInlineCompletionProvider]; [GoMlModels] implements it, tests fake it. */
 interface GoNnEngine {
@@ -71,11 +76,74 @@ object GoNnInline {
     /**
      * The grey text of [answer]: only what the model's own policy shows, without the tail that the line already has after the caret.
      * The model writes the line to its end and sees what is there: at `Validate() (int⟨⟩) {` it answered `, error) {` (seen live, accepted
-     * as `(int, error) {) {`); the engine drops such a tail only when it is closers, `{` is not one.
+     * as `(int, error) {) {`); the engine drops such a tail only when it is closers, `{` is not one. Nothing when the suggestion is what
+     * already follows the caret on the line, or when it would make the line a copy of the previous one ([repeatsPreviousLine]).
      */
-    fun text(answer: Answer?, after: ByteArray = ByteArray(0)): String? {
+    fun text(answer: Answer?, after: ByteArray = ByteArray(0), before: ByteArray = ByteArray(0)): String? {
         val text = answer?.takeIf { it.show }?.text?.takeIf { it.isNotEmpty() } ?: return null
-        return trimOverlap(text, restOfLine(after)).takeIf { it.isNotEmpty() }
+        val rest = restOfLine(after)
+        if (text == rest || repeatsPreviousLine(before, text)) return null
+        return trimOverlap(text, rest).takeIf { it.isNotEmpty() }
+    }
+
+    /**
+     * True when the line of the caret completed with [text] equals the previous line exactly: the model copied the line above
+     * (`a.Name = b.Name` twice), a repetition the engine's n-gram guard does not see because the copy is in the prompt, not in the output.
+     */
+    fun repeatsPreviousLine(before: ByteArray, text: String): Boolean {
+        val line = lineBefore(before, 0)
+        val prevEnd = before.size - line.size - 1   // the `\n` before the current line
+        if (prevEnd < 0) return false
+        var prevStart = prevEnd
+        while (prevStart > 0 && before[prevStart - 1] != '\n'.code.toByte()) prevStart--
+        if (prevEnd == prevStart) return false   // an empty previous line is no copy
+        return String(before, prevStart, prevEnd - prevStart, Charsets.UTF_8) == String(line, Charsets.UTF_8) + text
+    }
+
+    /**
+     * True when the caret stands inside a string, raw string or rune literal or in a comment (`// ⟨⟩` included), where the grey text is
+     * free text and off unless [GoMlSettings.inlineInStringsAndComments]; right after the closing quote or the end of a block comment it is code again.
+     * From the PSI token at the caret while the document is committed, else from the lexer of go-psi over the text (the request of a
+     * typing event comes with the cached PSI, which may be behind the document).
+     */
+    fun inStringOrComment(file: PsiFile, document: Document, offset: Int): Boolean {
+        if (offset <= 0) return false
+        if (!PsiDocumentManager.getInstance(file.project).isCommitted(document)) return inStringOrComment(document.immutableCharSequence, offset)
+        val leaf = file.findElementAt(offset - 1) ?: return false
+        val range = leaf.textRange
+        return inText(leaf.node.elementType, range.endOffset, leaf.text, offset)
+    }
+
+    /** [inStringOrComment] over the text alone: the token of the lexer that holds the byte before the caret. */
+    fun inStringOrComment(text: CharSequence, offset: Int): Boolean {
+        if (offset <= 0) return false
+        val lexer = GoLexer()
+        lexer.start(text, 0, text.length, 0)
+        while (true) {
+            val type = lexer.tokenType ?: return false
+            if (lexer.tokenEnd >= offset) return inText(type, lexer.tokenEnd, lexer.tokenSequence, offset)
+            lexer.advance()
+        }
+    }
+
+    /** The token [type] that ends at [end] (its [text]) holds the byte before the caret at [offset]: is the caret in its text? */
+    private fun inText(type: IElementType, end: Int, text: CharSequence, offset: Int): Boolean = when (type) {
+        GoTypes.STRING -> offset < end || !closed(text, '"', escapes = true)
+        GoTypes.CHAR -> offset < end || !closed(text, '\'', escapes = true)
+        GoTypes.RAW_STRING -> offset < end || !closed(text, '`', escapes = false)
+        GoTypes.LINE_COMMENT -> text[offset - 1 - (end - text.length)] != '\n'   // to the end of its line (`// ⟨⟩` included), not the next line
+        GoTypes.BLOCK_COMMENT -> offset < end || !(text.length >= 4 && text.endsWith("*/"))
+        else -> false
+    }
+
+    /** True when the literal [text] ends with its closing [quote] (not an escaped one). */
+    private fun closed(text: CharSequence, quote: Char, escapes: Boolean): Boolean {
+        if (text.length < 2 || text[text.length - 1] != quote) return false
+        if (!escapes) return true
+        var backslashes = 0
+        var i = text.length - 2
+        while (i >= 0 && text[i] == '\\') { backslashes++; i-- }
+        return backslashes % 2 == 0
     }
 
     /** [text] without its longest tail that is also the start of [rest] (whitespace included: `, error) {` before `) {` → `, error`). */
@@ -227,7 +295,12 @@ object GoNnInline {
 /**
  * Grey text to the end of the line from our transformer ([GoMlModels], `NnCompletion` of the engine) while typing in a Go file or on an
  * explicit call; Tab accepts it. Only what the model's policy shows (`confProd ≥` [GoMlSettings.inlineThreshold], no lone closers unless
- * [GoMlSettings.inlineShowClosers]), otherwise nothing.
+ * [GoMlSettings.inlineShowClosers]), otherwise nothing; nothing inside a string literal or a comment unless
+ * [GoMlSettings.inlineInStringsAndComments] (the network is not even asked there).
+ *
+ * With the completion list open the platform arbitrates Tab itself: `InlineCompletionActionsPromoter` puts `InsertInlineCompletionAction`
+ * first while the grey text is shown and `InlineCompletionHandler.insert()` hides the lookup, so one Tab inserts the grey text only (the
+ * list's item is never inserted on top of it); Enter chooses the list's item and the grey text goes away with the lookup.
  *
  * The platform asks only the first enabled provider, and the idioms of the host (`GoInlineIdiomsProvider`: `if err != nil` after Enter,
  * suggestions from the context) are enabled on every change in a Go file. So this provider is registered `order="first"` and asks the
@@ -261,8 +334,11 @@ class GoNnInlineCompletionProvider internal constructor(private val engine: () -
             if (suggestion !== InlineCompletionSuggestion.Empty) { answered = provider; return suggestion }
         }
         answered = null
-        val context = readAction { GoNnInline.context(request.document.immutableCharSequence, request.endOffset, path(request.file)) }
-        return GoNnInline.suggestion(GoNnInline.text(engine().complete(request.editor, context), context.after))
+        val context = readAction {
+            if (!GoMlSettings.getInstance().inlineInStringsAndComments && GoNnInline.inStringOrComment(request.file, request.document, request.endOffset)) null
+            else GoNnInline.context(request.document.immutableCharSequence, request.endOffset, path(request.file))
+        } ?: return InlineCompletionSuggestion.Empty
+        return GoNnInline.suggestion(GoNnInline.text(engine().complete(request.editor, context), context.after, context.before))
     }
 
     private fun path(file: PsiFile): String =
