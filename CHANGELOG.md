@@ -6,22 +6,6 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Unreleased — quick wins of the grey text (fold into the next version)
-- No grey text inside string, raw string and rune literals or comments: the provider looks at the PSI token at the caret (`STRING`,
-  `RAW_STRING`, `CHAR`, `LINE_COMMENT`, `BLOCK_COMMENT`) before it asks the network, or at the lexer's token while the document is not yet
-  committed; right after the closing quote or `*/` it is code again, `// ⟨caret⟩` on an empty comment stays suppressed. Setting
-  "Suggest inside strings and comments" (off) turns the gate off; the code-only confidence gate (`codeConfidence`) is unchanged — this
-  one is in addition to it
-- The thread of the network runs at a low priority (`MIN_PRIORITY + 1`) while it loads, warms up or prefills an opened file and at the
-  normal priority while a grey-text request is queued or running (`NnThread`: raised by the request, lowered when none waits; no extra
-  threads)
-- A suggestion that is exactly what already follows the caret on the line, or that would make the line a copy of the previous one (the
-  model repeating the line above: `a.Name = b.Name` twice) is dropped (`GoNnInline.repeatsPreviousLine`); the engine's own guard sees only
-  repetitions inside the generated text
-- Tab with the completion list and the grey text both shown is arbitrated by the platform (checked on 2026.1.4: `InlineCompletionActionsPromoter`
-  puts `InsertInlineCompletionAction` first while the grey text is shown and `InlineCompletionHandler.insert()` hides the lookup), so one
-  Tab inserts the grey text only, never a list item on top of it; the idioms provider's items behave the same; no change needed
-
 Versions 0.2.14–0.2.22 are wave 2 of `docs/FEATURES.md` §11 (analysis and intentions on the native PSI; all of them act only with Language features: Built-in,
 gopls keeps its own analyzers otherwise); versions 0.2.2–0.2.13 are wave 1 (editor features on the native PSI): one feature per version.
 Version 0.2.77 bundles delve as sources built on the user's machine.
@@ -45,6 +29,24 @@ Language features: Built-in.
 Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, directive comments, struct tag naming style).
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
+
+## [0.2.212] - 2026-10-08
+
+### Changed — quick wins of the grey text
+- No grey text inside string, raw string and rune literals or comments: the provider looks at the PSI token at the caret (`STRING`,
+  `RAW_STRING`, `CHAR`, `LINE_COMMENT`, `BLOCK_COMMENT`) before it asks the network, or at the lexer's token while the document is not yet
+  committed; right after the closing quote or `*/` it is code again, `// ⟨caret⟩` on an empty comment stays suppressed. Setting
+  "Suggest inside strings and comments" (off) turns the gate off; the code-only confidence gate (`codeConfidence`) is unchanged — this
+  one is in addition to it
+- The thread of the network runs at a low priority (`MIN_PRIORITY + 1`) while it loads, warms up or prefills an opened file and at the
+  normal priority while a grey-text request is queued or running (`NnThread`: raised by the request, lowered when none waits; no extra
+  threads)
+- A suggestion that is exactly what already follows the caret on the line, or that would make the line a copy of the previous one (the
+  model repeating the line above: `a.Name = b.Name` twice) is dropped (`GoNnInline.repeatsPreviousLine`); the engine's own guard sees only
+  repetitions inside the generated text
+- Tab with the completion list and the grey text both shown is arbitrated by the platform (checked on 2026.1.4: `InlineCompletionActionsPromoter`
+  puts `InsertInlineCompletionAction` first while the grey text is shown and `InlineCompletionHandler.insert()` hides the lookup), so one
+  Tab inserts the grey text only, never a list item on top of it; the idioms provider's items behave the same; no change needed
 
 ## [0.2.211] - 2026-10-08
 
