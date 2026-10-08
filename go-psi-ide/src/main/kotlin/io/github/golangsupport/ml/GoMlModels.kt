@@ -16,8 +16,6 @@ import io.github.completionml.core.nn.NnSession
 import io.github.completionml.core.nn.native.NativeLib
 import io.github.completionml.core.rank.FeatureExtractor
 import io.github.completionml.core.rank.LinearRanker
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
 import java.nio.file.FileAlreadyExistsException
@@ -27,7 +25,6 @@ import java.nio.file.attribute.PosixFilePermissions
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
@@ -76,17 +73,15 @@ class GoMlModels : GoNnEngine, Disposable {
 
     private val state = AtomicReference<State>(State.Idle)
 
-    // --- network state: [nnState] and [generation] under the lock; [current] and [sessions] only on [executor]
+    // --- network state: [nnState] and [generation] under the lock; [current] and [sessions] only on [thread]
     private var nnState: NnState = NnState.Idle
     private var generation = 0
     private var current: Nn? = null
     private val sessions = HashMap<Any, NnSession>()
-    private val executor = Executors.newSingleThreadExecutor { Thread(it, "Go NN completion").apply { isDaemon = true } }
-    private val dispatcher = executor.asCoroutineDispatcher()
+    /** The model's thread: low priority for the background work, normal while a completion waits ([NnThread]). */
+    private val thread = NnThread("Go NN completion")
     private val shown = AtomicInteger()
     private val accepted = AtomicInteger()
-    /** Completions waiting for the model's thread: a background prefill queued before them steps aside (the completion prefills itself). */
-    private val pending = AtomicInteger()
 
     /** Suggestions of the network shown since the start of the IDE (its own policy said `show`). */
     val shownCount: Int get() = shown.get()
@@ -124,7 +119,7 @@ class GoMlModels : GoNnEngine, Disposable {
             nnState = NnState.Loading
             generation
         }
-        executor.execute {
+        thread.execute {
             closeNn()
             val ready = loadNn(key)
             val stale = synchronized(this) { (generation != g).also { if (!it) { nnState = ready; current = ready.nn } } }
@@ -136,11 +131,9 @@ class GoMlModels : GoNnEngine, Disposable {
     override suspend fun complete(editor: Any, context: GoNnInline.Context): GoNnInline.Answer? {
         val settings = GoMlSettings.getInstance()
         nn(settings.modelDirectory) ?: return null
-        pending.incrementAndGet()
-        return withContext(dispatcher) {
-            pending.decrementAndGet()
+        return thread.complete {
             // a reset between the check and this task closed the model: [current] is null then
-            val nn = current ?: return@withContext null
+            val nn = current ?: return@complete null
             // the gate of this caret: lower right after a `.` (the model is as right there, less sure) and on a line with nothing typed yet
             // (the first word of a statement is one guess among a few); over the code tokens only, so a guessed string literal does not hide
             // a certain line (see GoNnInline.codeConfidence)
@@ -175,10 +168,10 @@ class GoMlModels : GoNnEngine, Disposable {
      * loaded (the load queued before it by [nn] runs first) and when a completion is already waiting — it prefills itself.
      */
     fun prefill(editor: Any, context: () -> GoNnInline.Context) {
-        if (executor.isShutdown) return
-        executor.execute {
+        if (thread.isShutdown) return
+        thread.execute {
             val nn = current ?: return@execute
-            if (pending.get() > 0) return@execute
+            if (thread.completionWaiting) return@execute
             val session = sessions.getOrPut(editor) { nn.model.newSession(SESSION_CAPACITY) }
             val started = System.nanoTime()
             val n = GoNnInline.prefill(nn.completion, session, context())
@@ -197,7 +190,7 @@ class GoMlModels : GoNnEngine, Disposable {
     }
 
     /** Frees the KV cache of a closed editor (native memory). */
-    fun release(editor: Any) { if (!executor.isShutdown) executor.execute { sessions.remove(editor)?.close() } }
+    fun release(editor: Any) { if (!thread.isShutdown) thread.execute { sessions.remove(editor)?.close() } }
 
     /** Status for the settings page: what is loaded, or why nothing is. */
     fun status(modelDirectory: String): String = when (val s = state.get()) {
@@ -228,17 +221,17 @@ class GoMlModels : GoNnEngine, Disposable {
     fun reset() {
         state.set(State.Idle)
         synchronized(this) { generation++; nnState = NnState.Idle }
-        executor.execute { closeNn() }
+        thread.execute { closeNn() }
         preload()
     }
 
     override fun dispose() {
         synchronized(this) { generation++; nnState = NnState.Idle }
-        executor.execute { closeNn() }
-        executor.shutdown()
+        thread.execute { closeNn() }
+        thread.shutdown()
     }
 
-    /** On [executor]: closes the sessions and the model. */
+    /** On [thread]: closes the sessions and the model. */
     private fun closeNn() {
         sessions.values.forEach { it.close() }
         sessions.clear()
@@ -274,7 +267,7 @@ class GoMlModels : GoNnEngine, Disposable {
         return Loaded(NgramModel.read(lm), LinearRanker.read(rank), dir.path)
     }
 
-    /** On [executor]: reads, builds and warms up the network of [key] (see [nnKey]). */
+    /** On [thread]: reads, builds and warms up the network of [key] (see [nnKey]). */
     private fun loadNn(key: String): NnState.Ready = try {
         val dir = key.substringBefore(KEY_SEPARATOR)
         val name = key.substringAfter(KEY_SEPARATOR)

@@ -38,6 +38,25 @@ class GoNnInlineTest {
         assertEquals("", GoNnInline.restOfLine("\n}".toByteArray()))
     }
 
+    @Test fun whatRepeatsTheLineIsDropped() {
+        fun b(s: String) = s.toByteArray()
+        // the suggestion is exactly what follows the caret on the line: nothing (the overlap trim leaves nothing either)
+        assertNull(GoNnInline.text(GoNnInline.Answer("items)", show = true, confProd = 0.9), b("items)\n}\n")))
+        assertEquals("o.", GoNnInline.text(GoNnInline.Answer("o.items)", show = true, confProd = 0.9), b("items)\n}\n")))
+        // the line would copy the previous one: `a.Name = b.Name` twice (the model repeats the line above)
+        assertTrue(GoNnInline.repeatsPreviousLine(b("func f() {\n\ta.Name = b.Name\n\ta."), "Name = b.Name"))
+        assertTrue(GoNnInline.repeatsPreviousLine(b("\ta.Name = b.Name\n\t"), "a.Name = b.Name"))
+        assertNull(GoNnInline.text(GoNnInline.Answer("Name = b.Name", show = true, confProd = 0.9), b("\n}\n"), b("func f() {\n\ta.Name = b.Name\n\ta.")))
+        // a different line, a longer or shorter one, a differing indentation, an empty previous line: shown
+        assertFalse(GoNnInline.repeatsPreviousLine(b("\ta.Name = b.Name\n\ta."), "Age = b.Age"))
+        assertFalse(GoNnInline.repeatsPreviousLine(b("\ta.Name = b.Name\n\ta."), "Name = b.Name2"))
+        assertFalse(GoNnInline.repeatsPreviousLine(b("\ta.Name = b.Name\n\t\ta."), "Name = b.Name"))
+        assertFalse(GoNnInline.repeatsPreviousLine(b("\n\ta."), "Name"))
+        assertFalse(GoNnInline.repeatsPreviousLine(b("\ta."), "Name"))
+        assertFalse(GoNnInline.repeatsPreviousLine(b(""), "x"))
+        assertEquals("Age = b.Age", GoNnInline.text(GoNnInline.Answer("Age = b.Age", show = true, confProd = 0.9), b("\n}\n"), b("\ta.Name = b.Name\n\ta.")))
+    }
+
     @Test fun shownAnswerGivesItsText() = assertEquals("tln(\"hi\"", shown(GoNnInline.Answer("tln(\"hi\"", show = true, confProd = 0.93)))
 
     @Test fun hiddenOrEmptyAnswerGivesNothing() {
