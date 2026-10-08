@@ -221,6 +221,7 @@ class GoMlModels : GoNnEngine, Disposable {
      */
     fun reset() {
         state.set(State.Idle)
+        GoImportStats.getInstance().reset()
         synchronized(this) { generation++; nnState = NnState.Idle }
         thread.execute { closeNn() }
         preload()

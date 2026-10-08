@@ -10,6 +10,7 @@ import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
 import io.github.golangsupport.lang.psi.*
+import io.github.golangsupport.ml.GoImportStats
 import io.github.golangsupport.semantic.psi.GoPsiUtil
 
 /**
@@ -122,6 +123,12 @@ class GoCompletionContext private constructor(val parameters: CompletionParamete
     val functionOwner: PsiElement? by lazy { GoPsiUtil.functionOwner(leaf) }
 
     val semantics: GoCompletionSemantics by lazy { GoCompletionSemantics(this) }
+
+    /** The import paths of the file (the context of the corpus import statistics). */
+    private val importPaths: List<String> by lazy { originalFile.imports.map { it.path } }
+
+    /** [GoImportStats.score] of [path] for [name] with the file's imports; null when the statistics are off, not loaded or do not know [name]. */
+    fun importStatsScore(name: String, path: String): Float? = GoImportStats.getInstance().score(name, path, importPaths)
 
     init {
         analyze()

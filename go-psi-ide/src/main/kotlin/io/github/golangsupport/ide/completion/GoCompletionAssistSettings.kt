@@ -9,7 +9,8 @@ import com.intellij.openapi.components.service
 
 /**
  * Machine-wide switches of the completion helpers that need no model (Settings | Go | Editor and Completion in the host): the
- * field-to-field "mapping" items ([GoMappingCompletion]) and the memory of accepted items ([GoAcceptanceMemory]). Kept in
+ * field-to-field "mapping" items ([GoMappingCompletion]), the memory of accepted items ([GoAcceptanceMemory]) and the order of import
+ * candidates by the corpus statistics ([io.github.golangsupport.ml.GoImportStats]). Kept in
  * go-psi-ide so that the completion code and the host's settings page share them.
  */
 @Service(Service.Level.APP)
@@ -22,6 +23,8 @@ class GoCompletionAssistSettings : SimplePersistentStateComponent<GoCompletionAs
         var acceptanceEnabled by property(true)
         /** The ML ranker's bonus per accepted item: `weight × ln(1 + count)` in score units (the rankers without a model order by the count directly). */
         var acceptanceWeight by property(DEFAULT_ACCEPTANCE_WEIGHT)
+        /** The import candidates (add-import fix, unimported packages in completion) ordered by the corpus statistics ([io.github.golangsupport.ml.GoImportStats]). */
+        var importStatsEnabled by property(true)
     }
 
     var mappingEnabled: Boolean
@@ -35,6 +38,10 @@ class GoCompletionAssistSettings : SimplePersistentStateComponent<GoCompletionAs
     var acceptanceWeight: Double
         get() = state.acceptanceWeight.toString().toDouble()
         set(value) { state.acceptanceWeight = value.toFloat() }
+
+    var importStatsEnabled: Boolean
+        get() = state.importStatsEnabled
+        set(value) { state.importStatsEnabled = value }
 
     companion object {
         /**

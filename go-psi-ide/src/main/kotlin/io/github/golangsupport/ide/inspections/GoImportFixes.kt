@@ -33,6 +33,7 @@ import io.github.golangsupport.lang.psi.GoImportList
 import io.github.golangsupport.lang.psi.GoImportSpec
 import io.github.golangsupport.lang.psi.GoReferenceExpression
 import io.github.golangsupport.lang.psi.GoTypeReferenceExpression
+import io.github.golangsupport.ml.GoImportStats
 import io.github.golangsupport.semantic.scope.GoPackageModel
 import io.github.golangsupport.semantic.scope.GoScopes
 
@@ -181,7 +182,7 @@ internal object GoImportEdits {
  * module package whose name is the qualifier and which exports the selected name. One fix per
  * candidate path (`rand` -> `crypto/rand`, `math/rand`), standard library first.
  */
-class GoAddImportFix(element: PsiElement, private val path: String, private val all: List<String> = listOf(path)) :
+class GoAddImportFix(element: PsiElement, private val path: String, internal val all: List<String> = listOf(path)) :
     LocalQuickFixAndIntentionActionOnPsiElement(element), HighPriorityAction, HintAction {
 
     override fun getFamilyName(): String = "Add import"
@@ -220,6 +221,8 @@ class GoAddImportFix(element: PsiElement, private val path: String, private val 
 
     companion object {
         private const val MAX_FIXES = 5
+        /** How many packages with the name are resolved before the statistics order them (the first [MAX_FIXES] of them are offered). */
+        private const val MAX_CANDIDATES = 20
 
         fun forUndefined(file: GoFile, range: TextRange): List<LocalQuickFix> {
             val (ref, paths) = candidates(file, range, MAX_FIXES) ?: return emptyList()
@@ -228,7 +231,9 @@ class GoAddImportFix(element: PsiElement, private val path: String, private val 
 
         /**
          * The unresolved package qualifier at [range] (`strings` of `strings.ToUpper`) and the import paths of the packages with that name
-         * that export the selected name, at most [limit], standard library first; null when [range] is not such a qualifier.
+         * that export the selected name, at most [limit]; null when [range] is not such a qualifier. In the order of the corpus import
+         * statistics ([GoImportStats]: `rand` is `crypto/rand` next to `crypto/sha256`, `math/rand` next to `time`), the paths it does not
+         * know (and everything while it is off or not loaded) standard library first, then the build list.
          */
         fun candidates(file: GoFile, range: TextRange, limit: Int): Pair<GoReferenceExpression, List<String>>? {
             val ref = PsiTreeUtil.findElementOfClassAtRange(file, range.startOffset, range.endOffset, GoReferenceExpression::class.java) ?: return null
@@ -240,18 +245,19 @@ class GoAddImportFix(element: PsiElement, private val path: String, private val 
                 parent is GoTypeReferenceExpression && parent.referenceExpression == ref -> parent.identifier.text
                 else -> return null
             }
-            val imported = file.imports.map { it.path }.toSet()
+            val imported = file.imports.map { it.path }
+            val importedSet = imported.toSet()
             val model = GoPackageModel.getInstance(file.project)
             val paths = GoImportPaths.all(file.project, file.originalFile.virtualFile).asSequence()
-                .filter { it.name == name && it.path !in imported }
+                .filter { it.name == name && it.path !in importedSet }
                 .filter { entry ->
                     val pkg = model.resolveImport(entry.path, file) ?: return@filter false
                     (pkg.name == null || pkg.name == name) && model.scopeOf(pkg).lookup(selected).any { it.isPublic() }
                 }
-                .take(limit)
+                .take(MAX_CANDIDATES)
                 .map { it.path }
                 .toList()
-            return ref to paths
+            return ref to GoImportStats.getInstance().order(name, paths, imported).take(limit)
         }
     }
 }

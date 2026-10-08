@@ -67,6 +67,8 @@ class GoLookupInfo(
     /** 2 identical to the expected type, 1 assignable, 0 otherwise. */
     val expectedMatch: Int,
     val element: PsiElement?,
+    /** The import path the candidate adds on insertion (unimported packages and their members), else null. */
+    val importPath: String? = null,
 ) {
     /** Score of a registered [io.github.golangsupport.ide.completion.api.GoCompletionRanker], if any. */
     @Volatile
@@ -83,6 +85,10 @@ class GoLookupInfo(
     /** True when the ranker's score already carries the acceptance bonus (the weigher stays neutral then). */
     @Volatile
     var acceptanceInScore: Boolean = false
+
+    /** The corpus import statistics' score of [importPath] for [name] ([GoImportStatsWeigher]); null when unknown or off. */
+    @Volatile
+    var importStatsScore: Float? = null
 
     companion object {
         val KEY: Key<GoLookupInfo> = Key.create("gopsi.completion.info")
@@ -127,7 +133,11 @@ object GoLookupElementFactory {
             context.semantics.expectedType
         } else null
         val match = if (expected != null) expectedMatch(candidate, expected) else 0
-        var builder = LookupElementBuilder.create(candidate.lookupString)
+        // The lookup drops builders equal by lookup string, object and handler class: the packages of one name (`rand` of crypto/rand,
+        // math/rand, math/rand/v2) and the members of such packages are told apart by the import path.
+        val importPath = candidate.importPath
+        var builder = if (importPath == null) LookupElementBuilder.create(candidate.lookupString)
+            else LookupElementBuilder.create(importPath + "\u0000" + candidate.lookupString, candidate.lookupString)
             .withIcon(candidate.icon ?: iconFor(candidate))
             .withBoldness(candidate.bold)
         candidate.element?.let { builder = builder.withPsiElement(it) }
@@ -144,8 +154,12 @@ object GoLookupElementFactory {
         val handler = candidate.insertHandler ?: defaultInsertHandler(candidate, context, expected)
         if (handler != null) builder = builder.withInsertHandler(handler)
         if (candidate.kind == GoCandidateKind.KEYWORD) builder = builder.withCaseSensitivity(true)
-        val info = GoLookupInfo(candidate.name, candidate.kind, candidate.level, match, candidate.element)
+        val info = GoLookupInfo(candidate.name, candidate.kind, candidate.level, match, candidate.element, candidate.importPath)
         info.contextKind = GoAcceptanceMemory.kindOf(context)
+        // only where the item itself chooses the package (`rand (crypto/rand)`, `api.Handler` of a project package), not the members
+        // listed after a qualifier the plugin already resolved to one path (`strings.Bu` without the import)
+        if (importPath != null && candidate.level >= GoScopeLevel.UNIMPORTED && (candidate.kind == GoCandidateKind.PACKAGE || candidate.lookupString != candidate.name))
+            info.importStatsScore = context.importStatsScore(candidate.name, importPath)
         builder.putUserData(GoLookupInfo.KEY, info)
         return builder
     }

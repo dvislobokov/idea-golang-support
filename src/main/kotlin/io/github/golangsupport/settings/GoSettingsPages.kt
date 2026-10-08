@@ -150,6 +150,7 @@ class GoEditorConfigurable(project: Project) : GoSettingsPage(project, "page.edi
             row { checkBox(GoBundle.message("completion.arguments")).bindSelected(settings::completionArguments).comment(GoBundle.message("completion.arguments.comment")) }
             val assist = GoCompletionAssistSettings.getInstance()
             row { checkBox(GoBundle.message("completion.mapping")).bindSelected(assist::mappingEnabled).comment(GoBundle.message("completion.mapping.comment")) }
+            row { checkBox(GoBundle.message("completion.importStats")).bindSelected(assist::importStatsEnabled).comment(GoBundle.message("completion.importStats.comment")) }
             row {
                 checkBox(GoBundle.message("completion.acceptance")).bindSelected(assist::acceptanceEnabled).comment(GoBundle.message("completion.acceptance.comment"))
                 button(GoBundle.message("completion.acceptance.reset")) { GoAcceptanceMemory.getInstance(project).clear() }

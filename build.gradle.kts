@@ -115,7 +115,8 @@ tasks.processResources {
 // Smart Completion (docs/ML.md): `-PmlEnabled=true` (or MLENABLED=true in the environment) puts the ML features into the plugin —
 // META-INF/go-ml.xml (the completionRanker, the grey-text inline provider and the Settings | Go | Smart Completion page), the transformer
 // go-nn-31m-e2.cml with its tokenizer go-16384.bpe from ml-models/go/ (required), with `-Pml.big=true` the 50 M transformer
-// go-nn-50m-e3-lr2e3.cml too (the setting "Big model" switches), and the ranker pair lm.cml / rank.cml under ml/go/: by default the
+// go-nn-50m-e3-lr2e3.cml too (the setting "Big model" switches), the import statistics go-imports-e20.cml when present (GoImportStats:
+// the plain build reads it from the model directory setting or from ml-models/go next to the plugin), and the ranker pair lm.cml / rank.cml under ml/go/: by default the
 // n-gram e14-b.cml and the real-list GBDT ranker e19-rank-gbdt.cml of ml-models/go/ (MRR 0.834 vs linear e17b 0.799, rules 0.513), renamed; `-Pml.models=<dir>`
 // takes lm.cml / rank.cml from that directory instead (a newer training; missing there: no ranker, only the grey text works).
 // The proxy ranker e14-b-rank.cml is never shipped. A build without the flag has no trace of any of it.
@@ -126,12 +127,14 @@ if (mlEnabled) {
     val nnDir = file("ml-models/go")
     val nnFiles = listOf("go-nn-31m-e2.cml", "go-16384.bpe") + (if (mlBig) listOf("go-nn-50m-e3-lr2e3.cml") else emptyList())
     for (name in nnFiles) check(File(nnDir, name).isFile) { "mlEnabled: $name not found in $nnDir" }
+    // the corpus import statistics (GoImportStats, e20): optional, the feature is silently off without it
+    val importFiles = listOf("go-imports-e20.cml").filter { File(nnDir, it).isFile }
     val bundledRanker = mapOf("e14-b.cml" to "lm.cml", "e19-rank-gbdt.cml" to "rank.cml")
     val rankerFiles = if (mlModels != null) listOf("lm.cml", "rank.cml").filter { File(mlModels, it).isFile } else bundledRanker.keys.filter { File(nnDir, it).isFile }
     tasks.processResources {
         from("src/ml/resources")
         from(nnDir) {
-            include(nnFiles)
+            include(nnFiles + importFiles)
             into("ml/go")
         }
         if (mlModels != null && rankerFiles.isNotEmpty()) from(mlModels) {

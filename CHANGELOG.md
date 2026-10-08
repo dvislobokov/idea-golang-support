@@ -30,6 +30,37 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.214] - 2026-10-08
+
+### Added — import choice by corpus statistics (engine e20)
+- `GoImportStats` (application service over the engine's `ImportsModel`, `ml-models/go/go-imports-e20.cml`: 46 k import paths, 125 k names,
+  2.9 MB, ~100 ms to read on a pooled thread, 1–3 µs a query): which import path usually supplies a package qualifier or an exported name,
+  given the imports the file already has (`rand` is `crypto/rand` next to `crypto/sha256` and `math/rand` next to `time`, `template` is
+  `html/template` next to `net/http`, `pprof` is `net/http/pprof` there). On the engine's test fold top-1 0.717 with the context vs 0.685 by
+  frequency alone. It only ORDERS what the plugin found in GOROOT and the build list; a path PSI does not know is never offered.
+- Where it applies: (1) the add-import fix — `GoAddImportFix.candidates` resolves up to 20 packages with the name and orders them by the
+  statistics (unknown ones after, standard library first as before), so the first intention, the default of the "Import …?" hint and the
+  order of its popup follow the statistics; "Add unambiguous imports on the fly" is unchanged (it needs exactly one candidate); (2) the
+  completion list — unimported packages (`rand (crypto/rand)`) and the members of unimported packages carry the score in `GoLookupInfo`
+  and the weigher `goImportStats` (after `goCompletion`, before `prefix`) orders them inside the unimported bucket only: a ranker that
+  scored the list still decides the whole order, the statistics only break its ties. `rankCoImports` ("files with these imports also
+  import X") is deliberately not used: there is no place in the plugin to suggest packages nobody referenced, and adding imports by
+  statistics would be a guess.
+- The artifact: the ML build (`-PmlEnabled=true`) bundles `go-imports-e20.cml` under `ml/go/` when it is in `ml-models/go`; the plain build
+  reads it from the model directory of Settings | Go | Smart Completion (any `*imports*.cml` there) or from `ml-models/go` next to the
+  installed plugin; with none of them the feature is silently off and nothing waits for it (null while it loads = the plugin's own order).
+- Setting "Order imports by corpus statistics" (on; Settings | Go, Completion group, `GoCompletionAssistSettings.importStatsEnabled`), EN/RU,
+  guide row.
+
+### Fixed
+- The completion list showed only the first package of a name (`rand (crypto/rand)`): the second (`math/rand`, `math/rand/v2`) and the members
+  of a same-named unimported package were dropped by the lookup as duplicates (equal lookup string and handler class). Candidates with an
+  import path are distinct now, and the tie-break among them is deterministic (standard library first, then by path) when the statistics
+  have nothing to say.
+- Tests: `GoImportStatsTest` (7: a toy `ImportsModel.write` artifact flips the fix and the completion order with the imports present, unknown
+  names and the setting off leave the order alone, the popup list of the fix, the order helper, and the real `go-imports-e20.cml` — skipped
+  without it).
+
 ## [0.2.213] - 2026-10-08
 
 ### Changed

@@ -46,18 +46,45 @@ class GoCompletionWeigher : CompletionWeigher() {
     }
 }
 
-/** Alphabetical tie-break for Go candidates (case-insensitive, then case-sensitive). */
+/**
+ * Alphabetical tie-break for Go candidates (case-insensitive, then case-sensitive); the packages of one name (`rand` of crypto/rand and
+ * math/rand) by their import path, the standard library first — the order of the list when the import statistics have nothing to say.
+ */
 class GoAlphabeticalWeigher : CompletionWeigher() {
     override fun weigh(element: LookupElement, location: CompletionLocation): Comparable<*> {
-        if (GoCompletionWeigher.infoOf(element) == null) return Reversed("")
-        return Reversed(element.lookupString)
+        val info = GoCompletionWeigher.infoOf(element) ?: return Reversed("", "")
+        return Reversed(element.lookupString, info.importPath?.let { (if ('.' in it.substringBefore('/')) "~" else "") + it } ?: "")
     }
 
     /** Descending weights sort first, so the string order is inverted. */
-    data class Reversed(val text: String) : Comparable<Reversed> {
+    data class Reversed(val text: String, val path: String) : Comparable<Reversed> {
         override fun compareTo(other: Reversed): Int {
             val c = other.text.compareTo(text, ignoreCase = true)
-            return if (c != 0) c else other.text.compareTo(text)
+            if (c != 0) return c
+            val cs = other.text.compareTo(text)
+            return if (cs != 0) cs else other.path.compareTo(path)
         }
+    }
+}
+
+/**
+ * Inside the bucket of unimported candidates of [GoCompletionWeigher] (same expected-type match, same scope level, no ranker score or the
+ * same one): the paths the corpus import statistics know for the name, best first ([GoLookupInfo.importStatsScore], see
+ * [io.github.golangsupport.ml.GoImportStats]), then the ones it does not know in the plugin's own order. Neutral for everything else, so a
+ * `GoCompletionRanker` that scored the list still decides the whole order and this only breaks its ties.
+ */
+class GoImportStatsWeigher : CompletionWeigher() {
+    override fun weigh(element: LookupElement, location: CompletionLocation): Comparable<*> {
+        val score = GoCompletionWeigher.infoOf(element)?.importStatsScore ?: return NEUTRAL
+        return Weight(1, score)
+    }
+
+    /** Larger is better: a known path above an unknown one, then by the score. */
+    data class Weight(val known: Int, val score: Float) : Comparable<Weight> {
+        override fun compareTo(other: Weight): Int = compareValuesBy(this, other, Weight::known, Weight::score)
+    }
+
+    companion object {
+        private val NEUTRAL = Weight(0, 0f)
     }
 }

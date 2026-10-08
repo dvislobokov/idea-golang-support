@@ -17,6 +17,9 @@
              implementationClass="io.github.golangsupport.ide.completion.GoAcceptanceWeigher"/>
     <weigher key="completion" id="goCompletion" order="after priority, before prefix"
              implementationClass="io.github.golangsupport.ide.completion.GoCompletionWeigher"/>
+    <!-- Unimported packages and their members in the order of the corpus import statistics (GoImportStats); a tie-break inside the buckets of goCompletion. -->
+    <weigher key="completion" id="goImportStats" order="after goCompletion, before prefix"
+             implementationClass="io.github.golangsupport.ide.completion.GoImportStatsWeigher"/>
     <weigher key="completion" id="goAlphabetical" order="after proximity, before grouping"
              implementationClass="io.github.golangsupport.ide.completion.GoAlphabeticalWeigher"/>
     <!-- Printf verbs: `%` typed in a call's string argument opens the popup (GoFormatVerbProvider decides what it shows). -->
