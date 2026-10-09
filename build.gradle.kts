@@ -114,18 +114,16 @@ tasks.processResources {
 
 // Smart Completion (docs/ML.md): `-PmlEnabled=true` (or MLENABLED=true in the environment) puts the ML features into the plugin —
 // META-INF/go-ml.xml (the completionRanker, the grey-text inline provider and the Settings | Go | Smart Completion page), the transformer
-// go-nn-31m-e2.cml with its tokenizer go-16384.bpe from ml-models/go/ (required), with `-Pml.big=true` the 50 M transformer
-// go-nn-50m-e3-lr2e3.cml too (the setting "Big model" switches), the import statistics go-imports-e20.cml when present (GoImportStats:
+// go-nn-50m-e3-lr2e3.cml with its tokenizer go-16384.bpe from ml-models/go/ (required; the 31 M one is not shipped since 0.2.216), the import statistics go-imports-e20.cml when present (GoImportStats:
 // the plain build reads it from the model directory setting or from ml-models/go next to the plugin), and the ranker pair lm.cml / rank.cml under ml/go/: by default the
 // n-gram e14-b.cml and the real-list GBDT ranker e19-rank-gbdt.cml of ml-models/go/ (MRR 0.834 vs linear e17b 0.799, rules 0.513), renamed; `-Pml.models=<dir>`
 // takes lm.cml / rank.cml from that directory instead (a newer training; missing there: no ranker, only the grey text works).
 // The proxy ranker e14-b-rank.cml is never shipped. A build without the flag has no trace of any of it.
 val mlEnabled = providers.gradleProperty("mlEnabled").orElse(providers.environmentVariable("MLENABLED")).map { it.equals("true", ignoreCase = true) }.getOrElse(false)
 if (mlEnabled) {
-    val mlBig = providers.gradleProperty("ml.big").map { it.equals("true", ignoreCase = true) }.getOrElse(false)
     val mlModels = providers.gradleProperty("ml.models").map { file(it) }.orNull
     val nnDir = file("ml-models/go")
-    val nnFiles = listOf("go-nn-31m-e2.cml", "go-16384.bpe") + (if (mlBig) listOf("go-nn-50m-e3-lr2e3.cml") else emptyList())
+    val nnFiles = listOf("go-nn-50m-e3-lr2e3.cml", "go-16384.bpe")
     for (name in nnFiles) check(File(nnDir, name).isFile) { "mlEnabled: $name not found in $nnDir" }
     // the corpus import statistics (GoImportStats, e20): optional, the feature is silently off without it
     val importFiles = listOf("go-imports-e20.cml").filter { File(nnDir, it).isFile }
@@ -151,7 +149,7 @@ if (mlEnabled) {
     tasks.buildPlugin { archiveClassifier.set("ml") }
 }
 
-// delve (third_party/delve: a git submodule at a release tag, vendor/ included) ships as sources in delve/ of the plugin and is built with
+// delve (third_party/delve: the sources of a release tag, vendor/ included, plain files of this repository, see third_party/README.md) ships as sources in delve/ of the plugin and is built with
 // the user's go in the background (GoBundledDelve): no network, no `go install`. SOURCE-HASH names the build, so changed sources give a new
 // hash and a rebuild after the plugin is updated. Tests and fixtures stay out of the ZIP.
 val delveSources = fileTree("third_party/delve") {
@@ -166,7 +164,7 @@ val delveSourceHash = tasks.register("delveSourceHash") {
     doLast {
         val files = sortedMapOf<String, File>()
         sources.visit { if (!isDirectory) files[relativePath.pathString] = file }
-        check(files.isNotEmpty()) { "third_party/delve is empty: run `git submodule update --init`" }
+        check(files.isNotEmpty()) { "third_party/delve is empty: the delve sources are part of the repository, restore them" }
         val digest = MessageDigest.getInstance("SHA-256")
         files.forEach { (path, file) -> digest.update(path.toByteArray()); digest.update(file.readBytes()) }
         output.get().asFile.writeText(digest.digest().joinToString("") { "%02x".format(it) }.take(16))

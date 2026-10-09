@@ -86,6 +86,7 @@ class GoSettingsConfigurable(project: Project) : GoSettingsPage(project, "page.g
         }
         group(GoBundle.message("root.general")) {
             row { checkBox(GoBundle.message("settings.runConfigurations")).bindSelected(settings::createRunConfigurations).comment(GoBundle.message("settings.runConfigurations.comment")) }
+            row { checkBox(GoBundle.message("settings.createModule")).bindSelected(settings::createModule).comment(GoBundle.message("settings.createModule.comment")) }
             row(GoBundle.message("settings.testArguments")) { textField().align(AlignX.FILL).bindText(settings::testArguments).comment(GoBundle.message("settings.testArguments.comment")) }
             // the pages are rebuilt when the dialog is reopened: said here, since the texts around do not change at once
             row(GoBundle.message("settings.language")) {

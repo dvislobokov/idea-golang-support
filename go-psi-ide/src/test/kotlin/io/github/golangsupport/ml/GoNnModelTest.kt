@@ -66,23 +66,6 @@ class GoNnModelTest {
         } finally { nn.model.close() }
     }
 
-    @Test fun theBigModelLoadsByItsName() {
-        assumeTrue("no ml-models/go/${GoMlModels.NN_MODEL_BIG}", dir != null && File(dir, GoMlModels.NN_MODEL_BIG).isFile)
-        val nn = checkNotNull(GoMlModels.loadNn(dir, model = GoMlModels.NN_MODEL_BIG)) { "no network in $dir" }
-        try {
-            assertEquals(GoMlModels.NN_MODEL_BIG.removeSuffix(".cml"), nn.name)
-            val before = "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Prin"
-            val c = GoNnInline.context(before + "\n}\n", before.length, "main.go")
-            val r = nn.model.newSession(2048).use { nn.completion.complete(c.path, c.before, c.after, it) }
-            println("GoNnModelTest: ${nn.name} 'fmt.Prin' -> '${r.textString}' confProd ${r.confProd}")
-            assertTrue("empty completion", r.text.isNotEmpty())
-        } finally { nn.model.close() }
-        // a directory without the big model falls back to the small one, the bundled choice too
-        assertEquals(GoMlModels.NN_MODEL, GoMlModels.nnModelName(big = true, modelDirectory = ""))
-        assertEquals(GoMlModels.NN_MODEL_BIG, GoMlModels.nnModelName(big = true, modelDirectory = dir!!.path))
-        assertEquals(GoMlModels.NN_MODEL, GoMlModels.nnModelName(big = false, modelDirectory = dir.path))
-    }
-
     @Test fun healsAWordBeingTypedAndTrimsThePairedCloser() {
         // the live case of 2026-10-07: `return le` continued ` le` + `(`, and `return len(` + `)` doubled the `)` — both fixed in the engine (ac9b3fd)
         assumeTrue("no ml-models/go/${GoMlModels.NN_MODEL}", dir != null)

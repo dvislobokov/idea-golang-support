@@ -18,8 +18,8 @@ if (-not (Test-Path (Join-Path $jbr "bin\java.exe"))) { throw "no JBR at $jbr (i
 $env:JAVA_HOME = $jbr
 Write-Host "JAVA_HOME = $jbr"
 
-# delve sources are a submodule: the sandbox and the ZIP carry them
-if (-not (Test-Path "third_party\delve\go.mod")) { git submodule update --init; if (-not $?) { throw "git submodule update failed" } }
+# delve sources are plain files of the repository (third_party\delve, see third_party\README.md): the sandbox and the ZIP carry them
+if (-not (Test-Path "third_party\delve\go.mod")) { throw "third_party\delve\go.mod is missing: the delve sources are part of the repository" }
 
 # --offline: online, Gradle tries to fetch java-compiler-ant-tasks for test instrumentation, which this machine's proxy blocks
 $tasks = @(); if (-not $NoTests) { $tasks += "test" }; $tasks += "buildPlugin"

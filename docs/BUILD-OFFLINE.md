@@ -7,7 +7,7 @@
 |---|---|
 | `nexus.init.gradle` | init-скрипт Gradle: перенаправляет все репозитории сборки на прокси Nexus, проект не меняется |
 | `truststore.sh` | truststore Java: сертификаты JDK плюс корневые сертификаты компании |
-| `Jenkinsfile` | пример конвейера: checkout с сабмодулем, инструменты из Nexus, тесты, `buildPlugin` |
+| `Jenkinsfile` | пример конвейера: checkout, инструменты из Nexus, тесты, `buildPlugin` |
 
 Результат сборки — `build/distributions/idea-golang-support-<версия>.zip`. Он ставится в любую IDE на платформе 2026.1+ через Settings | Plugins | Install Plugin from Disk.
 
@@ -22,7 +22,7 @@
 | Grammar-Kit, JFlex (генерация парсера и лексера Go), `java-compiler-ant-tasks` (инструментирование), coroutines-агент | `https://cache-redirector.jetbrains.com/intellij-dependencies` | генерация кода, сборка |
 | IntelliJ IDEA Community 2026.1.x | GitHub (релизы `JetBrains/intellij-community`) | платформа, против которой собирается плагин |
 | JDK 21 | любой дистрибутив (Temurin, Liberica, JBR) | toolchain модулей go-psi (`jvmToolchain(21)`) и запуск Gradle |
-| delve v1.27.2 (git-сабмодуль `third_party/delve`) | `https://github.com/go-delve/delve.git` | исходники delve кладутся в ZIP плагина |
+| delve v1.27.2 — ничего: исходники лежат в репозитории (`third_party/delve`, `third_party/README.md`) | — | исходники delve кладутся в ZIP плагина, собираются у пользователя |
 
 Не нужны для сборки: JetBrains Runtime и установщики IDE (IDE берётся локально), Marketplace (только для `runIdeForUiTests`), Plugin Verifier (`verifyPlugin`),
 корпуса и бенчмарки (`corpusTest`, `benchmark` — им нужен установленный Go). Init-скрипт убирает Ivy-репозитории установщиков и JBR из сборки сам.
@@ -48,8 +48,8 @@ Version policy — Mixed (в `intellij-releases` и `intellij-dependencies` ес
 - `idea/ideaIC-2026.1.4.tar.gz` — IntelliJ IDEA Community с GitHub;
 - `jdk/OpenJDK21U-jdk_x64_linux.tar.gz` — JDK 21.
 
-**Git-зеркало delve**: `https://github.com/go-delve/delve.git` во внутренний Git (Gitea, GitLab, Bitbucket) с тегом `v1.27.2`.
-В репозитории delve уже есть `vendor/`, своих Go-зависимостей сборка плагина не тянет.
+**Delve зеркалить не нужно**: его исходники (v1.27.2 с `vendor/`) лежат в этом репозитории обычными файлами (`third_party/delve`,
+`third_party/README.md`), сборка плагина их только упаковывает — ни Go, ни сети для этого не требуется.
 
 ## 3. Сертификаты (truststore)
 
@@ -124,8 +124,6 @@ NEXUS_REPORT_ONLY=true ./gradlew --init-script tools/ci/nexus.init.gradle help -
 export JAVA_HOME=/path/to/jdk21
 export GRADLE_OPTS="-Djavax.net.ssl.trustStore=/path/to/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
 export NEXUS_URL=https://nexus.example.local NEXUS_USER=… NEXUS_PASSWORD=…
-git config --global url."https://git.example.local/mirrors/".insteadOf https://github.com/go-delve/
-git submodule update --init --depth 1
 
 ./gradlew --no-daemon --no-configuration-cache --init-script tools/ci/nexus.init.gradle \
     -PlocalIdePath=/path/to/ideaIC \
@@ -155,6 +153,6 @@ Proxy-репозитории тогда не скачают ничего, и и�
 | `PKIX path building failed` | корни компании не в truststore той JVM, что ходит в сеть: wrapper — `GRADLE_OPTS`, демон — `systemProp.*` |
 | `nexus.init.gradle: no Nexus proxy for these repositories` | сборка обратилась к новому адресу: прокси в Nexus и строка в `SOURCES` |
 | `Could not resolve com.jetbrains.intellij.platform:test-framework:<номер>` | номера сборки IDE нет в `intellij-releases` (раздел 6) |
-| `third_party/delve is empty: run git submodule update --init` | сабмодуль не скачан: зеркало и `insteadOf` |
+| `third_party/delve is empty` | каталог `third_party/delve` потерян при копировании репозитория: он часть репозитория, восстановить из git |
 | `Cannot find a Java installation … languageVersion=21` | нет JDK 21 в `org.gradle.java.installations.paths` |
 | wrapper: `401` при скачивании Gradle | нет `systemProp.gradle.wrapperUser` / `wrapperPassword` |

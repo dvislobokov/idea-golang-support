@@ -44,11 +44,6 @@ class GoMlConfigurable(@Suppress("UNUSED_PARAMETER") project: Project) : BoundCo
             row(GoBundle.message("ml.inline.dotThreshold")) {
                 spinner(0.05..0.99, 0.05).bindValue(settings::inlineDotThreshold).comment(GoBundle.message("ml.inline.dotThreshold.comment"))
             }
-            row {
-                checkBox(GoBundle.message("ml.inline.bigModel")).bindSelected(settings::inlineBigModel)
-                    .comment(GoBundle.message(if (GoMlModels.isNnBigBundled) "ml.inline.bigModel.comment" else "ml.inline.bigModel.absent"))
-                    .enabled(GoMlModels.isNnBigBundled || settings.modelDirectory.isNotBlank())
-            }
             row { checkBox(GoBundle.message("ml.inline.showClosers")).bindSelected(settings::inlineShowClosers).comment(GoBundle.message("ml.inline.showClosers.comment")) }
             row { checkBox(GoBundle.message("ml.inline.guessStrings")).bindSelected(settings::inlineGuessStrings).comment(GoBundle.message("ml.inline.guessStrings.comment")) }
             row { checkBox(GoBundle.message("ml.inline.inStrings")).bindSelected(settings::inlineInStrings).comment(GoBundle.message("ml.inline.inStrings.comment")) }
@@ -74,7 +69,7 @@ class GoMlConfigurable(@Suppress("UNUSED_PARAMETER") project: Project) : BoundCo
         refreshStatus()
     }
 
-    private fun modelChoice() = listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineBigModel, settings.inlineThreshold, settings.inlineShowClosers)
+    private fun modelChoice() = listOf(settings.modelDirectory, settings.inlineEnabled, settings.inlineThreshold, settings.inlineShowClosers)
 
     private fun refreshStatus() {
         val models = GoMlModels.getInstance()

@@ -197,6 +197,8 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
         /** On: unformatted Go passes no review, so the formatter is not something to remember about. */
         var formatOnSave by property(true)
         var createRunConfigurations by property(true)
+        /** A directory-based Go project with no module gets one, so the IDE indexes and highlights its files (GoProjectModule). */
+        var createModule by property(true)
 
         /** `if err != nil { ... }` and the `defer` of what was just opened, as grey text to accept with Tab. */
         var inlineIdioms by property(true)
@@ -523,6 +525,10 @@ class GoSettings : SimplePersistentStateComponent<GoSettings.Settings>(Settings(
     var createRunConfigurations: Boolean
         get() = state.createRunConfigurations
         set(value) { state.createRunConfigurations = value }
+
+    var createModule: Boolean
+        get() = state.createModule
+        set(value) { state.createModule = value }
 
     var golangciLint: Boolean
         get() = state.golangciLint

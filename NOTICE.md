@@ -76,5 +76,5 @@ BSD 3-Clause License, Copyright (c) 2009 The Go Authors. <https://go.dev/LICENSE
 
 MIT License, Copyright (c) 2014 Derek Parker. <https://github.com/go-delve/delve>
 
-- The sources of delve (`third_party/delve`, a git submodule at tag v1.27.2, with its `vendor/` directory and the licenses of the vendored
+- The sources of delve (`third_party/delve`, tag v1.27.2 as plain files of this repository, with its `vendor/` directory and the licenses of the vendored
   modules in it) ship inside the plugin unmodified and are built on the user's machine (`GoBundledDelve`).

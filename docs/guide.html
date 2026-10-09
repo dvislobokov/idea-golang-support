@@ -945,6 +945,7 @@ n := <span class="fn">next</span>()
       <thead><tr><th>Настройка</th><th>Что делает</th></tr></thead>
       <tbody>
         <tr><td>Create run configurations for the programs of the project</td><td>Создаёт конфигурацию для каждого каталога с <code>func main</code>. Удалённая вручную не создаётся снова.</td></tr>
+        <tr><td>Create a module for a project without one</td><td>Проект без модуля (каталог, открытый другой IDE) получает модуль с каталогом проекта как content root: без него IDE не индексирует файлы и не показывает цвета, ошибки и intentions.</td></tr>
         <tr><td>Test arguments</td><td>Добавляются к каждому <code>go test</code>.</td></tr>
         <tr><td>Language of these pages</td><td>Язык страниц настроек: как в IDE, English или Русский.</td></tr>
         <tr><td>Shared indexes URL <span class="new">новое</span></td><td>Адрес каталога с <code>index.json</code> (записи <code>key</code>, <code>ideBuild</code>, <code>url</code>, <code>sha256</code>), откуда в фоне скачивается готовый индекс стандартной библиотеки (GOROOT) для вашей версии Go: он подключается при следующем открытии проекта вместо индексации <code>$GOROOT/src</code>. Пусто — только индексы, построенные пунктом Go, Build Shared Index for GOROOT… на этой машине. Поле работает в IDE с плагином Shared Indexes; у самосборного Go (<code>devel</code>) индекса нет.</td></tr>

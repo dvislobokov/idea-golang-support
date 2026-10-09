@@ -30,6 +30,40 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.218] - 2026-10-09
+
+### Changed
+
+- **The delve sources are plain files of the repository** (`third_party/delve`, v1.27.2 with `vendor/`), no longer a git submodule: a ZIP of the
+  repository from GitHub or a shallow clone has them, so the build packs delve into the plugin from any copy of the repository and `git submodule
+  update --init` is gone from `build.ps1`, `docs/BUILD-OFFLINE.md` and `CLAUDE.md`. Building the plugin needs neither `go` nor network for delve:
+  it ships as sources and is built on the user's machine as before (`GoBundledDelve`). How to update delve — `third_party/README.md`.
+  `GoBundledDelveTest` checks that the sources are there and that it is not a submodule.
+
+## [0.2.217] - 2026-10-08
+
+### Fixed
+
+- **No colours, no errors, no Go intentions in a project without a module** (seen live 2026-10-08 in `echo-sample`, a directory opened as a project
+  by GIGA IDE: `.idea` with `misc.xml` and `workspace.xml`, no `.iml`, "modules: 0"). Outside every content root the IDE does not index the files,
+  and the daemon of 2026.1 treats a file it has not indexed as dumb per file: `DumbService.isUsableInCurrentContext(annotator, file)` is false,
+  so `GoSemanticHighlightingAnnotator`, `GoIdentifierAnnotator` and every inspection that is not DumbAware are skipped (`AnnotatorRunner`,
+  `InspectionRunner`), only the parser's errors remain; `ShowIntentionsPass` lists nothing of the plugin. The checker, the inspections and the
+  annotator answered when called directly, which is why no setting, gate or log explained it. IDEA creates a module only for a directory opened
+  without `.idea`; a `.idea` made by another IDE is taken as a configured project and left alone. Now `GoProjectModuleActivity` (after the Go
+  presence) creates one for a directory-based Go project with no module: `.idea/<name>.iml` of the default module type with the project directory
+  as the content root (`GoProjectModule`), one line in the plugin log. Setting "Create a module for a project without one" (on; Settings | Go,
+  General), EN/RU, guide row. `GoProjectModuleTest` (the rule: directory based, Go files, no module, the setting).
+- Robot: `daemon_state.js` (Power Save, highlighting level, highlights by severity), `check_debug.js` (gates, import resolution, checker
+  diagnostics, inspection profile), `intention_debug.js` (the plugin's intentions and their availability at the caret), `close_project.js`.
+
+## [0.2.216] - 2026-10-08
+
+- The ML build ships one network: `go-nn-50m-e3-lr2e3.cml` is now `GoMlModels.NN_MODEL`; `go-nn-31m-e2.cml`, `-Pml.big=true`, the
+  "Big model (50 M)" setting (`GoMlSettings.inlineBigModel`, its bundle keys) and `isNnBigBundled` / `nnModelName` are gone (the ZIP
+  loses 31 MB). A models directory still replaces the bundled pair. `GoNnModelSwitchTest` → `GoNnModelServiceTest` (background load,
+  prefill does not block); `GoNnModelTest.theBigModelLoadsByItsName` removed; robot `nn_big.js` removed (`nn_model_dir.js` stays).
+
 ## [0.2.215] - 2026-10-08
 
 - **Cannot find package** (seen live 2026-10-08: in `echo-sample` an import of `github.com/labstack/echo/v5` missing from go.mod was not

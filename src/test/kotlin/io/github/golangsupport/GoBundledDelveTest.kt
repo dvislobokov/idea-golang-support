@@ -7,7 +7,7 @@ import org.junit.Test
 import java.io.File
 import java.nio.file.Paths
 
-/** The delve shipped as sources: where its build goes, how it is built, and that the submodule carries what the build needs. */
+/** The delve shipped as sources: where its build goes, how it is built, and that the repository carries what the build needs. */
 class GoBundledDelveTest {
     @Test fun oneDirectoryPerSourceHash() {
         val path = GoBundledDelve.binaryPath(Paths.get("data", "delve"), "0123abcd")
@@ -24,9 +24,11 @@ class GoBundledDelveTest {
         assertEquals("off", GoBundledDelve.BUILD_ENVIRONMENT["GOWORK"])
     }
 
-    @Test fun theSubmoduleHasVendoredSources() {
+    @Test fun theRepositoryHasVendoredSources() {
+        // plain files, not a submodule: a ZIP of the repository from GitHub has them too (third_party/README.md)
         val delve = File("third_party/delve")
-        assertTrue("git submodule update --init", File(delve, "go.mod").isFile)
+        assertTrue("third_party/delve/go.mod is part of the repository", File(delve, "go.mod").isFile)
+        assertTrue("not a submodule", !File(delve, ".git").exists() && !File(".gitmodules").exists())
         assertTrue(File(delve, "vendor/modules.txt").isFile)
         assertTrue(File(delve, "cmd/dlv/main.go").isFile)
     }

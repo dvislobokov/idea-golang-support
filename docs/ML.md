@@ -135,10 +135,9 @@ Status 2026-10-05 (0.2.184): `ml-core/` is a copy of the pure-Kotlin engine modu
 `io.github.golangsupport.ml.GoMlFeatures` and the headless dataset export `:go-psi-ide:mlDataset` exist, and so does the
 IDE side: `GoMlCompletionRanker` (the `completionRanker` EP), `GoMlModels` (bundled or user-chosen `lm.cml` + `rank.cml`,
 loaded in the background on the first completion) and Settings | Go | Smart Completion (`GoMlSettings`). All of it is
-opt-in at build time: `./gradlew.bat buildPlugin -PmlEnabled=true [-Pml.big=true] [-Pml.models=<dir>]` (or `MLENABLED=true`) copies
-`META-INF/go-ml.xml`, the transformer `go-nn-31m-e2.cml` + `go-16384.bpe` (from `ml-models/go/`, required; grey-text completion), with
-`-Pml.big=true` the 50 M transformer `go-nn-50m-e3-lr2e3.cml` too (the setting "Big model (50 M)" switches between them: 65.7 % vs 63.6 % exact
-lines, ~1.7× the latency), and the ranker pair under `ml/go/`: by default `e14-b.cml` → `lm.cml` and `e17b-rank.cml` → `rank.cml` from
+opt-in at build time: `./gradlew.bat buildPlugin -PmlEnabled=true [-Pml.models=<dir>]` (or `MLENABLED=true`) copies
+`META-INF/go-ml.xml`, the transformer `go-nn-50m-e3-lr2e3.cml` + `go-16384.bpe` (from `ml-models/go/`, required; grey-text completion; since
+0.2.216 the only network — the 31 M one and the "Big model" switch are gone), and the ranker pair under `ml/go/`: by default `e14-b.cml` → `lm.cml` and `e17b-rank.cml` → `rank.cml` from
 `ml-models/go/` (the ranker trained on real completion lists: MRR 0.799 / top-1 0.700 vs the rule order 0.513 / 0.380 on held-out repositories),
 or `lm.cml` + `rank.cml` of `-Pml.models=<dir>` for a newer training; the proxy `e14-b-rank.cml` is never shipped; a plain build has neither the
 ranker nor the page. The zip gets the classifier `-ml`. Since 0.2.207 the models are loaded and warmed up when a project with Go files is

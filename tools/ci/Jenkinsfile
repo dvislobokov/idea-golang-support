@@ -7,7 +7,6 @@ pipeline {
         NEXUS_URL      = 'https://nexus.example.local'
         // raw repositories: distributions of Gradle, IntelliJ IDEA Community, JDK 21
         NEXUS_RAW      = "${NEXUS_URL}/repository/raw-tools"
-        GIT_MIRROR     = 'https://git.example.local/mirrors/'          // mirror of https://github.com/go-delve/
         IDE_ARCHIVE    = 'idea/ideaIC-2026.1.4.tar.gz'
         JDK_ARCHIVE    = 'jdk/OpenJDK21U-jdk_x64_linux.tar.gz'
         GRADLE_VERSION = '9.7.1'
@@ -18,12 +17,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                // the delve sources are plain files of the repository (third_party/delve): no submodules, no mirror of github.com
                 checkout scm
-                sh '''
-                    git config --global http.sslCAInfo /etc/pki/tls/certs/ca-bundle.crt
-                    git config --global url."${GIT_MIRROR}".insteadOf https://github.com/go-delve/
-                    git submodule sync && git submodule update --init --depth 1
-                '''
             }
         }
         stage('Tools') {

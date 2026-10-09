@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference
  * [GoMlSettings.modelDirectory]:
  *  - the ranker pair — the n-gram language model (`lm.cml`) and the linear ranker (`rank.cml`) of [GoMlCompletionRanker]; loaded once,
  *    in the background, on the first completion; until then (and in a build without them) the ranker abstains;
- *  - the network pair — the transformer [NN_MODEL] (or [NN_MODEL_BIG] with [GoMlSettings.inlineBigModel]) and its vocabulary [NN_VOCAB] of
+ *  - the network pair — the transformer [NN_MODEL] and its vocabulary [NN_VOCAB] of
  *    the grey text ([GoNnInlineCompletionProvider]). One [NnModel] per application (~100 MB, the int8 weights memory-mapped from a copy of the
  *    resource in the system directory), loaded and warmed up when a project with Go files is open ([preload]) or on the first Go editor.
  *    The model is not reentrant, so everything that touches it — loading, `complete`, [prefill], closing sessions — runs on one daemon
@@ -110,7 +110,7 @@ class GoMlModels : GoNnEngine, Disposable {
     fun nn(modelDirectory: String): Nn? {
         val settings = GoMlSettings.getInstance()
         if (!settings.inlineEnabled) return null
-        val key = nnKey(modelDirectory, settings.inlineBigModel)
+        val key = nnKey(modelDirectory)
         val g = synchronized(this) {
             when (val s = nnState) {
                 is NnState.Ready -> if (s.key == key) return s.nn
@@ -286,9 +286,7 @@ class GoMlModels : GoNnEngine, Disposable {
         const val CACHE_LAMBDA = 0.3
         private const val RESOURCE_DIR = "ml/go"
         /** The bundled transformer and its BPE vocabulary (`ml-models/go`, copied by the ML build). */
-        const val NN_MODEL = "go-nn-31m-e2.cml"
-        /** The big transformer (50 M, `-Pml.big=true` in the build; [GoMlSettings.inlineBigModel] chooses it). */
-        const val NN_MODEL_BIG = "go-nn-50m-e3-lr2e3.cml"
+        const val NN_MODEL = "go-nn-50m-e3-lr2e3.cml"
         const val NN_VOCAB = "go-16384.bpe"
         private const val KEY_SEPARATOR = "\u0000"
         /** KV cache of an editor's session: the prompt (≤ 2000 tokens) and the generated line; capped by the model's context. */
@@ -304,14 +302,8 @@ class GoMlModels : GoNnEngine, Disposable {
 
         /** True when the build carries the grey-text network. */
         val isNnBundled: Boolean by lazy { resource(NN_MODEL) != null && resource(NN_VOCAB) != null }
-        /** True when the build carries the big network too (`-Pml.big=true`). */
-        val isNnBigBundled: Boolean by lazy { resource(NN_MODEL_BIG) != null && resource(NN_VOCAB) != null }
-
-        /** The network file [GoMlSettings.inlineBigModel] asks for: the big one only when the build (or a directory) can have it. */
-        fun nnModelName(big: Boolean, modelDirectory: String = ""): String = if (big && (isNnBigBundled || modelDirectory.isNotBlank())) NN_MODEL_BIG else NN_MODEL
-
         /** The key of a network load: the directory and the model file. */
-        private fun nnKey(modelDirectory: String, big: Boolean): String = modelDirectory.trim().let { "$it$KEY_SEPARATOR${nnModelName(big, it)}" }
+        private fun nnKey(modelDirectory: String): String = modelDirectory.trim().let { "$it$KEY_SEPARATOR$NN_MODEL" }
         /** True in a build that carries any of the models (and therefore shows the Smart Completion settings page). */
         val isBundled: Boolean by lazy { isRankerBundled || isNnBundled }
 

@@ -14,7 +14,7 @@ PyCharm, WebStorm, Rider, внутренние форки платформы. С
 | Что | Чем сделано | Где |
 |---|---|---|
 | Смысл кода: подсветка, навигация, completion, инспекции, рефакторинги, форматирование | **свой парсер и анализатор Go** (go-psi): лексер, Grammar-Kit-парсер, PSI, стабы, индексы, типы, resolve, поток данных | `go-psi-core`, `go-psi-semantic`, `go-psi-ide` |
-| Отладка | **delve** (`dlv dap`), свой DAP-клиент на XDebugger API (платформенный модуль DAP есть не во всех IDE) | `src/.../debugger`, сабмодуль `third_party/delve` |
+| Отладка | **delve** (`dlv dap`), свой DAP-клиент на XDebugger API (платформенный модуль DAP есть не во всех IDE) | `src/.../debugger`, исходники `third_party/delve` |
 | Всё остальное: сборка, запуск, тесты, модули, мониторинг, инструменты | команда `go` и инструменты экосистемы | `src/.../build`, `run`, `testing`, `mod`, `monitor`, `cli` |
 
 **gopls** в плагине есть, но с 0.2.82 выключен по умолчанию и не запускается; включается одной настройкой (Settings | Tools | Go | Language Server).
@@ -37,7 +37,7 @@ idea-golang-support/
 ├── go-psi-semantic/    project model (go env, go.mod), типы, resolve, проверки, поток данных  51 main / 44 test
 ├── go-psi-ide/         IDE-фичи поверх PSI: completion, инспекции, intentions, рефакторинги… 365 main / 158 test
 ├── ml-core/            копия чистого Kotlin-движка ML completion (n-gram LM + линейный ранкер) из idea-ml-completion
-├── third_party/delve/  git-сабмодуль delve (тег v1.27.2, vendor/ внутри): исходники кладутся в плагин, собираются у пользователя
+├── third_party/delve/  исходники delve (тег v1.27.2, vendor/ внутри) обычными файлами репозитория: кладутся в плагин, собираются у пользователя
 ├── docs/               документация (список в §9)
 ├── tools/              скрипты: CI, зонды, UI-робот, гейты, сверка с go vet, иконки
 ├── testData/           метрики корпусных гейтов и пороги бенчмарков (могут только улучшаться)

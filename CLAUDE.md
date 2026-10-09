@@ -128,7 +128,7 @@ export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 Обратная связь — через точки расширения плагина (`languageServerControl`). Платформенный DAP (`com.intellij.platform.dap.*`) не использовать вовсе: отладчик — свой клиент в пакете `debugger`.
 
 Отладчик, что важно знать (проверено вживую):
-- delve встроен: сабмодуль `third_party/delve` (тег v1.27.2, с `vendor/`), `prepareSandbox*` кладёт исходники и `SOURCE-HASH` в `delve/` плагина, `GoBundledDelve` собирает их в фоне при открытии проекта в `system/go-plugin/delve/<hash>/` (`GoTool.find`: путь из настроек → встроенный → PATH). Обновить delve — `git -C third_party/delve checkout <тег>` (vendor уже в репозитории delve). После клона — `git submodule update --init`.
+- delve встроен: исходники `third_party/delve` (тег v1.27.2, с `vendor/`) лежат в репозитории обычными файлами (не сабмодуль: ZIP с GitHub сабмодули не включает; `third_party/README.md`), `prepareSandbox*` кладёт исходники и `SOURCE-HASH` в `delve/` плагина, `GoBundledDelve` собирает их в фоне при открытии проекта в `system/go-plugin/delve/<hash>/` (`GoTool.find`: путь из настроек → встроенный → PATH). Сборке плагина `go` для этого не нужен. Обновить delve — шаги в `third_party/README.md` (клон тега, замена каталога, версия в README / NOTICE / guide).
 - `dlv dap` работает только по TCP: `--listen=127.0.0.1:0`, порт — из первой строки stdout (`DAP server listening at:`). **`--log-dest` нельзя**: с ним и эта
   строка уходит в файл; лог сессии пишет `DelveHandle` из потока процесса.
 - Программу собирает сам delve (`mode: debug | test`), `outputMode: remote` — вывод программы приходит событиями протокола.

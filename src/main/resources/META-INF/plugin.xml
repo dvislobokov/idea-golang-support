@@ -167,6 +167,8 @@
         <completion.contributor language="Go" implementationClass="io.github.golangsupport.catalogue.GoCatalogueCompletionContributor"/>
         <!-- does the project have Go files at all: without them the menu Go, the tool windows and the startup work of a Go project are not there -->
         <postStartupActivity implementation="io.github.golangsupport.lang.GoProjectPresence$Startup" order="first"/>
+        <!-- a Go project without a module (a directory opened by another IDE) gets one: outside a content root the IDE does not index or highlight -->
+        <postStartupActivity implementation="io.github.golangsupport.mod.GoProjectModuleActivity"/>
         <postStartupActivity implementation="io.github.golangsupport.catalogue.GoCatalogueStartupActivity"/>
         <!-- the interfaces of the project are read once the index is there: Implement Interface opens at once -->
         <postStartupActivity implementation="io.github.golangsupport.lang.GoProjectInterfacesStartup"/>

@@ -29,6 +29,11 @@ type Order struct {
 	items    []Item `db:"items" mapstructure:"items" toml:"items"`
 }
 
+// NewOrder creates a new order.
+func NewOrder(currency string) *Order {
+	return &Order{Currency: currency}
+}
+
 // Flags is padded by the compiler: 24 bytes where 16 would do (Alt+Enter: Reorder fields; fieldalignment of golangci-lint says so too).
 type Flags struct {
 	Debug   bool
@@ -46,30 +51,30 @@ func (o *Order) Add(item Item) {
 }
 
 // Total is the sum of price times quantity.
-func (o *Order) Total() int {
+func (o *Order) Total() (int, error) {
 	total := 0
 	for _, item := range o.items {
-		total += item.Price * item.Quantity
+		if item.Price > 0 {
+			total += item.Price * item.Quantity
+		}
 	}
-
-	_, err := os.Open("123")
-	if err != nil {
-		return 0
-	}
-
-	f, err := os.Open("123")
-	if err != nil {
-		return 0
-	}
-	defer f.Close()
-
-	return total
-
+	return total, nil
 }
 
+// Validate method to validate func order
 func (o *Order) Validate() error {
+
 	if len(o.items) == 0 {
 		return ErrEmpty
+	}
+
+	for _, item := range o.items {
+		if item.Price <= 0 {
+			return ErrEmpty
+		}
+		if item.Quantity < 0 {
+
+		}
 	}
 	return nil
 }
