@@ -114,7 +114,7 @@ tasks.processResources {
 
 // Smart Completion (docs/ML.md): `-PmlEnabled=true` (or MLENABLED=true in the environment) puts the ML features into the plugin —
 // META-INF/go-ml.xml (the completionRanker, the grey-text inline provider and the Settings | Go | Smart Completion page), the transformer
-// go-nn-50m-e3-lr2e3.cml with its tokenizer go-16384.bpe from ml-models/go/ (required; the 31 M one is not shipped since 0.2.216), the import statistics go-imports-e20.cml when present (GoImportStats:
+// go-nn-50m-caret-ft5e5.cml with its tokenizer go-16384.bpe from ml-models/go/ (required; since 0.2.220, before it go-nn-50m-e3-lr2e3.cml; the 31 M one is not shipped since 0.2.216), the import statistics go-imports-e20.cml when present (GoImportStats:
 // the plain build reads it from the model directory setting or from ml-models/go next to the plugin), and the ranker pair lm.cml / rank.cml under ml/go/: by default the
 // n-gram e14-b.cml and the real-list GBDT ranker e19-rank-gbdt.cml of ml-models/go/ (MRR 0.834 vs linear e17b 0.799, rules 0.513), renamed; `-Pml.models=<dir>`
 // takes lm.cml / rank.cml from that directory instead (a newer training; missing there: no ranker, only the grey text works).
@@ -123,7 +123,7 @@ val mlEnabled = providers.gradleProperty("mlEnabled").orElse(providers.environme
 if (mlEnabled) {
     val mlModels = providers.gradleProperty("ml.models").map { file(it) }.orNull
     val nnDir = file("ml-models/go")
-    val nnFiles = listOf("go-nn-50m-e3-lr2e3.cml", "go-16384.bpe")
+    val nnFiles = listOf("go-nn-50m-caret-ft5e5.cml", "go-16384.bpe")
     for (name in nnFiles) check(File(nnDir, name).isFile) { "mlEnabled: $name not found in $nnDir" }
     // the corpus import statistics (GoImportStats, e20): optional, the feature is silently off without it
     val importFiles = listOf("go-imports-e20.cml").filter { File(nnDir, it).isFile }

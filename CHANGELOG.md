@@ -30,6 +30,15 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.220] - 2026-10-10
+
+- ML grey text: a new network, `go-nn-50m-caret-ft5e5.cml` (`GoMlModels.NN_MODEL`), replaces `go-nn-50m-e3-lr2e3.cml` in the ML build — the
+  same architecture, size, vocabulary (`go-16384.bpe`) and prompt, so the latency is the same. Trained from scratch on a larger corpus
+  (10.4 G tokens, 41 688 repositories) and then fine-tuned on 1.05 M caret positions in the plugin's prompt format, loss on the rest of
+  the line and the stop token only (csharp-dataset-prepare `docs/experiments/README-RU.md`). On 12 000 positions of repositories no
+  model has seen: rest of the line exact 51.8 % (was 34.8 %), shown at the plugin's gate 37.2 % of positions (21.5 %), 91.3 % of the
+  shown lines exact (80.9 %). The old file stays in `ml-models/go` for comparison through the models directory setting.
+
 ## [0.2.219] - 2026-10-10
 
 ### Fixed

@@ -212,7 +212,7 @@ class GoMlModels : GoNnEngine, Disposable {
             ?: (s.error ?: "no network")
     }
 
-    /** The name of the loaded network (`go-nn-31m-e2`, `go-nn-50m-e3-lr2e3`), or null while none is. */
+    /** The name of the loaded network (`go-nn-50m-caret-ft5e5`; earlier `go-nn-50m-e3-lr2e3`), or null while none is. */
     val nnName: String? get() = (synchronized(this) { nnState } as? NnState.Ready)?.nn?.name
 
     /**
@@ -286,7 +286,7 @@ class GoMlModels : GoNnEngine, Disposable {
         const val CACHE_LAMBDA = 0.3
         private const val RESOURCE_DIR = "ml/go"
         /** The bundled transformer and its BPE vocabulary (`ml-models/go`, copied by the ML build). */
-        const val NN_MODEL = "go-nn-50m-e3-lr2e3.cml"
+        const val NN_MODEL = "go-nn-50m-caret-ft5e5.cml"
         const val NN_VOCAB = "go-16384.bpe"
         private const val KEY_SEPARATOR = "\u0000"
         /** KV cache of an editor's session: the prompt (≤ 2000 tokens) and the generated line; capped by the model's context. */
