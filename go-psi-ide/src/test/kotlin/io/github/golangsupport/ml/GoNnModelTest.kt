@@ -85,4 +85,22 @@ class GoNnModelTest {
             }
         } finally { nn.model.close() }
     }
+
+    @Test fun theTypedSpaceAfterReturnIsTyped() {
+        // healing v2 (0.2.221): at `return ⟨⟩` the space is the typed remainder, the prompt ends at `return`, the first token of the
+        // network starts with the space and the text to insert does not — the word is never glued to `return` and the space never doubled
+        assumeTrue("no ml-models/go/${GoMlModels.NN_MODEL}", dir != null)
+        val nn = checkNotNull(GoMlModels.loadNn(dir)) { "no network in $dir" }
+        try {
+            val head = "package store\n\ntype Order struct {\n\titems []string\n}\n\nfunc (o *Order) Count() int {\n\treturn "
+            val c = GoNnInline.context(head + "\n}\n", head.length, "store/order.go")
+            val r = nn.model.newSession(2048).use { nn.completion.complete(c.path, c.before, c.after, it) }
+            println("GoNnModelTest: 'return ⟨⟩' -> '${r.textString}' typed '${String(r.typed)}' confProd ${r.confProd}")
+            assertEquals(" ", String(r.typed))
+            assertTrue("the prompt ends at `return`", String(nn.completion.tok.tokenBytes(r.prompt.last())).endsWith("return"))
+            assertTrue("the network did not reproduce the space", !r.healMiss)
+            assertTrue("the first token carries the space", String(nn.completion.tok.tokenBytes(r.tokens[0])).startsWith(" "))
+            assertTrue("no second space in the inserted text: '${r.textString}'", r.text.isNotEmpty() && r.text[0] != ' '.code.toByte())
+        } finally { nn.model.close() }
+    }
 }

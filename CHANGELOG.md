@@ -30,6 +30,19 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.221] - 2026-10-10
+
+### Changed
+
+- **ML grey text: healing v2 in the engine** (`ml-core` synced from idea-ml-completion, `NnCompletion.Options.healTrailingSpace`). The spaces
+  and tabs right before the caret count as typed: the prompt of the network ends at the last non-blank byte of the line (`return ⟨⟩` → the
+  prompt ends at `return` and the first token has to start with the space; `x =  ⟨⟩`, `foo(\t⟨⟩`, `foo( ⟨⟩)` alike; the indentation of an
+  empty line is left alone), and the inserted text never doubles the space. Before, the prompt ended with a lone space token and the network
+  had to write the word without its space — a split it never saw in training (` Check`, not `Check`); models fine-tuned on such prompts
+  learned it and dropped the space where nobody typed one (`rangeSupportedLanguages`, C# `newHelloReply`). The prefill of the KV cache at
+  file open goes through the same rule, so the first keystroke after `return ⟨⟩` reuses the whole cache. Test
+  `GoNnModelTest.theTypedSpaceAfterReturnIsTyped`.
+
 ## [0.2.220] - 2026-10-10
 
 - ML grey text: a new network, `go-nn-50m-caret-ft5e5.cml` (`GoMlModels.NN_MODEL`), replaces `go-nn-50m-e3-lr2e3.cml` in the ML build — the
