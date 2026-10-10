@@ -23,7 +23,6 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.util.text.TextWithMnemonic
 import com.intellij.openapi.vcs.CheckinProjectPanel
 import com.intellij.openapi.vcs.changes.CommitContext
-import com.intellij.openapi.vcs.changes.ui.BooleanCommitOption
 import com.intellij.openapi.vcs.checkin.CheckinHandler
 import com.intellij.openapi.vcs.checkin.CheckinHandlerFactory
 import com.intellij.openapi.vcs.checkin.CommitCheck
@@ -31,6 +30,7 @@ import com.intellij.openapi.vcs.checkin.CommitInfo
 import com.intellij.openapi.vcs.checkin.CommitProblem
 import com.intellij.openapi.vcs.checkin.CommitProblemWithDetails
 import com.intellij.openapi.vcs.ui.RefreshableOnComponent
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.profile.codeInspection.InspectionProjectProfileManager
@@ -41,6 +41,7 @@ import io.github.golangsupport.lang.GoProjectPresence
 import io.github.golangsupport.project.api.GoToolchainProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.swing.JComponent
 
 /** The pure part of the commit check: which changed files it reads, how its findings are told. */
 object GoCommitChecks {
@@ -84,6 +85,18 @@ class GoCommitCheckSettings : SimplePersistentStateComponent<GoCommitCheckSettin
 }
 
 /** The commit option in projects with Go only. */
+/**
+ * The checkbox of the commit options panel. Not the platform's `BooleanCommitOption`: that class lives in `intellij.platform.vcs.impl`, which
+ * some distributions keep out of the compile classpath (seen 2026-10-10: a build against an IDE of the same number failed on it), while
+ * everything else the check needs is in the VCS API jar. The setting changes on the click too, so a commit that never saves the options sees it.
+ */
+class GoCommitOption(text: String, private val getter: () -> Boolean, private val setter: (Boolean) -> Unit) : RefreshableOnComponent {
+    private val checkBox = JBCheckBox(text, getter()).apply { addActionListener { setter(isSelected) } }
+    override fun getComponent(): JComponent = checkBox
+    override fun saveState() = setter(checkBox.isSelected)
+    override fun restoreState() { checkBox.isSelected = getter() }
+}
+
 class GoCheckinHandlerFactory : CheckinHandlerFactory() {
     override fun createHandler(panel: CheckinProjectPanel, commitContext: CommitContext): CheckinHandler =
         if (GoProjectPresence.hasGoFiles(panel.project)) GoCheckinHandler(panel.project) else CheckinHandler.DUMMY
@@ -96,8 +109,7 @@ class GoCheckinHandlerFactory : CheckinHandlerFactory() {
 class GoCheckinHandler(private val project: Project) : CheckinHandler(), CommitCheck {
     private val settings get() = GoCommitCheckSettings.getInstance(project)
 
-    override fun getBeforeCheckinConfigurationPanel(): RefreshableOnComponent =
-        BooleanCommitOption.create(project, this, true, "Check Go code", { settings.checkGoCode }, { settings.checkGoCode = it })
+    override fun getBeforeCheckinConfigurationPanel(): RefreshableOnComponent = GoCommitOption("Check Go code", { settings.checkGoCode }) { settings.checkGoCode = it }
 
     // after the modifying checks (reformat, optimize imports), with the platform's code analysis
     override fun getExecutionOrder(): CommitCheck.ExecutionOrder = CommitCheck.ExecutionOrder.LATE

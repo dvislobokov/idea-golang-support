@@ -30,6 +30,18 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.219] - 2026-10-10
+
+### Fixed
+
+- **The build failed on `BooleanCommitOption` in an internal IDE distribution** (seen 2026-10-10: `Unresolved reference 'BooleanCommitOption'` in
+  `GoCommitCheck.kt` against an IDE of the same build number, 261.26222.65). The class lives in `intellij.platform.vcs.impl.jar`, which that
+  distribution does not put on the compile classpath, while everything else the commit check uses (`CheckinHandler`, `CommitCheck`,
+  `RefreshableOnComponent`, …) is in the VCS API jar. The "Check Go code" checkbox of the commit options is now the plugin's own
+  `GoCommitOption` on `RefreshableOnComponent` (a `JBCheckBox` that writes the setting on the click and on `saveState`); no import from
+  `vcs.impl` remains. The plugin imports nothing else from the optional impl jars (vcs, dvcs, vcs.log, lvcs, tasks, credentialStore), checked
+  against the jars of 2026.1.4.
+
 ## [0.2.218] - 2026-10-09
 
 ### Changed
