@@ -135,11 +135,15 @@ class GoTypeBuilder(private val project: Project) : GoTypeSource {
 
     /** The method value of a method declaration, with receiver type parameters mapped to the type's parameters. */
     fun methodOf(m: GoMethodDeclaration, pkgPath: String?): GoMethod? {
-        val name = m.name ?: return null
-        return CachedValuesManager.getCachedValue(m) {
+        if (m.name == null) return null
+        // The provider of the first call stays with the cached value and computes it again after a change: what it captured then (the
+        // old name, seen in the comparison with GoLand: a renamed method still implemented the interface) would come back. Read inside.
+        val method = CachedValuesManager.getCachedValue(m) {
+            val name = m.name
             val sig = signatureOf(m.signature, m.typeParameters, receiverOf(m))
-            CachedValueProvider.Result.create(GoMethod(name, sig, m, m.isPointerReceiver, pkgPath), *dependencies(m))
-        }
+            CachedValueProvider.Result.create(name?.let { GoMethod(it, sig, m, m.isPointerReceiver, null) }, *dependencies(m))
+        } ?: return null
+        return if (method.pkgPath == pkgPath) method else method.withPkgPath(pkgPath)
     }
 
     private fun receiverOf(m: GoMethodDeclaration): GoParam? {

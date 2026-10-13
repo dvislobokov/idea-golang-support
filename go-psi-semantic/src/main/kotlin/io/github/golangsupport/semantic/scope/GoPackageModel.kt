@@ -106,10 +106,14 @@ class GoPackageModel(private val project: Project) {
     fun scopeOf(pkg: GoPackage): PackageScope {
         val dir = PsiManager.getInstance(project).findDirectory(pkg.directory) ?: return PackageScope(emptyList(), pkg.importPath, pkg.name)
         return CachedValuesManager.getCachedValue(dir) {
-            val files = pkg.goFiles.mapNotNull(::goFile)
-            CachedValueProvider.Result.create(PackageScope(files, pkg.importPath, pkg.name), *trackers.ownPackageDependencies(dir))
+            // the provider of the first call computes the value again after a change: the package as it is now, not the captured one
+            // (a file added to the package was not seen by its importers)
+            val now = current(dir.virtualFile) ?: pkg
+            CachedValueProvider.Result.create(PackageScope(now.goFiles.mapNotNull(::goFile), now.importPath, now.name), *trackers.ownPackageDependencies(dir))
         }
     }
+
+    private fun current(dir: VirtualFile): GoPackage? = runCatching { GoPackageResolver.getInstance(project).packageOf(dir) }.getOrNull()
 
     /**
      * The scope of the imported [pkg] as [from] sees it: an external test file (`package x_test` in the directory of `x`) imports the test
@@ -119,8 +123,9 @@ class GoPackageModel(private val project: Project) {
         if (!from.isTestFile || pkg.testFiles.isEmpty() || GoPsiUtil.originalVirtualFile(from).parent != pkg.directory) return scopeOf(pkg)
         val dir = PsiManager.getInstance(project).findDirectory(pkg.directory) ?: return scopeOf(pkg)
         return CachedValuesManager.getCachedValue(dir, TEST_VARIANT) {
-            val files = (pkg.goFiles + pkg.testFiles).mapNotNull(::goFile).filter { pkg.name == null || it.packageName == pkg.name }
-            CachedValueProvider.Result.create(PackageScope(files, pkg.importPath, pkg.name), *trackers.ownPackageDependencies(dir))
+            val now = current(dir.virtualFile) ?: pkg
+            val files = (now.goFiles + now.testFiles).mapNotNull(::goFile).filter { now.name == null || it.packageName == now.name }
+            CachedValueProvider.Result.create(PackageScope(files, now.importPath, now.name), *trackers.ownPackageDependencies(dir))
         }
     }
 

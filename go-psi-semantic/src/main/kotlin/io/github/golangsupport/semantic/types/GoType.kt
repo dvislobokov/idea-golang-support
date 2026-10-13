@@ -185,6 +185,7 @@ class GoMethod @JvmOverloads constructor(val name: String, val signature: GoSign
     val isExported: Boolean get() = name.isNotEmpty() && Character.isUpperCase(name.codePointAt(0))
     fun withSignature(signature: GoSignatureType): GoMethod =
         if (signature === this.signature) this else GoMethod(name, signature, declaration, pointerReceiver, pkgPath)
+    fun withPkgPath(pkgPath: String?): GoMethod = GoMethod(name, signature, declaration, pointerReceiver, pkgPath)
     override fun toString(): String = "$name${GoTypeRenderer.render(signature).removePrefix("func")}"
 }
 

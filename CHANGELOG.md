@@ -30,6 +30,23 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.225] - 2026-10-13
+
+### Fixed
+
+- **A renamed method breaks the implementation at once** (item 2 of `docs/compare/prometheus-broken-2026-10-13.md`, the commonest
+  miss of the comparison: 2 of 55 breakages of prometheus). `CachedValuesManager.getCachedValue(element) { … }` keeps the provider of
+  its first call and runs it again after a change, so `GoTypeBuilder.methodOf` rebuilt the method with the name it had captured then:
+  `SearchLabelNames` renamed to `SearchLabelName` still implemented `storage.Searcher`. The name is read inside the provider now.
+  The same capture made the package path of a method depend on the first caller (the checker passed none). Checked in the IDE on the
+  prometheus clone: `missing method SearchLabelNames` (storage/generic.go:30), `… SearchLabelValues` (tsdb/ooo_head_read.go:574).
+- **A file added to an imported package is seen by its importers.** The scope of an imported package was cached with the file list
+  of the first call (the same capture); and a Go file created outside the editor (git checkout, a generator) in a directory whose PSI
+  was never loaded came with no PSI event, so nothing was invalidated at all: `undefined: a.Y` stayed until the importer was edited.
+  `GoTrackers` now listens to VFS events for Go files of project content. Checked in the IDE: the error goes in 3 s.
+- Tests `GoCacheInvalidationTest.testRenamedMethodBreaksTheImplementation`, `testFileAddedToAnImportedPackage`; ABI dump of
+  go-psi-semantic updated (it was not after 0.2.222–0.2.224). Robot script `debug_scope.js` (what the semantic layer sees of a package).
+
 ## [0.2.224] - 2026-10-13
 
 Errors of the compiler the plugin did not report (`docs/compare/go-error-codes-2026-10-13.md`: the examples of

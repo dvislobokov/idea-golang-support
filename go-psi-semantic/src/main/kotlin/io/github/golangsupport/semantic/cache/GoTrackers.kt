@@ -119,6 +119,37 @@ class GoTrackers(private val project: Project) : Disposable {
                 GoPsiUtil.treeChanged()
             }
         })
+        // A Go file created, deleted, moved or renamed outside the editor (git checkout, a generator, another tool) in a directory whose
+        // PSI was never loaded comes with no PSI event the listener sees: importers kept their old view of the package (seen live).
+        project.messageBus.connect(this).subscribe(com.intellij.openapi.vfs.VirtualFileManager.VFS_CHANGES, object : com.intellij.openapi.vfs.newvfs.BulkFileListener {
+            override fun after(events: List<com.intellij.openapi.vfs.newvfs.events.VFileEvent>) {
+                // project content only: module downloads into GOMODCACHE change the project model (go.mod / go.sum) anyway
+                val index = ProjectFileIndex.getInstance(project)
+                for (event in events) for (dir in goFileSetDirs(event)) if (dir.isValid && index.isInContent(dir)) fileSetChanged(dir)
+            }
+        })
+    }
+
+    /** The directories whose set of Go files [event] changes. */
+    private fun goFileSetDirs(event: com.intellij.openapi.vfs.newvfs.events.VFileEvent): List<VirtualFile> {
+        fun go(name: String) = name.endsWith(".go")
+        return when (event) {
+            is com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent -> if (go(event.childName)) listOf(event.parent) else emptyList()
+            is com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent -> if (go(event.file.name)) listOfNotNull(event.file.parent) else emptyList()
+            is com.intellij.openapi.vfs.newvfs.events.VFileMoveEvent -> if (go(event.file.name)) listOf(event.oldParent, event.newParent) else emptyList()
+            is com.intellij.openapi.vfs.newvfs.events.VFileCopyEvent -> if (go(event.newChildName)) listOf(event.newParent) else emptyList()
+            is com.intellij.openapi.vfs.newvfs.events.VFilePropertyChangeEvent ->
+                if (event.propertyName == VirtualFile.PROP_NAME && (go(event.oldValue.toString()) || go(event.newValue.toString()))) listOfNotNull(event.file.parent) else emptyList()
+            else -> emptyList()
+        }
+    }
+
+    /** The set of Go files of [dir] changed (the same as a [structural] change of a [GoFile]). */
+    private fun fileSetChanged(dir: VirtualFile) {
+        anyGoChange.incModificationCount()
+        GoPsiUtil.treeChanged()
+        if (projectPackage(dir) != null) fileSetStamp = stamps.incrementAndGet()
+        bumpPackageOf(dir)
     }
 
     /** Bumped by every change of [file] (any position). */
@@ -411,13 +442,7 @@ class GoTrackers(private val project: Project) : Disposable {
     private fun structural(parent: PsiElement?, vararg children: PsiElement?) {
         for (child in children) {
             when (child) {
-                is GoFile -> {
-                    anyGoChange.incModificationCount()
-                    GoPsiUtil.treeChanged()
-                    val dir = (parent as? PsiDirectory)?.virtualFile ?: child.viewProvider.virtualFile.parent
-                    if (dir != null && projectPackage(dir) != null) fileSetStamp = stamps.incrementAndGet()
-                    bumpPackageOf(dir)
-                }
+                is GoFile -> ((parent as? PsiDirectory)?.virtualFile ?: child.viewProvider.virtualFile.parent)?.let(::fileSetChanged)
                 is PsiDirectory -> {
                     val anchor = (parent as? PsiDirectory)?.virtualFile ?: child.virtualFile
                     val index = ProjectFileIndex.getInstance(project)

@@ -864,8 +864,11 @@ public final class io/github/golangsupport/semantic/types/GoChanType : io/github
 
 public abstract class io/github/golangsupport/semantic/types/GoConstant {
 	public static final field Companion Lio/github/golangsupport/semantic/types/GoConstant$Companion;
+	public static final field MAX_HELD_STRING J
+	public static final field MAX_STRING_BYTES J
 	public final fun getKind ()Lio/github/golangsupport/semantic/types/GoBasicKind;
 	public final fun render ()Ljava/lang/String;
+	public final fun stringBytes ()Ljava/lang/Long;
 	public final fun toBigDecimal ()Ljava/math/BigDecimal;
 	public final fun toBigInteger ()Ljava/math/BigInteger;
 }
@@ -924,6 +927,17 @@ public final class io/github/golangsupport/semantic/types/GoConstant$Int : io/gi
 	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoConstant$Int;Ljava/math/BigInteger;ILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoConstant$Int;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getValue ()Ljava/math/BigInteger;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/golangsupport/semantic/types/GoConstant$LongStr : io/github/golangsupport/semantic/types/GoConstant {
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Lio/github/golangsupport/semantic/types/GoConstant$LongStr;
+	public static synthetic fun copy$default (Lio/github/golangsupport/semantic/types/GoConstant$LongStr;JILjava/lang/Object;)Lio/github/golangsupport/semantic/types/GoConstant$LongStr;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBytes ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1073,6 +1087,7 @@ public final class io/github/golangsupport/semantic/types/GoMethod {
 	public final fun getSignature ()Lio/github/golangsupport/semantic/types/GoSignatureType;
 	public final fun isExported ()Z
 	public fun toString ()Ljava/lang/String;
+	public final fun withPkgPath (Ljava/lang/String;)Lio/github/golangsupport/semantic/types/GoMethod;
 	public final fun withSignature (Lio/github/golangsupport/semantic/types/GoSignatureType;)Lio/github/golangsupport/semantic/types/GoMethod;
 }
 

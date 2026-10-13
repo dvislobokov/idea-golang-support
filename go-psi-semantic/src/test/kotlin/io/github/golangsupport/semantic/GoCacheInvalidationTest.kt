@@ -50,6 +50,30 @@ class GoCacheInvalidationTest : GoSemanticTestBase() {
         return Triple(a, b, c)
     }
 
+    /**
+     * A renamed method breaks the implementation at once (docs/compare/prometheus-broken-2026-10-13.md: after the same edit in an open
+     * document the `missing method` error did not show, on a fresh file it did): in the method's file and in another file of the package.
+     */
+    fun testRenamedMethodBreaksTheImplementation() {
+        val i = myFixture.addFileToProject("impl/i.go", "package impl\n\ntype I interface{ Run() error }\n\nvar _ I = &T{}\n") as GoFile
+        val t = myFixture.addFileToProject("impl/t.go", "package impl\n\ntype T struct{}\n\nfunc (t *T) Run() error { return nil }\n\nvar _ I = (*T)(nil)\n") as GoFile
+        fun errors(f: GoFile) = semantic.check(f).map { it.message.lineSequence().first() }
+        assertEquals(emptyList<String>(), errors(i))
+        assertEquals(emptyList<String>(), errors(t))
+        edit(t, "func (t *T) Run()", "func (t *T) Start()")
+        assertEquals(listOf("cannot use &T{} (value of type *T) as I value in variable declaration: *T does not implement I (missing method Run)"), errors(i))
+        assertEquals(listOf("cannot use (*T)(nil) (value of type *T) as I value in variable declaration: *T does not implement I (missing method Run)"), errors(t))
+    }
+
+    /** A file added to an imported package is in the importer's view of it (the scope of the package is cached on its directory). */
+    fun testFileAddedToAnImportedPackage() {
+        myFixture.addFileToProject("grow/a/a.go", "package a\n\nvar X = 1\n")
+        val user = myFixture.addFileToProject("grow/u/u.go", "package u\n\nimport \"../a\"\n\nvar _ = a.X + a.Y\n") as GoFile
+        assertEquals(listOf("undefined: a.Y"), semantic.check(user).map { it.message })
+        myFixture.addFileToProject("grow/a/b.go", "package a\n\nvar Y = 2\n")
+        assertEquals(emptyList<String>(), semantic.check(user).map { it.message })
+    }
+
     fun testExportedDeclarationEditInvalidatesImporters() {
         val (a, b, c) = addPackages()
         assertEquals("int", typeText(b, "t.X"))
