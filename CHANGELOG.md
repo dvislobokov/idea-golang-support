@@ -30,6 +30,23 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.226] - 2026-10-14
+
+### Changed
+
+- **A file the build leaves out is treated as GoLand treats it** (item 3 of `docs/compare/prometheus-broken-2026-10-13.md`; GoLand
+  snapped in `docs/goland-analysis/dumps/excluded-files.txt`). A file excluded by the target platform and build tags of the analysis
+  (`//go:build dedupelabels`, `x_linux.go` on windows, `mmap_arm64.go` on amd64) is checked for syntax only: the inspections of Go are
+  quiet in it (`GoInspectionSuppressor`), its own build constraint stays checked (a typo such as `linx` is often why it is left out).
+  On prometheus (windows/amd64) the problems of such files went from 91 to 0 (4 of them false errors). A banner above the editor says
+  why, with GoLand's text and links: "'mmap_arm64.go' is ignored by the build tool because of the architecture mismatch" (OS mismatch,
+  custom flag) — Rename file (excluded by its name) or Navigate to build constraints, and Edit settings (Build Tags page); it follows
+  changes of the target in the status bar widget. `GoBuildExclusion` (project API), `GoPackageModel.buildExclusion`.
+  Checked in the IDE on the prometheus clone (linux): the banners of `labels_dedupelabels.go`, `config_windows_test.go`, `mmap_arm64.go`,
+  none on `labels_stringlabels.go`; type errors appended to an excluded file stay quiet, a syntax error shows; the link goes to
+  `//go:build dedupelabels`. Tests `GoBuildExclusionTest`, `GoInspectionsTest.testFileOutsideTheBuildIsCheckedForSyntaxOnly`.
+- Robot scripts `banners.js` (the banners of the editor) and `banner_click.js` (a link of a banner), for GoLand and the sandbox.
+
 ## [0.2.225] - 2026-10-13
 
 ### Fixed

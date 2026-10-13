@@ -26,6 +26,18 @@ class GoInspectionsTest : GoSemanticIdeTestBase() {
 
     fun testUnresolvedReference() = doTest("unresolved", GoUnresolvedReferenceInspection())
 
+    /** A file the build leaves out (tests pin linux/amd64): only syntax errors, as in GoLand (docs/goland-analysis/dumps/excluded-files.txt). */
+    fun testFileOutsideTheBuildIsCheckedForSyntaxOnly() {
+        myFixture.enableInspections(GoUnresolvedReferenceInspection(), GoTypeMismatchInspection(), GoCheckerInspection(), GoUnusedImportInspection())
+        val excluded = myFixture.addFileToProject("excluded/x_windows.go",
+            "package excluded\n\nimport \"os\"\n\nvar _ int = 1.5\nvar _ = undefinedThing\n\nfunc f(<error descr=\"')' or <parameter declaration> expected, got '{'\">{</error>}\n")
+        myFixture.testHighlighting(true, false, true, excluded.virtualFile)
+        // the same code in a file of the build
+        val built = myFixture.addFileToProject("excluded/x_linux.go",
+            "package excluded\n\nvar _ int = <error descr=\"cannot use 1.5 (untyped float constant) as int value in variable declaration (truncated)\">1.5</error>\n")
+        myFixture.testHighlighting(true, false, true, built.virtualFile)
+    }
+
     fun testUnusedImport() = doTest("unusedImport", GoUnusedImportInspection())
 
     fun testUnusedVariable() = doTest("unusedVariable", GoUnusedVariableInspection())

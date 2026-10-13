@@ -102,6 +102,19 @@ class GoPackageModel(private val project: Project) {
         return psiDir.files.filterIsInstance<GoFile>().filter { it.isTestFile && it.packageName == packageName }
     }
 
+    /**
+     * Why the build of the project's context (the target platform and build tags of the analysis) leaves [file] out, or null when it
+     * builds. GoLand checks such a file for syntax only: inspections stay quiet in it (docs/goland-analysis/dumps/excluded-files.txt).
+     */
+    fun buildExclusion(file: GoFile): io.github.golangsupport.project.api.GoBuildExclusion? = CachedValuesManager.getCachedValue(file, BUILD_EXCLUSION) {
+        val vf = GoPsiUtil.originalVirtualFile(file)
+        val context = GoToolchainProvider.getInstance().toolchainFor(project)?.buildContext
+            ?: GoBuildContext(DefaultGoToolchainProvider.hostOs(), DefaultGoToolchainProvider.hostArch())
+        val exclusion = if (vf.fileSystem.protocol == "file" || vf.fileSystem.protocol == "temp")
+            io.github.golangsupport.project.api.GoBuildExclusion.of(vf.name, GoPsiUtil.originalFile(file).viewProvider.contents, context) else null
+        CachedValueProvider.Result.create(exclusion, *trackers.fileDeclarationsDependencies(file), trackers.projectModel)
+    }
+
     /** The package scope of a resolved import ([pkg] from the project model). */
     fun scopeOf(pkg: GoPackage): PackageScope {
         val dir = PsiManager.getInstance(project).findDirectory(pkg.directory) ?: return PackageScope(emptyList(), pkg.importPath, pkg.name)
@@ -204,6 +217,7 @@ class GoPackageModel(private val project: Project) {
         private val FILE_DECLARATIONS = Key.create<CachedValue<FileDeclarations>>("gopsi.fileDeclarations")
         private val TEST_FILES = Key.create<CachedValue<List<GoFile>>>("gopsi.packageTestFiles")
         private val TEST_VARIANT = Key.create<CachedValue<PackageScope>>("gopsi.packageTestVariant")
+        private val BUILD_EXCLUSION = Key.create<CachedValue<io.github.golangsupport.project.api.GoBuildExclusion?>>("gopsi.buildExclusion")
 
         @JvmStatic
         fun getInstance(project: Project): GoPackageModel = project.service()

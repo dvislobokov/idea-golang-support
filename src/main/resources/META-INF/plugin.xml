@@ -287,6 +287,7 @@
         <editorNotificationProvider implementation="io.github.golangsupport.mod.GoModNotificationProvider"/>
         <!-- a .go / go.mod / go.work that opens as another file type (a user association shadows ours): the fix above the file -->
         <editorNotificationProvider implementation="io.github.golangsupport.sdk.GoFileTypeNotificationProvider"/>
+        <editorNotificationProvider implementation="io.github.golangsupport.build.GoBuildExclusionNotificationProvider"/>
 
         <treeStructureProvider implementation="io.github.golangsupport.view.GoDependenciesTreeProvider"/>
         <notificationGroup id="Go" displayType="BALLOON"/>

@@ -30,6 +30,9 @@ class GoInspectionSuppressor : InspectionSuppressor {
 
     override fun isSuppressedFor(element: PsiElement, toolId: String): Boolean {
         val file = element.containingFile as? GoFile ?: return false
+        // a file the build leaves out (`//go:build dedupelabels`, `x_linux.go` on windows): GoLand checks its syntax only, the
+        // inspections of Go are quiet there; spelling and TODO stay (docs/goland-analysis/dumps/excluded-files.txt)
+        if (toolId in GO_INSPECTIONS && io.github.golangsupport.semantic.scope.GoPackageModel.getInstance(file.project).buildExclusion(file) != null) return true
         var e: PsiElement? = element
         while (e != null && e !is PsiFile) {
             if (GoSuppressionContainers.isContainer(e) && GoSuppressionContainers.leadingComments(e).any { mentions(it, toolId) }) return true
@@ -47,6 +50,15 @@ class GoInspectionSuppressor : InspectionSuppressor {
     private fun mentions(comment: PsiComment, toolId: String): Boolean {
         val matcher = SuppressionUtil.SUPPRESS_IN_LINE_COMMENT_PATTERN.matcher(comment.text)
         return matcher.matches() && SuppressionUtil.isInspectionToolIdMentioned(matcher.group(1), toolId)
+    }
+
+    private companion object {
+        /** The short names of the inspections of Go (of this plugin and of the host one): not spelling, TODO or other languages' ones. */
+        val GO_INSPECTIONS: Set<String> by lazy {
+            com.intellij.codeInspection.LocalInspectionEP.LOCAL_INSPECTION.extensionList.filter { it.language == "Go" }.mapNotNull { it.getShortName() }.toSet() -
+                // the build constraint itself stays checked: a malformed one or a typo (`linx`) is often why the file is left out
+                "GoBuildConstraint"
+        }
     }
 }
 

@@ -75,7 +75,11 @@ class GoPlatformWidgetFactory : StatusBarWidgetFactory {
             ApplicationManager.getApplication().executeOnPooledThread {
                 for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) runCatching { GoToolchainProvider.getInstance().toolchainFor(p) }
                 ApplicationManager.getApplication().invokeLater({
-                    for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) { DaemonCodeAnalyzer.getInstance(p).restart(); refresh(p) }
+                    for (p in ProjectManager.getInstance().openProjects) if (!p.isDisposed) {
+                        DaemonCodeAnalyzer.getInstance(p).restart(); refresh(p)
+                        // which files the build leaves out depends on the target (GoBuildExclusionNotificationProvider)
+                        com.intellij.ui.EditorNotifications.getInstance(p).updateAllNotifications()
+                    }
                 }, ModalityState.any())
             }
         }

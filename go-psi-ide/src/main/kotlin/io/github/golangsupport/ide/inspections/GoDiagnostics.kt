@@ -56,7 +56,9 @@ object GoDiagnosticsCache {
     }
 
     fun diagnostics(file: GoFile): List<GoDiagnostic> =
-        CachedValuesManager.getManager(file.project).getCachedValue(file, KEY, {
+        // a file the build leaves out is not type-checked, as in GoLand (GoInspectionSuppressor quiets the rest)
+        if (io.github.golangsupport.semantic.scope.GoPackageModel.getInstance(file.project).buildExclusion(file) != null) emptyList()
+        else CachedValuesManager.getManager(file.project).getCachedValue(file, KEY, {
             CachedValueProvider.Result.create(Holder(file), *GoTrackers.getInstance(file.project).bodyDependencies(file))
         }, false).diagnostics
 

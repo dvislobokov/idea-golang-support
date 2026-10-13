@@ -69,6 +69,29 @@ public final class io/github/golangsupport/project/api/GoBuildContext {
 public final class io/github/golangsupport/project/api/GoBuildContext$Companion {
 }
 
+public final class io/github/golangsupport/project/api/GoBuildExclusion {
+	public static final field Companion Lio/github/golangsupport/project/api/GoBuildExclusion$Companion;
+	public fun <init> (Lio/github/golangsupport/project/api/GoBuildExclusion$Reason;Z)V
+	public final fun getByName ()Z
+	public final fun getReason ()Lio/github/golangsupport/project/api/GoBuildExclusion$Reason;
+	public final fun message (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun of (Ljava/lang/String;Ljava/lang/CharSequence;Lio/github/golangsupport/project/api/GoBuildContext;)Lio/github/golangsupport/project/api/GoBuildExclusion;
+}
+
+public final class io/github/golangsupport/project/api/GoBuildExclusion$Companion {
+	public final fun of (Ljava/lang/String;Ljava/lang/CharSequence;Lio/github/golangsupport/project/api/GoBuildContext;)Lio/github/golangsupport/project/api/GoBuildExclusion;
+}
+
+public final class io/github/golangsupport/project/api/GoBuildExclusion$Reason : java/lang/Enum {
+	public static final field ARCHITECTURE Lio/github/golangsupport/project/api/GoBuildExclusion$Reason;
+	public static final field CUSTOM_FLAG Lio/github/golangsupport/project/api/GoBuildExclusion$Reason;
+	public static final field OS Lio/github/golangsupport/project/api/GoBuildExclusion$Reason;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getText ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/golangsupport/project/api/GoBuildExclusion$Reason;
+	public static fun values ()[Lio/github/golangsupport/project/api/GoBuildExclusion$Reason;
+}
+
 public abstract class io/github/golangsupport/project/api/GoConstraintExpr {
 	public abstract fun eval (Lkotlin/jvm/functions/Function1;)Z
 }

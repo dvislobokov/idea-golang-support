@@ -1,0 +1,29 @@
+Files excluded from the build in GoLand 2026.2.3 (Windows, windows/amd64, default build tags), prometheus v3.15.0, snapped 2026-10-14
+with tools/ui-robot/goland/analysis/banners.js and highlights.js.
+
+=== Banner (editor notification above the file), text and links
+model/labels/labels_dedupelabels.go  (//go:build dedupelabels)
+  'labels_dedupelabels.go' is ignored by the build tool because of the custom flag | Navigate to build constraints | Edit settings
+internal/tools/tools.go  (//go:build tools)
+  'tools.go' is ignored by the build tool because of the custom flag | Navigate to build constraints | Edit settings
+cmd/promtool/tsdb_posix_test.go  (//go:build !windows)
+  'tsdb_posix_test.go' is ignored by the build tool because of the OS mismatch | Navigate to build constraints | Edit settings
+tsdb/fileutil/dir_unix.go  (//go:build !windows ...)
+  'dir_unix.go' is ignored by the build tool because of the OS mismatch | Navigate to build constraints | Edit settings
+tsdb/fileutil/direct_io_linux.go  (name suffix _linux)
+  'direct_io_linux.go' is ignored by the build tool because of the OS mismatch | Rename file | Edit settings
+tsdb/fileutil/mmap_arm64.go  (name suffix _arm64)
+  'mmap_arm64.go' is ignored by the build tool because of the architecture mismatch | Rename file | Edit settings
+util/runtime/statfs_linux_386.go  (name suffix _linux_386: both differ, the architecture is named)
+  'statfs_linux_386.go' is ignored by the build tool because of the architecture mismatch | Rename file | Edit settings
+model/labels/labels_stringlabels.go, discovery/install/install.go  (in the build)
+  no banner
+
+=== Highlighting of an excluded file
+No error and no warning of the type checker or of inspections, even for code appended to the document:
+  var _ int = 1.5; var _ = undefinedThing; var _ = syscall.Mkfifo
+appended to tsdb_posix_test.go and to labels_dedupelabels.go: nothing (the same line in cmd/promtool/main.go:
+  ERRORS_ATTRIBUTES '1.5' (type untyped float) cannot be represented by the type int; WRONG_REFERENCES 'undefinedThing', 'syscall').
+Syntax errors are shown: `func zz( { x := }` appended to tsdb_posix_test.go:
+  ERRORS_ATTRIBUTES ')' or expected, got '{'; ERRORS_ATTRIBUTES expected, got '}'.
+Only TODO, typo / grammar and link highlighting otherwise.
