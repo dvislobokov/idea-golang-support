@@ -1,0 +1,263 @@
+{
+  "about": "Refactoring scenarios over prometheus v3.15.0 (build/compare/prometheus). The caret is at indexOf(anchor) + at; anchor must be unique in the file. A selection is the exact unique substring 'select' (searched after indexOf(within) when 'within' is given). 'gopls' says what tools/compare/refactor/gopls_refactor.py asks gopls: rename at the caret, or a code action of one of 'kinds' over the caret / selection ('goplsAnchor' / 'goplsAt' / 'goplsSelect' move the gopls place where gopls works elsewhere, e.g. inline at a call site). null = gopls has no such refactoring; the code action list at the place is printed anyway.",
+  "scenarios": [
+    {
+      "id": "rename-local", "refactoring": "rename", "what": "local variable",
+      "file": "notifier/alert.go", "anchor": "var relabeledAlerts []*Alert", "at": 4,
+      "params": {"newName": "kept"},
+      "gopls": {"op": "rename"},
+      "expected": "relabeledAlerts renamed at its declaration, both uses in `kept = append(kept, a)` and in `return kept`; nothing else changes."
+    },
+    {
+      "id": "rename-field", "refactoring": "rename", "what": "struct field used in other packages",
+      "file": "notifier/alert.go", "anchor": "GeneratorURL string    `json", "at": 0,
+      "params": {"newName": "SourceURL"},
+      "gopls": {"op": "rename"},
+      "expected": "Alert.GeneratorURL -> SourceURL in the declaration, the keyed literal and selector in notifier/alert.go, notifier/util.go, notifier/util_test.go, rules/manager.go, cmd/prometheus/main_test.go; the json tag `json:\"generatorURL,omitempty\"` must NOT change (wire format); the struct field block may need gofmt re-alignment."
+    },
+    {
+      "id": "rename-iface-method", "refactoring": "rename", "what": "interface method with its implementations",
+      "file": "notifier/alertmanager.go", "anchor": "\turl() *url.URL\n}", "at": 1,
+      "params": {"newName": "endpoint"},
+      "gopls": {"op": "rename"},
+      "expected": "alertmanager.url -> endpoint, the implementations alertmanagerLabels.url (alertmanager.go) and alertmanagerMock.url (manager_test.go), every am.url() call in alertmanagerset.go and the tests; the package net/url and local variables named url are untouched."
+    },
+    {
+      "id": "rename-type", "refactoring": "rename", "what": "type, with local variables of the same name around",
+      "file": "notifier/sendloop.go", "anchor": "type sendLoop struct", "at": 5,
+      "params": {"newName": "alertSender"},
+      "gopls": {"op": "rename"},
+      "expected": "type sendLoop -> alertSender in its declaration, receivers, `*sendLoop` in newSendLoop, `&sendLoop{`, `map[string]*sendLoop` (alertmanagerset.go, manager_test.go); the local variables named sendLoop (alertmanagerset.go:145,160, sendloop_test.go:63) and the function newSendLoop keep their names."
+    },
+    {
+      "id": "rename-package", "refactoring": "rename", "what": "package (clause; directory follows)",
+      "file": "util/kahansum/kahansum.go", "anchor": "package kahansum", "at": 8,
+      "params": {"newName": "kahan"},
+      "gopls": {"op": "rename"},
+      "expected": "package clause kahansum -> kahan in util/kahansum/*.go, the directory util/kahansum -> util/kahan, the 4 importers (model/histogram/float_histogram.go, promql/engine.go, promql/functions.go, promql/functions_internal_test.go) get the new import path and the qualifier kahansum. -> kahan."
+    },
+    {
+      "id": "rename-file", "refactoring": "rename", "what": "file (and its test file)",
+      "file": "notifier/util.go", "anchor": "package notifier", "at": 0,
+      "params": {"target": "file", "newName": "openapi.go"},
+      "gopls": null,
+      "expected": "notifier/util.go -> notifier/openapi.go; GoLand offers to rename util_test.go -> openapi_test.go as well; no text changes."
+    },
+    {
+      "id": "rename-conflict", "refactoring": "rename", "what": "local variable to a name that is taken in an inner scope",
+      "file": "notifier/alert.go", "anchor": "lb := labels.NewBuilder(labels.EmptyLabels())\n\tvar relabeledAlerts", "at": 0,
+      "params": {"newName": "a"},
+      "gopls": {"op": "rename"},
+      "expected": "A conflict is reported: inside `for _, a := range alerts` the renamed lb would be shadowed by the loop variable a (lb.Reset(a.Labels) -> a.Reset(a.Labels)). Applying it anyway breaks the build."
+    },
+    {
+      "id": "extract-variable", "refactoring": "extract-variable", "what": "expression with two occurrences",
+      "file": "notifier/sendloop.go", "select": "s.opts.QueueCapacity", "within": "if d := len(alerts) - s.opts.QueueCapacity",
+      "params": {"name": "capacity", "replaceAll": true},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.extract.variable-all", "refactor.extract.variable"]},
+      "expected": "`capacity := s.opts.QueueCapacity` before the first if of sendLoop.add, both occurrences in add replaced; compiles."
+    },
+    {
+      "id": "extract-constant", "refactoring": "extract-constant", "what": "string literal",
+      "file": "notifier/alert.go", "select": "\"[resolved]\"",
+      "params": {"name": "resolvedSuffix"},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.extract.constant-all", "refactor.extract.constant"]},
+      "expected": "`const resolvedSuffix = \"[resolved]\"` (local or package level) and `return s + resolvedSuffix`."
+    },
+    {
+      "id": "extract-function-multi", "refactoring": "extract-function", "what": "statements with two results (a new variable and a reassigned parameter)",
+      "file": "notifier/sendloop.go", "select": "var dropped int\n\t// Queue capacity should be significantly larger than a single alert\n\t// batch could be.\n\tif d := len(alerts) - s.opts.QueueCapacity; d > 0 {\n\t\ts.logger.Warn(\"Alert batch larger than queue capacity, dropping alerts\", \"count\", d)\n\t\tdropped += d\n\t\talerts = alerts[d:]\n\t}\n\n\t// If the queue is full, remove the oldest alerts in favor\n\t// of newer ones.\n\tif d := (len(s.queue) + len(alerts)) - s.opts.QueueCapacity; d > 0 {\n\t\ts.logger.Warn(\"Alert notification queue full, dropping alerts\", \"count\", d)\n\t\tdropped += d\n\t\ts.queue = s.queue[d:]\n\t}",
+      "params": {"name": "dropOverflow"},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.extract.method", "refactor.extract.function"]},
+      "expected": "A method `(s *sendLoop) dropOverflow(alerts []*Alert) (int, []*Alert)` (or named results) and the call `dropped, alerts := s.dropOverflow(alerts)` (alerts reassigned, dropped new); the rest of add keeps using both; compiles."
+    },
+    {
+      "id": "extract-function-err", "refactoring": "extract-function", "what": "statements with `return nil, err` of the enclosing function inside",
+      "file": "notifier/alertmanagerset.go", "select": "client, err := config_util.NewClientFromConfig(cfg.HTTPClientConfig, \"alertmanager\")\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tt := client.Transport\n\n\tif cfg.SigV4Config != nil {\n\t\tt, err = sigv4.NewSigV4RoundTripper(cfg.SigV4Config, client.Transport)\n\t\tif err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t}\n\n\tclient.Transport = t",
+      "params": {"name": "newClient"},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.extract.function"]},
+      "expected": "A function newClient(cfg) returning (*http.Client, error) (the early returns become `return nil, err` of the new function; `t` stays inside), the call `client, err := newClient(cfg)` + `if err != nil { return nil, err }` in newAlertmanagerSet; compiles. A tool that cannot handle returns refuses with a reason."
+    },
+    {
+      "id": "extract-method", "refactoring": "extract-function", "what": "statements using the receiver -> method",
+      "file": "notifier/sendloop.go", "select": "s.metrics.latencySummary.DeleteLabelValues(s.alertmanagerURL)\n\t\ts.metrics.latencyHistogram.DeleteLabelValues(s.alertmanagerURL)\n\t\ts.metrics.sent.DeleteLabelValues(s.alertmanagerURL)\n\t\ts.metrics.dropped.DeleteLabelValues(s.alertmanagerURL)\n\t\ts.metrics.errors.DeleteLabelValues(s.alertmanagerURL)\n\t\ts.metrics.queueLength.DeleteLabelValues(s.alertmanagerURL)",
+      "params": {"name": "deleteMetrics"},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.extract.method"]},
+      "expected": "`func (s *sendLoop) deleteMetrics()` with the six statements, the call `s.deleteMetrics()` inside the closure of stop; compiles."
+    },
+    {
+      "id": "introduce-parameter", "refactoring": "introduce-parameter", "what": "string literal of a function body -> parameter",
+      "file": "notifier/alertmanager.go", "select": "\"/api/%v/alerts\"",
+      "params": {"name": "format"},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.rewrite.addParam", "refactor.extract.parameter"]},
+      "expected": "postPath(pre string, v config.AlertmanagerAPIVersion, format string); the body uses format; both calls (AlertmanagerFromGroup, alertmanager_test.go) pass \"/api/%v/alerts\"; compiles."
+    },
+    {
+      "id": "inline-variable", "refactoring": "inline", "what": "local variable used once",
+      "file": "notifier/alertmanager.go", "anchor": "addr := lb.Get(model.AddressLabel)", "at": 0,
+      "goplsAnchor": "model.LabelValue(addr)", "goplsAt": 17,
+      "params": {},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.inline.variable"]},
+      "expected": "`if err := config.CheckTargetAddress(model.LabelValue(lb.Get(model.AddressLabel))); err != nil {`, the declaration removed."
+    },
+    {
+      "id": "inline-function-all", "refactoring": "inline", "what": "one-statement method, caret on the declaration (all calls + delete)",
+      "file": "notifier/alert.go", "anchor": "func (a *Alert) Resolved() bool", "at": 16,
+      "goplsAnchor": "if a.Resolved() {", "goplsAt": 5,
+      "params": {},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.inline.call"]},
+      "expected": "The call in String becomes `if a.ResolvedAt(time.Now()) {`; the plugin (all calls) also deletes the method Resolved (exported: callers outside the repo break - GoLand asks); gopls inlines one call only."
+    },
+    {
+      "id": "inline-function-call", "refactoring": "inline", "what": "two-statement function, caret on one call",
+      "file": "notifier/alertmanager.go", "anchor": "postPath(cfg.PathPrefix, cfg.APIVersion)", "at": 1,
+      "params": {},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.inline.call"]},
+      "expected": "The call is replaced by the body: e.g. `lb.Set(pathLabel, path.Join(\"/\", cfg.PathPrefix, fmt.Sprintf(\"/api/%v/alerts\", string(cfg.APIVersion))))` (or with a temporary variable), imports fmt/path already present; postPath stays (used by the test)."
+    },
+    {
+      "id": "inline-constant", "refactoring": "inline", "what": "package-level constant used twice",
+      "file": "notifier/alertmanager.go", "anchor": "const pathLabel", "at": 6,
+      "goplsAnchor": "a.Get(pathLabel)", "goplsAt": 6,
+      "params": {},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.inline.variable", "refactor.inline.constant"]},
+      "expected": "Both uses become \"__alerts_path__\" and the declaration is deleted."
+    },
+    {
+      "id": "cs-add-param", "refactoring": "change-signature", "what": "add a parameter with a default value at the calls",
+      "file": "notifier/alertmanager.go", "anchor": "func postPath(", "at": 5,
+      "params": {"parameters": [{"old": 0}, {"old": 1}, {"name": "root", "type": "string", "default": "\"/\""}]},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.rewrite.addParam"]},
+      "expected": "func postPath(pre string, v config.AlertmanagerAPIVersion, root string) string; both calls pass \"/\"; compiles (root unused is fine for a parameter)."
+    },
+    {
+      "id": "cs-remove-param", "refactoring": "change-signature", "what": "remove a parameter that the body uses",
+      "file": "notifier/sendloop.go", "anchor": "func (s *sendLoop) sendOne(", "at": 19,
+      "goplsAnchor": "c *http.Client, url string", "goplsAt": 0,
+      "params": {"parameters": [{"old": 0}, {"old": 2}, {"old": 3}]},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.rewrite.removeUnusedParam"]},
+      "expected": "A conflict: c is used in the body (`s.opts.Do(ctx, c, req)`); applied anyway, the call sites lose their second argument (sendloop.go, sendloop_test.go) and the body no longer compiles. gopls offers removeUnusedParam only for unused parameters."
+    },
+    {
+      "id": "cs-reorder", "refactoring": "change-signature", "what": "swap the first two parameters",
+      "file": "notifier/sendloop.go", "anchor": "func newSendLoop(", "at": 5,
+      "goplsAnchor": "\tclient *http.Client,\n\tcfg", "goplsAt": 1,
+      "params": {"parameters": [{"old": 1}, {"old": 0}, {"old": 2}, {"old": 3}, {"old": 4}, {"old": 5}]},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.rewrite.moveParamLeft"]},
+      "expected": "newSendLoop(client *http.Client, alertmanagerURL string, ...); every call (alertmanagerset.go, manager_test.go, sendloop_test.go x6) swaps its first two arguments; compiles."
+    },
+    {
+      "id": "cs-results", "refactoring": "change-signature", "what": "add a result",
+      "file": "notifier/sendloop.go", "anchor": "func (s *sendLoop) nextBatch()", "at": 19,
+      "params": {"results": [{"name": "", "type": "[]*Alert"}, {"name": "", "type": "int"}]},
+      "gopls": null,
+      "expected": "nextBatch() ([]*Alert, int); the body's `return alerts` cannot be fixed automatically and the single-value calls (sendloop.go:177, sendloop_test.go) break: a correct tool reports the call sites (GoLand: conflict dialog / leaves them for the user)."
+    },
+    {
+      "id": "move-func-file", "refactoring": "move", "what": "function to another file of the same package",
+      "file": "notifier/util.go", "anchor": "func labelsToOpenAPILabelSet(", "at": 5,
+      "params": {"names": ["labelsToOpenAPILabelSet"], "targetDir": "notifier", "targetFile": "alert.go"},
+      "gopls": null,
+      "expected": "labelsToOpenAPILabelSet moves to the end of alert.go; alert.go imports github.com/prometheus/alertmanager/api/v2/models; util.go keeps strfmt and models, drops labels (no longer used there); compiles."
+    },
+    {
+      "id": "move-type-newfile", "refactoring": "move", "what": "type with its method to a new file of the same package",
+      "file": "notifier/alertmanager.go", "anchor": "type alertmanagerLabels struct", "at": 5,
+      "goplsSelect": "type alertmanagerLabels struct{ labels.Labels }",
+      "params": {"names": ["alertmanagerLabels"], "targetDir": "notifier", "targetFile": "amlabels.go", "moveMethods": true},
+      "gopls": {"op": "codeAction", "kinds": ["refactor.extract.toNewFile"]},
+      "expected": "notifier/amlabels.go (package notifier) gets the type and its url() method with imports net/url, github.com/prometheus/common/model, model/labels; alertmanager.go drops imports it no longer needs (net/url stays for the interface); compiles. gopls extract-to-new-file moves the selected declaration only and names the file itself."
+    },
+    {
+      "id": "move-func-package", "refactoring": "move", "what": "function to a new package (export + import)",
+      "file": "notifier/util.go", "anchor": "func labelsToOpenAPILabelSet(", "at": 5,
+      "params": {"names": ["labelsToOpenAPILabelSet"], "targetDir": "notifier/openapi", "targetFile": "labels.go"},
+      "gopls": null,
+      "expected": "New package notifier/openapi (labels.go) with exported LabelsToOpenAPILabelSet; util.go and util_test.go call openapi.LabelsToOpenAPILabelSet and import github.com/prometheus/prometheus/notifier/openapi; compiles, go vet passes."
+    },
+    {
+      "id": "move-type-package", "refactoring": "move", "what": "type implementing an unexported interface method to another package",
+      "file": "notifier/alertmanager.go", "anchor": "type alertmanagerLabels struct", "at": 5,
+      "params": {"names": ["alertmanagerLabels"], "targetDir": "notifier/amlabels", "targetFile": "amlabels.go", "moveMethods": true},
+      "gopls": null,
+      "expected": "A conflict / refusal: alertmanagerLabels satisfies the unexported interface alertmanager through the unexported method url(), which a type of another package cannot do; pathLabel is unexported too. Applied anyway, the build breaks."
+    },
+    {
+      "id": "safe-delete-test-only", "refactoring": "safe-delete", "what": "exported function used only by its test",
+      "file": "util/strutil/strconv.go", "anchor": "func SanitizeFullLabelName(", "at": 5,
+      "params": {},
+      "gopls": null,
+      "expected": "A usage in strconv_test.go is reported (GoLand: 'usages found' dialog); deleting anyway keeps go build ./... green but breaks go vet ./util/strutil/ (the test)."
+    },
+    {
+      "id": "safe-delete-used", "refactoring": "safe-delete", "what": "function used in production code",
+      "file": "notifier/alertmanager.go", "anchor": "func postPath(", "at": 5,
+      "params": {},
+      "gopls": null,
+      "expected": "A conflict listing the usages (alertmanager.go AlertmanagerFromGroup, alertmanager_test.go); nothing is deleted unless forced."
+    },
+    {
+      "id": "implement-interface", "refactoring": "generate", "what": "implement a project interface (unexported method, foreign import)",
+      "file": "notifier/sendloop.go", "anchor": "type sendLoop struct", "at": 5,
+      "params": {"what": "implement", "interface": {"importPath": "github.com/prometheus/prometheus/notifier", "dir": "notifier", "name": "alertmanager"}},
+      "gopls": {"op": "codeAction", "kinds": ["quickfix", "refactor.rewrite"]},
+      "expected": "`func (s *sendLoop) url() *url.URL { panic(\"not implemented\") }` (pointer receiver as the other methods) after the type's methods; sendloop.go imports net/url; compiles (the parameter named url in sendOne shadows the package only inside sendOne). gopls offers 'declare missing methods' only on a type error, not at the type."
+    },
+    {
+      "id": "generate-constructor", "refactoring": "generate", "what": "constructor of a struct with fields of other packages",
+      "file": "notifier/alert.go", "anchor": "type Alert struct", "at": 5,
+      "params": {"what": "constructor"},
+      "gopls": null,
+      "expected": "func NewAlert(labels labels.Labels, ...) *Alert with all five fields; a parameter named labels would shadow the package labels in the parameter list (`labels labels.Labels` compiles, but a second `annotations labels.Labels` after it does not) - a correct generator picks non-shadowing names; compiles."
+    },
+    {
+      "id": "generate-getters-setters", "refactoring": "generate", "what": "getters and setters of a struct with unexported fields",
+      "file": "notifier/alertmanagerset.go", "anchor": "type alertmanagerSet struct", "at": 5,
+      "params": {"what": "getters-setters"},
+      "gopls": null,
+      "expected": "Cfg()/SetCfg(...) etc. for every field (GoLand: Getter and Setter dialog with the fields ticked); the copied sync.RWMutex getter returns a copy of a lock (go vet copylocks warns). Compiles."
+    },
+    {
+      "id": "generate-string", "refactoring": "generate", "what": "String() of a struct",
+      "file": "notifier/manager.go", "anchor": "type Options struct", "at": 5,
+      "params": {"what": "string"},
+      "gopls": null,
+      "expected": "func (o Options) String() string (or pointer receiver) with fmt.Sprintf over the fields; manager.go already imports fmt; compiles."
+    },
+    {
+      "id": "introduce-field", "refactoring": "introduce-field", "what": "expression of a method -> struct field initialized in the method",
+      "file": "notifier/sendloop.go", "select": "time.Duration(s.cfg.Timeout)",
+      "params": {"name": "timeout", "initializeHere": true},
+      "gopls": null,
+      "expected": "A field `timeout time.Duration` in sendLoop, `s.timeout = time.Duration(s.cfg.Timeout)` before the WithTimeout line, the call uses s.timeout; compiles."
+    },
+    {
+      "id": "convert-if-switch", "refactoring": "intention", "what": "if / else if chain -> switch",
+      "file": "model/exemplar/exemplar.go", "anchor": "if a.Ts < b.Ts {", "at": 0,
+      "params": {"intention": ["switch"]},
+      "gopls": {"op": "codeAction", "kinds": []},
+      "expected": "switch { case a.Ts < b.Ts: return -1; case a.Ts > b.Ts: return 1 } with the rest untouched; compiles."
+    },
+    {
+      "id": "convert-switch-if", "refactoring": "intention", "what": "switch with a default -> if / else",
+      "file": "notifier/sendloop.go", "anchor": "switch s.cfg.APIVersion {", "at": 0,
+      "params": {"intention": ["to 'if'", "to if", "'if'", "if"]},
+      "gopls": {"op": "codeAction", "kinds": []},
+      "expected": "if s.cfg.APIVersion == config.AlertmanagerAPIVersionV2 { ... } else { ... }; compiles."
+    },
+    {
+      "id": "convert-var-to-short", "refactoring": "intention", "what": "var declaration without a value -> short variable declaration",
+      "file": "notifier/sendloop.go", "anchor": "var dropped int", "at": 4,
+      "params": {"intention": [":=", "short"]},
+      "gopls": {"op": "codeAction", "kinds": []},
+      "expected": "`dropped := 0` if offered (GoLand: 'Convert to short var declaration' may need an initializer); compiles either way."
+    },
+    {
+      "id": "convert-short-to-var", "refactoring": "intention", "what": "short variable declaration -> var declaration with the type",
+      "file": "notifier/alertmanager.go", "anchor": "lb := labels.NewBuilder(labels.EmptyLabels())\n\n\tfor _, tlset", "at": 0,
+      "params": {"intention": ["'var'", "var declaration"]},
+      "gopls": {"op": "codeAction", "kinds": []},
+      "expected": "`var lb *labels.Builder = labels.NewBuilder(labels.EmptyLabels())` (or `var lb = ...`); compiles."
+    }
+  ]
+}

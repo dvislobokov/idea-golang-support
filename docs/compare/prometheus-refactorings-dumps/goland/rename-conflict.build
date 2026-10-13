@@ -1,0 +1,12 @@
+# github.com/prometheus/prometheus/notifier
+notifier\alert.go:72:2: declared and not used: a
+notifier\alert.go:76:5: a.Reset undefined (type *Alert has no field or method Reset)
+notifier\alert.go:79:7: a.Set undefined (type *Alert has no field or method Set)
+notifier\alert.go:83:34: cannot use a (variable of type *Alert) as *labels.Builder value in argument to relabel.ProcessBuilder
+notifier\alert.go:89:30: invalid operation: cannot call a.Labels (variable of struct type labels.Labels): labels.Labels is not a function
+notifier\alert.go:91:19: invalid operation: cannot call a.Labels (variable of struct type labels.Labels): labels.Labels is not a function
+BUILD_EXIT=1
+# github.com/prometheus/prometheus/notifier
+# [github.com/prometheus/prometheus/notifier]
+vet.exe: notifier\alert.go:76:5: a.Reset undefined (type *Alert has no field or method Reset)
+VET_EXIT=1

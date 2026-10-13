@@ -1,0 +1,1 @@
+{"id":"rename-local","intentions":["Add parens to declaration"],"refactorThis":["Rename…","Inline…","Move…","Copy File…","Update Syntax…"],"done":"rename run","usages":3,"conflicts":[],"note":null}

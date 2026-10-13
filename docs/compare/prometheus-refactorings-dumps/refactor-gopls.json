@@ -1,0 +1,1080 @@
+{
+ "gopls": {
+  "GoVersion": "go1.27.1",
+  "Path": "golang.org/x/tools/gopls",
+  "Main": {
+   "Path": "golang.org/x/tools/gopls",
+   "Version": "v0.23.0",
+   "Sum": "h1:Dn6mf9WXu9iLnTftDDMb9wV0c6Se7PjzEMqP0LEe08Y="
+  },
+  "Deps": [
+   {
+    "Path": "github.com/BurntSushi/toml",
+    "Version": "v1.6.0",
+    "Sum": "h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk="
+   },
+   {
+    "Path": "github.com/fatih/camelcase",
+    "Version": "v1.0.0",
+    "Sum": "h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8="
+   },
+   {
+    "Path": "github.com/fatih/gomodifytags",
+    "Version": "v1.17.1-0.20250423142747-f3939df9aa3c",
+    "Sum": "h1:dDSgAjoOMp8da3egfz0t2S+t8RGOpEmEXZubcGuc0Bg="
+   },
+   {
+    "Path": "github.com/fatih/structtag",
+    "Version": "v1.2.0",
+    "Sum": "h1:/OdNE99OxoI/PqaW/SuSK9uxxT3f/tcSZgon/ssNSx4="
+   },
+   {
+    "Path": "github.com/fsnotify/fsnotify",
+    "Version": "v1.9.0",
+    "Sum": "h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k="
+   },
+   {
+    "Path": "github.com/google/jsonschema-go",
+    "Version": "v0.4.3",
+    "Sum": "h1:/DBOLZTfDow7pe2GmaJNhltueGTtDKICi8V8p+DQPd0="
+   },
+   {
+    "Path": "github.com/modelcontextprotocol/go-sdk",
+    "Version": "v1.6.0",
+    "Sum": "h1:PPLS3kn7WtOEnR+Af4X5H96SG0qSab8R/ZQT/HkhPkY="
+   },
+   {
+    "Path": "github.com/segmentio/asm",
+    "Version": "v1.2.1",
+    "Sum": "h1:DTNbBqs57ioxAD4PrArqftgypG4/qNpXoJx8TVXxPR0="
+   },
+   {
+    "Path": "github.com/segmentio/encoding",
+    "Version": "v0.5.4",
+    "Sum": "h1:OW1VRern8Nw6ITAtwSZ7Idrl3MXCFwXHPgqESYfvNt0="
+   },
+   {
+    "Path": "github.com/yosida95/uritemplate/v3",
+    "Version": "v3.0.2",
+    "Sum": "h1:Ed3Oyj9yrmi9087+NczuL5BwkIc4wvTb5zIM+UJPGz4="
+   },
+   {
+    "Path": "golang.org/x/exp/typeparams",
+    "Version": "v0.0.0-20260611194520-c48552f49976",
+    "Sum": "h1:GTD/WuaexTazIG/SxLOz4rEKZPDVilmVVC2nz4xhwfE="
+   },
+   {
+    "Path": "golang.org/x/mod",
+    "Version": "v0.37.0",
+    "Sum": "h1:vF1DjpVEshcIqoEaauuHebaLk1O1forxjxBaVn884JQ="
+   },
+   {
+    "Path": "golang.org/x/oauth2",
+    "Version": "v0.36.0",
+    "Sum": "h1:peZ/1z27fi9hUOFCAZaHyrpWG5lwe0RJEEEeH0ThlIs="
+   },
+   {
+    "Path": "golang.org/x/sync",
+    "Version": "v0.21.0",
+    "Sum": "h1:HLII4xRRTtCRkxYp4HNFF0Js/Og6q2i++KXbg0gHCwM="
+   },
+   {
+    "Path": "golang.org/x/sys",
+    "Version": "v0.46.0",
+    "Sum": "h1:noSf2Fq6F8DBgS+LysIkx7rIExoNHJsxOAtPp4rthXw="
+   },
+   {
+    "Path": "golang.org/x/telemetry",
+    "Version": "v0.0.0-20260625142307-59b4966ccb57",
+    "Sum": "h1:nwGZBCt+FnXUrGsj5vjzAsEmkcaFvd82BbOjECiFYZc="
+   },
+   {
+    "Path": "golang.org/x/text",
+    "Version": "v0.38.0",
+    "Sum": "h1:sXmwo9DwP3OK9EZ7PqAdaooSGozfl/3a6/xJcbzPRhE="
+   },
+   {
+    "Path": "golang.org/x/tools",
+    "Version": "v0.47.1-0.20260707181000-a299dadba899",
+    "Sum": "h1:5O28oLQxJ1jif5UNdi9OULXCd4g3rsy3xkECh96fnf8="
+   },
+   {
+    "Path": "golang.org/x/vuln",
+    "Version": "v1.4.0",
+    "Sum": "h1:FpmTZiV4PyqY3lFfuCkz1JftEXb/+8M2NEkjJM5TF4g="
+   },
+   {
+    "Path": "honnef.co/go/tools",
+    "Version": "v0.8.0-rc.1",
+    "Sum": "h1:wqMm2kjcEXMOr+6yau+pdKqJKe6l2N1aKPkpini+Kzk="
+   },
+   {
+    "Path": "mvdan.cc/gofumpt",
+    "Version": "v0.10.0",
+    "Sum": "h1:yGGpRS2pBN2OQIi7b21IXknJna7faPkFaVfHLrN6Euo="
+   },
+   {
+    "Path": "mvdan.cc/xurls/v2",
+    "Version": "v2.6.0",
+    "Sum": "h1:3NTZpeTxYVWNSokW3MKeyVkz/j7uYXYiMtXRUfmjbgI="
+   }
+  ],
+  "Settings": [
+   {
+    "Key": "-buildmode",
+    "Value": "exe"
+   },
+   {
+    "Key": "-compiler",
+    "Value": "gc"
+   },
+   {
+    "Key": "DefaultGODEBUG",
+    "Value": "tracebacklabels=0,x509sslcertoverrideplatform=0"
+   },
+   {
+    "Key": "CGO_ENABLED",
+    "Value": "0"
+   },
+   {
+    "Key": "GOARCH",
+    "Value": "amd64"
+   },
+   {
+    "Key": "GOOS",
+    "Value": "windows"
+   },
+   {
+    "Key": "GOAMD64",
+    "Value": "v1"
+   }
+  ],
+  "Version": "v0.23.0"
+ },
+ "root": "C:\\Users\\dvislobokov\\idea-golang-support\\.claude\\worktrees\\agent-ae9f0bb3458cde266\\build\\compare\\prometheus-stand",
+ "results": [
+  {
+   "id": "rename-local",
+   "refactoring": "rename",
+   "what": "local variable",
+   "file": "notifier/alert.go",
+   "line": 73,
+   "actions": [
+    "source.addTest: Add test for relabelAlerts",
+    "source.assembly: Browse amd64 assembly for relabelAlerts",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "applied",
+   "done": "textDocument/rename to kept",
+   "changed": [
+    "notifier/alert.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -70,7 +70,7 @@\n \n func relabelAlerts(relabelConfigs []*relabel.Config, externalLabels labels.Labels, alerts []*Alert) []*Alert {\n \tlb := labels.NewBuilder(labels.EmptyLabels())\n-\tvar relabeledAlerts []*Alert\n+\tvar kept []*Alert\n \n \tfor _, a := range alerts {\n \t\tlb.Reset(a.Labels)\n@@ -96,7 +96,7 @@\n \t\t\t}\n \t\t}\n \n-\t\trelabeledAlerts = append(relabeledAlerts, a)\n+\t\tkept = append(kept, a)\n \t}\n-\treturn relabeledAlerts\n+\treturn kept\n }\n",
+   "millis": 1993
+  },
+  {
+   "id": "rename-field",
+   "refactoring": "rename",
+   "what": "struct field used in other packages",
+   "file": "notifier/alert.go",
+   "line": 36,
+   "actions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.rewrite.addTags: Add struct tags",
+    "refactor.rewrite.removeTags: Remove struct tags",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "applied",
+   "done": "textDocument/rename to SourceURL",
+   "changed": [
+    "cmd/prometheus/main_test.go",
+    "notifier/alert.go",
+    "notifier/util.go",
+    "notifier/util_test.go",
+    "rules/manager.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/cmd/prometheus/main_test.go\n+++ b/cmd/prometheus/main_test.go\n@@ -210,7 +210,7 @@\n \t\t\t\t\tAnnotations:  labels.FromStrings(\"a2\", \"v2\"),\n \t\t\t\t\tStartsAt:     time.Unix(2, 0),\n \t\t\t\t\tEndsAt:       time.Unix(3, 0),\n-\t\t\t\t\tGeneratorURL: \"http://localhost:9090/graph?g0.expr=up&g0.tab=1\",\n+\t\t\t\t\tSourceURL: \"http://localhost:9090/graph?g0.expr=up&g0.tab=1\",\n \t\t\t\t},\n \t\t\t},\n \t\t},\n@@ -230,7 +230,7 @@\n \t\t\t\t\tAnnotations:  labels.FromStrings(\"a2\", \"v2\"),\n \t\t\t\t\tStartsAt:     time.Unix(2, 0),\n \t\t\t\t\tEndsAt:       time.Unix(4, 0),\n-\t\t\t\t\tGeneratorURL: \"http://localhost:9090/graph?g0.expr=up&g0.tab=1\",\n+\t\t\t\t\tSourceURL: \"http://localhost:9090/graph?g0.expr=up&g0.tab=1\",\n \t\t\t\t},\n \t\t\t},\n \t\t},\n--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -33,7 +33,7 @@\n \t// The known time range for this alert. Both ends are optional.\n \tStartsAt     time.Time `json:\"startsAt,omitempty\"`\n \tEndsAt       time.Time `json:\"endsAt,omitempty\"`\n-\tGeneratorURL string    `json:\"generatorURL,omitempty\"`\n+\tSourceURL string    `json:\"generatorURL,omitempty\"`\n }\n \n // Name returns the name of the alert. It is equivalent to the \"alertname\" label.\n@@ -92,7 +92,7 @@\n \t\t\t\tAnnotations:  a.Annotations,\n \t\t\t\tStartsAt:     a.StartsAt,\n \t\t\t\tEndsAt:       a.EndsAt,\n-\t\t\t\tGeneratorURL: a.GeneratorURL,\n+\t\t\t\tSourceURL: a.SourceURL,\n \t\t\t}\n \t\t}\n \n--- a/notifier/util.go\n+++ b/notifier/util.go\n@@ -30,7 +30,7 @@\n \t\t\tEndsAt:      end,\n \t\t\tStartsAt:    start,\n \t\t\tAlert: models.Alert{\n-\t\t\t\tGeneratorURL: strfmt.URI(a.GeneratorURL),\n+\t\t\t\tGeneratorURL: strfmt.URI(a.SourceURL),\n \t\t\t\tLabels:       labelsToOpenAPILabelSet(a.Labels),\n \t\t\t},\n \t\t})\n--- a/notifier/util_test.go\n+++ b/notifier/util_test.go\n@@ -66,7 +66,7 @@\n \t\tAnnotations:  labels.FromStrings(\"summary\", \"Test alert\"),\n \t\tStartsAt:     now,\n \t\tEndsAt:       now.Add(time.Hour),\n-\t\tGeneratorURL: \"http://prometheus:9090/graph\",\n+\t\tSourceURL: \"http://prometheus:9090/graph\",\n \t}\n \n \tresult := alertsToOpenAPIAlerts([]*Alert{alert})\n@@ -111,7 +111,7 @@\n \t\tAnnotations:  labels.EmptyLabels(),\n \t\tStartsAt:     time.Time{},\n \t\tEndsAt:       time.Time{},\n-\t\tGeneratorURL: \"\",\n+\t\tSourceURL: \"\",\n \t}\n \n \tresult := alertsToOpenAPIAlerts([]*Alert{alert})\n--- a/rules/manager.go\n+++ b/rules/manager.go\n@@ -504,7 +504,7 @@\n \t\t\t\tStartsAt:     alert.FiredAt,\n \t\t\t\tLabels:       alert.Labels,\n \t\t\t\tAnnotations:  alert.Annotations,\n-\t\t\t\tGeneratorURL: externalURL + strutil.TableLinkForExpression(expr),\n+\t\t\t\tSourceURL: externalURL + strutil.TableLinkForExpression(expr),\n \t\t\t}\n \t\t\tif !alert.ResolvedAt.IsZero() {\n \t\t\t\ta.EndsAt = alert.ResolvedAt\n",
+   "millis": 319
+  },
+  {
+   "id": "rename-iface-method",
+   "refactoring": "rename",
+   "what": "interface method with its implementations",
+   "file": "notifier/alertmanager.go",
+   "line": 31,
+   "actions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "applied",
+   "done": "textDocument/rename to endpoint",
+   "changed": [
+    "notifier/alertmanager.go",
+    "notifier/alertmanagerset.go",
+    "notifier/manager.go",
+    "notifier/manager_test.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -28,14 +28,14 @@\n \n // Alertmanager holds Alertmanager endpoint information.\n type alertmanager interface {\n-\turl() *url.URL\n+\tendpoint() *url.URL\n }\n \n type alertmanagerLabels struct{ labels.Labels }\n \n const pathLabel = \"__alerts_path__\"\n \n-func (a alertmanagerLabels) url() *url.URL {\n+func (a alertmanagerLabels) endpoint() *url.URL {\n \treturn &url.URL{\n \t\tScheme: a.Get(model.SchemeLabel),\n \t\tHost:   a.Get(model.AddressLabel),\n--- a/notifier/alertmanagerset.go\n+++ b/notifier/alertmanagerset.go\n@@ -100,7 +100,7 @@\n \t// Deduplicate Alertmanagers and add sendloops for new Alertmanagers.\n \tseen := map[string]struct{}{}\n \tfor _, am := range allAms {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \t\tif _, ok := seen[us]; ok {\n \t\t\tcontinue\n \t\t}\n@@ -113,7 +113,7 @@\n \t// Populate a list of Alertmanagers to clean up,\n \t// avoid cleaning up what we just added.\n \tfor _, am := range previousAms {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \t\tif _, ok := seen[us]; ok {\n \t\t\tcontinue\n \t\t}\n@@ -151,7 +151,7 @@\n // This function expects the caller to acquire needed locks.\n func (s *alertmanagerSet) addSendLoops(ams []alertmanager) {\n \tfor _, am := range ams {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \t\t// Only add if sendloop doesn't already exist\n \t\tif loop, exists := s.sendLoops[us]; exists {\n \t\t\tloop.logger.Debug(\"Alertmanager already has send loop running, skipping\")\n@@ -167,7 +167,7 @@\n // This function expects the caller to acquire needed locks.\n func (s *alertmanagerSet) cleanSendLoops(ams ...alertmanager) {\n \tfor _, am := range ams {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \t\tif sendLoop, ok := s.sendLoops[us]; ok {\n \t\t\tsendLoop.stop()\n \t\t\tdelete(s.sendLoops, us)\n@@ -180,7 +180,7 @@\n // This is mainly needed for testing where the loops are added as part of the test setup.\n func (s *alertmanagerSet) startSendLoops(ams []alertmanager) {\n \tfor _, am := range ams {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \n \t\tif l, ok := s.sendLoops[us]; ok {\n \t\t\tgo l.loop()\n--- a/notifier/manager.go\n+++ b/notifier/manager.go\n@@ -288,7 +288,7 @@\n \tfor _, ams := range amSets {\n \t\tams.mtx.RLock()\n \t\tfor _, am := range ams.ams {\n-\t\t\tres = append(res, am.url())\n+\t\t\tres = append(res, am.endpoint())\n \t\t}\n \t\tams.mtx.RUnlock()\n \t}\n@@ -307,7 +307,7 @@\n \tfor _, ams := range amSets {\n \t\tams.mtx.RLock()\n \t\tfor _, dam := range ams.droppedAms {\n-\t\t\tres = append(res, dam.url())\n+\t\t\tres = append(res, dam.endpoint())\n \t\t}\n \t\tams.mtx.RUnlock()\n \t}\n--- a/notifier/manager_test.go\n+++ b/notifier/manager_test.go\n@@ -576,7 +576,7 @@\n \turlf func() string\n }\n \n-func (a alertmanagerMock) url() *url.URL {\n+func (a alertmanagerMock) endpoint() *url.URL {\n \tu, err := url.Parse(a.urlf())\n \tif err != nil {\n \t\tpanic(err)\n@@ -1081,7 +1081,7 @@\n \t// Ensure the config order is taken into account.\n \tams := n.alertmanagers[\"config-1\"].ams\n \trequire.Len(t, ams, 1)\n-\trequire.Equal(t, alertmanagerURL, ams[0].url().String())\n+\trequire.Equal(t, alertmanagerURL, ams[0].endpoint().String())\n \n \t// 3. Ensure known alertmanagers are reused for new config with identical AlertmanagerConfig.\n \ts = `\n@@ -1102,7 +1102,7 @@\n \tfor cfgIdx := range 2 {\n \t\tams := n.alertmanagers[fmt.Sprintf(\"config-%d\", cfgIdx)].ams\n \t\trequire.Len(t, ams, 1)\n-\t\trequire.Equal(t, alertmanagerURL, ams[0].url().String())\n+\t\trequire.Equal(t, alertmanagerURL, ams[0].endpoint().String())\n \t}\n \n \t// 4. Ensure known alertmanagers are reused only for identical AlertmanagerConfig.\n",
+   "millis": 62
+  },
+  {
+   "id": "rename-type",
+   "refactoring": "rename",
+   "what": "type, with local variables of the same name around",
+   "file": "notifier/sendloop.go",
+   "line": 30,
+   "actions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "applied",
+   "done": "textDocument/rename to alertSender",
+   "changed": [
+    "notifier/alertmanagerset.go",
+    "notifier/manager_test.go",
+    "notifier/sendloop.go",
+    "notifier/sendloop_test.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alertmanagerset.go\n+++ b/notifier/alertmanagerset.go\n@@ -42,7 +42,7 @@\n \tmtx        sync.RWMutex\n \tams        []alertmanager\n \tdroppedAms []alertmanager\n-\tsendLoops  map[string]*sendLoop\n+\tsendLoops  map[string]*alertSender\n \n \tlogger *slog.Logger\n }\n@@ -67,7 +67,7 @@\n \t\tclient:    client,\n \t\tcfg:       cfg,\n \t\topts:      opts,\n-\t\tsendLoops: make(map[string]*sendLoop),\n+\t\tsendLoops: make(map[string]*alertSender),\n \t\tlogger:    logger,\n \t\tmetrics:   metrics,\n \t}\n--- a/notifier/manager_test.go\n+++ b/notifier/manager_test.go\n@@ -105,7 +105,7 @@\n \t\tams[i] = alertmanagerMock{urlf: func() string { return am }}\n \t}\n \tlogger := slog.New(slog.DiscardHandler)\n-\tsendLoops := make(map[string]*sendLoop)\n+\tsendLoops := make(map[string]*alertSender)\n \tfor _, am := range alertmanagerURLs {\n \t\tsendLoops[am] = newSendLoop(am, client, cfg, opts, logger, metrics)\n \t}\n@@ -1594,7 +1594,7 @@\n \t// Capture the old sendLoop.\n \toldSendLoops := n.alertmanagers[\"config-0\"].sendLoops\n \trequire.Len(t, oldSendLoops, 1)\n-\tvar oldSendLoop *sendLoop\n+\tvar oldSendLoop *alertSender\n \tfor _, sl := range oldSendLoops {\n \t\toldSendLoop = sl\n \t}\n--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -27,7 +27,7 @@\n \t\"github.com/prometheus/prometheus/config\"\n )\n \n-type sendLoop struct {\n+type alertSender struct {\n \talertmanagerURL string\n \n \tcfg    *config.AlertmanagerConfig\n@@ -52,14 +52,14 @@\n \topts *Options,\n \tlogger *slog.Logger,\n \tmetrics *alertMetrics,\n-) *sendLoop {\n+) *alertSender {\n \t// This will initialize the Counters for the AM to 0 and set the static queue capacity gauge.\n \tmetrics.dropped.WithLabelValues(alertmanagerURL)\n \tmetrics.errors.WithLabelValues(alertmanagerURL)\n \tmetrics.sent.WithLabelValues(alertmanagerURL)\n \tmetrics.queueLength.WithLabelValues(alertmanagerURL)\n \n-\treturn &sendLoop{\n+\treturn &alertSender{\n \t\talertmanagerURL: alertmanagerURL,\n \t\tclient:          client,\n \t\tcfg:             cfg,\n@@ -72,7 +72,7 @@\n \t}\n }\n \n-func (s *sendLoop) add(alerts ...*Alert) {\n+func (s *alertSender) add(alerts ...*Alert) {\n \tselect {\n \tcase <-s.stopped:\n \t\treturn\n@@ -112,7 +112,7 @@\n \t}\n }\n \n-func (s *sendLoop) notifyWork() {\n+func (s *alertSender) notifyWork() {\n \tselect {\n \tcase <-s.stopped:\n \t\treturn\n@@ -121,7 +121,7 @@\n \t}\n }\n \n-func (s *sendLoop) stop() {\n+func (s *alertSender) stop() {\n \ts.stopOnce.Do(func() {\n \t\ts.logger.Debug(\"Stopping send loop\")\n \t\tclose(s.stopped)\n@@ -143,20 +143,20 @@\n \t})\n }\n \n-func (s *sendLoop) drainQueue() {\n+func (s *alertSender) drainQueue() {\n \tfor s.queueLen() > 0 {\n \t\ts.sendOneBatch()\n \t}\n }\n \n-func (s *sendLoop) queueLen() int {\n+func (s *alertSender) queueLen() int {\n \ts.mtx.RLock()\n \tdefer s.mtx.RUnlock()\n \n \treturn len(s.queue)\n }\n \n-func (s *sendLoop) nextBatch() []*Alert {\n+func (s *alertSender) nextBatch() []*Alert {\n \ts.mtx.Lock()\n \tdefer s.mtx.Unlock()\n \n@@ -173,7 +173,7 @@\n \treturn alerts\n }\n \n-func (s *sendLoop) sendOneBatch() {\n+func (s *alertSender) sendOneBatch() {\n \talerts := s.nextBatch()\n \n \tif !s.sendAll(alerts) {\n@@ -183,7 +183,7 @@\n \n // loop continuously consumes the notifications queue and sends alerts to\n // the Alertmanager.\n-func (s *sendLoop) loop() {\n+func (s *alertSender) loop() {\n \ts.logger.Debug(\"Starting send loop\")\n \tfor {\n \t\t// If we've been asked to stop, that takes priority over sending any further notifications.\n@@ -206,7 +206,7 @@\n \t}\n }\n \n-func (s *sendLoop) sendAll(alerts []*Alert) bool {\n+func (s *alertSender) sendAll(alerts []*Alert) bool {\n \tif len(alerts) == 0 {\n \t\treturn true\n \t}\n@@ -248,7 +248,7 @@\n \treturn true\n }\n \n-func (s *sendLoop) sendOne(ctx context.Context, c *http.Client, url string, b []byte) error {\n+func (s *alertSender) sendOne(ctx context.Context, c *http.Client, url string, b []byte) error {\n \treq, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))\n \tif err != nil {\n \t\treturn err\n--- a/notifier/sendloop_test.go\n+++ b/notifier/sendloop_test.go\n@@ -35,7 +35,7 @@\n \tconst testBody = \"testbody\"\n \n \tvar received bool\n-\th := sendLoop{\n+\th := alertSender{\n \t\topts: &Options{\n \t\t\tDo: func(_ context.Context, _ *http.Client, req *http.Request) (*http.Response, error) {\n \t\t\t\treceived = true\n",
+   "millis": 55
+  },
+  {
+   "id": "rename-package",
+   "refactoring": "rename",
+   "what": "package (clause; directory follows)",
+   "file": "util/kahansum/kahansum.go",
+   "line": 14,
+   "actions": [
+    "source.doc: Browse documentation for package kahansum",
+    "source.splitPackage: Split package \"kahansum\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"kahansum\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "applied",
+   "done": "textDocument/rename to kahan",
+   "changed": [
+    "model/histogram/float_histogram.go",
+    "promql/engine.go",
+    "promql/functions.go",
+    "promql/functions_internal_test.go"
+   ],
+   "created": [
+    "util/kahan/kahansum.go",
+    "util/kahan/kahansum_test.go"
+   ],
+   "deleted": [
+    "util/kahansum/kahansum.go",
+    "util/kahansum/kahansum_test.go"
+   ],
+   "diff": "--- a/model/histogram/float_histogram.go\n+++ b/model/histogram/float_histogram.go\n@@ -20,7 +20,7 @@\n \t\"slices\"\n \t\"strings\"\n \n-\t\"github.com/prometheus/prometheus/util/kahansum\"\n+\t\"github.com/prometheus/prometheus/util/kahan\"\n )\n \n // FloatHistogram is similar to Histogram but uses float64 for all\n@@ -428,11 +428,11 @@\n \t}\n \tif !h.UsesCustomBuckets() {\n \t\totherZeroCount, otherCZeroCount := h.reconcileZeroBuckets(other, c)\n-\t\th.ZeroCount, c.ZeroCount = kahansum.Inc(otherZeroCount, h.ZeroCount, c.ZeroCount)\n-\t\th.ZeroCount, c.ZeroCount = kahansum.Inc(otherCZeroCount, h.ZeroCount, c.ZeroCount)\n-\t}\n-\th.Count, c.Count = kahansum.Inc(other.Count, h.Count, c.Count)\n-\th.Sum, c.Sum = kahansum.Inc(other.Sum, h.Sum, c.Sum)\n+\t\th.ZeroCount, c.ZeroCount = kahan.Inc(otherZeroCount, h.ZeroCount, c.ZeroCount)\n+\t\th.ZeroCount, c.ZeroCount = kahan.Inc(otherCZeroCount, h.ZeroCount, c.ZeroCount)\n+\t}\n+\th.Count, c.Count = kahan.Inc(other.Count, h.Count, c.Count)\n+\th.Sum, c.Sum = kahan.Inc(other.Sum, h.Sum, c.Sum)\n \n \tvar (\n \t\thPositiveSpans       = h.PositiveSpans\n@@ -1019,9 +1019,9 @@\n \t\t\t\tbreak\n \t\t\t}\n \t\t\t// Bucket to be merged into zero bucket.\n-\t\t\thZeroCount, cZeroCount = kahansum.Inc(b.Count, hZeroCount, cZeroCount)\n+\t\t\thZeroCount, cZeroCount = kahan.Inc(b.Count, hZeroCount, cZeroCount)\n \t\t\tif c != nil {\n-\t\t\t\thZeroCount, cZeroCount = kahansum.Inc(c.PositiveBuckets[bucketsIdx], hZeroCount, cZeroCount)\n+\t\t\t\thZeroCount, cZeroCount = kahan.Inc(c.PositiveBuckets[bucketsIdx], hZeroCount, cZeroCount)\n \t\t\t}\n \t\t\tif b.Upper > largerThreshold {\n \t\t\t\t// New threshold ended up within a bucket. if it's\n@@ -1042,9 +1042,9 @@\n \t\t\t\tbreak\n \t\t\t}\n \t\t\t// Bucket to be merged into zero bucket.\n-\t\t\thZeroCount, cZeroCount = kahansum.Inc(b.Count, hZeroCount, cZeroCount)\n+\t\t\thZeroCount, cZeroCount = kahan.Inc(b.Count, hZeroCount, cZeroCount)\n \t\t\tif c != nil {\n-\t\t\t\thZeroCount, cZeroCount = kahansum.Inc(c.NegativeBuckets[bucketsIdx], hZeroCount, cZeroCount)\n+\t\t\t\thZeroCount, cZeroCount = kahan.Inc(c.NegativeBuckets[bucketsIdx], hZeroCount, cZeroCount)\n \t\t\t}\n \t\t\tif b.Lower < -largerThreshold {\n \t\t\t\t// New threshold ended up within a bucket. If\n@@ -1609,9 +1609,9 @@\n \t\t\t\t\tgoto nextLoop\n \t\t\t\t} else if spansA[0].Offset == indexB {\n \t\t\t\t\t// Just add to first bucket.\n-\t\t\t\t\tbucketsA[0], compensationBucketsA[0] = kahansum.Inc(bucketB, bucketsA[0], compensationBucketsA[0])\n+\t\t\t\t\tbucketsA[0], compensationBucketsA[0] = kahan.Inc(bucketB, bucketsA[0], compensationBucketsA[0])\n \t\t\t\t\tif compensationBucketB != 0 {\n-\t\t\t\t\t\tbucketsA[0], compensationBucketsA[0] = kahansum.Inc(compensationBucketB, bucketsA[0], compensationBucketsA[0])\n+\t\t\t\t\t\tbucketsA[0], compensationBucketsA[0] = kahan.Inc(compensationBucketB, bucketsA[0], compensationBucketsA[0])\n \t\t\t\t\t}\n \t\t\t\t\tgoto nextLoop\n \t\t\t\t}\n@@ -1625,9 +1625,9 @@\n \t\t\t\t\t// Bucket is in current span.\n \t\t\t\t\tiBucket += int(deltaIndex)\n \t\t\t\t\tiInSpan += deltaIndex\n-\t\t\t\t\tbucketsA[iBucket], compensationBucketsA[iBucket] = kahansum.Inc(bucketB, bucketsA[iBucket], compensationBucketsA[iBucket])\n+\t\t\t\t\tbucketsA[iBucket], compensationBucketsA[iBucket] = kahan.Inc(bucketB, bucketsA[iBucket], compensationBucketsA[iBucket])\n \t\t\t\t\tif compensationBucketB != 0 {\n-\t\t\t\t\t\tbucketsA[iBucket], compensationBucketsA[iBucket] = kahansum.Inc(compensationBucketB, bucketsA[iBucket], compensationBucketsA[iBucket])\n+\t\t\t\t\t\tbucketsA[iBucket], compensationBucketsA[iBucket] = kahan.Inc(compensationBucketB, bucketsA[iBucket], compensationBucketsA[iBucket])\n \t\t\t\t\t}\n \t\t\t\t\tbreak\n \t\t\t\t}\n@@ -1851,11 +1851,11 @@\n \t\t\t\t\t}\n \n \t\t\t\t\tif negative {\n-\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Dec(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n+\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Dec(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n \t\t\t\t\t} else {\n-\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Inc(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n+\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Inc(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n \t\t\t\t\t\tif withCompensation && bucketsC != nil {\n-\t\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Inc(bucketsC[bucketIdx], targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n+\t\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Inc(bucketsC[bucketIdx], targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n \t\t\t\t\t\t}\n \t\t\t\t\t}\n \t\t\t\t}\n@@ -1996,12 +1996,12 @@\n \t\t\tcase lastTargetBucketIdx == targetBucketIdx:\n \t\t\t\t// The current bucket has to be merged into the same target bucket as the previous bucket.\n \t\t\t\tlastBucketIdx := len(targetReceivingBuckets) - 1\n-\t\t\t\ttargetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahansum.Inc(\n+\t\t\t\ttargetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahan.Inc(\n \t\t\t\t\toriginReceivingBuckets[bucketCountIdx],\n \t\t\t\t\ttargetReceivingBuckets[lastBucketIdx],\n \t\t\t\t\ttargetCompensationBuckets[lastBucketIdx],\n \t\t\t\t)\n-\t\t\t\ttargetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahansum.Inc(\n+\t\t\t\ttargetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahan.Inc(\n \t\t\t\t\toriginCompensationBuckets[bucketCountIdx],\n \t\t\t\t\ttargetReceivingBuckets[lastBucketIdx],\n \t\t\t\t\ttargetCompensationBuckets[lastBucketIdx],\n--- a/promql/engine.go\n+++ b/promql/engine.go\n@@ -51,7 +51,7 @@\n \t\"github.com/prometheus/prometheus/tsdb/chunkenc\"\n \t\"github.com/prometheus/prometheus/util/annotations\"\n \t\"github.com/prometheus/prometheus/util/features\"\n-\t\"github.com/prometheus/prometheus/util/kahansum\"\n+\t\"github.com/prometheus/prometheus/util/kahan\"\n \t\"github.com/prometheus/prometheus/util/logging\"\n \t\"github.com/prometheus/prometheus/util/stats\"\n \t\"github.com/prometheus/prometheus/util/zeropool\"\n@@ -3788,7 +3788,7 @@\n \t\t\t\t// point in copying the histogram in that case.\n \t\t\t} else {\n \t\t\t\tgroup.hasFloat = true\n-\t\t\t\tgroup.floatValue, group.floatKahanC = kahansum.Inc(f, group.floatValue, group.floatKahanC)\n+\t\t\t\tgroup.floatValue, group.floatKahanC = kahan.Inc(f, group.floatValue, group.floatKahanC)\n \t\t\t}\n \n \t\tcase parser.AVG:\n@@ -3875,7 +3875,7 @@\n \t\t\t} else {\n \t\t\t\tgroup.hasFloat = true\n \t\t\t\tif !group.floatIncrementalMean {\n-\t\t\t\t\tnewV, newC := kahansum.Inc(f, group.floatValue, group.floatKahanC)\n+\t\t\t\t\tnewV, newC := kahan.Inc(f, group.floatValue, group.floatKahanC)\n \t\t\t\t\tif !math.IsInf(newV, 0) {\n \t\t\t\t\t\t// The sum doesn't overflow, so we propagate it to the\n \t\t\t\t\t\t// group struct and continue with the regular\n@@ -3891,7 +3891,7 @@\n \t\t\t\t\tgroup.floatKahanC /= group.groupCount - 1\n \t\t\t\t}\n \t\t\t\tq := (group.groupCount - 1) / group.groupCount\n-\t\t\t\tgroup.floatMean, group.floatKahanC = kahansum.Inc(\n+\t\t\t\tgroup.floatMean, group.floatKahanC = kahan.Inc(\n \t\t\t\t\tf/group.groupCount,\n \t\t\t\t\tq*group.floatMean,\n \t\t\t\t\tq*group.floatKahanC,\n--- a/promql/functions.go\n+++ b/promql/functions.go\n@@ -33,7 +33,7 @@\n \t\"github.com/prometheus/prometheus/promql/parser/posrange\"\n \t\"github.com/prometheus/prometheus/schema\"\n \t\"github.com/prometheus/prometheus/util/annotations\"\n-\t\"github.com/prometheus/prometheus/util/kahansum\"\n+\t\"github.com/prometheus/prometheus/util/kahan\"\n )\n \n // FunctionCall is the type of a PromQL function implementation\n@@ -1344,7 +1344,7 @@\n \t\tfor i, f := range s.Floats[1:] {\n \t\t\tcount = float64(i + 2)\n \t\t\tif !incrementalMean {\n-\t\t\t\tnewSum, newC := kahansum.Inc(f.F, sum, kahanC)\n+\t\t\t\tnewSum, newC := kahan.Inc(f.F, sum, kahanC)\n \t\t\t\t// Perform regular mean calculation as long as\n \t\t\t\t// the sum doesn't overflow.\n \t\t\t\tif !math.IsInf(newSum, 0) {\n@@ -1358,7 +1358,7 @@\n \t\t\t\tkahanC /= (count - 1)\n \t\t\t}\n \t\t\tq := (count - 1) / count\n-\t\t\tmean, kahanC = kahansum.Inc(f.F/count, q*mean, q*kahanC)\n+\t\t\tmean, kahanC = kahan.Inc(f.F/count, q*mean, q*kahanC)\n \t\t}\n \t\tif incrementalMean {\n \t\t\treturn mean + kahanC\n@@ -1639,7 +1639,7 @@\n \treturn aggrOverTime(matrixVal, enh, func(s Series) float64 {\n \t\tvar sum, c float64\n \t\tfor _, f := range s.Floats {\n-\t\t\tsum, c = kahansum.Inc(f.F, sum, c)\n+\t\t\tsum, c = kahan.Inc(f.F, sum, c)\n \t\t}\n \t\tif math.IsInf(sum, 0) {\n \t\t\treturn sum\n@@ -1692,8 +1692,8 @@\n \t\tfor _, f := range s.Floats {\n \t\t\tcount++\n \t\t\tdelta := f.F - (mean + cMean)\n-\t\t\tmean, cMean = kahansum.Inc(delta/count, mean, cMean)\n-\t\t\taux, cAux = kahansum.Inc(delta*(f.F-(mean+cMean)), aux, cAux)\n+\t\t\tmean, cMean = kahan.Inc(delta/count, mean, cMean)\n+\t\t\taux, cAux = kahan.Inc(delta*(f.F-(mean+cMean)), aux, cAux)\n \t\t}\n \t\tvariance := (aux + cAux) / count\n \t\tif varianceToResult == nil {\n@@ -1965,10 +1965,10 @@\n \t\t}\n \t\tn += 1.0\n \t\tx := float64(sample.T-interceptTime) / 1e3\n-\t\tsumX, cX = kahansum.Inc(x, sumX, cX)\n-\t\tsumY, cY = kahansum.Inc(sample.F, sumY, cY)\n-\t\tsumXY, cXY = kahansum.Inc(x*sample.F, sumXY, cXY)\n-\t\tsumX2, cX2 = kahansum.Inc(x*x, sumX2, cX2)\n+\t\tsumX, cX = kahan.Inc(x, sumX, cX)\n+\t\tsumY, cY = kahan.Inc(sample.F, sumY, cY)\n+\t\tsumXY, cXY = kahan.Inc(x*sample.F, sumXY, cXY)\n+\t\tsumX2, cX2 = kahan.Inc(x*x, sumX2, cX2)\n \t}\n \tif constY {\n \t\tif math.IsInf(initY, 0) {\n@@ -2104,7 +2104,7 @@\n \t\t\t\t}\n \t\t\t}\n \t\t\tdelta := val - mean\n-\t\t\tvariance, cVariance = kahansum.Inc(bucket.Count*delta*delta, variance, cVariance)\n+\t\t\tvariance, cVariance = kahan.Inc(bucket.Count*delta*delta, variance, cVariance)\n \t\t}\n \t\tvariance += cVariance\n \t\tvariance /= h.Count\n--- a/promql/functions_internal_test.go\n+++ b/promql/functions_internal_test.go\n@@ -25,7 +25,7 @@\n \t\"github.com/prometheus/prometheus/model/labels\"\n \t\"github.com/prometheus/prometheus/promql/parser/posrange\"\n \t\"github.com/prometheus/prometheus/util/annotations\"\n-\t\"github.com/prometheus/prometheus/util/kahansum\"\n+\t\"github.com/prometheus/prometheus/util/kahan\"\n )\n \n func TestHistogramRateCounterResetHint(t *testing.T) {\n@@ -81,7 +81,7 @@\n \n \trunTest := func(t *testing.T, a, b, expected float64) {\n \t\tt.Run(fmt.Sprintf(\"%v + %v = %v\", a, b, expected), func(t *testing.T) {\n-\t\t\tsum, c := kahansum.Inc(b, a, 0)\n+\t\t\tsum, c := kahan.Inc(b, a, 0)\n \t\t\tresult := sum + c\n \n \t\t\tif math.IsNaN(expected) {\n--- /dev/null\n+++ b/util/kahan/kahansum.go\n@@ -0,0 +1,59 @@\n+// Copyright 2024 The Prometheus Authors\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+// http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package kahan\n+\n+import \"math\"\n+\n+// isInf reports whether f is positive or negative infinity.\n+// It avoids math.IsInf to prevent inflating Inc's inlining cost.\n+func isInf(f float64) bool {\n+\treturn f > math.MaxFloat64 || f < -math.MaxFloat64\n+}\n+\n+// Inc performs addition of two floating-point numbers using the Kahan summation algorithm.\n+func Inc(inc, sum, c float64) (newSum, newC float64) {\n+\t// We've seen Kahan summation return less accurate results when Inc function is\n+\t// allowed to be inlined (see https://github.com/prometheus/prometheus/pull/16895).\n+\t// Go permits fusing float operations (e.g. using fused multiply-add, which allows\n+\t// calculating a*b+c without rounding the result of a*b to precision available in float64),\n+\t// and Kahan sum is sensitive to float rounding behavior. Instead of forbidding inlining\n+\t// (which only disallows fusing operations outside of Inc with operations  happening inside)\n+\t// and eating the performance cost of non-inlined function calls, we forbid just the fusing\n+\t// across Inc call boundary. We can do that by explicitly requesting Inc arguments and results\n+\t// to be rounded to float64 precision, as documented in go spec (https://go.dev/ref/spec#Floating_point_operators).\n+\t// The following casts are not no-ops!\n+\tinc = float64(inc)\n+\tsum = float64(sum)\n+\tc = float64(c)\n+\n+\tt := sum + inc\n+\tswitch {\n+\tcase isInf(t):\n+\t\tc = 0\n+\n+\t\t// Using Neumaier improvement, swap if next term larger than sum.\n+\tcase math.Abs(sum) >= math.Abs(inc):\n+\t\tc += (sum - t) + inc\n+\tdefault:\n+\t\tc += (inc - t) + sum\n+\t}\n+\n+\tt = float64(t)\n+\tc = float64(c)\n+\treturn t, c\n+}\n+\n+func Dec(dec, sum, c float64) (newSum, newC float64) {\n+\treturn Inc(-dec, sum, c)\n+}\n--- /dev/null\n+++ b/util/kahan/kahansum_test.go\n@@ -0,0 +1,36 @@\n+// Copyright The Prometheus Authors\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+// http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package kahan\n+\n+import (\n+\t\"math\"\n+\t\"testing\"\n+\n+\t\"github.com/stretchr/testify/require\"\n+)\n+\n+func TestIsInf(t *testing.T) {\n+\tfor _, f := range []float64{\n+\t\tmath.Inf(1),\n+\t\tmath.Inf(-1),\n+\t\tmath.MaxFloat64,\n+\t\t-math.MaxFloat64,\n+\t\t1.0,\n+\t\t-1.0,\n+\t\t0,\n+\t\tmath.NaN(),\n+\t} {\n+\t\trequire.Equal(t, math.IsInf(f, 0), isInf(f), \"%e\", f)\n+\t}\n+}\n--- a/util/kahansum/kahansum.go\n+++ /dev/null\n@@ -1,59 +0,0 @@\n-// Copyright 2024 The Prometheus Authors\n-// Licensed under the Apache License, Version 2.0 (the \"License\");\n-// you may not use this file except in compliance with the License.\n-// You may obtain a copy of the License at\n-//\n-// http://www.apache.org/licenses/LICENSE-2.0\n-//\n-// Unless required by applicable law or agreed to in writing, software\n-// distributed under the License is distributed on an \"AS IS\" BASIS,\n-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n-// See the License for the specific language governing permissions and\n-// limitations under the License.\n-\n-package kahansum\n-\n-import \"math\"\n-\n-// isInf reports whether f is positive or negative infinity.\n-// It avoids math.IsInf to prevent inflating Inc's inlining cost.\n-func isInf(f float64) bool {\n-\treturn f > math.MaxFloat64 || f < -math.MaxFloat64\n-}\n-\n-// Inc performs addition of two floating-point numbers using the Kahan summation algorithm.\n-func Inc(inc, sum, c float64) (newSum, newC float64) {\n-\t// We've seen Kahan summation return less accurate results when Inc function is\n-\t// allowed to be inlined (see https://github.com/prometheus/prometheus/pull/16895).\n-\t// Go permits fusing float operations (e.g. using fused multiply-add, which allows\n-\t// calculating a*b+c without rounding the result of a*b to precision available in float64),\n-\t// and Kahan sum is sensitive to float rounding behavior. Instead of forbidding inlining\n-\t// (which only disallows fusing operations outside of Inc with operations  happening inside)\n-\t// and eating the performance cost of non-inlined function calls, we forbid just the fusing\n-\t// across Inc call boundary. We can do that by explicitly requesting Inc arguments and results\n-\t// to be rounded to float64 precision, as documented in go spec (https://go.dev/ref/spec#Floating_point_operators).\n-\t// The following casts are not no-ops!\n-\tinc = float64(inc)\n-\tsum = float64(sum)\n-\tc = float64(c)\n-\n-\tt := sum + inc\n-\tswitch {\n-\tcase isInf(t):\n-\t\tc = 0\n-\n-\t\t// Using Neumaier improvement, swap if next term larger than sum.\n-\tcase math.Abs(sum) >= math.Abs(inc):\n-\t\tc += (sum - t) + inc\n-\tdefault:\n-\t\tc += (inc - t) + sum\n-\t}\n-\n-\tt = float64(t)\n-\tc = float64(c)\n-\treturn t, c\n-}\n-\n-func Dec(dec, sum, c float64) (newSum, newC float64) {\n-\treturn Inc(-dec, sum, c)\n-}\n--- a/util/kahansum/kahansum_test.go\n+++ /dev/null\n@@ -1,36 +0,0 @@\n-// Copyright The Prometheus Authors\n-// Licensed under the Apache License, Version 2.0 (the \"License\");\n-// you may not use this file except in compliance with the License.\n-// You may obtain a copy of the License at\n-//\n-// http://www.apache.org/licenses/LICENSE-2.0\n-//\n-// Unless required by applicable law or agreed to in writing, software\n-// distributed under the License is distributed on an \"AS IS\" BASIS,\n-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n-// See the License for the specific language governing permissions and\n-// limitations under the License.\n-\n-package kahansum\n-\n-import (\n-\t\"math\"\n-\t\"testing\"\n-\n-\t\"github.com/stretchr/testify/require\"\n-)\n-\n-func TestIsInf(t *testing.T) {\n-\tfor _, f := range []float64{\n-\t\tmath.Inf(1),\n-\t\tmath.Inf(-1),\n-\t\tmath.MaxFloat64,\n-\t\t-math.MaxFloat64,\n-\t\t1.0,\n-\t\t-1.0,\n-\t\t0,\n-\t\tmath.NaN(),\n-\t} {\n-\t\trequire.Equal(t, math.IsInf(f, 0), isInf(f), \"%e\", f)\n-\t}\n-}\n",
+   "millis": 188
+  },
+  {
+   "id": "rename-file",
+   "refactoring": "rename",
+   "what": "file (and its test file)",
+   "file": "notifier/util.go",
+   "line": 14,
+   "actions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 42
+  },
+  {
+   "id": "rename-conflict",
+   "refactoring": "rename",
+   "what": "local variable to a name that is taken in an inner scope",
+   "file": "notifier/alert.go",
+   "line": 72,
+   "actions": [
+    "source.addTest: Add test for relabelAlerts",
+    "source.assembly: Browse amd64 assembly for relabelAlerts",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "refused",
+   "message": "notifier/alert.go:72:2: renaming this var \"lb\" to \"a\"\nnotifier/alert.go:76:3:\twould cause this reference to become shadowed\nnotifier/alert.go:75:9:\tby this intervening var definition",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 2
+  },
+  {
+   "id": "extract-variable",
+   "refactoring": "extract-variable",
+   "what": "expression with two occurrences",
+   "file": "notifier/sendloop.go",
+   "line": 88,
+   "actions": [
+    "source.addTest: Add test for add",
+    "source.assembly: Browse amd64 assembly for add",
+    "source.doc: Browse documentation for package notifier",
+    "source.freesymbols: Browse free symbols",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.variable: Extract variable",
+    "refactor.extract.variable-all: Extract 2 occurrences of s.opts.QueueCapacity",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.extract.variable-all: Extract 2 occurrences of s.opts.QueueCapacity",
+   "status": "applied",
+   "changed": [
+    "notifier/sendloop.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -85,7 +85,8 @@\n \tvar dropped int\n \t// Queue capacity should be significantly larger than a single alert\n \t// batch could be.\n-\tif d := len(alerts) - s.opts.QueueCapacity; d > 0 {\n+\tnewVar := s.opts.QueueCapacity\n+\tif d := len(alerts) - newVar; d > 0 {\n \t\ts.logger.Warn(\"Alert batch larger than queue capacity, dropping alerts\", \"count\", d)\n \t\tdropped += d\n \t\talerts = alerts[d:]\n@@ -93,7 +94,7 @@\n \n \t// If the queue is full, remove the oldest alerts in favor\n \t// of newer ones.\n-\tif d := (len(s.queue) + len(alerts)) - s.opts.QueueCapacity; d > 0 {\n+\tif d := (len(s.queue) + len(alerts)) - newVar; d > 0 {\n \t\ts.logger.Warn(\"Alert notification queue full, dropping alerts\", \"count\", d)\n \t\tdropped += d\n \t\ts.queue = s.queue[d:]\n",
+   "millis": 2
+  },
+  {
+   "id": "extract-constant",
+   "refactoring": "extract-constant",
+   "what": "string literal",
+   "file": "notifier/alert.go",
+   "line": 52,
+   "actions": [
+    "source.addTest: Add test for String",
+    "source.assembly: Browse amd64 assembly for String",
+    "source.doc: Browse documentation for method (*Alert).String",
+    "source.freesymbols: Browse free symbols",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.constant: Extract constant",
+    "refactor.rewrite.changeQuote: Convert to raw string literal",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.extract.constant: Extract constant",
+   "status": "applied",
+   "changed": [
+    "notifier/alert.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -49,7 +49,8 @@\n func (a *Alert) String() string {\n \ts := fmt.Sprintf(\"%s[%s]\", a.Name(), fmt.Sprintf(\"%016x\", a.Hash())[:7])\n \tif a.Resolved() {\n-\t\treturn s + \"[resolved]\"\n+\t\tconst newConst = \"[resolved]\"\n+\t\treturn s + newConst\n \t}\n \treturn s + \"[active]\"\n }\n",
+   "millis": 2
+  },
+  {
+   "id": "extract-function-multi",
+   "refactoring": "extract-function",
+   "what": "statements with two results (a new variable and a reassigned parameter)",
+   "file": "notifier/sendloop.go",
+   "line": 85,
+   "actions": [
+    "source.addTest: Add test for add",
+    "source.assembly: Browse amd64 assembly for add",
+    "source.doc: Browse documentation for package notifier",
+    "source.freesymbols: Browse free symbols",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.function: Extract function",
+    "refactor.extract.method: Extract method",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.extract.method: Extract method",
+   "status": "applied",
+   "changed": [
+    "notifier/sendloop.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -82,6 +82,22 @@\n \ts.mtx.Lock()\n \tdefer s.mtx.Unlock()\n \n+\tdropped, alerts := s.newMethod(alerts)\n+\n+\ts.queue = append(s.queue, alerts...)\n+\n+\t// Notify sending goroutine that there are alerts to be processed.\n+\t// If we cannot send on the channel, it means the signal already exists\n+\t// and has not been consumed yet.\n+\ts.notifyWork()\n+\n+\ts.metrics.queueLength.WithLabelValues(s.alertmanagerURL).Set(float64(len(s.queue)))\n+\tif dropped > 0 {\n+\t\ts.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(dropped))\n+\t}\n+}\n+\n+func (s *sendLoop) newMethod(alerts []*Alert) (int, []*Alert) {\n \tvar dropped int\n \t// Queue capacity should be significantly larger than a single alert\n \t// batch could be.\n@@ -98,18 +114,7 @@\n \t\tdropped += d\n \t\ts.queue = s.queue[d:]\n \t}\n-\n-\ts.queue = append(s.queue, alerts...)\n-\n-\t// Notify sending goroutine that there are alerts to be processed.\n-\t// If we cannot send on the channel, it means the signal already exists\n-\t// and has not been consumed yet.\n-\ts.notifyWork()\n-\n-\ts.metrics.queueLength.WithLabelValues(s.alertmanagerURL).Set(float64(len(s.queue)))\n-\tif dropped > 0 {\n-\t\ts.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(dropped))\n-\t}\n+\treturn dropped, alerts\n }\n \n func (s *sendLoop) notifyWork() {\n",
+   "millis": 3
+  },
+  {
+   "id": "extract-function-err",
+   "refactoring": "extract-function",
+   "what": "statements with `return nil, err` of the enclosing function inside",
+   "file": "notifier/alertmanagerset.go",
+   "line": 51,
+   "actions": [
+    "source.addTest: Add test for newAlertmanagerSet",
+    "source.assembly: Browse amd64 assembly for newAlertmanagerSet",
+    "source.doc: Browse documentation for package notifier",
+    "source.freesymbols: Browse free symbols",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.function: Extract function",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.extract.function: Extract function",
+   "status": "applied",
+   "changed": [
+    "notifier/alertmanagerset.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alertmanagerset.go\n+++ b/notifier/alertmanagerset.go\n@@ -48,20 +48,10 @@\n }\n \n func newAlertmanagerSet(cfg *config.AlertmanagerConfig, opts *Options, logger *slog.Logger, metrics *alertMetrics) (*alertmanagerSet, error) {\n-\tclient, err := config_util.NewClientFromConfig(cfg.HTTPClientConfig, \"alertmanager\")\n+\tclient, result, err := newFunction(cfg)\n \tif err != nil {\n-\t\treturn nil, err\n+\t\treturn result, err\n \t}\n-\tt := client.Transport\n-\n-\tif cfg.SigV4Config != nil {\n-\t\tt, err = sigv4.NewSigV4RoundTripper(cfg.SigV4Config, client.Transport)\n-\t\tif err != nil {\n-\t\t\treturn nil, err\n-\t\t}\n-\t}\n-\n-\tclient.Transport = t\n \n \ts := &alertmanagerSet{\n \t\tclient:    client,\n@@ -72,6 +62,24 @@\n \t\tmetrics:   metrics,\n \t}\n \treturn s, nil\n+}\n+\n+func newFunction(cfg *config.AlertmanagerConfig) (*http.Client, *alertmanagerSet, error) {\n+\tclient, err := config_util.NewClientFromConfig(cfg.HTTPClientConfig, \"alertmanager\")\n+\tif err != nil {\n+\t\treturn nil, nil, err\n+\t}\n+\tt := client.Transport\n+\n+\tif cfg.SigV4Config != nil {\n+\t\tt, err = sigv4.NewSigV4RoundTripper(cfg.SigV4Config, client.Transport)\n+\t\tif err != nil {\n+\t\t\treturn nil, nil, err\n+\t\t}\n+\t}\n+\n+\tclient.Transport = t\n+\treturn client, nil, nil\n }\n \n // sync extracts a deduplicated set of Alertmanager endpoints from a list\n",
+   "millis": 40
+  },
+  {
+   "id": "extract-method",
+   "refactoring": "extract-function",
+   "what": "statements using the receiver -> method",
+   "file": "notifier/sendloop.go",
+   "line": 137,
+   "actions": [
+    "source.addTest: Add test for stop",
+    "source.assembly: Browse amd64 assembly for stop",
+    "source.doc: Browse documentation for package notifier",
+    "source.freesymbols: Browse free symbols",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.function: Extract function",
+    "refactor.extract.method: Extract method",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.extract.method: Extract method",
+   "status": "applied",
+   "changed": [
+    "notifier/sendloop.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -134,13 +134,17 @@\n \t\t\ts.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(ql))\n \t\t}\n \n-\t\ts.metrics.latencySummary.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.latencyHistogram.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.sent.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.dropped.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.errors.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.queueLength.DeleteLabelValues(s.alertmanagerURL)\n+\t\ts.newMethod()\n \t})\n+}\n+\n+func (s *sendLoop) newMethod() {\n+\ts.metrics.latencySummary.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.latencyHistogram.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.sent.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.dropped.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.errors.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.queueLength.DeleteLabelValues(s.alertmanagerURL)\n }\n \n func (s *sendLoop) drainQueue() {\n",
+   "millis": 2
+  },
+  {
+   "id": "introduce-parameter",
+   "refactoring": "introduce-parameter",
+   "what": "string literal of a function body -> parameter",
+   "file": "notifier/alertmanager.go",
+   "line": 88,
+   "actions": [
+    "source.addTest: Add test for postPath",
+    "source.assembly: Browse amd64 assembly for postPath",
+    "source.doc: Browse documentation for package notifier",
+    "source.freesymbols: Browse free symbols",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.constant: Extract constant",
+    "refactor.inline.call: Inline call to Sprintf",
+    "refactor.rewrite.changeQuote: Convert to raw string literal",
+    "refactor.rewrite.splitLines: Split arguments into separate lines",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-offered",
+   "message": "none of ['refactor.rewrite.addParam', 'refactor.extract.parameter'] offered at the place",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 0
+  },
+  {
+   "id": "inline-variable",
+   "refactoring": "inline",
+   "what": "local variable used once",
+   "file": "notifier/alertmanager.go",
+   "line": 77,
+   "actions": [
+    "source.addTest: Add test for AlertmanagerFromGroup",
+    "source.assembly: Browse amd64 assembly for AlertmanagerFromGroup",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "goplsPlaceLine": 78,
+   "goplsPlaceActions": [
+    "source.addTest: Add test for AlertmanagerFromGroup",
+    "source.assembly: Browse amd64 assembly for AlertmanagerFromGroup",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.inline.variable: Inline variable \"addr\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.inline.variable: Inline variable \"addr\"",
+   "status": "applied",
+   "changed": [
+    "notifier/alertmanager.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -75,7 +75,7 @@\n \t\t}\n \n \t\taddr := lb.Get(model.AddressLabel)\n-\t\tif err := config.CheckTargetAddress(model.LabelValue(addr)); err != nil {\n+\t\tif err := config.CheckTargetAddress(model.LabelValue(lb.Get(model.AddressLabel))); err != nil {\n \t\t\treturn nil, nil, err\n \t\t}\n \n",
+   "millis": 2
+  },
+  {
+   "id": "inline-function-all",
+   "refactoring": "inline",
+   "what": "one-statement method, caret on the declaration (all calls + delete)",
+   "file": "notifier/alert.go",
+   "line": 58,
+   "actions": [
+    "source.addTest: Add test for Resolved",
+    "source.assembly: Browse amd64 assembly for Resolved",
+    "source.doc: Browse documentation for method (*Alert).Resolved",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "goplsPlaceLine": 51,
+   "goplsPlaceActions": [
+    "source.addTest: Add test for String",
+    "source.assembly: Browse amd64 assembly for String",
+    "source.doc: Browse documentation for method (*Alert).Resolved",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.inline.call: Inline call to Resolved",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.inline.call: Inline call to Resolved",
+   "status": "applied",
+   "changed": [
+    "notifier/alert.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -48,7 +48,7 @@\n \n func (a *Alert) String() string {\n \ts := fmt.Sprintf(\"%s[%s]\", a.Name(), fmt.Sprintf(\"%016x\", a.Hash())[:7])\n-\tif a.Resolved() {\n+\tif a.ResolvedAt(time.Now()) {\n \t\treturn s + \"[resolved]\"\n \t}\n \treturn s + \"[active]\"\n",
+   "millis": 18
+  },
+  {
+   "id": "inline-function-call",
+   "refactoring": "inline",
+   "what": "two-statement function, caret on one call",
+   "file": "notifier/alertmanager.go",
+   "line": 61,
+   "actions": [
+    "source.addTest: Add test for AlertmanagerFromGroup",
+    "source.assembly: Browse amd64 assembly for AlertmanagerFromGroup",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.inline.call: Inline call to postPath",
+    "refactor.rewrite.splitLines: Split arguments into separate lines",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.inline.call: Inline call to postPath",
+   "status": "applied",
+   "changed": [
+    "notifier/alertmanager.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -58,7 +58,11 @@\n \t\t}\n \t\t// Set configured scheme as the initial scheme label for overwrite.\n \t\tlb.Set(model.SchemeLabel, cfg.Scheme)\n-\t\tlb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion))\n+\t\tlb.Set(pathLabel, func() string {\n+\tvar pre string = cfg.PathPrefix\n+\talertPushEndpoint := fmt.Sprintf(\"/api/%v/alerts\", string(cfg.APIVersion))\n+\treturn path.Join(\"/\", pre, alertPushEndpoint)\n+}())\n \n \t\t// Combine target labels with target group labels.\n \t\tfor ln, lv := range tg.Labels {\n",
+   "millis": 3
+  },
+  {
+   "id": "inline-constant",
+   "refactoring": "inline",
+   "what": "package-level constant used twice",
+   "file": "notifier/alertmanager.go",
+   "line": 36,
+   "actions": [
+    "source.assembly: Browse amd64 assembly for package initializer",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "goplsPlaceLine": 42,
+   "goplsPlaceActions": [
+    "source.addTest: Add test for url",
+    "source.assembly: Browse amd64 assembly for url",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.inline.call: Inline call to Get",
+    "refactor.rewrite.fillStruct: Fill url.URL",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-offered",
+   "message": "none of ['refactor.inline.variable', 'refactor.inline.constant'] offered at the place",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "cs-add-param",
+   "refactoring": "change-signature",
+   "what": "add a parameter with a default value at the calls",
+   "file": "notifier/alertmanager.go",
+   "line": 87,
+   "actions": [
+    "source.addTest: Add test for postPath",
+    "source.assembly: Browse amd64 assembly for postPath",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-offered",
+   "message": "none of ['refactor.rewrite.addParam'] offered at the place",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 0
+  },
+  {
+   "id": "cs-remove-param",
+   "refactoring": "change-signature",
+   "what": "remove a parameter that the body uses",
+   "file": "notifier/sendloop.go",
+   "line": 251,
+   "actions": [
+    "source.addTest: Add test for sendOne",
+    "source.assembly: Browse amd64 assembly for sendOne",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "goplsPlaceLine": 251,
+   "goplsPlaceActions": [
+    "source.addTest: Add test for sendOne",
+    "source.assembly: Browse amd64 assembly for sendOne",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.rewrite.moveParamLeft: Move parameter left",
+    "refactor.rewrite.moveParamRight: Move parameter right",
+    "refactor.rewrite.splitLines: Split parameters into separate lines",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-offered",
+   "message": "none of ['refactor.rewrite.removeUnusedParam'] offered at the place",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "cs-reorder",
+   "refactoring": "change-signature",
+   "what": "swap the first two parameters",
+   "file": "notifier/sendloop.go",
+   "line": 48,
+   "actions": [
+    "source.addTest: Add test for newSendLoop",
+    "source.assembly: Browse amd64 assembly for newSendLoop",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "goplsPlaceLine": 50,
+   "goplsPlaceActions": [
+    "source.addTest: Add test for newSendLoop",
+    "source.assembly: Browse amd64 assembly for newSendLoop",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.rewrite.joinLines: Join parameters into one line",
+    "refactor.rewrite.moveParamLeft: Move parameter left",
+    "refactor.rewrite.moveParamRight: Move parameter right",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.rewrite.moveParamLeft: Move parameter left",
+   "status": "applied",
+   "changed": [
+    "notifier/alertmanagerset.go",
+    "notifier/manager_test.go",
+    "notifier/sendloop.go",
+    "notifier/sendloop_test.go"
+   ],
+   "created": [],
+   "deleted": [],
+   "diff": "--- a/notifier/alertmanagerset.go\n+++ b/notifier/alertmanagerset.go\n@@ -157,7 +157,7 @@\n \t\t\tloop.logger.Debug(\"Alertmanager already has send loop running, skipping\")\n \t\t\tcontinue\n \t\t}\n-\t\tsendLoop := newSendLoop(us, s.client, s.cfg, s.opts, s.logger.With(\"alertmanager\", us), s.metrics)\n+\t\tsendLoop := newSendLoop(s.client, us, s.cfg, s.opts, s.logger.With(\"alertmanager\", us), s.metrics)\n \t\tgo sendLoop.loop()\n \t\ts.sendLoops[us] = sendLoop\n \t}\n--- a/notifier/manager_test.go\n+++ b/notifier/manager_test.go\n@@ -107,7 +107,7 @@\n \tlogger := slog.New(slog.DiscardHandler)\n \tsendLoops := make(map[string]*sendLoop)\n \tfor _, am := range alertmanagerURLs {\n-\t\tsendLoops[am] = newSendLoop(am, client, cfg, opts, logger, metrics)\n+\t\tsendLoops[am] = newSendLoop(client, am, cfg, opts, logger, metrics)\n \t}\n \treturn &alertmanagerSet{\n \t\tams:       ams,\n--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -45,14 +45,7 @@\n \tlogger *slog.Logger\n }\n \n-func newSendLoop(\n-\talertmanagerURL string,\n-\tclient *http.Client,\n-\tcfg *config.AlertmanagerConfig,\n-\topts *Options,\n-\tlogger *slog.Logger,\n-\tmetrics *alertMetrics,\n-) *sendLoop {\n+func newSendLoop(client *http.Client, alertmanagerURL string, cfg *config.AlertmanagerConfig, opts *Options, logger *slog.Logger, metrics *alertMetrics) *sendLoop {\n \t// This will initialize the Counters for the AM to 0 and set the static queue capacity gauge.\n \tmetrics.dropped.WithLabelValues(alertmanagerURL)\n \tmetrics.errors.WithLabelValues(alertmanagerURL)\n--- a/notifier/sendloop_test.go\n+++ b/notifier/sendloop_test.go\n@@ -60,7 +60,7 @@\n }\n \n func TestHandlerNextBatch(t *testing.T) {\n-\tsendLoop := newSendLoop(\"http://mock\", nil, &config.DefaultAlertmanagerConfig, &Options{MaxBatchSize: DefaultMaxBatchSize}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\tsendLoop := newSendLoop(nil, \"http://mock\", &config.DefaultAlertmanagerConfig, &Options{MaxBatchSize: DefaultMaxBatchSize}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \n \tfor i := range make([]struct{}, 2*DefaultMaxBatchSize+1) {\n \t\tsendLoop.queue = append(sendLoop.queue, &Alert{\n@@ -79,7 +79,7 @@\n \talert1 := &Alert{Labels: labels.FromStrings(\"alertname\", \"existing1\")}\n \talert2 := &Alert{Labels: labels.FromStrings(\"alertname\", \"existing2\")}\n \n-\ts := newSendLoop(\"http://foo.bar/\", nil, nil, &Options{QueueCapacity: 5}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\ts := newSendLoop(nil, \"http://foo.bar/\", nil, &Options{QueueCapacity: 5}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \ts.add(alert1, alert2)\n \trequire.Equal(t, []*Alert{alert1, alert2}, s.queue)\n \trequire.Len(t, s.queue, 2)\n@@ -100,7 +100,7 @@\n \talert1 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert1\")}\n \talert2 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert2\")}\n \n-\ts := newSendLoop(\"http://foo.bar/\", nil, nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\ts := newSendLoop(nil, \"http://foo.bar/\", nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \ts.add(alert1, alert2)\n \n \talert3 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert3\")}\n@@ -118,7 +118,7 @@\n \talert1 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert1\")}\n \talert2 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert2\")}\n \n-\ts := newSendLoop(\"http://foo.bar/\", nil, nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\ts := newSendLoop(nil, \"http://foo.bar/\", nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \ts.add(alert1, alert2)\n \n \talert3 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert3\")}\n@@ -135,7 +135,7 @@\n }\n \n func TestNextBatchAlertsFromQueue(t *testing.T) {\n-\ts := newSendLoop(\"http://foo.bar/\", nil, nil, &Options{QueueCapacity: 5, MaxBatchSize: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\ts := newSendLoop(nil, \"http://foo.bar/\", nil, &Options{QueueCapacity: 5, MaxBatchSize: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \n \talert1 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert1\")}\n \talert2 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert2\")}\n@@ -167,7 +167,7 @@\n \topts := &Options{QueueCapacity: 10, MaxBatchSize: DefaultMaxBatchSize}\n \n \t// Create first sendLoop - this initializes metrics with the alertmanager URL label\n-\tsendLoop1 := newSendLoop(alertmanagerURL, nil, &config.DefaultAlertmanagerConfig, opts, logger, metrics)\n+\tsendLoop1 := newSendLoop(nil, alertmanagerURL, &config.DefaultAlertmanagerConfig, opts, logger, metrics)\n \n \t// Verify metrics are initialized\n \trequire.Equal(t, 0.0, prom_testutil.ToFloat64(metrics.dropped.WithLabelValues(alertmanagerURL)))\n@@ -178,7 +178,7 @@\n \n \t// Create second sendLoop with the same URL - this should NOT panic or conflict\n \t// because metrics were properly cleaned up\n-\tsendLoop2 := newSendLoop(alertmanagerURL, nil, &config.DefaultAlertmanagerConfig, opts, logger, metrics)\n+\tsendLoop2 := newSendLoop(nil, alertmanagerURL, &config.DefaultAlertmanagerConfig, opts, logger, metrics)\n \tdefer sendLoop2.stop()\n \n \t// Verify metrics are re-initialized correctly\n",
+   "millis": 107
+  },
+  {
+   "id": "cs-results",
+   "refactoring": "change-signature",
+   "what": "add a result",
+   "file": "notifier/sendloop.go",
+   "line": 159,
+   "actions": [
+    "source.addTest: Add test for nextBatch",
+    "source.assembly: Browse amd64 assembly for nextBatch",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "move-func-file",
+   "refactoring": "move",
+   "what": "function to another file of the same package",
+   "file": "notifier/util.go",
+   "line": 42,
+   "actions": [
+    "source.addTest: Add test for labelsToOpenAPILabelSet",
+    "source.assembly: Browse amd64 assembly for labelsToOpenAPILabelSet",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "move-type-newfile",
+   "refactoring": "move",
+   "what": "type with its method to a new file of the same package",
+   "file": "notifier/alertmanager.go",
+   "line": 34,
+   "actions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "goplsPlaceLine": 34,
+   "goplsPlaceActions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.freesymbols: Browse free symbols",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "refactor.rewrite.addTags: Add struct tags",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "done": "refactor.extract.toNewFile: Extract declarations to new file",
+   "status": "applied",
+   "changed": [
+    "notifier/alertmanager.go"
+   ],
+   "created": [
+    "notifier/alertmanagerlabels.go"
+   ],
+   "deleted": [],
+   "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -30,8 +30,6 @@\n type alertmanager interface {\n \turl() *url.URL\n }\n-\n-type alertmanagerLabels struct{ labels.Labels }\n \n const pathLabel = \"__alerts_path__\"\n \n--- /dev/null\n+++ b/notifier/alertmanagerlabels.go\n@@ -0,0 +1,20 @@\n+// Copyright The Prometheus Authors\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+// http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package notifier\n+\n+import (\n+\t\"github.com/prometheus/prometheus/model/labels\"\n+)\n+\n+type alertmanagerLabels struct{ labels.Labels }\n",
+   "millis": 506
+  },
+  {
+   "id": "move-func-package",
+   "refactoring": "move",
+   "what": "function to a new package (export + import)",
+   "file": "notifier/util.go",
+   "line": 42,
+   "actions": [
+    "source.addTest: Add test for labelsToOpenAPILabelSet",
+    "source.assembly: Browse amd64 assembly for labelsToOpenAPILabelSet",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 0
+  },
+  {
+   "id": "move-type-package",
+   "refactoring": "move",
+   "what": "type implementing an unexported interface method to another package",
+   "file": "notifier/alertmanager.go",
+   "line": 34,
+   "actions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 0
+  },
+  {
+   "id": "safe-delete-test-only",
+   "refactoring": "safe-delete",
+   "what": "exported function used only by its test",
+   "file": "util/strutil/strconv.go",
+   "line": 51,
+   "actions": [
+    "source.addTest: Add test for SanitizeFullLabelName",
+    "source.assembly: Browse amd64 assembly for SanitizeFullLabelName",
+    "source.doc: Browse documentation for func SanitizeFullLabelName",
+    "source.splitPackage: Split package \"strutil\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"strutil\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 49
+  },
+  {
+   "id": "safe-delete-used",
+   "refactoring": "safe-delete",
+   "what": "function used in production code",
+   "file": "notifier/alertmanager.go",
+   "line": 87,
+   "actions": [
+    "source.addTest: Add test for postPath",
+    "source.assembly: Browse amd64 assembly for postPath",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.toNewFile: Extract declarations to new file",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "implement-interface",
+   "refactoring": "generate",
+   "what": "implement a project interface (unexported method, foreign import)",
+   "file": "notifier/sendloop.go",
+   "line": 30,
+   "actions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-offered",
+   "message": "none of ['quickfix', 'refactor.rewrite'] offered at the place",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "generate-constructor",
+   "refactoring": "generate",
+   "what": "constructor of a struct with fields of other packages",
+   "file": "notifier/alert.go",
+   "line": 25,
+   "actions": [
+    "source.doc: Browse documentation for type Alert",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "generate-getters-setters",
+   "refactoring": "generate",
+   "what": "getters and setters of a struct with unexported fields",
+   "file": "notifier/alertmanagerset.go",
+   "line": 35,
+   "actions": [
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "generate-string",
+   "refactoring": "generate",
+   "what": "String() of a struct",
+   "file": "notifier/manager.go",
+   "line": 68,
+   "actions": [
+    "source.doc: Browse documentation for type Options",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 52
+  },
+  {
+   "id": "introduce-field",
+   "refactoring": "introduce-field",
+   "what": "expression of a method -> struct field initialized in the method",
+   "file": "notifier/sendloop.go",
+   "line": 235,
+   "actions": [
+    "source.addTest: Add test for sendAll",
+    "source.assembly: Browse amd64 assembly for sendAll",
+    "source.doc: Browse documentation for package notifier",
+    "source.freesymbols: Browse free symbols",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "refactor.extract.variable: Extract variable",
+    "refactor.rewrite.splitLines: Split arguments into separate lines",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "gopls has no such refactoring",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 0
+  },
+  {
+   "id": "convert-if-switch",
+   "refactoring": "intention",
+   "what": "if / else if chain -> switch",
+   "file": "model/exemplar/exemplar.go",
+   "line": 56,
+   "actions": [
+    "source.addTest: Add test for Compare",
+    "source.assembly: Browse amd64 assembly for Compare",
+    "source.doc: Browse documentation for func Compare",
+    "source.splitPackage: Split package \"exemplar\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"exemplar\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "no gopls code action for this; list recorded",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 49
+  },
+  {
+   "id": "convert-switch-if",
+   "refactoring": "intention",
+   "what": "switch with a default -> if / else",
+   "file": "notifier/sendloop.go",
+   "line": 218,
+   "actions": [
+    "source.addTest: Add test for sendAll",
+    "source.assembly: Browse amd64 assembly for sendAll",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "no gopls code action for this; list recorded",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "convert-var-to-short",
+   "refactoring": "intention",
+   "what": "var declaration without a value -> short variable declaration",
+   "file": "notifier/sendloop.go",
+   "line": 85,
+   "actions": [
+    "source.addTest: Add test for add",
+    "source.assembly: Browse amd64 assembly for add",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "no gopls code action for this; list recorded",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  },
+  {
+   "id": "convert-short-to-var",
+   "refactoring": "intention",
+   "what": "short variable declaration -> var declaration with the type",
+   "file": "notifier/alertmanager.go",
+   "line": 51,
+   "actions": [
+    "source.addTest: Add test for AlertmanagerFromGroup",
+    "source.assembly: Browse amd64 assembly for AlertmanagerFromGroup",
+    "source.doc: Browse documentation for package notifier",
+    "source.splitPackage: Split package \"notifier\"",
+    "source.toggleCompilerOptDetails: Show compiler optimization details for \"notifier\"",
+    "gopls.doc.features: Browse gopls feature documentation"
+   ],
+   "status": "not-supported",
+   "message": "no gopls code action for this; list recorded",
+   "changed": [],
+   "created": [],
+   "deleted": [],
+   "diff": "",
+   "millis": 1
+  }
+ ]
+}

@@ -1,0 +1,7138 @@
+{
+  "attempts": [
+    {
+      "site": 281,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1007,
+      "ident": "t",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 1,
+      "size": 240,
+      "millis": 6576,
+      "top": [
+        "t",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 282,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1015,
+      "ident": "Unlock",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 2,
+      "size": 6,
+      "millis": 278,
+      "top": [
+        "Lock",
+        "Unlock",
+        "TryLock",
+        ".p",
+        ".par"
+      ]
+    },
+    {
+      "site": 282,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1015,
+      "ident": "Unlock",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 131,
+      "top": [
+        "Unlock"
+      ]
+    },
+    {
+      "site": 282,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1015,
+      "ident": "Unlock",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 115,
+      "top": [
+        "Unlock"
+      ]
+    },
+    {
+      "site": 283,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1375,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 2,
+      "size": 244,
+      "millis": 259,
+      "top": [
+        "ewmaWeight",
+        "tSample",
+        "tExemplar",
+        "tFloatHistogram",
+        "tHistogram"
+      ]
+    },
+    {
+      "site": 283,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1375,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 678,
+      "millis": 3845,
+      "top": [
+        "tSample",
+        "tExemplar",
+        "tFloatHistogram",
+        "tHistogram",
+        "tMetadata"
+      ]
+    },
+    {
+      "site": 283,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1375,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 15,
+      "millis": 386,
+      "top": [
+        "tSample",
+        "tsdb.DefaultSamplesPerChunk",
+        "testrecord.GenTestRefSamplesCase",
+        "testrecord.Realistic1000WithConstSTSamples",
+        "testrecord.Realistic1000WithVariableSTSamples"
+      ]
+    },
+    {
+      "site": 284,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1407,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 101,
+      "size": 117,
+      "millis": 180,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 284,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1407,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 3,
+      "size": 356,
+      "millis": 240,
+      "top": [
+        "func",
+        "fmt",
+        "float64",
+        "float32",
+        "filter"
+      ]
+    },
+    {
+      "site": 284,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1407,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 21,
+      "millis": 158,
+      "top": [
+        "float64",
+        "float32",
+        "floats",
+        "float16",
+        "floatingips"
+      ]
+    },
+    {
+      "site": 285,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1627,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 0,
+      "rank": 223,
+      "size": 257,
+      "millis": 362,
+      "top": [
+        "pBuf",
+        "pendingData",
+        "symbolTable",
+        "s",
+        "droppedSamples"
+      ]
+    },
+    {
+      "site": 285,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1627,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 1,
+      "rank": 9,
+      "size": 371,
+      "millis": 160,
+      "top": [
+        "func",
+        "filterExtLabelsFromMatchers",
+        "filter",
+        "fi",
+        "fil"
+      ]
+    },
+    {
+      "site": 285,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1627,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 3,
+      "rank": 1,
+      "size": 50,
+      "millis": 323,
+      "top": [
+        "float64",
+        "float32",
+        "floats",
+        "float16",
+        "floatingips"
+      ]
+    },
+    {
+      "site": 286,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1676,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 2,
+      "size": 248,
+      "millis": 189,
+      "top": [
+        "ewmaWeight",
+        "tSample",
+        "tExemplar",
+        "tFloatHistogram",
+        "tHistogram"
+      ]
+    },
+    {
+      "site": 286,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1676,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 681,
+      "millis": 236,
+      "top": [
+        "tSample",
+        "tExemplar",
+        "tFloatHistogram",
+        "tHistogram",
+        "tMetadata"
+      ]
+    },
+    {
+      "site": 286,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1676,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 15,
+      "millis": 121,
+      "top": [
+        "tSample",
+        "tsdb.DefaultSamplesPerChunk",
+        "testrecord.GenTestRefSamplesCase",
+        "testrecord.Realistic1000WithConstSTSamples",
+        "testrecord.Realistic1000WithVariableSTSamples"
+      ]
+    },
+    {
+      "site": 287,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1682,
+      "ident": "tExemplar",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 5,
+      "size": 248,
+      "millis": 130,
+      "top": [
+        "tSample",
+        "ewmaWeight",
+        "tFloatHistogram",
+        "tHistogram",
+        "tExemplar"
+      ]
+    },
+    {
+      "site": 287,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1682,
+      "ident": "tExemplar",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 4,
+      "size": 681,
+      "millis": 217,
+      "top": [
+        "tSample",
+        "tFloatHistogram",
+        "tHistogram",
+        "tExemplar",
+        "tMetadata"
+      ]
+    },
+    {
+      "site": 287,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1682,
+      "ident": "tExemplar",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 19,
+      "millis": 314,
+      "top": [
+        "tExemplar",
+        "template.NewTemplateExpander",
+        "d.floatHistogram.TestExpression",
+        "strutil.TableLinkForExpression",
+        "sendBatchContext"
+      ]
+    },
+    {
+      "site": 288,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1692,
+      "ident": "tFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 5,
+      "size": 248,
+      "millis": 117,
+      "top": [
+        "tSample",
+        "ewmaWeight",
+        "tExemplar",
+        "tHistogram",
+        "tFloatHistogram"
+      ]
+    },
+    {
+      "site": 288,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1692,
+      "ident": "tFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 4,
+      "size": 681,
+      "millis": 155,
+      "top": [
+        "tSample",
+        "tExemplar",
+        "tHistogram",
+        "tFloatHistogram",
+        "tMetadata"
+      ]
+    },
+    {
+      "site": 288,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1692,
+      "ident": "tFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 12,
+      "millis": 101,
+      "top": [
+        "tFloatHistogram",
+        "d.histogram.ToFloat",
+        "tsdbutil.GenerateTestFloatHistogram",
+        "tsdbutil.GenerateTestFloatHistograms",
+        "tsdbutil.GenerateTestCustomBucketsFloatHistograms"
+      ]
+    },
+    {
+      "site": 289,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1716,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 72,
+      "size": 117,
+      "millis": 137,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 289,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1716,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 6,
+      "size": 501,
+      "millis": 171,
+      "top": [
+        "entry",
+        "en",
+        "ewmaRate",
+        "errSeriesSet",
+        "errors"
+      ]
+    },
+    {
+      "site": 289,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1716,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 3,
+      "size": 28,
+      "millis": 164,
+      "top": [
+        "errSeriesSet",
+        "errors",
+        "error",
+        "errcheck",
+        "errcheck"
+      ]
+    },
+    {
+      "site": 290,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1773,
+      "ident": "histogramCount",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 128,
+      "top": [
+        "histogramCount"
+      ]
+    },
+    {
+      "site": 290,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1773,
+      "ident": "histogramCount",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 5,
+      "millis": 75,
+      "top": [
+        "histogramCount",
+        "chan",
+        "chan",
+        "switch",
+        "switch"
+      ]
+    },
+    {
+      "site": 290,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1773,
+      "ident": "histogramCount",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 55,
+      "top": [
+        "histogramCount"
+      ]
+    },
+    {
+      "site": 291,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1816,
+      "ident": "ctx",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 1,
+      "size": 9,
+      "millis": 102,
+      "top": [
+        "ctx",
+        "sampleCount",
+        "exemplarCount",
+        "histogramCount",
+        "metadataCount"
+      ]
+    },
+    {
+      "site": 291,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1816,
+      "ident": "ctx",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 6,
+      "millis": 97,
+      "top": [
+        "ctx",
+        "sampleCount",
+        "exemplarCount",
+        "histogramCount",
+        "metadataCount"
+      ]
+    },
+    {
+      "site": 292,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1903,
+      "ident": "SampleAgeLimit",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 4,
+      "size": 13,
+      "millis": 132,
+      "top": [
+        "MaxSamplesPerSend",
+        "MaxShards",
+        "MaxBackoff",
+        "SampleAgeLimit",
+        "BatchSendDeadline"
+      ]
+    },
+    {
+      "site": 292,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1903,
+      "ident": "SampleAgeLimit",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 5,
+      "millis": 96,
+      "top": [
+        "SampleAgeLimit",
+        "MaxSamplesPerSend",
+        "MaxShards",
+        "BatchSendDeadline",
+        "MinShards"
+      ]
+    },
+    {
+      "site": 292,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1903,
+      "ident": "SampleAgeLimit",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 2,
+      "millis": 75,
+      "top": [
+        "SampleAgeLimit",
+        "MaxSamplesPerSend"
+      ]
+    },
+    {
+      "site": 293,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1973,
+      "ident": "int",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 4,
+      "size": 117,
+      "millis": 128,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 293,
+      "file": "storage/remote/queue_manager.go",
+      "line": 1973,
+      "ident": "int",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 2,
+      "size": 334,
+      "millis": 149,
+      "top": [
+        "interface",
+        "int",
+        "injectHeadersRoundTripper",
+        "int64",
+        "int32"
+      ]
+    },
+    {
+      "site": 294,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2013,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 2,
+      "size": 252,
+      "millis": 327,
+      "top": [
+        "ewmaWeight",
+        "tSample",
+        "tExemplar",
+        "tFloatHistogram",
+        "tHistogram"
+      ]
+    },
+    {
+      "site": 294,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2013,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 685,
+      "millis": 136,
+      "top": [
+        "tSample",
+        "tExemplar",
+        "tFloatHistogram",
+        "tHistogram",
+        "tMetadata"
+      ]
+    },
+    {
+      "site": 294,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2013,
+      "ident": "tSample",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 15,
+      "millis": 105,
+      "top": [
+        "tSample",
+        "tsdb.DefaultSamplesPerChunk",
+        "testrecord.GenTestRefSamplesCase",
+        "testrecord.Realistic1000WithConstSTSamples",
+        "testrecord.Realistic1000WithVariableSTSamples"
+      ]
+    },
+    {
+      "site": 295,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2032,
+      "ident": "nPendingHistograms",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 3,
+      "size": 252,
+      "millis": 159,
+      "top": [
+        "d",
+        "nPending",
+        "nPendingHistograms",
+        "nPendingExemplars",
+        "nPendingSamples"
+      ]
+    },
+    {
+      "site": 295,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2032,
+      "ident": "nPendingHistograms",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 2,
+      "size": 299,
+      "millis": 149,
+      "top": [
+        "nPending",
+        "nPendingHistograms",
+        "nPendingExemplars",
+        "nPendingSamples",
+        "nPendingMetadata"
+      ]
+    },
+    {
+      "site": 295,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2032,
+      "ident": "nPendingHistograms",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 2,
+      "size": 5,
+      "millis": 131,
+      "top": [
+        "nPending",
+        "nPendingHistograms",
+        "nPendingExemplars",
+        "nPendingSamples",
+        "nPendingMetadata"
+      ]
+    },
+    {
+      "site": 296,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2139,
+      "ident": "stats",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 1,
+      "size": 242,
+      "millis": 105,
+      "top": [
+        "stats",
+        "timeSeries",
+        "time",
+        "ts",
+        "filter"
+      ]
+    },
+    {
+      "site": 296,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2139,
+      "ident": "stats",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 8,
+      "size": 862,
+      "millis": 151,
+      "top": [
+        "make",
+        "sl",
+        "select",
+        "se",
+        "switch"
+      ]
+    },
+    {
+      "site": 296,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2139,
+      "ident": "stats",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 75,
+      "millis": 313,
+      "top": [
+        "stats",
+        "stat",
+        "startTimeCallback",
+        "state",
+        "status"
+      ]
+    },
+    {
+      "site": 297,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2178,
+      "ident": "byte",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 100,
+      "size": 117,
+      "millis": 115,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 297,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2178,
+      "ident": "byte",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 19,
+      "size": 311,
+      "millis": 122,
+      "top": [
+        "batchMetricsUpdater",
+        "batch",
+        "batch",
+        "batch",
+        "batch"
+      ]
+    },
+    {
+      "site": 297,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2178,
+      "ident": "byte",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 8,
+      "millis": 194,
+      "top": [
+        "byte",
+        "bytes",
+        "bytebufferpool",
+        "bytesource",
+        "bytestream"
+      ]
+    },
+    {
+      "site": 298,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2185,
+      "ident": "Request",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 5,
+      "size": 14,
+      "millis": 251,
+      "top": [
+        "Histogram",
+        "Metadata",
+        "Sample",
+        "TimeSeries",
+        "Request"
+      ]
+    },
+    {
+      "site": 298,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2185,
+      "ident": "Request",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 10,
+      "millis": 68,
+      "top": [
+        "Request",
+        "Histogram",
+        "TimeSeries",
+        "Exemplar",
+        "Metadata_MetricType"
+      ]
+    },
+    {
+      "site": 298,
+      "file": "storage/remote/queue_manager.go",
+      "line": 2185,
+      "ident": "Request",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 81,
+      "top": [
+        "Request"
+      ]
+    },
+    {
+      "site": 299,
+      "file": "tsdb/compact.go",
+      "line": 81,
+      "ident": "CompactorMetrics",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 40,
+      "size": 177,
+      "millis": 249,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 299,
+      "file": "tsdb/compact.go",
+      "line": 81,
+      "ident": "CompactorMetrics",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 4,
+      "size": 89,
+      "millis": 248,
+      "top": [
+        "CircularExemplarStorage",
+        "ChunkReader",
+        "ChunkWriter",
+        "CompactorMetrics",
+        "Compactor"
+      ]
+    },
+    {
+      "site": 299,
+      "file": "tsdb/compact.go",
+      "line": 81,
+      "ident": "CompactorMetrics",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 12,
+      "millis": 197,
+      "top": [
+        "CompactorMetrics",
+        "Compactor",
+        "httputil.CompressionHandler",
+        "complex128",
+        "complex64"
+      ]
+    },
+    {
+      "site": 300,
+      "file": "tsdb/compact.go",
+      "line": 82,
+      "ident": "slog",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 176,
+      "millis": 113,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 300,
+      "file": "tsdb/compact.go",
+      "line": 82,
+      "ident": "slog",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 40,
+      "size": 815,
+      "millis": 238,
+      "top": [
+        "struct",
+        "sample",
+        "sampleType",
+        "seriesRefs",
+        "se"
+      ]
+    },
+    {
+      "site": 300,
+      "file": "tsdb/compact.go",
+      "line": 82,
+      "ident": "slog",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 1,
+      "size": 11,
+      "millis": 184,
+      "top": [
+        "slog",
+        "slog",
+        "slog",
+        "slog",
+        "slogapp"
+      ]
+    },
+    {
+      "site": 301,
+      "file": "tsdb/compact.go",
+      "line": 127,
+      "ident": "time",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 372,
+      "millis": 595,
+      "top": [
+        "m",
+        "r",
+        "chan",
+        "func",
+        "interface"
+      ]
+    },
+    {
+      "site": 301,
+      "file": "tsdb/compact.go",
+      "line": 127,
+      "ident": "time",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 192,
+      "size": 759,
+      "millis": 195,
+      "top": [
+        "testValue",
+        "te",
+        "test",
+        "test",
+        "test"
+      ]
+    },
+    {
+      "site": 301,
+      "file": "tsdb/compact.go",
+      "line": 127,
+      "ident": "time",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 1,
+      "size": 114,
+      "millis": 324,
+      "top": [
+        "time",
+        "time",
+        "timestamp.Time",
+        "timestamp",
+        "timestamp"
+      ]
+    },
+    {
+      "site": 302,
+      "file": "tsdb/compact.go",
+      "line": 185,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 159,
+      "size": 177,
+      "millis": 137,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 302,
+      "file": "tsdb/compact.go",
+      "line": 185,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 12,
+      "size": 339,
+      "millis": 110,
+      "top": [
+        "blockBaseQuerier",
+        "block",
+        "blockIndexReader",
+        "blockBaseSeriesSet",
+        "blockQuerier"
+      ]
+    },
+    {
+      "site": 302,
+      "file": "tsdb/compact.go",
+      "line": 185,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 10,
+      "millis": 184,
+      "top": [
+        "bool",
+        "booking",
+        "books",
+        "bools",
+        "bootstrap"
+      ]
+    },
+    {
+      "site": 303,
+      "file": "tsdb/compact.go",
+      "line": 562,
+      "ident": "MaxTime",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 1,
+      "size": 11,
+      "millis": 101,
+      "top": [
+        "MaxTime",
+        "MinTime",
+        "Compaction",
+        "ULID",
+        "Stats"
+      ]
+    },
+    {
+      "site": 303,
+      "file": "tsdb/compact.go",
+      "line": 562,
+      "ident": "MaxTime",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 46,
+      "top": [
+        "MaxTime",
+        "MinTime",
+        "Compaction"
+      ]
+    },
+    {
+      "site": 303,
+      "file": "tsdb/compact.go",
+      "line": 562,
+      "ident": "MaxTime",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 37,
+      "top": [
+        "MaxTime"
+      ]
+    },
+    {
+      "site": 304,
+      "file": "tsdb/compact.go",
+      "line": 588,
+      "ident": "Block",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 8,
+      "size": 177,
+      "millis": 103,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 304,
+      "file": "tsdb/compact.go",
+      "line": 588,
+      "ident": "Block",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 1,
+      "size": 43,
+      "millis": 125,
+      "top": [
+        "Block",
+        "BlockMeta",
+        "BlockReader",
+        "BlockMetaCompaction",
+        "BlockStats"
+      ]
+    },
+    {
+      "site": 304,
+      "file": "tsdb/compact.go",
+      "line": 588,
+      "ident": "Block",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 23,
+      "millis": 147,
+      "top": [
+        "Block",
+        "BlockMeta",
+        "BlockReader",
+        "BlockMetaCompaction",
+        "BlockStats"
+      ]
+    },
+    {
+      "site": 305,
+      "file": "tsdb/compact.go",
+      "line": 655,
+      "ident": "fmt",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 382,
+      "millis": 156,
+      "top": [
+        "blocks",
+        "err",
+        "meta",
+        "metas",
+        "start"
+      ]
+    },
+    {
+      "site": 305,
+      "file": "tsdb/compact.go",
+      "line": 655,
+      "ident": "fmt",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 18,
+      "size": 418,
+      "millis": 173,
+      "top": [
+        "func",
+        "floatHistogram",
+        "float",
+        "filepath",
+        "fi"
+      ]
+    },
+    {
+      "site": 306,
+      "file": "tsdb/compact.go",
+      "line": 692,
+      "ident": "ULID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 2,
+      "size": 4,
+      "millis": 124,
+      "top": [
+        "Compaction",
+        "ULID",
+        "Stats",
+        "Version"
+      ]
+    },
+    {
+      "site": 306,
+      "file": "tsdb/compact.go",
+      "line": 692,
+      "ident": "ULID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 34,
+      "top": [
+        "ULID"
+      ]
+    },
+    {
+      "site": 306,
+      "file": "tsdb/compact.go",
+      "line": 692,
+      "ident": "ULID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 30,
+      "top": [
+        "ULID"
+      ]
+    },
+    {
+      "site": 307,
+      "file": "tsdb/compact.go",
+      "line": 701,
+      "ident": "ULID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 21,
+      "top": [
+        "ULID"
+      ]
+    },
+    {
+      "site": 307,
+      "file": "tsdb/compact.go",
+      "line": 701,
+      "ident": "ULID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 26,
+      "top": [
+        "ULID"
+      ]
+    },
+    {
+      "site": 307,
+      "file": "tsdb/compact.go",
+      "line": 701,
+      "ident": "ULID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 24,
+      "top": [
+        "ULID"
+      ]
+    },
+    {
+      "site": 308,
+      "file": "tsdb/compact.go",
+      "line": 798,
+      "ident": "trange",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 212,
+      "top": [
+        "trange"
+      ]
+    },
+    {
+      "site": 308,
+      "file": "tsdb/compact.go",
+      "line": 798,
+      "ident": "trange",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 4,
+      "millis": 106,
+      "top": [
+        "trange",
+        "select",
+        "switch",
+        "switch"
+      ]
+    },
+    {
+      "site": 308,
+      "file": "tsdb/compact.go",
+      "line": 798,
+      "ident": "trange",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 30,
+      "top": [
+        "trange"
+      ]
+    },
+    {
+      "site": 309,
+      "file": "tsdb/compact.go",
+      "line": 837,
+      "ident": "Errorf",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 2,
+      "size": 29,
+      "millis": 55,
+      "top": [
+        "Append",
+        "Errorf",
+        "Sprintf",
+        "Sprint",
+        "State"
+      ]
+    },
+    {
+      "site": 309,
+      "file": "tsdb/compact.go",
+      "line": 837,
+      "ident": "Errorf",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 10,
+      "millis": 42,
+      "top": [
+        "Errorf",
+        "Append",
+        "State",
+        "ScanState",
+        "Appendf"
+      ]
+    },
+    {
+      "site": 309,
+      "file": "tsdb/compact.go",
+      "line": 837,
+      "ident": "Errorf",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 42,
+      "top": [
+        "Errorf"
+      ]
+    },
+    {
+      "site": 310,
+      "file": "tsdb/compact.go",
+      "line": 845,
+      "ident": "fileutil",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 382,
+      "millis": 249,
+      "top": [
+        "dir",
+        "err",
+        "errs",
+        "closers",
+        "c"
+      ]
+    },
+    {
+      "site": 310,
+      "file": "tsdb/compact.go",
+      "line": 845,
+      "ident": "fileutil",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 19,
+      "size": 418,
+      "millis": 220,
+      "top": [
+        "func",
+        "floatHistogram",
+        "float",
+        "filepath",
+        "fi"
+      ]
+    },
+    {
+      "site": 310,
+      "file": "tsdb/compact.go",
+      "line": 845,
+      "ident": "fileutil",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 10,
+      "size": 66,
+      "millis": 255,
+      "top": [
+        "fil",
+        "filepath",
+        "file",
+        "file",
+        "file"
+      ]
+    },
+    {
+      "site": 311,
+      "file": "tsdb/compact.go",
+      "line": 895,
+      "ident": "ChunkWriter",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 47,
+      "size": 177,
+      "millis": 95,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 311,
+      "file": "tsdb/compact.go",
+      "line": 895,
+      "ident": "ChunkWriter",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 5,
+      "size": 89,
+      "millis": 76,
+      "top": [
+        "CircularExemplarStorage",
+        "ChunkReader",
+        "CompactorMetrics",
+        "Compactor",
+        "ChunkWriter"
+      ]
+    },
+    {
+      "site": 311,
+      "file": "tsdb/compact.go",
+      "line": 895,
+      "ident": "ChunkWriter",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 2,
+      "size": 34,
+      "millis": 86,
+      "top": [
+        "ChunkReader",
+        "ChunkWriter",
+        "ChunkSnapshotStats",
+        "ChunkReaderWithCopy",
+        "fuzzing.ChunkFuzzSeed"
+      ]
+    },
+    {
+      "site": 312,
+      "file": "tsdb/compact.go",
+      "line": 935,
+      "ident": "err",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 2,
+      "size": 390,
+      "millis": 282,
+      "top": [
+        "b",
+        "err",
+        "i",
+        "closers",
+        "close"
+      ]
+    },
+    {
+      "site": 312,
+      "file": "tsdb/compact.go",
+      "line": 935,
+      "ident": "err",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 737,
+      "millis": 108,
+      "top": [
+        "err",
+        "errLoadWbl",
+        "exemplarWithSeriesRef",
+        "exemplar",
+        "exemplar"
+      ]
+    },
+    {
+      "site": 313,
+      "file": "tsdb/compact.go",
+      "line": 984,
+      "ident": "set",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 6,
+      "size": 391,
+      "millis": 119,
+      "top": [
+        "chks",
+        "ref",
+        "closers",
+        "close",
+        "symbols"
+      ]
+    },
+    {
+      "site": 313,
+      "file": "tsdb/compact.go",
+      "line": 984,
+      "ident": "set",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 10,
+      "size": 944,
+      "millis": 126,
+      "top": [
+        "for",
+        "se",
+        "make",
+        "sl",
+        "select"
+      ]
+    },
+    {
+      "site": 314,
+      "file": "tsdb/compact.go",
+      "line": 995,
+      "ident": "chksIter",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 392,
+      "millis": 162,
+      "top": [
+        "chksIter",
+        "chks",
+        "nil",
+        "ref",
+        "s"
+      ]
+    },
+    {
+      "site": 314,
+      "file": "tsdb/compact.go",
+      "line": 995,
+      "ident": "chksIter",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 903,
+      "millis": 103,
+      "top": [
+        "chksIter",
+        "chks",
+        "closers",
+        "close",
+        "ctx"
+      ]
+    },
+    {
+      "site": 314,
+      "file": "tsdb/compact.go",
+      "line": 995,
+      "ident": "chksIter",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 1,
+      "size": 9,
+      "millis": 54,
+      "top": [
+        "chksIter",
+        "chks",
+        "chksIter.At().Chunk",
+        "chksIter.At().MaxTime",
+        "chksIter.At().MinTime"
+      ]
+    },
+    {
+      "site": 315,
+      "file": "tsdb/head_append.go",
+      "line": 140,
+      "ident": "runtime",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 370,
+      "millis": 215,
+      "top": [
+        "antiDeadlockTimeout",
+        "h",
+        "t",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 315,
+      "file": "tsdb/head_append.go",
+      "line": 140,
+      "ident": "runtime",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 41,
+      "size": 644,
+      "millis": 274,
+      "top": [
+        "ok",
+        "requireEqualSeries",
+        "require",
+        "require",
+        "require"
+      ]
+    },
+    {
+      "site": 315,
+      "file": "tsdb/head_append.go",
+      "line": 140,
+      "ident": "runtime",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 7,
+      "size": 93,
+      "millis": 244,
+      "top": [
+        "run",
+        "run",
+        "run",
+        "run",
+        "run"
+      ]
+    },
+    {
+      "site": 316,
+      "file": "tsdb/head_append.go",
+      "line": 172,
+      "ident": "context",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 173,
+      "millis": 180,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 316,
+      "file": "tsdb/head_append.go",
+      "line": 172,
+      "ident": "context",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 20,
+      "size": 783,
+      "millis": 166,
+      "top": [
+        "chan",
+        "cha",
+        "chunkOpts",
+        "circularBufferEntry",
+        "chunkSnapshotRecord"
+      ]
+    },
+    {
+      "site": 316,
+      "file": "tsdb/head_append.go",
+      "line": 172,
+      "ident": "context",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 1,
+      "size": 165,
+      "millis": 118,
+      "top": [
+        "context",
+        "context",
+        "context",
+        "context",
+        "context"
+      ]
+    },
+    {
+      "site": 317,
+      "file": "tsdb/head_append.go",
+      "line": 174,
+      "ident": "Inc",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 2,
+      "size": 9,
+      "millis": 178,
+      "top": [
+        "Add",
+        "Inc",
+        "Write",
+        "Collect",
+        "Desc"
+      ]
+    },
+    {
+      "site": 317,
+      "file": "tsdb/head_append.go",
+      "line": 174,
+      "ident": "Inc",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 68,
+      "top": [
+        "Inc",
+        "Write",
+        "Describe"
+      ]
+    },
+    {
+      "site": 318,
+      "file": "tsdb/head_append.go",
+      "line": 198,
+      "ident": "appendID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 3,
+      "millis": 88,
+      "top": [
+        "appendID",
+        "batches",
+        "closed"
+      ]
+    },
+    {
+      "site": 318,
+      "file": "tsdb/head_append.go",
+      "line": 198,
+      "ident": "appendID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 6,
+      "millis": 197,
+      "top": [
+        "appendID",
+        "chan",
+        "chan",
+        "map",
+        "make"
+      ]
+    },
+    {
+      "site": 318,
+      "file": "tsdb/head_append.go",
+      "line": 198,
+      "ident": "appendID",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 33,
+      "top": [
+        "appendID"
+      ]
+    },
+    {
+      "site": 319,
+      "file": "tsdb/head_append.go",
+      "line": 331,
+      "ident": "chunks",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 173,
+      "millis": 105,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 319,
+      "file": "tsdb/head_append.go",
+      "line": 331,
+      "ident": "chunks",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 16,
+      "size": 778,
+      "millis": 160,
+      "top": [
+        "chan",
+        "cha",
+        "chunkOpts",
+        "circularBufferEntry",
+        "chunkSnapshotRecord"
+      ]
+    },
+    {
+      "site": 319,
+      "file": "tsdb/head_append.go",
+      "line": 331,
+      "ident": "chunks",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 7,
+      "size": 40,
+      "millis": 104,
+      "top": [
+        "chunkOpts",
+        "chunkSnapshotRecord",
+        "chunkSeriesEntry",
+        "chunkCacheEnabler",
+        "chunkenc"
+      ]
+    },
+    {
+      "site": 320,
+      "file": "tsdb/head_append.go",
+      "line": 386,
+      "ident": "memSeries",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 12,
+      "size": 174,
+      "millis": 185,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 320,
+      "file": "tsdb/head_append.go",
+      "line": 386,
+      "ident": "memSeries",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 7,
+      "size": 415,
+      "millis": 170,
+      "top": [
+        "map",
+        "memChunk",
+        "mem",
+        "mem",
+        "mem"
+      ]
+    },
+    {
+      "site": 320,
+      "file": "tsdb/head_append.go",
+      "line": 386,
+      "ident": "memSeries",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 6,
+      "size": 29,
+      "millis": 150,
+      "top": [
+        "mem",
+        "mem",
+        "mem",
+        "mem",
+        "memChunk"
+      ]
+    },
+    {
+      "site": 321,
+      "file": "tsdb/head_append.go",
+      "line": 406,
+      "ident": "h",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 2,
+      "size": 370,
+      "millis": 215,
+      "top": [
+        "b",
+        "h",
+        "chan",
+        "func",
+        "interface"
+      ]
+    },
+    {
+      "site": 322,
+      "file": "tsdb/head_append.go",
+      "line": 443,
+      "ident": "SeriesRef",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 7,
+      "size": 52,
+      "millis": 170,
+      "top": [
+        "AOptions",
+        "Appender",
+        "AppenderV2",
+        "Labels",
+        "Querier"
+      ]
+    },
+    {
+      "site": 322,
+      "file": "tsdb/head_append.go",
+      "line": 443,
+      "ident": "SeriesRef",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 2,
+      "size": 30,
+      "millis": 141,
+      "top": [
+        "Series",
+        "SeriesRef",
+        "Samples",
+        "SelectHints",
+        "SearchHints"
+      ]
+    },
+    {
+      "site": 322,
+      "file": "tsdb/head_append.go",
+      "line": 443,
+      "ident": "SeriesRef",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 2,
+      "size": 13,
+      "millis": 114,
+      "top": [
+        "Series",
+        "SeriesRef",
+        "SeriesSet",
+        "SeriesEntry",
+        "SearchResult"
+      ]
+    },
+    {
+      "site": 323,
+      "file": "tsdb/head_append.go",
+      "line": 474,
+      "ident": "stFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 9,
+      "size": 374,
+      "millis": 348,
+      "top": [
+        "oooChunkIDMask",
+        "headChunksBufMaxCap",
+        "stCustomBucketFloatHistogram",
+        "s",
+        "stCustomBucketHistogram"
+      ]
+    },
+    {
+      "site": 323,
+      "file": "tsdb/head_append.go",
+      "line": 474,
+      "ident": "stFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 6,
+      "size": 934,
+      "millis": 420,
+      "top": [
+        "s",
+        "stCustomBucketFloatHistogram",
+        "stCustomBucketHistogram",
+        "stHistogram",
+        "stFloat"
+      ]
+    },
+    {
+      "site": 323,
+      "file": "tsdb/head_append.go",
+      "line": 474,
+      "ident": "stFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 47,
+      "millis": 120,
+      "top": [
+        "stFloat",
+        "stFloatHistogram",
+        "stCustomBucketFloatHistogram",
+        "rules.StateFiring",
+        "seriesStateFilename"
+      ]
+    },
+    {
+      "site": 324,
+      "file": "tsdb/head_append.go",
+      "line": 474,
+      "ident": "stCustomBucketFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 9,
+      "size": 374,
+      "millis": 76,
+      "top": [
+        "oooChunkIDMask",
+        "headChunksBufMaxCap",
+        "stCustomBucketHistogram",
+        "s",
+        "stFloatHistogram"
+      ]
+    },
+    {
+      "site": 324,
+      "file": "tsdb/head_append.go",
+      "line": 474,
+      "ident": "stCustomBucketFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 6,
+      "size": 934,
+      "millis": 158,
+      "top": [
+        "s",
+        "stCustomBucketHistogram",
+        "stFloatHistogram",
+        "stFloat",
+        "stHistogram"
+      ]
+    },
+    {
+      "site": 324,
+      "file": "tsdb/head_append.go",
+      "line": 474,
+      "ident": "stCustomBucketFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 21,
+      "millis": 87,
+      "top": [
+        "stCustomBucketHistogram",
+        "stCustomBucketFloatHistogram",
+        "config.StorageConfig",
+        "remote.StreamChunkedReadResponses",
+        "LastChunkSnapshot"
+      ]
+    },
+    {
+      "site": 325,
+      "file": "tsdb/head_append.go",
+      "line": 631,
+      "ident": "clear",
+      "kind": "statement-start",
+      "sub": "builtin",
+      "prefix": 0,
+      "rank": 352,
+      "size": 373,
+      "millis": 82,
+      "top": [
+        "b",
+        "h",
+        "a",
+        "s",
+        "st"
+      ]
+    },
+    {
+      "site": 325,
+      "file": "tsdb/head_append.go",
+      "line": 631,
+      "ident": "clear",
+      "kind": "statement-start",
+      "sub": "builtin",
+      "prefix": 1,
+      "rank": 44,
+      "size": 900,
+      "millis": 102,
+      "top": [
+        "chan",
+        "cha",
+        "chan",
+        "chunkDir",
+        "chunkOpts"
+      ]
+    },
+    {
+      "site": 325,
+      "file": "tsdb/head_append.go",
+      "line": 631,
+      "ident": "clear",
+      "kind": "statement-start",
+      "sub": "builtin",
+      "prefix": 3,
+      "rank": 1,
+      "size": 11,
+      "millis": 66,
+      "top": [
+        "clear",
+        "cleanhttp",
+        "cleanrooms",
+        "cleanroomsiface",
+        "cleanroomsml"
+      ]
+    },
+    {
+      "site": 326,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 11,
+      "size": 373,
+      "millis": 60,
+      "top": [
+        "st",
+        "s",
+        "oooChunkIDMask",
+        "headChunksBufMaxCap",
+        "h"
+      ]
+    },
+    {
+      "site": 326,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 7,
+      "size": 934,
+      "millis": 100,
+      "top": [
+        "s",
+        "st",
+        "stCustomBucketFloatHistogram",
+        "stCustomBucketHistogram",
+        "stHistogram"
+      ]
+    },
+    {
+      "site": 326,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 10,
+      "millis": 61,
+      "top": [
+        "stFloat",
+        "stFloatHistogram",
+        "stCustomBucketFloatHistogram",
+        "rules.StateFiring",
+        "seriesStateFilename"
+      ]
+    },
+    {
+      "site": 327,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stCustomBucketHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 11,
+      "size": 373,
+      "millis": 69,
+      "top": [
+        "st",
+        "s",
+        "oooChunkIDMask",
+        "headChunksBufMaxCap",
+        "h"
+      ]
+    },
+    {
+      "site": 327,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stCustomBucketHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 7,
+      "size": 934,
+      "millis": 105,
+      "top": [
+        "s",
+        "st",
+        "stCustomBucketFloatHistogram",
+        "stFloatHistogram",
+        "stFloat"
+      ]
+    },
+    {
+      "site": 327,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stCustomBucketHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 23,
+      "millis": 99,
+      "top": [
+        "stCustomBucketFloatHistogram",
+        "stCustomBucketHistogram",
+        "config.StorageConfig",
+        "remote.StreamChunkedReadResponses",
+        "LastChunkSnapshot"
+      ]
+    },
+    {
+      "site": 328,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stCustomBucketFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 11,
+      "size": 373,
+      "millis": 60,
+      "top": [
+        "st",
+        "s",
+        "oooChunkIDMask",
+        "headChunksBufMaxCap",
+        "h"
+      ]
+    },
+    {
+      "site": 328,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stCustomBucketFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 7,
+      "size": 934,
+      "millis": 102,
+      "top": [
+        "s",
+        "st",
+        "stCustomBucketHistogram",
+        "stFloatHistogram",
+        "stFloat"
+      ]
+    },
+    {
+      "site": 328,
+      "file": "tsdb/head_append.go",
+      "line": 633,
+      "ident": "stCustomBucketFloatHistogram",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 23,
+      "millis": 57,
+      "top": [
+        "stCustomBucketHistogram",
+        "stCustomBucketFloatHistogram",
+        "config.StorageConfig",
+        "remote.StreamChunkedReadResponses",
+        "LastChunkSnapshot"
+      ]
+    },
+    {
+      "site": 329,
+      "file": "tsdb/head_append.go",
+      "line": 670,
+      "ident": "lastBatch",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 1,
+      "size": 376,
+      "millis": 61,
+      "top": [
+        "lastBatch",
+        "nil",
+        "h",
+        "ok",
+        "newBatch"
+      ]
+    },
+    {
+      "site": 329,
+      "file": "tsdb/head_append.go",
+      "line": 670,
+      "ident": "lastBatch",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 448,
+      "millis": 58,
+      "top": [
+        "lastBatch",
+        "labelValuesWithMatchers",
+        "label",
+        "labelNamesWithMatchers",
+        "lessByMinTimeAndMinRef"
+      ]
+    },
+    {
+      "site": 329,
+      "file": "tsdb/head_append.go",
+      "line": 670,
+      "ident": "lastBatch",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 3,
+      "rank": 1,
+      "size": 57,
+      "millis": 67,
+      "top": [
+        "lastBatch",
+        "a.head.lastSeriesID",
+        "h.exemplarMetrics.lastExemplarsTs",
+        "a.head.lastMemoryTruncationTime",
+        "a.head.lastWALTruncationTime"
+      ]
+    },
+    {
+      "site": 330,
+      "file": "tsdb/head_append.go",
+      "line": 781,
+      "ident": "memSeries",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 6,
+      "size": 132,
+      "millis": 65,
+      "top": [
+        "Block",
+        "BlockMeta",
+        "DB",
+        "Head",
+        "memChunk"
+      ]
+    },
+    {
+      "site": 330,
+      "file": "tsdb/head_append.go",
+      "line": 781,
+      "ident": "memSeries",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 2,
+      "size": 37,
+      "millis": 66,
+      "top": [
+        "memChunk",
+        "memSeries",
+        "mmappedChunk",
+        "memSeriesOOOFields",
+        "mergedStringIter"
+      ]
+    },
+    {
+      "site": 330,
+      "file": "tsdb/head_append.go",
+      "line": 781,
+      "ident": "memSeries",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 2,
+      "size": 3,
+      "millis": 59,
+      "top": [
+        "memChunk",
+        "memSeries",
+        "memSeriesOOOFields"
+      ]
+    },
+    {
+      "site": 331,
+      "file": "tsdb/head_append.go",
+      "line": 852,
+      "ident": "ref",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 6,
+      "size": 374,
+      "millis": 414,
+      "top": [
+        "err",
+        "e",
+        "s",
+        "a",
+        "lset"
+      ]
+    },
+    {
+      "site": 331,
+      "file": "tsdb/head_append.go",
+      "line": 852,
+      "ident": "ref",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 623,
+      "millis": 84,
+      "top": [
+        "ref",
+        "requireEqualSeries",
+        "require",
+        "require",
+        "require"
+      ]
+    },
+    {
+      "site": 332,
+      "file": "tsdb/head_append.go",
+      "line": 862,
+      "ident": "a",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 1,
+      "size": 374,
+      "millis": 72,
+      "top": [
+        "a",
+        "fh",
+        "h",
+        "lset",
+        "ref"
+      ]
+    },
+    {
+      "site": 333,
+      "file": "tsdb/head_append.go",
+      "line": 895,
+      "ident": "oooTimeWindow",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 4,
+      "size": 41,
+      "millis": 82,
+      "top": [
+        "headMaxt",
+        "head",
+        "minValidTime",
+        "oooTimeWindow",
+        "Append"
+      ]
+    },
+    {
+      "site": 333,
+      "file": "tsdb/head_append.go",
+      "line": 895,
+      "ident": "oooTimeWindow",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 21,
+      "millis": 68,
+      "top": [
+        "oooTimeWindow",
+        "Commit",
+        "getOrCreate",
+        "AppendHistogram",
+        "Rollback"
+      ]
+    },
+    {
+      "site": 333,
+      "file": "tsdb/head_append.go",
+      "line": 895,
+      "ident": "oooTimeWindow",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 63,
+      "top": [
+        "oooTimeWindow"
+      ]
+    },
+    {
+      "site": 334,
+      "file": "tsdb/head_append.go",
+      "line": 963,
+      "ident": "Labels",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 1,
+      "size": 11,
+      "millis": 241,
+      "top": [
+        "Labels",
+        "Label",
+        "Matcher",
+        "Slice",
+        "ScratchBuilder"
+      ]
+    },
+    {
+      "site": 334,
+      "file": "tsdb/head_append.go",
+      "line": 963,
+      "ident": "Labels",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 7,
+      "millis": 139,
+      "top": [
+        "Labels",
+        "Label",
+        "Slice",
+        "ScratchBuilder",
+        "Selector"
+      ]
+    },
+    {
+      "site": 334,
+      "file": "tsdb/head_append.go",
+      "line": 963,
+      "ident": "Labels",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 2,
+      "millis": 154,
+      "top": [
+        "Labels",
+        "Label"
+      ]
+    },
+    {
+      "site": 335,
+      "file": "tsdb/head_append.go",
+      "line": 1159,
+      "ident": "head",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 3,
+      "size": 32,
+      "millis": 122,
+      "top": [
+        "appendID",
+        "Commit",
+        "head",
+        "headMaxt",
+        "minValidTime"
+      ]
+    },
+    {
+      "site": 335,
+      "file": "tsdb/head_append.go",
+      "line": 1159,
+      "ident": "head",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 8,
+      "millis": 61,
+      "top": [
+        "head",
+        "headMaxt",
+        "batches",
+        "useHistogramST",
+        "getCurrentBatch"
+      ]
+    },
+    {
+      "site": 335,
+      "file": "tsdb/head_append.go",
+      "line": 1159,
+      "ident": "head",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 2,
+      "millis": 74,
+      "top": [
+        "head",
+        "headMaxt"
+      ]
+    },
+    {
+      "site": 336,
+      "file": "tsdb/head_append.go",
+      "line": 1430,
+      "ident": "Ref",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 101,
+      "top": [
+        "Ref"
+      ]
+    },
+    {
+      "site": 336,
+      "file": "tsdb/head_append.go",
+      "line": 1430,
+      "ident": "Ref",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 7,
+      "millis": 155,
+      "top": [
+        "Ref",
+        "defer",
+        "for",
+        "for",
+        "for"
+      ]
+    },
+    {
+      "site": 337,
+      "file": "tsdb/head_append.go",
+      "line": 1452,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 3,
+      "size": 379,
+      "millis": 122,
+      "top": [
+        "chunkCreated",
+        "ok",
+        "oooSample",
+        "defaultIsolationDisabled",
+        "overlapsClosedInterval"
+      ]
+    },
+    {
+      "site": 337,
+      "file": "tsdb/head_append.go",
+      "line": 1452,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 2,
+      "size": 418,
+      "millis": 61,
+      "top": [
+        "ok",
+        "oooSample",
+        "overlapsClosedInterval",
+        "oooHeadChunk",
+        "oooChunkIDMask"
+      ]
+    },
+    {
+      "site": 337,
+      "file": "tsdb/head_append.go",
+      "line": 1452,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 1,
+      "size": 80,
+      "millis": 98,
+      "top": [
+        "oooSample",
+        "oooCompactionHeadULID.Timestamp().Equal",
+        "oooCompactionHeadULID",
+        "oooCompactionHeadULID.Timestamp().After",
+        "oooCompactionHeadULID.Timestamp().IsZero"
+      ]
+    },
+    {
+      "site": 338,
+      "file": "tsdb/head_append.go",
+      "line": 1555,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 3,
+      "size": 379,
+      "millis": 71,
+      "top": [
+        "chunkCreated",
+        "ok",
+        "oooSample",
+        "defaultIsolationDisabled",
+        "overlapsClosedInterval"
+      ]
+    },
+    {
+      "site": 338,
+      "file": "tsdb/head_append.go",
+      "line": 1555,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 2,
+      "size": 418,
+      "millis": 59,
+      "top": [
+        "ok",
+        "oooSample",
+        "overlapsClosedInterval",
+        "oooHeadChunk",
+        "oooChunkIDMask"
+      ]
+    },
+    {
+      "site": 338,
+      "file": "tsdb/head_append.go",
+      "line": 1555,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 1,
+      "size": 80,
+      "millis": 116,
+      "top": [
+        "oooSample",
+        "oooCompactionHeadULID.Timestamp().Equal",
+        "oooCompactionHeadULID",
+        "oooCompactionHeadULID.Timestamp().After",
+        "oooCompactionHeadULID.Timestamp().IsZero"
+      ]
+    },
+    {
+      "site": 339,
+      "file": "tsdb/head_append.go",
+      "line": 1559,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 380,
+      "millis": 75,
+      "top": [
+        "nil",
+        "chunkCreated",
+        "err",
+        "i",
+        "ok"
+      ]
+    },
+    {
+      "site": 339,
+      "file": "tsdb/head_append.go",
+      "line": 1559,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 399,
+      "millis": 79,
+      "top": [
+        "nil",
+        "newSample",
+        "new",
+        "ne",
+        "noExemplar"
+      ]
+    },
+    {
+      "site": 340,
+      "file": "tsdb/head_append.go",
+      "line": 1657,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 3,
+      "size": 379,
+      "millis": 68,
+      "top": [
+        "chunkCreated",
+        "ok",
+        "oooSample",
+        "defaultIsolationDisabled",
+        "overlapsClosedInterval"
+      ]
+    },
+    {
+      "site": 340,
+      "file": "tsdb/head_append.go",
+      "line": 1657,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 2,
+      "size": 418,
+      "millis": 59,
+      "top": [
+        "ok",
+        "oooSample",
+        "overlapsClosedInterval",
+        "oooHeadChunk",
+        "oooChunkIDMask"
+      ]
+    },
+    {
+      "site": 340,
+      "file": "tsdb/head_append.go",
+      "line": 1657,
+      "ident": "oooSample",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 1,
+      "size": 80,
+      "millis": 59,
+      "top": [
+        "oooSample",
+        "oooCompactionHeadULID.Timestamp().Equal",
+        "oooCompactionHeadULID",
+        "oooCompactionHeadULID.Timestamp().After",
+        "oooCompactionHeadULID.Timestamp().IsZero"
+      ]
+    },
+    {
+      "site": 341,
+      "file": "tsdb/head_append.go",
+      "line": 1789,
+      "ident": "Errorf",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 2,
+      "size": 29,
+      "millis": 75,
+      "top": [
+        "Append",
+        "Errorf",
+        "Sprintf",
+        "Sprint",
+        "State"
+      ]
+    },
+    {
+      "site": 341,
+      "file": "tsdb/head_append.go",
+      "line": 1789,
+      "ident": "Errorf",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 10,
+      "millis": 59,
+      "top": [
+        "Errorf",
+        "Append",
+        "State",
+        "ScanState",
+        "Appendf"
+      ]
+    },
+    {
+      "site": 341,
+      "file": "tsdb/head_append.go",
+      "line": 1789,
+      "ident": "Errorf",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 58,
+      "top": [
+        "Errorf"
+      ]
+    },
+    {
+      "site": 342,
+      "file": "tsdb/head_append.go",
+      "line": 2007,
+      "ident": "s",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 4,
+      "size": 380,
+      "millis": 81,
+      "top": [
+        "c",
+        "chunkCreated",
+        "sampleInOrder",
+        "s",
+        "sample"
+      ]
+    },
+    {
+      "site": 343,
+      "file": "tsdb/head_append.go",
+      "line": 2188,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 0,
+      "rank": 341,
+      "size": 373,
+      "millis": 93,
+      "top": [
+        "n",
+        "maxT",
+        "max",
+        "start",
+        "cur"
+      ]
+    },
+    {
+      "site": 343,
+      "file": "tsdb/head_append.go",
+      "line": 2188,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 1,
+      "rank": 7,
+      "size": 419,
+      "millis": 53,
+      "top": [
+        "func",
+        "floatHistogram",
+        "float",
+        "fmt",
+        "false"
+      ]
+    },
+    {
+      "site": 343,
+      "file": "tsdb/head_append.go",
+      "line": 2188,
+      "ident": "float64",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 3,
+      "rank": 3,
+      "size": 56,
+      "millis": 67,
+      "top": [
+        "floatHistogram",
+        "float",
+        "float64",
+        "float32",
+        "floats"
+      ]
+    },
+    {
+      "site": 344,
+      "file": "tsdb/head_append.go",
+      "line": 2188,
+      "ident": "n",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 373,
+      "millis": 94,
+      "top": [
+        "n",
+        "ratioToFull",
+        "oooChunkIDMask",
+        "headChunksBufMaxCap",
+        "noExemplar"
+      ]
+    },
+    {
+      "site": 345,
+      "file": "tsdb/head_append.go",
+      "line": 2260,
+      "ident": "minTime",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 35,
+      "top": [
+        "minTime"
+      ]
+    },
+    {
+      "site": 345,
+      "file": "tsdb/head_append.go",
+      "line": 2260,
+      "ident": "minTime",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 5,
+      "size": 5,
+      "millis": 99,
+      "top": [
+        "chan",
+        "chan",
+        "map",
+        "make",
+        "minTime"
+      ]
+    },
+    {
+      "site": 345,
+      "file": "tsdb/head_append.go",
+      "line": 2260,
+      "ident": "minTime",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 39,
+      "top": [
+        "minTime"
+      ]
+    },
+    {
+      "site": 346,
+      "file": "tsdb/head_append.go",
+      "line": 2326,
+      "ident": "series",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 4,
+      "size": 374,
+      "millis": 70,
+      "top": [
+        "b",
+        "h",
+        "i",
+        "series",
+        "a"
+      ]
+    },
+    {
+      "site": 346,
+      "file": "tsdb/head_append.go",
+      "line": 2326,
+      "ident": "series",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 8,
+      "size": 939,
+      "millis": 87,
+      "top": [
+        "make",
+        "sl",
+        "select",
+        "se",
+        "switch"
+      ]
+    },
+    {
+      "site": 346,
+      "file": "tsdb/head_append.go",
+      "line": 2326,
+      "ident": "series",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 194,
+      "millis": 150,
+      "top": [
+        "series",
+        "seriesRefs",
+        "seriesData",
+        "seriesHashmap",
+        "seriesRefSet"
+      ]
+    },
+    {
+      "site": 347,
+      "file": "tsdb/index/postings.go",
+      "line": 51,
+      "ident": "storage",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 71,
+      "millis": 65,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 347,
+      "file": "tsdb/index/postings.go",
+      "line": 51,
+      "ident": "storage",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 11,
+      "size": 778,
+      "millis": 122,
+      "top": [
+        "struct",
+        "stringListIter",
+        "string",
+        "symbolsIter",
+        "slices"
+      ]
+    },
+    {
+      "site": 347,
+      "file": "tsdb/index/postings.go",
+      "line": 51,
+      "ident": "storage",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 58,
+      "millis": 64,
+      "top": [
+        "storage",
+        "storage",
+        "storage",
+        "storage",
+        "storage"
+      ]
+    },
+    {
+      "site": 348,
+      "file": "tsdb/index/postings.go",
+      "line": 217,
+      "ident": "Count",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 29,
+      "top": [
+        "Count"
+      ]
+    },
+    {
+      "site": 348,
+      "file": "tsdb/index/postings.go",
+      "line": 217,
+      "ident": "Count",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 32,
+      "top": [
+        "Count"
+      ]
+    },
+    {
+      "site": 348,
+      "file": "tsdb/index/postings.go",
+      "line": 217,
+      "ident": "Count",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 22,
+      "top": [
+        "Count"
+      ]
+    },
+    {
+      "site": 349,
+      "file": "tsdb/index/postings.go",
+      "line": 228,
+      "ident": "Name",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 23,
+      "top": [
+        "Name"
+      ]
+    },
+    {
+      "site": 349,
+      "file": "tsdb/index/postings.go",
+      "line": 228,
+      "ident": "Name",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 22,
+      "top": [
+        "Name"
+      ]
+    },
+    {
+      "site": 349,
+      "file": "tsdb/index/postings.go",
+      "line": 228,
+      "ident": "Name",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 21,
+      "top": [
+        "Name"
+      ]
+    },
+    {
+      "site": 350,
+      "file": "tsdb/index/postings.go",
+      "line": 237,
+      "ident": "LabelValuePairsStats",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 21,
+      "top": [
+        "LabelValuePairsStats"
+      ]
+    },
+    {
+      "site": 350,
+      "file": "tsdb/index/postings.go",
+      "line": 237,
+      "ident": "LabelValuePairsStats",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 22,
+      "top": [
+        "LabelValuePairsStats",
+        "make",
+        "select"
+      ]
+    },
+    {
+      "site": 350,
+      "file": "tsdb/index/postings.go",
+      "line": 237,
+      "ident": "LabelValuePairsStats",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 18,
+      "top": [
+        "LabelValuePairsStats"
+      ]
+    },
+    {
+      "site": 351,
+      "file": "tsdb/index/postings.go",
+      "line": 262,
+      "ident": "runtime",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 151,
+      "millis": 106,
+      "top": [
+        "concurrency",
+        "p",
+        "numberOfConcurrentProcesses",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 351,
+      "file": "tsdb/index/postings.go",
+      "line": 262,
+      "ident": "runtime",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 372,
+      "size": 462,
+      "millis": 68,
+      "top": [
+        "removedPostings",
+        "realByteSlice",
+        "real",
+        "rune",
+        "ru"
+      ]
+    },
+    {
+      "site": 351,
+      "file": "tsdb/index/postings.go",
+      "line": 262,
+      "ident": "runtime",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 13,
+      "size": 52,
+      "millis": 111,
+      "top": [
+        "run",
+        "run",
+        "run",
+        "run",
+        "run"
+      ]
+    },
+    {
+      "site": 352,
+      "file": "tsdb/index/postings.go",
+      "line": 300,
+      "ident": "workc",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 4,
+      "size": 155,
+      "millis": 56,
+      "top": [
+        "nextJob",
+        "wg",
+        "concurrency",
+        "workc",
+        "p"
+      ]
+    },
+    {
+      "site": 352,
+      "file": "tsdb/index/postings.go",
+      "line": 300,
+      "ident": "workc",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 2,
+      "size": 163,
+      "millis": 33,
+      "top": [
+        "wg",
+        "workc",
+        "wo",
+        "write",
+        "write"
+      ]
+    },
+    {
+      "site": 352,
+      "file": "tsdb/index/postings.go",
+      "line": 300,
+      "ident": "workc",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 1,
+      "size": 36,
+      "millis": 63,
+      "top": [
+        "workc",
+        "workdocs",
+        "workdocsiface",
+        "worker",
+        "workflowexecutions"
+      ]
+    },
+    {
+      "site": 353,
+      "file": "tsdb/index/postings.go",
+      "line": 314,
+      "ident": "Value",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 2,
+      "size": 5,
+      "millis": 42,
+      "top": [
+        "Name",
+        "Value",
+        ".p",
+        ".par",
+        ".pointer"
+      ]
+    },
+    {
+      "site": 353,
+      "file": "tsdb/index/postings.go",
+      "line": 314,
+      "ident": "Value",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 36,
+      "top": [
+        "Value"
+      ]
+    },
+    {
+      "site": 353,
+      "file": "tsdb/index/postings.go",
+      "line": 314,
+      "ident": "Value",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 35,
+      "top": [
+        "Value"
+      ]
+    },
+    {
+      "site": 354,
+      "file": "tsdb/index/postings.go",
+      "line": 462,
+      "ident": "p",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 4,
+      "size": 154,
+      "millis": 37,
+      "top": [
+        "readOnlyLabelValues",
+        "ctx",
+        "name",
+        "p",
+        "match"
+      ]
+    },
+    {
+      "site": 355,
+      "file": "tsdb/index/postings.go",
+      "line": 509,
+      "ident": "list",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 2,
+      "millis": 23,
+      "top": [
+        "list",
+        "cur"
+      ]
+    },
+    {
+      "site": 355,
+      "file": "tsdb/index/postings.go",
+      "line": 509,
+      "ident": "list",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 21,
+      "top": [
+        "list"
+      ]
+    },
+    {
+      "site": 355,
+      "file": "tsdb/index/postings.go",
+      "line": 509,
+      "ident": "list",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 22,
+      "top": [
+        "list"
+      ]
+    },
+    {
+      "site": 356,
+      "file": "tsdb/index/postings.go",
+      "line": 542,
+      "ident": "res",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 1,
+      "size": 152,
+      "millis": 38,
+      "top": [
+        "res",
+        "nil",
+        "err",
+        "p",
+        "chan"
+      ]
+    },
+    {
+      "site": 356,
+      "file": "tsdb/index/postings.go",
+      "line": 542,
+      "ident": "res",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 449,
+      "millis": 53,
+      "top": [
+        "res",
+        "removedPostings",
+        "realByteSlice",
+        "real",
+        "runtime"
+      ]
+    },
+    {
+      "site": 357,
+      "file": "tsdb/index/postings.go",
+      "line": 615,
+      "ident": "intersectPostings",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 0,
+      "rank": 34,
+      "size": 150,
+      "millis": 50,
+      "top": [
+        "its",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 357,
+      "file": "tsdb/index/postings.go",
+      "line": 615,
+      "ident": "intersectPostings",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 1,
+      "rank": 10,
+      "size": 364,
+      "millis": 48,
+      "top": [
+        "its",
+        "it",
+        "interface",
+        "int",
+        "indexWriterSeriesSlice"
+      ]
+    },
+    {
+      "site": 357,
+      "file": "tsdb/index/postings.go",
+      "line": 615,
+      "ident": "intersectPostings",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 3,
+      "rank": 3,
+      "size": 90,
+      "millis": 101,
+      "top": [
+        "int",
+        "interface",
+        "intersectPostings",
+        "int64",
+        "int16"
+      ]
+    },
+    {
+      "site": 358,
+      "file": "tsdb/index/postings.go",
+      "line": 696,
+      "ident": "loser",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 72,
+      "millis": 47,
+      "top": [
+        "T",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 358,
+      "file": "tsdb/index/postings.go",
+      "line": 696,
+      "ident": "loser",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 11,
+      "size": 274,
+      "millis": 48,
+      "top": [
+        "listPostings",
+        "list",
+        "labels",
+        "label",
+        "limit"
+      ]
+    },
+    {
+      "site": 358,
+      "file": "tsdb/index/postings.go",
+      "line": 696,
+      "ident": "loser",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 5,
+      "millis": 52,
+      "top": [
+        "loser",
+        "lostcancel",
+        "lostcancel",
+        "web.LocalStorage",
+        "testutil.Closer"
+      ]
+    },
+    {
+      "site": 359,
+      "file": "tsdb/index/postings.go",
+      "line": 701,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 153,
+      "millis": 44,
+      "top": [
+        "m",
+        "p",
+        "T",
+        "nonEmpty",
+        "chan"
+      ]
+    },
+    {
+      "site": 359,
+      "file": "tsdb/index/postings.go",
+      "line": 701,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 47,
+      "size": 418,
+      "millis": 51,
+      "top": [
+        "m",
+        "map",
+        "maxHeap",
+        "max",
+        "mergedPostings"
+      ]
+    },
+    {
+      "site": 359,
+      "file": "tsdb/index/postings.go",
+      "line": 701,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 12,
+      "size": 58,
+      "millis": 145,
+      "top": [
+        "mat",
+        "match",
+        "match",
+        "match",
+        "matchers"
+      ]
+    },
+    {
+      "site": 360,
+      "file": "tsdb/index/postings.go",
+      "line": 714,
+      "ident": "newItem",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 0,
+      "rank": 1,
+      "size": 152,
+      "millis": 55,
+      "top": [
+        "newItem",
+        "new",
+        "defaultLabelNamesMapSize",
+        "FormatV1",
+        "symbolFactor"
+      ]
+    },
+    {
+      "site": 360,
+      "file": "tsdb/index/postings.go",
+      "line": 714,
+      "ident": "newItem",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 1,
+      "rank": 1,
+      "size": 256,
+      "millis": 38,
+      "top": [
+        "newItem",
+        "new",
+        "ne",
+        "newRemovedPostings",
+        "newBigEndianPostings"
+      ]
+    },
+    {
+      "site": 360,
+      "file": "tsdb/index/postings.go",
+      "line": 714,
+      "ident": "newItem",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 3,
+      "rank": 2,
+      "size": 119,
+      "millis": 246,
+      "top": [
+        "new",
+        "newItem",
+        "newRemovedPostings",
+        "newBigEndianPostings",
+        "newIntersectPostings"
+      ]
+    },
+    {
+      "site": 361,
+      "file": "tsdb/index/postings.go",
+      "line": 870,
+      "ident": "false",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 3,
+      "size": 152,
+      "millis": 30,
+      "top": [
+        "IsEmptyPostingsType",
+        "true",
+        "false",
+        "i",
+        "it"
+      ]
+    },
+    {
+      "site": 361,
+      "file": "tsdb/index/postings.go",
+      "line": 870,
+      "ident": "false",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 368,
+      "millis": 33,
+      "top": [
+        "false",
+        "fa",
+        "func",
+        "fmt",
+        "float32"
+      ]
+    },
+    {
+      "site": 361,
+      "file": "tsdb/index/postings.go",
+      "line": 870,
+      "ident": "false",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 3,
+      "rank": 1,
+      "size": 5,
+      "millis": 41,
+      "top": [
+        "false",
+        "fallback",
+        "scrape.FailureLogger",
+        "testhelpers.FakeAlertmanagerRetriever",
+        "v1.FuzzAlgorithms"
+      ]
+    },
+    {
+      "site": 362,
+      "file": "tsdb/index/postings.go",
+      "line": 904,
+      "ident": "binary",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 149,
+      "millis": 40,
+      "top": [
+        "it",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 362,
+      "file": "tsdb/index/postings.go",
+      "line": 904,
+      "ident": "binary",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 24,
+      "size": 319,
+      "millis": 52,
+      "top": [
+        "bigEndianPostings",
+        "big",
+        "bool",
+        "bo",
+        "byte"
+      ]
+    },
+    {
+      "site": 362,
+      "file": "tsdb/index/postings.go",
+      "line": 904,
+      "ident": "binary",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 1,
+      "size": 17,
+      "millis": 53,
+      "top": [
+        "binary",
+        "binaryauthorization",
+        "binaryauthorization",
+        "binarylog",
+        "bind"
+      ]
+    },
+    {
+      "site": 363,
+      "file": "tsdb/index/postings.go",
+      "line": 1022,
+      "ident": "int",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 4,
+      "size": 72,
+      "millis": 32,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 363,
+      "file": "tsdb/index/postings.go",
+      "line": 1022,
+      "ident": "int",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 2,
+      "size": 314,
+      "millis": 42,
+      "top": [
+        "interface",
+        "int",
+        "intersectPostings",
+        "indexWriterSeriesSlice",
+        "indexWriterSeries"
+      ]
+    },
+    {
+      "site": 364,
+      "file": "web/api/v1/api.go",
+      "line": 108,
+      "ident": "errorType",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 0,
+      "rank": 34,
+      "size": 363,
+      "millis": 467,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 364,
+      "file": "web/api/v1/api.go",
+      "line": 108,
+      "ident": "errorType",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 1,
+      "rank": 7,
+      "size": 699,
+      "millis": 326,
+      "top": [
+        "errorBadData",
+        "error",
+        "example",
+        "errorResponseExamples",
+        "errorResponse"
+      ]
+    },
+    {
+      "site": 364,
+      "file": "web/api/v1/api.go",
+      "line": 108,
+      "ident": "errorType",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 3,
+      "rank": 6,
+      "size": 107,
+      "millis": 304,
+      "top": [
+        "errorBadData",
+        "error",
+        "errorResponseExamples",
+        "errorResponse",
+        "errorInternal"
+      ]
+    },
+    {
+      "site": 365,
+      "file": "web/api/v1/api.go",
+      "line": 152,
+      "ident": "rules",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 145,
+      "millis": 105,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 365,
+      "file": "web/api/v1/api.go",
+      "line": 152,
+      "ident": "rules",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 20,
+      "size": 456,
+      "millis": 128,
+      "top": [
+        "relabel",
+        "remote",
+        "route",
+        "ro",
+        "regexp"
+      ]
+    },
+    {
+      "site": 365,
+      "file": "web/api/v1/api.go",
+      "line": 152,
+      "ident": "rules",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 23,
+      "millis": 126,
+      "top": [
+        "rules",
+        "rules",
+        "rules",
+        "rules",
+        "rules"
+      ]
+    },
+    {
+      "site": 366,
+      "file": "web/api/v1/api.go",
+      "line": 184,
+      "ident": "time",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 145,
+      "millis": 94,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 366,
+      "file": "web/api/v1/api.go",
+      "line": 184,
+      "ident": "time",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 2,
+      "size": 606,
+      "millis": 110,
+      "top": [
+        "timestamp",
+        "time",
+        "time",
+        "ti",
+        "tsdb"
+      ]
+    },
+    {
+      "site": 366,
+      "file": "web/api/v1/api.go",
+      "line": 184,
+      "ident": "time",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 2,
+      "size": 19,
+      "millis": 109,
+      "top": [
+        "timestamp",
+        "time",
+        "time",
+        "timeformat",
+        "timeinterval"
+      ]
+    },
+    {
+      "site": 367,
+      "file": "web/api/v1/api.go",
+      "line": 358,
+      "ident": "parser",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 5,
+      "millis": 143,
+      "top": [
+        "parser",
+        "codecs",
+        "customStatsRenderer",
+        "otlpWriteHandler",
+        "remoteWriteHandler"
+      ]
+    },
+    {
+      "site": 367,
+      "file": "web/api/v1/api.go",
+      "line": 358,
+      "ident": "parser",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 110,
+      "top": [
+        "parser",
+        "map",
+        "otlpWriteHandler"
+      ]
+    },
+    {
+      "site": 367,
+      "file": "web/api/v1/api.go",
+      "line": 358,
+      "ident": "parser",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 35,
+      "top": [
+        "parser"
+      ]
+    },
+    {
+      "site": 368,
+      "file": "web/api/v1/api.go",
+      "line": 382,
+      "ident": "logger",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 408,
+      "millis": 149,
+      "top": [
+        "logger",
+        "nil",
+        "a",
+        "q",
+        "db"
+      ]
+    },
+    {
+      "site": 368,
+      "file": "web/api/v1/api.go",
+      "line": 382,
+      "ident": "logger",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 469,
+      "millis": 93,
+      "top": [
+        "logger",
+        "lo",
+        "log",
+        "log",
+        "log"
+      ]
+    },
+    {
+      "site": 368,
+      "file": "web/api/v1/api.go",
+      "line": 382,
+      "ident": "logger",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 12,
+      "size": 94,
+      "millis": 149,
+      "top": [
+        "log",
+        "log",
+        "log",
+        "log",
+        "log"
+      ]
+    },
+    {
+      "site": 369,
+      "file": "web/api/v1/api.go",
+      "line": 413,
+      "ident": "route",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 145,
+      "millis": 154,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 369,
+      "file": "web/api/v1/api.go",
+      "line": 413,
+      "ident": "route",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 19,
+      "size": 456,
+      "millis": 153,
+      "top": [
+        "rules",
+        "ru",
+        "relabel",
+        "remote",
+        "regexp"
+      ]
+    },
+    {
+      "site": 369,
+      "file": "web/api/v1/api.go",
+      "line": 413,
+      "ident": "route",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 37,
+      "millis": 126,
+      "top": [
+        "route",
+        "route",
+        "route",
+        "route",
+        "route"
+      ]
+    },
+    {
+      "site": 370,
+      "file": "web/api/v1/api.go",
+      "line": 427,
+      "ident": "data",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 3,
+      "size": 7,
+      "millis": 197,
+      "top": [
+        "err",
+        "warnings",
+        "data",
+        "finalizer",
+        ".p"
+      ]
+    },
+    {
+      "site": 370,
+      "file": "web/api/v1/api.go",
+      "line": 427,
+      "ident": "data",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 96,
+      "top": [
+        "data"
+      ]
+    },
+    {
+      "site": 370,
+      "file": "web/api/v1/api.go",
+      "line": 427,
+      "ident": "data",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 79,
+      "top": [
+        "data"
+      ]
+    },
+    {
+      "site": 371,
+      "file": "web/api/v1/api.go",
+      "line": 532,
+      "ident": "trace",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 145,
+      "millis": 102,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 371,
+      "file": "web/api/v1/api.go",
+      "line": 532,
+      "ident": "trace",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 391,
+      "size": 617,
+      "millis": 159,
+      "top": [
+        "time",
+        "ti",
+        "timestamp",
+        "tsdb",
+        "test"
+      ]
+    },
+    {
+      "site": 371,
+      "file": "web/api/v1/api.go",
+      "line": 532,
+      "ident": "trace",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 65,
+      "millis": 99,
+      "top": [
+        "trace",
+        "trace",
+        "trace",
+        "trace",
+        "trace"
+      ]
+    },
+    {
+      "site": 372,
+      "file": "web/api/v1/api.go",
+      "line": 543,
+      "ident": "totalSamples",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 3,
+      "size": 369,
+      "millis": 216,
+      "top": [
+        "s",
+        "resultSeries",
+        "totalSamples",
+        "value",
+        "span"
+      ]
+    },
+    {
+      "site": 372,
+      "file": "web/api/v1/api.go",
+      "line": 543,
+      "ident": "totalSamples",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 767,
+      "millis": 134,
+      "top": [
+        "totalSamples",
+        "to",
+        "to",
+        "timestampExamples",
+        "time"
+      ]
+    },
+    {
+      "site": 372,
+      "file": "web/api/v1/api.go",
+      "line": 543,
+      "ident": "totalSamples",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 6,
+      "millis": 153,
+      "top": [
+        "totalSamples",
+        "s.Samples.TotalSamples",
+        "s.Samples.TotalSamplesPerStep",
+        "s.Samples.TotalSamplesPerStepMap",
+        "record.ToMetricType"
+      ]
+    },
+    {
+      "site": 373,
+      "file": "web/api/v1/api.go",
+      "line": 627,
+      "ident": "DefaultStatsRenderer",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 0,
+      "rank": 4,
+      "size": 377,
+      "millis": 148,
+      "top": [
+        "sr",
+        "func(ctx context.Context, statistics *stats.Statistics, string2 string) stats.QueryStats {}",
+        "func",
+        "DefaultStatsRenderer",
+        "nil"
+      ]
+    },
+    {
+      "site": 373,
+      "file": "web/api/v1/api.go",
+      "line": 627,
+      "ident": "DefaultStatsRenderer",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 1,
+      "rank": 1,
+      "size": 81,
+      "millis": 73,
+      "top": [
+        "DefaultStatsRenderer",
+        "DroppedTarget",
+        "defaultSearchBatchSize",
+        "durationSchema",
+        "dateTimeSchemaWithDescription"
+      ]
+    },
+    {
+      "site": 373,
+      "file": "web/api/v1/api.go",
+      "line": 627,
+      "ident": "DefaultStatsRenderer",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 3,
+      "rank": 1,
+      "size": 55,
+      "millis": 324,
+      "top": [
+        "DefaultStatsRenderer",
+        "agent.DefaultMaxWALTime",
+        "agent.DefaultMinWALTime",
+        "agent.DefaultOptions",
+        "agent.DefaultTruncateFrequency"
+      ]
+    },
+    {
+      "site": 374,
+      "file": "web/api/v1/api.go",
+      "line": 693,
+      "ident": "statsAll",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 3,
+      "size": 365,
+      "millis": 87,
+      "top": [
+        "s",
+        "getRuleGroupNextToken",
+        "statsAll",
+        "stats",
+        "statsTrue"
+      ]
+    },
+    {
+      "site": 374,
+      "file": "web/api/v1/api.go",
+      "line": 693,
+      "ident": "statsAll",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 2,
+      "size": 931,
+      "millis": 101,
+      "top": [
+        "s",
+        "statsAll",
+        "stats",
+        "stat",
+        "statsTrue"
+      ]
+    },
+    {
+      "site": 374,
+      "file": "web/api/v1/api.go",
+      "line": 693,
+      "ident": "statsAll",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 69,
+      "millis": 78,
+      "top": [
+        "statsAll",
+        "stats",
+        "stat",
+        "statsTrue",
+        "status"
+      ]
+    },
+    {
+      "site": 375,
+      "file": "web/api/v1/api.go",
+      "line": 955,
+      "ident": "strings",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 367,
+      "millis": 222,
+      "top": [
+        "ctx",
+        "name",
+        "api",
+        "r",
+        "result"
+      ]
+    },
+    {
+      "site": 375,
+      "file": "web/api/v1/api.go",
+      "line": 955,
+      "ident": "strings",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 95,
+      "size": 933,
+      "millis": 317,
+      "top": [
+        "struct",
+        "stringSchema",
+        "string",
+        "schemaRef",
+        "schema"
+      ]
+    },
+    {
+      "site": 375,
+      "file": "web/api/v1/api.go",
+      "line": 955,
+      "ident": "strings",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 17,
+      "size": 122,
+      "millis": 241,
+      "top": [
+        "str",
+        "struct",
+        "stringSchema",
+        "string",
+        "stringSchemaWithDescription"
+      ]
+    },
+    {
+      "site": 376,
+      "file": "web/api/v1/api.go",
+      "line": 1010,
+      "ident": "vals",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 12,
+      "size": 381,
+      "millis": 293,
+      "top": [
+        "ctx",
+        "err",
+        "limit",
+        "matchers",
+        "matcherSets"
+      ]
+    },
+    {
+      "site": 376,
+      "file": "web/api/v1/api.go",
+      "line": 1010,
+      "ident": "vals",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 883,
+      "millis": 135,
+      "top": [
+        "vals",
+        "vectorExample",
+        "v3",
+        "v3",
+        "v3"
+      ]
+    },
+    {
+      "site": 376,
+      "file": "web/api/v1/api.go",
+      "line": 1010,
+      "ident": "vals",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 62,
+      "millis": 106,
+      "top": [
+        "vals",
+        "value",
+        "value",
+        "valid",
+        "validate"
+      ]
+    },
+    {
+      "site": 377,
+      "file": "web/api/v1/api.go",
+      "line": 1012,
+      "ident": "apiFuncResult",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 0,
+      "rank": 30,
+      "size": 381,
+      "millis": 90,
+      "top": [
+        "result",
+        "r",
+        "invalidParamError",
+        "setUnavailStatusOnTSDBNotReady",
+        "ctx"
+      ]
+    },
+    {
+      "site": 377,
+      "file": "web/api/v1/api.go",
+      "line": 1012,
+      "ident": "apiFuncResult",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 1,
+      "rank": 3,
+      "size": 747,
+      "millis": 159,
+      "top": [
+        "api",
+        "apiError",
+        "apiFuncResult",
+        "apiFunc",
+        "alertmanagersResponseExamples"
+      ]
+    },
+    {
+      "site": 377,
+      "file": "web/api/v1/api.go",
+      "line": 1012,
+      "ident": "apiFuncResult",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 3,
+      "rank": 4,
+      "size": 106,
+      "millis": 126,
+      "top": [
+        "api",
+        "API",
+        "apiError",
+        "apiFuncResult",
+        "apiFunc"
+      ]
+    },
+    {
+      "site": 378,
+      "file": "web/api/v1/api.go",
+      "line": 1221,
+      "ident": "err",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 1,
+      "size": 368,
+      "millis": 115,
+      "top": [
+        "err",
+        "host",
+        "port",
+        "errWithPort",
+        "input"
+      ]
+    },
+    {
+      "site": 378,
+      "file": "web/api/v1/api.go",
+      "line": 1221,
+      "ident": "err",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 2,
+      "size": 712,
+      "millis": 108,
+      "top": [
+        "if",
+        "err",
+        "errWithPort",
+        "errorBadData",
+        "error"
+      ]
+    },
+    {
+      "site": 379,
+      "file": "web/api/v1/api.go",
+      "line": 1230,
+      "ident": "u",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 1,
+      "size": 368,
+      "millis": 127,
+      "top": [
+        "u",
+        "nil",
+        "err",
+        "host",
+        "port"
+      ]
+    },
+    {
+      "site": 380,
+      "file": "web/api/v1/api.go",
+      "line": 1273,
+      "ident": "names",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 366,
+      "millis": 102,
+      "top": [
+        "names",
+        "LocalhostRepresentations",
+        "fuzzAlgorithms",
+        "sanitizeList",
+        "FuzzAlgorithms"
+      ]
+    },
+    {
+      "site": 380,
+      "file": "web/api/v1/api.go",
+      "line": 1273,
+      "ident": "names",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 360,
+      "millis": 103,
+      "top": [
+        "names",
+        "name",
+        "nil",
+        "neverEmpty",
+        "ne"
+      ]
+    },
+    {
+      "site": 380,
+      "file": "web/api/v1/api.go",
+      "line": 1273,
+      "ident": "names",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 1,
+      "size": 41,
+      "millis": 79,
+      "top": [
+        "names",
+        "name",
+        "namevalidationutil.CheckNameValidationScheme",
+        "namevalidationutil",
+        "namegenerator"
+      ]
+    },
+    {
+      "site": 381,
+      "file": "web/api/v1/api.go",
+      "line": 1275,
+      "ident": "data",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 42,
+      "top": [
+        "data"
+      ]
+    },
+    {
+      "site": 381,
+      "file": "web/api/v1/api.go",
+      "line": 1275,
+      "ident": "data",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 31,
+      "top": [
+        "data"
+      ]
+    },
+    {
+      "site": 381,
+      "file": "web/api/v1/api.go",
+      "line": 1275,
+      "ident": "data",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 34,
+      "top": [
+        "data"
+      ]
+    },
+    {
+      "site": 382,
+      "file": "web/api/v1/api.go",
+      "line": 1289,
+      "ident": "yaml",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 367,
+      "millis": 245,
+      "top": [
+        "err",
+        "scrapePool",
+        "scrape",
+        "scrapeConfig",
+        "api"
+      ]
+    },
+    {
+      "site": 382,
+      "file": "web/api/v1/api.go",
+      "line": 1289,
+      "ident": "yaml",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 1,
+      "size": 78,
+      "millis": 178,
+      "top": [
+        "yaml",
+        "yaml",
+        "yaml",
+        "yaml",
+        "yaml"
+      ]
+    },
+    {
+      "site": 382,
+      "file": "web/api/v1/api.go",
+      "line": 1289,
+      "ident": "yaml",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 30,
+      "millis": 260,
+      "top": [
+        "yaml",
+        "yaml",
+        "yaml",
+        "yaml",
+        "yaml"
+      ]
+    },
+    {
+      "site": 383,
+      "file": "web/api/v1/api.go",
+      "line": 1300,
+      "ident": "string",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 0,
+      "rank": 103,
+      "size": 146,
+      "millis": 102,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 383,
+      "file": "web/api/v1/api.go",
+      "line": 1300,
+      "ident": "string",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 1,
+      "rank": 32,
+      "size": 779,
+      "millis": 59,
+      "top": [
+        "struct",
+        "searchBatch",
+        "search",
+        "search",
+        "se"
+      ]
+    },
+    {
+      "site": 383,
+      "file": "web/api/v1/api.go",
+      "line": 1300,
+      "ident": "string",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 3,
+      "rank": 5,
+      "size": 52,
+      "millis": 53,
+      "top": [
+        "str",
+        "struct",
+        "strconv",
+        "strings",
+        "string"
+      ]
+    },
+    {
+      "site": 384,
+      "file": "web/api/v1/api.go",
+      "line": 1303,
+      "ident": "t",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 2,
+      "size": 370,
+      "millis": 176,
+      "top": [
+        "n",
+        "t",
+        "p",
+        "pools",
+        "api"
+      ]
+    },
+    {
+      "site": 385,
+      "file": "web/api/v1/api.go",
+      "line": 1397,
+      "ident": "strconv",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 367,
+      "millis": 164,
+      "top": [
+        "err",
+        "limit",
+        "s",
+        "api",
+        "r"
+      ]
+    },
+    {
+      "site": 385,
+      "file": "web/api/v1/api.go",
+      "line": 1397,
+      "ident": "strconv",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 92,
+      "size": 931,
+      "millis": 297,
+      "top": [
+        "s",
+        "struct",
+        "stringSchema",
+        "string",
+        "schemaRef"
+      ]
+    },
+    {
+      "site": 385,
+      "file": "web/api/v1/api.go",
+      "line": 1397,
+      "ident": "strconv",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 17,
+      "size": 119,
+      "millis": 266,
+      "top": [
+        "str",
+        "struct",
+        "stringSchema",
+        "string",
+        "stringSchemaWithDescription"
+      ]
+    },
+    {
+      "site": 386,
+      "file": "web/api/v1/api.go",
+      "line": 1462,
+      "ident": "relabel",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 145,
+      "millis": 118,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 386,
+      "file": "web/api/v1/api.go",
+      "line": 1462,
+      "ident": "relabel",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 20,
+      "size": 452,
+      "millis": 120,
+      "top": [
+        "rules",
+        "ru",
+        "remote",
+        "route",
+        "ro"
+      ]
+    },
+    {
+      "site": 386,
+      "file": "web/api/v1/api.go",
+      "line": 1462,
+      "ident": "relabel",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 4,
+      "millis": 152,
+      "top": [
+        "relabel",
+        "RelabelStep",
+        "RelabelStepsResponse",
+        "fileutil.Releaser"
+      ]
+    },
+    {
+      "site": 387,
+      "file": "web/api/v1/api.go",
+      "line": 1478,
+      "ident": "apiFuncResult",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 0,
+      "rank": 17,
+      "size": 367,
+      "millis": 240,
+      "top": [
+        "invalidParamError",
+        "setUnavailStatusOnTSDBNotReady",
+        "scrapePool",
+        "scrape",
+        "labelsJSON"
+      ]
+    },
+    {
+      "site": 387,
+      "file": "web/api/v1/api.go",
+      "line": 1478,
+      "ident": "apiFuncResult",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 1,
+      "rank": 3,
+      "size": 741,
+      "millis": 79,
+      "top": [
+        "api",
+        "apiError",
+        "apiFuncResult",
+        "apiFunc",
+        "alertmanagersResponseExamples"
+      ]
+    },
+    {
+      "site": 387,
+      "file": "web/api/v1/api.go",
+      "line": 1478,
+      "ident": "apiFuncResult",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 3,
+      "rank": 4,
+      "size": 106,
+      "millis": 84,
+      "top": [
+        "api",
+        "API",
+        "apiError",
+        "apiFuncResult",
+        "apiFunc"
+      ]
+    },
+    {
+      "site": 388,
+      "file": "web/api/v1/api.go",
+      "line": 1560,
+      "ident": "Alerts",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 49,
+      "top": [
+        "Alerts"
+      ]
+    },
+    {
+      "site": 388,
+      "file": "web/api/v1/api.go",
+      "line": 1560,
+      "ident": "Alerts",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 31,
+      "top": [
+        "Alerts"
+      ]
+    },
+    {
+      "site": 388,
+      "file": "web/api/v1/api.go",
+      "line": 1560,
+      "ident": "Alerts",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 43,
+      "top": [
+        "Alerts"
+      ]
+    },
+    {
+      "site": 389,
+      "file": "web/api/v1/api.go",
+      "line": 1606,
+      "ident": "Help",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 47,
+      "top": [
+        "Help"
+      ]
+    },
+    {
+      "site": 389,
+      "file": "web/api/v1/api.go",
+      "line": 1606,
+      "ident": "Help",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 36,
+      "top": [
+        "Help"
+      ]
+    },
+    {
+      "site": 389,
+      "file": "web/api/v1/api.go",
+      "line": 1606,
+      "ident": "Help",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 32,
+      "top": [
+        "Help"
+      ]
+    },
+    {
+      "site": 390,
+      "file": "web/api/v1/api.go",
+      "line": 1615,
+      "ident": "metrics",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 6,
+      "size": 375,
+      "millis": 80,
+      "top": [
+        "limit",
+        "m",
+        "ok",
+        "t",
+        "tt"
+      ]
+    },
+    {
+      "site": 390,
+      "file": "web/api/v1/api.go",
+      "line": 1615,
+      "ident": "metrics",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 6,
+      "size": 521,
+      "millis": 94,
+      "top": [
+        "m",
+        "chan",
+        "chan",
+        "map",
+        "make"
+      ]
+    },
+    {
+      "site": 390,
+      "file": "web/api/v1/api.go",
+      "line": 1615,
+      "ident": "metrics",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 80,
+      "millis": 97,
+      "top": [
+        "metrics",
+        "metric",
+        "metricMetadata",
+        "metadataCacheEntry",
+        "metadata"
+      ]
+    },
+    {
+      "site": 391,
+      "file": "web/api/v1/api.go",
+      "line": 1796,
+      "ident": "lastError",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 20,
+      "size": 387,
+      "millis": 102,
+      "top": [
+        "err",
+        "matcherSets",
+        "res",
+        "r",
+        "typ"
+      ]
+    },
+    {
+      "site": 391,
+      "file": "web/api/v1/api.go",
+      "line": 1796,
+      "ident": "lastError",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 464,
+      "millis": 77,
+      "top": [
+        "lastError",
+        "labelsResponseExamples",
+        "labels",
+        "label",
+        "labelsIsEmpty"
+      ]
+    },
+    {
+      "site": 391,
+      "file": "web/api/v1/api.go",
+      "line": 1796,
+      "ident": "lastError",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 60,
+      "millis": 98,
+      "top": [
+        "lastError",
+        "wlog.LastCheckpoint",
+        "apiRuleGroup.LastEvaluation.Add",
+        "apiRuleGroup.LastEvaluation.Equal",
+        "apiRuleGroup.LastEvaluation.String"
+      ]
+    },
+    {
+      "site": 392,
+      "file": "web/api/v1/api.go",
+      "line": 1996,
+      "ident": "TSDBStat",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 0,
+      "rank": 35,
+      "size": 146,
+      "millis": 49,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 392,
+      "file": "web/api/v1/api.go",
+      "line": 1996,
+      "ident": "TSDBStat",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 1,
+      "rank": 3,
+      "size": 98,
+      "millis": 41,
+      "top": [
+        "Target",
+        "TargetRetriever",
+        "TSDBStat",
+        "TSDBAdminStats",
+        "TargetDiscovery"
+      ]
+    },
+    {
+      "site": 392,
+      "file": "web/api/v1/api.go",
+      "line": 1996,
+      "ident": "TSDBStat",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 3,
+      "rank": 1,
+      "size": 7,
+      "millis": 53,
+      "top": [
+        "TSDBStat",
+        "TSDBAdminStats",
+        "TSDBStatus",
+        "testhelpers.TSDBNotReadyQueryable",
+        "tsdb"
+      ]
+    },
+    {
+      "site": 393,
+      "file": "web/api/v1/api.go",
+      "line": 2004,
+      "ident": "API",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 1,
+      "size": 70,
+      "millis": 70,
+      "top": [
+        "API",
+        "apiError",
+        "apiFuncResult",
+        "apiFunc",
+        "example"
+      ]
+    },
+    {
+      "site": 393,
+      "file": "web/api/v1/api.go",
+      "line": 2004,
+      "ident": "API",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 1,
+      "size": 47,
+      "millis": 55,
+      "top": [
+        "API",
+        "Alert",
+        "AlertingRule",
+        "AlertmanagerTarget",
+        "AlertmanagerRetriever"
+      ]
+    },
+    {
+      "site": 394,
+      "file": "web/api/v1/api.go",
+      "line": 2080,
+      "ident": "HeadStats",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 0,
+      "rank": 102,
+      "size": 371,
+      "millis": 176,
+      "top": [
+        "err",
+        "limit",
+        "s",
+        "metrics",
+        "chunkCount"
+      ]
+    },
+    {
+      "site": 394,
+      "file": "web/api/v1/api.go",
+      "line": 2080,
+      "ident": "HeadStats",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 1,
+      "rank": 1,
+      "size": 103,
+      "millis": 74,
+      "top": [
+        "HeadStats",
+        "http",
+        "httputil",
+        "hex",
+        "chunkCount"
+      ]
+    },
+    {
+      "site": 394,
+      "file": "web/api/v1/api.go",
+      "line": 2080,
+      "ident": "HeadStats",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 3,
+      "rank": 1,
+      "size": 22,
+      "millis": 72,
+      "top": [
+        "HeadStats",
+        "r.Response.Header",
+        "chunks.HeadChunkFileHeaderSize",
+        "chunks.HeadChunkID",
+        "chunks.HeadChunkRef"
+      ]
+    },
+    {
+      "site": 395,
+      "file": "web/api/v1/api.go",
+      "line": 2116,
+      "ident": "w",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 366,
+      "millis": 341,
+      "top": [
+        "w",
+        "nil",
+        "api",
+        "r",
+        "chan"
+      ]
+    },
+    {
+      "site": 396,
+      "file": "web/api/v1/api.go",
+      "line": 2178,
+      "ident": "w",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 366,
+      "millis": 102,
+      "top": [
+        "w",
+        "nil",
+        "api",
+        "r",
+        "chan"
+      ]
+    },
+    {
+      "site": 397,
+      "file": "web/api/v1/api.go",
+      "line": 2184,
+      "ident": "otlpWriteHandler",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 63,
+      "size": 91,
+      "millis": 161,
+      "top": [
+        "parser",
+        "query",
+        "rules",
+        "db",
+        "config"
+      ]
+    },
+    {
+      "site": 397,
+      "file": "web/api/v1/api.go",
+      "line": 2184,
+      "ident": "otlpWriteHandler",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 4,
+      "size": 38,
+      "millis": 98,
+      "top": [
+        "overrideErrorCode",
+        "options",
+        "openAPIBuilder",
+        "otlpWriteHandler",
+        "otlpWrite"
+      ]
+    },
+    {
+      "site": 397,
+      "file": "web/api/v1/api.go",
+      "line": 2184,
+      "ident": "otlpWriteHandler",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 2,
+      "millis": 91,
+      "top": [
+        "otlpWriteHandler",
+        "otlpWrite"
+      ]
+    },
+    {
+      "site": 398,
+      "file": "web/api/v1/api.go",
+      "line": 2294,
+      "ident": "String",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 1,
+      "size": 5,
+      "millis": 121,
+      "top": [
+        "String",
+        "Type",
+        "SubType",
+        "Satisfies",
+        ".par"
+      ]
+    },
+    {
+      "site": 398,
+      "file": "web/api/v1/api.go",
+      "line": 2294,
+      "ident": "String",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 90,
+      "top": [
+        "String",
+        "SubType",
+        "Satisfies"
+      ]
+    },
+    {
+      "site": 398,
+      "file": "web/api/v1/api.go",
+      "line": 2294,
+      "ident": "String",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 67,
+      "top": [
+        "String"
+      ]
+    },
+    {
+      "site": 399,
+      "file": "web/api/v1/api.go",
+      "line": 2318,
+      "ident": "any",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 129,
+      "size": 146,
+      "millis": 75,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 399,
+      "file": "web/api/v1/api.go",
+      "line": 2318,
+      "ident": "any",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 24,
+      "size": 574,
+      "millis": 122,
+      "top": [
+        "apiError",
+        "api",
+        "api",
+        "api",
+        "api"
+      ]
+    },
+    {
+      "site": 400,
+      "file": "web/api/v1/api.go",
+      "line": 2352,
+      "ident": "errorBadData",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 2,
+      "size": 364,
+      "millis": 156,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 400,
+      "file": "web/api/v1/api.go",
+      "line": 2352,
+      "ident": "errorBadData",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 2,
+      "size": 700,
+      "millis": 116,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 400,
+      "file": "web/api/v1/api.go",
+      "line": 2352,
+      "ident": "errorBadData",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 2,
+      "size": 108,
+      "millis": 78,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 401,
+      "file": "web/api/v1/api.go",
+      "line": 2354,
+      "ident": "errorExec",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 6,
+      "size": 364,
+      "millis": 76,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorNone"
+      ]
+    },
+    {
+      "site": 401,
+      "file": "web/api/v1/api.go",
+      "line": 2354,
+      "ident": "errorExec",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 6,
+      "size": 700,
+      "millis": 84,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorNone"
+      ]
+    },
+    {
+      "site": 401,
+      "file": "web/api/v1/api.go",
+      "line": 2354,
+      "ident": "errorExec",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 6,
+      "size": 108,
+      "millis": 85,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorNone"
+      ]
+    },
+    {
+      "site": 402,
+      "file": "web/api/v1/api.go",
+      "line": 2356,
+      "ident": "errorCanceled",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 8,
+      "size": 364,
+      "millis": 69,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 402,
+      "file": "web/api/v1/api.go",
+      "line": 2356,
+      "ident": "errorCanceled",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 8,
+      "size": 700,
+      "millis": 92,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 402,
+      "file": "web/api/v1/api.go",
+      "line": 2356,
+      "ident": "errorCanceled",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 8,
+      "size": 108,
+      "millis": 86,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 403,
+      "file": "web/api/v1/api.go",
+      "line": 2360,
+      "ident": "errorInternal",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 4,
+      "size": 364,
+      "millis": 80,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 403,
+      "file": "web/api/v1/api.go",
+      "line": 2360,
+      "ident": "errorInternal",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 4,
+      "size": 700,
+      "millis": 104,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 403,
+      "file": "web/api/v1/api.go",
+      "line": 2360,
+      "ident": "errorInternal",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 4,
+      "size": 108,
+      "millis": 77,
+      "top": [
+        "errType",
+        "errorBadData",
+        "error",
+        "errorInternal",
+        "errorExec"
+      ]
+    },
+    {
+      "site": 404,
+      "file": "web/api/v1/api.go",
+      "line": 2380,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 5,
+      "size": 369,
+      "millis": 119,
+      "top": [
+        "err",
+        "returnAPIError",
+        "r",
+        "searchAPIError",
+        "nil"
+      ]
+    },
+    {
+      "site": 404,
+      "file": "web/api/v1/api.go",
+      "line": 2380,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 360,
+      "millis": 79,
+      "top": [
+        "nil",
+        "neverEmpty",
+        "ne",
+        "ndjsonResponsesWithErrorExamples",
+        "nd"
+      ]
+    },
+    {
+      "site": 405,
+      "file": "web/api/v1/api.go",
+      "line": 2398,
+      "ident": "minTimeFormatted",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 11,
+      "size": 364,
+      "millis": 82,
+      "top": [
+        "s",
+        "getRuleGroupNextToken",
+        "statsAll",
+        "stats",
+        "statsTrue"
+      ]
+    },
+    {
+      "site": 405,
+      "file": "web/api/v1/api.go",
+      "line": 2398,
+      "ident": "minTimeFormatted",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 3,
+      "size": 533,
+      "millis": 91,
+      "top": [
+        "maxTimeFormatted",
+        "max",
+        "minTimeFormatted",
+        "min",
+        "mi"
+      ]
+    },
+    {
+      "site": 405,
+      "file": "web/api/v1/api.go",
+      "line": 2398,
+      "ident": "minTimeFormatted",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 2,
+      "size": 73,
+      "millis": 68,
+      "top": [
+        "min",
+        "minTimeFormatted",
+        "MinTime.Local().String",
+        "MinTime",
+        "MinTime.Month().String"
+      ]
+    },
+    {
+      "site": 406,
+      "file": "web/api/v1/api.go",
+      "line": 2400,
+      "ident": "maxTimeFormatted",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 0,
+      "rank": 11,
+      "size": 364,
+      "millis": 60,
+      "top": [
+        "s",
+        "getRuleGroupNextToken",
+        "statsAll",
+        "stats",
+        "statsTrue"
+      ]
+    },
+    {
+      "site": 406,
+      "file": "web/api/v1/api.go",
+      "line": 2400,
+      "ident": "maxTimeFormatted",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 1,
+      "rank": 4,
+      "size": 533,
+      "millis": 63,
+      "top": [
+        "minTimeFormatted",
+        "min",
+        "mi",
+        "maxTimeFormatted",
+        "max"
+      ]
+    },
+    {
+      "site": 406,
+      "file": "web/api/v1/api.go",
+      "line": 2400,
+      "ident": "maxTimeFormatted",
+      "kind": "case",
+      "sub": "value",
+      "prefix": 3,
+      "rank": 2,
+      "size": 71,
+      "millis": 69,
+      "top": [
+        "max",
+        "maxTimeFormatted",
+        "MaxTime.Local().String",
+        "MaxTime",
+        "MaxTime.Month().String"
+      ]
+    },
+    {
+      "site": 407,
+      "file": "web/api/v1/api.go",
+      "line": 2467,
+      "ident": "Result",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 3,
+      "size": 34,
+      "millis": 91,
+      "top": [
+        "Query",
+        "String",
+        "Result",
+        "FPoint",
+        "Matrix"
+      ]
+    },
+    {
+      "site": 407,
+      "file": "web/api/v1/api.go",
+      "line": 2467,
+      "ident": "Result",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 26,
+      "millis": 100,
+      "top": [
+        "Result",
+        "RatioSampler",
+        "Query",
+        "String",
+        "Matrix"
+      ]
+    },
+    {
+      "site": 407,
+      "file": "web/api/v1/api.go",
+      "line": 2467,
+      "ident": "Result",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 163,
+      "top": [
+        "Result"
+      ]
+    },
+    {
+      "site": 408,
+      "file": "web/api/v1/search.go",
+      "line": 86,
+      "ident": "slices",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 328,
+      "millis": 228,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 408,
+      "file": "web/api/v1/search.go",
+      "line": 86,
+      "ident": "slices",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 103,
+      "size": 934,
+      "millis": 267,
+      "top": [
+        "struct",
+        "stringSchema",
+        "string",
+        "schemaRef",
+        "schema"
+      ]
+    },
+    {
+      "site": 408,
+      "file": "web/api/v1/search.go",
+      "line": 86,
+      "ident": "slices",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 1,
+      "size": 25,
+      "millis": 273,
+      "top": [
+        "slices",
+        "slices",
+        "slices",
+        "slices",
+        "sliceutil"
+      ]
+    },
+    {
+      "site": 409,
+      "file": "web/api/v1/search.go",
+      "line": 183,
+      "ident": "API",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 1,
+      "size": 70,
+      "millis": 40,
+      "top": [
+        "API",
+        "apiError",
+        "apiFuncResult",
+        "apiFunc",
+        "example"
+      ]
+    },
+    {
+      "site": 409,
+      "file": "web/api/v1/search.go",
+      "line": 183,
+      "ident": "API",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 1,
+      "size": 47,
+      "millis": 39,
+      "top": [
+        "API",
+        "AlertingRule",
+        "Alert",
+        "AlertmanagerRetriever",
+        "AlertmanagerTarget"
+      ]
+    },
+    {
+      "site": 410,
+      "file": "web/api/v1/search.go",
+      "line": 242,
+      "ident": "sp",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 1,
+      "size": 338,
+      "millis": 165,
+      "top": [
+        "sp",
+        "err",
+        "start",
+        "now",
+        "apiErr"
+      ]
+    },
+    {
+      "site": 410,
+      "file": "web/api/v1/search.go",
+      "line": 242,
+      "ident": "sp",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 934,
+      "millis": 66,
+      "top": [
+        "sp",
+        "start",
+        "struct",
+        "stringSchema",
+        "string"
+      ]
+    },
+    {
+      "site": 411,
+      "file": "web/api/v1/search.go",
+      "line": 434,
+      "ident": "Status",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 23,
+      "top": [
+        "Status"
+      ]
+    },
+    {
+      "site": 411,
+      "file": "web/api/v1/search.go",
+      "line": 434,
+      "ident": "Status",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 21,
+      "top": [
+        "Status"
+      ]
+    },
+    {
+      "site": 411,
+      "file": "web/api/v1/search.go",
+      "line": 434,
+      "ident": "Status",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 21,
+      "top": [
+        "Status"
+      ]
+    },
+    {
+      "site": 412,
+      "file": "web/api/v1/search.go",
+      "line": 470,
+      "ident": "Err",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 2,
+      "size": 8,
+      "millis": 35,
+      "top": [
+        "Close",
+        "Err",
+        "Warnings",
+        "Next",
+        "At"
+      ]
+    },
+    {
+      "site": 412,
+      "file": "web/api/v1/search.go",
+      "line": 470,
+      "ident": "Err",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 33,
+      "top": [
+        "Err",
+        "Close",
+        "Next"
+      ]
+    },
+    {
+      "site": 413,
+      "file": "web/api/v1/search.go",
+      "line": 476,
+      "ident": "At",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 5,
+      "size": 8,
+      "millis": 56,
+      "top": [
+        "Close",
+        "Err",
+        "Warnings",
+        "Next",
+        "At"
+      ]
+    },
+    {
+      "site": 413,
+      "file": "web/api/v1/search.go",
+      "line": 476,
+      "ident": "At",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 1,
+      "size": 2,
+      "millis": 30,
+      "top": [
+        "At",
+        "Warnings"
+      ]
+    },
+    {
+      "site": 414,
+      "file": "web/api/v1/search.go",
+      "line": 486,
+      "ident": "limit",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 3,
+      "millis": 52,
+      "top": [
+        "limit",
+        "hasMore",
+        "emitted"
+      ]
+    },
+    {
+      "site": 414,
+      "file": "web/api/v1/search.go",
+      "line": 486,
+      "ident": "limit",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 4,
+      "millis": 66,
+      "top": [
+        "limit",
+        "for",
+        "make",
+        "select"
+      ]
+    },
+    {
+      "site": 414,
+      "file": "web/api/v1/search.go",
+      "line": 486,
+      "ident": "limit",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 26,
+      "top": [
+        "limit"
+      ]
+    },
+    {
+      "site": 415,
+      "file": "web/api/v1/search.go",
+      "line": 548,
+      "ident": "nw",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 343,
+      "millis": 136,
+      "top": [
+        "nw",
+        "nil",
+        "batch",
+        "err",
+        "firstBatch"
+      ]
+    },
+    {
+      "site": 415,
+      "file": "web/api/v1/search.go",
+      "line": 548,
+      "ident": "nw",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 357,
+      "millis": 43,
+      "top": [
+        "nw",
+        "nil",
+        "ndjsonWriter",
+        "nd",
+        "neverEmpty"
+      ]
+    },
+    {
+      "site": 416,
+      "file": "web/api/v1/search.go",
+      "line": 551,
+      "ident": "batch",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 343,
+      "millis": 38,
+      "top": [
+        "batch",
+        "err",
+        "nw",
+        "firstBatch",
+        "firstErr"
+      ]
+    },
+    {
+      "site": 416,
+      "file": "web/api/v1/search.go",
+      "line": 551,
+      "ident": "batch",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 344,
+      "millis": 45,
+      "top": [
+        "batch",
+        "buildSearchFilter",
+        "build",
+        "build",
+        "build"
+      ]
+    },
+    {
+      "site": 416,
+      "file": "web/api/v1/search.go",
+      "line": 551,
+      "ident": "batch",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 1,
+      "size": 6,
+      "millis": 94,
+      "top": [
+        "batch",
+        "batchiface",
+        "firstBatch",
+        "searchBatch",
+        "defaultSearchBatchSize"
+      ]
+    },
+    {
+      "site": 417,
+      "file": "web/api/v1/search.go",
+      "line": 562,
+      "ident": "trailerWarnings",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 8,
+      "size": 343,
+      "millis": 68,
+      "top": [
+        "nil",
+        "err",
+        "nw",
+        "firstBatch",
+        "firstErr"
+      ]
+    },
+    {
+      "site": 417,
+      "file": "web/api/v1/search.go",
+      "line": 562,
+      "ident": "trailerWarnings",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 2,
+      "size": 762,
+      "millis": 59,
+      "top": [
+        "T",
+        "trailerWarnings",
+        "tr",
+        "toResult",
+        "to"
+      ]
+    },
+    {
+      "site": 417,
+      "file": "web/api/v1/search.go",
+      "line": 562,
+      "ident": "trailerWarnings",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 1,
+      "size": 81,
+      "millis": 43,
+      "top": [
+        "trailerWarnings",
+        "translateAST",
+        "translate",
+        "translate",
+        "translate"
+      ]
+    },
+    {
+      "site": 418,
+      "file": "web/api/v1/search.go",
+      "line": 659,
+      "ident": "f",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 338,
+      "millis": 50,
+      "top": [
+        "f",
+        "s",
+        "filters",
+        "threshold",
+        "terms"
+      ]
+    },
+    {
+      "site": 419,
+      "file": "web/api/v1/search.go",
+      "line": 705,
+      "ident": "New",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 1,
+      "size": 7,
+      "millis": 34,
+      "top": [
+        "New",
+        "Join",
+        "As",
+        "Is",
+        "AsType"
+      ]
+    },
+    {
+      "site": 419,
+      "file": "web/api/v1/search.go",
+      "line": 705,
+      "ident": "New",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 4,
+      "millis": 32,
+      "top": [
+        "New",
+        "Join",
+        "ErrUnsupported",
+        "Unwrap"
+      ]
+    },
+    {
+      "site": 420,
+      "file": "web/api/v1/search.go",
+      "line": 726,
+      "ident": "apiError",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 0,
+      "rank": 14,
+      "size": 335,
+      "millis": 41,
+      "top": [
+        "sp",
+        "apiErr",
+        "api",
+        "endpoint",
+        "r"
+      ]
+    },
+    {
+      "site": 420,
+      "file": "web/api/v1/search.go",
+      "line": 726,
+      "ident": "apiError",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 1,
+      "rank": 3,
+      "size": 730,
+      "millis": 63,
+      "top": [
+        "apiErr",
+        "api",
+        "apiError",
+        "apiFuncResult",
+        "apiFunc"
+      ]
+    },
+    {
+      "site": 420,
+      "file": "web/api/v1/search.go",
+      "line": 726,
+      "ident": "apiError",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 3,
+      "rank": 4,
+      "size": 111,
+      "millis": 45,
+      "top": [
+        "api",
+        "API",
+        "apiErr",
+        "apiError",
+        "apiFuncResult"
+      ]
+    }
+  ],
+  "insertions": [
+    {
+      "site": 300,
+      "ident": "slog",
+      "importPath": "log/slog",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "logger                      *slog.Logger",
+      "caretColumn": 35
+    },
+    {
+      "site": 301,
+      "ident": "time",
+      "importPath": "time",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "NativeHistogramMinResetDuration: 1 * time.Hour,",
+      "caretColumn": 44
+    },
+    {
+      "site": 305,
+      "ident": "fmt",
+      "importPath": "fmt",
+      "prefix": 1,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "\"sources\", fmt.Sprintf(\"%v\", uids),",
+      "caretColumn": 19
+    },
+    {
+      "site": 310,
+      "ident": "fileutil",
+      "importPath": "github.com/prometheus/prometheus/tsdb/fileutil",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "df, err := fileutil.OpenDir(tmp)",
+      "caretColumn": 21
+    },
+    {
+      "site": 315,
+      "ident": "runtime",
+      "importPath": "runtime",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "runtime.Gosched()",
+      "caretColumn": 12
+    },
+    {
+      "site": 316,
+      "ident": "context",
+      "importPath": "context",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "func (h *Head) Appender(context.Context) storage.Appender {",
+      "caretColumn": 32
+    },
+    {
+      "site": 319,
+      "ident": "chunks",
+      "importPath": "github.com/prometheus/prometheus/tsdb/chunks",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "func (h *Head) getTypeMap() map[chunks.HeadSeriesRef]sampleType {",
+      "caretColumn": 39
+    },
+    {
+      "site": 347,
+      "ident": "storage",
+      "importPath": "github.com/prometheus/prometheus/storage",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "x := make([][]storage.SeriesRef, 0, ensureOrderBatchSize)",
+      "caretColumn": 24
+    },
+    {
+      "site": 351,
+      "ident": "runtime",
+      "importPath": "runtime",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "concurrency = runtime.GOMAXPROCS(0)",
+      "caretColumn": 24
+    },
+    {
+      "site": 358,
+      "ident": "loser",
+      "importPath": "github.com/bboreham/go-loser",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "h   *loser.Tree[storage.SeriesRef, T]",
+      "caretColumn": 12
+    },
+    {
+      "site": 359,
+      "ident": "math",
+      "importPath": "math",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "const maxVal = storage.SeriesRef(math.MaxUint64) // This value must be higher than all real values used in the tree.",
+      "caretColumn": 39
+    },
+    {
+      "site": 362,
+      "ident": "binary",
+      "importPath": "encoding/binary",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "it.cur = binary.BigEndian.Uint32(it.list)",
+      "caretColumn": 18
+    },
+    {
+      "site": 365,
+      "ident": "rules",
+      "importPath": "github.com/prometheus/prometheus/rules",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "RuleGroups() []*rules.Group",
+      "caretColumn": 23
+    },
+    {
+      "site": 366,
+      "ident": "time",
+      "importPath": "time",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "StartTime           time.Time `json:\"startTime\"`",
+      "caretColumn": 26
+    },
+    {
+      "site": 369,
+      "ident": "route",
+      "importPath": "github.com/prometheus/common/route",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "func (api *API) Register(r *route.Router) {",
+      "caretColumn": 34
+    },
+    {
+      "site": 371,
+      "ident": "trace",
+      "importPath": "go.opentelemetry.io/otel/trace",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "func setQueryResultSpanAttributes(span trace.Span, qry promql.Query, value parser.Value) {",
+      "caretColumn": 45
+    },
+    {
+      "site": 375,
+      "ident": "strings",
+      "importPath": "strings",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "if strings.HasPrefix(name, \"U__\") {",
+      "caretColumn": 12
+    },
+    {
+      "site": 382,
+      "ident": "yaml",
+      "importPath": "go.yaml.in/yaml/v2",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "configYAML, err := yaml.Marshal(scrapeConfig)",
+      "caretColumn": 25
+    },
+    {
+      "site": 385,
+      "ident": "strconv",
+      "importPath": "strconv",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "if limit, err = strconv.Atoi(s); err != nil {",
+      "caretColumn": 26
+    },
+    {
+      "site": 386,
+      "ident": "relabel",
+      "importPath": "github.com/prometheus/prometheus/model/relabel",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "Rule   *relabel.Config `json:\"rule\"`",
+      "caretColumn": 17
+    },
+    {
+      "site": 408,
+      "ident": "slices",
+      "importPath": "slices",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "return slices.Clone(fuzzAlgorithms)",
+      "caretColumn": 15
+    }
+  ]
+}

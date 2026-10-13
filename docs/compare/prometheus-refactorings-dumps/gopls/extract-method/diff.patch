@@ -1,0 +1,26 @@
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -134,13 +134,17 @@
+ 			s.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(ql))
+ 		}
+ 
+-		s.metrics.latencySummary.DeleteLabelValues(s.alertmanagerURL)
+-		s.metrics.latencyHistogram.DeleteLabelValues(s.alertmanagerURL)
+-		s.metrics.sent.DeleteLabelValues(s.alertmanagerURL)
+-		s.metrics.dropped.DeleteLabelValues(s.alertmanagerURL)
+-		s.metrics.errors.DeleteLabelValues(s.alertmanagerURL)
+-		s.metrics.queueLength.DeleteLabelValues(s.alertmanagerURL)
++		s.newMethod()
+ 	})
++}
++
++func (s *sendLoop) newMethod() {
++	s.metrics.latencySummary.DeleteLabelValues(s.alertmanagerURL)
++	s.metrics.latencyHistogram.DeleteLabelValues(s.alertmanagerURL)
++	s.metrics.sent.DeleteLabelValues(s.alertmanagerURL)
++	s.metrics.dropped.DeleteLabelValues(s.alertmanagerURL)
++	s.metrics.errors.DeleteLabelValues(s.alertmanagerURL)
++	s.metrics.queueLength.DeleteLabelValues(s.alertmanagerURL)
+ }
+ 
+ func (s *sendLoop) drainQueue() {

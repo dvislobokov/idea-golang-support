@@ -1,0 +1,796 @@
+{
+ "clone": "C:\\Users\\dvislobokov\\idea-golang-support\\.claude\\worktrees\\agent-ae9f0bb3458cde266\\build\\compare\\prometheus-refactor",
+ "results": [
+  {
+   "id": "convert-short-to-var",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 9500
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 860
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "convert-switch-if",
+   "side": "refactor",
+   "written": [
+    "notifier/sendloop.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 15768
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 689
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "cs-add-param",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go",
+    "notifier/alertmanager_test.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 12865
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 754
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "cs-remove-param",
+   "side": "refactor",
+   "written": [
+    "notifier/sendloop.go",
+    "notifier/sendloop_test.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "notifier\\sendloop.go:258:30: undefined: c"
+    ],
+    "millis": 2159
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "# [github.com/prometheus/prometheus/notifier]",
+     "vet.exe: notifier\\sendloop.go:258:30: undefined: c"
+    ],
+    "millis": 463
+   },
+   "baselineVetFails": [],
+   "verdict": "build broken: notifier\\sendloop.go:258:30: undefined: c"
+  },
+  {
+   "id": "cs-reorder",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanagerset.go",
+    "notifier/manager_test.go",
+    "notifier/sendloop.go",
+    "notifier/sendloop_test.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 13348
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 1644
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "cs-results",
+   "side": "refactor",
+   "written": [
+    "notifier/sendloop.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "notifier\\sendloop.go:173:9: not enough return values",
+     "\thave ([]*Alert)",
+     "\twant ([]*Alert, int)",
+     "notifier\\sendloop.go:177:12: assignment mismatch: 1 variable but s.nextBatch returns 2 values"
+    ],
+    "millis": 6389
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "# [github.com/prometheus/prometheus/notifier]",
+     "vet.exe: notifier\\sendloop.go:173:9: not enough return values",
+     "\thave ([]*Alert)",
+     "\twant ([]*Alert, int)"
+    ],
+    "millis": 1118
+   },
+   "baselineVetFails": [],
+   "verdict": "build broken: notifier\\sendloop.go:173:9: not enough return values"
+  },
+  {
+   "id": "extract-constant",
+   "side": "refactor",
+   "written": [
+    "notifier/alert.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 34752
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 1005
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "extract-function-multi",
+   "side": "refactor",
+   "written": [
+    "notifier/sendloop.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 33620
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 3133
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "extract-method",
+   "side": "refactor",
+   "written": [
+    "notifier/sendloop.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 29815
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 639
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "extract-variable",
+   "side": "refactor",
+   "written": [
+    "notifier/sendloop.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 12482
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 467
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "generate-constructor",
+   "side": "refactor",
+   "written": [
+    "notifier/alert.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 16522
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 628
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "generate-getters-setters",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanagerset.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 14857
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 1,
+    "lines": [
+     "notifier\\alertmanagerset.go:210:9: return copies lock value: sync.RWMutex",
+     "notifier\\alertmanagerset.go:245:39: SetMtx passes lock by value: sync.RWMutex",
+     "notifier\\alertmanagerset.go:246:11: assignment copies lock value to as.mtx: sync.RWMutex"
+    ],
+    "millis": 982
+   },
+   "baselineVetFails": [],
+   "verdict": "vet broken: notifier\\alertmanagerset.go:210:9: return copies lock value: sync.RWMutex"
+  },
+  {
+   "id": "generate-string",
+   "side": "refactor",
+   "written": [
+    "notifier/manager.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 20871
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 1,
+    "lines": [
+     "notifier\\manager.go:83:114: fmt.Sprintf format %v arg o.Do is a func value, not called"
+    ],
+    "millis": 1052
+   },
+   "baselineVetFails": [],
+   "verdict": "vet broken: notifier\\manager.go:83:114: fmt.Sprintf format %v arg o.Do is a func value, not called"
+  },
+  {
+   "id": "implement-interface",
+   "side": "refactor",
+   "written": [
+    "notifier/sendloop.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 19518
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 909
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "inline-constant",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 13089
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 841
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "inline-variable",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 12942
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 1076
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "introduce-field",
+   "side": "refactor",
+   "written": [
+    "notifier/sendloop.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 16724
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 778
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "introduce-parameter",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go",
+    "notifier/alertmanager_test.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 12256
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 634
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "move-func-file",
+   "side": "refactor",
+   "written": [
+    "notifier/alert.go",
+    "notifier/util.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 15275
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 748
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "move-func-package",
+   "side": "refactor",
+   "written": [
+    "notifier/openapi/labels.go",
+    "notifier/util.go",
+    "notifier/util_test.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "notifier\\util.go:29:25: undefined: openapi.labelsToOpenAPILabelSet",
+     "notifier\\util.go:34:27: undefined: openapi.labelsToOpenAPILabelSet"
+    ],
+    "millis": 2037
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/ ./notifier/openapi/",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "# [github.com/prometheus/prometheus/notifier]",
+     "vet.exe: notifier\\util.go:29:25: undefined: openapi.labelsToOpenAPILabelSet"
+    ],
+    "millis": 487
+   },
+   "baselineVetFails": [],
+   "verdict": "build broken: notifier\\util.go:29:25: undefined: openapi.labelsToOpenAPILabelSet"
+  },
+  {
+   "id": "move-type-newfile",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go",
+    "notifier/amlabels.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 14769
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 808
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "move-type-package",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go",
+    "notifier/amlabels/amlabels.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 1,
+    "lines": [
+     "package github.com/prometheus/prometheus/cmd/prometheus",
+     "\timports github.com/prometheus/prometheus/notifier from main.go",
+     "\timports github.com/prometheus/prometheus/notifier/amlabels from alertmanager.go",
+     "\timports github.com/prometheus/prometheus/notifier from amlabels.go: import cycle not allowed"
+    ],
+    "millis": 1097
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/ ./notifier/amlabels/",
+    "exit": 1,
+    "lines": [
+     "package github.com/prometheus/prometheus/notifier",
+     "\timports github.com/prometheus/prometheus/notifier/amlabels from alertmanager.go",
+     "\timports github.com/prometheus/prometheus/notifier from amlabels.go: import cycle not allowed"
+    ],
+    "millis": 202
+   },
+   "baselineVetFails": [],
+   "verdict": "build broken: imports github.com/prometheus/prometheus/notifier from amlabels.go: import cycle not allowed"
+  },
+  {
+   "id": "rename-conflict",
+   "side": "refactor",
+   "written": [
+    "notifier/alert.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "notifier\\alert.go:72:2: declared and not used: a",
+     "notifier\\alert.go:76:5: a.Reset undefined (type *Alert has no field or method Reset)",
+     "notifier\\alert.go:79:7: a.Set undefined (type *Alert has no field or method Set)",
+     "notifier\\alert.go:83:34: cannot use a (variable of type *Alert) as *labels.Builder value in argument to relabel.ProcessBuilder",
+     "notifier\\alert.go:89:30: invalid operation: cannot call a.Labels (variable of struct type labels.Labels): labels.Labels is not a function",
+     "notifier\\alert.go:91:19: invalid operation: cannot call a.Labels (variable of struct type labels.Labels): labels.Labels is not a function"
+    ],
+    "millis": 2173
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "# [github.com/prometheus/prometheus/notifier]",
+     "vet.exe: notifier\\alert.go:76:5: a.Reset undefined (type *Alert has no field or method Reset)"
+    ],
+    "millis": 728
+   },
+   "baselineVetFails": [],
+   "verdict": "build broken: notifier\\alert.go:72:2: declared and not used: a"
+  },
+  {
+   "id": "rename-field",
+   "side": "refactor",
+   "written": [
+    "cmd/prometheus/main_test.go",
+    "notifier/alert.go",
+    "notifier/util.go",
+    "notifier/util_test.go",
+    "rules/manager.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 15586
+   },
+   "vet": {
+    "cmd": "go vet ./cmd/prometheus/ ./notifier/ ./rules/",
+    "exit": 0,
+    "lines": [],
+    "millis": 1919
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "rename-file",
+   "side": "refactor",
+   "written": [
+    "notifier/openapi.go",
+    "notifier/openapi_test.go"
+   ],
+   "deleted": [
+    "notifier/util.go",
+    "notifier/util_test.go"
+   ],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 15208
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 732
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "rename-iface-method",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go",
+    "notifier/alertmanagerset.go",
+    "notifier/manager.go",
+    "notifier/manager_test.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 7063
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 606
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "rename-local",
+   "side": "refactor",
+   "written": [
+    "notifier/alert.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 6274
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 515
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "rename-package",
+   "side": "refactor",
+   "written": [
+    "model/histogram/float_histogram.go",
+    "promql/engine.go",
+    "promql/functions.go",
+    "promql/functions_internal_test.go",
+    "util/kahan/kahansum.go",
+    "util/kahan/kahansum_test.go"
+   ],
+   "deleted": [
+    "util/kahansum/kahansum.go",
+    "util/kahansum/kahansum_test.go"
+   ],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 6385
+   },
+   "vet": {
+    "cmd": "go vet ./model/histogram/ ./promql/ ./util/kahan/",
+    "exit": 1,
+    "lines": [
+     "promql\\histogram_stats_iterator.go:66:36: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)",
+     "promql\\value.go:495:35: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)",
+     "promql\\histogram_stats_iterator_test.go:224:27: method Seek(int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)"
+    ],
+    "millis": 641
+   },
+   "baselineVetFails": [
+    "./promql/"
+   ],
+   "verdict": "vet fails (also on the clean clone): promql\\histogram_stats_iterator.go:66:36: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)"
+  },
+  {
+   "id": "rename-type",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanagerset.go",
+    "notifier/manager_test.go",
+    "notifier/sendloop.go",
+    "notifier/sendloop_test.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 0,
+    "lines": [],
+    "millis": 6152
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 0,
+    "lines": [],
+    "millis": 640
+   },
+   "baselineVetFails": [],
+   "verdict": "ok"
+  },
+  {
+   "id": "safe-delete-test-only",
+   "side": "refactor",
+   "written": [
+    "util/strutil/strconv.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/util/strutil",
+     "util\\strutil\\strconv.go:19:2: \"strings\" imported and not used"
+    ],
+    "millis": 1273
+   },
+   "vet": {
+    "cmd": "go vet ./util/strutil/",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/util/strutil",
+     "# [github.com/prometheus/prometheus/util/strutil]",
+     "vet.exe: util\\strutil\\strconv_test.go:224:14: undefined: SanitizeFullLabelName"
+    ],
+    "millis": 219
+   },
+   "baselineVetFails": [],
+   "verdict": "build broken: util\\strutil\\strconv.go:19:2: \"strings\" imported and not used"
+  },
+  {
+   "id": "safe-delete-used",
+   "side": "refactor",
+   "written": [
+    "notifier/alertmanager.go"
+   ],
+   "deleted": [],
+   "build": {
+    "cmd": "go build ./...",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "notifier\\alertmanager.go:17:2: \"fmt\" imported and not used",
+     "notifier\\alertmanager.go:19:2: \"path\" imported and not used",
+     "notifier\\alertmanager.go:61:21: undefined: postPath"
+    ],
+    "millis": 2484
+   },
+   "vet": {
+    "cmd": "go vet ./notifier/",
+    "exit": 1,
+    "lines": [
+     "# github.com/prometheus/prometheus/notifier",
+     "# [github.com/prometheus/prometheus/notifier]",
+     "vet.exe: notifier\\alertmanager.go:61:21: undefined: postPath"
+    ],
+    "millis": 761
+   },
+   "baselineVetFails": [],
+   "verdict": "build broken: notifier\\alertmanager.go:17:2: \"fmt\" imported and not used"
+  }
+ ]
+}

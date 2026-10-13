@@ -1,0 +1,147 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "E10",
+   "category": "enter",
+   "title": "Enter after a case clause",
+   "query": null,
+   "text": "package scrape\n\ntype TargetHealth string\n\nfunc describe(h TargetHealth) string {\n\tswitch h {\n\tcase \"up\":\n\t\t<caret>\n\t}\n\treturn \"\"\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1867
+  },
+  {
+   "id": "C01",
+   "category": "complete",
+   "title": "Complete Statement after `if err != nil`",
+   "query": null,
+   "text": "package scrape\n\nfunc scrape() error {\n\terr := run()\n\tif err != nil {\n\t\t<caret>\n\t}\n\treturn nil\n}\n\nfunc run() error { return nil }\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1847
+  },
+  {
+   "id": "C02",
+   "category": "complete",
+   "title": "Complete Statement after a for header",
+   "query": null,
+   "text": "package scrape\n\nfunc count(targets []string) int {\n\tn := 0\n\tfor i := 0; i < len(targets); i++ {\n\t\t<caret>\n\t}\n\treturn n\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1785
+  },
+  {
+   "id": "C03",
+   "category": "complete",
+   "title": "Complete Statement on `func f(` without `)`",
+   "query": null,
+   "text": "package scrape\n\ntype scrapePool struct{}\n\ntype Target struct{}\n\nfunc (sp *scrapePool) sync(targets []*Target {\n\t<caret>\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1813
+  },
+  {
+   "id": "C04",
+   "category": "complete",
+   "title": "Complete Statement on a call without `)`",
+   "query": null,
+   "text": "package scrape\n\nimport \"net/http\"\n\nfunc fetch(client *http.Client, req *http.Request) {\n\tclient.Do(req)\n\t<caret>\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1781
+  },
+  {
+   "id": "C05",
+   "category": "complete",
+   "title": "Complete Statement on `return fmt.Errorf(` without `)`",
+   "query": null,
+   "text": "package rules\n\nimport \"fmt\"\n\nfunc reload(name string, err error) error {\n\treturn fmt.Errorf(\"reload %s: %w\", name, err)\n\t<caret>\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1793
+  },
+  {
+   "id": "P01",
+   "category": "pairs",
+   "title": "'(' after a method name",
+   "query": null,
+   "text": "package scrape\n\ntype scrapePool struct{}\n\nfunc (sp *scrapePool) reload() {}\n\nfunc run(sp *scrapePool) {\n\tsp.reload(<caret>)\n}\n",
+   "steps": [
+    {
+     "key": "(",
+     "line": "\tsp.reload(<caret>)",
+     "selection": null
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1791
+  },
+  {
+   "id": "P02",
+   "category": "pairs",
+   "title": "'\"' opens a pair, the closing one is overtyped",
+   "query": null,
+   "text": "package scrape\n\nfunc job() string {\n\tname := \"node\"<caret>\n\treturn name\n}\n",
+   "steps": [
+    {
+     "key": "\"",
+     "line": "\tname := \"<caret>\"",
+     "selection": null
+    },
+    {
+     "key": "n",
+     "line": "\tname := \"n<caret>\"",
+     "selection": null
+    },
+    {
+     "key": "o",
+     "line": "\tname := \"no<caret>\"",
+     "selection": null
+    },
+    {
+     "key": "d",
+     "line": "\tname := \"nod<caret>\"",
+     "selection": null
+    },
+    {
+     "key": "e",
+     "line": "\tname := \"node<caret>\"",
+     "selection": null
+    },
+    {
+     "key": "\"",
+     "line": "\tname := \"node\"<caret>",
+     "selection": null
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2601
+  }
+ ]
+}

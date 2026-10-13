@@ -1,0 +1,50 @@
+--- a/notifier/alertmanagerset.go
++++ b/notifier/alertmanagerset.go
+@@ -48,20 +48,10 @@
+ }
+ 
+ func newAlertmanagerSet(cfg *config.AlertmanagerConfig, opts *Options, logger *slog.Logger, metrics *alertMetrics) (*alertmanagerSet, error) {
+-	client, err := config_util.NewClientFromConfig(cfg.HTTPClientConfig, "alertmanager")
++	client, result, err := newFunction(cfg)
+ 	if err != nil {
+-		return nil, err
++		return result, err
+ 	}
+-	t := client.Transport
+-
+-	if cfg.SigV4Config != nil {
+-		t, err = sigv4.NewSigV4RoundTripper(cfg.SigV4Config, client.Transport)
+-		if err != nil {
+-			return nil, err
+-		}
+-	}
+-
+-	client.Transport = t
+ 
+ 	s := &alertmanagerSet{
+ 		client:    client,
+@@ -72,6 +62,24 @@
+ 		metrics:   metrics,
+ 	}
+ 	return s, nil
++}
++
++func newFunction(cfg *config.AlertmanagerConfig) (*http.Client, *alertmanagerSet, error) {
++	client, err := config_util.NewClientFromConfig(cfg.HTTPClientConfig, "alertmanager")
++	if err != nil {
++		return nil, nil, err
++	}
++	t := client.Transport
++
++	if cfg.SigV4Config != nil {
++		t, err = sigv4.NewSigV4RoundTripper(cfg.SigV4Config, client.Transport)
++		if err != nil {
++			return nil, nil, err
++		}
++	}
++
++	client.Transport = t
++	return client, nil, nil
+ }
+ 
+ // sync extracts a deduplicated set of Alertmanager endpoints from a list

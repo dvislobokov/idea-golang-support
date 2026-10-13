@@ -1,0 +1,442 @@
+--- a/model/histogram/float_histogram.go
++++ b/model/histogram/float_histogram.go
+@@ -20,7 +20,7 @@
+ 	"slices"
+ 	"strings"
+ 
+-	"github.com/prometheus/prometheus/util/kahansum"
++	"github.com/prometheus/prometheus/util/kahan"
+ )
+ 
+ // FloatHistogram is similar to Histogram but uses float64 for all
+@@ -428,11 +428,11 @@
+ 	}
+ 	if !h.UsesCustomBuckets() {
+ 		otherZeroCount, otherCZeroCount := h.reconcileZeroBuckets(other, c)
+-		h.ZeroCount, c.ZeroCount = kahansum.Inc(otherZeroCount, h.ZeroCount, c.ZeroCount)
+-		h.ZeroCount, c.ZeroCount = kahansum.Inc(otherCZeroCount, h.ZeroCount, c.ZeroCount)
++		h.ZeroCount, c.ZeroCount = kahan.Inc(otherZeroCount, h.ZeroCount, c.ZeroCount)
++		h.ZeroCount, c.ZeroCount = kahan.Inc(otherCZeroCount, h.ZeroCount, c.ZeroCount)
+ 	}
+-	h.Count, c.Count = kahansum.Inc(other.Count, h.Count, c.Count)
+-	h.Sum, c.Sum = kahansum.Inc(other.Sum, h.Sum, c.Sum)
++	h.Count, c.Count = kahan.Inc(other.Count, h.Count, c.Count)
++	h.Sum, c.Sum = kahan.Inc(other.Sum, h.Sum, c.Sum)
+ 
+ 	var (
+ 		hPositiveSpans       = h.PositiveSpans
+@@ -1019,9 +1019,9 @@
+ 				break
+ 			}
+ 			// Bucket to be merged into zero bucket.
+-			hZeroCount, cZeroCount = kahansum.Inc(b.Count, hZeroCount, cZeroCount)
++			hZeroCount, cZeroCount = kahan.Inc(b.Count, hZeroCount, cZeroCount)
+ 			if c != nil {
+-				hZeroCount, cZeroCount = kahansum.Inc(c.PositiveBuckets[bucketsIdx], hZeroCount, cZeroCount)
++				hZeroCount, cZeroCount = kahan.Inc(c.PositiveBuckets[bucketsIdx], hZeroCount, cZeroCount)
+ 			}
+ 			if b.Upper > largerThreshold {
+ 				// New threshold ended up within a bucket. if it's
+@@ -1042,9 +1042,9 @@
+ 				break
+ 			}
+ 			// Bucket to be merged into zero bucket.
+-			hZeroCount, cZeroCount = kahansum.Inc(b.Count, hZeroCount, cZeroCount)
++			hZeroCount, cZeroCount = kahan.Inc(b.Count, hZeroCount, cZeroCount)
+ 			if c != nil {
+-				hZeroCount, cZeroCount = kahansum.Inc(c.NegativeBuckets[bucketsIdx], hZeroCount, cZeroCount)
++				hZeroCount, cZeroCount = kahan.Inc(c.NegativeBuckets[bucketsIdx], hZeroCount, cZeroCount)
+ 			}
+ 			if b.Lower < -largerThreshold {
+ 				// New threshold ended up within a bucket. If
+@@ -1609,9 +1609,9 @@
+ 					goto nextLoop
+ 				} else if spansA[0].Offset == indexB {
+ 					// Just add to first bucket.
+-					bucketsA[0], compensationBucketsA[0] = kahansum.Inc(bucketB, bucketsA[0], compensationBucketsA[0])
++					bucketsA[0], compensationBucketsA[0] = kahan.Inc(bucketB, bucketsA[0], compensationBucketsA[0])
+ 					if compensationBucketB != 0 {
+-						bucketsA[0], compensationBucketsA[0] = kahansum.Inc(compensationBucketB, bucketsA[0], compensationBucketsA[0])
++						bucketsA[0], compensationBucketsA[0] = kahan.Inc(compensationBucketB, bucketsA[0], compensationBucketsA[0])
+ 					}
+ 					goto nextLoop
+ 				}
+@@ -1625,9 +1625,9 @@
+ 					// Bucket is in current span.
+ 					iBucket += int(deltaIndex)
+ 					iInSpan += deltaIndex
+-					bucketsA[iBucket], compensationBucketsA[iBucket] = kahansum.Inc(bucketB, bucketsA[iBucket], compensationBucketsA[iBucket])
++					bucketsA[iBucket], compensationBucketsA[iBucket] = kahan.Inc(bucketB, bucketsA[iBucket], compensationBucketsA[iBucket])
+ 					if compensationBucketB != 0 {
+-						bucketsA[iBucket], compensationBucketsA[iBucket] = kahansum.Inc(compensationBucketB, bucketsA[iBucket], compensationBucketsA[iBucket])
++						bucketsA[iBucket], compensationBucketsA[iBucket] = kahan.Inc(compensationBucketB, bucketsA[iBucket], compensationBucketsA[iBucket])
+ 					}
+ 					break
+ 				}
+@@ -1851,11 +1851,11 @@
+ 					}
+ 
+ 					if negative {
+-						targetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Dec(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])
++						targetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Dec(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])
+ 					} else {
+-						targetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Inc(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])
++						targetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Inc(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])
+ 						if withCompensation && bucketsC != nil {
+-							targetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Inc(bucketsC[bucketIdx], targetBuckets[targetIdx], cTargetBuckets[targetIdx])
++							targetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Inc(bucketsC[bucketIdx], targetBuckets[targetIdx], cTargetBuckets[targetIdx])
+ 						}
+ 					}
+ 				}
+@@ -1996,12 +1996,12 @@
+ 			case lastTargetBucketIdx == targetBucketIdx:
+ 				// The current bucket has to be merged into the same target bucket as the previous bucket.
+ 				lastBucketIdx := len(targetReceivingBuckets) - 1
+-				targetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahansum.Inc(
++				targetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahan.Inc(
+ 					originReceivingBuckets[bucketCountIdx],
+ 					targetReceivingBuckets[lastBucketIdx],
+ 					targetCompensationBuckets[lastBucketIdx],
+ 				)
+-				targetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahansum.Inc(
++				targetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahan.Inc(
+ 					originCompensationBuckets[bucketCountIdx],
+ 					targetReceivingBuckets[lastBucketIdx],
+ 					targetCompensationBuckets[lastBucketIdx],
+--- a/promql/engine.go
++++ b/promql/engine.go
+@@ -51,7 +51,7 @@
+ 	"github.com/prometheus/prometheus/tsdb/chunkenc"
+ 	"github.com/prometheus/prometheus/util/annotations"
+ 	"github.com/prometheus/prometheus/util/features"
+-	"github.com/prometheus/prometheus/util/kahansum"
++	"github.com/prometheus/prometheus/util/kahan"
+ 	"github.com/prometheus/prometheus/util/logging"
+ 	"github.com/prometheus/prometheus/util/stats"
+ 	"github.com/prometheus/prometheus/util/zeropool"
+@@ -3788,7 +3788,7 @@
+ 				// point in copying the histogram in that case.
+ 			} else {
+ 				group.hasFloat = true
+-				group.floatValue, group.floatKahanC = kahansum.Inc(f, group.floatValue, group.floatKahanC)
++				group.floatValue, group.floatKahanC = kahan.Inc(f, group.floatValue, group.floatKahanC)
+ 			}
+ 
+ 		case parser.AVG:
+@@ -3875,7 +3875,7 @@
+ 			} else {
+ 				group.hasFloat = true
+ 				if !group.floatIncrementalMean {
+-					newV, newC := kahansum.Inc(f, group.floatValue, group.floatKahanC)
++					newV, newC := kahan.Inc(f, group.floatValue, group.floatKahanC)
+ 					if !math.IsInf(newV, 0) {
+ 						// The sum doesn't overflow, so we propagate it to the
+ 						// group struct and continue with the regular
+@@ -3891,7 +3891,7 @@
+ 					group.floatKahanC /= group.groupCount - 1
+ 				}
+ 				q := (group.groupCount - 1) / group.groupCount
+-				group.floatMean, group.floatKahanC = kahansum.Inc(
++				group.floatMean, group.floatKahanC = kahan.Inc(
+ 					f/group.groupCount,
+ 					q*group.floatMean,
+ 					q*group.floatKahanC,
+--- a/promql/functions.go
++++ b/promql/functions.go
+@@ -33,7 +33,7 @@
+ 	"github.com/prometheus/prometheus/promql/parser/posrange"
+ 	"github.com/prometheus/prometheus/schema"
+ 	"github.com/prometheus/prometheus/util/annotations"
+-	"github.com/prometheus/prometheus/util/kahansum"
++	"github.com/prometheus/prometheus/util/kahan"
+ )
+ 
+ // FunctionCall is the type of a PromQL function implementation
+@@ -1344,7 +1344,7 @@
+ 		for i, f := range s.Floats[1:] {
+ 			count = float64(i + 2)
+ 			if !incrementalMean {
+-				newSum, newC := kahansum.Inc(f.F, sum, kahanC)
++				newSum, newC := kahan.Inc(f.F, sum, kahanC)
+ 				// Perform regular mean calculation as long as
+ 				// the sum doesn't overflow.
+ 				if !math.IsInf(newSum, 0) {
+@@ -1358,7 +1358,7 @@
+ 				kahanC /= (count - 1)
+ 			}
+ 			q := (count - 1) / count
+-			mean, kahanC = kahansum.Inc(f.F/count, q*mean, q*kahanC)
++			mean, kahanC = kahan.Inc(f.F/count, q*mean, q*kahanC)
+ 		}
+ 		if incrementalMean {
+ 			return mean + kahanC
+@@ -1639,7 +1639,7 @@
+ 	return aggrOverTime(matrixVal, enh, func(s Series) float64 {
+ 		var sum, c float64
+ 		for _, f := range s.Floats {
+-			sum, c = kahansum.Inc(f.F, sum, c)
++			sum, c = kahan.Inc(f.F, sum, c)
+ 		}
+ 		if math.IsInf(sum, 0) {
+ 			return sum
+@@ -1692,8 +1692,8 @@
+ 		for _, f := range s.Floats {
+ 			count++
+ 			delta := f.F - (mean + cMean)
+-			mean, cMean = kahansum.Inc(delta/count, mean, cMean)
+-			aux, cAux = kahansum.Inc(delta*(f.F-(mean+cMean)), aux, cAux)
++			mean, cMean = kahan.Inc(delta/count, mean, cMean)
++			aux, cAux = kahan.Inc(delta*(f.F-(mean+cMean)), aux, cAux)
+ 		}
+ 		variance := (aux + cAux) / count
+ 		if varianceToResult == nil {
+@@ -1965,10 +1965,10 @@
+ 		}
+ 		n += 1.0
+ 		x := float64(sample.T-interceptTime) / 1e3
+-		sumX, cX = kahansum.Inc(x, sumX, cX)
+-		sumY, cY = kahansum.Inc(sample.F, sumY, cY)
+-		sumXY, cXY = kahansum.Inc(x*sample.F, sumXY, cXY)
+-		sumX2, cX2 = kahansum.Inc(x*x, sumX2, cX2)
++		sumX, cX = kahan.Inc(x, sumX, cX)
++		sumY, cY = kahan.Inc(sample.F, sumY, cY)
++		sumXY, cXY = kahan.Inc(x*sample.F, sumXY, cXY)
++		sumX2, cX2 = kahan.Inc(x*x, sumX2, cX2)
+ 	}
+ 	if constY {
+ 		if math.IsInf(initY, 0) {
+@@ -2104,7 +2104,7 @@
+ 				}
+ 			}
+ 			delta := val - mean
+-			variance, cVariance = kahansum.Inc(bucket.Count*delta*delta, variance, cVariance)
++			variance, cVariance = kahan.Inc(bucket.Count*delta*delta, variance, cVariance)
+ 		}
+ 		variance += cVariance
+ 		variance /= h.Count
+--- a/promql/functions_internal_test.go
++++ b/promql/functions_internal_test.go
+@@ -25,7 +25,7 @@
+ 	"github.com/prometheus/prometheus/model/labels"
+ 	"github.com/prometheus/prometheus/promql/parser/posrange"
+ 	"github.com/prometheus/prometheus/util/annotations"
+-	"github.com/prometheus/prometheus/util/kahansum"
++	"github.com/prometheus/prometheus/util/kahan"
+ )
+ 
+ func TestHistogramRateCounterResetHint(t *testing.T) {
+@@ -81,7 +81,7 @@
+ 
+ 	runTest := func(t *testing.T, a, b, expected float64) {
+ 		t.Run(fmt.Sprintf("%v + %v = %v", a, b, expected), func(t *testing.T) {
+-			sum, c := kahansum.Inc(b, a, 0)
++			sum, c := kahan.Inc(b, a, 0)
+ 			result := sum + c
+ 
+ 			if math.IsNaN(expected) {
+--- /dev/null
++++ b/util/kahan/kahansum.go
+@@ -1,0 +1,60 @@
++// Copyright 2024 The Prometheus Authors
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++// http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++package kahan
++
++import "math"
++
++// isInf reports whether f is positive or negative infinity.
++// It avoids math.IsInf to prevent inflating Inc's inlining cost.
++func isInf(f float64) bool {
++	return f > math.MaxFloat64 || f < -math.MaxFloat64
++}
++
++// Inc performs addition of two floating-point numbers using the Kahan summation algorithm.
++func Inc(inc, sum, c float64) (newSum, newC float64) {
++	// We've seen Kahan summation return less accurate results when Inc function is
++	// allowed to be inlined (see https://github.com/prometheus/prometheus/pull/16895).
++	// Go permits fusing float operations (e.g. using fused multiply-add, which allows
++	// calculating a*b+c without rounding the result of a*b to precision available in float64),
++	// and Kahan sum is sensitive to float rounding behavior. Instead of forbidding inlining
++	// (which only disallows fusing operations outside of Inc with operations  happening inside)
++	// and eating the performance cost of non-inlined function calls, we forbid just the fusing
++	// across Inc call boundary. We can do that by explicitly requesting Inc arguments and results
++	// to be rounded to float64 precision, as documented in go spec (https://go.dev/ref/spec#Floating_point_operators).
++	// The following casts are not no-ops!
++	inc = float64(inc)
++	sum = float64(sum)
++	c = float64(c)
++
++	t := sum + inc
++	switch {
++	case isInf(t):
++		c = 0
++
++		// Using Neumaier improvement, swap if next term larger than sum.
++	case math.Abs(sum) >= math.Abs(inc):
++		c += (sum - t) + inc
++	default:
++		c += (inc - t) + sum
++	}
++
++	t = float64(t)
++	c = float64(c)
++	return t, c
++}
++
++func Dec(dec, sum, c float64) (newSum, newC float64) {
++	return Inc(-dec, sum, c)
++}
++
+--- /dev/null
++++ b/util/kahan/kahansum_test.go
+@@ -1,0 +1,37 @@
++// Copyright The Prometheus Authors
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++// http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++package kahan
++
++import (
++	"math"
++	"testing"
++
++	"github.com/stretchr/testify/require"
++)
++
++func TestIsInf(t *testing.T) {
++	for _, f := range []float64{
++		math.Inf(1),
++		math.Inf(-1),
++		math.MaxFloat64,
++		-math.MaxFloat64,
++		1.0,
++		-1.0,
++		0,
++		math.NaN(),
++	} {
++		require.Equal(t, math.IsInf(f, 0), isInf(f), "%e", f)
++	}
++}
++
+--- a/util/kahansum/kahansum.go
++++ /dev/null
+@@ -1,60 +1,0 @@
+-// Copyright 2024 The Prometheus Authors
+-// Licensed under the Apache License, Version 2.0 (the "License");
+-// you may not use this file except in compliance with the License.
+-// You may obtain a copy of the License at
+-//
+-// http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing, software
+-// distributed under the License is distributed on an "AS IS" BASIS,
+-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-// See the License for the specific language governing permissions and
+-// limitations under the License.
+-
+-package kahansum
+-
+-import "math"
+-
+-// isInf reports whether f is positive or negative infinity.
+-// It avoids math.IsInf to prevent inflating Inc's inlining cost.
+-func isInf(f float64) bool {
+-	return f > math.MaxFloat64 || f < -math.MaxFloat64
+-}
+-
+-// Inc performs addition of two floating-point numbers using the Kahan summation algorithm.
+-func Inc(inc, sum, c float64) (newSum, newC float64) {
+-	// We've seen Kahan summation return less accurate results when Inc function is
+-	// allowed to be inlined (see https://github.com/prometheus/prometheus/pull/16895).
+-	// Go permits fusing float operations (e.g. using fused multiply-add, which allows
+-	// calculating a*b+c without rounding the result of a*b to precision available in float64),
+-	// and Kahan sum is sensitive to float rounding behavior. Instead of forbidding inlining
+-	// (which only disallows fusing operations outside of Inc with operations  happening inside)
+-	// and eating the performance cost of non-inlined function calls, we forbid just the fusing
+-	// across Inc call boundary. We can do that by explicitly requesting Inc arguments and results
+-	// to be rounded to float64 precision, as documented in go spec (https://go.dev/ref/spec#Floating_point_operators).
+-	// The following casts are not no-ops!
+-	inc = float64(inc)
+-	sum = float64(sum)
+-	c = float64(c)
+-
+-	t := sum + inc
+-	switch {
+-	case isInf(t):
+-		c = 0
+-
+-		// Using Neumaier improvement, swap if next term larger than sum.
+-	case math.Abs(sum) >= math.Abs(inc):
+-		c += (sum - t) + inc
+-	default:
+-		c += (inc - t) + sum
+-	}
+-
+-	t = float64(t)
+-	c = float64(c)
+-	return t, c
+-}
+-
+-func Dec(dec, sum, c float64) (newSum, newC float64) {
+-	return Inc(-dec, sum, c)
+-}
+-
+--- a/util/kahansum/kahansum_test.go
++++ /dev/null
+@@ -1,37 +1,0 @@
+-// Copyright The Prometheus Authors
+-// Licensed under the Apache License, Version 2.0 (the "License");
+-// you may not use this file except in compliance with the License.
+-// You may obtain a copy of the License at
+-//
+-// http://www.apache.org/licenses/LICENSE-2.0
+-//
+-// Unless required by applicable law or agreed to in writing, software
+-// distributed under the License is distributed on an "AS IS" BASIS,
+-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-// See the License for the specific language governing permissions and
+-// limitations under the License.
+-
+-package kahansum
+-
+-import (
+-	"math"
+-	"testing"
+-
+-	"github.com/stretchr/testify/require"
+-)
+-
+-func TestIsInf(t *testing.T) {
+-	for _, f := range []float64{
+-		math.Inf(1),
+-		math.Inf(-1),
+-		math.MaxFloat64,
+-		-math.MaxFloat64,
+-		1.0,
+-		-1.0,
+-		0,
+-		math.NaN(),
+-	} {
+-		require.Equal(t, math.IsInf(f, 0), isInf(f), "%e", f)
+-	}
+-}
+-

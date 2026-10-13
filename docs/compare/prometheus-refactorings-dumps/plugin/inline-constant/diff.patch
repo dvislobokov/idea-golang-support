@@ -1,0 +1,26 @@
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -33,13 +33,11 @@
+ 
+ type alertmanagerLabels struct{ labels.Labels }
+ 
+-const pathLabel = "__alerts_path__"
+-
+ func (a alertmanagerLabels) url() *url.URL {
+ 	return &url.URL{
+ 		Scheme: a.Get(model.SchemeLabel),
+ 		Host:   a.Get(model.AddressLabel),
+-		Path:   a.Get(pathLabel),
++		Path:   a.Get("__alerts_path__"),
+ 	}
+ }
+ 
+@@ -58,7 +56,7 @@
+ 		}
+ 		// Set configured scheme as the initial scheme label for overwrite.
+ 		lb.Set(model.SchemeLabel, cfg.Scheme)
+-		lb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion))
++		lb.Set("__alerts_path__", postPath(cfg.PathPrefix, cfg.APIVersion))
+ 
+ 		// Combine target labels with target group labels.
+ 		for ln, lv := range tg.Labels {

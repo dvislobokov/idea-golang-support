@@ -1,0 +1,7409 @@
+{
+  "attempts": [
+    {
+      "site": 1,
+      "file": "cmd/promtool/main.go",
+      "line": 109,
+      "ident": "context",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 246,
+      "millis": 6536,
+      "top": [
+        "serverURL",
+        "httpRoundTripper",
+        "http",
+        "httpConfigFilePath",
+        "remoteWriteURL"
+      ]
+    },
+    {
+      "site": 1,
+      "file": "cmd/promtool/main.go",
+      "line": 109,
+      "ident": "context",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 39,
+      "size": 774,
+      "millis": 3938,
+      "top": [
+        "chan",
+        "cha",
+        "checkErr",
+        "check",
+        "check"
+      ]
+    },
+    {
+      "site": 1,
+      "file": "cmd/promtool/main.go",
+      "line": 109,
+      "ident": "context",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 3,
+      "size": 162,
+      "millis": 523,
+      "top": [
+        "configLintConfig",
+        "config",
+        "context",
+        "context",
+        "context"
+      ]
+    },
+    {
+      "site": 2,
+      "file": "cmd/promtool/main.go",
+      "line": 186,
+      "ident": "queryInstantCmd",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 16,
+      "size": 277,
+      "millis": 488,
+      "top": [
+        "ctx",
+        "serverURL",
+        "app",
+        "httpRoundTripper",
+        "http"
+      ]
+    },
+    {
+      "site": 2,
+      "file": "cmd/promtool/main.go",
+      "line": 186,
+      "ident": "queryInstantCmd",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 4,
+      "size": 69,
+      "millis": 126,
+      "top": [
+        "queryCmd",
+        "query",
+        "qu",
+        "queryInstantCmd",
+        "queryCmdFmt"
+      ]
+    },
+    {
+      "site": 2,
+      "file": "cmd/promtool/main.go",
+      "line": 186,
+      "ident": "queryInstantCmd",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 3,
+      "size": 129,
+      "millis": 466,
+      "top": [
+        "queryCmd",
+        "query",
+        "queryInstantCmd",
+        "queryCmdFmt",
+        "queryRangeAPI"
+      ]
+    },
+    {
+      "site": 3,
+      "file": "cmd/promtool/main.go",
+      "line": 216,
+      "ident": "String",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 4,
+      "size": 135,
+      "millis": 295,
+      "top": [
+        "Default",
+        "Duration",
+        "Required",
+        "String",
+        "Bool"
+      ]
+    },
+    {
+      "site": 3,
+      "file": "cmd/promtool/main.go",
+      "line": 216,
+      "ident": "String",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 1,
+      "size": 73,
+      "millis": 122,
+      "top": [
+        "String",
+        "Short",
+        "Strings",
+        "StringMap",
+        "StringVar"
+      ]
+    },
+    {
+      "site": 3,
+      "file": "cmd/promtool/main.go",
+      "line": 216,
+      "ident": "String",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 3,
+      "rank": 1,
+      "size": 6,
+      "millis": 112,
+      "top": [
+        "String",
+        "Strings",
+        "StringMap",
+        "StringVar",
+        "StringsVar"
+      ]
+    },
+    {
+      "site": 4,
+      "file": "cmd/promtool/main.go",
+      "line": 278,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 339,
+      "millis": 258,
+      "top": [
+        "ctx",
+        "serverURL",
+        "app",
+        "httpRoundTripper",
+        "http"
+      ]
+    },
+    {
+      "site": 4,
+      "file": "cmd/promtool/main.go",
+      "line": 278,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 50,
+      "size": 515,
+      "millis": 255,
+      "top": [
+        "metricFiles",
+        "metric",
+        "metric",
+        "metric",
+        "metric"
+      ]
+    },
+    {
+      "site": 4,
+      "file": "cmd/promtool/main.go",
+      "line": 278,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 6,
+      "size": 63,
+      "millis": 327,
+      "top": [
+        "mat",
+        "matchesRun",
+        "match",
+        "match",
+        "match"
+      ]
+    },
+    {
+      "site": 5,
+      "file": "cmd/promtool/main.go",
+      "line": 299,
+      "ident": "importRulesCmd",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 15,
+      "size": 359,
+      "millis": 217,
+      "top": [
+        "ctx",
+        "serverURL",
+        "app",
+        "maxBlockDuration",
+        "max"
+      ]
+    },
+    {
+      "site": 5,
+      "file": "cmd/promtool/main.go",
+      "line": 299,
+      "ident": "importRulesCmd",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 5,
+      "size": 486,
+      "millis": 179,
+      "top": [
+        "if",
+        "if",
+        "if",
+        "if",
+        "importRulesCmd"
+      ]
+    },
+    {
+      "site": 5,
+      "file": "cmd/promtool/main.go",
+      "line": 299,
+      "ident": "importRulesCmd",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 77,
+      "millis": 115,
+      "top": [
+        "importRulesCmd",
+        "importRules",
+        "import",
+        "importCmd",
+        "importDBPath"
+      ]
+    },
+    {
+      "site": 6,
+      "file": "cmd/promtool/main.go",
+      "line": 374,
+      "ident": "fmt",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 381,
+      "millis": 263,
+      "top": [
+        "ctx",
+        "f",
+        "p",
+        "serverURL",
+        "app"
+      ]
+    },
+    {
+      "site": 6,
+      "file": "cmd/promtool/main.go",
+      "line": 374,
+      "ident": "fmt",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 29,
+      "size": 435,
+      "millis": 227,
+      "top": [
+        "f",
+        "for",
+        "fo",
+        "for",
+        "for"
+      ]
+    },
+    {
+      "site": 7,
+      "file": "cmd/promtool/main.go",
+      "line": 433,
+      "ident": "EnableAtModifier",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 2,
+      "millis": 177,
+      "top": [
+        "EnableAtModifier",
+        "StartTime"
+      ]
+    },
+    {
+      "site": 7,
+      "file": "cmd/promtool/main.go",
+      "line": 433,
+      "ident": "EnableAtModifier",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 2,
+      "size": 10,
+      "millis": 124,
+      "top": [
+        "if",
+        "EnableAtModifier",
+        "chan",
+        "chan",
+        "defer"
+      ]
+    },
+    {
+      "site": 7,
+      "file": "cmd/promtool/main.go",
+      "line": 433,
+      "ident": "EnableAtModifier",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 77,
+      "top": [
+        "EnableAtModifier"
+      ]
+    },
+    {
+      "site": 8,
+      "file": "cmd/promtool/main.go",
+      "line": 478,
+      "ident": "promtoolParser",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 381,
+      "millis": 197,
+      "top": [
+        "promtoolParser",
+        "p",
+        "nil",
+        "ctx",
+        "serverURL"
+      ]
+    },
+    {
+      "site": 8,
+      "file": "cmd/promtool/main.go",
+      "line": 478,
+      "ident": "promtoolParser",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 2,
+      "size": 600,
+      "millis": 167,
+      "top": [
+        "p",
+        "promtoolParser",
+        "promtool",
+        "pushMetricsCmd",
+        "push"
+      ]
+    },
+    {
+      "site": 8,
+      "file": "cmd/promtool/main.go",
+      "line": 478,
+      "ident": "promtoolParser",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 1,
+      "size": 268,
+      "millis": 274,
+      "top": [
+        "promtoolParser",
+        "promtool",
+        "promQLLabelsSetCmd",
+        "promQLLabelsDeleteCmd",
+        "promQLCmd"
+      ]
+    },
+    {
+      "site": 9,
+      "file": "cmd/promtool/main.go",
+      "line": 520,
+      "ident": "lintOptionDuplicateRules",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 6,
+      "size": 249,
+      "millis": 113,
+      "top": [
+        "setting",
+        "stringVal",
+        "string",
+        "lintOptionAll",
+        "lintOptionNone"
+      ]
+    },
+    {
+      "site": 9,
+      "file": "cmd/promtool/main.go",
+      "line": 520,
+      "ident": "lintOptionDuplicateRules",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 4,
+      "size": 375,
+      "millis": 127,
+      "top": [
+        "lintOptionAll",
+        "lint",
+        "lintOptionNone",
+        "lintOptionDuplicateRules",
+        "lintOptionTooLongScrapeInterval"
+      ]
+    },
+    {
+      "site": 9,
+      "file": "cmd/promtool/main.go",
+      "line": 520,
+      "ident": "lintOptionDuplicateRules",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 4,
+      "size": 33,
+      "millis": 98,
+      "top": [
+        "lintOptionAll",
+        "lint",
+        "lintOptionNone",
+        "lintOptionDuplicateRules",
+        "lintOptionTooLongScrapeInterval"
+      ]
+    },
+    {
+      "site": 10,
+      "file": "cmd/promtool/main.go",
+      "line": 522,
+      "ident": "lintOptionNone",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 6,
+      "size": 249,
+      "millis": 98,
+      "top": [
+        "setting",
+        "stringVal",
+        "string",
+        "lintOptionDuplicateRules",
+        "lintOptionAll"
+      ]
+    },
+    {
+      "site": 10,
+      "file": "cmd/promtool/main.go",
+      "line": 522,
+      "ident": "lintOptionNone",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 4,
+      "size": 375,
+      "millis": 103,
+      "top": [
+        "lintOptionDuplicateRules",
+        "lint",
+        "lintOptionAll",
+        "lintOptionNone",
+        "lintOptionTooLongScrapeInterval"
+      ]
+    },
+    {
+      "site": 10,
+      "file": "cmd/promtool/main.go",
+      "line": 522,
+      "ident": "lintOptionNone",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 4,
+      "size": 33,
+      "millis": 85,
+      "top": [
+        "lintOptionDuplicateRules",
+        "lint",
+        "lintOptionAll",
+        "lintOptionNone",
+        "lintOptionTooLongScrapeInterval"
+      ]
+    },
+    {
+      "site": 11,
+      "file": "cmd/promtool/main.go",
+      "line": 551,
+      "ident": "lintOptionAll",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 5,
+      "size": 252,
+      "millis": 112,
+      "top": [
+        "option",
+        "optionsStr",
+        "lintOptionDuplicateRules",
+        "lintOptionNone",
+        "lintOptionAll"
+      ]
+    },
+    {
+      "site": 11,
+      "file": "cmd/promtool/main.go",
+      "line": 551,
+      "ident": "lintOptionAll",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 4,
+      "size": 376,
+      "millis": 124,
+      "top": [
+        "lintOptionDuplicateRules",
+        "lint",
+        "lintOptionNone",
+        "lintOptionAll",
+        "lintOptionTooLongScrapeInterval"
+      ]
+    },
+    {
+      "site": 11,
+      "file": "cmd/promtool/main.go",
+      "line": 551,
+      "ident": "lintOptionAll",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 4,
+      "size": 38,
+      "millis": 84,
+      "top": [
+        "lintOptionDuplicateRules",
+        "lint",
+        "lintOptionNone",
+        "lintOptionAll",
+        "lintOptionTooLongScrapeInterval"
+      ]
+    },
+    {
+      "site": 12,
+      "file": "cmd/promtool/main.go",
+      "line": 556,
+      "ident": "lintOptionNone",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 5,
+      "size": 252,
+      "millis": 94,
+      "top": [
+        "option",
+        "optionsStr",
+        "lintOptionDuplicateRules",
+        "lintOptionAll",
+        "lintOptionNone"
+      ]
+    },
+    {
+      "site": 12,
+      "file": "cmd/promtool/main.go",
+      "line": 556,
+      "ident": "lintOptionNone",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 4,
+      "size": 376,
+      "millis": 104,
+      "top": [
+        "lintOptionDuplicateRules",
+        "lint",
+        "lintOptionAll",
+        "lintOptionNone",
+        "lintOptionTooLongScrapeInterval"
+      ]
+    },
+    {
+      "site": 12,
+      "file": "cmd/promtool/main.go",
+      "line": 556,
+      "ident": "lintOptionNone",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 4,
+      "size": 38,
+      "millis": 76,
+      "top": [
+        "lintOptionDuplicateRules",
+        "lint",
+        "lintOptionAll",
+        "lintOptionNone",
+        "lintOptionTooLongScrapeInterval"
+      ]
+    },
+    {
+      "site": 13,
+      "file": "cmd/promtool/main.go",
+      "line": 574,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 58,
+      "size": 104,
+      "millis": 90,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 13,
+      "file": "cmd/promtool/main.go",
+      "line": 574,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 14,
+      "size": 482,
+      "millis": 141,
+      "top": [
+        "endpointsGroup",
+        "en",
+        "endpoint",
+        "endpoint",
+        "endpoint"
+      ]
+    },
+    {
+      "site": 13,
+      "file": "cmd/promtool/main.go",
+      "line": 574,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 2,
+      "size": 26,
+      "millis": 102,
+      "top": [
+        "errors",
+        "error",
+        "errcheck",
+        "errcheck",
+        "errdefs"
+      ]
+    },
+    {
+      "site": 14,
+      "file": "cmd/promtool/main.go",
+      "line": 583,
+      "ident": "Address",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 2,
+      "millis": 76,
+      "top": [
+        "Address",
+        "Client"
+      ]
+    },
+    {
+      "site": 14,
+      "file": "cmd/promtool/main.go",
+      "line": 583,
+      "ident": "Address",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 5,
+      "millis": 47,
+      "top": [
+        "Address",
+        "chan",
+        "chan",
+        "map",
+        "make"
+      ]
+    },
+    {
+      "site": 14,
+      "file": "cmd/promtool/main.go",
+      "line": 583,
+      "ident": "Address",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 39,
+      "top": [
+        "Address"
+      ]
+    },
+    {
+      "site": 15,
+      "file": "cmd/promtool/main.go",
+      "line": 655,
+      "ident": "f",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 3,
+      "size": 247,
+      "millis": 156,
+      "top": [
+        "err",
+        "failed",
+        "f",
+        "files",
+        "file"
+      ]
+    },
+    {
+      "site": 16,
+      "file": "cmd/promtool/main.go",
+      "line": 737,
+      "ident": "Glob",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 3,
+      "size": 27,
+      "millis": 158,
+      "top": [
+        "Join",
+        "Dir",
+        "Glob",
+        "Base",
+        "Split"
+      ]
+    },
+    {
+      "site": 16,
+      "file": "cmd/promtool/main.go",
+      "line": 737,
+      "ident": "Glob",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 72,
+      "top": [
+        "Glob"
+      ]
+    },
+    {
+      "site": 16,
+      "file": "cmd/promtool/main.go",
+      "line": 737,
+      "ident": "Glob",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 69,
+      "top": [
+        "Glob"
+      ]
+    },
+    {
+      "site": 17,
+      "file": "cmd/promtool/main.go",
+      "line": 834,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 1,
+      "size": 247,
+      "millis": 114,
+      "top": [
+        "nil",
+        "err",
+        "content",
+        "fd",
+        "filename"
+      ]
+    },
+    {
+      "site": 17,
+      "file": "cmd/promtool/main.go",
+      "line": 834,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 280,
+      "millis": 92,
+      "top": [
+        "nil",
+        "newRulesLintConfig",
+        "new",
+        "ne",
+        "newConfigLintConfig"
+      ]
+    },
+    {
+      "site": 18,
+      "file": "cmd/promtool/main.go",
+      "line": 883,
+      "ident": "false",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 0,
+      "rank": 213,
+      "size": 245,
+      "millis": 89,
+      "top": [
+        "p",
+        "ls",
+        "logger",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 18,
+      "file": "cmd/promtool/main.go",
+      "line": 883,
+      "ident": "false",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 1,
+      "rank": 20,
+      "size": 392,
+      "millis": 85,
+      "top": [
+        "func",
+        "failureExitCode",
+        "fa",
+        "formatSeriesSet",
+        "format"
+      ]
+    },
+    {
+      "site": 18,
+      "file": "cmd/promtool/main.go",
+      "line": 883,
+      "ident": "false",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 3,
+      "rank": 1,
+      "size": 5,
+      "millis": 82,
+      "top": [
+        "false",
+        "fallback",
+        "testhelpers.FakeAlertmanagerRetriever",
+        "v1.FuzzAlgorithms",
+        "checkTargetGroupsForAlertmanager"
+      ]
+    },
+    {
+      "site": 19,
+      "file": "cmd/promtool/main.go",
+      "line": 938,
+      "ident": "fmt",
+      "kind": "statement-start",
+      "sub": "package",
+      "prefix": 0,
+      "rank": 180,
+      "size": 252,
+      "millis": 165,
+      "top": [
+        "errs",
+        "f",
+        "failed",
+        "n",
+        "hasErrors"
+      ]
+    },
+    {
+      "site": 19,
+      "file": "cmd/promtool/main.go",
+      "line": 938,
+      "ident": "fmt",
+      "kind": "statement-start",
+      "sub": "package",
+      "prefix": 1,
+      "rank": 27,
+      "size": 408,
+      "millis": 99,
+      "top": [
+        "f",
+        "for",
+        "fo",
+        "for",
+        "for"
+      ]
+    },
+    {
+      "site": 20,
+      "file": "cmd/promtool/main.go",
+      "line": 990,
+      "ident": "string",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 56,
+      "size": 104,
+      "millis": 92,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 20,
+      "file": "cmd/promtool/main.go",
+      "line": 990,
+      "ident": "string",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 13,
+      "size": 784,
+      "millis": 194,
+      "top": [
+        "struct",
+        "series",
+        "se",
+        "statistics",
+        "stat"
+      ]
+    },
+    {
+      "site": 20,
+      "file": "cmd/promtool/main.go",
+      "line": 990,
+      "ident": "string",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 4,
+      "size": 54,
+      "millis": 165,
+      "top": [
+        "str",
+        "struct",
+        "strings",
+        "string",
+        "strconv"
+      ]
+    },
+    {
+      "site": 21,
+      "file": "cmd/promtool/main.go",
+      "line": 996,
+      "ident": "compareRuleTypes",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 11,
+      "size": 35,
+      "millis": 51,
+      "top": [
+        "series",
+        "rulesLintConfig",
+        "ruleImporter",
+        "alert",
+        "compareRuleType"
+      ]
+    },
+    {
+      "site": 21,
+      "file": "cmd/promtool/main.go",
+      "line": 996,
+      "ident": "compareRuleTypes",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 3,
+      "size": 16,
+      "millis": 38,
+      "top": [
+        "compareRuleType",
+        "configLintConfig",
+        "compareRuleTypes",
+        "rulesLintConfig",
+        "metricStat"
+      ]
+    },
+    {
+      "site": 21,
+      "file": "cmd/promtool/main.go",
+      "line": 996,
+      "ident": "compareRuleTypes",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 2,
+      "size": 2,
+      "millis": 37,
+      "top": [
+        "compareRuleType",
+        "compareRuleTypes"
+      ]
+    },
+    {
+      "site": 22,
+      "file": "cmd/promtool/main.go",
+      "line": 1015,
+      "ident": "metric",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 84,
+      "top": [
+        "metric"
+      ]
+    },
+    {
+      "site": 22,
+      "file": "cmd/promtool/main.go",
+      "line": 1015,
+      "ident": "metric",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 5,
+      "size": 5,
+      "millis": 38,
+      "top": [
+        "chan",
+        "chan",
+        "map",
+        "make",
+        "metric"
+      ]
+    },
+    {
+      "site": 22,
+      "file": "cmd/promtool/main.go",
+      "line": 1015,
+      "ident": "metric",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 40,
+      "top": [
+        "metric"
+      ]
+    },
+    {
+      "site": 23,
+      "file": "cmd/promtool/main.go",
+      "line": 1124,
+      "ident": "expfmt",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 243,
+      "millis": 155,
+      "top": [
+        "r",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 23,
+      "file": "cmd/promtool/main.go",
+      "line": 1124,
+      "ident": "expfmt",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 389,
+      "size": 601,
+      "millis": 252,
+      "top": [
+        "errLint",
+        "endpointsGroup",
+        "en",
+        "endpoint",
+        "endpoint"
+      ]
+    },
+    {
+      "site": 23,
+      "file": "cmd/promtool/main.go",
+      "line": 1124,
+      "ident": "expfmt",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 12,
+      "size": 50,
+      "millis": 253,
+      "top": [
+        "exp",
+        "exp",
+        "expr",
+        "expr",
+        "expr"
+      ]
+    },
+    {
+      "site": 24,
+      "file": "cmd/promtool/main.go",
+      "line": 1136,
+      "ident": "Metric",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 2,
+      "size": 20,
+      "millis": 261,
+      "top": [
+        "String",
+        "Metric",
+        "Name",
+        "Type",
+        "GetName"
+      ]
+    },
+    {
+      "site": 24,
+      "file": "cmd/promtool/main.go",
+      "line": 1136,
+      "ident": "Metric",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 5,
+      "millis": 130,
+      "top": [
+        "Metric",
+        "Name",
+        "GetName",
+        "GetMetric",
+        "ProtoMessage"
+      ]
+    },
+    {
+      "site": 24,
+      "file": "cmd/promtool/main.go",
+      "line": 1136,
+      "ident": "Metric",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 2,
+      "millis": 73,
+      "top": [
+        "Metric",
+        "GetMetric"
+      ]
+    },
+    {
+      "site": 25,
+      "file": "cmd/promtool/main.go",
+      "line": 1234,
+      "ident": "serverURL",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 36,
+      "top": [
+        "serverURL"
+      ]
+    },
+    {
+      "site": 25,
+      "file": "cmd/promtool/main.go",
+      "line": 1234,
+      "ident": "serverURL",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 5,
+      "size": 6,
+      "millis": 35,
+      "top": [
+        "make",
+        "select",
+        "switch",
+        "switch",
+        "serverURL"
+      ]
+    },
+    {
+      "site": 25,
+      "file": "cmd/promtool/main.go",
+      "line": 1234,
+      "ident": "serverURL",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 30,
+      "top": [
+        "serverURL"
+      ]
+    },
+    {
+      "site": 26,
+      "file": "cmd/promtool/main.go",
+      "line": 1352,
+      "ident": "scrape",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 103,
+      "millis": 137,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 26,
+      "file": "cmd/promtool/main.go",
+      "line": 1352,
+      "ident": "scrape",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 49,
+      "size": 784,
+      "millis": 118,
+      "top": [
+        "struct",
+        "series",
+        "se",
+        "statistics",
+        "stat"
+      ]
+    },
+    {
+      "site": 26,
+      "file": "cmd/promtool/main.go",
+      "line": 1352,
+      "ident": "scrape",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 9,
+      "millis": 106,
+      "top": [
+        "scrape",
+        "scram",
+        "script",
+        "scrypt",
+        "v1.ScrapePoolsDiscovery"
+      ]
+    },
+    {
+      "site": 27,
+      "file": "cmd/promtool/main.go",
+      "line": 1372,
+      "ident": "Println",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 6,
+      "size": 29,
+      "millis": 104,
+      "top": [
+        "Errorf",
+        "Fprintln",
+        "Fprint",
+        "Printf",
+        "Print"
+      ]
+    },
+    {
+      "site": 27,
+      "file": "cmd/promtool/main.go",
+      "line": 1372,
+      "ident": "Println",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 3,
+      "size": 12,
+      "millis": 63,
+      "top": [
+        "Printf",
+        "Print",
+        "Println",
+        "Fprintln",
+        "Fprint"
+      ]
+    },
+    {
+      "site": 27,
+      "file": "cmd/promtool/main.go",
+      "line": 1372,
+      "ident": "Println",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 3,
+      "size": 9,
+      "millis": 56,
+      "top": [
+        "Printf",
+        "Print",
+        "Println",
+        "Fprintln",
+        "Fprint"
+      ]
+    },
+    {
+      "site": 28,
+      "file": "cmd/promtool/main.go",
+      "line": 1376,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 58,
+      "size": 104,
+      "millis": 75,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 28,
+      "file": "cmd/promtool/main.go",
+      "line": 1376,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 14,
+      "size": 482,
+      "millis": 101,
+      "top": [
+        "endpointsGroup",
+        "en",
+        "endpoint",
+        "endpoint",
+        "endpoint"
+      ]
+    },
+    {
+      "site": 28,
+      "file": "cmd/promtool/main.go",
+      "line": 1376,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 2,
+      "size": 26,
+      "millis": 104,
+      "top": [
+        "errors",
+        "error",
+        "errcheck",
+        "errcheck",
+        "errdefs"
+      ]
+    },
+    {
+      "site": 29,
+      "file": "cmd/promtool/main.go",
+      "line": 1396,
+      "ident": "parser",
+      "kind": "statement-start",
+      "sub": "package",
+      "prefix": 0,
+      "rank": 181,
+      "size": 250,
+      "millis": 160,
+      "top": [
+        "err",
+        "expr",
+        "matchType",
+        "name",
+        "p"
+      ]
+    },
+    {
+      "site": 29,
+      "file": "cmd/promtool/main.go",
+      "line": 1396,
+      "ident": "parser",
+      "kind": "statement-start",
+      "sub": "package",
+      "prefix": 1,
+      "rank": 27,
+      "size": 542,
+      "millis": 89,
+      "top": [
+        "p",
+        "promqlPrinter",
+        "promql",
+        "parseTime",
+        "pa"
+      ]
+    },
+    {
+      "site": 29,
+      "file": "cmd/promtool/main.go",
+      "line": 1396,
+      "ident": "parser",
+      "kind": "statement-start",
+      "sub": "package",
+      "prefix": 3,
+      "rank": 12,
+      "size": 53,
+      "millis": 125,
+      "top": [
+        "par",
+        "parseTime",
+        "parse",
+        "parse",
+        "parse"
+      ]
+    },
+    {
+      "site": 30,
+      "file": "config/config.go",
+      "line": 117,
+      "ident": "otlptranslator",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 153,
+      "millis": 121,
+      "top": [
+        "cfg",
+        "err",
+        "b",
+        "s",
+        "logger"
+      ]
+    },
+    {
+      "site": 30,
+      "file": "config/config.go",
+      "line": 117,
+      "ident": "otlptranslator",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 2,
+      "size": 277,
+      "millis": 125,
+      "top": [
+        "os",
+        "otlptranslator",
+        "opts",
+        "opt",
+        "opt"
+      ]
+    },
+    {
+      "site": 30,
+      "file": "config/config.go",
+      "line": 117,
+      "ident": "otlptranslator",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 33,
+      "millis": 265,
+      "top": [
+        "otlptranslator",
+        "otlptrace",
+        "otlptracegrpc",
+        "otlptracehttp",
+        "OTLPConfig"
+      ]
+    },
+    {
+      "site": 31,
+      "file": "config/config.go",
+      "line": 187,
+      "ident": "ScrapeNativeHistograms",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 2,
+      "size": 11,
+      "millis": 76,
+      "top": [
+        "ScrapeFailureLogFile",
+        "ScrapeNativeHistograms",
+        "BodySizeLimit",
+        "LabelLimit",
+        "LabelNameLengthLimit"
+      ]
+    },
+    {
+      "site": 31,
+      "file": "config/config.go",
+      "line": 187,
+      "ident": "ScrapeNativeHistograms",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 2,
+      "size": 6,
+      "millis": 55,
+      "top": [
+        "ScrapeFailureLogFile",
+        "ScrapeNativeHistograms",
+        "SampleLimit",
+        "BodySizeLimit",
+        "ExternalLabels"
+      ]
+    },
+    {
+      "site": 31,
+      "file": "config/config.go",
+      "line": 187,
+      "ident": "ScrapeNativeHistograms",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 2,
+      "size": 2,
+      "millis": 61,
+      "top": [
+        "ScrapeFailureLogFile",
+        "ScrapeNativeHistograms"
+      ]
+    },
+    {
+      "site": 32,
+      "file": "config/config.go",
+      "line": 211,
+      "ident": "config",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 148,
+      "millis": 79,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 32,
+      "file": "config/config.go",
+      "line": 211,
+      "ident": "config",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 17,
+      "size": 771,
+      "millis": 114,
+      "top": [
+        "chan",
+        "cha",
+        "checkStaticTargets",
+        "check",
+        "check"
+      ]
+    },
+    {
+      "site": 32,
+      "file": "config/config.go",
+      "line": 211,
+      "ident": "config",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 248,
+      "millis": 184,
+      "top": [
+        "config",
+        "config",
+        "config",
+        "config",
+        "config"
+      ]
+    },
+    {
+      "site": 33,
+      "file": "config/config.go",
+      "line": 234,
+      "ident": "HTTPClientConfig",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 12,
+      "millis": 118,
+      "top": [
+        "HTTPClientConfig",
+        "Name",
+        "URL",
+        "Headers",
+        "SigV4Config"
+      ]
+    },
+    {
+      "site": 33,
+      "file": "config/config.go",
+      "line": 234,
+      "ident": "HTTPClientConfig",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 58,
+      "top": [
+        "HTTPClientConfig",
+        "Headers",
+        "SendNativeHistograms"
+      ]
+    },
+    {
+      "site": 33,
+      "file": "config/config.go",
+      "line": 234,
+      "ident": "HTTPClientConfig",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 53,
+      "top": [
+        "HTTPClientConfig"
+      ]
+    },
+    {
+      "site": 34,
+      "file": "config/config.go",
+      "line": 300,
+      "ident": "ScrapeConfig",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 9,
+      "size": 76,
+      "millis": 77,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 34,
+      "file": "config/config.go",
+      "line": 300,
+      "ident": "ScrapeConfig",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 1,
+      "size": 25,
+      "millis": 71,
+      "top": [
+        "ScrapeConfig",
+        "ScrapeProtocol",
+        "StorageConfig",
+        "ScrapeConfigs",
+        "struct"
+      ]
+    },
+    {
+      "site": 34,
+      "file": "config/config.go",
+      "line": 300,
+      "ident": "ScrapeConfig",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 7,
+      "millis": 78,
+      "top": [
+        "ScrapeConfig",
+        "ScrapeProtocol",
+        "ScrapeConfigs",
+        "v1.ScrapePoolsDiscovery",
+        "remote.ReadyScrapeManager"
+      ]
+    },
+    {
+      "site": 35,
+      "file": "config/config.go",
+      "line": 622,
+      "ident": "strings",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 151,
+      "millis": 73,
+      "top": [
+        "sp",
+        "dups",
+        "sps",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 35,
+      "file": "config/config.go",
+      "line": 622,
+      "ident": "strings",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 14,
+      "size": 802,
+      "millis": 107,
+      "top": [
+        "sp",
+        "sps",
+        "struct",
+        "sanitizeAttributes",
+        "sigv4"
+      ]
+    },
+    {
+      "site": 35,
+      "file": "config/config.go",
+      "line": 622,
+      "ident": "strings",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 5,
+      "size": 118,
+      "millis": 126,
+      "top": [
+        "str",
+        "struct",
+        "strconv",
+        "string",
+        "strings"
+      ]
+    },
+    {
+      "site": 36,
+      "file": "config/config.go",
+      "line": 662,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 10,
+      "size": 154,
+      "millis": 91,
+      "top": [
+        "fileErr",
+        "checkStaticTargets",
+        "c",
+        "sanitizeAttributes",
+        "validateAcceptScrapeProtocols"
+      ]
+    },
+    {
+      "site": 36,
+      "file": "config/config.go",
+      "line": 662,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 246,
+      "millis": 62,
+      "top": [
+        "nil",
+        "new",
+        "ne",
+        "name",
+        "nomad"
+      ]
+    },
+    {
+      "site": 37,
+      "file": "config/config.go",
+      "line": 1076,
+      "ident": "c",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 150,
+      "millis": 54,
+      "top": [
+        "c",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 38,
+      "file": "config/config.go",
+      "line": 1201,
+      "ident": "FloatChunkEncodingXOR2",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 4,
+      "size": 152,
+      "millis": 56,
+      "top": [
+        "filePath",
+        "GzipCompression",
+        "FloatChunkEncodingXOR",
+        "FloatChunkEncodingXOR2",
+        "UTF8NamesHeader"
+      ]
+    },
+    {
+      "site": 38,
+      "file": "config/config.go",
+      "line": 1201,
+      "ident": "FloatChunkEncodingXOR2",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 2,
+      "size": 54,
+      "millis": 36,
+      "top": [
+        "FloatChunkEncodingXOR",
+        "FloatChunkEncodingXOR2",
+        "filePath",
+        "func",
+        "fileErr"
+      ]
+    },
+    {
+      "site": 38,
+      "file": "config/config.go",
+      "line": 1201,
+      "ident": "FloatChunkEncodingXOR2",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 61,
+      "millis": 166,
+      "top": [
+        "FloatChunkEncodingXOR",
+        "FloatChunkEncodingXOR2",
+        "t.ChunkEncoding.Floats",
+        "chunkenc.FloatHistogramAppender",
+        "histogram.FloatHistogram"
+      ]
+    },
+    {
+      "site": 39,
+      "file": "config/config.go",
+      "line": 1319,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 34,
+      "size": 76,
+      "millis": 55,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 39,
+      "file": "config/config.go",
+      "line": 1319,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 2,
+      "size": 458,
+      "millis": 80,
+      "top": [
+        "errors",
+        "error",
+        "exp",
+        "exp",
+        "ee"
+      ]
+    },
+    {
+      "site": 39,
+      "file": "config/config.go",
+      "line": 1319,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 2,
+      "size": 29,
+      "millis": 66,
+      "top": [
+        "errors",
+        "error",
+        "errcheck",
+        "errcheck",
+        "errdefs"
+      ]
+    },
+    {
+      "site": 40,
+      "file": "config/config.go",
+      "line": 1361,
+      "ident": "slices",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 151,
+      "millis": 71,
+      "top": [
+        "plain",
+        "unmarshal",
+        "v",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 40,
+      "file": "config/config.go",
+      "line": 1361,
+      "ident": "slices",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 357,
+      "size": 801,
+      "millis": 118,
+      "top": [
+        "struct",
+        "sanitizeAttributes",
+        "strings",
+        "string",
+        "sigv4"
+      ]
+    },
+    {
+      "site": 40,
+      "file": "config/config.go",
+      "line": 1361,
+      "ident": "slices",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 1,
+      "size": 48,
+      "millis": 156,
+      "top": [
+        "slices",
+        "slices",
+        "slices",
+        "slices",
+        "sliceutil"
+      ]
+    },
+    {
+      "site": 41,
+      "file": "config/config.go",
+      "line": 1532,
+      "ident": "any",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 60,
+      "size": 76,
+      "millis": 46,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 41,
+      "file": "config/config.go",
+      "line": 1532,
+      "ident": "any",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 5,
+      "size": 536,
+      "millis": 81,
+      "top": [
+        "azuread",
+        "azure",
+        "azure",
+        "az",
+        "any"
+      ]
+    },
+    {
+      "site": 42,
+      "file": "config/config.go",
+      "line": 1792,
+      "ident": "OTLPConfig",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 4,
+      "size": 24,
+      "millis": 48,
+      "top": [
+        "Config",
+        "GlobalConfig",
+        "ScrapeConfig",
+        "OTLPConfig",
+        "ScrapeProtocol"
+      ]
+    },
+    {
+      "site": 42,
+      "file": "config/config.go",
+      "line": 1792,
+      "ident": "OTLPConfig",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 1,
+      "size": 23,
+      "millis": 38,
+      "top": [
+        "OTLPConfig",
+        "Config",
+        "GlobalConfig",
+        "ScrapeConfig",
+        "ScrapeProtocol"
+      ]
+    },
+    {
+      "site": 42,
+      "file": "config/config.go",
+      "line": 1792,
+      "ident": "OTLPConfig",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 48,
+      "top": [
+        "OTLPConfig"
+      ]
+    },
+    {
+      "site": 43,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 90,
+      "ident": "replicaSetInf",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 89,
+      "top": [
+        "replicaSetInf"
+      ]
+    },
+    {
+      "site": 43,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 90,
+      "ident": "replicaSetInf",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 7,
+      "millis": 71,
+      "top": [
+        "replicaSetInf",
+        "defer",
+        "for",
+        "for",
+        "for"
+      ]
+    },
+    {
+      "site": 43,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 90,
+      "ident": "replicaSetInf",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 22,
+      "top": [
+        "replicaSetInf"
+      ]
+    },
+    {
+      "site": 44,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 195,
+      "ident": "l",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 14,
+      "size": 224,
+      "millis": 291,
+      "top": [
+        "e",
+        "err",
+        "serviceUpdate",
+        "svcAddCount",
+        "svc"
+      ]
+    },
+    {
+      "site": 45,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 274,
+      "ident": "errors",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 205,
+      "millis": 96,
+      "top": [
+        "cacheSyncs",
+        "cache",
+        "ctx",
+        "e",
+        "ch"
+      ]
+    },
+    {
+      "site": 45,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 274,
+      "ident": "errors",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 40,
+      "size": 597,
+      "millis": 172,
+      "top": [
+        "e",
+        "endpointsSourceFromNamespaceAndName",
+        "endpointsSource",
+        "endpoints",
+        "endpoints"
+      ]
+    },
+    {
+      "site": 45,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 274,
+      "ident": "errors",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 2,
+      "size": 142,
+      "millis": 172,
+      "top": [
+        "error",
+        "errors",
+        "errors",
+        "errors",
+        "errors"
+      ]
+    },
+    {
+      "site": 46,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 349,
+      "ident": "Source",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 2,
+      "size": 3,
+      "millis": 45,
+      "top": [
+        "Labels",
+        "Source",
+        "Targets"
+      ]
+    },
+    {
+      "site": 46,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 349,
+      "ident": "Source",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 5,
+      "size": 7,
+      "millis": 54,
+      "top": [
+        "make",
+        "select",
+        "switch",
+        "switch",
+        "Source"
+      ]
+    },
+    {
+      "site": 46,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 349,
+      "ident": "Source",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 21,
+      "top": [
+        "Source"
+      ]
+    },
+    {
+      "site": 47,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 394,
+      "ident": "target",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 1,
+      "size": 212,
+      "millis": 85,
+      "top": [
+        "target",
+        "tg",
+        "a",
+        "seenPods",
+        "podEntry"
+      ]
+    },
+    {
+      "site": 47,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 394,
+      "ident": "target",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 645,
+      "millis": 76,
+      "top": [
+        "target",
+        "ta",
+        "tar",
+        "tg",
+        "tlsHosts"
+      ]
+    },
+    {
+      "site": 47,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 394,
+      "ident": "target",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 2,
+      "size": 65,
+      "millis": 202,
+      "top": [
+        "tar",
+        "target",
+        "targetgroup",
+        "target.Validate().Error",
+        "target.Clone().String"
+      ]
+    },
+    {
+      "site": 48,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 394,
+      "ident": "logger",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 1,
+      "size": 31,
+      "millis": 33,
+      "top": [
+        "logger",
+        "Run",
+        "enqueue",
+        "namespaceInf",
+        "queue"
+      ]
+    },
+    {
+      "site": 48,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 394,
+      "ident": "logger",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 6,
+      "millis": 29,
+      "top": [
+        "logger",
+        "replicaSetInf",
+        "withDeploymentMetadata",
+        "resolvePodRef",
+        "addServiceLabels"
+      ]
+    },
+    {
+      "site": 48,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 394,
+      "ident": "logger",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 29,
+      "top": [
+        "logger"
+      ]
+    },
+    {
+      "site": 49,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 423,
+      "ident": "Containers",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 3,
+      "size": 57,
+      "millis": 39,
+      "top": [
+        "String",
+        "NodeName",
+        "Containers",
+        "InitContainers",
+        "Hostname"
+      ]
+    },
+    {
+      "site": 49,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 423,
+      "ident": "Containers",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 30,
+      "millis": 28,
+      "top": [
+        "Containers",
+        "InitContainers",
+        "DeepCopy",
+        "DeepCopyInto",
+        "DNSConfig"
+      ]
+    },
+    {
+      "site": 49,
+      "file": "discovery/kubernetes/endpoints.go",
+      "line": 423,
+      "ident": "Containers",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 8,
+      "millis": 32,
+      "top": [
+        "Containers",
+        "InitContainers",
+        "DNSConfig",
+        "EphemeralContainers",
+        "SecurityContext"
+      ]
+    },
+    {
+      "site": 50,
+      "file": "model/histogram/generic.go",
+      "line": 40,
+      "ident": "errors",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 133,
+      "millis": 81,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 50,
+      "file": "model/histogram/generic.go",
+      "line": 40,
+      "ident": "errors",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 5,
+      "size": 530,
+      "millis": 123,
+      "top": [
+        "exponentialBounds",
+        "exp",
+        "exp",
+        "error",
+        "errors"
+      ]
+    },
+    {
+      "site": 50,
+      "file": "model/histogram/generic.go",
+      "line": 40,
+      "ident": "errors",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 2,
+      "size": 157,
+      "millis": 130,
+      "top": [
+        "error",
+        "errors",
+        "errors",
+        "errors",
+        "errors"
+      ]
+    },
+    {
+      "site": 51,
+      "file": "model/histogram/generic.go",
+      "line": 266,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 30,
+      "size": 47,
+      "millis": 43,
+      "top": [
+        "IBC",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 51,
+      "file": "model/histogram/generic.go",
+      "line": 266,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 6,
+      "size": 310,
+      "millis": 45,
+      "top": [
+        "baseBucketIterator",
+        "bas",
+        "base",
+        "base",
+        "base"
+      ]
+    },
+    {
+      "site": 51,
+      "file": "model/histogram/generic.go",
+      "line": 266,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 10,
+      "millis": 38,
+      "top": [
+        "bool",
+        "booking",
+        "books",
+        "bools",
+        "bootstrap"
+      ]
+    },
+    {
+      "site": 52,
+      "file": "model/histogram/generic.go",
+      "line": 527,
+      "ident": "ErrHistogramSpansBucketsMismatch",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 36,
+      "size": 137,
+      "millis": 50,
+      "top": [
+        "spanBuckets",
+        "spans",
+        "numBuckets",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 52,
+      "file": "model/histogram/generic.go",
+      "line": 527,
+      "ident": "ErrHistogramSpansBucketsMismatch",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 3,
+      "size": 100,
+      "millis": 35,
+      "top": [
+        "Error",
+        "ErrHistogramSpanNegativeOffset",
+        "ErrHistogramSpansBucketsMismatch",
+        "ExponentialSchemaMax",
+        "ExponentialSchemaMaxReserved"
+      ]
+    },
+    {
+      "site": 52,
+      "file": "model/histogram/generic.go",
+      "line": 527,
+      "ident": "ErrHistogramSpansBucketsMismatch",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 3,
+      "size": 134,
+      "millis": 77,
+      "top": [
+        "Error",
+        "ErrHistogramSpanNegativeOffset",
+        "ErrHistogramSpansBucketsMismatch",
+        "ErrHistogramNegativeBucketCount",
+        "ErrHistogramCustomBucketsInfinite"
+      ]
+    },
+    {
+      "site": 53,
+      "file": "model/histogram/generic.go",
+      "line": 532,
+      "ident": "InternalBucketCount",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 19,
+      "size": 49,
+      "millis": 37,
+      "top": [
+        "IBC",
+        "BC",
+        "chan",
+        "func",
+        "interface"
+      ]
+    },
+    {
+      "site": 53,
+      "file": "model/histogram/generic.go",
+      "line": 532,
+      "ident": "InternalBucketCount",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 2,
+      "size": 27,
+      "millis": 36,
+      "top": [
+        "IBC",
+        "InternalBucketCount",
+        "interface",
+        "int",
+        "int32"
+      ]
+    },
+    {
+      "site": 53,
+      "file": "model/histogram/generic.go",
+      "line": 532,
+      "ident": "InternalBucketCount",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 2,
+      "size": 23,
+      "millis": 45,
+      "top": [
+        "int",
+        "InternalBucketCount",
+        "tombstones.Interval",
+        "tombstones.Intervals",
+        "interface"
+      ]
+    },
+    {
+      "site": 54,
+      "file": "model/histogram/generic.go",
+      "line": 656,
+      "ident": "exp",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 139,
+      "millis": 71,
+      "top": [
+        "exp",
+        "frac",
+        "fracIdx",
+        "idx",
+        "schema"
+      ]
+    },
+    {
+      "site": 54,
+      "file": "model/histogram/generic.go",
+      "line": 656,
+      "ident": "exp",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 519,
+      "millis": 50,
+      "top": [
+        "exp",
+        "exponentialBounds",
+        "errors",
+        "error",
+        "early_data"
+      ]
+    },
+    {
+      "site": 55,
+      "file": "model/histogram/generic.go",
+      "line": 845,
+      "ident": "targetBuckets",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 1,
+      "size": 149,
+      "millis": 40,
+      "top": [
+        "targetBuckets",
+        "bucketCountIdx",
+        "targetSpans",
+        "targetBucketIdx",
+        "lastTargetBucketIdx"
+      ]
+    },
+    {
+      "site": 55,
+      "file": "model/histogram/generic.go",
+      "line": 845,
+      "ident": "targetBuckets",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 643,
+      "millis": 75,
+      "top": [
+        "targetBuckets",
+        "target",
+        "ta",
+        "tar",
+        "targetSpans"
+      ]
+    },
+    {
+      "site": 55,
+      "file": "model/histogram/generic.go",
+      "line": 845,
+      "ident": "targetBuckets",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 2,
+      "size": 34,
+      "millis": 124,
+      "top": [
+        "tar",
+        "targetBuckets",
+        "target",
+        "targetSpans",
+        "targetBucketIdx"
+      ]
+    },
+    {
+      "site": 56,
+      "file": "model/histogram/generic.go",
+      "line": 908,
+      "ident": "targetSpans",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 5,
+      "size": 152,
+      "millis": 36,
+      "top": [
+        "span",
+        "targetBuckets",
+        "bucketCountIdx",
+        "j",
+        "targetSpans"
+      ]
+    },
+    {
+      "site": 56,
+      "file": "model/histogram/generic.go",
+      "line": 908,
+      "ident": "targetSpans",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 5,
+      "size": 643,
+      "millis": 66,
+      "top": [
+        "targetBuckets",
+        "target",
+        "ta",
+        "tar",
+        "targetSpans"
+      ]
+    },
+    {
+      "site": 56,
+      "file": "model/histogram/generic.go",
+      "line": 908,
+      "ident": "targetSpans",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 4,
+      "size": 34,
+      "millis": 41,
+      "top": [
+        "tar",
+        "targetBuckets",
+        "target",
+        "targetSpans",
+        "targetBucketIdx"
+      ]
+    },
+    {
+      "site": 57,
+      "file": "model/relabel/relabel.go",
+      "line": 33,
+      "ident": "regexp",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 78,
+      "millis": 36,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 57,
+      "file": "model/relabel/relabel.go",
+      "line": 33,
+      "ident": "regexp",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 17,
+      "size": 418,
+      "millis": 84,
+      "top": [
+        "relabel",
+        "relabelTargetLegacy",
+        "real",
+        "recover",
+        "rune"
+      ]
+    },
+    {
+      "site": 57,
+      "file": "model/relabel/relabel.go",
+      "line": 33,
+      "ident": "regexp",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 45,
+      "millis": 72,
+      "top": [
+        "regexp",
+        "regexp",
+        "regex_engines",
+        "regexp2",
+        "reggen"
+      ]
+    },
+    {
+      "site": 58,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "Keep",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 7,
+      "size": 83,
+      "millis": 31,
+      "top": [
+        "act",
+        "a",
+        "Replace",
+        "DropEqual",
+        "Drop"
+      ]
+    },
+    {
+      "site": 58,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "Keep",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 2,
+      "size": 4,
+      "millis": 18,
+      "top": [
+        "KeepEqual",
+        "Keep",
+        "LabelKeep",
+        "make"
+      ]
+    },
+    {
+      "site": 58,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "Keep",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 10,
+      "millis": 35,
+      "top": [
+        "KeepEqual",
+        "Keep",
+        "LabelKeep",
+        "treecache.NewZookeeperLogger",
+        "treecache.NewZookeeperTreeCache"
+      ]
+    },
+    {
+      "site": 59,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "HashMod",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 10,
+      "size": 83,
+      "millis": 22,
+      "top": [
+        "act",
+        "a",
+        "Replace",
+        "DropEqual",
+        "Drop"
+      ]
+    },
+    {
+      "site": 59,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "HashMod",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 17,
+      "top": [
+        "HashMod",
+        "unmarshal",
+        "chan"
+      ]
+    },
+    {
+      "site": 59,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "HashMod",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 4,
+      "millis": 33,
+      "top": [
+        "HashMod",
+        "promql.HashRatioSampler",
+        "promql.NewHashRatioSampler",
+        "testutil.DirHash"
+      ]
+    },
+    {
+      "site": 60,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelMap",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 12,
+      "size": 83,
+      "millis": 22,
+      "top": [
+        "act",
+        "a",
+        "Replace",
+        "DropEqual",
+        "Drop"
+      ]
+    },
+    {
+      "site": 60,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelMap",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 3,
+      "size": 30,
+      "millis": 21,
+      "top": [
+        "Lowercase",
+        "LabelDrop",
+        "LabelMap",
+        "LabelKeep",
+        "labels"
+      ]
+    },
+    {
+      "site": 60,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelMap",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 3,
+      "size": 96,
+      "millis": 78,
+      "top": [
+        "LabelDrop",
+        "prompb.Label",
+        "LabelMap",
+        "LabelKeep",
+        "io_prometheus_client.LabelPair"
+      ]
+    },
+    {
+      "site": 61,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelDrop",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 13,
+      "size": 83,
+      "millis": 27,
+      "top": [
+        "act",
+        "a",
+        "Replace",
+        "DropEqual",
+        "Drop"
+      ]
+    },
+    {
+      "site": 61,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelDrop",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 4,
+      "size": 30,
+      "millis": 19,
+      "top": [
+        "Lowercase",
+        "LabelMap",
+        "LabelKeep",
+        "LabelDrop",
+        "labels"
+      ]
+    },
+    {
+      "site": 61,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelDrop",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 4,
+      "size": 96,
+      "millis": 36,
+      "top": [
+        "LabelMap",
+        "prompb.Label",
+        "LabelKeep",
+        "LabelDrop",
+        "io_prometheus_client.LabelPair"
+      ]
+    },
+    {
+      "site": 62,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelKeep",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 13,
+      "size": 83,
+      "millis": 25,
+      "top": [
+        "act",
+        "a",
+        "Replace",
+        "DropEqual",
+        "Drop"
+      ]
+    },
+    {
+      "site": 62,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelKeep",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 4,
+      "size": 30,
+      "millis": 29,
+      "top": [
+        "Lowercase",
+        "LabelMap",
+        "LabelDrop",
+        "LabelKeep",
+        "labels"
+      ]
+    },
+    {
+      "site": 62,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "LabelKeep",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 4,
+      "size": 96,
+      "millis": 42,
+      "top": [
+        "LabelMap",
+        "prompb.Label",
+        "LabelDrop",
+        "LabelKeep",
+        "io_prometheus_client.LabelPair"
+      ]
+    },
+    {
+      "site": 63,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "Uppercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 11,
+      "size": 83,
+      "millis": 23,
+      "top": [
+        "act",
+        "a",
+        "Replace",
+        "DropEqual",
+        "Drop"
+      ]
+    },
+    {
+      "site": 63,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "Uppercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 17,
+      "millis": 18,
+      "top": [
+        "Uppercase",
+        "unmarshal",
+        "uint64",
+        "uint",
+        "uint16"
+      ]
+    },
+    {
+      "site": 63,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "Uppercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 5,
+      "millis": 30,
+      "top": [
+        "Uppercase",
+        "parser.TRIM_UPPER",
+        "config.SupportedAlertmanagerAPIVersions",
+        "agent.ErrUnsupported",
+        "fileutil.UncachedIOSupported"
+      ]
+    },
+    {
+      "site": 64,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "KeepEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 8,
+      "size": 83,
+      "millis": 26,
+      "top": [
+        "act",
+        "a",
+        "Replace",
+        "DropEqual",
+        "Drop"
+      ]
+    },
+    {
+      "site": 64,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "KeepEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 4,
+      "millis": 17,
+      "top": [
+        "KeepEqual",
+        "Keep",
+        "LabelKeep",
+        "make"
+      ]
+    },
+    {
+      "site": 64,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "KeepEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 10,
+      "millis": 25,
+      "top": [
+        "KeepEqual",
+        "Keep",
+        "LabelKeep",
+        "treecache.NewZookeeperLogger",
+        "treecache.NewZookeeperTreeCache"
+      ]
+    },
+    {
+      "site": 65,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "DropEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 7,
+      "size": 83,
+      "millis": 18,
+      "top": [
+        "act",
+        "a",
+        "Replace",
+        "KeepEqual",
+        "Keep"
+      ]
+    },
+    {
+      "site": 65,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "DropEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 10,
+      "millis": 19,
+      "top": [
+        "DropEqual",
+        "Drop",
+        "DefaultRelabelConfig",
+        "delete",
+        "HashMod"
+      ]
+    },
+    {
+      "site": 65,
+      "file": "model/relabel/relabel.go",
+      "line": 78,
+      "ident": "DropEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 9,
+      "millis": 38,
+      "top": [
+        "DropEqual",
+        "Drop",
+        "digitalocean.DropletsRole",
+        "v1.DroppedTarget",
+        "digitalocean.DatabasesRole"
+      ]
+    },
+    {
+      "site": 66,
+      "file": "model/relabel/relabel.go",
+      "line": 108,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 18,
+      "size": 39,
+      "millis": 22,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 66,
+      "file": "model/relabel/relabel.go",
+      "line": 108,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 2,
+      "size": 431,
+      "millis": 41,
+      "top": [
+        "errors",
+        "error",
+        "early_data",
+        "easyjson",
+        "easyjson"
+      ]
+    },
+    {
+      "site": 66,
+      "file": "model/relabel/relabel.go",
+      "line": 108,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 2,
+      "size": 29,
+      "millis": 31,
+      "top": [
+        "errors",
+        "error",
+        "errcheck",
+        "errcheck",
+        "errdefs"
+      ]
+    },
+    {
+      "site": 67,
+      "file": "model/relabel/relabel.go",
+      "line": 111,
+      "ident": "plain",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 0,
+      "rank": 1,
+      "size": 82,
+      "millis": 29,
+      "top": [
+        "plain",
+        "c",
+        "unmarshal",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 67,
+      "file": "model/relabel/relabel.go",
+      "line": 111,
+      "ident": "plain",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 1,
+      "rank": 1,
+      "size": 498,
+      "millis": 44,
+      "top": [
+        "plain",
+        "pl",
+        "panic",
+        "pa",
+        "print"
+      ]
+    },
+    {
+      "site": 67,
+      "file": "model/relabel/relabel.go",
+      "line": 111,
+      "ident": "plain",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 3,
+      "rank": 1,
+      "size": 68,
+      "millis": 60,
+      "top": [
+        "plain",
+        "places",
+        "plain_texts",
+        "plan9",
+        "plan9obj"
+      ]
+    },
+    {
+      "site": 68,
+      "file": "model/relabel/relabel.go",
+      "line": 223,
+      "ident": "err",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 1,
+      "size": 84,
+      "millis": 27,
+      "top": [
+        "err",
+        "nil",
+        "s",
+        "r",
+        "re"
+      ]
+    },
+    {
+      "site": 68,
+      "file": "model/relabel/relabel.go",
+      "line": 223,
+      "ident": "err",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 463,
+      "millis": 35,
+      "top": [
+        "err",
+        "errors",
+        "error",
+        "early_data",
+        "easyjson"
+      ]
+    },
+    {
+      "site": 69,
+      "file": "model/relabel/relabel.go",
+      "line": 240,
+      "ident": "json",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 81,
+      "millis": 30,
+      "top": [
+        "s",
+        "re",
+        "b",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 69,
+      "file": "model/relabel/relabel.go",
+      "line": 240,
+      "ident": "json",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 1,
+      "size": 94,
+      "millis": 27,
+      "top": [
+        "json",
+        "js",
+        "json",
+        "json",
+        "json"
+      ]
+    },
+    {
+      "site": 69,
+      "file": "model/relabel/relabel.go",
+      "line": 240,
+      "ident": "json",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 1,
+      "size": 56,
+      "millis": 31,
+      "top": [
+        "json",
+        "json",
+        "json",
+        "json",
+        "json"
+      ]
+    },
+    {
+      "site": 70,
+      "file": "model/relabel/relabel.go",
+      "line": 274,
+      "ident": "labels",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 38,
+      "millis": 27,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 70,
+      "file": "model/relabel/relabel.go",
+      "line": 274,
+      "ident": "labels",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 1,
+      "size": 270,
+      "millis": 30,
+      "top": [
+        "labels",
+        "label",
+        "labels",
+        "labels",
+        "labels"
+      ]
+    },
+    {
+      "site": 70,
+      "file": "model/relabel/relabel.go",
+      "line": 274,
+      "ident": "labels",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 16,
+      "millis": 35,
+      "top": [
+        "labels",
+        "label",
+        "labels",
+        "labels",
+        "labels"
+      ]
+    },
+    {
+      "site": 71,
+      "file": "model/relabel/relabel.go",
+      "line": 296,
+      "ident": "Drop",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 3,
+      "size": 85,
+      "millis": 37,
+      "top": [
+        "Replace",
+        "DropEqual",
+        "Drop",
+        "KeepEqual",
+        "Keep"
+      ]
+    },
+    {
+      "site": 71,
+      "file": "model/relabel/relabel.go",
+      "line": 296,
+      "ident": "Drop",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 2,
+      "size": 10,
+      "millis": 20,
+      "top": [
+        "DropEqual",
+        "Drop",
+        "DefaultRelabelConfig",
+        "delete",
+        "HashMod"
+      ]
+    },
+    {
+      "site": 71,
+      "file": "model/relabel/relabel.go",
+      "line": 296,
+      "ident": "Drop",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 11,
+      "millis": 34,
+      "top": [
+        "DropEqual",
+        "Drop",
+        "digitalocean.DropletsRole",
+        "lb.Labels().DropMetricName",
+        "lb.Labels().DropReserved"
+      ]
+    },
+    {
+      "site": 72,
+      "file": "model/relabel/relabel.go",
+      "line": 304,
+      "ident": "DropEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 5,
+      "size": 85,
+      "millis": 21,
+      "top": [
+        "Replace",
+        "KeepEqual",
+        "Keep",
+        "Lowercase",
+        "DropEqual"
+      ]
+    },
+    {
+      "site": 72,
+      "file": "model/relabel/relabel.go",
+      "line": 304,
+      "ident": "DropEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 10,
+      "millis": 21,
+      "top": [
+        "DropEqual",
+        "Drop",
+        "DefaultRelabelConfig",
+        "delete",
+        "HashMod"
+      ]
+    },
+    {
+      "site": 72,
+      "file": "model/relabel/relabel.go",
+      "line": 304,
+      "ident": "DropEqual",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 11,
+      "millis": 26,
+      "top": [
+        "DropEqual",
+        "Drop",
+        "digitalocean.DropletsRole",
+        "lb.Labels().DropMetricName",
+        "lb.Labels().DropReserved"
+      ]
+    },
+    {
+      "site": 73,
+      "file": "model/relabel/relabel.go",
+      "line": 312,
+      "ident": "Replace",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 1,
+      "size": 85,
+      "millis": 25,
+      "top": [
+        "Replace",
+        "DropEqual",
+        "Drop",
+        "KeepEqual",
+        "Keep"
+      ]
+    },
+    {
+      "site": 73,
+      "file": "model/relabel/relabel.go",
+      "line": 312,
+      "ident": "Replace",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 32,
+      "millis": 19,
+      "top": [
+        "Replace",
+        "Regexp",
+        "relabel",
+        "relabelTargetLegacy",
+        "regexp"
+      ]
+    },
+    {
+      "site": 73,
+      "file": "model/relabel/relabel.go",
+      "line": 312,
+      "ident": "Replace",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 32,
+      "millis": 47,
+      "top": [
+        "Replace",
+        "cfg.Regex.ReplaceAllString",
+        "cfg.Regex.ReplaceAll",
+        "DefaultRelabelConfig.Regex.ReplaceAll",
+        "relabelTargetLegacy.Copy().ReplaceAll"
+      ]
+    },
+    {
+      "site": 74,
+      "file": "model/relabel/relabel.go",
+      "line": 325,
+      "ident": "val",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 86,
+      "millis": 21,
+      "top": [
+        "val",
+        "va",
+        "values",
+        "indexes",
+        "cfg"
+      ]
+    },
+    {
+      "site": 74,
+      "file": "model/relabel/relabel.go",
+      "line": 325,
+      "ident": "val",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 855,
+      "millis": 62,
+      "top": [
+        "val",
+        "va",
+        "values",
+        "value",
+        "value"
+      ]
+    },
+    {
+      "site": 75,
+      "file": "model/relabel/relabel.go",
+      "line": 335,
+      "ident": "Lowercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 7,
+      "size": 85,
+      "millis": 19,
+      "top": [
+        "Replace",
+        "DropEqual",
+        "Drop",
+        "KeepEqual",
+        "Keep"
+      ]
+    },
+    {
+      "site": 75,
+      "file": "model/relabel/relabel.go",
+      "line": 335,
+      "ident": "Lowercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 32,
+      "millis": 17,
+      "top": [
+        "Lowercase",
+        "LabelMap",
+        "LabelDrop",
+        "LabelKeep",
+        "lb"
+      ]
+    },
+    {
+      "site": 75,
+      "file": "model/relabel/relabel.go",
+      "line": 335,
+      "ident": "Lowercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 8,
+      "millis": 21,
+      "top": [
+        "Lowercase",
+        "parser.TRIM_LOWER",
+        "annotations.IncompatibleBucketLayoutInBinOpWarning",
+        "annotations.NewIncompatibleBucketLayoutInBinOpWarning",
+        "io_prometheus_client.ErrIntOverflowMetrics"
+      ]
+    },
+    {
+      "site": 76,
+      "file": "model/relabel/relabel.go",
+      "line": 337,
+      "ident": "Uppercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 9,
+      "size": 85,
+      "millis": 20,
+      "top": [
+        "Replace",
+        "DropEqual",
+        "Drop",
+        "KeepEqual",
+        "Keep"
+      ]
+    },
+    {
+      "site": 76,
+      "file": "model/relabel/relabel.go",
+      "line": 337,
+      "ident": "Uppercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 17,
+      "millis": 36,
+      "top": [
+        "Uppercase",
+        "uint64",
+        "uint",
+        "uint16",
+        "uint32"
+      ]
+    },
+    {
+      "site": 76,
+      "file": "model/relabel/relabel.go",
+      "line": 337,
+      "ident": "Uppercase",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 1,
+      "size": 5,
+      "millis": 31,
+      "top": [
+        "Uppercase",
+        "parser.TRIM_UPPER",
+        "config.SupportedAlertmanagerAPIVersions",
+        "agent.ErrUnsupported",
+        "fileutil.UncachedIOSupported"
+      ]
+    },
+    {
+      "site": 77,
+      "file": "model/relabel/relabel.go",
+      "line": 339,
+      "ident": "HashMod",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 8,
+      "size": 85,
+      "millis": 21,
+      "top": [
+        "Replace",
+        "DropEqual",
+        "Drop",
+        "KeepEqual",
+        "Keep"
+      ]
+    },
+    {
+      "site": 77,
+      "file": "model/relabel/relabel.go",
+      "line": 339,
+      "ident": "HashMod",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 1,
+      "size": 2,
+      "millis": 18,
+      "top": [
+        "HashMod",
+        "chan"
+      ]
+    },
+    {
+      "site": 77,
+      "file": "model/relabel/relabel.go",
+      "line": 339,
+      "ident": "HashMod",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 2,
+      "size": 9,
+      "millis": 23,
+      "top": [
+        "lb.Labels().Has",
+        "HashMod",
+        "lb.Labels().Hash",
+        "lb.Labels().HasDuplicateLabelNames",
+        "lb.Labels().HashForLabels"
+      ]
+    },
+    {
+      "site": 78,
+      "file": "model/relabel/relabel.go",
+      "line": 340,
+      "ident": "md5",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 84,
+      "millis": 20,
+      "top": [
+        "val",
+        "va",
+        "values",
+        "cfg",
+        "lb"
+      ]
+    },
+    {
+      "site": 78,
+      "file": "model/relabel/relabel.go",
+      "line": 340,
+      "ident": "md5",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 117,
+      "size": 393,
+      "millis": 30,
+      "top": [
+        "map",
+        "model",
+        "make",
+        "max",
+        "min"
+      ]
+    },
+    {
+      "site": 79,
+      "file": "model/relabel/relabel.go",
+      "line": 344,
+      "ident": "LabelMap",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 0,
+      "rank": 10,
+      "size": 85,
+      "millis": 29,
+      "top": [
+        "Replace",
+        "DropEqual",
+        "Drop",
+        "KeepEqual",
+        "Keep"
+      ]
+    },
+    {
+      "site": 79,
+      "file": "model/relabel/relabel.go",
+      "line": 344,
+      "ident": "LabelMap",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 1,
+      "rank": 3,
+      "size": 32,
+      "millis": 20,
+      "top": [
+        "Lowercase",
+        "LabelDrop",
+        "LabelMap",
+        "LabelKeep",
+        "lb"
+      ]
+    },
+    {
+      "site": 79,
+      "file": "model/relabel/relabel.go",
+      "line": 344,
+      "ident": "LabelMap",
+      "kind": "case",
+      "sub": "const",
+      "prefix": 3,
+      "rank": 3,
+      "size": 96,
+      "millis": 53,
+      "top": [
+        "LabelDrop",
+        "prompb.Label",
+        "LabelMap",
+        "LabelKeep",
+        "io_prometheus_client.LabelPair"
+      ]
+    },
+    {
+      "site": 80,
+      "file": "notifier/manager.go",
+      "line": 64,
+      "ident": "slog",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 47,
+      "millis": 40,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 80,
+      "file": "notifier/manager.go",
+      "line": 64,
+      "ident": "slog",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 6,
+      "size": 766,
+      "millis": 98,
+      "top": [
+        "struct",
+        "sendLoop",
+        "se",
+        "sync",
+        "string"
+      ]
+    },
+    {
+      "site": 80,
+      "file": "notifier/manager.go",
+      "line": 64,
+      "ident": "slog",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 1,
+      "size": 11,
+      "millis": 31,
+      "top": [
+        "slog",
+        "slog",
+        "slog",
+        "slog",
+        "slogapp"
+      ]
+    },
+    {
+      "site": 81,
+      "file": "notifier/manager.go",
+      "line": 136,
+      "ident": "RelabelConfigs",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 5,
+      "size": 12,
+      "millis": 30,
+      "top": [
+        "QueueCapacity",
+        "Do",
+        "MaxBatchSize",
+        "Registerer",
+        "RelabelConfigs"
+      ]
+    },
+    {
+      "site": 81,
+      "file": "notifier/manager.go",
+      "line": 136,
+      "ident": "RelabelConfigs",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 2,
+      "size": 4,
+      "millis": 17,
+      "top": [
+        "Registerer",
+        "RelabelConfigs",
+        "ExternalLabels",
+        "DrainOnShutdown"
+      ]
+    },
+    {
+      "site": 81,
+      "file": "notifier/manager.go",
+      "line": 136,
+      "ident": "RelabelConfigs",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 19,
+      "top": [
+        "RelabelConfigs"
+      ]
+    },
+    {
+      "site": 82,
+      "file": "notifier/manager.go",
+      "line": 164,
+      "ident": "ams",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 1,
+      "size": 98,
+      "millis": 45,
+      "top": [
+        "ams",
+        "cfg",
+        "err",
+        "oldAmSet",
+        "ok"
+      ]
+    },
+    {
+      "site": 82,
+      "file": "notifier/manager.go",
+      "line": 164,
+      "ident": "ams",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 552,
+      "millis": 43,
+      "top": [
+        "ams",
+        "am",
+        "amSets",
+        "alertmanagerSet",
+        "alertmanager"
+      ]
+    },
+    {
+      "site": 83,
+      "file": "notifier/manager.go",
+      "line": 281,
+      "ident": "url",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 47,
+      "millis": 25,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 83,
+      "file": "notifier/manager.go",
+      "line": 281,
+      "ident": "url",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 9,
+      "size": 135,
+      "millis": 29,
+      "top": [
+        "uint64",
+        "uint",
+        "ui",
+        "ui",
+        "uint16"
+      ]
+    },
+    {
+      "site": 84,
+      "file": "promql/engine.go",
+      "line": 111,
+      "ident": "fmt",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 349,
+      "millis": 223,
+      "top": [
+        "e",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 84,
+      "file": "promql/engine.go",
+      "line": 111,
+      "ident": "fmt",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 104,
+      "size": 485,
+      "millis": 180,
+      "top": [
+        "func",
+        "foldQueryContextFunctions",
+        "fo",
+        "fParams",
+        "formatDate"
+      ]
+    },
+    {
+      "site": 85,
+      "file": "promql/engine.go",
+      "line": 176,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 98,
+      "size": 114,
+      "millis": 63,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 85,
+      "file": "promql/engine.go",
+      "line": 176,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 3,
+      "size": 305,
+      "millis": 65,
+      "top": [
+        "bytes",
+        "byte",
+        "bool",
+        "bo",
+        "buf"
+      ]
+    },
+    {
+      "site": 85,
+      "file": "promql/engine.go",
+      "line": 176,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 10,
+      "millis": 107,
+      "top": [
+        "bool",
+        "booking",
+        "books",
+        "bools",
+        "bootstrap"
+      ]
+    },
+    {
+      "site": 86,
+      "file": "promql/engine.go",
+      "line": 252,
+      "ident": "attribute",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 351,
+      "millis": 178,
+      "top": [
+        "span",
+        "ctx",
+        "q",
+        "chan",
+        "func"
+      ]
+    },
+    {
+      "site": 86,
+      "file": "promql/engine.go",
+      "line": 252,
+      "ident": "attribute",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 15,
+      "size": 711,
+      "millis": 152,
+      "top": [
+        "addToSeries",
+        "aggrOverTime",
+        "agg",
+        "allocateQueryLogFile",
+        "annosFromInterpolationError"
+      ]
+    },
+    {
+      "site": 86,
+      "file": "promql/engine.go",
+      "line": 252,
+      "ident": "attribute",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 12,
+      "millis": 223,
+      "top": [
+        "attribute",
+        "attachinterfaces",
+        "attachments",
+        "attestation",
+        "attribute_context"
+      ]
+    },
+    {
+      "site": 87,
+      "file": "promql/engine.go",
+      "line": 275,
+      "ident": "err",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 1,
+      "size": 350,
+      "millis": 269,
+      "top": [
+        "err",
+        "contextDone",
+        "context",
+        "ErrValidationAtModifierDisabled",
+        "allocateQueryLogFile"
+      ]
+    },
+    {
+      "site": 87,
+      "file": "promql/engine.go",
+      "line": 275,
+      "ident": "err",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 666,
+      "millis": 73,
+      "top": [
+        "err",
+        "ErrValidationAtModifierDisabled",
+        "ErrValidationNegativeOffsetDisabled",
+        "env",
+        "en"
+      ]
+    },
+    {
+      "site": 88,
+      "file": "promql/engine.go",
+      "line": 372,
+      "ident": "promslog",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 349,
+      "millis": 133,
+      "top": [
+        "opts",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 88,
+      "file": "promql/engine.go",
+      "line": 372,
+      "ident": "promslog",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 34,
+      "size": 552,
+      "millis": 145,
+      "top": [
+        "preprocessExprHelper",
+        "putFPointSlice",
+        "putHPointSlice",
+        "putMatrixSelectorHPointSlice",
+        "pickOrInterpolateLeft"
+      ]
+    },
+    {
+      "site": 88,
+      "file": "promql/engine.go",
+      "line": 372,
+      "ident": "promslog",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 4,
+      "size": 197,
+      "millis": 158,
+      "top": [
+        "prometheus",
+        "promql",
+        "promqltest",
+        "promslog",
+        "prometheusremotewrite.NewPrometheusConverter"
+      ]
+    },
+    {
+      "site": 89,
+      "file": "promql/engine.go",
+      "line": 376,
+      "ident": "Namespace",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 6,
+      "millis": 63,
+      "top": [
+        "Namespace",
+        "AgeBuckets",
+        "BufCap",
+        "ConstLabels",
+        "MaxAge"
+      ]
+    },
+    {
+      "site": 89,
+      "file": "promql/engine.go",
+      "line": 376,
+      "ident": "Namespace",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 5,
+      "millis": 36,
+      "top": [
+        "Namespace",
+        "chan",
+        "chan",
+        "ConstLabels",
+        "Unit"
+      ]
+    },
+    {
+      "site": 89,
+      "file": "promql/engine.go",
+      "line": 376,
+      "ident": "Namespace",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 33,
+      "top": [
+        "Namespace"
+      ]
+    },
+    {
+      "site": 90,
+      "file": "promql/engine.go",
+      "line": 494,
+      "ident": "activeQueryTracker",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 2,
+      "size": 3,
+      "millis": 57,
+      "top": [
+        "queryLogger",
+        "activeQueryTracker",
+        "queryLoggerLock"
+      ]
+    },
+    {
+      "site": 90,
+      "file": "promql/engine.go",
+      "line": 494,
+      "ident": "activeQueryTracker",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 5,
+      "millis": 62,
+      "top": [
+        "activeQueryTracker",
+        "chan",
+        "chan",
+        "map",
+        "make"
+      ]
+    },
+    {
+      "site": 90,
+      "file": "promql/engine.go",
+      "line": 494,
+      "ident": "activeQueryTracker",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 32,
+      "top": [
+        "activeQueryTracker"
+      ]
+    },
+    {
+      "site": 91,
+      "file": "promql/engine.go",
+      "line": 588,
+      "ident": "query",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 11,
+      "size": 114,
+      "millis": 155,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 91,
+      "file": "promql/engine.go",
+      "line": 588,
+      "ident": "query",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 1,
+      "size": 62,
+      "millis": 96,
+      "top": [
+        "query",
+        "qu",
+        "quantile",
+        "queries",
+        "qapps"
+      ]
+    },
+    {
+      "site": 91,
+      "file": "promql/engine.go",
+      "line": 588,
+      "ident": "query",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 38,
+      "millis": 101,
+      "top": [
+        "query",
+        "queries",
+        "queryparams",
+        "queryutil",
+        "queue"
+      ]
+    },
+    {
+      "site": 92,
+      "file": "promql/engine.go",
+      "line": 687,
+      "ident": "annotations",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 113,
+      "millis": 64,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 92,
+      "file": "promql/engine.go",
+      "line": 687,
+      "ident": "annotations",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 3,
+      "size": 555,
+      "millis": 77,
+      "top": [
+        "attribute",
+        "any",
+        "annotations",
+        "annotations",
+        "annotations"
+      ]
+    },
+    {
+      "site": 92,
+      "file": "promql/engine.go",
+      "line": 687,
+      "ident": "annotations",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 2,
+      "size": 8,
+      "millis": 86,
+      "top": [
+        "annotations.Annotations",
+        "annotations",
+        "annotations",
+        "annotations",
+        "annotations"
+      ]
+    },
+    {
+      "site": 93,
+      "file": "promql/engine.go",
+      "line": 687,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 73,
+      "size": 114,
+      "millis": 84,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 93,
+      "file": "promql/engine.go",
+      "line": 687,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 6,
+      "size": 491,
+      "millis": 80,
+      "top": [
+        "evaluator",
+        "errWithWarnings",
+        "engineMetrics",
+        "en",
+        "errors"
+      ]
+    },
+    {
+      "site": 93,
+      "file": "promql/engine.go",
+      "line": 687,
+      "ident": "error",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 3,
+      "size": 26,
+      "millis": 132,
+      "top": [
+        "errWithWarnings",
+        "errors",
+        "error",
+        "errgroup",
+        "errcheck"
+      ]
+    },
+    {
+      "site": 94,
+      "file": "promql/engine.go",
+      "line": 691,
+      "ident": "ng",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 3,
+      "size": 355,
+      "millis": 198,
+      "top": [
+        "ctx",
+        "err",
+        "ng",
+        "q",
+        "v"
+      ]
+    },
+    {
+      "site": 94,
+      "file": "promql/engine.go",
+      "line": 691,
+      "ident": "ng",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 398,
+      "millis": 69,
+      "top": [
+        "ng",
+        "namespace",
+        "name",
+        "newStepInvariantExpr",
+        "new"
+      ]
+    },
+    {
+      "site": 95,
+      "file": "promql/engine.go",
+      "line": 695,
+      "ident": "timeout",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 3,
+      "size": 34,
+      "millis": 108,
+      "top": [
+        "lookbackDelta",
+        "getLastSubqueryInterval",
+        "timeout",
+        "enableDelayedNameRemoval",
+        "logger"
+      ]
+    },
+    {
+      "site": 95,
+      "file": "promql/engine.go",
+      "line": 695,
+      "ident": "timeout",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 19,
+      "millis": 74,
+      "top": [
+        "timeout",
+        "lookbackDelta",
+        "getLastSubqueryInterval",
+        "metrics",
+        "useStartTimestamps"
+      ]
+    },
+    {
+      "site": 95,
+      "file": "promql/engine.go",
+      "line": 695,
+      "ident": "timeout",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 2,
+      "millis": 69,
+      "top": [
+        "timeout",
+        "useStartTimestamps"
+      ]
+    },
+    {
+      "site": 96,
+      "file": "promql/engine.go",
+      "line": 789,
+      "ident": "QueryPreparationTime",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 6,
+      "size": 23,
+      "millis": 74,
+      "top": [
+        "InnerEvalTime",
+        "EvalTotalTime",
+        "ExecQueueTime",
+        "ExecTotalTime",
+        "ResultSortTime"
+      ]
+    },
+    {
+      "site": 96,
+      "file": "promql/engine.go",
+      "line": 789,
+      "ident": "QueryPreparationTime",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 9,
+      "millis": 69,
+      "top": [
+        "QueryPreparationTime",
+        "QuerySamples",
+        "QueryTimers",
+        "QueryStats",
+        "QueryTiming"
+      ]
+    },
+    {
+      "site": 96,
+      "file": "promql/engine.go",
+      "line": 789,
+      "ident": "QueryPreparationTime",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 9,
+      "millis": 85,
+      "top": [
+        "QueryPreparationTime",
+        "QuerySamples",
+        "QueryTimers",
+        "QueryStats",
+        "QueryTiming"
+      ]
+    },
+    {
+      "site": 97,
+      "file": "promql/engine.go",
+      "line": 799,
+      "ident": "codes",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 358,
+      "millis": 278,
+      "top": [
+        "err",
+        "maxt",
+        "max",
+        "mint",
+        "min"
+      ]
+    },
+    {
+      "site": 97,
+      "file": "promql/engine.go",
+      "line": 799,
+      "ident": "codes",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 37,
+      "size": 878,
+      "millis": 193,
+      "top": [
+        "ctxPrepare",
+        "ctx",
+        "chan",
+        "cha",
+        "contextDone"
+      ]
+    },
+    {
+      "site": 97,
+      "file": "promql/engine.go",
+      "line": 799,
+      "ident": "codes",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 91,
+      "millis": 260,
+      "top": [
+        "codes",
+        "code",
+        "codes",
+        "codeartifact",
+        "codeartifactiface"
+      ]
+    },
+    {
+      "site": 98,
+      "file": "promql/engine.go",
+      "line": 801,
+      "ident": "prepareSpanTimer",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 10,
+      "size": 359,
+      "millis": 194,
+      "top": [
+        "err",
+        "maxt",
+        "max",
+        "mint",
+        "min"
+      ]
+    },
+    {
+      "site": 98,
+      "file": "promql/engine.go",
+      "line": 801,
+      "ident": "prepareSpanTimer",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 555,
+      "millis": 78,
+      "top": [
+        "prepareSpanTimer",
+        "preprocessExprHelper",
+        "putFPointSlice",
+        "putHPointSlice",
+        "putMatrixSelectorHPointSlice"
+      ]
+    },
+    {
+      "site": 98,
+      "file": "promql/engine.go",
+      "line": 801,
+      "ident": "prepareSpanTimer",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 58,
+      "millis": 105,
+      "top": [
+        "prepareSpanTimer",
+        "preprocessExprHelper",
+        "presence",
+        "precis",
+        "predeclared"
+      ]
+    },
+    {
+      "site": 99,
+      "file": "promql/engine.go",
+      "line": 846,
+      "ident": "String",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 0,
+      "rank": 18,
+      "size": 114,
+      "millis": 32,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 99,
+      "file": "promql/engine.go",
+      "line": 846,
+      "ident": "String",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 1,
+      "rank": 3,
+      "size": 52,
+      "millis": 33,
+      "top": [
+        "Sample",
+        "Series",
+        "String",
+        "StartTimestamps",
+        "Scalar"
+      ]
+    },
+    {
+      "site": 99,
+      "file": "promql/engine.go",
+      "line": 846,
+      "ident": "String",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 3,
+      "rank": 1,
+      "size": 10,
+      "millis": 45,
+      "top": [
+        "String",
+        "index.StringIter",
+        "struct",
+        "strconv",
+        "strings"
+      ]
+    },
+    {
+      "site": 100,
+      "file": "promql/engine.go",
+      "line": 868,
+      "ident": "warnings",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 1,
+      "size": 365,
+      "millis": 84,
+      "top": [
+        "warnings",
+        "handleVectorBinopError",
+        "nil",
+        "err",
+        "evaluator"
+      ]
+    },
+    {
+      "site": 100,
+      "file": "promql/engine.go",
+      "line": 868,
+      "ident": "warnings",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 154,
+      "millis": 70,
+      "top": [
+        "warnings",
+        "weight",
+        "writer",
+        "write",
+        "write"
+      ]
+    },
+    {
+      "site": 100,
+      "file": "promql/engine.go",
+      "line": 868,
+      "ident": "warnings",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 3,
+      "rank": 1,
+      "size": 18,
+      "millis": 64,
+      "top": [
+        "warnings",
+        "promqltest.Warn",
+        "evaluator.logger.Warn",
+        "ng.logger.Warn",
+        "prometheusremotewrite.WarningCategory"
+      ]
+    },
+    {
+      "site": 101,
+      "file": "promql/engine.go",
+      "line": 919,
+      "ident": "sort",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 352,
+      "millis": 179,
+      "top": [
+        "sortSpanTimer",
+        "ctx",
+        "mat",
+        "ng",
+        "query"
+      ]
+    },
+    {
+      "site": 101,
+      "file": "promql/engine.go",
+      "line": 919,
+      "ident": "sort",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 10,
+      "size": 904,
+      "millis": 185,
+      "top": [
+        "for",
+        "se",
+        "make",
+        "sl",
+        "select"
+      ]
+    },
+    {
+      "site": 101,
+      "file": "promql/engine.go",
+      "line": 919,
+      "ident": "sort",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 2,
+      "size": 17,
+      "millis": 137,
+      "top": [
+        "sortSpanTimer",
+        "sort",
+        "sort",
+        "query.ng.sortMatrixResult",
+        "sortedset"
+      ]
+    },
+    {
+      "site": 102,
+      "file": "promql/engine.go",
+      "line": 930,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 0,
+      "rank": -1,
+      "size": 349,
+      "millis": 152,
+      "top": [
+        "path",
+        "chan",
+        "func",
+        "interface",
+        "int"
+      ]
+    },
+    {
+      "site": 102,
+      "file": "promql/engine.go",
+      "line": 930,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 1,
+      "rank": 27,
+      "size": 514,
+      "millis": 168,
+      "top": [
+        "map",
+        "makeInt64Pointer",
+        "make",
+        "maxPointsSliceSize",
+        "max"
+      ]
+    },
+    {
+      "site": 102,
+      "file": "promql/engine.go",
+      "line": 930,
+      "ident": "math",
+      "kind": "unimported-package",
+      "sub": "std",
+      "prefix": 3,
+      "rank": 8,
+      "size": 53,
+      "millis": 132,
+      "top": [
+        "mat",
+        "matrixSelectorHPool",
+        "matrixSelectorSliceSize",
+        "matching",
+        "match"
+      ]
+    },
+    {
+      "site": 103,
+      "file": "promql/engine.go",
+      "line": 939,
+      "ident": "subqOffset",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 5,
+      "size": 356,
+      "millis": 129,
+      "top": [
+        "n",
+        "ok",
+        "ts",
+        "node",
+        "subqOffset"
+      ]
+    },
+    {
+      "site": 103,
+      "file": "promql/engine.go",
+      "line": 939,
+      "ident": "subqOffset",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 8,
+      "size": 904,
+      "millis": 85,
+      "top": [
+        "make",
+        "sl",
+        "select",
+        "se",
+        "switch"
+      ]
+    },
+    {
+      "site": 103,
+      "file": "promql/engine.go",
+      "line": 939,
+      "ident": "subqOffset",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 39,
+      "millis": 89,
+      "top": [
+        "subqOffset",
+        "subqRange",
+        "subsystem",
+        "subqueryTimes",
+        "subHistogramWithAnnotations"
+      ]
+    },
+    {
+      "site": 104,
+      "file": "promql/engine.go",
+      "line": 1236,
+      "ident": "errWithWarnings",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 0,
+      "rank": 31,
+      "size": 114,
+      "millis": 52,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 104,
+      "file": "promql/engine.go",
+      "line": 1236,
+      "ident": "errWithWarnings",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 1,
+      "rank": 2,
+      "size": 492,
+      "millis": 62,
+      "top": [
+        "evaluator",
+        "errWithWarnings",
+        "engineMetrics",
+        "en",
+        "errors"
+      ]
+    },
+    {
+      "site": 104,
+      "file": "promql/engine.go",
+      "line": 1236,
+      "ident": "errWithWarnings",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 3,
+      "rank": 1,
+      "size": 27,
+      "millis": 55,
+      "top": [
+        "errWithWarnings",
+        "errors",
+        "error",
+        "errgroup",
+        "errcheck"
+      ]
+    },
+    {
+      "site": 105,
+      "file": "promql/engine.go",
+      "line": 1239,
+      "ident": "error",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 0,
+      "rank": 73,
+      "size": 114,
+      "millis": 36,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 105,
+      "file": "promql/engine.go",
+      "line": 1239,
+      "ident": "error",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 1,
+      "rank": 6,
+      "size": 492,
+      "millis": 49,
+      "top": [
+        "evaluator",
+        "errWithWarnings",
+        "engineMetrics",
+        "en",
+        "errors"
+      ]
+    },
+    {
+      "site": 105,
+      "file": "promql/engine.go",
+      "line": 1239,
+      "ident": "error",
+      "kind": "case",
+      "sub": "type-switch",
+      "prefix": 3,
+      "rank": 3,
+      "size": 27,
+      "millis": 46,
+      "top": [
+        "errWithWarnings",
+        "errors",
+        "error",
+        "errgroup",
+        "errcheck"
+      ]
+    },
+    {
+      "site": 106,
+      "file": "promql/engine.go",
+      "line": 1280,
+      "ident": "labels",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 0,
+      "rank": -1,
+      "size": 113,
+      "millis": 61,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 106,
+      "file": "promql/engine.go",
+      "line": 1280,
+      "ident": "labels",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 1,
+      "rank": 13,
+      "size": 255,
+      "millis": 65,
+      "top": [
+        "logging",
+        "lo",
+        "log",
+        "log",
+        "log"
+      ]
+    },
+    {
+      "site": 106,
+      "file": "promql/engine.go",
+      "line": 1280,
+      "ident": "labels",
+      "kind": "unimported-package",
+      "sub": "module",
+      "prefix": 3,
+      "rank": 1,
+      "size": 15,
+      "millis": 127,
+      "top": [
+        "labels",
+        "label",
+        "labels",
+        "labels",
+        "labels"
+      ]
+    },
+    {
+      "site": 107,
+      "file": "promql/engine.go",
+      "line": 1324,
+      "ident": "Sample",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 0,
+      "rank": 16,
+      "size": 114,
+      "millis": 64,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 107,
+      "file": "promql/engine.go",
+      "line": 1324,
+      "ident": "Sample",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 1,
+      "rank": 1,
+      "size": 52,
+      "millis": 32,
+      "top": [
+        "Sample",
+        "Series",
+        "String",
+        "StartTimestamps",
+        "Scalar"
+      ]
+    },
+    {
+      "site": 107,
+      "file": "promql/engine.go",
+      "line": 1324,
+      "ident": "Sample",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 3,
+      "rank": 1,
+      "size": 10,
+      "millis": 46,
+      "top": [
+        "Sample",
+        "chunks.Samples",
+        "chunks.SampleSlice",
+        "ErrTooManySamples",
+        "HashRatioSampler"
+      ]
+    },
+    {
+      "site": 108,
+      "file": "promql/engine.go",
+      "line": 1351,
+      "ident": "Vector",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 19,
+      "size": 114,
+      "millis": 61,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 108,
+      "file": "promql/engine.go",
+      "line": 1351,
+      "ident": "Vector",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 1,
+      "size": 10,
+      "millis": 58,
+      "top": [
+        "Vector",
+        "vectorByValueHeap",
+        "vectorByReverseValueHeap",
+        "value",
+        "EvalNodeHelper"
+      ]
+    },
+    {
+      "site": 108,
+      "file": "promql/engine.go",
+      "line": 1351,
+      "ident": "Vector",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 4,
+      "millis": 64,
+      "top": [
+        "Vector",
+        "vectorByValueHeap",
+        "vectorByReverseValueHeap",
+        "discovery.RefreshMetricsVecs"
+      ]
+    },
+    {
+      "site": 109,
+      "file": "promql/engine.go",
+      "line": 1378,
+      "ident": "Metric",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 4,
+      "size": 10,
+      "millis": 139,
+      "top": [
+        "DropName",
+        "F",
+        "H",
+        "Metric",
+        "String"
+      ]
+    },
+    {
+      "site": 109,
+      "file": "promql/engine.go",
+      "line": 1378,
+      "ident": "Metric",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 3,
+      "millis": 94,
+      "top": [
+        "Metric",
+        "MarshalJSON",
+        "DropName"
+      ]
+    },
+    {
+      "site": 109,
+      "file": "promql/engine.go",
+      "line": 1378,
+      "ident": "Metric",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 81,
+      "top": [
+        "Metric"
+      ]
+    },
+    {
+      "site": 110,
+      "file": "promql/engine.go",
+      "line": 1403,
+      "ident": "MetricName",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 1,
+      "size": 37,
+      "millis": 85,
+      "top": [
+        "MetricName",
+        "BucketLabel",
+        "FormatOpenMetricsFloat",
+        "AlertName",
+        "Equal"
+      ]
+    },
+    {
+      "site": 110,
+      "file": "promql/engine.go",
+      "line": 1403,
+      "ident": "MetricName",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 23,
+      "millis": 71,
+      "top": [
+        "MetricName",
+        "Matcher",
+        "MatchEqual",
+        "MustNewMatcher",
+        "MatchRegexp"
+      ]
+    },
+    {
+      "site": 110,
+      "file": "promql/engine.go",
+      "line": 1403,
+      "ident": "MetricName",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 2,
+      "millis": 82,
+      "top": [
+        "MetricName",
+        "FormatOpenMetricsFloat"
+      ]
+    },
+    {
+      "site": 111,
+      "file": "promql/engine.go",
+      "line": 1417,
+      "ident": "string",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 0,
+      "rank": 81,
+      "size": 114,
+      "millis": 40,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 111,
+      "file": "promql/engine.go",
+      "line": 1417,
+      "ident": "string",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 1,
+      "rank": 15,
+      "size": 760,
+      "millis": 56,
+      "top": [
+        "struct",
+        "storageSeriesIterator",
+        "storage",
+        "syncWriter",
+        "sync"
+      ]
+    },
+    {
+      "site": 111,
+      "file": "promql/engine.go",
+      "line": 1417,
+      "ident": "string",
+      "kind": "type",
+      "sub": "conversion",
+      "prefix": 3,
+      "rank": 5,
+      "size": 52,
+      "millis": 43,
+      "top": [
+        "str",
+        "struct",
+        "strconv",
+        "strings",
+        "string"
+      ]
+    },
+    {
+      "site": 112,
+      "file": "promql/engine.go",
+      "line": 1457,
+      "ident": "Annotations",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 1,
+      "size": 2,
+      "millis": 73,
+      "top": [
+        "Annotations",
+        "HistogramOperation"
+      ]
+    },
+    {
+      "site": 112,
+      "file": "promql/engine.go",
+      "line": 1457,
+      "ident": "Annotations",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 1,
+      "size": 2,
+      "millis": 65,
+      "top": [
+        "Annotations",
+        "HistogramOperation"
+      ]
+    },
+    {
+      "site": 112,
+      "file": "promql/engine.go",
+      "line": 1457,
+      "ident": "Annotations",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 75,
+      "top": [
+        "Annotations"
+      ]
+    },
+    {
+      "site": 113,
+      "file": "promql/engine.go",
+      "line": 1586,
+      "ident": "DropName",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 2,
+      "millis": 35,
+      "top": [
+        "DropName",
+        "Histograms"
+      ]
+    },
+    {
+      "site": 113,
+      "file": "promql/engine.go",
+      "line": 1586,
+      "ident": "DropName",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 34,
+      "top": [
+        "DropName"
+      ]
+    },
+    {
+      "site": 113,
+      "file": "promql/engine.go",
+      "line": 1586,
+      "ident": "DropName",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 33,
+      "top": [
+        "DropName"
+      ]
+    },
+    {
+      "site": 114,
+      "file": "promql/engine.go",
+      "line": 1588,
+      "ident": "T",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 35,
+      "top": [
+        "T"
+      ]
+    },
+    {
+      "site": 115,
+      "file": "promql/engine.go",
+      "line": 1625,
+      "ident": "ev",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 17,
+      "size": 369,
+      "millis": 188,
+      "top": [
+        "enh",
+        "mat",
+        "warnings",
+        "numSteps",
+        "seriess"
+      ]
+    },
+    {
+      "site": 115,
+      "file": "promql/engine.go",
+      "line": 1625,
+      "ident": "ev",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 4,
+      "size": 692,
+      "millis": 78,
+      "top": [
+        "if",
+        "enh",
+        "en",
+        "ev",
+        "exprs"
+      ]
+    },
+    {
+      "site": 116,
+      "file": "promql/engine.go",
+      "line": 1682,
+      "ident": "errorf",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 12,
+      "size": 54,
+      "millis": 82,
+      "top": [
+        "currentSamples",
+        "enableDelayedNameRemoval",
+        "endTimestamp",
+        "error",
+        "interval"
+      ]
+    },
+    {
+      "site": 116,
+      "file": "promql/engine.go",
+      "line": 1682,
+      "ident": "errorf",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 4,
+      "size": 50,
+      "millis": 84,
+      "top": [
+        "enableDelayedNameRemoval",
+        "endTimestamp",
+        "error",
+        "errorf",
+        "enableTypeAndUnitLabels"
+      ]
+    },
+    {
+      "site": 116,
+      "file": "promql/engine.go",
+      "line": 1682,
+      "ident": "errorf",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 3,
+      "rank": 2,
+      "size": 3,
+      "millis": 73,
+      "top": [
+        "error",
+        "errorf",
+        "errf"
+      ]
+    },
+    {
+      "site": 117,
+      "file": "promql/engine.go",
+      "line": 1713,
+      "ident": "annos",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 1,
+      "size": 366,
+      "millis": 77,
+      "top": [
+        "annos",
+        "buf",
+        "enh",
+        "groupCount",
+        "result"
+      ]
+    },
+    {
+      "site": 117,
+      "file": "promql/engine.go",
+      "line": 1713,
+      "ident": "annos",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 718,
+      "millis": 87,
+      "top": [
+        "annos",
+        "aggExpr",
+        "agg",
+        "addToSeries",
+        "aggrOverTime"
+      ]
+    },
+    {
+      "site": 117,
+      "file": "promql/engine.go",
+      "line": 1713,
+      "ident": "annos",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 6,
+      "millis": 78,
+      "top": [
+        "annos",
+        "annosFromInterpolationError",
+        "annotations",
+        "announcementsservice",
+        "addHistogramWithAnnotations"
+      ]
+    },
+    {
+      "site": 118,
+      "file": "promql/engine.go",
+      "line": 1763,
+      "ident": "result",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 5,
+      "size": 367,
+      "millis": 65,
+      "top": [
+        "annos",
+        "buf",
+        "enh",
+        "groupCount",
+        "result"
+      ]
+    },
+    {
+      "site": 118,
+      "file": "promql/engine.go",
+      "line": 1763,
+      "ident": "result",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 1,
+      "size": 609,
+      "millis": 113,
+      "top": [
+        "result",
+        "resultMetric",
+        "ratiosampler",
+        "reuseOrGetFPointSlices",
+        "reuseOrGetHPointSlices"
+      ]
+    },
+    {
+      "site": 118,
+      "file": "promql/engine.go",
+      "line": 1763,
+      "ident": "result",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 110,
+      "millis": 97,
+      "top": [
+        "result",
+        "resultMetric",
+        "reseller",
+        "reservation",
+        "resiliencehub"
+      ]
+    },
+    {
+      "site": 119,
+      "file": "promql/engine.go",
+      "line": 1784,
+      "ident": "Series",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 0,
+      "rank": 31,
+      "size": 362,
+      "millis": 73,
+      "top": [
+        "annos",
+        "it",
+        "lb",
+        "mat",
+        "s"
+      ]
+    },
+    {
+      "site": 119,
+      "file": "promql/engine.go",
+      "line": 1784,
+      "ident": "Series",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 1,
+      "rank": 3,
+      "size": 193,
+      "millis": 65,
+      "top": [
+        "s",
+        "Sample",
+        "Series",
+        "String",
+        "StartTimestamps"
+      ]
+    },
+    {
+      "site": 119,
+      "file": "promql/engine.go",
+      "line": 1784,
+      "ident": "Series",
+      "kind": "type",
+      "sub": "composite-literal",
+      "prefix": 3,
+      "rank": 1,
+      "size": 65,
+      "millis": 105,
+      "top": [
+        "Series",
+        "chunks.SeriesRefSize",
+        "stackit.Server",
+        "tsdb.SeriesLifecycleCallback",
+        "tsdb.SeriesLifecycleState"
+      ]
+    },
+    {
+      "site": 120,
+      "file": "promql/engine.go",
+      "line": 1833,
+      "ident": "H",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 35,
+      "top": [
+        "H"
+      ]
+    },
+    {
+      "site": 121,
+      "file": "promql/engine.go",
+      "line": 1842,
+      "ident": "T",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 1,
+      "millis": 36,
+      "top": [
+        "T"
+      ]
+    },
+    {
+      "site": 122,
+      "file": "promql/engine.go",
+      "line": 1892,
+      "ident": "Series",
+      "kind": "type",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 17,
+      "size": 114,
+      "millis": 79,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 122,
+      "file": "promql/engine.go",
+      "line": 1892,
+      "ident": "Series",
+      "kind": "type",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 2,
+      "size": 52,
+      "millis": 81,
+      "top": [
+        "Sample",
+        "Series",
+        "String",
+        "StartTimestamps",
+        "Scalar"
+      ]
+    },
+    {
+      "site": 122,
+      "file": "promql/engine.go",
+      "line": 1892,
+      "ident": "Series",
+      "kind": "type",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 31,
+      "millis": 103,
+      "top": [
+        "Series",
+        "stackit.Server",
+        "tsdb.SeriesLifecycleCallback",
+        "tsdb.SeriesLifecycleState",
+        "wlog.SegmentRange"
+      ]
+    },
+    {
+      "site": 123,
+      "file": "promql/engine.go",
+      "line": 1921,
+      "ident": "currentSamples",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 1,
+      "size": 54,
+      "millis": 83,
+      "top": [
+        "currentSamples",
+        "numSteps",
+        "maxSamples",
+        "enableDelayedNameRemoval",
+        "endTimestamp"
+      ]
+    },
+    {
+      "site": 123,
+      "file": "promql/engine.go",
+      "line": 1921,
+      "ident": "currentSamples",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 21,
+      "millis": 110,
+      "top": [
+        "currentSamples",
+        "cleanupMetricLabels",
+        "combineWithInfoSeries",
+        "combineWithInfoVector",
+        "lookbackDelta"
+      ]
+    },
+    {
+      "site": 123,
+      "file": "promql/engine.go",
+      "line": 1921,
+      "ident": "currentSamples",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 119,
+      "top": [
+        "currentSamples"
+      ]
+    },
+    {
+      "site": 124,
+      "file": "promql/engine.go",
+      "line": 2103,
+      "ident": "s",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 1,
+      "size": 361,
+      "millis": 109,
+      "top": [
+        "s",
+        "mat",
+        "val",
+        "vs",
+        "ws"
+      ]
+    },
+    {
+      "site": 125,
+      "file": "promql/engine.go",
+      "line": 2188,
+      "ident": "true",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 0,
+      "rank": 14,
+      "size": 363,
+      "millis": 130,
+      "top": [
+        "ok",
+        "matrixArg",
+        "matrixFromSubquery",
+        "isStartTimestampReset",
+        "i"
+      ]
+    },
+    {
+      "site": 125,
+      "file": "promql/engine.go",
+      "line": 2188,
+      "ident": "true",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 1,
+      "rank": 1,
+      "size": 755,
+      "millis": 127,
+      "top": [
+        "true",
+        "tr",
+        "totalHPointSize",
+        "to",
+        "to"
+      ]
+    },
+    {
+      "site": 125,
+      "file": "promql/engine.go",
+      "line": 2188,
+      "ident": "true",
+      "kind": "expression",
+      "sub": "assignment-rhs",
+      "prefix": 3,
+      "rank": 1,
+      "size": 12,
+      "millis": 89,
+      "top": [
+        "true",
+        "trunk_details",
+        "trunks",
+        "trustedadvisor",
+        "trustedadvisoriface"
+      ]
+    },
+    {
+      "site": 126,
+      "file": "promql/engine.go",
+      "line": 2299,
+      "ident": "bufferRange",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 2,
+      "size": 376,
+      "millis": 91,
+      "top": [
+        "offset",
+        "bufferRange",
+        "selRange",
+        "sel",
+        "stepRange"
+      ]
+    },
+    {
+      "site": 126,
+      "file": "promql/engine.go",
+      "line": 2299,
+      "ident": "bufferRange",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 333,
+      "millis": 87,
+      "top": [
+        "bufferRange",
+        "buf",
+        "buffer",
+        "buffer",
+        "buffer"
+      ]
+    },
+    {
+      "site": 126,
+      "file": "promql/engine.go",
+      "line": 2299,
+      "ident": "bufferRange",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 2,
+      "size": 104,
+      "millis": 145,
+      "top": [
+        "buf",
+        "bufferRange",
+        "buffer",
+        "buffer",
+        "buffer"
+      ]
+    },
+    {
+      "site": 127,
+      "file": "promql/engine.go",
+      "line": 2336,
+      "ident": "inputDropName",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 36,
+      "size": 386,
+      "millis": 93,
+      "top": [
+        "ctx",
+        "e",
+        "enh",
+        "err",
+        "floats"
+      ]
+    },
+    {
+      "site": 127,
+      "file": "promql/engine.go",
+      "line": 2336,
+      "ident": "inputDropName",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 8,
+      "size": 487,
+      "millis": 120,
+      "top": [
+        "i",
+        "if",
+        "if",
+        "if",
+        "if"
+      ]
+    },
+    {
+      "site": 127,
+      "file": "promql/engine.go",
+      "line": 2336,
+      "ident": "inputDropName",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 12,
+      "millis": 108,
+      "top": [
+        "inputDropName",
+        "input",
+        "index.FindIntersectingPostings",
+        "azuread.IngestionPublicAudience",
+        "tsdb.IndexReaderPostingsFunc"
+      ]
+    },
+    {
+      "site": 128,
+      "file": "promql/engine.go",
+      "line": 2412,
+      "ident": "ev",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 43,
+      "size": 396,
+      "millis": 101,
+      "top": [
+        "annos",
+        "ctx",
+        "e",
+        "enh",
+        "err"
+      ]
+    },
+    {
+      "site": 128,
+      "file": "promql/engine.go",
+      "line": 2412,
+      "ident": "ev",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 7,
+      "size": 700,
+      "millis": 114,
+      "top": [
+        "e",
+        "if",
+        "enh",
+        "en",
+        "err"
+      ]
+    },
+    {
+      "site": 129,
+      "file": "promql/engine.go",
+      "line": 2466,
+      "ident": "floats",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 0,
+      "rank": 5,
+      "size": 381,
+      "millis": 73,
+      "top": [
+        "ctx",
+        "e",
+        "enh",
+        "err",
+        "floats"
+      ]
+    },
+    {
+      "site": 129,
+      "file": "promql/engine.go",
+      "line": 2466,
+      "ident": "floats",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 1,
+      "rank": 1,
+      "size": 488,
+      "millis": 90,
+      "top": [
+        "floats",
+        "func",
+        "foldQueryContextFunctions",
+        "fo",
+        "fParams"
+      ]
+    },
+    {
+      "site": 129,
+      "file": "promql/engine.go",
+      "line": 2466,
+      "ident": "floats",
+      "kind": "expression",
+      "sub": "call-argument",
+      "prefix": 3,
+      "rank": 1,
+      "size": 58,
+      "millis": 102,
+      "top": [
+        "floats",
+        "float64",
+        "float32",
+        "float16",
+        "floatingips"
+      ]
+    },
+    {
+      "site": 130,
+      "file": "promql/engine.go",
+      "line": 2474,
+      "ident": "endTimestamp",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 1,
+      "size": 54,
+      "millis": 114,
+      "top": [
+        "endTimestamp",
+        "interval",
+        "startTimestamp",
+        "currentSamples",
+        "enableDelayedNameRemoval"
+      ]
+    },
+    {
+      "site": 130,
+      "file": "promql/engine.go",
+      "line": 2474,
+      "ident": "endTimestamp",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 50,
+      "millis": 134,
+      "top": [
+        "endTimestamp",
+        "enableDelayedNameRemoval",
+        "error",
+        "errorf",
+        "enableTypeAndUnitLabels"
+      ]
+    },
+    {
+      "site": 130,
+      "file": "promql/engine.go",
+      "line": 2474,
+      "ident": "endTimestamp",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 2,
+      "millis": 116,
+      "top": [
+        "endTimestamp",
+        "enableDelayedNameRemoval"
+      ]
+    },
+    {
+      "site": 131,
+      "file": "promql/engine.go",
+      "line": 2530,
+      "ident": "Floats",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 2,
+      "size": 8,
+      "millis": 84,
+      "top": [
+        "DropName",
+        "Floats",
+        "Histograms",
+        "Metric",
+        "String"
+      ]
+    },
+    {
+      "site": 131,
+      "file": "promql/engine.go",
+      "line": 2530,
+      "ident": "Floats",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 80,
+      "top": [
+        "Floats"
+      ]
+    },
+    {
+      "site": 131,
+      "file": "promql/engine.go",
+      "line": 2530,
+      "ident": "Floats",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 73,
+      "top": [
+        "Floats"
+      ]
+    },
+    {
+      "site": 132,
+      "file": "promql/engine.go",
+      "line": 2543,
+      "ident": "Type",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 3,
+      "size": 8,
+      "millis": 83,
+      "top": [
+        "PositionRange",
+        "String",
+        "Type",
+        "Pretty",
+        "PromQLExpr"
+      ]
+    },
+    {
+      "site": 132,
+      "file": "promql/engine.go",
+      "line": 2543,
+      "ident": "Type",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 1,
+      "size": 4,
+      "millis": 78,
+      "top": [
+        "Type",
+        "PositionRange",
+        "String",
+        "Pretty"
+      ]
+    },
+    {
+      "site": 132,
+      "file": "promql/engine.go",
+      "line": 2543,
+      "ident": "Type",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 108,
+      "top": [
+        "Type"
+      ]
+    },
+    {
+      "site": 133,
+      "file": "promql/engine.go",
+      "line": 2932,
+      "ident": "Floats",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 0,
+      "rank": 2,
+      "size": 8,
+      "millis": 130,
+      "top": [
+        "DropName",
+        "Floats",
+        "Histograms",
+        "Metric",
+        "String"
+      ]
+    },
+    {
+      "site": 133,
+      "file": "promql/engine.go",
+      "line": 2932,
+      "ident": "Floats",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 1,
+      "rank": 1,
+      "size": 1,
+      "millis": 105,
+      "top": [
+        "Floats"
+      ]
+    },
+    {
+      "site": 133,
+      "file": "promql/engine.go",
+      "line": 2932,
+      "ident": "Floats",
+      "kind": "after-dot",
+      "sub": "field",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 126,
+      "top": [
+        "Floats"
+      ]
+    },
+    {
+      "site": 134,
+      "file": "promql/engine.go",
+      "line": 3031,
+      "ident": "ev",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 8,
+      "size": 361,
+      "millis": 114,
+      "top": [
+        "drop",
+        "mintFloats",
+        "mint",
+        "min",
+        "mintHistograms"
+      ]
+    },
+    {
+      "site": 134,
+      "file": "promql/engine.go",
+      "line": 3031,
+      "ident": "ev",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 2,
+      "size": 679,
+      "millis": 83,
+      "top": [
+        "if",
+        "ev",
+        "evaluator",
+        "env",
+        "en"
+      ]
+    },
+    {
+      "site": 135,
+      "file": "promql/engine.go",
+      "line": 3211,
+      "ident": "leftSigOrdinalsPresent",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 0,
+      "rank": 3,
+      "size": 358,
+      "millis": 70,
+      "top": [
+        "i",
+        "ls",
+        "leftSigOrdinalsPresent",
+        "enh",
+        "lhs"
+      ]
+    },
+    {
+      "site": 135,
+      "file": "promql/engine.go",
+      "line": 3211,
+      "ident": "leftSigOrdinalsPresent",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 1,
+      "rank": 2,
+      "size": 355,
+      "millis": 80,
+      "top": [
+        "ls",
+        "leftSigOrdinalsPresent",
+        "lhs",
+        "lhsh",
+        "linearRegression"
+      ]
+    },
+    {
+      "site": 135,
+      "file": "promql/engine.go",
+      "line": 3211,
+      "ident": "leftSigOrdinalsPresent",
+      "kind": "statement-start",
+      "sub": "var",
+      "prefix": 3,
+      "rank": 1,
+      "size": 5,
+      "millis": 150,
+      "top": [
+        "leftSigOrdinalsPresent",
+        "simpleFloatFunc",
+        "pickOrInterpolateLeft",
+        "pickOrInterpolateLeftHistogram",
+        "chunks.MaxChunkLengthFieldSize"
+      ]
+    },
+    {
+      "site": 136,
+      "file": "promql/engine.go",
+      "line": 3366,
+      "ident": "Metric",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 0,
+      "rank": 1,
+      "size": 2,
+      "millis": 47,
+      "top": [
+        "Metric",
+        "T"
+      ]
+    },
+    {
+      "site": 136,
+      "file": "promql/engine.go",
+      "line": 3366,
+      "ident": "Metric",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 1,
+      "rank": 5,
+      "size": 5,
+      "millis": 41,
+      "top": [
+        "chan",
+        "chan",
+        "map",
+        "make",
+        "Metric"
+      ]
+    },
+    {
+      "site": 136,
+      "file": "promql/engine.go",
+      "line": 3366,
+      "ident": "Metric",
+      "kind": "struct-literal-field",
+      "sub": "key",
+      "prefix": 3,
+      "rank": 1,
+      "size": 1,
+      "millis": 50,
+      "top": [
+        "Metric"
+      ]
+    },
+    {
+      "site": 137,
+      "file": "promql/engine.go",
+      "line": 3546,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 0,
+      "rank": 98,
+      "size": 114,
+      "millis": 66,
+      "top": [
+        "chan",
+        "func",
+        "interface",
+        "int",
+        "map"
+      ]
+    },
+    {
+      "site": 137,
+      "file": "promql/engine.go",
+      "line": 3546,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 1,
+      "rank": 3,
+      "size": 305,
+      "millis": 73,
+      "top": [
+        "bytes",
+        "byte",
+        "bool",
+        "bo",
+        "buf"
+      ]
+    },
+    {
+      "site": 137,
+      "file": "promql/engine.go",
+      "line": 3546,
+      "ident": "bool",
+      "kind": "type",
+      "sub": "field-or-param",
+      "prefix": 3,
+      "rank": 1,
+      "size": 10,
+      "millis": 143,
+      "top": [
+        "bool",
+        "booking",
+        "books",
+        "bools",
+        "bootstrap"
+      ]
+    },
+    {
+      "site": 138,
+      "file": "promql/engine.go",
+      "line": 3556,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 0,
+      "rank": 5,
+      "size": 360,
+      "millis": 145,
+      "top": [
+        "hlhs",
+        "hrhs",
+        "resH",
+        "res",
+        "nil"
+      ]
+    },
+    {
+      "site": 138,
+      "file": "promql/engine.go",
+      "line": 3556,
+      "ident": "nil",
+      "kind": "expression",
+      "sub": "return",
+      "prefix": 1,
+      "rank": 1,
+      "size": 397,
+      "millis": 69,
+      "top": [
+        "nil",
+        "namespace",
+        "name",
+        "newStepInvariantExpr",
+        "new"
+      ]
+    },
+    {
+      "site": 139,
+      "file": "promql/engine.go",
+      "line": 3562,
+      "ident": "Mod",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 0,
+      "rank": 20,
+      "size": 97,
+      "millis": 80,
+      "top": [
+        "IsNaN",
+        "Inf",
+        "NaN",
+        "Max",
+        "Min"
+      ]
+    },
+    {
+      "site": 139,
+      "file": "promql/engine.go",
+      "line": 3562,
+      "ident": "Mod",
+      "kind": "after-dot",
+      "sub": "package-member",
+      "prefix": 1,
+      "rank": 7,
+      "size": 31,
+      "millis": 123,
+      "top": [
+        "Max",
+        "Min",
+        "MaxInt64",
+        "MaxInt",
+        "MinInt64"
+      ]
+    },
+    {
+      "site": 140,
+      "file": "promql/engine.go",
+      "line": 3594,
+      "ident": "Mul",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 0,
+      "rank": 12,
+      "size": 40,
+      "millis": 118,
+      "top": [
+        "Add",
+        "Copy",
+        "Count",
+        "CounterResetHint",
+        "String"
+      ]
+    },
+    {
+      "site": 140,
+      "file": "promql/engine.go",
+      "line": 3594,
+      "ident": "Mul",
+      "kind": "after-dot",
+      "sub": "method",
+      "prefix": 1,
+      "rank": 1,
+      "size": 8,
+      "millis": 100,
+      "top": [
+        "Mul",
+        "Sum",
+        "Schema",
+        "Compact",
+        "UsesCustomBuckets"
+      ]
+    }
+  ],
+  "insertions": [
+    {
+      "site": 1,
+      "ident": "context",
+      "importPath": "context",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "ctx := context.Background()",
+      "caretColumn": 16
+    },
+    {
+      "site": 4,
+      "ident": "math",
+      "importPath": "math",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "dumpMinTime := tsdbDumpCmd.Flag(\"min-time\", \"Minimum timestamp to dump, in milliseconds since the Unix epoch.\").Default(strconv.FormatInt(math.MinInt64, 10)).Int64()",
+      "caretColumn": 144
+    },
+    {
+      "site": 6,
+      "ident": "fmt",
+      "importPath": "fmt",
+      "prefix": 1,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "fmt.Printf(\"  WARNING: Unknown feature passed to --enable-feature: %s\", o)",
+      "caretColumn": 8
+    },
+    {
+      "site": 23,
+      "ident": "expfmt",
+      "importPath": "github.com/prometheus/common/expfmt",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "p := expfmt.NewTextParser(model.NameValidationScheme)",
+      "caretColumn": 13
+    },
+    {
+      "site": 26,
+      "ident": "scrape",
+      "importPath": "github.com/prometheus/prometheus/scrape",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "var targets []*scrape.Target",
+      "caretColumn": 23
+    },
+    {
+      "site": 30,
+      "ident": "otlptranslator",
+      "importPath": "github.com/prometheus/otlptranslator",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "case otlptranslator.UnderscoreEscapingWithSuffixes, otlptranslator.UnderscoreEscapingWithoutSuffixes:",
+      "caretColumn": 21
+    },
+    {
+      "site": 32,
+      "ident": "config",
+      "importPath": "github.com/prometheus/common/config",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "HTTPClientConfig:  config.DefaultHTTPClientConfig,",
+      "caretColumn": 28
+    },
+    {
+      "site": 35,
+      "ident": "strings",
+      "importPath": "strings",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "if _, ok := dups[strings.ToLower(string(sp))]; ok {",
+      "caretColumn": 27
+    },
+    {
+      "site": 40,
+      "ident": "slices",
+      "importPath": "slices",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "if !slices.Contains(SupportedAlertmanagerAPIVersions, *v) {",
+      "caretColumn": 12
+    },
+    {
+      "site": 45,
+      "ident": "errors",
+      "importPath": "errors",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "if !errors.Is(ctx.Err(), context.Canceled) {",
+      "caretColumn": 13
+    },
+    {
+      "site": 50,
+      "ident": "errors",
+      "importPath": "errors",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "ErrHistogramCountNotBigEnough       = Error{error: errors.New(\"histogram's observation count should be at least the number of observations found in the buckets\")}",
+      "caretColumn": 59
+    },
+    {
+      "site": 57,
+      "ident": "regexp",
+      "importPath": "github.com/grafana/regexp",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "relabelTargetLegacy = regexp.MustCompile(`^(?:(?:[a-zA-Z_]|\\$(?:\\{\\w+\\}|\\w+))+\\w*)+$`)",
+      "caretColumn": 30
+    },
+    {
+      "site": 69,
+      "ident": "json",
+      "importPath": "encoding/json",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "if err := json.Unmarshal(b, &s); err != nil {",
+      "caretColumn": 16
+    },
+    {
+      "site": 70,
+      "ident": "labels",
+      "importPath": "github.com/prometheus/prometheus/model/labels",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "func ProcessBuilder(lb *labels.Builder, cfgs ...*Config) (keep bool) {",
+      "caretColumn": 31
+    },
+    {
+      "site": 78,
+      "ident": "md5",
+      "importPath": "crypto/md5",
+      "prefix": 1,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "hash := md5.Sum([]byte(val))",
+      "caretColumn": 14
+    },
+    {
+      "site": 80,
+      "ident": "slog",
+      "importPath": "log/slog",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "logger        *slog.Logger",
+      "caretColumn": 21
+    },
+    {
+      "site": 83,
+      "ident": "url",
+      "importPath": "net/url",
+      "prefix": 1,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "func (n *Manager) Alertmanagers() []*url.URL {",
+      "caretColumn": 41
+    },
+    {
+      "site": 84,
+      "ident": "fmt",
+      "importPath": "fmt",
+      "prefix": 1,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "return fmt.Sprintf(\"query timed out in %s\", string(e))",
+      "caretColumn": 12
+    },
+    {
+      "site": 86,
+      "ident": "attribute",
+      "importPath": "go.opentelemetry.io/otel/attribute",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "span.SetAttributes(attribute.String(queryTag, q.stmt.String()))",
+      "caretColumn": 31
+    },
+    {
+      "site": 88,
+      "ident": "promslog",
+      "importPath": "github.com/prometheus/common/promslog",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "opts.Logger = promslog.NewNopLogger()",
+      "caretColumn": 25
+    },
+    {
+      "site": 92,
+      "ident": "annotations",
+      "importPath": "github.com/prometheus/prometheus/util/annotations",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "func (ng *Engine) exec(ctx context.Context, q *query) (v parser.Value, ws annotations.Annotations, err error) {",
+      "caretColumn": 86
+    },
+    {
+      "site": 97,
+      "ident": "codes",
+      "importPath": "go.opentelemetry.io/otel/codes",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "querierSpan.SetStatus(codes.Error, err.Error())",
+      "caretColumn": 30
+    },
+    {
+      "site": 101,
+      "ident": "sort",
+      "importPath": "sort",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "sort.Sort(mat)",
+      "caretColumn": 6
+    },
+    {
+      "site": 102,
+      "ident": "math",
+      "importPath": "math",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": true,
+      "lineAfter": "ts                    int64 = math.MaxInt64",
+      "caretColumn": 37
+    },
+    {
+      "site": 106,
+      "ident": "labels",
+      "importPath": "github.com/prometheus/prometheus/model/labels",
+      "prefix": 3,
+      "chosen": true,
+      "importAdded": false,
+      "lineAfter": "signatureToLabelsWithQuantile map[string]map[float64]labels.Labels",
+      "caretColumn": 61
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"id":"rename-conflict","intentions":["Convert to var declaration"],"refactorThis":["Rename…","Inline…","Move…","Copy File…","Update Syntax…"],"done":"rename run","usages":5,"conflicts":[],"note":null}

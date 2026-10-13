@@ -1,0 +1,129 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "N01",
+   "category": "nav",
+   "title": "Ctrl+B on a local variable",
+   "query": "declaration",
+   "text": null,
+   "steps": null,
+   "items": [
+    "a.go:4: seriesAdded := added * 2"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1604
+  },
+  {
+   "id": "N02",
+   "category": "nav",
+   "title": "Ctrl+B on a method declared in another file of the package",
+   "query": "declaration",
+   "text": null,
+   "steps": null,
+   "items": [
+    "pool.go:6: func (sp *scrapePool) reload(targets []string) {"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1597
+  },
+  {
+   "id": "N03",
+   "category": "nav",
+   "title": "Ctrl+B on a standard library function",
+   "query": "declaration",
+   "text": null,
+   "steps": null,
+   "items": [
+    "$GOROOT/src/strings/strings.go:501: func HasPrefix(s, prefix string) bool {"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1597
+  },
+  {
+   "id": "N04",
+   "category": "nav",
+   "title": "Ctrl+B on an import path",
+   "query": "declaration",
+   "text": null,
+   "steps": null,
+   "items": [
+    "dir:$GOROOT/src/net/http"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1605
+  },
+  {
+   "id": "N06",
+   "category": "nav",
+   "title": "Ctrl+B on an embedded field in a selector",
+   "query": "declaration",
+   "text": null,
+   "steps": null,
+   "items": [
+    "a.go:6: sync.RWMutex"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1612
+  },
+  {
+   "id": "N07",
+   "category": "nav",
+   "title": "Ctrl+B on a method promoted from an embedded field",
+   "query": "declaration",
+   "text": null,
+   "steps": null,
+   "items": [
+    "$GOROOT/src/sync/rwmutex.go:114: func (rw *RWMutex) RUnlock() {"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1629
+  },
+  {
+   "id": "N09",
+   "category": "nav",
+   "title": "Ctrl+Alt+B on an interface type",
+   "query": "implementations",
+   "text": null,
+   "steps": null,
+   "items": [
+    "impl.go:3: type memAppender struct{}",
+    "impl.go:8: type nopAppender struct{}"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1686
+  },
+  {
+   "id": "N10",
+   "category": "nav",
+   "title": "Ctrl+Alt+B on an interface method at a call site",
+   "query": "implementations",
+   "text": null,
+   "steps": null,
+   "items": [
+    "a.go:5: Commit() error",
+    "impl.go:11: func (*nopAppender) Commit() error                                          { return nil }",
+    "impl.go:6: func (memAppender) Commit() error                                         { return nil }"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1646
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+{"id":"rename-iface-method","intentions":["Export","Add parens to declaration","Remove method from interface and all its implementations"],"refactorThis":["Rename…","Change Signature…","Move…","Copy File…","Update Syntax…"],"done":"rename run","usages":9,"conflicts":[],"note":null}

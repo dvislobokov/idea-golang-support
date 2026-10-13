@@ -1,0 +1,31 @@
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -58,7 +58,7 @@
+ 		}
+ 		// Set configured scheme as the initial scheme label for overwrite.
+ 		lb.Set(model.SchemeLabel, cfg.Scheme)
+-		lb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion))
++		lb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion, "/"))
+ 
+ 		// Combine target labels with target group labels.
+ 		for ln, lv := range tg.Labels {
+@@ -84,7 +84,7 @@
+ 	return res, droppedAlertManagers, nil
+ }
+ 
+-func postPath(pre string, v config.AlertmanagerAPIVersion) string {
++func postPath(pre string, v config.AlertmanagerAPIVersion, root string) string {
+ 	alertPushEndpoint := fmt.Sprintf("/api/%v/alerts", string(v))
+ 	return path.Join("/", pre, alertPushEndpoint)
+ }
+--- a/notifier/alertmanager_test.go
++++ b/notifier/alertmanager_test.go
+@@ -51,7 +51,7 @@
+ 		},
+ 	}
+ 	for _, c := range cases {
+-		require.Equal(t, c.out, postPath(c.in, config.AlertmanagerAPIVersionV2))
++		require.Equal(t, c.out, postPath(c.in, config.AlertmanagerAPIVersionV2, "/"))
+ 	}
+ }
+ 

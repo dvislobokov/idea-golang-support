@@ -1,0 +1,156 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "N11",
+   "category": "nav",
+   "title": "Ctrl+U from an implementing method to the interface method",
+   "query": "super",
+   "text": null,
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": "JavaException: java.lang.IllegalStateException: Access to Editor models (caret, selection, etc.) is allowed either from EDT, or under read action. Current thread: Thread[#161,eventLoopGroupProxy-4-1,5,main]",
+   "durationMs": 1617,
+   "stack": "java.lang.IllegalStateException: Access to Editor models (caret, selection, etc.) is allowed either from EDT, or under read action. Current thread: Thread[#161,eventLoopGroupProxy-4-1,5,main]"
+  },
+  {
+   "id": "N12",
+   "category": "nav",
+   "title": "Alt+F7 on a method used in two files",
+   "query": "usages",
+   "text": null,
+   "steps": null,
+   "items": [
+    "count: 3",
+    "a.go:10: sp.reload(nil)",
+    "loop.go:4: sp.reload(nil)",
+    "loop.go:6: sp.reload([]string{\"a\"})"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1820
+  },
+  {
+   "id": "N13",
+   "category": "nav",
+   "title": "Alt+F7 on a struct field",
+   "query": "usages",
+   "text": null,
+   "steps": null,
+   "items": [
+    "count: 3",
+    "a.go:11: t.health = h",
+    "a.go:12: _ = Target{health: h}",
+    "a.go:8: func (t *Target) up() bool { return t.health == \"up\" }"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1696
+  },
+  {
+   "id": "N14",
+   "category": "nav",
+   "title": "Ctrl+Shift+F7 on a local variable (reads and writes)",
+   "query": "highlight",
+   "text": null,
+   "steps": null,
+   "items": [
+    "4:2-4:7 'total' WRITE_SEARCH_RESULT_ATTRIBUTES",
+    "6:3-6:8 'total' WRITE_SEARCH_RESULT_ATTRIBUTES",
+    "8:5-8:10 'total' SEARCH_RESULT_ATTRIBUTES",
+    "9:3-9:8 'total' WRITE_SEARCH_RESULT_ATTRIBUTES",
+    "11:9-11:14 'total' SEARCH_RESULT_ATTRIBUTES"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2132
+  },
+  {
+   "id": "N15",
+   "category": "nav",
+   "title": "Ctrl+Shift+F7 on `return` (exit points)",
+   "query": "highlight",
+   "text": null,
+   "steps": null,
+   "items": [
+    "5:1-5:5 'func' SEARCH_RESULT_ATTRIBUTES",
+    "7:3-7:35 'return 0, errors.New(\"negative\")' SEARCH_RESULT_ATTRIBUTES",
+    "10:3-10:21 'panic(\"too large\")' SEARCH_RESULT_ATTRIBUTES",
+    "12:2-12:15 'return n, nil' SEARCH_RESULT_ATTRIBUTES"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2098
+  },
+  {
+   "id": "N16",
+   "category": "nav",
+   "title": "Ctrl+F12 file structure",
+   "query": "structure",
+   "text": null,
+   "steps": null,
+   "items": [
+    "TargetHealth: string",
+    "Scraper",
+    "  Scrape(ctx context.Context) error",
+    "Target",
+    "  Health() TargetHealth",
+    "  Scrape(ctx context.Context) error",
+    "  mtx: sync.RWMutex",
+    "  labels: map[string]string",
+    "  health: TargetHealth",
+    "pool",
+    "  Add(item T)",
+    "  items: []T",
+    "HealthUnknown: TargetHealth",
+    "HealthGood: TargetHealth",
+    "defaultHealth",
+    "NewTarget(labels map[string]string) *Target",
+    "run()"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1654
+  },
+  {
+   "id": "H01",
+   "category": "hints",
+   "title": "Ctrl+P on the second argument of a method call",
+   "query": "paraminfo",
+   "text": null,
+   "steps": null,
+   "items": [
+    "handler: GoParameterInfoHandler, current parameter: 1",
+    "start time.Time, [[duration time.Duration]], scraped int, added int, scrapeErr error"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1644
+  },
+  {
+   "id": "H02",
+   "category": "hints",
+   "title": "Ctrl+P on a variadic argument of fmt.Errorf",
+   "query": "paraminfo",
+   "text": null,
+   "steps": null,
+   "items": [
+    "handler: GoParameterInfoHandler, current parameter: 2",
+    "format string, [[a ...any]]"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1667
+  }
+ ]
+}

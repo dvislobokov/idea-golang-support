@@ -1,0 +1,11 @@
+--- a/notifier/alert.go
++++ b/notifier/alert.go
+@@ -48,7 +48,7 @@
+ 
+ func (a *Alert) String() string {
+ 	s := fmt.Sprintf("%s[%s]", a.Name(), fmt.Sprintf("%016x", a.Hash())[:7])
+-	if a.Resolved() {
++	if a.ResolvedAt(time.Now()) {
+ 		return s + "[resolved]"
+ 	}
+ 	return s + "[active]"

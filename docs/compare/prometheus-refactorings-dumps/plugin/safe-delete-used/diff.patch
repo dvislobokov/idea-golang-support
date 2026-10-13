@@ -1,0 +1,11 @@
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -84,8 +84,3 @@
+ 	return res, droppedAlertManagers, nil
+ }
+ 
+-func postPath(pre string, v config.AlertmanagerAPIVersion) string {
+-	alertPushEndpoint := fmt.Sprintf("/api/%v/alerts", string(v))
+-	return path.Join("/", pre, alertPushEndpoint)
+-}
+-

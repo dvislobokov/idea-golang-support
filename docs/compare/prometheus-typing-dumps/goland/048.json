@@ -1,0 +1,147 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "O02",
+   "category": "imports",
+   "title": "Optimize Imports with unsorted, aliased and blank imports",
+   "query": null,
+   "text": "package scrape\n\nimport (\n\t_ \"embed\"\n\t\"errors\"\n\tstdlog \"log\"\n\t\"time\"\n)\n\nfunc run() error {\n\t<caret>stdlog.Println(time.Now())\n\treturn errors.New(\"x\")\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4625
+  },
+  {
+   "id": "O03",
+   "category": "imports",
+   "title": "Optimize Imports leaves one import of a group",
+   "query": null,
+   "text": "package scrape\n\nimport (\n\t\"fmt\"\n)\n\nfunc run() {\n\t<caret>fmt.Println()\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4608
+  },
+  {
+   "id": "W01",
+   "category": "surround",
+   "title": "items offered for two selected statements, apply 'if'",
+   "query": "surround",
+   "text": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n\tif <caret>{\n\t\tn++\n\t\tn *= 2\n\t}\n\treturn n\n}\n",
+   "steps": null,
+   "items": [
+    "if { statements }",
+    "if { statements } else { }",
+    "for { statements }",
+    "{ statements }"
+   ],
+   "value": null,
+   "notes": [
+    "surround: applied 'if { statements }'"
+   ],
+   "error": null,
+   "durationMs": 1813
+  },
+  {
+   "id": "W02",
+   "category": "surround",
+   "title": "items offered for a selected expression, apply '(expr)'",
+   "query": "surround",
+   "text": "package scrape\n\nfunc ratio(added, total int) int {\n\treturn (added + total)<caret>\n}\n",
+   "steps": null,
+   "items": [
+    "(expression)"
+   ],
+   "value": null,
+   "notes": [
+    "surround: applied '(expression)'"
+   ],
+   "error": null,
+   "durationMs": 1753
+  },
+  {
+   "id": "W03",
+   "category": "surround",
+   "title": "items offered with the caret on a statement (no selection)",
+   "query": "surround",
+   "text": null,
+   "steps": null,
+   "items": [
+    "if { statements }",
+    "if { statements } else { }",
+    "for { statements }",
+    "{ statements }"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1610
+  },
+  {
+   "id": "G01",
+   "category": "generate",
+   "title": "items with the caret inside a struct type",
+   "query": "generate",
+   "text": null,
+   "steps": null,
+   "items": [
+    "Constructor",
+    "Getter and Setter",
+    "Getter",
+    "Setter",
+    "Struct Fields from JSON",
+    "Implement Methods…",
+    "Empty test file",
+    "Copyright"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1657
+  },
+  {
+   "id": "G02",
+   "category": "generate",
+   "title": "items at the top level of a file",
+   "query": "generate",
+   "text": null,
+   "steps": null,
+   "items": [
+    "Type from JSON",
+    "Implement Methods…",
+    "Empty test file",
+    "Copyright"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1612
+  },
+  {
+   "id": "G03",
+   "category": "generate",
+   "title": "items inside a function body",
+   "query": "generate",
+   "text": null,
+   "steps": null,
+   "items": [
+    "Implement Methods…",
+    "Empty test file",
+    "Test for function",
+    "Tests for file",
+    "Tests for package",
+    "Copyright"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1593
+  }
+ ]
+}

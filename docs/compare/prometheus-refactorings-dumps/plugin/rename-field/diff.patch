@@ -1,0 +1,82 @@
+--- a/cmd/prometheus/main_test.go
++++ b/cmd/prometheus/main_test.go
+@@ -210,7 +210,7 @@
+ 					Annotations:  labels.FromStrings("a2", "v2"),
+ 					StartsAt:     time.Unix(2, 0),
+ 					EndsAt:       time.Unix(3, 0),
+-					GeneratorURL: "http://localhost:9090/graph?g0.expr=up&g0.tab=1",
++					SourceURL: "http://localhost:9090/graph?g0.expr=up&g0.tab=1",
+ 				},
+ 			},
+ 		},
+@@ -230,7 +230,7 @@
+ 					Annotations:  labels.FromStrings("a2", "v2"),
+ 					StartsAt:     time.Unix(2, 0),
+ 					EndsAt:       time.Unix(4, 0),
+-					GeneratorURL: "http://localhost:9090/graph?g0.expr=up&g0.tab=1",
++					SourceURL: "http://localhost:9090/graph?g0.expr=up&g0.tab=1",
+ 				},
+ 			},
+ 		},
+--- a/notifier/alert.go
++++ b/notifier/alert.go
+@@ -33,7 +33,7 @@
+ 	// The known time range for this alert. Both ends are optional.
+ 	StartsAt     time.Time `json:"startsAt,omitempty"`
+ 	EndsAt       time.Time `json:"endsAt,omitempty"`
+-	GeneratorURL string    `json:"generatorURL,omitempty"`
++	SourceURL string    `json:"sourceURL,omitempty"`
+ }
+ 
+ // Name returns the name of the alert. It is equivalent to the "alertname" label.
+@@ -92,7 +92,7 @@
+ 				Annotations:  a.Annotations,
+ 				StartsAt:     a.StartsAt,
+ 				EndsAt:       a.EndsAt,
+-				GeneratorURL: a.GeneratorURL,
++				SourceURL: a.SourceURL,
+ 			}
+ 		}
+ 
+--- a/notifier/util.go
++++ b/notifier/util.go
+@@ -30,7 +30,7 @@
+ 			EndsAt:      end,
+ 			StartsAt:    start,
+ 			Alert: models.Alert{
+-				GeneratorURL: strfmt.URI(a.GeneratorURL),
++				GeneratorURL: strfmt.URI(a.SourceURL),
+ 				Labels:       labelsToOpenAPILabelSet(a.Labels),
+ 			},
+ 		})
+--- a/notifier/util_test.go
++++ b/notifier/util_test.go
+@@ -66,7 +66,7 @@
+ 		Annotations:  labels.FromStrings("summary", "Test alert"),
+ 		StartsAt:     now,
+ 		EndsAt:       now.Add(time.Hour),
+-		GeneratorURL: "http://prometheus:9090/graph",
++		SourceURL: "http://prometheus:9090/graph",
+ 	}
+ 
+ 	result := alertsToOpenAPIAlerts([]*Alert{alert})
+@@ -111,7 +111,7 @@
+ 		Annotations:  labels.EmptyLabels(),
+ 		StartsAt:     time.Time{},
+ 		EndsAt:       time.Time{},
+-		GeneratorURL: "",
++		SourceURL: "",
+ 	}
+ 
+ 	result := alertsToOpenAPIAlerts([]*Alert{alert})
+--- a/rules/manager.go
++++ b/rules/manager.go
+@@ -504,7 +504,7 @@
+ 				StartsAt:     alert.FiredAt,
+ 				Labels:       alert.Labels,
+ 				Annotations:  alert.Annotations,
+-				GeneratorURL: externalURL + strutil.TableLinkForExpression(expr),
++				SourceURL: externalURL + strutil.TableLinkForExpression(expr),
+ 			}
+ 			if !alert.ResolvedAt.IsZero() {
+ 				a.EndsAt = alert.ResolvedAt

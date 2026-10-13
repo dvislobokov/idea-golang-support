@@ -1,0 +1,1 @@
+{"id":"convert-if-switch","intentions":["Invert if","Replace 'if' with 'switch'"],"refactorThis":["Move…","Copy File…","Update Syntax…"],"done":"invoked: Replace 'if' with 'switch'","usages":null,"conflicts":[],"note":null}

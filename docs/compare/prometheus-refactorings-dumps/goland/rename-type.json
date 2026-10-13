@@ -1,0 +1,1 @@
+{"id":"rename-type","intentions":["Implement interface…","Generate method","Export","Generate constructor","Add parens to declaration","Add comment"],"refactorThis":["Rename…","Move…","Copy File…","Update Syntax…"],"done":"rename run","usages":17,"conflicts":[],"note":null}

@@ -1,0 +1,22 @@
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -42,7 +42,8 @@
+ 	stopped  chan struct{}
+ 	stopOnce sync.Once
+ 
+-	logger *slog.Logger
++	logger  *slog.Logger
++	timeout time.Duration
+ }
+ 
+ func newSendLoop(
+@@ -232,7 +233,8 @@
+ 		return false
+ 	}
+ 
+-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.cfg.Timeout))
++	s.timeout = time.Duration(s.cfg.Timeout)
++	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
+ 	defer cancel()
+ 
+ 	if err := s.sendOne(ctx, s.client, s.alertmanagerURL, payload); err != nil {

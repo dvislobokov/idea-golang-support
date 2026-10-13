@@ -1,0 +1,1 @@
+{"id":"convert-short-to-var","intentions":["Convert to var declaration"],"refactorThis":["Rename…","Inline…","Move…","Copy File…","Update Syntax…"],"done":"invoked: Convert to var declaration","usages":null,"conflicts":[],"note":null}

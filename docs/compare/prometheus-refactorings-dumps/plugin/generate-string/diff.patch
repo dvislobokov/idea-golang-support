@@ -1,0 +1,13 @@
+--- a/notifier/manager.go
++++ b/notifier/manager.go
+@@ -79,6 +79,10 @@
+ 	MaxBatchSize int
+ }
+ 
++func (o Options) String() string {
++	return fmt.Sprintf("Options{QueueCapacity: %v, DrainOnShutdown: %v, ExternalLabels: %v, RelabelConfigs: %v, Do: %v, Registerer: %v, MaxBatchSize: %v}", o.QueueCapacity, o.DrainOnShutdown, o.ExternalLabels, o.RelabelConfigs, o.Do, o.Registerer, o.MaxBatchSize)
++}
++
+ func do(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, error) {
+ 	if client == nil {
+ 		client = http.DefaultClient

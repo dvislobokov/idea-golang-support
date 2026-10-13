@@ -1,0 +1,1045 @@
+[
+  {
+    "id": "rename-local",
+    "refactoring": "rename",
+    "what": "local variable",
+    "file": "notifier/alert.go",
+    "line": 73,
+    "available": true,
+    "availability": {
+      "RenameElement": true
+    },
+    "intentions": [
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "renamed GoVarDefinitionImpl 'relabeledAlerts' to 'kept'",
+    "changed": [
+      "notifier/alert.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -70,7 +70,7 @@\n \n func relabelAlerts(relabelConfigs []*relabel.Config, externalLabels labels.Labels, alerts []*Alert) []*Alert {\n \tlb := labels.NewBuilder(labels.EmptyLabels())\n-\tvar relabeledAlerts []*Alert\n+\tvar kept []*Alert\n \n \tfor _, a := range alerts {\n \t\tlb.Reset(a.Labels)\n@@ -96,8 +96,8 @@\n \t\t\t}\n \t\t}\n \n-\t\trelabeledAlerts = append(relabeledAlerts, a)\n+\t\tkept = append(kept, a)\n \t}\n-\treturn relabeledAlerts\n+\treturn kept\n }\n \n",
+    "millis": 356,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "rename-field",
+    "refactoring": "rename",
+    "what": "struct field used in other packages",
+    "file": "notifier/alert.go",
+    "line": 36,
+    "available": true,
+    "availability": {
+      "RenameElement": true
+    },
+    "intentions": [
+      "Add key to tags",
+      "Update key value in tags",
+      "Add struct tags...",
+      "Copy JSON sample to clipboard",
+      "Implement interface..."
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "renamed GoFieldDefinitionImpl 'GeneratorURL' to 'SourceURL'; linked: Rename struct tags",
+    "changed": [
+      "cmd/prometheus/main_test.go",
+      "notifier/alert.go",
+      "notifier/util.go",
+      "notifier/util_test.go",
+      "rules/manager.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/cmd/prometheus/main_test.go\n+++ b/cmd/prometheus/main_test.go\n@@ -210,7 +210,7 @@\n \t\t\t\t\tAnnotations:  labels.FromStrings(\"a2\", \"v2\"),\n \t\t\t\t\tStartsAt:     time.Unix(2, 0),\n \t\t\t\t\tEndsAt:       time.Unix(3, 0),\n-\t\t\t\t\tGeneratorURL: \"http://localhost:9090/graph?g0.expr=up&g0.tab=1\",\n+\t\t\t\t\tSourceURL: \"http://localhost:9090/graph?g0.expr=up&g0.tab=1\",\n \t\t\t\t},\n \t\t\t},\n \t\t},\n@@ -230,7 +230,7 @@\n \t\t\t\t\tAnnotations:  labels.FromStrings(\"a2\", \"v2\"),\n \t\t\t\t\tStartsAt:     time.Unix(2, 0),\n \t\t\t\t\tEndsAt:       time.Unix(4, 0),\n-\t\t\t\t\tGeneratorURL: \"http://localhost:9090/graph?g0.expr=up&g0.tab=1\",\n+\t\t\t\t\tSourceURL: \"http://localhost:9090/graph?g0.expr=up&g0.tab=1\",\n \t\t\t\t},\n \t\t\t},\n \t\t},\n--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -33,7 +33,7 @@\n \t// The known time range for this alert. Both ends are optional.\n \tStartsAt     time.Time `json:\"startsAt,omitempty\"`\n \tEndsAt       time.Time `json:\"endsAt,omitempty\"`\n-\tGeneratorURL string    `json:\"generatorURL,omitempty\"`\n+\tSourceURL string    `json:\"sourceURL,omitempty\"`\n }\n \n // Name returns the name of the alert. It is equivalent to the \"alertname\" label.\n@@ -92,7 +92,7 @@\n \t\t\t\tAnnotations:  a.Annotations,\n \t\t\t\tStartsAt:     a.StartsAt,\n \t\t\t\tEndsAt:       a.EndsAt,\n-\t\t\t\tGeneratorURL: a.GeneratorURL,\n+\t\t\t\tSourceURL: a.SourceURL,\n \t\t\t}\n \t\t}\n \n--- a/notifier/util.go\n+++ b/notifier/util.go\n@@ -30,7 +30,7 @@\n \t\t\tEndsAt:      end,\n \t\t\tStartsAt:    start,\n \t\t\tAlert: models.Alert{\n-\t\t\t\tGeneratorURL: strfmt.URI(a.GeneratorURL),\n+\t\t\t\tGeneratorURL: strfmt.URI(a.SourceURL),\n \t\t\t\tLabels:       labelsToOpenAPILabelSet(a.Labels),\n \t\t\t},\n \t\t})\n--- a/notifier/util_test.go\n+++ b/notifier/util_test.go\n@@ -66,7 +66,7 @@\n \t\tAnnotations:  labels.FromStrings(\"summary\", \"Test alert\"),\n \t\tStartsAt:     now,\n \t\tEndsAt:       now.Add(time.Hour),\n-\t\tGeneratorURL: \"http://prometheus:9090/graph\",\n+\t\tSourceURL: \"http://prometheus:9090/graph\",\n \t}\n \n \tresult := alertsToOpenAPIAlerts([]*Alert{alert})\n@@ -111,7 +111,7 @@\n \t\tAnnotations:  labels.EmptyLabels(),\n \t\tStartsAt:     time.Time{},\n \t\tEndsAt:       time.Time{},\n-\t\tGeneratorURL: \"\",\n+\t\tSourceURL: \"\",\n \t}\n \n \tresult := alertsToOpenAPIAlerts([]*Alert{alert})\n--- a/rules/manager.go\n+++ b/rules/manager.go\n@@ -504,7 +504,7 @@\n \t\t\t\tStartsAt:     alert.FiredAt,\n \t\t\t\tLabels:       alert.Labels,\n \t\t\t\tAnnotations:  alert.Annotations,\n-\t\t\t\tGeneratorURL: externalURL + strutil.TableLinkForExpression(expr),\n+\t\t\t\tSourceURL: externalURL + strutil.TableLinkForExpression(expr),\n \t\t\t}\n \t\t\tif !alert.ResolvedAt.IsZero() {\n \t\t\t\ta.EndsAt = alert.ResolvedAt\n",
+    "millis": 277,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "rename-iface-method",
+    "refactoring": "rename",
+    "what": "interface method with its implementations",
+    "file": "notifier/alertmanager.go",
+    "line": 31,
+    "available": true,
+    "availability": {
+      "RenameElement": true
+    },
+    "intentions": [
+      "Add method to interface",
+      "Implement interface...",
+      "Remove method from interface and all its implementations",
+      "Go to Implementations"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "renamed GoMethodSpecImpl 'url' to 'endpoint'",
+    "changed": [
+      "notifier/alertmanager.go",
+      "notifier/alertmanagerset.go",
+      "notifier/manager.go",
+      "notifier/manager_test.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -28,14 +28,14 @@\n \n // Alertmanager holds Alertmanager endpoint information.\n type alertmanager interface {\n-\turl() *url.URL\n+\tendpoint() *url.URL\n }\n \n type alertmanagerLabels struct{ labels.Labels }\n \n const pathLabel = \"__alerts_path__\"\n \n-func (a alertmanagerLabels) url() *url.URL {\n+func (a alertmanagerLabels) endpoint() *url.URL {\n \treturn &url.URL{\n \t\tScheme: a.Get(model.SchemeLabel),\n \t\tHost:   a.Get(model.AddressLabel),\n--- a/notifier/alertmanagerset.go\n+++ b/notifier/alertmanagerset.go\n@@ -100,7 +100,7 @@\n \t// Deduplicate Alertmanagers and add sendloops for new Alertmanagers.\n \tseen := map[string]struct{}{}\n \tfor _, am := range allAms {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \t\tif _, ok := seen[us]; ok {\n \t\t\tcontinue\n \t\t}\n@@ -113,7 +113,7 @@\n \t// Populate a list of Alertmanagers to clean up,\n \t// avoid cleaning up what we just added.\n \tfor _, am := range previousAms {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \t\tif _, ok := seen[us]; ok {\n \t\t\tcontinue\n \t\t}\n@@ -151,7 +151,7 @@\n // This function expects the caller to acquire needed locks.\n func (s *alertmanagerSet) addSendLoops(ams []alertmanager) {\n \tfor _, am := range ams {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \t\t// Only add if sendloop doesn't already exist\n \t\tif loop, exists := s.sendLoops[us]; exists {\n \t\t\tloop.logger.Debug(\"Alertmanager already has send loop running, skipping\")\n@@ -167,7 +167,7 @@\n // This function expects the caller to acquire needed locks.\n func (s *alertmanagerSet) cleanSendLoops(ams ...alertmanager) {\n \tfor _, am := range ams {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \t\tif sendLoop, ok := s.sendLoops[us]; ok {\n \t\t\tsendLoop.stop()\n \t\t\tdelete(s.sendLoops, us)\n@@ -180,7 +180,7 @@\n // This is mainly needed for testing where the loops are added as part of the test setup.\n func (s *alertmanagerSet) startSendLoops(ams []alertmanager) {\n \tfor _, am := range ams {\n-\t\tus := am.url().String()\n+\t\tus := am.endpoint().String()\n \n \t\tif l, ok := s.sendLoops[us]; ok {\n \t\t\tgo l.loop()\n--- a/notifier/manager.go\n+++ b/notifier/manager.go\n@@ -288,7 +288,7 @@\n \tfor _, ams := range amSets {\n \t\tams.mtx.RLock()\n \t\tfor _, am := range ams.ams {\n-\t\t\tres = append(res, am.url())\n+\t\t\tres = append(res, am.endpoint())\n \t\t}\n \t\tams.mtx.RUnlock()\n \t}\n@@ -307,7 +307,7 @@\n \tfor _, ams := range amSets {\n \t\tams.mtx.RLock()\n \t\tfor _, dam := range ams.droppedAms {\n-\t\t\tres = append(res, dam.url())\n+\t\t\tres = append(res, dam.endpoint())\n \t\t}\n \t\tams.mtx.RUnlock()\n \t}\n--- a/notifier/manager_test.go\n+++ b/notifier/manager_test.go\n@@ -576,7 +576,7 @@\n \turlf func() string\n }\n \n-func (a alertmanagerMock) url() *url.URL {\n+func (a alertmanagerMock) endpoint() *url.URL {\n \tu, err := url.Parse(a.urlf())\n \tif err != nil {\n \t\tpanic(err)\n@@ -1081,7 +1081,7 @@\n \t// Ensure the config order is taken into account.\n \tams := n.alertmanagers[\"config-1\"].ams\n \trequire.Len(t, ams, 1)\n-\trequire.Equal(t, alertmanagerURL, ams[0].url().String())\n+\trequire.Equal(t, alertmanagerURL, ams[0].endpoint().String())\n \n \t// 3. Ensure known alertmanagers are reused for new config with identical AlertmanagerConfig.\n \ts = `\n@@ -1102,7 +1102,7 @@\n \tfor cfgIdx := range 2 {\n \t\tams := n.alertmanagers[fmt.Sprintf(\"config-%d\", cfgIdx)].ams\n \t\trequire.Len(t, ams, 1)\n-\t\trequire.Equal(t, alertmanagerURL, ams[0].url().String())\n+\t\trequire.Equal(t, alertmanagerURL, ams[0].endpoint().String())\n \t}\n \n \t// 4. Ensure known alertmanagers are reused only for identical AlertmanagerConfig.\n",
+    "millis": 144,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "rename-type",
+    "refactoring": "rename",
+    "what": "type, with local variables of the same name around",
+    "file": "notifier/sendloop.go",
+    "line": 30,
+    "available": true,
+    "availability": {
+      "RenameElement": true
+    },
+    "intentions": [
+      "Add key to tags",
+      "Add struct tags...",
+      "Copy JSON sample to clipboard",
+      "Export",
+      "Implement interface..."
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "renamed GoTypeSpecImpl 'sendLoop' to 'alertSender'",
+    "changed": [
+      "notifier/alertmanagerset.go",
+      "notifier/manager_test.go",
+      "notifier/sendloop.go",
+      "notifier/sendloop_test.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanagerset.go\n+++ b/notifier/alertmanagerset.go\n@@ -42,7 +42,7 @@\n \tmtx        sync.RWMutex\n \tams        []alertmanager\n \tdroppedAms []alertmanager\n-\tsendLoops  map[string]*sendLoop\n+\tsendLoops  map[string]*alertSender\n \n \tlogger *slog.Logger\n }\n@@ -67,7 +67,7 @@\n \t\tclient:    client,\n \t\tcfg:       cfg,\n \t\topts:      opts,\n-\t\tsendLoops: make(map[string]*sendLoop),\n+\t\tsendLoops: make(map[string]*alertSender),\n \t\tlogger:    logger,\n \t\tmetrics:   metrics,\n \t}\n--- a/notifier/manager_test.go\n+++ b/notifier/manager_test.go\n@@ -105,7 +105,7 @@\n \t\tams[i] = alertmanagerMock{urlf: func() string { return am }}\n \t}\n \tlogger := slog.New(slog.DiscardHandler)\n-\tsendLoops := make(map[string]*sendLoop)\n+\tsendLoops := make(map[string]*alertSender)\n \tfor _, am := range alertmanagerURLs {\n \t\tsendLoops[am] = newSendLoop(am, client, cfg, opts, logger, metrics)\n \t}\n@@ -1594,7 +1594,7 @@\n \t// Capture the old sendLoop.\n \toldSendLoops := n.alertmanagers[\"config-0\"].sendLoops\n \trequire.Len(t, oldSendLoops, 1)\n-\tvar oldSendLoop *sendLoop\n+\tvar oldSendLoop *alertSender\n \tfor _, sl := range oldSendLoops {\n \t\toldSendLoop = sl\n \t}\n--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -27,7 +27,7 @@\n \t\"github.com/prometheus/prometheus/config\"\n )\n \n-type sendLoop struct {\n+type alertSender struct {\n \talertmanagerURL string\n \n \tcfg    *config.AlertmanagerConfig\n@@ -52,14 +52,14 @@\n \topts *Options,\n \tlogger *slog.Logger,\n \tmetrics *alertMetrics,\n-) *sendLoop {\n+) *alertSender {\n \t// This will initialize the Counters for the AM to 0 and set the static queue capacity gauge.\n \tmetrics.dropped.WithLabelValues(alertmanagerURL)\n \tmetrics.errors.WithLabelValues(alertmanagerURL)\n \tmetrics.sent.WithLabelValues(alertmanagerURL)\n \tmetrics.queueLength.WithLabelValues(alertmanagerURL)\n \n-\treturn &sendLoop{\n+\treturn &alertSender{\n \t\talertmanagerURL: alertmanagerURL,\n \t\tclient:          client,\n \t\tcfg:             cfg,\n@@ -72,7 +72,7 @@\n \t}\n }\n \n-func (s *sendLoop) add(alerts ...*Alert) {\n+func (s *alertSender) add(alerts ...*Alert) {\n \tselect {\n \tcase <-s.stopped:\n \t\treturn\n@@ -112,7 +112,7 @@\n \t}\n }\n \n-func (s *sendLoop) notifyWork() {\n+func (s *alertSender) notifyWork() {\n \tselect {\n \tcase <-s.stopped:\n \t\treturn\n@@ -121,7 +121,7 @@\n \t}\n }\n \n-func (s *sendLoop) stop() {\n+func (s *alertSender) stop() {\n \ts.stopOnce.Do(func() {\n \t\ts.logger.Debug(\"Stopping send loop\")\n \t\tclose(s.stopped)\n@@ -143,20 +143,20 @@\n \t})\n }\n \n-func (s *sendLoop) drainQueue() {\n+func (s *alertSender) drainQueue() {\n \tfor s.queueLen() > 0 {\n \t\ts.sendOneBatch()\n \t}\n }\n \n-func (s *sendLoop) queueLen() int {\n+func (s *alertSender) queueLen() int {\n \ts.mtx.RLock()\n \tdefer s.mtx.RUnlock()\n \n \treturn len(s.queue)\n }\n \n-func (s *sendLoop) nextBatch() []*Alert {\n+func (s *alertSender) nextBatch() []*Alert {\n \ts.mtx.Lock()\n \tdefer s.mtx.Unlock()\n \n@@ -173,7 +173,7 @@\n \treturn alerts\n }\n \n-func (s *sendLoop) sendOneBatch() {\n+func (s *alertSender) sendOneBatch() {\n \talerts := s.nextBatch()\n \n \tif !s.sendAll(alerts) {\n@@ -183,7 +183,7 @@\n \n // loop continuously consumes the notifications queue and sends alerts to\n // the Alertmanager.\n-func (s *sendLoop) loop() {\n+func (s *alertSender) loop() {\n \ts.logger.Debug(\"Starting send loop\")\n \tfor {\n \t\t// If we've been asked to stop, that takes priority over sending any further notifications.\n@@ -206,7 +206,7 @@\n \t}\n }\n \n-func (s *sendLoop) sendAll(alerts []*Alert) bool {\n+func (s *alertSender) sendAll(alerts []*Alert) bool {\n \tif len(alerts) == 0 {\n \t\treturn true\n \t}\n@@ -248,7 +248,7 @@\n \treturn true\n }\n \n-func (s *sendLoop) sendOne(ctx context.Context, c *http.Client, url string, b []byte) error {\n+func (s *alertSender) sendOne(ctx context.Context, c *http.Client, url string, b []byte) error {\n \treq, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))\n \tif err != nil {\n \t\treturn err\n--- a/notifier/sendloop_test.go\n+++ b/notifier/sendloop_test.go\n@@ -35,7 +35,7 @@\n \tconst testBody = \"testbody\"\n \n \tvar received bool\n-\th := sendLoop{\n+\th := alertSender{\n \t\topts: &Options{\n \t\t\tDo: func(_ context.Context, _ *http.Client, req *http.Request) (*http.Response, error) {\n \t\t\t\treceived = true\n",
+    "millis": 223,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "rename-package",
+    "refactoring": "rename",
+    "what": "package (clause; directory follows)",
+    "file": "util/kahansum/kahansum.go",
+    "line": 14,
+    "available": true,
+    "availability": {
+      "RenameElement": true
+    },
+    "intentions": [],
+    "status": "applied",
+    "forced": false,
+    "done": "renamed GoPackageClauseImpl 'kahansum' to 'kahan'",
+    "changed": [
+      "model/histogram/float_histogram.go",
+      "promql/engine.go",
+      "promql/functions.go",
+      "promql/functions_internal_test.go"
+    ],
+    "created": [
+      "util/kahan/kahansum.go",
+      "util/kahan/kahansum_test.go"
+    ],
+    "deleted": [
+      "util/kahansum/kahansum.go",
+      "util/kahansum/kahansum_test.go"
+    ],
+    "diff": "--- a/model/histogram/float_histogram.go\n+++ b/model/histogram/float_histogram.go\n@@ -20,7 +20,7 @@\n \t\"slices\"\n \t\"strings\"\n \n-\t\"github.com/prometheus/prometheus/util/kahansum\"\n+\t\"github.com/prometheus/prometheus/util/kahan\"\n )\n \n // FloatHistogram is similar to Histogram but uses float64 for all\n@@ -428,11 +428,11 @@\n \t}\n \tif !h.UsesCustomBuckets() {\n \t\totherZeroCount, otherCZeroCount := h.reconcileZeroBuckets(other, c)\n-\t\th.ZeroCount, c.ZeroCount = kahansum.Inc(otherZeroCount, h.ZeroCount, c.ZeroCount)\n-\t\th.ZeroCount, c.ZeroCount = kahansum.Inc(otherCZeroCount, h.ZeroCount, c.ZeroCount)\n+\t\th.ZeroCount, c.ZeroCount = kahan.Inc(otherZeroCount, h.ZeroCount, c.ZeroCount)\n+\t\th.ZeroCount, c.ZeroCount = kahan.Inc(otherCZeroCount, h.ZeroCount, c.ZeroCount)\n \t}\n-\th.Count, c.Count = kahansum.Inc(other.Count, h.Count, c.Count)\n-\th.Sum, c.Sum = kahansum.Inc(other.Sum, h.Sum, c.Sum)\n+\th.Count, c.Count = kahan.Inc(other.Count, h.Count, c.Count)\n+\th.Sum, c.Sum = kahan.Inc(other.Sum, h.Sum, c.Sum)\n \n \tvar (\n \t\thPositiveSpans       = h.PositiveSpans\n@@ -1019,9 +1019,9 @@\n \t\t\t\tbreak\n \t\t\t}\n \t\t\t// Bucket to be merged into zero bucket.\n-\t\t\thZeroCount, cZeroCount = kahansum.Inc(b.Count, hZeroCount, cZeroCount)\n+\t\t\thZeroCount, cZeroCount = kahan.Inc(b.Count, hZeroCount, cZeroCount)\n \t\t\tif c != nil {\n-\t\t\t\thZeroCount, cZeroCount = kahansum.Inc(c.PositiveBuckets[bucketsIdx], hZeroCount, cZeroCount)\n+\t\t\t\thZeroCount, cZeroCount = kahan.Inc(c.PositiveBuckets[bucketsIdx], hZeroCount, cZeroCount)\n \t\t\t}\n \t\t\tif b.Upper > largerThreshold {\n \t\t\t\t// New threshold ended up within a bucket. if it's\n@@ -1042,9 +1042,9 @@\n \t\t\t\tbreak\n \t\t\t}\n \t\t\t// Bucket to be merged into zero bucket.\n-\t\t\thZeroCount, cZeroCount = kahansum.Inc(b.Count, hZeroCount, cZeroCount)\n+\t\t\thZeroCount, cZeroCount = kahan.Inc(b.Count, hZeroCount, cZeroCount)\n \t\t\tif c != nil {\n-\t\t\t\thZeroCount, cZeroCount = kahansum.Inc(c.NegativeBuckets[bucketsIdx], hZeroCount, cZeroCount)\n+\t\t\t\thZeroCount, cZeroCount = kahan.Inc(c.NegativeBuckets[bucketsIdx], hZeroCount, cZeroCount)\n \t\t\t}\n \t\t\tif b.Lower < -largerThreshold {\n \t\t\t\t// New threshold ended up within a bucket. If\n@@ -1609,9 +1609,9 @@\n \t\t\t\t\tgoto nextLoop\n \t\t\t\t} else if spansA[0].Offset == indexB {\n \t\t\t\t\t// Just add to first bucket.\n-\t\t\t\t\tbucketsA[0], compensationBucketsA[0] = kahansum.Inc(bucketB, bucketsA[0], compensationBucketsA[0])\n+\t\t\t\t\tbucketsA[0], compensationBucketsA[0] = kahan.Inc(bucketB, bucketsA[0], compensationBucketsA[0])\n \t\t\t\t\tif compensationBucketB != 0 {\n-\t\t\t\t\t\tbucketsA[0], compensationBucketsA[0] = kahansum.Inc(compensationBucketB, bucketsA[0], compensationBucketsA[0])\n+\t\t\t\t\t\tbucketsA[0], compensationBucketsA[0] = kahan.Inc(compensationBucketB, bucketsA[0], compensationBucketsA[0])\n \t\t\t\t\t}\n \t\t\t\t\tgoto nextLoop\n \t\t\t\t}\n@@ -1625,9 +1625,9 @@\n \t\t\t\t\t// Bucket is in current span.\n \t\t\t\t\tiBucket += int(deltaIndex)\n \t\t\t\t\tiInSpan += deltaIndex\n-\t\t\t\t\tbucketsA[iBucket], compensationBucketsA[iBucket] = kahansum.Inc(bucketB, bucketsA[iBucket], compensationBucketsA[iBucket])\n+\t\t\t\t\tbucketsA[iBucket], compensationBucketsA[iBucket] = kahan.Inc(bucketB, bucketsA[iBucket], compensationBucketsA[iBucket])\n \t\t\t\t\tif compensationBucketB != 0 {\n-\t\t\t\t\t\tbucketsA[iBucket], compensationBucketsA[iBucket] = kahansum.Inc(compensationBucketB, bucketsA[iBucket], compensationBucketsA[iBucket])\n+\t\t\t\t\t\tbucketsA[iBucket], compensationBucketsA[iBucket] = kahan.Inc(compensationBucketB, bucketsA[iBucket], compensationBucketsA[iBucket])\n \t\t\t\t\t}\n \t\t\t\t\tbreak\n \t\t\t\t}\n@@ -1851,11 +1851,11 @@\n \t\t\t\t\t}\n \n \t\t\t\t\tif negative {\n-\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Dec(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n+\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Dec(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n \t\t\t\t\t} else {\n-\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Inc(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n+\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Inc(value, targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n \t\t\t\t\t\tif withCompensation && bucketsC != nil {\n-\t\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahansum.Inc(bucketsC[bucketIdx], targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n+\t\t\t\t\t\t\ttargetBuckets[targetIdx], cTargetBuckets[targetIdx] = kahan.Inc(bucketsC[bucketIdx], targetBuckets[targetIdx], cTargetBuckets[targetIdx])\n \t\t\t\t\t\t}\n \t\t\t\t\t}\n \t\t\t\t}\n@@ -1996,12 +1996,12 @@\n \t\t\tcase lastTargetBucketIdx == targetBucketIdx:\n \t\t\t\t// The current bucket has to be merged into the same target bucket as the previous bucket.\n \t\t\t\tlastBucketIdx := len(targetReceivingBuckets) - 1\n-\t\t\t\ttargetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahansum.Inc(\n+\t\t\t\ttargetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahan.Inc(\n \t\t\t\t\toriginReceivingBuckets[bucketCountIdx],\n \t\t\t\t\ttargetReceivingBuckets[lastBucketIdx],\n \t\t\t\t\ttargetCompensationBuckets[lastBucketIdx],\n \t\t\t\t)\n-\t\t\t\ttargetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahansum.Inc(\n+\t\t\t\ttargetReceivingBuckets[lastBucketIdx], targetCompensationBuckets[lastBucketIdx] = kahan.Inc(\n \t\t\t\t\toriginCompensationBuckets[bucketCountIdx],\n \t\t\t\t\ttargetReceivingBuckets[lastBucketIdx],\n \t\t\t\t\ttargetCompensationBuckets[lastBucketIdx],\n--- a/promql/engine.go\n+++ b/promql/engine.go\n@@ -51,7 +51,7 @@\n \t\"github.com/prometheus/prometheus/tsdb/chunkenc\"\n \t\"github.com/prometheus/prometheus/util/annotations\"\n \t\"github.com/prometheus/prometheus/util/features\"\n-\t\"github.com/prometheus/prometheus/util/kahansum\"\n+\t\"github.com/prometheus/prometheus/util/kahan\"\n \t\"github.com/prometheus/prometheus/util/logging\"\n \t\"github.com/prometheus/prometheus/util/stats\"\n \t\"github.com/prometheus/prometheus/util/zeropool\"\n@@ -3788,7 +3788,7 @@\n \t\t\t\t// point in copying the histogram in that case.\n \t\t\t} else {\n \t\t\t\tgroup.hasFloat = true\n-\t\t\t\tgroup.floatValue, group.floatKahanC = kahansum.Inc(f, group.floatValue, group.floatKahanC)\n+\t\t\t\tgroup.floatValue, group.floatKahanC = kahan.Inc(f, group.floatValue, group.floatKahanC)\n \t\t\t}\n \n \t\tcase parser.AVG:\n@@ -3875,7 +3875,7 @@\n \t\t\t} else {\n \t\t\t\tgroup.hasFloat = true\n \t\t\t\tif !group.floatIncrementalMean {\n-\t\t\t\t\tnewV, newC := kahansum.Inc(f, group.floatValue, group.floatKahanC)\n+\t\t\t\t\tnewV, newC := kahan.Inc(f, group.floatValue, group.floatKahanC)\n \t\t\t\t\tif !math.IsInf(newV, 0) {\n \t\t\t\t\t\t// The sum doesn't overflow, so we propagate it to the\n \t\t\t\t\t\t// group struct and continue with the regular\n@@ -3891,7 +3891,7 @@\n \t\t\t\t\tgroup.floatKahanC /= group.groupCount - 1\n \t\t\t\t}\n \t\t\t\tq := (group.groupCount - 1) / group.groupCount\n-\t\t\t\tgroup.floatMean, group.floatKahanC = kahansum.Inc(\n+\t\t\t\tgroup.floatMean, group.floatKahanC = kahan.Inc(\n \t\t\t\t\tf/group.groupCount,\n \t\t\t\t\tq*group.floatMean,\n \t\t\t\t\tq*group.floatKahanC,\n--- a/promql/functions.go\n+++ b/promql/functions.go\n@@ -33,7 +33,7 @@\n \t\"github.com/prometheus/prometheus/promql/parser/posrange\"\n \t\"github.com/prometheus/prometheus/schema\"\n \t\"github.com/prometheus/prometheus/util/annotations\"\n-\t\"github.com/prometheus/prometheus/util/kahansum\"\n+\t\"github.com/prometheus/prometheus/util/kahan\"\n )\n \n // FunctionCall is the type of a PromQL function implementation\n@@ -1344,7 +1344,7 @@\n \t\tfor i, f := range s.Floats[1:] {\n \t\t\tcount = float64(i + 2)\n \t\t\tif !incrementalMean {\n-\t\t\t\tnewSum, newC := kahansum.Inc(f.F, sum, kahanC)\n+\t\t\t\tnewSum, newC := kahan.Inc(f.F, sum, kahanC)\n \t\t\t\t// Perform regular mean calculation as long as\n \t\t\t\t// the sum doesn't overflow.\n \t\t\t\tif !math.IsInf(newSum, 0) {\n@@ -1358,7 +1358,7 @@\n \t\t\t\tkahanC /= (count - 1)\n \t\t\t}\n \t\t\tq := (count - 1) / count\n-\t\t\tmean, kahanC = kahansum.Inc(f.F/count, q*mean, q*kahanC)\n+\t\t\tmean, kahanC = kahan.Inc(f.F/count, q*mean, q*kahanC)\n \t\t}\n \t\tif incrementalMean {\n \t\t\treturn mean + kahanC\n@@ -1639,7 +1639,7 @@\n \treturn aggrOverTime(matrixVal, enh, func(s Series) float64 {\n \t\tvar sum, c float64\n \t\tfor _, f := range s.Floats {\n-\t\t\tsum, c = kahansum.Inc(f.F, sum, c)\n+\t\t\tsum, c = kahan.Inc(f.F, sum, c)\n \t\t}\n \t\tif math.IsInf(sum, 0) {\n \t\t\treturn sum\n@@ -1692,8 +1692,8 @@\n \t\tfor _, f := range s.Floats {\n \t\t\tcount++\n \t\t\tdelta := f.F - (mean + cMean)\n-\t\t\tmean, cMean = kahansum.Inc(delta/count, mean, cMean)\n-\t\t\taux, cAux = kahansum.Inc(delta*(f.F-(mean+cMean)), aux, cAux)\n+\t\t\tmean, cMean = kahan.Inc(delta/count, mean, cMean)\n+\t\t\taux, cAux = kahan.Inc(delta*(f.F-(mean+cMean)), aux, cAux)\n \t\t}\n \t\tvariance := (aux + cAux) / count\n \t\tif varianceToResult == nil {\n@@ -1965,10 +1965,10 @@\n \t\t}\n \t\tn += 1.0\n \t\tx := float64(sample.T-interceptTime) / 1e3\n-\t\tsumX, cX = kahansum.Inc(x, sumX, cX)\n-\t\tsumY, cY = kahansum.Inc(sample.F, sumY, cY)\n-\t\tsumXY, cXY = kahansum.Inc(x*sample.F, sumXY, cXY)\n-\t\tsumX2, cX2 = kahansum.Inc(x*x, sumX2, cX2)\n+\t\tsumX, cX = kahan.Inc(x, sumX, cX)\n+\t\tsumY, cY = kahan.Inc(sample.F, sumY, cY)\n+\t\tsumXY, cXY = kahan.Inc(x*sample.F, sumXY, cXY)\n+\t\tsumX2, cX2 = kahan.Inc(x*x, sumX2, cX2)\n \t}\n \tif constY {\n \t\tif math.IsInf(initY, 0) {\n@@ -2104,7 +2104,7 @@\n \t\t\t\t}\n \t\t\t}\n \t\t\tdelta := val - mean\n-\t\t\tvariance, cVariance = kahansum.Inc(bucket.Count*delta*delta, variance, cVariance)\n+\t\t\tvariance, cVariance = kahan.Inc(bucket.Count*delta*delta, variance, cVariance)\n \t\t}\n \t\tvariance += cVariance\n \t\tvariance /= h.Count\n--- a/promql/functions_internal_test.go\n+++ b/promql/functions_internal_test.go\n@@ -25,7 +25,7 @@\n \t\"github.com/prometheus/prometheus/model/labels\"\n \t\"github.com/prometheus/prometheus/promql/parser/posrange\"\n \t\"github.com/prometheus/prometheus/util/annotations\"\n-\t\"github.com/prometheus/prometheus/util/kahansum\"\n+\t\"github.com/prometheus/prometheus/util/kahan\"\n )\n \n func TestHistogramRateCounterResetHint(t *testing.T) {\n@@ -81,7 +81,7 @@\n \n \trunTest := func(t *testing.T, a, b, expected float64) {\n \t\tt.Run(fmt.Sprintf(\"%v + %v = %v\", a, b, expected), func(t *testing.T) {\n-\t\t\tsum, c := kahansum.Inc(b, a, 0)\n+\t\t\tsum, c := kahan.Inc(b, a, 0)\n \t\t\tresult := sum + c\n \n \t\t\tif math.IsNaN(expected) {\n--- /dev/null\n+++ b/util/kahan/kahansum.go\n@@ -1,0 +1,60 @@\n+// Copyright 2024 The Prometheus Authors\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+// http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package kahan\n+\n+import \"math\"\n+\n+// isInf reports whether f is positive or negative infinity.\n+// It avoids math.IsInf to prevent inflating Inc's inlining cost.\n+func isInf(f float64) bool {\n+\treturn f > math.MaxFloat64 || f < -math.MaxFloat64\n+}\n+\n+// Inc performs addition of two floating-point numbers using the Kahan summation algorithm.\n+func Inc(inc, sum, c float64) (newSum, newC float64) {\n+\t// We've seen Kahan summation return less accurate results when Inc function is\n+\t// allowed to be inlined (see https://github.com/prometheus/prometheus/pull/16895).\n+\t// Go permits fusing float operations (e.g. using fused multiply-add, which allows\n+\t// calculating a*b+c without rounding the result of a*b to precision available in float64),\n+\t// and Kahan sum is sensitive to float rounding behavior. Instead of forbidding inlining\n+\t// (which only disallows fusing operations outside of Inc with operations  happening inside)\n+\t// and eating the performance cost of non-inlined function calls, we forbid just the fusing\n+\t// across Inc call boundary. We can do that by explicitly requesting Inc arguments and results\n+\t// to be rounded to float64 precision, as documented in go spec (https://go.dev/ref/spec#Floating_point_operators).\n+\t// The following casts are not no-ops!\n+\tinc = float64(inc)\n+\tsum = float64(sum)\n+\tc = float64(c)\n+\n+\tt := sum + inc\n+\tswitch {\n+\tcase isInf(t):\n+\t\tc = 0\n+\n+\t\t// Using Neumaier improvement, swap if next term larger than sum.\n+\tcase math.Abs(sum) >= math.Abs(inc):\n+\t\tc += (sum - t) + inc\n+\tdefault:\n+\t\tc += (inc - t) + sum\n+\t}\n+\n+\tt = float64(t)\n+\tc = float64(c)\n+\treturn t, c\n+}\n+\n+func Dec(dec, sum, c float64) (newSum, newC float64) {\n+\treturn Inc(-dec, sum, c)\n+}\n+\n--- /dev/null\n+++ b/util/kahan/kahansum_test.go\n@@ -1,0 +1,37 @@\n+// Copyright The Prometheus Authors\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+// http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package kahan\n+\n+import (\n+\t\"math\"\n+\t\"testing\"\n+\n+\t\"github.com/stretchr/testify/require\"\n+)\n+\n+func TestIsInf(t *testing.T) {\n+\tfor _, f := range []float64{\n+\t\tmath.Inf(1),\n+\t\tmath.Inf(-1),\n+\t\tmath.MaxFloat64,\n+\t\t-math.MaxFloat64,\n+\t\t1.0,\n+\t\t-1.0,\n+\t\t0,\n+\t\tmath.NaN(),\n+\t} {\n+\t\trequire.Equal(t, math.IsInf(f, 0), isInf(f), \"%e\", f)\n+\t}\n+}\n+\n--- a/util/kahansum/kahansum.go\n+++ /dev/null\n@@ -1,60 +1,0 @@\n-// Copyright 2024 The Prometheus Authors\n-// Licensed under the Apache License, Version 2.0 (the \"License\");\n-// you may not use this file except in compliance with the License.\n-// You may obtain a copy of the License at\n-//\n-// http://www.apache.org/licenses/LICENSE-2.0\n-//\n-// Unless required by applicable law or agreed to in writing, software\n-// distributed under the License is distributed on an \"AS IS\" BASIS,\n-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n-// See the License for the specific language governing permissions and\n-// limitations under the License.\n-\n-package kahansum\n-\n-import \"math\"\n-\n-// isInf reports whether f is positive or negative infinity.\n-// It avoids math.IsInf to prevent inflating Inc's inlining cost.\n-func isInf(f float64) bool {\n-\treturn f > math.MaxFloat64 || f < -math.MaxFloat64\n-}\n-\n-// Inc performs addition of two floating-point numbers using the Kahan summation algorithm.\n-func Inc(inc, sum, c float64) (newSum, newC float64) {\n-\t// We've seen Kahan summation return less accurate results when Inc function is\n-\t// allowed to be inlined (see https://github.com/prometheus/prometheus/pull/16895).\n-\t// Go permits fusing float operations (e.g. using fused multiply-add, which allows\n-\t// calculating a*b+c without rounding the result of a*b to precision available in float64),\n-\t// and Kahan sum is sensitive to float rounding behavior. Instead of forbidding inlining\n-\t// (which only disallows fusing operations outside of Inc with operations  happening inside)\n-\t// and eating the performance cost of non-inlined function calls, we forbid just the fusing\n-\t// across Inc call boundary. We can do that by explicitly requesting Inc arguments and results\n-\t// to be rounded to float64 precision, as documented in go spec (https://go.dev/ref/spec#Floating_point_operators).\n-\t// The following casts are not no-ops!\n-\tinc = float64(inc)\n-\tsum = float64(sum)\n-\tc = float64(c)\n-\n-\tt := sum + inc\n-\tswitch {\n-\tcase isInf(t):\n-\t\tc = 0\n-\n-\t\t// Using Neumaier improvement, swap if next term larger than sum.\n-\tcase math.Abs(sum) >= math.Abs(inc):\n-\t\tc += (sum - t) + inc\n-\tdefault:\n-\t\tc += (inc - t) + sum\n-\t}\n-\n-\tt = float64(t)\n-\tc = float64(c)\n-\treturn t, c\n-}\n-\n-func Dec(dec, sum, c float64) (newSum, newC float64) {\n-\treturn Inc(-dec, sum, c)\n-}\n-\n--- a/util/kahansum/kahansum_test.go\n+++ /dev/null\n@@ -1,37 +1,0 @@\n-// Copyright The Prometheus Authors\n-// Licensed under the Apache License, Version 2.0 (the \"License\");\n-// you may not use this file except in compliance with the License.\n-// You may obtain a copy of the License at\n-//\n-// http://www.apache.org/licenses/LICENSE-2.0\n-//\n-// Unless required by applicable law or agreed to in writing, software\n-// distributed under the License is distributed on an \"AS IS\" BASIS,\n-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n-// See the License for the specific language governing permissions and\n-// limitations under the License.\n-\n-package kahansum\n-\n-import (\n-\t\"math\"\n-\t\"testing\"\n-\n-\t\"github.com/stretchr/testify/require\"\n-)\n-\n-func TestIsInf(t *testing.T) {\n-\tfor _, f := range []float64{\n-\t\tmath.Inf(1),\n-\t\tmath.Inf(-1),\n-\t\tmath.MaxFloat64,\n-\t\t-math.MaxFloat64,\n-\t\t1.0,\n-\t\t-1.0,\n-\t\t0,\n-\t\tmath.NaN(),\n-\t} {\n-\t\trequire.Equal(t, math.IsInf(f, 0), isInf(f), \"%e\", f)\n-\t}\n-}\n-\n",
+    "millis": 661,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "rename-file",
+    "refactoring": "rename",
+    "what": "file (and its test file)",
+    "file": "notifier/util.go",
+    "line": 14,
+    "available": true,
+    "availability": {
+      "RenameElement": true
+    },
+    "intentions": [],
+    "status": "applied",
+    "forced": false,
+    "done": "renamed GoFile 'util.go' to 'openapi.go'; linked: Rename test/production file",
+    "changed": [],
+    "created": [
+      "notifier/openapi.go",
+      "notifier/openapi_test.go"
+    ],
+    "deleted": [
+      "notifier/util.go",
+      "notifier/util_test.go"
+    ],
+    "diff": "--- /dev/null\n+++ b/notifier/openapi.go\n@@ -1,0 +1,50 @@\n+// Copyright The Prometheus Authors\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+// http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package notifier\n+\n+import (\n+\t\"github.com/go-openapi/strfmt\"\n+\t\"github.com/prometheus/alertmanager/api/v2/models\"\n+\n+\t\"github.com/prometheus/prometheus/model/labels\"\n+)\n+\n+func alertsToOpenAPIAlerts(alerts []*Alert) models.PostableAlerts {\n+\topenAPIAlerts := models.PostableAlerts{}\n+\tfor _, a := range alerts {\n+\t\tstart := strfmt.DateTime(a.StartsAt)\n+\t\tend := strfmt.DateTime(a.EndsAt)\n+\t\topenAPIAlerts = append(openAPIAlerts, &models.PostableAlert{\n+\t\t\tAnnotations: labelsToOpenAPILabelSet(a.Annotations),\n+\t\t\tEndsAt:      end,\n+\t\t\tStartsAt:    start,\n+\t\t\tAlert: models.Alert{\n+\t\t\t\tGeneratorURL: strfmt.URI(a.GeneratorURL),\n+\t\t\t\tLabels:       labelsToOpenAPILabelSet(a.Labels),\n+\t\t\t},\n+\t\t})\n+\t}\n+\n+\treturn openAPIAlerts\n+}\n+\n+func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {\n+\tapiLabelSet := models.LabelSet{}\n+\tmodelLabelSet.Range(func(label labels.Label) {\n+\t\tapiLabelSet[label.Name] = label.Value\n+\t})\n+\n+\treturn apiLabelSet\n+}\n+\n--- /dev/null\n+++ b/notifier/openapi_test.go\n@@ -1,0 +1,125 @@\n+// Copyright The Prometheus Authors\n+// Licensed under the Apache License, Version 2.0 (the \"License\");\n+// you may not use this file except in compliance with the License.\n+// You may obtain a copy of the License at\n+//\n+// http://www.apache.org/licenses/LICENSE-2.0\n+//\n+// Unless required by applicable law or agreed to in writing, software\n+// distributed under the License is distributed on an \"AS IS\" BASIS,\n+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n+// See the License for the specific language governing permissions and\n+// limitations under the License.\n+\n+package notifier\n+\n+import (\n+\t\"testing\"\n+\t\"time\"\n+\n+\t\"github.com/prometheus/alertmanager/api/v2/models\"\n+\t\"github.com/stretchr/testify/require\"\n+\n+\t\"github.com/prometheus/prometheus/model/labels\"\n+)\n+\n+func TestLabelsToOpenAPILabelSet(t *testing.T) {\n+\trequire.Equal(t, models.LabelSet{\"aaa\": \"111\", \"bbb\": \"222\"}, labelsToOpenAPILabelSet(labels.FromStrings(\"aaa\", \"111\", \"bbb\", \"222\")))\n+}\n+\n+// Edge case tests for utility functions\n+\n+func TestLabelsToOpenAPILabelSetEmpty(t *testing.T) {\n+\tresult := labelsToOpenAPILabelSet(labels.EmptyLabels())\n+\trequire.Empty(t, result)\n+}\n+\n+func TestLabelsToOpenAPILabelSetSpecialCharacters(t *testing.T) {\n+\tresult := labelsToOpenAPILabelSet(labels.FromStrings(\n+\t\t\"special/chars\", \"value with spaces\",\n+\t\t\"unicode\", \"αβγ\",\n+\t\t\"empty\", \"\",\n+\t))\n+\n+\texpected := models.LabelSet{\n+\t\t\"special/chars\": \"value with spaces\",\n+\t\t\"unicode\":       \"αβγ\",\n+\t\t\"empty\":         \"\",\n+\t}\n+\trequire.Equal(t, expected, result)\n+}\n+\n+func TestAlertsToOpenAPIAlertsEmpty(t *testing.T) {\n+\tresult := alertsToOpenAPIAlerts([]*Alert{})\n+\trequire.Empty(t, result)\n+}\n+\n+func TestAlertsToOpenAPIAlertsNil(t *testing.T) {\n+\tresult := alertsToOpenAPIAlerts(nil)\n+\trequire.Empty(t, result)\n+}\n+\n+func TestAlertsToOpenAPIAlertsSingle(t *testing.T) {\n+\tnow := time.Now()\n+\talert := &Alert{\n+\t\tLabels:       labels.FromStrings(\"alertname\", \"test\", \"severity\", \"critical\"),\n+\t\tAnnotations:  labels.FromStrings(\"summary\", \"Test alert\"),\n+\t\tStartsAt:     now,\n+\t\tEndsAt:       now.Add(time.Hour),\n+\t\tGeneratorURL: \"http://prometheus:9090/graph\",\n+\t}\n+\n+\tresult := alertsToOpenAPIAlerts([]*Alert{alert})\n+\trequire.Len(t, result, 1)\n+\n+\tapiAlert := result[0]\n+\trequire.Equal(t, \"test\", apiAlert.Labels[\"alertname\"])\n+\trequire.Equal(t, \"critical\", apiAlert.Labels[\"severity\"])\n+\trequire.Equal(t, \"Test alert\", apiAlert.Annotations[\"summary\"])\n+\trequire.Equal(t, \"http://prometheus:9090/graph\", string(apiAlert.GeneratorURL))\n+}\n+\n+func TestAlertsToOpenAPIAlertsMultiple(t *testing.T) {\n+\tnow := time.Now()\n+\talerts := []*Alert{\n+\t\t{\n+\t\t\tLabels:      labels.FromStrings(\"alertname\", \"alert1\"),\n+\t\t\tAnnotations: labels.FromStrings(\"desc\", \"First alert\"),\n+\t\t\tStartsAt:    now,\n+\t\t\tEndsAt:      now.Add(time.Hour),\n+\t\t},\n+\t\t{\n+\t\t\tLabels:      labels.FromStrings(\"alertname\", \"alert2\"),\n+\t\t\tAnnotations: labels.FromStrings(\"desc\", \"Second alert\"),\n+\t\t\tStartsAt:    now.Add(time.Minute),\n+\t\t\tEndsAt:      now.Add(2 * time.Hour),\n+\t\t},\n+\t}\n+\n+\tresult := alertsToOpenAPIAlerts(alerts)\n+\trequire.Len(t, result, 2)\n+\n+\trequire.Equal(t, \"alert1\", result[0].Labels[\"alertname\"])\n+\trequire.Equal(t, \"alert2\", result[1].Labels[\"alertname\"])\n+\trequire.Equal(t, \"First alert\", result[0].Annotations[\"desc\"])\n+\trequire.Equal(t, \"Second alert\", result[1].Annotations[\"desc\"])\n+}\n+\n+func TestAlertsToOpenAPIAlertsEmptyFields(t *testing.T) {\n+\talert := &Alert{\n+\t\tLabels:       labels.EmptyLabels(),\n+\t\tAnnotations:  labels.EmptyLabels(),\n+\t\tStartsAt:     time.Time{},\n+\t\tEndsAt:       time.Time{},\n+\t\tGeneratorURL: \"\",\n+\t}\n+\n+\tresult := alertsToOpenAPIAlerts([]*Alert{alert})\n+\trequire.Len(t, result, 1)\n+\n+\tapiAlert := result[0]\n+\trequire.Empty(t, apiAlert.Labels)\n+\trequire.Empty(t, apiAlert.Annotations)\n+\trequire.Empty(t, string(apiAlert.GeneratorURL))\n+}\n+\n--- a/notifier/util.go\n+++ /dev/null\n@@ -1,50 +1,0 @@\n-// Copyright The Prometheus Authors\n-// Licensed under the Apache License, Version 2.0 (the \"License\");\n-// you may not use this file except in compliance with the License.\n-// You may obtain a copy of the License at\n-//\n-// http://www.apache.org/licenses/LICENSE-2.0\n-//\n-// Unless required by applicable law or agreed to in writing, software\n-// distributed under the License is distributed on an \"AS IS\" BASIS,\n-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n-// See the License for the specific language governing permissions and\n-// limitations under the License.\n-\n-package notifier\n-\n-import (\n-\t\"github.com/go-openapi/strfmt\"\n-\t\"github.com/prometheus/alertmanager/api/v2/models\"\n-\n-\t\"github.com/prometheus/prometheus/model/labels\"\n-)\n-\n-func alertsToOpenAPIAlerts(alerts []*Alert) models.PostableAlerts {\n-\topenAPIAlerts := models.PostableAlerts{}\n-\tfor _, a := range alerts {\n-\t\tstart := strfmt.DateTime(a.StartsAt)\n-\t\tend := strfmt.DateTime(a.EndsAt)\n-\t\topenAPIAlerts = append(openAPIAlerts, &models.PostableAlert{\n-\t\t\tAnnotations: labelsToOpenAPILabelSet(a.Annotations),\n-\t\t\tEndsAt:      end,\n-\t\t\tStartsAt:    start,\n-\t\t\tAlert: models.Alert{\n-\t\t\t\tGeneratorURL: strfmt.URI(a.GeneratorURL),\n-\t\t\t\tLabels:       labelsToOpenAPILabelSet(a.Labels),\n-\t\t\t},\n-\t\t})\n-\t}\n-\n-\treturn openAPIAlerts\n-}\n-\n-func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {\n-\tapiLabelSet := models.LabelSet{}\n-\tmodelLabelSet.Range(func(label labels.Label) {\n-\t\tapiLabelSet[label.Name] = label.Value\n-\t})\n-\n-\treturn apiLabelSet\n-}\n-\n--- a/notifier/util_test.go\n+++ /dev/null\n@@ -1,125 +1,0 @@\n-// Copyright The Prometheus Authors\n-// Licensed under the Apache License, Version 2.0 (the \"License\");\n-// you may not use this file except in compliance with the License.\n-// You may obtain a copy of the License at\n-//\n-// http://www.apache.org/licenses/LICENSE-2.0\n-//\n-// Unless required by applicable law or agreed to in writing, software\n-// distributed under the License is distributed on an \"AS IS\" BASIS,\n-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n-// See the License for the specific language governing permissions and\n-// limitations under the License.\n-\n-package notifier\n-\n-import (\n-\t\"testing\"\n-\t\"time\"\n-\n-\t\"github.com/prometheus/alertmanager/api/v2/models\"\n-\t\"github.com/stretchr/testify/require\"\n-\n-\t\"github.com/prometheus/prometheus/model/labels\"\n-)\n-\n-func TestLabelsToOpenAPILabelSet(t *testing.T) {\n-\trequire.Equal(t, models.LabelSet{\"aaa\": \"111\", \"bbb\": \"222\"}, labelsToOpenAPILabelSet(labels.FromStrings(\"aaa\", \"111\", \"bbb\", \"222\")))\n-}\n-\n-// Edge case tests for utility functions\n-\n-func TestLabelsToOpenAPILabelSetEmpty(t *testing.T) {\n-\tresult := labelsToOpenAPILabelSet(labels.EmptyLabels())\n-\trequire.Empty(t, result)\n-}\n-\n-func TestLabelsToOpenAPILabelSetSpecialCharacters(t *testing.T) {\n-\tresult := labelsToOpenAPILabelSet(labels.FromStrings(\n-\t\t\"special/chars\", \"value with spaces\",\n-\t\t\"unicode\", \"αβγ\",\n-\t\t\"empty\", \"\",\n-\t))\n-\n-\texpected := models.LabelSet{\n-\t\t\"special/chars\": \"value with spaces\",\n-\t\t\"unicode\":       \"αβγ\",\n-\t\t\"empty\":         \"\",\n-\t}\n-\trequire.Equal(t, expected, result)\n-}\n-\n-func TestAlertsToOpenAPIAlertsEmpty(t *testing.T) {\n-\tresult := alertsToOpenAPIAlerts([]*Alert{})\n-\trequire.Empty(t, result)\n-}\n-\n-func TestAlertsToOpenAPIAlertsNil(t *testing.T) {\n-\tresult := alertsToOpenAPIAlerts(nil)\n-\trequire.Empty(t, result)\n-}\n-\n-func TestAlertsToOpenAPIAlertsSingle(t *testing.T) {\n-\tnow := time.Now()\n-\talert := &Alert{\n-\t\tLabels:       labels.FromStrings(\"alertname\", \"test\", \"severity\", \"critical\"),\n-\t\tAnnotations:  labels.FromStrings(\"summary\", \"Test alert\"),\n-\t\tStartsAt:     now,\n-\t\tEndsAt:       now.Add(time.Hour),\n-\t\tGeneratorURL: \"http://prometheus:9090/graph\",\n-\t}\n-\n-\tresult := alertsToOpenAPIAlerts([]*Alert{alert})\n-\trequire.Len(t, result, 1)\n-\n-\tapiAlert := result[0]\n-\trequire.Equal(t, \"test\", apiAlert.Labels[\"alertname\"])\n-\trequire.Equal(t, \"critical\", apiAlert.Labels[\"severity\"])\n-\trequire.Equal(t, \"Test alert\", apiAlert.Annotations[\"summary\"])\n-\trequire.Equal(t, \"http://prometheus:9090/graph\", string(apiAlert.GeneratorURL))\n-}\n-\n-func TestAlertsToOpenAPIAlertsMultiple(t *testing.T) {\n-\tnow := time.Now()\n-\talerts := []*Alert{\n-\t\t{\n-\t\t\tLabels:      labels.FromStrings(\"alertname\", \"alert1\"),\n-\t\t\tAnnotations: labels.FromStrings(\"desc\", \"First alert\"),\n-\t\t\tStartsAt:    now,\n-\t\t\tEndsAt:      now.Add(time.Hour),\n-\t\t},\n-\t\t{\n-\t\t\tLabels:      labels.FromStrings(\"alertname\", \"alert2\"),\n-\t\t\tAnnotations: labels.FromStrings(\"desc\", \"Second alert\"),\n-\t\t\tStartsAt:    now.Add(time.Minute),\n-\t\t\tEndsAt:      now.Add(2 * time.Hour),\n-\t\t},\n-\t}\n-\n-\tresult := alertsToOpenAPIAlerts(alerts)\n-\trequire.Len(t, result, 2)\n-\n-\trequire.Equal(t, \"alert1\", result[0].Labels[\"alertname\"])\n-\trequire.Equal(t, \"alert2\", result[1].Labels[\"alertname\"])\n-\trequire.Equal(t, \"First alert\", result[0].Annotations[\"desc\"])\n-\trequire.Equal(t, \"Second alert\", result[1].Annotations[\"desc\"])\n-}\n-\n-func TestAlertsToOpenAPIAlertsEmptyFields(t *testing.T) {\n-\talert := &Alert{\n-\t\tLabels:       labels.EmptyLabels(),\n-\t\tAnnotations:  labels.EmptyLabels(),\n-\t\tStartsAt:     time.Time{},\n-\t\tEndsAt:       time.Time{},\n-\t\tGeneratorURL: \"\",\n-\t}\n-\n-\tresult := alertsToOpenAPIAlerts([]*Alert{alert})\n-\trequire.Len(t, result, 1)\n-\n-\tapiAlert := result[0]\n-\trequire.Empty(t, apiAlert.Labels)\n-\trequire.Empty(t, apiAlert.Annotations)\n-\trequire.Empty(t, string(apiAlert.GeneratorURL))\n-}\n-\n",
+    "millis": 866,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "rename-conflict",
+    "refactoring": "rename",
+    "what": "local variable to a name that is taken in an inner scope",
+    "file": "notifier/alert.go",
+    "line": 72,
+    "available": true,
+    "availability": {
+      "RenameElement": true
+    },
+    "intentions": [
+      "Convert to 'var' declaration",
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "renamed GoVarDefinitionImpl 'lb' to 'a'",
+    "changed": [
+      "notifier/alert.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -69,26 +69,26 @@\n }\n \n func relabelAlerts(relabelConfigs []*relabel.Config, externalLabels labels.Labels, alerts []*Alert) []*Alert {\n-\tlb := labels.NewBuilder(labels.EmptyLabels())\n+\ta := labels.NewBuilder(labels.EmptyLabels())\n \tvar relabeledAlerts []*Alert\n \n \tfor _, a := range alerts {\n-\t\tlb.Reset(a.Labels)\n+\t\ta.Reset(a.Labels)\n \t\texternalLabels.Range(func(l labels.Label) {\n \t\t\tif a.Labels.Get(l.Name) == \"\" {\n-\t\t\t\tlb.Set(l.Name, l.Value)\n+\t\t\t\ta.Set(l.Name, l.Value)\n \t\t\t}\n \t\t})\n \n-\t\tkeep := relabel.ProcessBuilder(lb, relabelConfigs...)\n+\t\tkeep := relabel.ProcessBuilder(a, relabelConfigs...)\n \t\tif !keep {\n \t\t\tcontinue\n \t\t}\n \n \t\t// If relabeling has altered the labels, create a new Alert to preserve immutability.\n-\t\tif !labels.Equal(a.Labels, lb.Labels()) {\n+\t\tif !labels.Equal(a.Labels, a.Labels()) {\n \t\t\ta = &Alert{\n-\t\t\t\tLabels:       lb.Labels(),\n+\t\t\t\tLabels:       a.Labels(),\n \t\t\t\tAnnotations:  a.Annotations,\n \t\t\t\tStartsAt:     a.StartsAt,\n \t\t\t\tEndsAt:       a.EndsAt,\n",
+    "millis": 53,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "extract-variable",
+    "refactoring": "extract-variable",
+    "what": "expression with two occurrences",
+    "file": "notifier/sendloop.go",
+    "line": 88,
+    "available": true,
+    "availability": {
+      "IntroduceVariable": true
+    },
+    "intentions": [
+      "Flip '-' (changes semantics)",
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "invoked extract-variable handler with name 'capacity'",
+    "changed": [
+      "notifier/sendloop.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -85,7 +85,8 @@\n \tvar dropped int\n \t// Queue capacity should be significantly larger than a single alert\n \t// batch could be.\n-\tif d := len(alerts) - s.opts.QueueCapacity; d > 0 {\n+\tcapacity := s.opts.QueueCapacity\n+\tif d := len(alerts) - capacity; d > 0 {\n \t\ts.logger.Warn(\"Alert batch larger than queue capacity, dropping alerts\", \"count\", d)\n \t\tdropped += d\n \t\talerts = alerts[d:]\n@@ -93,7 +94,7 @@\n \n \t// If the queue is full, remove the oldest alerts in favor\n \t// of newer ones.\n-\tif d := (len(s.queue) + len(alerts)) - s.opts.QueueCapacity; d > 0 {\n+\tif d := (len(s.queue) + len(alerts)) - capacity; d > 0 {\n \t\ts.logger.Warn(\"Alert notification queue full, dropping alerts\", \"count\", d)\n \t\tdropped += d\n \t\ts.queue = s.queue[d:]\n",
+    "millis": 44,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "extract-constant",
+    "refactoring": "extract-constant",
+    "what": "string literal",
+    "file": "notifier/alert.go",
+    "line": 52,
+    "available": true,
+    "availability": {
+      "IntroduceConstant": true
+    },
+    "intentions": [
+      "Convert to raw string literal",
+      "Flip '+' (changes semantics)",
+      "Generate test",
+      "Inject language or reference"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "invoked extract-constant handler with name 'resolvedSuffix'",
+    "changed": [
+      "notifier/alert.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -21,6 +21,8 @@\n \t\"github.com/prometheus/prometheus/model/relabel\"\n )\n \n+const resolvedSuffix = \"[resolved]\"\n+\n // Alert is a generic representation of an alert in the Prometheus eco-system.\n type Alert struct {\n \t// Label value pairs for purpose of aggregation, matching, and disposition\n@@ -49,7 +51,7 @@\n func (a *Alert) String() string {\n \ts := fmt.Sprintf(\"%s[%s]\", a.Name(), fmt.Sprintf(\"%016x\", a.Hash())[:7])\n \tif a.Resolved() {\n-\t\treturn s + \"[resolved]\"\n+\t\treturn s + resolvedSuffix\n \t}\n \treturn s + \"[active]\"\n }\n",
+    "millis": 10,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "extract-function-multi",
+    "refactoring": "extract-function",
+    "what": "statements with two results (a new variable and a reassigned parameter)",
+    "file": "notifier/sendloop.go",
+    "line": 85,
+    "available": true,
+    "availability": {
+      "ExtractMethod": true
+    },
+    "intentions": [
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "invoked extract-function handler with name 'dropOverflow'",
+    "changed": [
+      "notifier/sendloop.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -82,6 +82,22 @@\n \ts.mtx.Lock()\n \tdefer s.mtx.Unlock()\n \n+\tdropped, alerts := s.dropOverflow(alerts)\n+\n+\ts.queue = append(s.queue, alerts...)\n+\n+\t// Notify sending goroutine that there are alerts to be processed.\n+\t// If we cannot send on the channel, it means the signal already exists\n+\t// and has not been consumed yet.\n+\ts.notifyWork()\n+\n+\ts.metrics.queueLength.WithLabelValues(s.alertmanagerURL).Set(float64(len(s.queue)))\n+\tif dropped > 0 {\n+\t\ts.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(dropped))\n+\t}\n+}\n+\n+func (s *sendLoop) dropOverflow(alerts []*Alert) (int, []*Alert) {\n \tvar dropped int\n \t// Queue capacity should be significantly larger than a single alert\n \t// batch could be.\n@@ -98,18 +114,7 @@\n \t\tdropped += d\n \t\ts.queue = s.queue[d:]\n \t}\n-\n-\ts.queue = append(s.queue, alerts...)\n-\n-\t// Notify sending goroutine that there are alerts to be processed.\n-\t// If we cannot send on the channel, it means the signal already exists\n-\t// and has not been consumed yet.\n-\ts.notifyWork()\n-\n-\ts.metrics.queueLength.WithLabelValues(s.alertmanagerURL).Set(float64(len(s.queue)))\n-\tif dropped > 0 {\n-\t\ts.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(dropped))\n-\t}\n+\treturn dropped, alerts\n }\n \n func (s *sendLoop) notifyWork() {\n",
+    "millis": 19,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "extract-function-err",
+    "refactoring": "extract-function",
+    "what": "statements with `return nil, err` of the enclosing function inside",
+    "file": "notifier/alertmanagerset.go",
+    "line": 51,
+    "available": true,
+    "availability": {
+      "ExtractMethod": true
+    },
+    "intentions": [
+      "Generate test"
+    ],
+    "status": "refused",
+    "message": "Cannot perform refactoring.\nNot every path of the selection ends in 'return'",
+    "forced": false,
+    "changed": [],
+    "created": [],
+    "deleted": [],
+    "diff": "",
+    "millis": 1,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "extract-method",
+    "refactoring": "extract-function",
+    "what": "statements using the receiver -> method",
+    "file": "notifier/sendloop.go",
+    "line": 137,
+    "available": true,
+    "availability": {
+      "ExtractMethod": true
+    },
+    "intentions": [
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "invoked extract-function handler with name 'deleteMetrics'",
+    "changed": [
+      "notifier/sendloop.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -134,13 +134,17 @@\n \t\t\ts.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(ql))\n \t\t}\n \n-\t\ts.metrics.latencySummary.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.latencyHistogram.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.sent.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.dropped.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.errors.DeleteLabelValues(s.alertmanagerURL)\n-\t\ts.metrics.queueLength.DeleteLabelValues(s.alertmanagerURL)\n+\t\ts.deleteMetrics()\n \t})\n+}\n+\n+func (s *sendLoop) deleteMetrics() {\n+\ts.metrics.latencySummary.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.latencyHistogram.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.sent.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.dropped.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.errors.DeleteLabelValues(s.alertmanagerURL)\n+\ts.metrics.queueLength.DeleteLabelValues(s.alertmanagerURL)\n }\n \n func (s *sendLoop) drainQueue() {\n",
+    "millis": 11,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "introduce-parameter",
+    "refactoring": "introduce-parameter",
+    "what": "string literal of a function body -> parameter",
+    "file": "notifier/alertmanager.go",
+    "line": 88,
+    "available": true,
+    "availability": {
+      "IntroduceParameter": true
+    },
+    "intentions": [
+      "Convert to 'var' declaration",
+      "Convert to raw string literal",
+      "Generate test",
+      "Put arguments on separate lines",
+      "Exclude string formatting function",
+      "Inject language or reference"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "invoked introduce-parameter handler with name 'format'",
+    "changed": [
+      "notifier/alertmanager.go",
+      "notifier/alertmanager_test.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -58,7 +58,7 @@\n \t\t}\n \t\t// Set configured scheme as the initial scheme label for overwrite.\n \t\tlb.Set(model.SchemeLabel, cfg.Scheme)\n-\t\tlb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion))\n+\t\tlb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion, \"/api/%v/alerts\"))\n \n \t\t// Combine target labels with target group labels.\n \t\tfor ln, lv := range tg.Labels {\n@@ -84,8 +84,8 @@\n \treturn res, droppedAlertManagers, nil\n }\n \n-func postPath(pre string, v config.AlertmanagerAPIVersion) string {\n-\talertPushEndpoint := fmt.Sprintf(\"/api/%v/alerts\", string(v))\n+func postPath(pre string, v config.AlertmanagerAPIVersion, format string) string {\n+\talertPushEndpoint := fmt.Sprintf(format, string(v))\n \treturn path.Join(\"/\", pre, alertPushEndpoint)\n }\n \n--- a/notifier/alertmanager_test.go\n+++ b/notifier/alertmanager_test.go\n@@ -51,7 +51,7 @@\n \t\t},\n \t}\n \tfor _, c := range cases {\n-\t\trequire.Equal(t, c.out, postPath(c.in, config.AlertmanagerAPIVersionV2))\n+\t\trequire.Equal(t, c.out, postPath(c.in, config.AlertmanagerAPIVersionV2, \"/api/%v/alerts\"))\n \t}\n }\n \n",
+    "millis": 53,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "inline-variable",
+    "refactoring": "inline",
+    "what": "local variable used once",
+    "file": "notifier/alertmanager.go",
+    "line": 77,
+    "available": true,
+    "availability": {
+      "Inline": true
+    },
+    "intentions": [
+      "Convert to 'var' declaration",
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "inlined GoVarDefinitionImpl (Inline Variable)",
+    "changed": [
+      "notifier/alertmanager.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -74,8 +74,7 @@\n \t\t\tcontinue\n \t\t}\n \n-\t\taddr := lb.Get(model.AddressLabel)\n-\t\tif err := config.CheckTargetAddress(model.LabelValue(addr)); err != nil {\n+\t\tif err := config.CheckTargetAddress(model.LabelValue(lb.Get(model.AddressLabel))); err != nil {\n \t\t\treturn nil, nil, err\n \t\t}\n \n",
+    "millis": 13,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "inline-function-all",
+    "refactoring": "inline",
+    "what": "one-statement method, caret on the declaration (all calls + delete)",
+    "file": "notifier/alert.go",
+    "line": 58,
+    "available": true,
+    "availability": {
+      "Inline": true
+    },
+    "intentions": [
+      "Generate test"
+    ],
+    "status": "refused",
+    "message": "Cannot perform refactoring.\nPut the caret on a call: inlining every call of a method is not supported",
+    "forced": false,
+    "changed": [],
+    "created": [],
+    "deleted": [],
+    "diff": "",
+    "millis": 1,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "inline-function-call",
+    "refactoring": "inline",
+    "what": "two-statement function, caret on one call",
+    "file": "notifier/alertmanager.go",
+    "line": 61,
+    "available": true,
+    "availability": {
+      "Inline": true
+    },
+    "intentions": [
+      "Generate test",
+      "Put arguments on separate lines"
+    ],
+    "status": "refused",
+    "message": "Cannot perform refactoring.\nThe body of 'postPath' is not a single statement: only one-statement bodies can be inlined",
+    "forced": false,
+    "changed": [],
+    "created": [],
+    "deleted": [],
+    "diff": "",
+    "millis": 1,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "inline-constant",
+    "refactoring": "inline",
+    "what": "package-level constant used twice",
+    "file": "notifier/alertmanager.go",
+    "line": 36,
+    "available": true,
+    "availability": {
+      "Inline": true
+    },
+    "intentions": [
+      "Export",
+      "Specify type explicitly"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "inlined GoConstDefinitionImpl (Inline Constant)",
+    "changed": [
+      "notifier/alertmanager.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -33,13 +33,11 @@\n \n type alertmanagerLabels struct{ labels.Labels }\n \n-const pathLabel = \"__alerts_path__\"\n-\n func (a alertmanagerLabels) url() *url.URL {\n \treturn &url.URL{\n \t\tScheme: a.Get(model.SchemeLabel),\n \t\tHost:   a.Get(model.AddressLabel),\n-\t\tPath:   a.Get(pathLabel),\n+\t\tPath:   a.Get(\"__alerts_path__\"),\n \t}\n }\n \n@@ -58,7 +56,7 @@\n \t\t}\n \t\t// Set configured scheme as the initial scheme label for overwrite.\n \t\tlb.Set(model.SchemeLabel, cfg.Scheme)\n-\t\tlb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion))\n+\t\tlb.Set(\"__alerts_path__\", postPath(cfg.PathPrefix, cfg.APIVersion))\n \n \t\t// Combine target labels with target group labels.\n \t\tfor ln, lv := range tg.Labels {\n",
+    "millis": 13,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "cs-add-param",
+    "refactoring": "change-signature",
+    "what": "add a parameter with a default value at the calls",
+    "file": "notifier/alertmanager.go",
+    "line": 87,
+    "available": true,
+    "availability": {
+      "ChangeSignature": true
+    },
+    "intentions": [
+      "Export",
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "postPath: (pre string, v config.AlertmanagerAPIVersion, root string) string",
+    "changed": [
+      "notifier/alertmanager.go",
+      "notifier/alertmanager_test.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -58,7 +58,7 @@\n \t\t}\n \t\t// Set configured scheme as the initial scheme label for overwrite.\n \t\tlb.Set(model.SchemeLabel, cfg.Scheme)\n-\t\tlb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion))\n+\t\tlb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion, \"/\"))\n \n \t\t// Combine target labels with target group labels.\n \t\tfor ln, lv := range tg.Labels {\n@@ -84,7 +84,7 @@\n \treturn res, droppedAlertManagers, nil\n }\n \n-func postPath(pre string, v config.AlertmanagerAPIVersion) string {\n+func postPath(pre string, v config.AlertmanagerAPIVersion, root string) string {\n \talertPushEndpoint := fmt.Sprintf(\"/api/%v/alerts\", string(v))\n \treturn path.Join(\"/\", pre, alertPushEndpoint)\n }\n--- a/notifier/alertmanager_test.go\n+++ b/notifier/alertmanager_test.go\n@@ -51,7 +51,7 @@\n \t\t},\n \t}\n \tfor _, c := range cases {\n-\t\trequire.Equal(t, c.out, postPath(c.in, config.AlertmanagerAPIVersionV2))\n+\t\trequire.Equal(t, c.out, postPath(c.in, config.AlertmanagerAPIVersionV2, \"/\"))\n \t}\n }\n \n",
+    "millis": 38,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "cs-remove-param",
+    "refactoring": "change-signature",
+    "what": "remove a parameter that the body uses",
+    "file": "notifier/sendloop.go",
+    "line": 251,
+    "available": true,
+    "availability": {
+      "ChangeSignature": true
+    },
+    "intentions": [
+      "Export",
+      "Generate test"
+    ],
+    "status": "conflict",
+    "message": "Parameter c is used in the body; the references stay and no longer resolve",
+    "conflicts": [
+      "Parameter c is used in the body; the references stay and no longer resolve"
+    ],
+    "forced": true,
+    "done": "sendLoop.sendOne: (ctx context.Context, url string, b []byte) error",
+    "changed": [
+      "notifier/sendloop.go",
+      "notifier/sendloop_test.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -235,7 +235,7 @@\n \tctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.cfg.Timeout))\n \tdefer cancel()\n \n-\tif err := s.sendOne(ctx, s.client, s.alertmanagerURL, payload); err != nil {\n+\tif err := s.sendOne(ctx, s.alertmanagerURL, payload); err != nil {\n \t\ts.logger.Error(\"Error sending alerts\", \"count\", len(alerts), \"err\", err)\n \t\ts.metrics.errors.WithLabelValues(s.alertmanagerURL).Add(float64(len(alerts)))\n \t\treturn false\n@@ -248,7 +248,7 @@\n \treturn true\n }\n \n-func (s *sendLoop) sendOne(ctx context.Context, c *http.Client, url string, b []byte) error {\n+func (s *sendLoop) sendOne(ctx context.Context, url string, b []byte) error {\n \treq, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))\n \tif err != nil {\n \t\treturn err\n--- a/notifier/sendloop_test.go\n+++ b/notifier/sendloop_test.go\n@@ -54,7 +54,7 @@\n \t\t},\n \t}\n \n-\th.sendOne(context.Background(), nil, testURL, []byte(testBody))\n+\th.sendOne(context.Background(), testURL, []byte(testBody))\n \n \trequire.True(t, received)\n }\n",
+    "millis": 54,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "cs-reorder",
+    "refactoring": "change-signature",
+    "what": "swap the first two parameters",
+    "file": "notifier/sendloop.go",
+    "line": 48,
+    "available": true,
+    "availability": {
+      "ChangeSignature": true
+    },
+    "intentions": [
+      "Export",
+      "Generate test"
+    ],
+    "status": "conflict",
+    "message": "The arguments of this call of newSendLoop have side effects; their evaluation order changes\nThe arguments of this call of newSendLoop have side effects; their evaluation order changes\nThe arguments of this call of newSendLoop have side effects; their evaluation order changes\nThe arguments of this call of newSendLoop have side effects; their evaluation order changes\nThe arguments of this call of newSendLoop have side effects; their evaluation order changes\nThe arguments of this call of newSendLoop have side effects; their evaluation order changes",
+    "conflicts": [
+      "The arguments of this call of newSendLoop have side effects; their evaluation order changes",
+      "The arguments of this call of newSendLoop have side effects; their evaluation order changes",
+      "The arguments of this call of newSendLoop have side effects; their evaluation order changes",
+      "The arguments of this call of newSendLoop have side effects; their evaluation order changes",
+      "The arguments of this call of newSendLoop have side effects; their evaluation order changes",
+      "The arguments of this call of newSendLoop have side effects; their evaluation order changes"
+    ],
+    "forced": true,
+    "done": "newSendLoop: (client *http.Client, alertmanagerURL string, cfg *config.AlertmanagerConfig, opts *Options, logger *slog.Logger, metrics *alertMetrics) *sendLoop",
+    "changed": [
+      "notifier/alertmanagerset.go",
+      "notifier/manager_test.go",
+      "notifier/sendloop.go",
+      "notifier/sendloop_test.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanagerset.go\n+++ b/notifier/alertmanagerset.go\n@@ -157,7 +157,7 @@\n \t\t\tloop.logger.Debug(\"Alertmanager already has send loop running, skipping\")\n \t\t\tcontinue\n \t\t}\n-\t\tsendLoop := newSendLoop(us, s.client, s.cfg, s.opts, s.logger.With(\"alertmanager\", us), s.metrics)\n+\t\tsendLoop := newSendLoop(s.client, us, s.cfg, s.opts, s.logger.With(\"alertmanager\", us), s.metrics)\n \t\tgo sendLoop.loop()\n \t\ts.sendLoops[us] = sendLoop\n \t}\n--- a/notifier/manager_test.go\n+++ b/notifier/manager_test.go\n@@ -107,7 +107,7 @@\n \tlogger := slog.New(slog.DiscardHandler)\n \tsendLoops := make(map[string]*sendLoop)\n \tfor _, am := range alertmanagerURLs {\n-\t\tsendLoops[am] = newSendLoop(am, client, cfg, opts, logger, metrics)\n+\t\tsendLoops[am] = newSendLoop(client, am, cfg, opts, logger, metrics)\n \t}\n \treturn &alertmanagerSet{\n \t\tams:       ams,\n--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -45,14 +45,7 @@\n \tlogger *slog.Logger\n }\n \n-func newSendLoop(\n-\talertmanagerURL string,\n-\tclient *http.Client,\n-\tcfg *config.AlertmanagerConfig,\n-\topts *Options,\n-\tlogger *slog.Logger,\n-\tmetrics *alertMetrics,\n-) *sendLoop {\n+func newSendLoop(client *http.Client, alertmanagerURL string, cfg *config.AlertmanagerConfig, opts *Options, logger *slog.Logger, metrics *alertMetrics) *sendLoop {\n \t// This will initialize the Counters for the AM to 0 and set the static queue capacity gauge.\n \tmetrics.dropped.WithLabelValues(alertmanagerURL)\n \tmetrics.errors.WithLabelValues(alertmanagerURL)\n--- a/notifier/sendloop_test.go\n+++ b/notifier/sendloop_test.go\n@@ -60,7 +60,7 @@\n }\n \n func TestHandlerNextBatch(t *testing.T) {\n-\tsendLoop := newSendLoop(\"http://mock\", nil, &config.DefaultAlertmanagerConfig, &Options{MaxBatchSize: DefaultMaxBatchSize}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\tsendLoop := newSendLoop(nil, \"http://mock\", &config.DefaultAlertmanagerConfig, &Options{MaxBatchSize: DefaultMaxBatchSize}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \n \tfor i := range make([]struct{}, 2*DefaultMaxBatchSize+1) {\n \t\tsendLoop.queue = append(sendLoop.queue, &Alert{\n@@ -79,7 +79,7 @@\n \talert1 := &Alert{Labels: labels.FromStrings(\"alertname\", \"existing1\")}\n \talert2 := &Alert{Labels: labels.FromStrings(\"alertname\", \"existing2\")}\n \n-\ts := newSendLoop(\"http://foo.bar/\", nil, nil, &Options{QueueCapacity: 5}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\ts := newSendLoop(nil, \"http://foo.bar/\", nil, &Options{QueueCapacity: 5}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \ts.add(alert1, alert2)\n \trequire.Equal(t, []*Alert{alert1, alert2}, s.queue)\n \trequire.Len(t, s.queue, 2)\n@@ -100,7 +100,7 @@\n \talert1 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert1\")}\n \talert2 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert2\")}\n \n-\ts := newSendLoop(\"http://foo.bar/\", nil, nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\ts := newSendLoop(nil, \"http://foo.bar/\", nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \ts.add(alert1, alert2)\n \n \talert3 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert3\")}\n@@ -118,7 +118,7 @@\n \talert1 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert1\")}\n \talert2 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert2\")}\n \n-\ts := newSendLoop(\"http://foo.bar/\", nil, nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\ts := newSendLoop(nil, \"http://foo.bar/\", nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \ts.add(alert1, alert2)\n \n \talert3 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert3\")}\n@@ -135,7 +135,7 @@\n }\n \n func TestNextBatchAlertsFromQueue(t *testing.T) {\n-\ts := newSendLoop(\"http://foo.bar/\", nil, nil, &Options{QueueCapacity: 5, MaxBatchSize: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n+\ts := newSendLoop(nil, \"http://foo.bar/\", nil, &Options{QueueCapacity: 5, MaxBatchSize: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))\n \n \talert1 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert1\")}\n \talert2 := &Alert{Labels: labels.FromStrings(\"alertname\", \"alert2\")}\n@@ -167,7 +167,7 @@\n \topts := &Options{QueueCapacity: 10, MaxBatchSize: DefaultMaxBatchSize}\n \n \t// Create first sendLoop - this initializes metrics with the alertmanager URL label\n-\tsendLoop1 := newSendLoop(alertmanagerURL, nil, &config.DefaultAlertmanagerConfig, opts, logger, metrics)\n+\tsendLoop1 := newSendLoop(nil, alertmanagerURL, &config.DefaultAlertmanagerConfig, opts, logger, metrics)\n \n \t// Verify metrics are initialized\n \trequire.Equal(t, 0.0, prom_testutil.ToFloat64(metrics.dropped.WithLabelValues(alertmanagerURL)))\n@@ -178,7 +178,7 @@\n \n \t// Create second sendLoop with the same URL - this should NOT panic or conflict\n \t// because metrics were properly cleaned up\n-\tsendLoop2 := newSendLoop(alertmanagerURL, nil, &config.DefaultAlertmanagerConfig, opts, logger, metrics)\n+\tsendLoop2 := newSendLoop(nil, alertmanagerURL, &config.DefaultAlertmanagerConfig, opts, logger, metrics)\n \tdefer sendLoop2.stop()\n \n \t// Verify metrics are re-initialized correctly\n",
+    "millis": 50,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "cs-results",
+    "refactoring": "change-signature",
+    "what": "add a result",
+    "file": "notifier/sendloop.go",
+    "line": 159,
+    "available": true,
+    "availability": {
+      "ChangeSignature": true
+    },
+    "intentions": [
+      "Export",
+      "Generate test"
+    ],
+    "status": "conflict",
+    "message": "9 call sites use the results of sendLoop.nextBatch; the calls are not rewritten",
+    "conflicts": [
+      "9 call sites use the results of sendLoop.nextBatch; the calls are not rewritten"
+    ],
+    "forced": true,
+    "done": "sendLoop.nextBatch: () ([]*Alert, int)",
+    "changed": [
+      "notifier/sendloop.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -156,7 +156,7 @@\n \treturn len(s.queue)\n }\n \n-func (s *sendLoop) nextBatch() []*Alert {\n+func (s *sendLoop) nextBatch() ([]*Alert, int) {\n \ts.mtx.Lock()\n \tdefer s.mtx.Unlock()\n \n",
+    "millis": 31,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "move-func-file",
+    "refactoring": "move",
+    "what": "function to another file of the same package",
+    "file": "notifier/util.go",
+    "line": 42,
+    "available": true,
+    "availability": {
+      "Move": true
+    },
+    "intentions": [
+      "Export",
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "moved [labelsToOpenAPILabelSet] to notifier/alert.go",
+    "changed": [
+      "notifier/alert.go",
+      "notifier/util.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -17,6 +17,8 @@\n \t\"fmt\"\n \t\"time\"\n \n+\t\"github.com/prometheus/alertmanager/api/v2/models\"\n+\n \t\"github.com/prometheus/prometheus/model/labels\"\n \t\"github.com/prometheus/prometheus/model/relabel\"\n )\n@@ -99,5 +101,14 @@\n \t\trelabeledAlerts = append(relabeledAlerts, a)\n \t}\n \treturn relabeledAlerts\n+}\n+\n+func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {\n+\tapiLabelSet := models.LabelSet{}\n+\tmodelLabelSet.Range(func(label labels.Label) {\n+\t\tapiLabelSet[label.Name] = label.Value\n+\t})\n+\n+\treturn apiLabelSet\n }\n \n--- a/notifier/util.go\n+++ b/notifier/util.go\n@@ -17,7 +17,6 @@\n \t\"github.com/go-openapi/strfmt\"\n \t\"github.com/prometheus/alertmanager/api/v2/models\"\n \n-\t\"github.com/prometheus/prometheus/model/labels\"\n )\n \n func alertsToOpenAPIAlerts(alerts []*Alert) models.PostableAlerts {\n@@ -37,14 +36,5 @@\n \t}\n \n \treturn openAPIAlerts\n-}\n-\n-func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {\n-\tapiLabelSet := models.LabelSet{}\n-\tmodelLabelSet.Range(func(label labels.Label) {\n-\t\tapiLabelSet[label.Name] = label.Value\n-\t})\n-\n-\treturn apiLabelSet\n }\n \n",
+    "millis": 49,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "move-type-newfile",
+    "refactoring": "move",
+    "what": "type with its method to a new file of the same package",
+    "file": "notifier/alertmanager.go",
+    "line": 34,
+    "available": true,
+    "availability": {
+      "Move": true
+    },
+    "intentions": [
+      "Add struct tags...",
+      "Copy JSON sample to clipboard",
+      "Export",
+      "Implement interface...",
+      "Go to Interfaces"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "moved [alertmanagerLabels] to notifier/amlabels.go",
+    "changed": [
+      "notifier/alertmanager.go"
+    ],
+    "created": [
+      "notifier/amlabels.go"
+    ],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -31,17 +31,7 @@\n \turl() *url.URL\n }\n \n-type alertmanagerLabels struct{ labels.Labels }\n-\n const pathLabel = \"__alerts_path__\"\n-\n-func (a alertmanagerLabels) url() *url.URL {\n-\treturn &url.URL{\n-\t\tScheme: a.Get(model.SchemeLabel),\n-\t\tHost:   a.Get(model.AddressLabel),\n-\t\tPath:   a.Get(pathLabel),\n-\t}\n-}\n \n // AlertmanagerFromGroup extracts a list of alertmanagers from a target group\n // and an associated AlertmanagerConfig.\n--- /dev/null\n+++ b/notifier/amlabels.go\n@@ -1,0 +1,20 @@\n+package notifier\n+\n+import (\n+\t\"net/url\"\n+\n+\t\"github.com/prometheus/common/model\"\n+\n+\t\"github.com/prometheus/prometheus/model/labels\"\n+)\n+\n+type alertmanagerLabels struct{ labels.Labels }\n+\n+func (a alertmanagerLabels) url() *url.URL {\n+\treturn &url.URL{\n+\t\tScheme: a.Get(model.SchemeLabel),\n+\t\tHost:   a.Get(model.AddressLabel),\n+\t\tPath:   a.Get(pathLabel),\n+\t}\n+}\n+\n",
+    "millis": 776,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "move-func-package",
+    "refactoring": "move",
+    "what": "function to a new package (export + import)",
+    "file": "notifier/util.go",
+    "line": 42,
+    "available": true,
+    "availability": {
+      "Move": true
+    },
+    "intentions": [
+      "Export",
+      "Generate test"
+    ],
+    "status": "conflict",
+    "message": "labelsToOpenAPILabelSet is unexported and used from package notifier\nlabelsToOpenAPILabelSet is unexported and used from package notifier\nlabelsToOpenAPILabelSet is unexported and used from package notifier\nlabelsToOpenAPILabelSet is unexported and used from package notifier\nlabelsToOpenAPILabelSet is unexported and used from package notifier",
+    "conflicts": [
+      "labelsToOpenAPILabelSet is unexported and used from package notifier",
+      "labelsToOpenAPILabelSet is unexported and used from package notifier",
+      "labelsToOpenAPILabelSet is unexported and used from package notifier",
+      "labelsToOpenAPILabelSet is unexported and used from package notifier",
+      "labelsToOpenAPILabelSet is unexported and used from package notifier"
+    ],
+    "forced": true,
+    "done": "moved [labelsToOpenAPILabelSet] to notifier/openapi/labels.go",
+    "changed": [
+      "notifier/util.go",
+      "notifier/util_test.go"
+    ],
+    "created": [
+      "notifier/openapi/labels.go"
+    ],
+    "deleted": [],
+    "diff": "--- /dev/null\n+++ b/notifier/openapi/labels.go\n@@ -1,0 +1,17 @@\n+package openapi\n+\n+import (\n+\t\"github.com/prometheus/alertmanager/api/v2/models\"\n+\n+\t\"github.com/prometheus/prometheus/model/labels\"\n+)\n+\n+func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {\n+\tapiLabelSet := models.LabelSet{}\n+\tmodelLabelSet.Range(func(label labels.Label) {\n+\t\tapiLabelSet[label.Name] = label.Value\n+\t})\n+\n+\treturn apiLabelSet\n+}\n+\n--- a/notifier/util.go\n+++ b/notifier/util.go\n@@ -17,7 +17,7 @@\n \t\"github.com/go-openapi/strfmt\"\n \t\"github.com/prometheus/alertmanager/api/v2/models\"\n \n-\t\"github.com/prometheus/prometheus/model/labels\"\n+\t\"github.com/prometheus/prometheus/notifier/openapi\"\n )\n \n func alertsToOpenAPIAlerts(alerts []*Alert) models.PostableAlerts {\n@@ -26,25 +26,16 @@\n \t\tstart := strfmt.DateTime(a.StartsAt)\n \t\tend := strfmt.DateTime(a.EndsAt)\n \t\topenAPIAlerts = append(openAPIAlerts, &models.PostableAlert{\n-\t\t\tAnnotations: labelsToOpenAPILabelSet(a.Annotations),\n+\t\t\tAnnotations: openapi.labelsToOpenAPILabelSet(a.Annotations),\n \t\t\tEndsAt:      end,\n \t\t\tStartsAt:    start,\n \t\t\tAlert: models.Alert{\n \t\t\t\tGeneratorURL: strfmt.URI(a.GeneratorURL),\n-\t\t\t\tLabels:       labelsToOpenAPILabelSet(a.Labels),\n+\t\t\t\tLabels:       openapi.labelsToOpenAPILabelSet(a.Labels),\n \t\t\t},\n \t\t})\n \t}\n \n \treturn openAPIAlerts\n-}\n-\n-func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {\n-\tapiLabelSet := models.LabelSet{}\n-\tmodelLabelSet.Range(func(label labels.Label) {\n-\t\tapiLabelSet[label.Name] = label.Value\n-\t})\n-\n-\treturn apiLabelSet\n }\n \n--- a/notifier/util_test.go\n+++ b/notifier/util_test.go\n@@ -21,21 +21,22 @@\n \t\"github.com/stretchr/testify/require\"\n \n \t\"github.com/prometheus/prometheus/model/labels\"\n+\t\"github.com/prometheus/prometheus/notifier/openapi\"\n )\n \n func TestLabelsToOpenAPILabelSet(t *testing.T) {\n-\trequire.Equal(t, models.LabelSet{\"aaa\": \"111\", \"bbb\": \"222\"}, labelsToOpenAPILabelSet(labels.FromStrings(\"aaa\", \"111\", \"bbb\", \"222\")))\n+\trequire.Equal(t, models.LabelSet{\"aaa\": \"111\", \"bbb\": \"222\"}, openapi.labelsToOpenAPILabelSet(labels.FromStrings(\"aaa\", \"111\", \"bbb\", \"222\")))\n }\n \n // Edge case tests for utility functions\n \n func TestLabelsToOpenAPILabelSetEmpty(t *testing.T) {\n-\tresult := labelsToOpenAPILabelSet(labels.EmptyLabels())\n+\tresult := openapi.labelsToOpenAPILabelSet(labels.EmptyLabels())\n \trequire.Empty(t, result)\n }\n \n func TestLabelsToOpenAPILabelSetSpecialCharacters(t *testing.T) {\n-\tresult := labelsToOpenAPILabelSet(labels.FromStrings(\n+\tresult := openapi.labelsToOpenAPILabelSet(labels.FromStrings(\n \t\t\"special/chars\", \"value with spaces\",\n \t\t\"unicode\", \"αβγ\",\n \t\t\"empty\", \"\",\n",
+    "millis": 650,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "move-type-package",
+    "refactoring": "move",
+    "what": "type implementing an unexported interface method to another package",
+    "file": "notifier/alertmanager.go",
+    "line": 34,
+    "available": true,
+    "availability": {
+      "Move": true
+    },
+    "intentions": [
+      "Add struct tags...",
+      "Copy JSON sample to clipboard",
+      "Export",
+      "Implement interface...",
+      "Go to Interfaces"
+    ],
+    "status": "conflict",
+    "message": "Import cycle: package amlabels would import notifier, which imports amlabels\nalertmanagerLabels is unexported and used from package notifier\nalertmanagerLabels is unexported and used from package notifier\npathLabel is unexported and used from package amlabels",
+    "conflicts": [
+      "Import cycle: package amlabels would import notifier, which imports amlabels",
+      "alertmanagerLabels is unexported and used from package notifier",
+      "alertmanagerLabels is unexported and used from package notifier",
+      "pathLabel is unexported and used from package amlabels"
+    ],
+    "forced": true,
+    "done": "moved [alertmanagerLabels] to notifier/amlabels/amlabels.go",
+    "changed": [
+      "notifier/alertmanager.go"
+    ],
+    "created": [
+      "notifier/amlabels/amlabels.go"
+    ],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -24,25 +24,16 @@\n \t\"github.com/prometheus/prometheus/discovery/targetgroup\"\n \t\"github.com/prometheus/prometheus/model/labels\"\n \t\"github.com/prometheus/prometheus/model/relabel\"\n+\t\"github.com/prometheus/prometheus/notifier/amlabels\"\n )\n \n // Alertmanager holds Alertmanager endpoint information.\n type alertmanager interface {\n \turl() *url.URL\n }\n-\n-type alertmanagerLabels struct{ labels.Labels }\n \n const pathLabel = \"__alerts_path__\"\n \n-func (a alertmanagerLabels) url() *url.URL {\n-\treturn &url.URL{\n-\t\tScheme: a.Get(model.SchemeLabel),\n-\t\tHost:   a.Get(model.AddressLabel),\n-\t\tPath:   a.Get(pathLabel),\n-\t}\n-}\n-\n // AlertmanagerFromGroup extracts a list of alertmanagers from a target group\n // and an associated AlertmanagerConfig.\n func AlertmanagerFromGroup(tg *targetgroup.Group, cfg *config.AlertmanagerConfig) ([]alertmanager, []alertmanager, error) {\n@@ -70,7 +61,7 @@\n \t\tpreRelabel := lb.Labels()\n \t\tkeep := relabel.ProcessBuilder(lb, cfg.RelabelConfigs...)\n \t\tif !keep {\n-\t\t\tdroppedAlertManagers = append(droppedAlertManagers, alertmanagerLabels{preRelabel})\n+\t\t\tdroppedAlertManagers = append(droppedAlertManagers, amlabels.alertmanagerLabels{preRelabel})\n \t\t\tcontinue\n \t\t}\n \n@@ -79,7 +70,7 @@\n \t\t\treturn nil, nil, err\n \t\t}\n \n-\t\tres = append(res, alertmanagerLabels{lb.Labels()})\n+\t\tres = append(res, amlabels.alertmanagerLabels{lb.Labels()})\n \t}\n \treturn res, droppedAlertManagers, nil\n }\n--- /dev/null\n+++ b/notifier/amlabels/amlabels.go\n@@ -1,0 +1,21 @@\n+package amlabels\n+\n+import (\n+\t\"net/url\"\n+\n+\t\"github.com/prometheus/common/model\"\n+\n+\t\"github.com/prometheus/prometheus/model/labels\"\n+\t\"github.com/prometheus/prometheus/notifier\"\n+)\n+\n+type alertmanagerLabels struct{ labels.Labels }\n+\n+func (a alertmanagerLabels) url() *url.URL {\n+\treturn &url.URL{\n+\t\tScheme: a.Get(model.SchemeLabel),\n+\t\tHost:   a.Get(model.AddressLabel),\n+\t\tPath:   a.Get(notifier.pathLabel),\n+\t}\n+}\n+\n",
+    "millis": 603,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "safe-delete-test-only",
+    "refactoring": "safe-delete",
+    "what": "exported function used only by its test",
+    "file": "util/strutil/strconv.go",
+    "line": 51,
+    "available": true,
+    "availability": {
+      "SafeDelete": true
+    },
+    "intentions": [
+      "Generate test"
+    ],
+    "status": "conflict",
+    "message": "Usage of function SanitizeFullLabelName in string, comment or non-code file that is not safe to delete.\nUsage of function SanitizeFullLabelName that is not safe to delete.",
+    "conflicts": [
+      "Usage of function SanitizeFullLabelName in string, comment or non-code file that is not safe to delete.",
+      "Usage of function SanitizeFullLabelName that is not safe to delete."
+    ],
+    "forced": true,
+    "done": "safe delete of GoFunctionDeclarationImpl",
+    "changed": [
+      "util/strutil/strconv.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/util/strutil/strconv.go\n+++ b/util/strutil/strconv.go\n@@ -46,20 +46,3 @@\n \treturn invalidLabelCharRE.ReplaceAllString(name, \"_\")\n }\n \n-// SanitizeFullLabelName replaces any invalid character with an underscore, and\n-// if given an empty string, returns a string containing a single underscore.\n-func SanitizeFullLabelName(name string) string {\n-\tif name == \"\" {\n-\t\treturn \"_\"\n-\t}\n-\tvar validSb strings.Builder\n-\tfor i, b := range name {\n-\t\tif (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || b == '_' || (b >= '0' && b <= '9' && i > 0) {\n-\t\t\tvalidSb.WriteRune(b)\n-\t\t} else {\n-\t\t\tvalidSb.WriteRune('_')\n-\t\t}\n-\t}\n-\treturn validSb.String()\n-}\n-\n",
+    "millis": 64,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "safe-delete-used",
+    "refactoring": "safe-delete",
+    "what": "function used in production code",
+    "file": "notifier/alertmanager.go",
+    "line": 87,
+    "available": true,
+    "availability": {
+      "SafeDelete": true
+    },
+    "intentions": [
+      "Export",
+      "Generate test"
+    ],
+    "status": "conflict",
+    "message": "Usage of function postPath that is not safe to delete.\nUsage of function postPath that is not safe to delete.",
+    "conflicts": [
+      "Usage of function postPath that is not safe to delete.",
+      "Usage of function postPath that is not safe to delete."
+    ],
+    "forced": true,
+    "done": "safe delete of GoFunctionDeclarationImpl",
+    "changed": [
+      "notifier/alertmanager.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -84,8 +84,3 @@\n \treturn res, droppedAlertManagers, nil\n }\n \n-func postPath(pre string, v config.AlertmanagerAPIVersion) string {\n-\talertPushEndpoint := fmt.Sprintf(\"/api/%v/alerts\", string(v))\n-\treturn path.Join(\"/\", pre, alertPushEndpoint)\n-}\n-\n",
+    "millis": 27,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "implement-interface",
+    "refactoring": "generate",
+    "what": "implement a project interface (unexported method, foreign import)",
+    "file": "notifier/sendloop.go",
+    "line": 30,
+    "available": true,
+    "availability": {
+      "Go.Generate.Implement": true,
+      "Go.Generate.Constructor": "other: true",
+      "Go.Generate.Getters": "other: true",
+      "Go.Generate.Setters": "other: true",
+      "Go.Generate.GettersSetters": "other: true",
+      "Go.Generate.String": "other: true"
+    },
+    "intentions": [
+      "Add key to tags",
+      "Add struct tags...",
+      "Copy JSON sample to clipboard",
+      "Export",
+      "Implement interface..."
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "implemented alertmanager: imports [net/url]",
+    "changed": [
+      "notifier/sendloop.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -21,6 +21,7 @@\n \t\"io\"\n \t\"log/slog\"\n \t\"net/http\"\n+\t\"net/url\"\n \t\"sync\"\n \t\"time\"\n \n@@ -270,5 +271,9 @@\n \t}\n \n \treturn nil\n+}\n+\n+func (s *sendLoop) url() *url.URL {\n+\tpanic(\"not implemented\")\n }\n \n",
+    "millis": 75,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "generate-constructor",
+    "refactoring": "generate",
+    "what": "constructor of a struct with fields of other packages",
+    "file": "notifier/alert.go",
+    "line": 25,
+    "available": true,
+    "availability": {
+      "Go.Generate.Implement": "other: true",
+      "Go.Generate.Constructor": true,
+      "Go.Generate.Getters": "other: true",
+      "Go.Generate.Setters": "other: true",
+      "Go.Generate.GettersSetters": "other: true",
+      "Go.Generate.String": "other: true"
+    },
+    "intentions": [
+      "Add key to tags",
+      "Change field name style in tags",
+      "Add struct tags...",
+      "Copy JSON sample to clipboard",
+      "Implement interface..."
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "generated constructor for Alert over 5 fields",
+    "changed": [
+      "notifier/alert.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alert.go\n+++ b/notifier/alert.go\n@@ -68,6 +68,10 @@\n \treturn !a.EndsAt.After(ts)\n }\n \n+func NewAlert(labels labels.Labels, annotations labels.Labels, startsAt time.Time, endsAt time.Time, generatorURL string) *Alert {\n+\treturn &Alert{Labels: labels, Annotations: annotations, StartsAt: startsAt, EndsAt: endsAt, GeneratorURL: generatorURL}\n+}\n+\n func relabelAlerts(relabelConfigs []*relabel.Config, externalLabels labels.Labels, alerts []*Alert) []*Alert {\n \tlb := labels.NewBuilder(labels.EmptyLabels())\n \tvar relabeledAlerts []*Alert\n",
+    "millis": 14,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "generate-getters-setters",
+    "refactoring": "generate",
+    "what": "getters and setters of a struct with unexported fields",
+    "file": "notifier/alertmanagerset.go",
+    "line": 35,
+    "available": true,
+    "availability": {
+      "Go.Generate.Implement": "other: true",
+      "Go.Generate.Constructor": "other: true",
+      "Go.Generate.Getters": "other: true",
+      "Go.Generate.Setters": "other: true",
+      "Go.Generate.GettersSetters": true,
+      "Go.Generate.String": "other: true"
+    },
+    "intentions": [
+      "Add key to tags",
+      "Add struct tags...",
+      "Copy JSON sample to clipboard",
+      "Export",
+      "Implement interface..."
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "generated getters-setters for alertmanagerSet over 9 fields",
+    "changed": [
+      "notifier/alertmanagerset.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanagerset.go\n+++ b/notifier/alertmanagerset.go\n@@ -190,3 +190,75 @@\n \t}\n }\n \n+func (as *alertmanagerSet) Cfg() *config.AlertmanagerConfig {\n+\treturn as.cfg\n+}\n+\n+func (as *alertmanagerSet) Client() *http.Client {\n+\treturn as.client\n+}\n+\n+func (as *alertmanagerSet) Opts() *Options {\n+\treturn as.opts\n+}\n+\n+func (as *alertmanagerSet) Metrics() *alertMetrics {\n+\treturn as.metrics\n+}\n+\n+func (as *alertmanagerSet) Mtx() sync.RWMutex {\n+\treturn as.mtx\n+}\n+\n+func (as *alertmanagerSet) Ams() []alertmanager {\n+\treturn as.ams\n+}\n+\n+func (as *alertmanagerSet) DroppedAms() []alertmanager {\n+\treturn as.droppedAms\n+}\n+\n+func (as *alertmanagerSet) SendLoops() map[string]*sendLoop {\n+\treturn as.sendLoops\n+}\n+\n+func (as *alertmanagerSet) Logger() *slog.Logger {\n+\treturn as.logger\n+}\n+\n+func (as *alertmanagerSet) SetCfg(cfg *config.AlertmanagerConfig) {\n+\tas.cfg = cfg\n+}\n+\n+func (as *alertmanagerSet) SetClient(client *http.Client) {\n+\tas.client = client\n+}\n+\n+func (as *alertmanagerSet) SetOpts(opts *Options) {\n+\tas.opts = opts\n+}\n+\n+func (as *alertmanagerSet) SetMetrics(metrics *alertMetrics) {\n+\tas.metrics = metrics\n+}\n+\n+func (as *alertmanagerSet) SetMtx(mtx sync.RWMutex) {\n+\tas.mtx = mtx\n+}\n+\n+func (as *alertmanagerSet) SetAms(ams []alertmanager) {\n+\tas.ams = ams\n+}\n+\n+func (as *alertmanagerSet) SetDroppedAms(droppedAms []alertmanager) {\n+\tas.droppedAms = droppedAms\n+}\n+\n+func (as *alertmanagerSet) SetSendLoops(sendLoops map[string]*sendLoop) {\n+\tas.sendLoops = sendLoops\n+}\n+\n+func (as *alertmanagerSet) SetLogger(logger *slog.Logger) {\n+\tas.logger = logger\n+}\n+\n",
+    "millis": 15,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "generate-string",
+    "refactoring": "generate",
+    "what": "String() of a struct",
+    "file": "notifier/manager.go",
+    "line": 68,
+    "available": true,
+    "availability": {
+      "Go.Generate.Implement": "other: true",
+      "Go.Generate.Constructor": "other: true",
+      "Go.Generate.Getters": "other: true",
+      "Go.Generate.Setters": "other: true",
+      "Go.Generate.GettersSetters": "other: true",
+      "Go.Generate.String": true
+    },
+    "intentions": [
+      "Add key to tags",
+      "Add struct tags...",
+      "Copy JSON sample to clipboard",
+      "Implement interface..."
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "generated string for Options over 7 fields",
+    "changed": [
+      "notifier/manager.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/manager.go\n+++ b/notifier/manager.go\n@@ -79,6 +79,10 @@\n \tMaxBatchSize int\n }\n \n+func (o Options) String() string {\n+\treturn fmt.Sprintf(\"Options{QueueCapacity: %v, DrainOnShutdown: %v, ExternalLabels: %v, RelabelConfigs: %v, Do: %v, Registerer: %v, MaxBatchSize: %v}\", o.QueueCapacity, o.DrainOnShutdown, o.ExternalLabels, o.RelabelConfigs, o.Do, o.Registerer, o.MaxBatchSize)\n+}\n+\n func do(ctx context.Context, client *http.Client, req *http.Request) (*http.Response, error) {\n \tif client == nil {\n \t\tclient = http.DefaultClient\n",
+    "millis": 15,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "introduce-field",
+    "refactoring": "introduce-field",
+    "what": "expression of a method -> struct field initialized in the method",
+    "file": "notifier/sendloop.go",
+    "line": 235,
+    "available": true,
+    "availability": {
+      "IntroduceField": true
+    },
+    "intentions": [
+      "Generate test",
+      "Put arguments on separate lines"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "invoked introduce-field handler with name 'timeout'",
+    "changed": [
+      "notifier/sendloop.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -42,7 +42,8 @@\n \tstopped  chan struct{}\n \tstopOnce sync.Once\n \n-\tlogger *slog.Logger\n+\tlogger  *slog.Logger\n+\ttimeout time.Duration\n }\n \n func newSendLoop(\n@@ -232,7 +233,8 @@\n \t\treturn false\n \t}\n \n-\tctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.cfg.Timeout))\n+\ts.timeout = time.Duration(s.cfg.Timeout)\n+\tctx, cancel := context.WithTimeout(context.Background(), s.timeout)\n \tdefer cancel()\n \n \tif err := s.sendOne(ctx, s.client, s.alertmanagerURL, payload); err != nil {\n",
+    "millis": 38,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "convert-if-switch",
+    "refactoring": "intention",
+    "what": "if / else if chain -> switch",
+    "file": "model/exemplar/exemplar.go",
+    "line": 56,
+    "available": false,
+    "availability": {
+      "intention": false
+    },
+    "intentions": [
+      "Generate test"
+    ],
+    "status": "not-available",
+    "forced": false,
+    "done": "no intention matching [switch]",
+    "changed": [],
+    "created": [],
+    "deleted": [],
+    "diff": "",
+    "millis": 9,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "convert-switch-if",
+    "refactoring": "intention",
+    "what": "switch with a default -> if / else",
+    "file": "notifier/sendloop.go",
+    "line": 218,
+    "available": true,
+    "availability": {
+      "intention": true
+    },
+    "intentions": [
+      "Convert 'switch' to 'if'",
+      "Fill switch",
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "launched 'Convert 'switch' to 'if''",
+    "changed": [
+      "notifier/sendloop.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/sendloop.go\n+++ b/notifier/sendloop.go\n@@ -215,16 +215,14 @@\n \n \tvar payload []byte\n \tvar err error\n-\tswitch s.cfg.APIVersion {\n-\tcase config.AlertmanagerAPIVersionV2:\n+\tif s.cfg.APIVersion == config.AlertmanagerAPIVersionV2 {\n \t\topenAPIAlerts := alertsToOpenAPIAlerts(alerts)\n \t\tpayload, err = json.Marshal(openAPIAlerts)\n \t\tif err != nil {\n \t\t\ts.logger.Error(\"Encoding alerts for Alertmanager API v2 failed\", \"err\", err)\n \t\t\treturn false\n \t\t}\n-\n-\tdefault:\n+\t} else {\n \t\ts.logger.Error(\n \t\t\tfmt.Sprintf(\"Invalid Alertmanager API version '%v', expected one of '%v'\", s.cfg.APIVersion, config.SupportedAlertmanagerAPIVersions),\n \t\t\t\"err\", err,\n",
+    "millis": 48,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "convert-var-to-short",
+    "refactoring": "intention",
+    "what": "var declaration without a value -> short variable declaration",
+    "file": "notifier/sendloop.go",
+    "line": 85,
+    "available": false,
+    "availability": {
+      "intention": false
+    },
+    "intentions": [
+      "Generate test"
+    ],
+    "status": "not-available",
+    "forced": false,
+    "done": "no intention matching [:=, short]",
+    "changed": [],
+    "created": [],
+    "deleted": [],
+    "diff": "",
+    "millis": 10,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  },
+  {
+    "id": "convert-short-to-var",
+    "refactoring": "intention",
+    "what": "short variable declaration -> var declaration with the type",
+    "file": "notifier/alertmanager.go",
+    "line": 51,
+    "available": true,
+    "availability": {
+      "intention": true
+    },
+    "intentions": [
+      "Convert to 'var' declaration",
+      "Generate test"
+    ],
+    "status": "applied",
+    "forced": false,
+    "done": "launched 'Convert to 'var' declaration'",
+    "changed": [
+      "notifier/alertmanager.go"
+    ],
+    "created": [],
+    "deleted": [],
+    "diff": "--- a/notifier/alertmanager.go\n+++ b/notifier/alertmanager.go\n@@ -48,7 +48,7 @@\n func AlertmanagerFromGroup(tg *targetgroup.Group, cfg *config.AlertmanagerConfig) ([]alertmanager, []alertmanager, error) {\n \tvar res []alertmanager\n \tvar droppedAlertManagers []alertmanager\n-\tlb := labels.NewBuilder(labels.EmptyLabels())\n+\tvar lb *labels.Builder = labels.NewBuilder(labels.EmptyLabels())\n \n \tfor _, tlset := range tg.Targets {\n \t\tlb.Reset(labels.EmptyLabels())\n",
+    "millis": 425,
+    "restored": "restored: unsaved=0 git='' vfsMismatch=[]"
+  }
+]

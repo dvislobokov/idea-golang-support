@@ -1,0 +1,819 @@
+[
+  {
+    "id": "C01",
+    "items": [
+      "Name() → *probeHolder  : string",
+      "name → probeHolder  : string"
+    ],
+    "size": 2,
+    "lookup": true,
+    "picked": "Name() → *probeHolder  : string",
+    "after": [
+      "\t// @BODY",
+      "\t_ = h.Name()<caret>",
+      "\t_ = ts"
+    ],
+    "head": [],
+    "millis": 6173
+  },
+  {
+    "id": "C02",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\t// @USE",
+      "\tm.Update(<caret>)",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 113
+  },
+  {
+    "id": "C03",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\t// @USE",
+      "\t_ = labels.FromStrings(<caret>)",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 73
+  },
+  {
+    "id": "C04",
+    "items": [
+      "Name() → *Group  : string",
+      "name → Group  : string",
+      "terminated → Group  : chan struct{}",
+      "managerDone → Group  : chan struct{}"
+    ],
+    "size": 4,
+    "lookup": true,
+    "picked": "Name() → *Group  : string",
+    "after": [
+      "\t// @USE",
+      "\t_ = g.Name()<caret>me()",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 71
+  },
+  {
+    "id": "C05",
+    "items": [
+      "Name() → *Group  : string",
+      "name → Group  : string",
+      "terminated → Group  : chan struct{}",
+      "managerDone → Group  : chan struct{}"
+    ],
+    "size": 4,
+    "lookup": true,
+    "picked": "Name() → *Group  : string",
+    "after": [
+      "\t// @USE",
+      "\t_ = g.Name(<caret>)",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 28
+  },
+  {
+    "id": "C06",
+    "items": [
+      "Interval() → *Group  : Duration",
+      "interval → Group  : Duration"
+    ],
+    "size": 2,
+    "lookup": true,
+    "picked": "Interval() → *Group  : Duration",
+    "after": [
+      "\t// @USE",
+      "\t_ = g.Interval(<caret>)",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 28
+  },
+  {
+    "id": "C07",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\th := newProbeHolder(\"x\")",
+      "\t// @USE",
+      "\t_ = strconv.Itoa(<caret>)"
+    ],
+    "head": [
+      "package rules",
+      "",
+      "// Completion probes of docs/compare part 2 (prometheus-completion-*.md). Copied into rules/ of a prometheus clone for a run and deleted",
+      "// after it. Every `// @NAME` line is an anchor: a scenario inserts its text on the line after it. The file builds as it is.",
+      "",
+      "import (",
+      "\t\"context\"",
+      "\t\"errors\"",
+      "\t\"fmt\"",
+      "\t\"log/slog\"",
+      "\t\"strconv\"",
+      "\t\"strings\"",
+      "\t\"time\"",
+      "",
+      "\t\"github.com/prometheus/prometheus/model/labels\"",
+      "\t\"github.com/prometheus/prometheus/promql/parser\"",
+      ")",
+      ""
+    ],
+    "millis": 3926
+  },
+  {
+    "id": "C08",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\th := newProbeHolder(\"x\")",
+      "\t// @USE",
+      "\t_ = strconv.<caret>"
+    ],
+    "head": [
+      "package rules",
+      "",
+      "// Completion probes of docs/compare part 2 (prometheus-completion-*.md). Copied into rules/ of a prometheus clone for a run and deleted",
+      "// after it. Every `// @NAME` line is an anchor: a scenario inserts its text on the line after it. The file builds as it is.",
+      "",
+      "import (",
+      "\t\"context\"",
+      "\t\"errors\"",
+      "\t\"fmt\"",
+      "\t\"log/slog\"",
+      "\t\"strconv\"",
+      "\t\"strings\"",
+      "\t\"time\"",
+      "",
+      "\t\"github.com/prometheus/prometheus/model/labels\"",
+      "\t\"github.com/prometheus/prometheus/promql/parser\"",
+      ")",
+      ""
+    ],
+    "millis": 366
+  },
+  {
+    "id": "C09",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\th := newProbeHolder(\"x\")",
+      "\t// @USE",
+      "\t_ = rand.Int(<caret>)"
+    ],
+    "head": [],
+    "millis": 140
+  },
+  {
+    "id": "C10",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\th := newProbeHolder(\"x\")",
+      "\t// @USE",
+      "\t_ = template.New(<caret>)"
+    ],
+    "head": [],
+    "millis": 125
+  },
+  {
+    "id": "C11",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\tctx := context.Background()",
+      "\th := newProbeHolder(\"x\")",
+      "\t// @USE"
+    ],
+    "head": [
+      "package rules",
+      "",
+      "// Completion probes of docs/compare part 2 (prometheus-completion-*.md). Copied into rules/ of a prometheus clone for a run and deleted",
+      "// after it. Every `// @NAME` line is an anchor: a scenario inserts its text on the line after it. The file builds as it is.",
+      "",
+      "import (",
+      "\t\"context\"",
+      "\t\"errors\"",
+      "\t\"fmt\"",
+      "\t\"log/slog\"",
+      "\t\"strings\"",
+      "\t\"time\"",
+      "",
+      "\t\"github.com/prometheus/common/promslog\"",
+      "",
+      "\t\"github.com/prometheus/prometheus/model/labels\"",
+      "\t\"github.com/prometheus/prometheus/promql/parser\"",
+      ")"
+    ],
+    "millis": 73
+  },
+  {
+    "id": "C12",
+    "items": [
+      "0",
+      "resolvedRetention = 15 * time.Minute  : Duration",
+      "g.opts.ForGracePeriod  : Duration",
+      "m.opts.ForGracePeriod  : Duration",
+      "g.lastEvalTimestamp.Sub(u Time) → Time  : Duration",
+      "g.lastEvaluation.Sub(u Time) → Time  : Duration",
+      "g.opts.OutageTolerance  : Duration",
+      "m.opts.OutageTolerance  : Duration",
+      "g.opts.ResendDelay  : Duration",
+      "m.opts.ResendDelay  : Duration",
+      "g.evaluationRuleTimeSum.Abs() → Duration  : Duration",
+      "g.evaluationTime.Abs() → Duration  : Duration"
+    ],
+    "size": 25,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 141
+  },
+  {
+    "id": "C13",
+    "items": [
+      "&slog.Logger{}",
+      "g.opts.Logger  : *Logger",
+      "m.opts.Logger  : *Logger",
+      "g.logger.With(args ...any) → *Logger  : *Logger",
+      "h.logger.With(args ...any) → *Logger  : *Logger",
+      "m.logger.With(args ...any) → *Logger  : *Logger",
+      "g.logger.WithGroup(name string) → *Logger  : *Logger",
+      "h.logger.WithGroup(name string) → *Logger  : *Logger",
+      "m.logger.WithGroup(name string) → *Logger  : *Logger",
+      "nil",
+      "new(Type)  : *Type"
+    ],
+    "size": 11,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 30
+  },
+  {
+    "id": "C14",
+    "items": [
+      "\"\"",
+      "GroupKey(file string, name string)  : string",
+      "namespace = \"prometheus\"  : untyped string",
+      "nameAndLabels(rule Rule)  : string",
+      "alertForStateMetricName = \"ALERTS_FOR_STATE\"  : untyped string",
+      "alertMetricName = \"ALERTS\"  : untyped string",
+      "probeSwitch(s RuleHealth, r Rule)  : string",
+      "alertStateLabel = \"alertstate\"  : untyped string",
+      "KindAlerting = \"alerting\"  : untyped string",
+      "KindRecording = \"recording\"  : untyped string",
+      "h.labels.String() → Labels  : string",
+      "g.evaluationRuleTimeSum.String() → Duration  : string"
+    ],
+    "size": 28,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 30
+  },
+  {
+    "id": "C15",
+    "items": [
+      "if  : if expr {}"
+    ],
+    "size": 1,
+    "lookup": true,
+    "picked": "if  : if expr {}",
+    "after": [
+      "\t// @BODY",
+      "\tif h.labels.IsEmpty() {",
+      "\t\t<caret>"
+    ],
+    "head": [],
+    "millis": 28
+  },
+  {
+    "id": "C16",
+    "items": [
+      "nn  : if expr != nil {}"
+    ],
+    "size": 1,
+    "lookup": true,
+    "picked": "nn  : if expr != nil {}",
+    "after": [
+      "\t// @BODY",
+      "\tif expr != nil {",
+      "\t\t<caret>"
+    ],
+    "head": [],
+    "millis": 62
+  },
+  {
+    "id": "C17",
+    "items": [
+      "for  : for _, v := range expr {}",
+      "fori  : for i := 0; i < expr; i++ {}",
+      "forr  : for index, elem := range expr {}",
+      "forrev  : for i := len(expr) - 1; i >= 0; i-- {}"
+    ],
+    "size": 4,
+    "lookup": true,
+    "picked": "for  : for _, v := range expr {}",
+    "after": [
+      "\t// @USE",
+      "\tfor _, rule := range rules {",
+      "\t\t<caret>"
+    ],
+    "head": [],
+    "millis": 26
+  },
+  {
+    "id": "C18",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\t// @USE",
+      "\tm.Stop().return<caret>",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "note": "no lookup",
+    "millis": 147
+  },
+  {
+    "id": "C19",
+    "items": [
+      "rr  : return expr, nil",
+      "Error() → interface {...}  : string"
+    ],
+    "size": 2,
+    "lookup": true,
+    "picked": "rr  : return expr, nil",
+    "after": [
+      "\t// @USE",
+      "\treturn err, nil<caret>",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 26
+  },
+  {
+    "id": "C20",
+    "items": [
+      "var  : name := expr"
+    ],
+    "size": 1,
+    "lookup": true,
+    "picked": "var  : name := expr",
+    "after": [
+      "\t// @USE",
+      "\tname := g.Name()<caret>",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 23
+  },
+  {
+    "id": "C21",
+    "items": [
+      "for _, v := range xs {...}  : range",
+      "for i, rule := range rules {...}  : slice",
+      "for i := range n {...}  : count",
+      "for i := 0; i < n; i++ {...}  : counter",
+      "for {...}  : endless",
+      "for { select { case <-ctx.Done(): ... } }  : select loop",
+      "for range rules  for i, v := range rules {...}",
+      "forecastqueryservice (github.com/aws/aws-sdk-go/service/forecastqueryservice)  : import",
+      "forecastqueryserviceiface (github.com/aws/aws-sdk-go/service/forecastqueryservice/forecastqueryserviceiface)  : import",
+      "forecastservice (github.com/aws/aws-sdk-go/service/forecastservice)  : import",
+      "forecastserviceiface (github.com/aws/aws-sdk-go/service/forecastservice/forecastserviceiface)  : import",
+      "format (go/format)  : import",
+      "format (github.com/daixiang0/gci/pkg/format)  : import",
+      "format (github.com/onsi/gomega/format)  : import",
+      "format (github.com/prometheus/alertmanager/cli/format)  : import",
+      "formatter (github.com/docker/cli/cli/command/formatter)  : import",
+      "formatter (github.com/onsi/ginkgo/v2/formatter)  : import",
+      "forms (google.golang.org/api/forms/v1)  : import",
+      "g.opts.ForGracePeriod  : Duration",
+      "m.opts.ForGracePeriod  : Duration"
+    ],
+    "size": 57,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 147
+  },
+  {
+    "id": "C22",
+    "items": [
+      "if err != nil {...}  : error check",
+      "err  : error",
+      "err  : if err != nil { return ... }",
+      "g.Context().Err() → interface {...}  : error",
+      "errors (errors)",
+      "error builtin",
+      "errcheck (github.com/kisielk/errcheck)  : import",
+      "errcheck (github.com/kisielk/errcheck/errcheck)  : import",
+      "errdefs (github.com/containerd/errdefs)  : import",
+      "errdetails (google.golang.org/genproto/googleapis/rpc/errdetails)  : import",
+      "errgroup (golang.org/x/sync/errgroup)  : import",
+      "errgrpc (github.com/containerd/errdefs/pkg/errgrpc)  : import"
+    ],
+    "size": 121,
+    "lookup": true,
+    "picked": "err  : error",
+    "after": [
+      "\t// @USE",
+      "\terr<caret>",
+      "\t_, _, _, _ = total, ctx, h, g",
+      "\treturn err",
+      "}",
+      ""
+    ],
+    "head": [],
+    "millis": 285
+  },
+  {
+    "id": "C23",
+    "items": [
+      "func (ph *probeHolder) GetEvaluationTimestamp() time.Time {...}  : missing method of Rule",
+      "func (ph *probeHolder) NewDiscovererMetrics(prometheus.Registerer, RefreshMetricsInstantiator) DiscovererMetrics {...}  : missing method of Config",
+      "func (ph *probeHolder) SetEvaluationTimestamp(time.Time) {...}  : missing method of Rule",
+      "func  : Implement Interface...",
+      "meth  : Method"
+    ],
+    "size": 5,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 436
+  },
+  {
+    "id": "C24",
+    "items": [
+      "fo (github.com/go-playground/locales/fo)  : import",
+      "formatter fmt.Formatter",
+      "format (go/format)  : import",
+      "format (github.com/daixiang0/gci/pkg/format)  : import",
+      "format (github.com/onsi/gomega/format)  : import",
+      "format (github.com/prometheus/alertmanager/cli/format)  : import",
+      "formatter (github.com/docker/cli/cli/command/formatter)  : import",
+      "formatter (github.com/onsi/ginkgo/v2/formatter)  : import",
+      "fo_DK (github.com/go-playground/locales/fo_DK)  : import",
+      "fo_FO (github.com/go-playground/locales/fo_FO)  : import",
+      "forecastqueryservice (github.com/aws/aws-sdk-go/service/forecastqueryservice)  : import",
+      "forecastqueryserviceiface (github.com/aws/aws-sdk-go/service/forecastqueryservice/forecastqueryserviceiface)  : import",
+      "forecastservice (github.com/aws/aws-sdk-go/service/forecastservice)  : import",
+      "forecastserviceiface (github.com/aws/aws-sdk-go/service/forecastservice/forecastserviceiface)  : import",
+      "forms (google.golang.org/api/forms/v1)  : import",
+      "fourier (gonum.org/v1/gonum/dsp/fourier)  : import",
+      "foursquare (golang.org/x/oauth2/foursquare)  : import"
+    ],
+    "size": 17,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 75
+  },
+  {
+    "id": "C25",
+    "items": [
+      "func (ph *probeHolder) ArtifactDir() string {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Attr(key, value string) {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Chdir(dir string) {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Cleanup(func()) {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Context() context.Context {...}  : missing method of TBRun",
+      "func (ph *probeHolder) DependencyRules() []Rule {...}  : missing method of Rule",
+      "func (ph *probeHolder) DependentRules() []Rule {...}  : missing method of Rule",
+      "func (ph *probeHolder) Endpoint() string {...}  : missing method of WriteClient",
+      "func (ph *probeHolder) Error(args ...any) {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Errorf(format string, args ...any) {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Fail() {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Failed() bool {...}  : missing method of TBRun",
+      "func (ph *probeHolder) FailNow() {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Fatal(args ...any) {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Fatalf(format string, args ...any) {...}  : missing method of TBRun",
+      "func (ph *probeHolder) GetEvaluationDuration() time.Duration {...}  : missing method of Rule",
+      "func (ph *probeHolder) GetEvaluationTimestamp() time.Time {...}  : missing method of Rule",
+      "func (ph *probeHolder) Health() RuleHealth {...}  : missing method of Rule",
+      "func (ph *probeHolder) Helper() {...}  : missing method of TBRun",
+      "func (ph *probeHolder) Labels() labels.Labels {...}  : missing method of Rule"
+    ],
+    "size": 53,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 160
+  },
+  {
+    "id": "C26",
+    "items": [
+      "return err  : return values",
+      "return",
+      "retail (google.golang.org/api/retail/v2)  : import",
+      "retail (google.golang.org/genproto/googleapis/cloud/retail/v2)  : import",
+      "retry (github.com/aws/aws-sdk-go-v2/aws/retry)  : import",
+      "retry (github.com/google/s2a-go/retry)  : import",
+      "retry (github.com/hashicorp/consul/sdk/testutil/retry)  : import",
+      "retry (github.com/hashicorp/serf/testutil/retry)  : import",
+      "retry (k8s.io/client-go/util/retry)  : import",
+      "retryablehttp (github.com/hashicorp/go-retryablehttp)  : import",
+      "runutil.Retry(interval Duration, stopc <-chan struct{}, f func() error) github.com/prometheus/prometheus/util/runutil  : error",
+      "remote.AcceptedResponseTypes github.com/prometheus/prometheus/storage/remote"
+    ],
+    "size": 45,
+    "lookup": true,
+    "picked": "return err  : return values",
+    "after": [
+      "\t// @USE",
+      "\treturn err<caret>",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 299
+  },
+  {
+    "id": "C27",
+    "items": [
+      "range",
+      "race (runtime/race)  : import",
+      "radix (github.com/armon/go-radix)  : import",
+      "radix (github.com/pb33f/libopenapi-validator/radix)  : import",
+      "ram (github.com/aws/aws-sdk-go/service/ram)  : import",
+      "ramiface (github.com/aws/aws-sdk-go/service/ram/ramiface)  : import",
+      "rand (crypto/rand)  : import",
+      "rand (math/rand)  : import",
+      "rand (math/rand/v2)  : import",
+      "rand (github.com/aws/smithy-go/rand)  : import"
+    ],
+    "size": 138,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 97
+  },
+  {
+    "id": "C28",
+    "items": [
+      "race (runtime/race)  : import",
+      "radix (github.com/armon/go-radix)  : import",
+      "radix (github.com/pb33f/libopenapi-validator/radix)  : import",
+      "ram (github.com/aws/aws-sdk-go/service/ram)  : import",
+      "ramiface (github.com/aws/aws-sdk-go/service/ram/ramiface)  : import",
+      "rand (crypto/rand)  : import",
+      "rand (math/rand)  : import",
+      "rand (math/rand/v2)  : import",
+      "rand (github.com/aws/smithy-go/rand)  : import",
+      "rand (golang.org/x/exp/rand)  : import"
+    ],
+    "size": 137,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 61
+  },
+  {
+    "id": "C29",
+    "items": [
+      "chan",
+      "cha (golang.org/x/tools/go/callgraph/cha)  : import",
+      "chunkenc (github.com/prometheus/prometheus/tsdb/chunkenc)  : import",
+      "chunkenc.FloatHistogramSTChunk github.com/prometheus/prometheus/tsdb/chunkenc",
+      "chunkenc.HistogramSTChunk github.com/prometheus/prometheus/tsdb/chunkenc",
+      "chunkenc.XOR2Chunk github.com/prometheus/prometheus/tsdb/chunkenc",
+      "chunkenc.XORChunk github.com/prometheus/prometheus/tsdb/chunkenc",
+      "chunks.BlockChunkRef github.com/prometheus/prometheus/tsdb/chunks",
+      "chunks (github.com/prometheus/prometheus/tsdb/chunks)  : import",
+      "chunks.ChunkDiskMapper github.com/prometheus/prometheus/tsdb/chunks"
+    ],
+    "size": 72,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 61
+  },
+  {
+    "id": "C30",
+    "items": [],
+    "size": 0,
+    "lookup": false,
+    "after": [
+      "\t// @STR",
+      "\t_ = \"he<caret>\"",
+      "\t_ = errors.New(\"x\")"
+    ],
+    "head": [],
+    "note": "no lookup",
+    "millis": 46
+  },
+  {
+    "id": "C31",
+    "items": [
+      "newProbeHolder",
+      "clone",
+      "line"
+    ],
+    "size": 3,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 149
+  },
+  {
+    "id": "C32",
+    "items": [
+      "rule",
+      "r"
+    ],
+    "size": 2,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 44
+  },
+  {
+    "id": "C33",
+    "items": [
+      "manager",
+      "m2"
+    ],
+    "size": 2,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 16
+  },
+  {
+    "id": "C34",
+    "items": [
+      "return err  : return values",
+      "return",
+      "ctx  : Context",
+      "err  : error",
+      "h  : *probeHolder",
+      "n  : int",
+      "total  : int",
+      "g  : *Group",
+      "m  : *Manager",
+      "rules  : []Rule"
+    ],
+    "size": 142,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 125
+  },
+  {
+    "id": "C35",
+    "items": [
+      "err  : error",
+      "errors (errors)",
+      "error builtin",
+      "expr (cel.dev/expr)  : import",
+      "exp (github.com/hetznercloud/hcloud-go/v2/hcloud/exp)  : import",
+      "exp (github.com/prometheus/client_golang/exp)  : import",
+      "expr (github.com/bufbuild/protocompile/experimental/expr)  : import",
+      "expr (github.com/chenzhuoyu/iasm/expr)  : import",
+      "expr (github.com/envoyproxy/go-control-plane/envoy/extensions/rate_limit_descriptors/expr/v3)  : import",
+      "expr (google.golang.org/genproto/googleapis/type/expr)  : import",
+      "eg (golang.org/x/tools/cmd/eg)  : import",
+      "eg (golang.org/x/tools/refactor/eg)  : import"
+    ],
+    "size": 509,
+    "lookup": true,
+    "picked": "err  : error",
+    "after": [
+      "\t// @USE",
+      "\t_, err = h.Eval(ctx, time.Now(), nil)",
+      "\tif err<caret>",
+      "\t_, _, _, _ = total, ctx, h, g",
+      "\treturn err",
+      "}"
+    ],
+    "head": [],
+    "millis": 100
+  },
+  {
+    "id": "C36",
+    "items": [
+      "name: h.name map",
+      "name → probeHolder  : string",
+      "name (github.com/google/go-containerregistry/pkg/name)  : import",
+      "namespace = \"prometheus\"  : untyped string",
+      "nameAndLabels(rule Rule)  : string",
+      "namevalidationutil.CheckNameValidationScheme(nameValidationScheme ValidationScheme) github.com/prometheus/prometheus/util/namevalidationutil  : error",
+      "namevalidationutil (github.com/prometheus/prometheus/util/namevalidationutil)  : import",
+      "namegenerator (github.com/scaleway/scaleway-sdk-go/namegenerator)  : import",
+      "namer (k8s.io/gengo/v2/namer)  : import",
+      "naming (k8s.io/apimachinery/pkg/api/apitesting/naming)  : import",
+      "naming (k8s.io/apimachinery/pkg/util/naming)  : import",
+      "naq (github.com/go-playground/locales/naq)  : import"
+    ],
+    "size": 105,
+    "lookup": true,
+    "picked": "name: h.name map",
+    "after": [
+      "\t// @USE",
+      "\t_ = probeHolder{name: h.name<caret>}",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 258
+  },
+  {
+    "id": "C37",
+    "items": [
+      "ExternalURL → ManagerOptions  : *URL",
+      "g.opts.ExternalURL  : *URL",
+      "m.opts.ExternalURL  : *URL",
+      "config.ExternalFilesConfig github.com/prometheus/prometheus/config",
+      "stats.ExecTotalTime = iota github.com/prometheus/prometheus/util/stats",
+      "stats.ExecQueueTime = iota github.com/prometheus/prometheus/util/stats",
+      "Context → ManagerOptions  : Context",
+      "FromOriginContext(ctx Context)  : RuleDetail",
+      "NewOriginContext(ctx Context, rule RuleDetail)  : Context",
+      "context (context)",
+      "g.opts.Context  : Context",
+      "m.opts.Context  : Context"
+    ],
+    "size": 49,
+    "lookup": true,
+    "picked": "ExternalURL → ManagerOptions  : *URL",
+    "after": [
+      "\t// @USE",
+      "\t_ = &ManagerOptions{ExternalURL: <caret>}",
+      "\t_, _, _, _ = total, ctx, h, g"
+    ],
+    "head": [],
+    "millis": 61
+  },
+  {
+    "id": "C38",
+    "items": [
+      "AlertingRule struct",
+      "Alert struct",
+      "AlertState type",
+      "v1.AlertDiscovery github.com/prometheus/prometheus/web/api/v1",
+      "v1.AlertmanagerDiscovery github.com/prometheus/prometheus/web/api/v1",
+      "v1.AlertmanagerTarget github.com/prometheus/prometheus/web/api/v1",
+      "RuleHealth type",
+      "sequentialRuleEvalController struct",
+      "GroupEvalIterationFunc func",
+      "concurrentRuleEvalController struct",
+      "tombstones.Interval github.com/prometheus/prometheus/tsdb/tombstones",
+      "testhelpers.FakeAlertmanagerRetriever github.com/prometheus/prometheus/web/api/testhelpers"
+    ],
+    "size": 18,
+    "lookup": true,
+    "picked": "AlertingRule struct",
+    "after": [
+      "\t// @TYPECASE",
+      "\tcase *AlertingRule<caret>:",
+      "\t}"
+    ],
+    "head": [],
+    "millis": 39
+  },
+  {
+    "id": "C39",
+    "items": [
+      "HealthBad = \"err\"  : RuleHealth",
+      "HealthUnknown = \"unknown\"  : RuleHealth",
+      "HealthGood = \"ok\"  : RuleHealth",
+      "chunks.HeadChunkFileHeaderSize = SegmentHeaderSize github.com/prometheus/prometheus/tsdb/chunks",
+      "tsdb.Head github.com/prometheus/prometheus/tsdb",
+      "chunks.HeadChunkID github.com/prometheus/prometheus/tsdb/chunks",
+      "chunks.HeadChunkRef github.com/prometheus/prometheus/tsdb/chunks",
+      "chunks.HeadSeriesRef github.com/prometheus/prometheus/tsdb/chunks",
+      "index.HeaderLen = 5 github.com/prometheus/prometheus/tsdb/index  : untyped int",
+      "tsdb.HeadAndOOOChunkQuerier github.com/prometheus/prometheus/tsdb"
+    ],
+    "size": 61,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 78
+  },
+  {
+    "id": "C40",
+    "items": [
+      "Labels() → interface {...}  : Labels",
+      "LastError() → interface {...}  : error",
+      "SetLastError(error) → interface {...}"
+    ],
+    "size": 3,
+    "lookup": true,
+    "after": [],
+    "head": [],
+    "millis": 19
+  }
+]

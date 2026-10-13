@@ -1,0 +1,105 @@
+--- a/notifier/alertmanagerset.go
++++ b/notifier/alertmanagerset.go
+@@ -157,7 +157,7 @@
+ 			loop.logger.Debug("Alertmanager already has send loop running, skipping")
+ 			continue
+ 		}
+-		sendLoop := newSendLoop(us, s.client, s.cfg, s.opts, s.logger.With("alertmanager", us), s.metrics)
++		sendLoop := newSendLoop(s.client, us, s.cfg, s.opts, s.logger.With("alertmanager", us), s.metrics)
+ 		go sendLoop.loop()
+ 		s.sendLoops[us] = sendLoop
+ 	}
+--- a/notifier/manager_test.go
++++ b/notifier/manager_test.go
+@@ -107,7 +107,7 @@
+ 	logger := slog.New(slog.DiscardHandler)
+ 	sendLoops := make(map[string]*sendLoop)
+ 	for _, am := range alertmanagerURLs {
+-		sendLoops[am] = newSendLoop(am, client, cfg, opts, logger, metrics)
++		sendLoops[am] = newSendLoop(client, am, cfg, opts, logger, metrics)
+ 	}
+ 	return &alertmanagerSet{
+ 		ams:       ams,
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -45,14 +45,7 @@
+ 	logger *slog.Logger
+ }
+ 
+-func newSendLoop(
+-	alertmanagerURL string,
+-	client *http.Client,
+-	cfg *config.AlertmanagerConfig,
+-	opts *Options,
+-	logger *slog.Logger,
+-	metrics *alertMetrics,
+-) *sendLoop {
++func newSendLoop(client *http.Client, alertmanagerURL string, cfg *config.AlertmanagerConfig, opts *Options, logger *slog.Logger, metrics *alertMetrics) *sendLoop {
+ 	// This will initialize the Counters for the AM to 0 and set the static queue capacity gauge.
+ 	metrics.dropped.WithLabelValues(alertmanagerURL)
+ 	metrics.errors.WithLabelValues(alertmanagerURL)
+--- a/notifier/sendloop_test.go
++++ b/notifier/sendloop_test.go
+@@ -60,7 +60,7 @@
+ }
+ 
+ func TestHandlerNextBatch(t *testing.T) {
+-	sendLoop := newSendLoop("http://mock", nil, &config.DefaultAlertmanagerConfig, &Options{MaxBatchSize: DefaultMaxBatchSize}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
++	sendLoop := newSendLoop(nil, "http://mock", &config.DefaultAlertmanagerConfig, &Options{MaxBatchSize: DefaultMaxBatchSize}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
+ 
+ 	for i := range make([]struct{}, 2*DefaultMaxBatchSize+1) {
+ 		sendLoop.queue = append(sendLoop.queue, &Alert{
+@@ -79,7 +79,7 @@
+ 	alert1 := &Alert{Labels: labels.FromStrings("alertname", "existing1")}
+ 	alert2 := &Alert{Labels: labels.FromStrings("alertname", "existing2")}
+ 
+-	s := newSendLoop("http://foo.bar/", nil, nil, &Options{QueueCapacity: 5}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
++	s := newSendLoop(nil, "http://foo.bar/", nil, &Options{QueueCapacity: 5}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
+ 	s.add(alert1, alert2)
+ 	require.Equal(t, []*Alert{alert1, alert2}, s.queue)
+ 	require.Len(t, s.queue, 2)
+@@ -100,7 +100,7 @@
+ 	alert1 := &Alert{Labels: labels.FromStrings("alertname", "alert1")}
+ 	alert2 := &Alert{Labels: labels.FromStrings("alertname", "alert2")}
+ 
+-	s := newSendLoop("http://foo.bar/", nil, nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
++	s := newSendLoop(nil, "http://foo.bar/", nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
+ 	s.add(alert1, alert2)
+ 
+ 	alert3 := &Alert{Labels: labels.FromStrings("alertname", "alert3")}
+@@ -118,7 +118,7 @@
+ 	alert1 := &Alert{Labels: labels.FromStrings("alertname", "alert1")}
+ 	alert2 := &Alert{Labels: labels.FromStrings("alertname", "alert2")}
+ 
+-	s := newSendLoop("http://foo.bar/", nil, nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
++	s := newSendLoop(nil, "http://foo.bar/", nil, &Options{QueueCapacity: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
+ 	s.add(alert1, alert2)
+ 
+ 	alert3 := &Alert{Labels: labels.FromStrings("alertname", "alert3")}
+@@ -135,7 +135,7 @@
+ }
+ 
+ func TestNextBatchAlertsFromQueue(t *testing.T) {
+-	s := newSendLoop("http://foo.bar/", nil, nil, &Options{QueueCapacity: 5, MaxBatchSize: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
++	s := newSendLoop(nil, "http://foo.bar/", nil, &Options{QueueCapacity: 5, MaxBatchSize: 3}, slog.New(slog.DiscardHandler), newAlertMetrics(prometheus.NewRegistry(), nil))
+ 
+ 	alert1 := &Alert{Labels: labels.FromStrings("alertname", "alert1")}
+ 	alert2 := &Alert{Labels: labels.FromStrings("alertname", "alert2")}
+@@ -167,7 +167,7 @@
+ 	opts := &Options{QueueCapacity: 10, MaxBatchSize: DefaultMaxBatchSize}
+ 
+ 	// Create first sendLoop - this initializes metrics with the alertmanager URL label
+-	sendLoop1 := newSendLoop(alertmanagerURL, nil, &config.DefaultAlertmanagerConfig, opts, logger, metrics)
++	sendLoop1 := newSendLoop(nil, alertmanagerURL, &config.DefaultAlertmanagerConfig, opts, logger, metrics)
+ 
+ 	// Verify metrics are initialized
+ 	require.Equal(t, 0.0, prom_testutil.ToFloat64(metrics.dropped.WithLabelValues(alertmanagerURL)))
+@@ -178,7 +178,7 @@
+ 
+ 	// Create second sendLoop with the same URL - this should NOT panic or conflict
+ 	// because metrics were properly cleaned up
+-	sendLoop2 := newSendLoop(alertmanagerURL, nil, &config.DefaultAlertmanagerConfig, opts, logger, metrics)
++	sendLoop2 := newSendLoop(nil, alertmanagerURL, &config.DefaultAlertmanagerConfig, opts, logger, metrics)
+ 	defer sendLoop2.stop()
+ 
+ 	// Verify metrics are re-initialized correctly

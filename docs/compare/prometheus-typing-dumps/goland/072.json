@@ -1,0 +1,150 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "H03",
+   "category": "hints",
+   "title": "Ctrl+P on a generic function call",
+   "query": "paraminfo",
+   "text": null,
+   "steps": null,
+   "items": [
+    "handler: GoParameterInfoHandler, current parameter: 1",
+    "items []T, [[f func(T) U]]"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1641
+  },
+  {
+   "id": "H04",
+   "category": "hints",
+   "title": "Ctrl+P on a standard library call",
+   "query": "paraminfo",
+   "text": null,
+   "steps": null,
+   "items": [
+    "handler: GoParameterInfoHandler, current parameter: 1",
+    "s string, [[count int]]"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1681
+  },
+  {
+   "id": "H06",
+   "category": "hints",
+   "title": "Ctrl+Q on a standard library function",
+   "query": "quickdoc",
+   "text": null,
+   "steps": null,
+   "items": [
+    "<table class='sections'><tr><td valign='top' class='section'><p>Package:</td><td valign='top'><p><a href=\"psi_element://PACKAGE:strings\">strings</a></p>\n</td>\n</table>\n<div class='definition'><pre><a href=\"psi_element://KEYWORD:#func\"><span style=\"color:#cf8e6d;\">func</span></a> TrimPrefix(s <a href=\"psi_element://TYPE:builtin#builtin.string\">string</a>, prefix <a href=\"psi_element://TYPE:builtin#builtin.string\">string</a>) <a href=\"psi_element://TYPE:builtin#builtin.string\">string</a></pre></div>\n<div class='content'><p>TrimPrefix returns s without the provided leading prefix string.\nIf s doesn't start with prefix, s is returned unchanged.\n</p>\n\n<br/><div><a href='goExample://Example'>Example</a></div>\n<div>Code:</div>\n<pre>&#32;&#32;&#32;&#32;<span style=\"color:#cf8e6d;\">var&#32;</span><span style=\"\">s&#32;=&#32;</span><span style=\"color:#6aab73;\">\"¡¡¡Hello,&#32;Gophers!!!\"<br></span><span style=\"color:#6aab73;\">&#32;&#32;&#32;&#32;</span><span style=\"\">s&#32;=&#32;strings.TrimPrefix(s,&#32;</span><span style=\"color:#6aab73;\">\"¡¡¡Hello,&#32;\"</span><span style=\"\">)<br></span><span style=\"\">&#32;&#32;&#32;&#32;s&#32;=&#32;strings.TrimPrefix(s,&#32;</span><span style=\"color:#6aab73;\">\"¡¡¡Howdy,&#32;\"</span><span style=\"\">)<br></span><span style=\"\">&#32;&#32;&#32;&#32;fmt.Print(s)<br></span><span style=\"\">&#32;&#32;&#32;&#32;</span></pre>\n<div>Output:</div>\n<div style='padding-left: 10px;'><pre>Gophers!!!\n</pre></div>\n</div>\n"
+   ],
+   "value": "Package: strings func TrimPrefix(s string, prefix string) string TrimPrefix returns s without the provided leading prefix string. If s doesn't start with prefix, s is returned unchanged. Example Code: &#32;&#32;&#32;&#32;var&#32;s&#32;=&#32;\"¡¡¡Hello,&#32;Gophers!!!\" &#32;&#32;&#32;&#32;s&#32;=&#32;",
+   "notes": [],
+   "error": null,
+   "durationMs": 1858
+  },
+  {
+   "id": "H07",
+   "category": "hints",
+   "title": "Ctrl+Q on a project function with a doc comment",
+   "query": "quickdoc",
+   "text": null,
+   "steps": null,
+   "items": [
+    "<table class='sections'><tr><td valign='top' class='section'><p>Package:</td><td valign='top'><p><a href=\"psi_element://PACKAGE:github.com/prometheus/prometheus/typingcmp/h07\">scrape</a></p>\n</td>\n</table>\n<div class='definition'><pre><a href=\"psi_element://KEYWORD:#func\"><span style=\"color:#cf8e6d;\">func</span></a> jitter(interval <a href=\"psi_element://PACKAGE:time\">time</a>.<a href=\"psi_element://TYPE:time#time.Duration\">Duration</a>, hash <a href=\"psi_element://TYPE:builtin#builtin.uint64\">uint64</a>) <a href=\"psi_element://PACKAGE:time\">time</a>.<a href=\"psi_element://TYPE:time#time.Duration\">Duration</a></pre></div>\n<div class='content'><p>jitter returns a deterministic offset in [0, interval) for the target with the given hash,\nso that targets of one job are not scraped at the same moment.\n</p>\n</div>\n"
+   ],
+   "value": "Package: scrape func jitter(interval time.Duration, hash uint64) time.Duration jitter returns a deterministic offset in [0, interval) for the target with the given hash, so that targets of one job are not scraped at the same moment.",
+   "notes": [],
+   "error": null,
+   "durationMs": 1669
+  },
+  {
+   "id": "H08",
+   "category": "hints",
+   "title": "Ctrl+Q on a struct type",
+   "query": "quickdoc",
+   "text": null,
+   "steps": null,
+   "items": [
+    "<table class='sections'><tr><td valign='top' class='section'><p>Package:</td><td valign='top'><p><a href=\"psi_element://PACKAGE:github.com/prometheus/prometheus/typingcmp/h08\">scrape</a></p>\n</td>\n</table>\n<div class='definition'><pre><a href=\"psi_element://KEYWORD:#type\"><span style=\"color:#cf8e6d;\">type</span></a> Target <a href=\"psi_element://KEYWORD:#struct\"><span style=\"color:#cf8e6d;\">struct</span></a> {\n&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"psi_element://FIELD:github.com/prometheus/prometheus/typingcmp/h08#scrape.Target.mtx\">mtx</a>    <a href=\"psi_element://PACKAGE:sync\">sync</a>.<a href=\"psi_element://TYPE:sync#sync.RWMutex\">RWMutex</a>\n&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"psi_element://FIELD:github.com/prometheus/prometheus/typingcmp/h08#scrape.Target.labels\">labels</a> <a href=\"psi_element://KEYWORD:#map\"><span style=\"color:#cf8e6d;\">map</span></a>[<a href=\"psi_element://TYPE:builtin#builtin.string\">string</a>]<a href=\"psi_element://TYPE:builtin#builtin.string\">string</a>\n&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"psi_element://FIELD:github.com/prometheus/prometheus/typingcmp/h08#scrape.Target.health\">health</a> <a href=\"psi_element://TYPE:builtin#builtin.string\">string</a>\n}</pre></div>\n<div class='content'><p>Target refers to a singular HTTP or HTTPS endpoint.\n</p>\n</div>\n"
+   ],
+   "value": "Package: scrape type Target struct { mtx sync.RWMutex labels map[string]string health string } Target refers to a singular HTTP or HTTPS endpoint.",
+   "notes": [],
+   "error": null,
+   "durationMs": 1675
+  },
+  {
+   "id": "H09",
+   "category": "hints",
+   "title": "Ctrl+Shift+P on an index expression",
+   "query": "exprtype",
+   "text": null,
+   "steps": null,
+   "items": [
+    "\"job\" -> string",
+    "lset[\"job\"] -> []string"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1684
+  },
+  {
+   "id": "H11",
+   "category": "hints",
+   "title": "inlay hints in a function with literal arguments",
+   "query": "inlays",
+   "text": null,
+   "steps": null,
+   "items": [
+    "5:6 above_line com.intellij.codeInsight.codeVision.ui.renderers.BlockCodeVisionInlayRenderer@564e2eb4",
+    "5:25 after_line_end com.intellij.codeInsight.codeVision.ui.renderers.InlineCodeVisionInlayRenderer@78b800b6",
+    "7:110 after_line_end com.intellij.codeInsight.codeVision.ui.renderers.InlineCodeVisionInlayRenderer@3babd71d",
+    "9:93 after_line_end com.intellij.codeInsight.codeVision.ui.renderers.InlineCodeVisionInlayRenderer@6ea1f6c2",
+    "13:13 after_line_end com.intellij.codeInsight.codeVision.ui.renderers.InlineCodeVisionInlayRenderer@256725ec",
+    "14:32 inline limit:",
+    "14:38 inline honorLabels:",
+    "14:44 inline name:",
+    "15:24 inline duration:",
+    "15:27 inline scraped:",
+    "15:31 inline added:",
+    "15:34 inline scrapeErr:"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1645
+  },
+  {
+   "id": "H12",
+   "category": "hints",
+   "title": "inlay hints of an unkeyed struct literal and constants",
+   "query": "inlays",
+   "text": null,
+   "steps": null,
+   "items": [
+    "3:6 above_line com.intellij.codeInsight.codeVision.ui.renderers.BlockCodeVisionInlayRenderer@5a0719f3",
+    "3:21 after_line_end com.intellij.codeInsight.codeVision.ui.renderers.InlineCodeVisionInlayRenderer@73c67796",
+    "9:14 inline = 1024",
+    "9:24 after_line_end com.intellij.codeInsight.codeVision.ui.renderers.InlineCodeVisionInlayRenderer@4e1be734",
+    "10:11 inline = 2048",
+    "10:33 after_line_end com.intellij.codeInsight.codeVision.ui.renderers.InlineCodeVisionInlayRenderer@4aade423",
+    "13:26 after_line_end com.intellij.codeInsight.codeVision.ui.renderers.InlineCodeVisionInlayRenderer@1e34c4d7",
+    "14:19 inline T:",
+    "14:25 inline V:",
+    "14:32 inline T:",
+    "14:38 inline V:"
+   ],
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1647
+  }
+ ]
+}

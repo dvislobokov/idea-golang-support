@@ -1,0 +1,1186 @@
+[
+ {
+  "code": "BlankPkgName",
+  "example": "BlankPkgName_1",
+  "verdict": "no-site",
+  "gotypes": "no error",
+  "plugin": "1 ERROR: invalid package name _",
+  "text": null
+ },
+ {
+  "code": "InvalidPkgUse",
+  "example": "InvalidPkgUse_1",
+  "verdict": "ok",
+  "gotypes": "use of package fmt not in selector",
+  "plugin": "ERROR: use of package fmt not in selector",
+  "text": 1.0
+ },
+ {
+  "code": "BrokenImport",
+  "example": "BrokenImport_1",
+  "verdict": "ok",
+  "gotypes": "could not import amissingpackage (invalid package name: \"\")",
+  "plugin": "ERROR: cannot find package \"amissingpackage\"",
+  "text": 0.48
+ },
+ {
+  "code": "ImportCRenamed",
+  "example": "ImportCRenamed_1",
+  "verdict": "no-site",
+  "gotypes": "no error",
+  "plugin": "3 ERROR: cannot rename import \"C\"",
+  "text": null
+ },
+ {
+  "code": "UnusedImport",
+  "example": "UnusedImport_1",
+  "verdict": "ok",
+  "gotypes": "\"fmt\" imported and not used",
+  "plugin": "ERROR: \"fmt\" imported and not used",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidInitCycle",
+  "example": "InvalidInitCycle_1",
+  "verdict": "ok",
+  "gotypes": "initialization cycle for x",
+  "plugin": "ERROR: initialization cycle for x; x refers to x",
+  "text": 0.78
+ },
+ {
+  "code": "DuplicateDecl",
+  "example": "DuplicateDecl_1",
+  "verdict": "ok",
+  "gotypes": "x redeclared in this block",
+  "plugin": "ERROR: x redeclared in this block",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidDeclCycle",
+  "example": "InvalidDeclCycle_1",
+  "verdict": "ok",
+  "gotypes": "invalid recursive type: S refers to itself",
+  "plugin": "ERROR: invalid recursive type: S refers to itself",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidDeclCycle",
+  "example": "InvalidDeclCycle_2",
+  "verdict": "miss",
+  "gotypes": "invalid recursive type: T refers to itself",
+  "plugin": "",
+  "text": null
+ },
+ {
+  "code": "InvalidConstInit",
+  "example": "InvalidConstInit_1",
+  "verdict": "ok",
+  "gotypes": "x (variable of type int) is not constant",
+  "plugin": "ERROR: x (variable of type int) is not constant",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidConstVal",
+  "example": "InvalidConstVal_1",
+  "verdict": "ok",
+  "gotypes": "cannot convert \"hello\" (untyped string constant) to type uint",
+  "plugin": "ERROR: cannot convert \"hello\" (untyped string constant) to type uint",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidConstType",
+  "example": "InvalidConstType_1",
+  "verdict": "ok",
+  "gotypes": "invalid constant type *int",
+  "plugin": "ERROR: invalid constant type *int",
+  "text": 1.0
+ },
+ {
+  "code": "UntypedNilUse",
+  "example": "UntypedNilUse_1",
+  "verdict": "ok",
+  "gotypes": "use of untyped nil in variable declaration",
+  "plugin": "ERROR: use of untyped nil in variable declaration",
+  "text": 1.0
+ },
+ {
+  "code": "WrongAssignCount",
+  "example": "WrongAssignCount_1",
+  "verdict": "ok",
+  "gotypes": "extra init expr 2",
+  "plugin": "ERROR: extra init expr 2",
+  "text": 1.0
+ },
+ {
+  "code": "UnassignableOperand",
+  "example": "UnassignableOperand_1",
+  "verdict": "ok",
+  "gotypes": "cannot assign to c (neither addressable nor a map index expression)",
+  "plugin": "ERROR: cannot assign to c (neither addressable nor a map index expression)",
+  "text": 1.0
+ },
+ {
+  "code": "NoNewVar",
+  "example": "NoNewVar_1",
+  "verdict": "ok",
+  "gotypes": "no new variables on left side of :=",
+  "plugin": "ERROR: no new variables on left side of :=",
+  "text": 1.0
+ },
+ {
+  "code": "MultiValAssignOp",
+  "example": "MultiValAssignOp_1",
+  "verdict": "ok",
+  "gotypes": "assignment operation += requires single-valued expressions",
+  "plugin": "ERROR: assignment operation += requires single-valued expressions",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidIfaceAssign",
+  "example": "InvalidIfaceAssign_1",
+  "verdict": "ok",
+  "gotypes": "cannot use T(1) (constant 1 of int type T) as I value in variable declaration: T does not implement I (missing method f)",
+  "plugin": "ERROR: cannot use T(1) (constant 1 of type T) as I value in variable declaration: T does not implement I (missing method f)",
+  "text": 0.98
+ },
+ {
+  "code": "InvalidChanAssign",
+  "example": "InvalidChanAssign_1",
+  "verdict": "ok",
+  "gotypes": "cannot use x (variable of chan type T1) as T2 value in variable declaration",
+  "plugin": "ERROR: cannot use x (variable of chan type T1) as T2 value in variable declaration",
+  "text": 1.0
+ },
+ {
+  "code": "IncompatibleAssign",
+  "example": "IncompatibleAssign_1",
+  "verdict": "ok",
+  "gotypes": "cannot use x (variable of type []int) as int value in variable declaration",
+  "plugin": "ERROR: cannot use x (variable of type []int) as int value in variable declaration",
+  "text": 1.0
+ },
+ {
+  "code": "UnaddressableFieldAssign",
+  "example": "UnaddressableFieldAssign_1",
+  "verdict": "ok",
+  "gotypes": "cannot assign to struct field m[\"foo\"].i in map",
+  "plugin": "ERROR: cannot assign to struct field m[\"foo\"].i in map",
+  "text": 1.0
+ },
+ {
+  "code": "NotAType",
+  "example": "NotAType_1",
+  "verdict": "ok",
+  "gotypes": "S (package-level variable) is not a type",
+  "plugin": "ERROR: S (package-level variable) is not a type",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidArrayLen",
+  "example": "InvalidArrayLen_1",
+  "verdict": "ok",
+  "gotypes": "invalid array length n",
+  "plugin": "ERROR: invalid array length n",
+  "text": 1.0
+ },
+ {
+  "code": "BlankIfaceMethod",
+  "example": "BlankIfaceMethod_1",
+  "verdict": "ok",
+  "gotypes": "methods must have a unique non-blank name",
+  "plugin": "ERROR: methods must have a unique non-blank name",
+  "text": 1.0
+ },
+ {
+  "code": "IncomparableMapKey",
+  "example": "IncomparableMapKey_1",
+  "verdict": "ok",
+  "gotypes": "invalid map key type T",
+  "plugin": "ERROR: invalid map key type T",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidPtrEmbed",
+  "example": "InvalidPtrEmbed_1",
+  "verdict": "ok",
+  "gotypes": "embedded field type cannot be a pointer",
+  "plugin": "ERROR: embedded field type cannot be a pointer",
+  "text": 1.0
+ },
+ {
+  "code": "BadRecv",
+  "example": "BadRecv_1",
+  "verdict": "ok",
+  "gotypes": "method has no receiver",
+  "plugin": "ERROR: <type> or IDENTIFIER expected, got ')'",
+  "text": 0.17
+ },
+ {
+  "code": "InvalidRecv",
+  "example": "InvalidRecv_1",
+  "verdict": "ok",
+  "gotypes": "invalid receiver type **T",
+  "plugin": "ERROR: invalid receiver type **T (cannot be a pointer)",
+  "text": 0.69
+ },
+ {
+  "code": "DuplicateFieldAndMethod",
+  "example": "DuplicateFieldAndMethod_1",
+  "verdict": "ok",
+  "gotypes": "field and method with the same name m",
+  "plugin": "ERROR: field and method with the same name m",
+  "text": 1.0
+ },
+ {
+  "code": "DuplicateMethod",
+  "example": "DuplicateMethod_1",
+  "verdict": "ok",
+  "gotypes": "method T.m already declared at C:\\Users\\dvislobokov\\idea-golang-support\\build\\compare\\codes\\ex\\DuplicateMethod_1\\example.go:4:10",
+  "plugin": "ERROR: method T.m already declared",
+  "text": 0.35
+ },
+ {
+  "code": "InvalidBlank",
+  "example": "InvalidBlank_1",
+  "verdict": "ok",
+  "gotypes": "cannot use _ as value or type",
+  "plugin": "ERROR: cannot use _ as value",
+  "text": 0.84
+ },
+ {
+  "code": "InvalidIota",
+  "example": "InvalidIota_1",
+  "verdict": "ok",
+  "gotypes": "cannot use iota outside constant declaration",
+  "plugin": "ERROR: cannot use iota outside constant declaration",
+  "text": 1.0
+ },
+ {
+  "code": "MissingInitBody",
+  "example": "MissingInitBody_1",
+  "verdict": "ok",
+  "gotypes": "func init must have a body",
+  "plugin": "ERROR: func init must have a body",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidInitDecl",
+  "example": "InvalidInitDecl_1",
+  "verdict": "ok",
+  "gotypes": "cannot declare init - must be func",
+  "plugin": "ERROR: cannot declare init - must be func",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidInitDecl",
+  "example": "InvalidInitDecl_2",
+  "verdict": "ok",
+  "gotypes": "func init must have no arguments and no return values",
+  "plugin": "ERROR: func init must have no arguments and no return values",
+  "text": 1.0
+ },
+ {
+  "code": "TooManyValues",
+  "example": "TooManyValues_1",
+  "verdict": "ok",
+  "gotypes": "multiple-value ReturnTwo() (value of type (int, int)) in single-value context",
+  "plugin": "ERROR: multiple-value ReturnTwo() (value of type (int, int)) in single-value context",
+  "text": 1.0
+ },
+ {
+  "code": "NotAnExpr",
+  "example": "NotAnExpr_1",
+  "verdict": "ok",
+  "gotypes": "T (type) is not an expression",
+  "plugin": "ERROR: T (type) is not used",
+  "text": 0.69
+ },
+ {
+  "code": "TruncatedFloat",
+  "example": "TruncatedFloat_1",
+  "verdict": "ok",
+  "gotypes": "cannot use 98.6 (untyped float constant) as int value in variable declaration (truncated)",
+  "plugin": "ERROR: cannot use 98.6 (untyped float constant) as int value in variable declaration (truncated)",
+  "text": 1.0
+ },
+ {
+  "code": "NumericOverflow",
+  "example": "NumericOverflow_1",
+  "verdict": "ok",
+  "gotypes": "cannot use 1000 (untyped int constant) as int8 value in variable declaration (overflows)",
+  "plugin": "ERROR: cannot use 1000 (untyped int constant) as int8 value in variable declaration (overflows)",
+  "text": 1.0
+ },
+ {
+  "code": "UndefinedOp",
+  "example": "UndefinedOp_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: operator - not defined on \"a\" (untyped string constant)",
+  "plugin": "ERROR: invalid operation: operator - not defined on \"b\" (untyped string constant)",
+  "text": 0.99
+ },
+ {
+  "code": "MismatchedTypes",
+  "example": "MismatchedTypes_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: a - b (mismatched types string and int)",
+  "plugin": "ERROR: invalid operation: a - b (mismatched types string and int)",
+  "text": 1.0
+ },
+ {
+  "code": "DivByZero",
+  "example": "DivByZero_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: division by zero",
+  "plugin": "ERROR: invalid operation: division by zero",
+  "text": 1.0
+ },
+ {
+  "code": "NonNumericIncDec",
+  "example": "NonNumericIncDec_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: c++ (non-numeric type string)",
+  "plugin": "ERROR: invalid operation: c++ (non-numeric type string)",
+  "text": 1.0
+ },
+ {
+  "code": "UnaddressableOperand",
+  "example": "UnaddressableOperand_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: cannot take address of 1 (untyped int constant)",
+  "plugin": "ERROR: invalid operation: cannot take address of 1 (untyped int constant)",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidIndirection",
+  "example": "InvalidIndirection_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: cannot indirect x (variable of type int)",
+  "plugin": "ERROR: invalid operation: cannot indirect x (variable of type int)",
+  "text": 1.0
+ },
+ {
+  "code": "NonIndexableOperand",
+  "example": "NonIndexableOperand_1",
+  "verdict": "ok",
+  "gotypes": "cannot index x (variable of type int)",
+  "plugin": "ERROR: invalid operation: cannot index x (variable of type int)",
+  "text": 0.8
+ },
+ {
+  "code": "InvalidIndex",
+  "example": "InvalidIndex_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: index 5 out of bounds [0:3]",
+  "plugin": "ERROR: invalid argument: index 5 out of bounds [0:3]",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidIndex",
+  "example": "InvalidIndex_2",
+  "verdict": "ok",
+  "gotypes": "invalid argument: index -1 (constant of type int) must not be negative",
+  "plugin": "ERROR: invalid argument: index -1 (constant of type int) must not be negative",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidIndex",
+  "example": "InvalidIndex_3",
+  "verdict": "ok",
+  "gotypes": "invalid argument: index i (variable of type string) must be integer",
+  "plugin": "ERROR: invalid argument: i (variable of type string) must be integer",
+  "text": 0.95
+ },
+ {
+  "code": "SwappedSliceIndices",
+  "example": "SwappedSliceIndices_1",
+  "verdict": "ok",
+  "gotypes": "invalid slice indices: 1 < 2",
+  "plugin": "ERROR: invalid slice indices: 1 < 2",
+  "text": 1.0
+ },
+ {
+  "code": "NonSliceableOperand",
+  "example": "NonSliceableOperand_1",
+  "verdict": "ok",
+  "gotypes": "cannot slice unaddressable value [...]int{…} (value of type [3]int)",
+  "plugin": "ERROR: cannot slice [...]int{...} (value of type [3]int)",
+  "text": 0.83
+ },
+ {
+  "code": "NonSliceableOperand",
+  "example": "NonSliceableOperand_2",
+  "verdict": "ok",
+  "gotypes": "cannot slice 1 (untyped int constant)",
+  "plugin": "ERROR: cannot slice 1 (untyped int constant)",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidSliceExpr",
+  "example": "InvalidSliceExpr_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: 3-index slice of string",
+  "plugin": "ERROR: invalid operation: 3-index slice of string",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidShiftCount",
+  "example": "InvalidShiftCount_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: shift count x (variable of type string) must be integer",
+  "plugin": "ERROR: invalid operation: shift count x (variable of type string) must be integer",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidShiftOperand",
+  "example": "InvalidShiftOperand_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: shifted operand s (variable of type string) must be integer",
+  "plugin": "ERROR: invalid operation: shifted operand s (variable of type string) must be integer",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidReceive",
+  "example": "InvalidReceive_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: cannot receive from non-channel int x (variable of type int)",
+  "plugin": "ERROR: invalid operation: cannot receive from non-channel x (variable of type int)",
+  "text": 0.97
+ },
+ {
+  "code": "InvalidSend",
+  "example": "InvalidSend_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: cannot send to non-channel int x (variable of type int)",
+  "plugin": "ERROR: invalid operation: cannot send to non-channel x (variable of type int)",
+  "text": 0.97
+ },
+ {
+  "code": "DuplicateLitKey",
+  "example": "DuplicateLitKey_1",
+  "verdict": "ok",
+  "gotypes": "duplicate index 0 in array or slice literal",
+  "plugin": "ERROR: duplicate index 0 in array or slice literal",
+  "text": 1.0
+ },
+ {
+  "code": "DuplicateLitKey",
+  "example": "DuplicateLitKey_2",
+  "verdict": "ok",
+  "gotypes": "duplicate key \"a\" in map literal",
+  "plugin": "ERROR: duplicate key \"a\" in map literal",
+  "text": 1.0
+ },
+ {
+  "code": "MissingLitKey",
+  "example": "MissingLitKey_1",
+  "verdict": "ok",
+  "gotypes": "missing key in map literal",
+  "plugin": "ERROR: missing key in map literal",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidLitIndex",
+  "example": "InvalidLitIndex_1",
+  "verdict": "ok",
+  "gotypes": "index i must be integer constant",
+  "plugin": "ERROR: index i must be integer constant",
+  "text": 1.0
+ },
+ {
+  "code": "OversizeArrayLit",
+  "example": "OversizeArrayLit_1",
+  "verdict": "ok",
+  "gotypes": "index 2 is out of bounds (>= 2)",
+  "plugin": "ERROR: index 2 out of bounds [0:2]",
+  "text": 0.79
+ },
+ {
+  "code": "MixedStructLit",
+  "example": "MixedStructLit_1",
+  "verdict": "ok",
+  "gotypes": "mixture of field:value and value elements in struct literal",
+  "plugin": "ERROR: mixture of field:value and value elements in struct literal",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidStructLit",
+  "example": "InvalidStructLit_1",
+  "verdict": "ok",
+  "gotypes": "too many values in struct literal of type struct{i int; j int}",
+  "plugin": "ERROR: too many values in struct literal of type struct{i int; j int}",
+  "text": 1.0
+ },
+ {
+  "code": "MissingLitField",
+  "example": "MissingLitField_1",
+  "verdict": "ok",
+  "gotypes": "unknown field j in struct literal of type struct{i int}",
+  "plugin": "ERROR: unknown field j in struct literal of type struct{i int}",
+  "text": 1.0
+ },
+ {
+  "code": "DuplicateLitField",
+  "example": "DuplicateLitField_1",
+  "verdict": "ok",
+  "gotypes": "duplicate field name i in struct literal",
+  "plugin": "ERROR: duplicate field name i in struct literal",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidLitField",
+  "example": "InvalidLitField_1",
+  "verdict": "ok",
+  "gotypes": "invalid field name 1 in struct literal",
+  "plugin": "ERROR: invalid field name 1 in struct literal",
+  "text": 1.0
+ },
+ {
+  "code": "UntypedLit",
+  "example": "UntypedLit_1",
+  "verdict": "ok",
+  "gotypes": "missing type in composite literal",
+  "plugin": "ERROR: invalid composite literal element type struct{i int}: missing type",
+  "text": 0.42
+ },
+ {
+  "code": "InvalidLit",
+  "example": "InvalidLit_1",
+  "verdict": "ok",
+  "gotypes": "invalid composite literal type P",
+  "plugin": "ERROR: invalid composite literal type P",
+  "text": 1.0
+ },
+ {
+  "code": "AmbiguousSelector",
+  "example": "AmbiguousSelector_1",
+  "verdict": "ok",
+  "gotypes": "ambiguous selector x.i",
+  "plugin": "ERROR: ambiguous selector x.i",
+  "text": 1.0
+ },
+ {
+  "code": "UndeclaredImportedName",
+  "example": "UndeclaredImportedName_1",
+  "verdict": "ok",
+  "gotypes": "undefined: types.NotAnActualIdentifier",
+  "plugin": "ERROR: undefined: types.NotAnActualIdentifier",
+  "text": 1.0
+ },
+ {
+  "code": "UnexportedName",
+  "example": "UnexportedName_1",
+  "verdict": "ok",
+  "gotypes": "name flag not exported by package reflect",
+  "plugin": "ERROR: name flag not exported by package reflect",
+  "text": 1.0
+ },
+ {
+  "code": "UndeclaredName",
+  "example": "UndeclaredName_1",
+  "verdict": "ok",
+  "gotypes": "undefined: T",
+  "plugin": "ERROR: undefined: T",
+  "text": 1.0
+ },
+ {
+  "code": "MissingFieldOrMethod",
+  "example": "MissingFieldOrMethod_1",
+  "verdict": "ok",
+  "gotypes": "T{}.f undefined (type T has no field or method f)",
+  "plugin": "ERROR: T{}.f undefined (type T has no field or method f)",
+  "text": 1.0
+ },
+ {
+  "code": "BadDotDotDotSyntax",
+  "example": "BadDotDotDotSyntax_1",
+  "verdict": "ok",
+  "gotypes": "invalid use of [...] array (outside a composite literal)",
+  "plugin": "ERROR: invalid use of [...] array (outside a composite literal)",
+  "text": 1.0
+ },
+ {
+  "code": "NonVariadicDotDotDot",
+  "example": "NonVariadicDotDotDot_1",
+  "verdict": "ok",
+  "gotypes": "cannot use ... in call to non-variadic printArgs",
+  "plugin": "ERROR: have (...) but function is not variadic: cannot use ... in call to non-variadic printArgs",
+  "text": 0.7
+ },
+ {
+  "code": "InvalidDotDotDot",
+  "example": "InvalidDotDotDot_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: invalid use of ... with built-in len",
+  "plugin": "ERROR: invalid operation: invalid use of ... with built-in len",
+  "text": 1.0
+ },
+ {
+  "code": "UncalledBuiltin",
+  "example": "UncalledBuiltin_1",
+  "verdict": "ok",
+  "gotypes": "copy (built-in) must be called",
+  "plugin": "ERROR: copy (built-in) must be called",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidAppend",
+  "example": "InvalidAppend_1",
+  "verdict": "ok",
+  "gotypes": "invalid append: argument must be a slice; have 1 (untyped int constant)",
+  "plugin": "ERROR: invalid append: argument must be a slice; have 1 (untyped int constant)",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidCap",
+  "example": "InvalidCap_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: s (variable of type int) for built-in cap",
+  "plugin": "ERROR: invalid argument: s (variable of type int) for built-in cap",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidClose",
+  "example": "InvalidClose_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: cannot close non-channel x (variable of type int)",
+  "plugin": "ERROR: invalid operation: cannot close non-channel x (variable of type int)",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidCopy",
+  "example": "InvalidCopy_1",
+  "verdict": "ok",
+  "gotypes": "invalid copy: arguments x (variable of type []int) and y (variable of type []int64) have different element types int and int64",
+  "plugin": "ERROR: invalid copy: arguments x (variable of type []int) and y (variable of type []int64) have different element types int and int64",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidComplex",
+  "example": "InvalidComplex_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: complex(float32(1), float64(2)) (mismatched types float32 and float64)",
+  "plugin": "ERROR: invalid operation: complex(float32(1), float64(2)) (mismatched types float32 and float64)",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidDelete",
+  "example": "InvalidDelete_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: m (variable of type string) is not a map",
+  "plugin": "ERROR: invalid argument: m (variable of type string) is not a map",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidImag",
+  "example": "InvalidImag_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: argument has type int, expected complex type",
+  "plugin": "ERROR: invalid argument: argument has type int, expected complex type",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidLen",
+  "example": "InvalidLen_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: s (variable of type int) for built-in len",
+  "plugin": "ERROR: invalid argument: s (variable of type int) for built-in len",
+  "text": 1.0
+ },
+ {
+  "code": "SwappedMakeArgs",
+  "example": "SwappedMakeArgs_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: length and capacity swapped",
+  "plugin": "ERROR: invalid argument: length and capacity swapped",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidMake",
+  "example": "InvalidMake_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: cannot make int: type must be slice, map, or channel",
+  "plugin": "ERROR: invalid argument: cannot make int: type must be slice, map, or channel",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidReal",
+  "example": "InvalidReal_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: argument has type int, expected complex type",
+  "plugin": "ERROR: invalid argument: argument has type int, expected complex type",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidAssert",
+  "example": "InvalidAssert_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: x (variable of type int) is not an interface",
+  "plugin": "ERROR: invalid operation: x (variable of type int) is not an interface",
+  "text": 1.0
+ },
+ {
+  "code": "ImpossibleAssert",
+  "example": "ImpossibleAssert_1",
+  "verdict": "ok",
+  "gotypes": "impossible type assertion: x.(T)\n\tT does not implement I (method m has pointer receiver)",
+  "plugin": "ERROR: impossible type assertion: x.(T); T does not implement I (method m has pointer receiver)",
+  "text": 0.99
+ },
+ {
+  "code": "InvalidConversion",
+  "example": "InvalidConversion_1",
+  "verdict": "ok",
+  "gotypes": "cannot convert x (variable of type float64) to type string",
+  "plugin": "ERROR: cannot convert x (variable of type float64) to type string",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidUntypedConversion",
+  "example": "InvalidUntypedConversion_1",
+  "verdict": "miss",
+  "gotypes": "cannot convert 1024 (untyped int constant) to type T",
+  "plugin": "3 WARNING: Unused function 'f'",
+  "text": null
+ },
+ {
+  "code": "BadOffsetofSyntax",
+  "example": "BadOffsetofSyntax_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: x is not a selector expression",
+  "plugin": "ERROR: invalid argument: x (variable of type int) is not a selector expression",
+  "text": 0.81
+ },
+ {
+  "code": "InvalidOffsetof",
+  "example": "InvalidOffsetof_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: field f is embedded via a pointer in S",
+  "plugin": "ERROR: invalid argument: field f is embedded via a pointer in s (variable of struct type S)",
+  "text": 0.8
+ },
+ {
+  "code": "InvalidOffsetof",
+  "example": "InvalidOffsetof_2",
+  "verdict": "ok",
+  "gotypes": "invalid argument: s.m is a method value",
+  "plugin": "ERROR: invalid argument: s.m is a method value",
+  "text": 1.0
+ },
+ {
+  "code": "UnusedExpr",
+  "example": "UnusedExpr_1",
+  "verdict": "ok",
+  "gotypes": "i * i (value of type int) is not used",
+  "plugin": "ERROR: i * i (value of type int) is not used",
+  "text": 1.0
+ },
+ {
+  "code": "UnusedVar",
+  "example": "UnusedVar_1",
+  "verdict": "ok",
+  "gotypes": "declared and not used: x",
+  "plugin": "ERROR: declared and not used: x",
+  "text": 1.0
+ },
+ {
+  "code": "MissingReturn",
+  "example": "MissingReturn_1",
+  "verdict": "ok",
+  "gotypes": "missing return",
+  "plugin": "ERROR: missing return",
+  "text": 1.0
+ },
+ {
+  "code": "WrongResultCount",
+  "example": "WrongResultCount_1",
+  "verdict": "ok",
+  "gotypes": "too many return values\n\thave (number, number)\n\twant (int)",
+  "plugin": "ERROR: too many return values; have (number, number); want (int)",
+  "text": 0.98
+ },
+ {
+  "code": "OutOfScopeResult",
+  "example": "OutOfScopeResult_1",
+  "verdict": "ok",
+  "gotypes": "result parameter i not in scope at return",
+  "plugin": "ERROR: result parameter i not in scope at return",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidCond",
+  "example": "InvalidCond_1",
+  "verdict": "ok",
+  "gotypes": "non-boolean condition in if statement",
+  "plugin": "ERROR: non-boolean condition in if statement",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidPostDecl",
+  "example": "InvalidPostDecl_1",
+  "verdict": "ok",
+  "gotypes": "cannot declare in post statement",
+  "plugin": "ERROR: cannot declare in post statement of for loop",
+  "text": 0.84
+ },
+ {
+  "code": "InvalidIterVar",
+  "example": "InvalidIterVar_1",
+  "verdict": "ok",
+  "gotypes": "range over c (variable of type chan int) permits only one iteration variable",
+  "plugin": "ERROR: range over c (variable of type chan int) permits only one iteration variable",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidRangeExpr",
+  "example": "InvalidRangeExpr_1",
+  "verdict": "ok",
+  "gotypes": "cannot range over f (variable of type float64)",
+  "plugin": "ERROR: cannot range over f (variable of type float64)",
+  "text": 1.0
+ },
+ {
+  "code": "MisplacedBreak",
+  "example": "MisplacedBreak_1",
+  "verdict": "ok",
+  "gotypes": "break not in for, switch, or select statement",
+  "plugin": "ERROR: break is not in a loop, switch, or select",
+  "text": 0.77
+ },
+ {
+  "code": "MisplacedContinue",
+  "example": "MisplacedContinue_1",
+  "verdict": "ok",
+  "gotypes": "continue not in for statement",
+  "plugin": "ERROR: continue is not in a loop",
+  "text": 0.63
+ },
+ {
+  "code": "MisplacedFallthrough",
+  "example": "MisplacedFallthrough_1",
+  "verdict": "ok",
+  "gotypes": "cannot fallthrough in type switch",
+  "plugin": "ERROR: cannot fallthrough in type switch",
+  "text": 1.0
+ },
+ {
+  "code": "DuplicateCase",
+  "example": "DuplicateCase_1",
+  "verdict": "ok",
+  "gotypes": "duplicate case 1 (constant of type int) in expression switch",
+  "plugin": "ERROR: duplicate case 1 in expression switch",
+  "text": 0.76
+ },
+ {
+  "code": "DuplicateDefault",
+  "example": "DuplicateDefault_1",
+  "verdict": "ok",
+  "gotypes": "multiple defaults (first at C:\\Users\\dvislobokov\\idea-golang-support\\build\\compare\\codes\\ex\\DuplicateDefault_1\\example.go:7:2)",
+  "plugin": "ERROR: multiple defaults in switch",
+  "text": 0.3
+ },
+ {
+  "code": "BadTypeKeyword",
+  "example": "BadTypeKeyword_1",
+  "verdict": "ok",
+  "gotypes": "use of .(type) outside type switch",
+  "plugin": "ERROR: 'type' unexpected",
+  "text": 0.39
+ },
+ {
+  "code": "InvalidTypeSwitch",
+  "example": "InvalidTypeSwitch_1",
+  "verdict": "ok",
+  "gotypes": "i (variable of type int) is not an interface",
+  "plugin": "ERROR: i (variable of type int) is not an interface",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidExprSwitch",
+  "example": "InvalidExprSwitch_1",
+  "verdict": "ok",
+  "gotypes": "cannot switch on a (variable of type struct{_ func()}) (struct{_ func()} is not comparable)",
+  "plugin": "ERROR: cannot switch on a (variable of type struct{_ func()}) (struct{_ func()} is not comparable)",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidSelectCase",
+  "example": "InvalidSelectCase_1",
+  "verdict": "ok",
+  "gotypes": "select case must be send or receive (possibly with assignment)",
+  "plugin": "ERROR: select case must be send or receive (possibly with assignment)",
+  "text": 1.0
+ },
+ {
+  "code": "UndeclaredLabel",
+  "example": "UndeclaredLabel_1",
+  "verdict": "ok",
+  "gotypes": "label L not declared",
+  "plugin": "ERROR: label L not declared",
+  "text": 1.0
+ },
+ {
+  "code": "DuplicateLabel",
+  "example": "DuplicateLabel_1",
+  "verdict": "ok",
+  "gotypes": "label L already declared",
+  "plugin": "ERROR: label L already declared",
+  "text": 1.0
+ },
+ {
+  "code": "MisplacedLabel",
+  "example": "MisplacedLabel_1",
+  "verdict": "ok",
+  "gotypes": "invalid break label L",
+  "plugin": "ERROR: invalid break label L",
+  "text": 1.0
+ },
+ {
+  "code": "UnusedLabel",
+  "example": "UnusedLabel_1",
+  "verdict": "ok",
+  "gotypes": "label L declared and not used",
+  "plugin": "ERROR: label L declared and not used",
+  "text": 1.0
+ },
+ {
+  "code": "JumpOverDecl",
+  "example": "JumpOverDecl_1",
+  "verdict": "ok",
+  "gotypes": "goto L jumps over variable declaration at line 5",
+  "plugin": "ERROR: goto L jumps over variable declaration at line 5",
+  "text": 1.0
+ },
+ {
+  "code": "JumpIntoBlock",
+  "example": "JumpIntoBlock_1",
+  "verdict": "ok",
+  "gotypes": "goto L jumps into block",
+  "plugin": "ERROR: goto L jumps into block",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidMethodExpr",
+  "example": "InvalidMethodExpr_1",
+  "verdict": "ok",
+  "gotypes": "invalid method expression T.m (needs pointer receiver (*T).m)",
+  "plugin": "ERROR: invalid method expression T.m (needs pointer receiver (*T).m)",
+  "text": 1.0
+ },
+ {
+  "code": "WrongArgCount",
+  "example": "WrongArgCount_1",
+  "verdict": "ok",
+  "gotypes": "not enough arguments in call to f\n\thave ()\n\twant (int)",
+  "plugin": "ERROR: not enough arguments in call to f; have (); want (int)",
+  "text": 0.98
+ },
+ {
+  "code": "InvalidCall",
+  "example": "InvalidCall_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: cannot call x (variable of type string): string is not a function",
+  "plugin": "ERROR: invalid operation: cannot call x (variable of type string): string is not a function",
+  "text": 1.0
+ },
+ {
+  "code": "UnusedResults",
+  "example": "UnusedResults_1",
+  "verdict": "ok",
+  "gotypes": "defer discards result of len(a) (value of type int)",
+  "plugin": "ERROR: defer discards result of len(a)",
+  "text": 0.76
+ },
+ {
+  "code": "InvalidDefer",
+  "example": "InvalidDefer_1",
+  "verdict": "ok",
+  "gotypes": "defer requires function call, not conversion int32(i) (value of type int32)",
+  "plugin": "ERROR: defer requires function call, not conversion",
+  "text": 0.74
+ },
+ {
+  "code": "InvalidGo",
+  "example": "InvalidGo_1",
+  "verdict": "ok",
+  "gotypes": "go requires function call, not conversion int32(i) (value of type int32)",
+  "plugin": "ERROR: go requires function call, not conversion",
+  "text": 0.73
+ },
+ {
+  "code": "RepeatedDecl",
+  "example": "RepeatedDecl_1",
+  "verdict": "ok",
+  "gotypes": "y repeated on left side of :=",
+  "plugin": "ERROR: y repeated on left side of :=",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidUnsafeAdd",
+  "example": "InvalidUnsafeAdd_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: length float64(1) (constant 1 of type float64) must be integer",
+  "plugin": "ERROR: invalid argument: float64(1) (constant 1 of type float64) must be integer",
+  "text": 0.95
+ },
+ {
+  "code": "InvalidUnsafeSlice",
+  "example": "InvalidUnsafeSlice_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: x (variable of type int) is not a pointer",
+  "plugin": "ERROR: invalid argument: x (variable of type int) is not a pointer",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidUnsafeSlice",
+  "example": "InvalidUnsafeSlice_2",
+  "verdict": "ok",
+  "gotypes": "invalid argument: length float64(1) (constant 1 of type float64) must be integer",
+  "plugin": "ERROR: invalid argument: float64(1) (constant 1 of type float64) must be integer",
+  "text": 0.95
+ },
+ {
+  "code": "InvalidUnsafeSlice",
+  "example": "InvalidUnsafeSlice_3",
+  "verdict": "ok",
+  "gotypes": "invalid argument: length -1 (constant of type int) must not be negative",
+  "plugin": "ERROR: invalid argument: index -1 (constant of type int) must not be negative",
+  "text": 0.94
+ },
+ {
+  "code": "InvalidUnsafeSlice",
+  "example": "InvalidUnsafeSlice_4",
+  "verdict": "miss",
+  "gotypes": "invalid argument: length uint64(1) << 63 (constant 9223372036854775808 of type uint64) overflows int",
+  "plugin": "",
+  "text": null
+ },
+ {
+  "code": "NotAGenericType",
+  "example": "NotAGenericType_1",
+  "verdict": "ok",
+  "gotypes": "invalid operation: T[int] (T is not a generic type)",
+  "plugin": "ERROR: invalid operation: T[int] (T is not a generic type)",
+  "text": 1.0
+ },
+ {
+  "code": "WrongTypeArgCount",
+  "example": "WrongTypeArgCount_1",
+  "verdict": "ok",
+  "gotypes": "too many type arguments for type T: have 2, want 1",
+  "plugin": "ERROR: too many type arguments for type T: have 2, want 1",
+  "text": 1.0
+ },
+ {
+  "code": "WrongTypeArgCount",
+  "example": "WrongTypeArgCount_2",
+  "verdict": "ok",
+  "gotypes": "cannot use generic function f without instantiation",
+  "plugin": "ERROR: cannot use generic function f without instantiation",
+  "text": 1.0
+ },
+ {
+  "code": "CannotInferTypeArgs",
+  "example": "CannotInferTypeArgs_1",
+  "verdict": "ok",
+  "gotypes": "in call to f, cannot infer T (declared at C:\\Users\\dvislobokov\\idea-golang-support\\build\\compare\\codes\\ex\\CannotInferTypeArgs_1\\example.go:3:8)",
+  "plugin": "ERROR: in call to f, cannot infer T",
+  "text": 0.33
+ },
+ {
+  "code": "InvalidInstanceCycle",
+  "example": "InvalidInstanceCycle_1",
+  "verdict": "miss",
+  "gotypes": "instantiation cycle:",
+  "plugin": "3 WARNING: Unused function 'f'",
+  "text": null
+ },
+ {
+  "code": "InvalidUnion",
+  "example": "InvalidUnion_1",
+  "verdict": "ok",
+  "gotypes": "cannot use interface{m()} in union (interface{m()} contains methods)",
+  "plugin": "ERROR: cannot use interface{m()} in union (interface{m()} contains methods)",
+  "text": 1.0
+ },
+ {
+  "code": "MisplacedConstraintIface",
+  "example": "MisplacedConstraintIface_1",
+  "verdict": "ok",
+  "gotypes": "cannot use type I outside a type constraint: interface contains type constraints",
+  "plugin": "ERROR: cannot use type I outside a type constraint: interface contains type constraints",
+  "text": 1.0
+ },
+ {
+  "code": "MisplacedTypeParam",
+  "example": "MisplacedTypeParam_1",
+  "verdict": "ok",
+  "gotypes": "cannot use a type parameter as RHS in type declaration",
+  "plugin": "ERROR: cannot use a type parameter as RHS in type declaration",
+  "text": 1.0
+ },
+ {
+  "code": "MisplacedTypeParam",
+  "example": "MisplacedTypeParam_2",
+  "verdict": "ok",
+  "gotypes": "embedded field type cannot be a (pointer to a) type parameter",
+  "plugin": "ERROR: embedded field type cannot be a (pointer to a) type parameter",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidUnsafeSliceData",
+  "example": "InvalidUnsafeSliceData_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: x (variable of type int) is not a slice",
+  "plugin": "ERROR: invalid argument: x (variable of type int) is not a slice",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidUnsafeString",
+  "example": "InvalidUnsafeString_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: length -1 (constant of type int) must not be negative",
+  "plugin": "ERROR: invalid argument: index -1 (constant of type int) must not be negative",
+  "text": 0.94
+ },
+ {
+  "code": "InvalidClear",
+  "example": "InvalidClear_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: cannot clear x (variable of type int): argument must be (or constrained by) map or slice",
+  "plugin": "ERROR: invalid argument: cannot clear x (variable of type int): argument must be (or constrained by) map or slice",
+  "text": 1.0
+ },
+ {
+  "code": "TypeTooLarge",
+  "example": "TypeTooLarge_1",
+  "verdict": "miss",
+  "gotypes": "a (variable of type [2147483648]E) is too large",
+  "plugin": "",
+  "text": null
+ },
+ {
+  "code": "TypeTooLarge",
+  "example": "TypeTooLarge_2",
+  "verdict": "miss",
+  "gotypes": "s (variable of type struct{_ [2147483648]E; x int}) is too large",
+  "plugin": "",
+  "text": null
+ },
+ {
+  "code": "InvalidMinMaxOperand",
+  "example": "InvalidMinMaxOperand_1",
+  "verdict": "ok",
+  "gotypes": "invalid argument: true (untyped bool constant) cannot be ordered",
+  "plugin": "ERROR: invalid argument: true (untyped bool constant) cannot be ordered",
+  "text": 1.0
+ },
+ {
+  "code": "InvalidMinMaxOperand",
+  "example": "InvalidMinMaxOperand_2",
+  "verdict": "ok",
+  "gotypes": "invalid argument: s (variable of type []byte) cannot be ordered",
+  "plugin": "ERROR: invalid argument: s (variable of type []byte) cannot be ordered",
+  "text": 1.0
+ }
+]

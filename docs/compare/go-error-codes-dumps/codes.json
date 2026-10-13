@@ -1,0 +1,1299 @@
+[
+ {
+  "name": "Test",
+  "value": 1,
+  "summary": "Test is reserved for errors that only apply while in self-test mode.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "BlankPkgName",
+  "value": 2,
+  "summary": "BlankPkgName occurs when a package name is the blank identifier \"_\".",
+  "deprecated": false,
+  "examples": [
+   "package _"
+  ]
+ },
+ {
+  "name": "MismatchedPkgName",
+  "value": 3,
+  "summary": "MismatchedPkgName occurs when a file's package name doesn't match the package name already established by other files.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "InvalidPkgUse",
+  "value": 4,
+  "summary": "InvalidPkgUse occurs when a package identifier is used outside of a selector expression.",
+  "deprecated": false,
+  "examples": [
+   "import \"fmt\"\n\nvar _ = fmt"
+  ]
+ },
+ {
+  "name": "BadImportPath",
+  "value": 5,
+  "summary": "BadImportPath occurs when an import path is not valid.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "BrokenImport",
+  "value": 6,
+  "summary": "BrokenImport occurs when importing a package fails.",
+  "deprecated": false,
+  "examples": [
+   "import \"amissingpackage\""
+  ]
+ },
+ {
+  "name": "ImportCRenamed",
+  "value": 7,
+  "summary": "ImportCRenamed occurs when the special import \"C\" is renamed. \"C\" is a pseudo-package, and must not be renamed.",
+  "deprecated": false,
+  "examples": [
+   "import _ \"C\""
+  ]
+ },
+ {
+  "name": "UnusedImport",
+  "value": 8,
+  "summary": "UnusedImport occurs when an import is unused.",
+  "deprecated": false,
+  "examples": [
+   "import \"fmt\"\n\nfunc main() {}"
+  ]
+ },
+ {
+  "name": "InvalidInitCycle",
+  "value": 9,
+  "summary": "InvalidInitCycle occurs when an invalid cycle is detected within the initialization graph.",
+  "deprecated": false,
+  "examples": [
+   "var x int = f()\n\nfunc f() int { return x }"
+  ]
+ },
+ {
+  "name": "DuplicateDecl",
+  "value": 10,
+  "summary": "DuplicateDecl occurs when an identifier is declared multiple times.",
+  "deprecated": false,
+  "examples": [
+   "var x = 1\nvar x = 2"
+  ]
+ },
+ {
+  "name": "InvalidDeclCycle",
+  "value": 11,
+  "summary": "InvalidDeclCycle occurs when a declaration cycle is not valid.",
+  "deprecated": false,
+  "examples": [
+   "type S struct {\n\tS\n}",
+   "import \"unsafe\"\n\ntype T [unsafe.Sizeof(T{})]int"
+  ]
+ },
+ {
+  "name": "InvalidTypeCycle",
+  "value": 12,
+  "summary": "TODO(markfreeman): Retire InvalidTypeCycle, as it's never emitted.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "InvalidConstInit",
+  "value": 13,
+  "summary": "InvalidConstInit occurs when a const declaration has a non-constant initializer.",
+  "deprecated": false,
+  "examples": [
+   "var x int\nconst _ = x"
+  ]
+ },
+ {
+  "name": "InvalidConstVal",
+  "value": 14,
+  "summary": "InvalidConstVal occurs when a const value cannot be converted to its target type.",
+  "deprecated": false,
+  "examples": [
+   "const _ = 1 << \"hello\""
+  ]
+ },
+ {
+  "name": "InvalidConstType",
+  "value": 15,
+  "summary": "InvalidConstType occurs when the underlying type in a const declaration is not a valid constant type.",
+  "deprecated": false,
+  "examples": [
+   "const c *int = 4"
+  ]
+ },
+ {
+  "name": "UntypedNilUse",
+  "value": 16,
+  "summary": "UntypedNilUse occurs when the predeclared (untyped) value nil is used to initialize a variable declared without an explicit type.",
+  "deprecated": false,
+  "examples": [
+   "var x = nil"
+  ]
+ },
+ {
+  "name": "WrongAssignCount",
+  "value": 17,
+  "summary": "WrongAssignCount occurs when the number of values on the right-hand side of an assignment or initialization expression does not match the number of variables on the left-hand side.",
+  "deprecated": false,
+  "examples": [
+   "var x = 1, 2"
+  ]
+ },
+ {
+  "name": "UnassignableOperand",
+  "value": 18,
+  "summary": "UnassignableOperand occurs when the left-hand side of an assignment is not assignable.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tconst c = 1\n\tc = 2\n}"
+  ]
+ },
+ {
+  "name": "NoNewVar",
+  "value": 19,
+  "summary": "NoNewVar occurs when a short variable declaration (':=') does not declare new variables.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tx := 1\n\tx := 2\n}"
+  ]
+ },
+ {
+  "name": "MultiValAssignOp",
+  "value": 20,
+  "summary": "MultiValAssignOp occurs when an assignment operation (+=, *=, etc) does not have single-valued left-hand or right-hand side.",
+  "deprecated": false,
+  "examples": [
+   "func f() int {\n\tx, y := 1, 2\n\tx, y += 1\n\treturn x + y\n}"
+  ]
+ },
+ {
+  "name": "InvalidIfaceAssign",
+  "value": 21,
+  "summary": "InvalidIfaceAssign occurs when a value of type T is used as an interface, but T does not implement a method of the expected interface.",
+  "deprecated": false,
+  "examples": [
+   "type I interface {\n\tf()\n}\n\ntype T int\n\nvar x I = T(1)"
+  ]
+ },
+ {
+  "name": "InvalidChanAssign",
+  "value": 22,
+  "summary": "InvalidChanAssign occurs when a chan assignment is invalid.",
+  "deprecated": false,
+  "examples": [
+   "type T1 chan int\ntype T2 chan int\n\nvar x T1\n// Invalid assignment because both types are named\nvar _ T2 = x"
+  ]
+ },
+ {
+  "name": "IncompatibleAssign",
+  "value": 23,
+  "summary": "IncompatibleAssign occurs when the type of the right-hand side expression in an assignment cannot be assigned to the type of the variable being assigned.",
+  "deprecated": false,
+  "examples": [
+   "var x []int\nvar _ int = x"
+  ]
+ },
+ {
+  "name": "UnaddressableFieldAssign",
+  "value": 24,
+  "summary": "UnaddressableFieldAssign occurs when trying to assign to a struct field in a map value.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tm := make(map[string]struct{i int})\n\tm[\"foo\"].i = 42\n}"
+  ]
+ },
+ {
+  "name": "NotAType",
+  "value": 25,
+  "summary": "NotAType occurs when the identifier used as the underlying type in a type declaration or the right-hand side of a type alias does not denote a type.",
+  "deprecated": false,
+  "examples": [
+   "var S = 2\n\ntype T S"
+  ]
+ },
+ {
+  "name": "InvalidArrayLen",
+  "value": 26,
+  "summary": "InvalidArrayLen occurs when an array length is not a constant value.",
+  "deprecated": false,
+  "examples": [
+   "var n = 3\nvar _ = [n]int{}"
+  ]
+ },
+ {
+  "name": "BlankIfaceMethod",
+  "value": 27,
+  "summary": "BlankIfaceMethod occurs when a method name is '_'.",
+  "deprecated": false,
+  "examples": [
+   "type T interface {\n\t_(int)\n}"
+  ]
+ },
+ {
+  "name": "IncomparableMapKey",
+  "value": 28,
+  "summary": "IncomparableMapKey occurs when a map key type does not support the == and != operators.",
+  "deprecated": false,
+  "examples": [
+   "var x map[T]int\n\ntype T []int"
+  ]
+ },
+ {
+  "name": "InvalidPtrEmbed",
+  "value": 29,
+  "summary": "InvalidPtrEmbed occurs when an embedded field is of the pointer form *T, and T itself is itself a pointer, an unsafe.Pointer, or an interface.",
+  "deprecated": false,
+  "examples": [
+   "type T *int\n\ntype S struct {\n\t*T\n}"
+  ]
+ },
+ {
+  "name": "BadRecv",
+  "value": 30,
+  "summary": "BadRecv occurs when a method declaration does not have exactly one receiver parameter.",
+  "deprecated": false,
+  "examples": [
+   "func () _() {}"
+  ]
+ },
+ {
+  "name": "InvalidRecv",
+  "value": 31,
+  "summary": "InvalidRecv occurs when a receiver type expression is not of the form T or *T, or T is a pointer type.",
+  "deprecated": false,
+  "examples": [
+   "type T struct {}\n\nfunc (**T) m() {}"
+  ]
+ },
+ {
+  "name": "DuplicateFieldAndMethod",
+  "value": 32,
+  "summary": "DuplicateFieldAndMethod occurs when an identifier appears as both a field and method name.",
+  "deprecated": false,
+  "examples": [
+   "type T struct {\n\tm int\n}\n\nfunc (T) m() {}"
+  ]
+ },
+ {
+  "name": "DuplicateMethod",
+  "value": 33,
+  "summary": "DuplicateMethod occurs when two methods on the same receiver type have the same name.",
+  "deprecated": false,
+  "examples": [
+   "type T struct {}\nfunc (T) m() {}\nfunc (T) m(i int) int { return i }"
+  ]
+ },
+ {
+  "name": "InvalidBlank",
+  "value": 34,
+  "summary": "InvalidBlank occurs when a blank identifier is used as a value or type.",
+  "deprecated": false,
+  "examples": [
+   "var x = _"
+  ]
+ },
+ {
+  "name": "InvalidIota",
+  "value": 35,
+  "summary": "InvalidIota occurs when the predeclared identifier iota is used outside of a constant declaration.",
+  "deprecated": false,
+  "examples": [
+   "var x = iota"
+  ]
+ },
+ {
+  "name": "MissingInitBody",
+  "value": 36,
+  "summary": "MissingInitBody occurs when an init function is missing its body.",
+  "deprecated": false,
+  "examples": [
+   "func init()"
+  ]
+ },
+ {
+  "name": "InvalidInitSig",
+  "value": 37,
+  "summary": "InvalidInitSig occurs when an init function declares parameters or results.",
+  "deprecated": true,
+  "examples": []
+ },
+ {
+  "name": "InvalidInitDecl",
+  "value": 38,
+  "summary": "InvalidInitDecl occurs when init is declared as anything other than a function.",
+  "deprecated": false,
+  "examples": [
+   "var init = 1",
+   "func init() int { return 1 }"
+  ]
+ },
+ {
+  "name": "InvalidMainDecl",
+  "value": 39,
+  "summary": "InvalidMainDecl occurs when main is declared as anything other than a function, in a main package.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "TooManyValues",
+  "value": 40,
+  "summary": "TooManyValues occurs when a function returns too many values for the expression context in which it is used.",
+  "deprecated": false,
+  "examples": [
+   "func ReturnTwo() (int, int) {\n\treturn 1, 2\n}\n\nvar x = ReturnTwo()"
+  ]
+ },
+ {
+  "name": "NotAnExpr",
+  "value": 41,
+  "summary": "NotAnExpr occurs when a type expression is used where a value expression is expected.",
+  "deprecated": false,
+  "examples": [
+   "type T struct {}\n\nfunc f() {\n\tT\n}"
+  ]
+ },
+ {
+  "name": "TruncatedFloat",
+  "value": 42,
+  "summary": "TruncatedFloat occurs when a float constant is truncated to an integer value.",
+  "deprecated": false,
+  "examples": [
+   "var _ int = 98.6"
+  ]
+ },
+ {
+  "name": "NumericOverflow",
+  "value": 43,
+  "summary": "NumericOverflow occurs when a numeric constant overflows its target type.",
+  "deprecated": false,
+  "examples": [
+   "var x int8 = 1000"
+  ]
+ },
+ {
+  "name": "UndefinedOp",
+  "value": 44,
+  "summary": "UndefinedOp occurs when an operator is not defined for the type(s) used in an operation.",
+  "deprecated": false,
+  "examples": [
+   "var c = \"a\" - \"b\""
+  ]
+ },
+ {
+  "name": "MismatchedTypes",
+  "value": 45,
+  "summary": "MismatchedTypes occurs when operand types are incompatible in a binary operation.",
+  "deprecated": false,
+  "examples": [
+   "var a = \"hello\"\nvar b = 1\nvar c = a - b"
+  ]
+ },
+ {
+  "name": "DivByZero",
+  "value": 46,
+  "summary": "DivByZero occurs when a division operation is provable at compile time to be a division by zero.",
+  "deprecated": false,
+  "examples": [
+   "const divisor = 0\nvar x int = 1/divisor"
+  ]
+ },
+ {
+  "name": "NonNumericIncDec",
+  "value": 47,
+  "summary": "NonNumericIncDec occurs when an increment or decrement operator is applied to a non-numeric value.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tvar c = \"c\"\n\tc++\n}"
+  ]
+ },
+ {
+  "name": "UnaddressableOperand",
+  "value": 48,
+  "summary": "UnaddressableOperand occurs when the & operator is applied to an unaddressable expression.",
+  "deprecated": false,
+  "examples": [
+   "var x = &1"
+  ]
+ },
+ {
+  "name": "InvalidIndirection",
+  "value": 49,
+  "summary": "InvalidIndirection occurs when a non-pointer value is indirected via the '*' operator.",
+  "deprecated": false,
+  "examples": [
+   "var x int\nvar y = *x"
+  ]
+ },
+ {
+  "name": "NonIndexableOperand",
+  "value": 50,
+  "summary": "NonIndexableOperand occurs when an index operation is applied to a value that cannot be indexed.",
+  "deprecated": false,
+  "examples": [
+   "var x = 1\nvar y = x[1]"
+  ]
+ },
+ {
+  "name": "InvalidIndex",
+  "value": 51,
+  "summary": "InvalidIndex occurs when an index argument is not of integer type, negative, or out-of-bounds.",
+  "deprecated": false,
+  "examples": [
+   "var s = [...]int{1,2,3}\nvar x = s[5]",
+   "var s = []int{1,2,3}\nvar _ = s[-1]",
+   "var s = []int{1,2,3}\nvar i string\nvar _ = s[i]"
+  ]
+ },
+ {
+  "name": "SwappedSliceIndices",
+  "value": 52,
+  "summary": "SwappedSliceIndices occurs when constant indices in a slice expression are decreasing in value.",
+  "deprecated": false,
+  "examples": [
+   "var _ = []int{1,2,3}[2:1]"
+  ]
+ },
+ {
+  "name": "NonSliceableOperand",
+  "value": 53,
+  "summary": "NonSliceableOperand occurs when a slice operation is applied to a value whose type is not sliceable, or is unaddressable.",
+  "deprecated": false,
+  "examples": [
+   "var x = [...]int{1, 2, 3}[:1]",
+   "var x = 1\nvar y = 1[:1]"
+  ]
+ },
+ {
+  "name": "InvalidSliceExpr",
+  "value": 54,
+  "summary": "InvalidSliceExpr occurs when a three-index slice expression (a[x:y:z]) is applied to a string.",
+  "deprecated": false,
+  "examples": [
+   "var s = \"hello\"\nvar x = s[1:2:3]"
+  ]
+ },
+ {
+  "name": "InvalidShiftCount",
+  "value": 55,
+  "summary": "InvalidShiftCount occurs when the right-hand side of a shift operation is either non-integer, negative, or too large.",
+  "deprecated": false,
+  "examples": [
+   "var (\n\tx string\n\ty int = 1 << x\n)"
+  ]
+ },
+ {
+  "name": "InvalidShiftOperand",
+  "value": 56,
+  "summary": "InvalidShiftOperand occurs when the shifted operand is not an integer.",
+  "deprecated": false,
+  "examples": [
+   "var s = \"hello\"\nvar x = s << 2"
+  ]
+ },
+ {
+  "name": "InvalidReceive",
+  "value": 57,
+  "summary": "InvalidReceive occurs when there is a channel receive from a value that is either not a channel, or is a send-only channel.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tvar x = 1\n\t<-x\n}"
+  ]
+ },
+ {
+  "name": "InvalidSend",
+  "value": 58,
+  "summary": "InvalidSend occurs when there is a channel send to a value that is not a channel, or is a receive-only channel.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tvar x = 1\n\tx <- \"hello!\"\n}"
+  ]
+ },
+ {
+  "name": "DuplicateLitKey",
+  "value": 59,
+  "summary": "DuplicateLitKey occurs when an index is duplicated in a slice, array, or map literal.",
+  "deprecated": false,
+  "examples": [
+   "var _ = []int{0:1, 0:2}",
+   "var _ = map[string]int{\"a\": 1, \"a\": 2}"
+  ]
+ },
+ {
+  "name": "MissingLitKey",
+  "value": 60,
+  "summary": "MissingLitKey occurs when a map literal is missing a key expression.",
+  "deprecated": false,
+  "examples": [
+   "var _ = map[string]int{1}"
+  ]
+ },
+ {
+  "name": "InvalidLitIndex",
+  "value": 61,
+  "summary": "InvalidLitIndex occurs when the key in a key-value element of a slice or array literal is not an integer constant.",
+  "deprecated": false,
+  "examples": [
+   "var i = 0\nvar x = []string{i: \"world\"}"
+  ]
+ },
+ {
+  "name": "OversizeArrayLit",
+  "value": 62,
+  "summary": "OversizeArrayLit occurs when an array literal exceeds its length.",
+  "deprecated": false,
+  "examples": [
+   "var _ = [2]int{1,2,3}"
+  ]
+ },
+ {
+  "name": "MixedStructLit",
+  "value": 63,
+  "summary": "MixedStructLit occurs when a struct literal contains a mix of positional and named elements.",
+  "deprecated": false,
+  "examples": [
+   "var _ = struct{i, j int}{i: 1, 2}"
+  ]
+ },
+ {
+  "name": "InvalidStructLit",
+  "value": 64,
+  "summary": "InvalidStructLit occurs when a positional struct literal has an incorrect number of values.",
+  "deprecated": false,
+  "examples": [
+   "var _ = struct{i, j int}{1,2,3}"
+  ]
+ },
+ {
+  "name": "MissingLitField",
+  "value": 65,
+  "summary": "MissingLitField occurs when a struct literal refers to a field that does not exist on the struct type.",
+  "deprecated": false,
+  "examples": [
+   "var _ = struct{i int}{j: 2}"
+  ]
+ },
+ {
+  "name": "DuplicateLitField",
+  "value": 66,
+  "summary": "DuplicateLitField occurs when a struct literal contains duplicated fields.",
+  "deprecated": false,
+  "examples": [
+   "var _ = struct{i int}{i: 1, i: 2}"
+  ]
+ },
+ {
+  "name": "UnexportedLitField",
+  "value": 67,
+  "summary": "UnexportedLitField occurs when a positional struct literal implicitly assigns an unexported field of an imported type.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "InvalidLitField",
+  "value": 68,
+  "summary": "InvalidLitField occurs when a field name is not a valid identifier.",
+  "deprecated": false,
+  "examples": [
+   "var _ = struct{i int}{1: 1}"
+  ]
+ },
+ {
+  "name": "UntypedLit",
+  "value": 69,
+  "summary": "UntypedLit occurs when a composite literal omits a required type identifier.",
+  "deprecated": false,
+  "examples": [
+   "type outer struct{\n\tinner struct { i int }\n}\n\nvar _ = outer{inner: {1}}"
+  ]
+ },
+ {
+  "name": "InvalidLit",
+  "value": 70,
+  "summary": "InvalidLit occurs when a composite literal expression does not match its type.",
+  "deprecated": false,
+  "examples": [
+   "type P *struct{\n\tx int\n}\nvar _ = P {}"
+  ]
+ },
+ {
+  "name": "AmbiguousSelector",
+  "value": 71,
+  "summary": "AmbiguousSelector occurs when a selector is ambiguous.",
+  "deprecated": false,
+  "examples": [
+   "type E1 struct { i int }\ntype E2 struct { i int }\ntype T struct { E1; E2 }\n\nvar x T\nvar _ = x.i"
+  ]
+ },
+ {
+  "name": "UndeclaredImportedName",
+  "value": 72,
+  "summary": "UndeclaredImportedName occurs when a package-qualified identifier is undeclared by the imported package.",
+  "deprecated": false,
+  "examples": [
+   "import \"go/types\"\n\nvar _ = types.NotAnActualIdentifier"
+  ]
+ },
+ {
+  "name": "UnexportedName",
+  "value": 73,
+  "summary": "UnexportedName occurs when a selector refers to an unexported identifier of an imported package.",
+  "deprecated": false,
+  "examples": [
+   "import \"reflect\"\n\ntype _ reflect.flag"
+  ]
+ },
+ {
+  "name": "UndeclaredName",
+  "value": 74,
+  "summary": "UndeclaredName occurs when an identifier is not declared in the current scope.",
+  "deprecated": false,
+  "examples": [
+   "var x T"
+  ]
+ },
+ {
+  "name": "MissingFieldOrMethod",
+  "value": 75,
+  "summary": "MissingFieldOrMethod occurs when a selector references a field or method that does not exist.",
+  "deprecated": false,
+  "examples": [
+   "type T struct {}\n\nvar x = T{}.f"
+  ]
+ },
+ {
+  "name": "BadDotDotDotSyntax",
+  "value": 76,
+  "summary": "BadDotDotDotSyntax occurs when a \"...\" occurs in a context where it is not valid.",
+  "deprecated": false,
+  "examples": [
+   "var _ = map[int][...]int{0: {}}"
+  ]
+ },
+ {
+  "name": "NonVariadicDotDotDot",
+  "value": 77,
+  "summary": "NonVariadicDotDotDot occurs when a \"...\" is used on the final argument to a non-variadic function.",
+  "deprecated": false,
+  "examples": [
+   "func printArgs(s []string) {\n\tfor _, a := range s {\n\t\tprintln(a)\n\t}\n}\n\nfunc f() {\n\ts := []string{\"a\", \"b\", \"c\"}\n\tprintArgs(s...)\n}"
+  ]
+ },
+ {
+  "name": "InvalidDotDotDot",
+  "value": 78,
+  "summary": "InvalidDotDotDot occurs when a \"...\" is used in a non-variadic built-in function.",
+  "deprecated": false,
+  "examples": [
+   "var s = []int{1, 2, 3}\nvar l = len(s...)"
+  ]
+ },
+ {
+  "name": "UncalledBuiltin",
+  "value": 79,
+  "summary": "UncalledBuiltin occurs when a built-in function is used as a function-valued expression, instead of being called.",
+  "deprecated": false,
+  "examples": [
+   "var _ = copy"
+  ]
+ },
+ {
+  "name": "InvalidAppend",
+  "value": 80,
+  "summary": "InvalidAppend occurs when append is called with a first argument that is not a slice.",
+  "deprecated": false,
+  "examples": [
+   "var _ = append(1, 2)"
+  ]
+ },
+ {
+  "name": "InvalidCap",
+  "value": 81,
+  "summary": "InvalidCap occurs when an argument to the cap built-in function is not of supported type.",
+  "deprecated": false,
+  "examples": [
+   "var s = 2\nvar x = cap(s)"
+  ]
+ },
+ {
+  "name": "InvalidClose",
+  "value": 82,
+  "summary": "InvalidClose occurs when close(...) is called with an argument that is not of channel type, or that is a receive-only channel.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tvar x int\n\tclose(x)\n}"
+  ]
+ },
+ {
+  "name": "InvalidCopy",
+  "value": 83,
+  "summary": "InvalidCopy occurs when the arguments are not of slice type or do not have compatible type.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tvar x []int\n\ty := []int64{1,2,3}\n\tcopy(x, y)\n}"
+  ]
+ },
+ {
+  "name": "InvalidComplex",
+  "value": 84,
+  "summary": "InvalidComplex occurs when the complex built-in function is called with arguments with incompatible types.",
+  "deprecated": false,
+  "examples": [
+   "var _ = complex(float32(1), float64(2))"
+  ]
+ },
+ {
+  "name": "InvalidDelete",
+  "value": 85,
+  "summary": "InvalidDelete occurs when the delete built-in function is called with a first argument that is not a map.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tm := \"hello\"\n\tdelete(m, \"e\")\n}"
+  ]
+ },
+ {
+  "name": "InvalidImag",
+  "value": 86,
+  "summary": "InvalidImag occurs when the imag built-in function is called with an argument that does not have complex type.",
+  "deprecated": false,
+  "examples": [
+   "var _ = imag(int(1))"
+  ]
+ },
+ {
+  "name": "InvalidLen",
+  "value": 87,
+  "summary": "InvalidLen occurs when an argument to the len built-in function is not of supported type.",
+  "deprecated": false,
+  "examples": [
+   "var s = 2\nvar x = len(s)"
+  ]
+ },
+ {
+  "name": "SwappedMakeArgs",
+  "value": 88,
+  "summary": "SwappedMakeArgs occurs when make is called with three arguments, and its length argument is larger than its capacity argument.",
+  "deprecated": false,
+  "examples": [
+   "var x = make([]int, 3, 2)"
+  ]
+ },
+ {
+  "name": "InvalidMake",
+  "value": 89,
+  "summary": "InvalidMake occurs when make is called with an unsupported type argument.",
+  "deprecated": false,
+  "examples": [
+   "var x = make(int)"
+  ]
+ },
+ {
+  "name": "InvalidReal",
+  "value": 90,
+  "summary": "InvalidReal occurs when the real built-in function is called with an argument that does not have complex type.",
+  "deprecated": false,
+  "examples": [
+   "var _ = real(int(1))"
+  ]
+ },
+ {
+  "name": "InvalidAssert",
+  "value": 91,
+  "summary": "InvalidAssert occurs when a type assertion is applied to a value that is not of interface type.",
+  "deprecated": false,
+  "examples": [
+   "var x = 1\nvar _ = x.(float64)"
+  ]
+ },
+ {
+  "name": "ImpossibleAssert",
+  "value": 92,
+  "summary": "ImpossibleAssert occurs for a type assertion x.(T) when the value x of interface cannot have dynamic type T, due to a missing or mismatching method on T.",
+  "deprecated": false,
+  "examples": [
+   "type T int\n\nfunc (t *T) m() int { return int(*t) }\n\ntype I interface { m() int }\n\nvar x I\nvar _ = x.(T)"
+  ]
+ },
+ {
+  "name": "InvalidConversion",
+  "value": 93,
+  "summary": "InvalidConversion occurs when the argument type cannot be converted to the target.",
+  "deprecated": false,
+  "examples": [
+   "var x float64\nvar _ = string(x)"
+  ]
+ },
+ {
+  "name": "InvalidUntypedConversion",
+  "value": 94,
+  "summary": "InvalidUntypedConversion occurs when there is no valid implicit conversion from an untyped value satisfying the type constraints of the context in which it is used.",
+  "deprecated": false,
+  "examples": [
+   "func f[T ~int8 | ~int16 | ~int32 | ~int64](x T) T {\n\treturn x + 1024\n}"
+  ]
+ },
+ {
+  "name": "BadOffsetofSyntax",
+  "value": 95,
+  "summary": "BadOffsetofSyntax occurs when unsafe.Offsetof is called with an argument that is not a selector expression.",
+  "deprecated": false,
+  "examples": [
+   "import \"unsafe\"\n\nvar x int\nvar _ = unsafe.Offsetof(x)"
+  ]
+ },
+ {
+  "name": "InvalidOffsetof",
+  "value": 96,
+  "summary": "InvalidOffsetof occurs when unsafe.Offsetof is called with a method selector, rather than a field selector, or when the field is embedded via a pointer.",
+  "deprecated": false,
+  "examples": [
+   "import \"unsafe\"\n\ntype T struct { f int }\ntype S struct { *T }\nvar s S\nvar _ = unsafe.Offsetof(s.f)",
+   "import \"unsafe\"\n\ntype S struct{}\n\nfunc (S) m() {}\n\nvar s S\nvar _ = unsafe.Offsetof(s.m)"
+  ]
+ },
+ {
+  "name": "UnusedExpr",
+  "value": 97,
+  "summary": "UnusedExpr occurs when a side-effect free expression is used as a statement. Such a statement has no effect.",
+  "deprecated": false,
+  "examples": [
+   "func f(i int) {\n\ti*i\n}"
+  ]
+ },
+ {
+  "name": "UnusedVar",
+  "value": 98,
+  "summary": "UnusedVar occurs when a variable is declared but unused.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tx := 1\n}"
+  ]
+ },
+ {
+  "name": "MissingReturn",
+  "value": 99,
+  "summary": "MissingReturn occurs when a function with results is missing a return statement.",
+  "deprecated": false,
+  "examples": [
+   "func f() int {}"
+  ]
+ },
+ {
+  "name": "WrongResultCount",
+  "value": 100,
+  "summary": "WrongResultCount occurs when a return statement returns an incorrect number of values.",
+  "deprecated": false,
+  "examples": [
+   "func ReturnOne() int {\n\treturn 1, 2\n}"
+  ]
+ },
+ {
+  "name": "OutOfScopeResult",
+  "value": 101,
+  "summary": "OutOfScopeResult occurs when the name of a value implicitly returned by an empty return statement is shadowed in a nested scope.",
+  "deprecated": false,
+  "examples": [
+   "func factor(n int) (i int) {\n\tfor i := 2; i < n; i++ {\n\t\tif n%i == 0 {\n\t\t\treturn\n\t\t}\n\t}\n\treturn 0\n}"
+  ]
+ },
+ {
+  "name": "InvalidCond",
+  "value": 102,
+  "summary": "InvalidCond occurs when an if condition is not a boolean expression.",
+  "deprecated": false,
+  "examples": [
+   "func checkReturn(i int) {\n\tif i {\n\t\tpanic(\"non-zero return\")\n\t}\n}"
+  ]
+ },
+ {
+  "name": "InvalidPostDecl",
+  "value": 103,
+  "summary": "InvalidPostDecl occurs when there is a declaration in a for-loop post statement.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tfor i := 0; i < 10; j := 0 {}\n}"
+  ]
+ },
+ {
+  "name": "InvalidIterVar",
+  "value": 104,
+  "summary": "InvalidIterVar occurs when two iteration variables are used while ranging over a channel.",
+  "deprecated": false,
+  "examples": [
+   "func f(c chan int) {\n\tfor k, v := range c {\n\t\tprintln(k, v)\n\t}\n}"
+  ]
+ },
+ {
+  "name": "InvalidRangeExpr",
+  "value": 105,
+  "summary": "InvalidRangeExpr occurs when the type of a range expression is not a valid type for use with a range loop.",
+  "deprecated": false,
+  "examples": [
+   "func f(f float64) {\n\tfor j := range f {\n\t\tprintln(j)\n\t}\n}"
+  ]
+ },
+ {
+  "name": "MisplacedBreak",
+  "value": 106,
+  "summary": "MisplacedBreak occurs when a break statement is not within a for, switch, or select statement of the innermost function definition.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tbreak\n}"
+  ]
+ },
+ {
+  "name": "MisplacedContinue",
+  "value": 107,
+  "summary": "MisplacedContinue occurs when a continue statement is not within a for loop of the innermost function definition.",
+  "deprecated": false,
+  "examples": [
+   "func sumeven(n int) int {\n\tproceed := func() {\n\t\tcontinue\n\t}\n\tsum := 0\n\tfor i := 1; i <= n; i++ {\n\t\tif i % 2 != 0 {\n\t\t\tproceed()\n\t\t}\n\t\tsum += i\n\t}\n\treturn sum\n}"
+  ]
+ },
+ {
+  "name": "MisplacedFallthrough",
+  "value": 108,
+  "summary": "MisplacedFallthrough occurs when a fallthrough statement is not within an expression switch.",
+  "deprecated": false,
+  "examples": [
+   "func typename(i interface{}) string {\n\tswitch i.(type) {\n\tcase int64:\n\t\tfallthrough\n\tcase int:\n\t\treturn \"int\"\n\t}\n\treturn \"unsupported\"\n}"
+  ]
+ },
+ {
+  "name": "DuplicateCase",
+  "value": 109,
+  "summary": "DuplicateCase occurs when a type or expression switch has duplicate cases.",
+  "deprecated": false,
+  "examples": [
+   "func printInt(i int) {\n\tswitch i {\n\tcase 1:\n\t\tprintln(\"one\")\n\tcase 1:\n\t\tprintln(\"One\")\n\t}\n}"
+  ]
+ },
+ {
+  "name": "DuplicateDefault",
+  "value": 110,
+  "summary": "DuplicateDefault occurs when a type or expression switch has multiple default clauses.",
+  "deprecated": false,
+  "examples": [
+   "func printInt(i int) {\n\tswitch i {\n\tcase 1:\n\t\tprintln(\"one\")\n\tdefault:\n\t\tprintln(\"One\")\n\tdefault:\n\t\tprintln(\"1\")\n\t}\n}"
+  ]
+ },
+ {
+  "name": "BadTypeKeyword",
+  "value": 111,
+  "summary": "BadTypeKeyword occurs when a .(type) expression is used anywhere other than a type switch.",
+  "deprecated": false,
+  "examples": [
+   "type I interface {\n\tm()\n}\nvar t I\nvar _ = t.(type)"
+  ]
+ },
+ {
+  "name": "InvalidTypeSwitch",
+  "value": 112,
+  "summary": "InvalidTypeSwitch occurs when .(type) is used on an expression that is not of interface type.",
+  "deprecated": false,
+  "examples": [
+   "func f(i int) {\n\tswitch x := i.(type) {}\n}"
+  ]
+ },
+ {
+  "name": "InvalidExprSwitch",
+  "value": 113,
+  "summary": "InvalidExprSwitch occurs when a switch expression is not comparable.",
+  "deprecated": false,
+  "examples": [
+   "func _() {\n\tvar a struct{ _ func() }\n\tswitch a /* ERROR cannot switch on a */ {\n\t}\n}"
+  ]
+ },
+ {
+  "name": "InvalidSelectCase",
+  "value": 114,
+  "summary": "InvalidSelectCase occurs when a select case is not a channel send or receive.",
+  "deprecated": false,
+  "examples": [
+   "func checkChan(c <-chan int) bool {\n\tselect {\n\tcase c:\n\t\treturn true\n\tdefault:\n\t\treturn false\n\t}\n}"
+  ]
+ },
+ {
+  "name": "UndeclaredLabel",
+  "value": 115,
+  "summary": "UndeclaredLabel occurs when an undeclared label is jumped to.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\n\tgoto L\n}"
+  ]
+ },
+ {
+  "name": "DuplicateLabel",
+  "value": 116,
+  "summary": "DuplicateLabel occurs when a label is declared more than once.",
+  "deprecated": false,
+  "examples": [
+   "func f() int {\nL:\nL:\n\treturn 1\n}"
+  ]
+ },
+ {
+  "name": "MisplacedLabel",
+  "value": 117,
+  "summary": "MisplacedLabel occurs when a break or continue label is not on a for, switch, or select statement.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\nL:\n\ta := []int{1,2,3}\n\tfor _, e := range a {\n\t\tif e > 10 {\n\t\t\tbreak L\n\t\t}\n\t\tprintln(a)\n\t}\n}"
+  ]
+ },
+ {
+  "name": "UnusedLabel",
+  "value": 118,
+  "summary": "UnusedLabel occurs when a label is declared and not used.",
+  "deprecated": false,
+  "examples": [
+   "func f() {\nL:\n}"
+  ]
+ },
+ {
+  "name": "JumpOverDecl",
+  "value": 119,
+  "summary": "JumpOverDecl occurs when a label jumps over a variable declaration.",
+  "deprecated": false,
+  "examples": [
+   "func f() int {\n\tgoto L\n\tx := 2\nL:\n\tx++\n\treturn x\n}"
+  ]
+ },
+ {
+  "name": "JumpIntoBlock",
+  "value": 120,
+  "summary": "JumpIntoBlock occurs when a forward jump goes to a label inside a nested block.",
+  "deprecated": false,
+  "examples": [
+   "func f(x int) {\n \tgoto L\n \tif x > 0 {\n \tL:\n \t\tprint(\"inside block\")\n \t}\n}"
+  ]
+ },
+ {
+  "name": "InvalidMethodExpr",
+  "value": 121,
+  "summary": "InvalidMethodExpr occurs when a pointer method is called but the argument is not addressable.",
+  "deprecated": false,
+  "examples": [
+   "type T struct {}\n\nfunc (*T) m() int { return 1 }\n\nvar _ = T.m(T{})"
+  ]
+ },
+ {
+  "name": "WrongArgCount",
+  "value": 122,
+  "summary": "WrongArgCount occurs when too few or too many arguments are passed by a function call.",
+  "deprecated": false,
+  "examples": [
+   "func f(i int) {}\nvar x = f()"
+  ]
+ },
+ {
+  "name": "InvalidCall",
+  "value": 123,
+  "summary": "InvalidCall occurs when an expression is called that is not of function type.",
+  "deprecated": false,
+  "examples": [
+   "var x = \"x\"\nvar y = x()"
+  ]
+ },
+ {
+  "name": "UnusedResults",
+  "value": 124,
+  "summary": "UnusedResults occurs when a restricted expression-only built-in function is suspended via go or defer. Such a suspension discards the results of these side-effect free built-in functions, and therefore is ineffectual.",
+  "deprecated": false,
+  "examples": [
+   "func f(a []int) int {\n\tdefer len(a)\n\treturn i\n}"
+  ]
+ },
+ {
+  "name": "InvalidDefer",
+  "value": 125,
+  "summary": "InvalidDefer occurs when a deferred expression is not a function call, for example if the expression is a type conversion.",
+  "deprecated": false,
+  "examples": [
+   "func f(i int) int {\n\tdefer int32(i)\n\treturn i\n}"
+  ]
+ },
+ {
+  "name": "InvalidGo",
+  "value": 126,
+  "summary": "InvalidGo occurs when a go expression is not a function call, for example if the expression is a type conversion.",
+  "deprecated": false,
+  "examples": [
+   "func f(i int) int {\n\tgo int32(i)\n\treturn i\n}"
+  ]
+ },
+ {
+  "name": "BadDecl",
+  "value": 127,
+  "summary": "All codes below were added in Go 1.17.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "RepeatedDecl",
+  "value": 128,
+  "summary": "RepeatedDecl occurs when an identifier occurs more than once on the left hand side of a short variable declaration.",
+  "deprecated": false,
+  "examples": [
+   "func _() {\n\tx, y, y := 1, 2, 3\n}"
+  ]
+ },
+ {
+  "name": "InvalidUnsafeAdd",
+  "value": 129,
+  "summary": "InvalidUnsafeAdd occurs when unsafe.Add is called with a length argument that is not of integer type. It also occurs if it is used in a package compiled for a language version before go1.17.",
+  "deprecated": false,
+  "examples": [
+   "import \"unsafe\"\n\nvar p unsafe.Pointer\nvar _ = unsafe.Add(p, float64(1))"
+  ]
+ },
+ {
+  "name": "InvalidUnsafeSlice",
+  "value": 130,
+  "summary": "InvalidUnsafeSlice occurs when unsafe.Slice is called with a pointer argument that is not of pointer type or a length argument that is not of integer type, negative, or out of bounds. It also occurs if it is used in a package compiled for a language version before go1.17.",
+  "deprecated": false,
+  "examples": [
+   "import \"unsafe\"\n\nvar x int\nvar _ = unsafe.Slice(x, 1)",
+   "import \"unsafe\"\n\nvar x int\nvar _ = unsafe.Slice(&x, float64(1))",
+   "import \"unsafe\"\n\nvar x int\nvar _ = unsafe.Slice(&x, -1)",
+   "import \"unsafe\"\n\nvar x int\nvar _ = unsafe.Slice(&x, uint64(1) << 63)"
+  ]
+ },
+ {
+  "name": "UnsupportedFeature",
+  "value": 131,
+  "summary": "All codes below were added in Go 1.18.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "NotAGenericType",
+  "value": 132,
+  "summary": "NotAGenericType occurs when a non-generic type is used where a generic type is expected: in type or function instantiation.",
+  "deprecated": false,
+  "examples": [
+   "type T int\n\nvar _ T[int]"
+  ]
+ },
+ {
+  "name": "WrongTypeArgCount",
+  "value": 133,
+  "summary": "WrongTypeArgCount occurs when a type or function is instantiated with an incorrect number of type arguments, including when a generic type or function is used without instantiation.",
+  "deprecated": false,
+  "examples": [
+   "type T[p any] int\n\nvar _ T[int, string]",
+   "func f[T any]() {}\n\nvar x = f"
+  ]
+ },
+ {
+  "name": "CannotInferTypeArgs",
+  "value": 134,
+  "summary": "CannotInferTypeArgs occurs when type or function type argument inference fails to infer all type arguments.",
+  "deprecated": false,
+  "examples": [
+   "func f[T any]() {}\n\nfunc _() {\n\tf()\n}"
+  ]
+ },
+ {
+  "name": "InvalidInstanceCycle",
+  "value": 135,
+  "summary": "InvalidInstanceCycle occurs when an invalid cycle is detected within the instantiation graph.",
+  "deprecated": false,
+  "examples": [
+   "func f[T any]() { f[*T]() }"
+  ]
+ },
+ {
+  "name": "InvalidUnion",
+  "value": 136,
+  "summary": "InvalidUnion occurs when an embedded union or approximation element is not valid.",
+  "deprecated": false,
+  "examples": [
+   "type _ interface {\n \t~int | interface{ m() }\n}"
+  ]
+ },
+ {
+  "name": "MisplacedConstraintIface",
+  "value": 137,
+  "summary": "MisplacedConstraintIface occurs when a constraint-type interface is used outside of constraint position.",
+  "deprecated": false,
+  "examples": [
+   "type I interface { ~int }\n\nvar _ I"
+  ]
+ },
+ {
+  "name": "InvalidMethodTypeParams",
+  "value": 138,
+  "summary": "InvalidMethodTypeParams occurs when methods have type parameters.",
+  "deprecated": false,
+  "examples": []
+ },
+ {
+  "name": "MisplacedTypeParam",
+  "value": 139,
+  "summary": "MisplacedTypeParam occurs when a type parameter is used in a place where it is not permitted.",
+  "deprecated": false,
+  "examples": [
+   "type T[P any] P",
+   "type T[P any] struct{ *P }"
+  ]
+ },
+ {
+  "name": "InvalidUnsafeSliceData",
+  "value": 140,
+  "summary": "InvalidUnsafeSliceData occurs when unsafe.SliceData is called with an argument that is not of slice type. It also occurs if it is used in a package compiled for a language version before go1.20.",
+  "deprecated": false,
+  "examples": [
+   "import \"unsafe\"\n\nvar x int\nvar _ = unsafe.SliceData(x)"
+  ]
+ },
+ {
+  "name": "InvalidUnsafeString",
+  "value": 141,
+  "summary": "InvalidUnsafeString occurs when unsafe.String is called with a length argument that is not of integer type, negative, or out of bounds. It also occurs if it is used in a package compiled for a language version before go1.20.",
+  "deprecated": false,
+  "examples": [
+   "import \"unsafe\"\n\nvar b [10]byte\nvar _ = unsafe.String(&b[0], -1)"
+  ]
+ },
+ {
+  "name": "InvalidClear",
+  "value": 142,
+  "summary": "InvalidClear occurs when clear is called with an argument that is not of map or slice type.",
+  "deprecated": false,
+  "examples": [
+   "func _(x int) {\n\tclear(x)\n}"
+  ]
+ },
+ {
+  "name": "TypeTooLarge",
+  "value": 143,
+  "summary": "TypeTooLarge occurs if unsafe.Sizeof or unsafe.Offsetof is called with an expression whose type is too large.",
+  "deprecated": false,
+  "examples": [
+   "import \"unsafe\"\n\ntype E [1 << 31 - 1]int\nvar a [1 << 31]E\nvar _ = unsafe.Sizeof(a)",
+   "import \"unsafe\"\n\n type E [1 << 31 - 1]int\n var s struct {\n \t_ [1 << 31]E\n \tx int\n }\nvar _ = unsafe.Offsetof(s.x)"
+  ]
+ },
+ {
+  "name": "InvalidMinMaxOperand",
+  "value": 144,
+  "summary": "InvalidMinMaxOperand occurs if min or max is called with an operand that cannot be ordered because it does not support the < operator.",
+  "deprecated": false,
+  "examples": [
+   "const _ = min(true)",
+   "var s, t []byte\nvar _ = max(s, t)"
+  ]
+ },
+ {
+  "name": "TooNew",
+  "value": 145,
+  "summary": "TooNew indicates that, through build tags or a go.mod file, a source file requires a version of Go that is newer than the logic of the type checker. As a consequence, the type checker may produce spurious errors or fail to report real errors. The solution is to rebuild the application with a newer Go release.",
+  "deprecated": false,
+  "examples": []
+ }
+]

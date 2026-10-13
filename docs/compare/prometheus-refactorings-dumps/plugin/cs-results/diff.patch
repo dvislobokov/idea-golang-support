@@ -1,0 +1,11 @@
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -156,7 +156,7 @@
+ 	return len(s.queue)
+ }
+ 
+-func (s *sendLoop) nextBatch() []*Alert {
++func (s *sendLoop) nextBatch() ([]*Alert, int) {
+ 	s.mtx.Lock()
+ 	defer s.mtx.Unlock()
+ 

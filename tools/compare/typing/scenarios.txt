@@ -1,0 +1,1207 @@
+# Typing / keyboard scenarios: the plugin against GoLand (docs/compare/prometheus-typing-dumps).
+# Format (one parser per side, same rules: tools/compare/typing/to_json.py and GoTypingHarnessTest.kt):
+#   === ID | category | title         a scenario starts; a line starting with '#' at column 0 is a comment everywhere (sections too)
+#   key: value                        header fields until the first section:
+#       file:   main file name (default a.go); every file of a scenario lives in its own directory (one package)
+#       steps:  yes = record the caret line and the selection after every key token
+#       gofmt:  yes = to_json.py records what `gofmt` makes of the before-text (markers removed)
+#       query:  declaration | implementations | super | usages | highlight | structure | paraminfo | quickdoc | exprtype | inlays | surround | generate
+#               (run after the keys; the result is a list or a text instead of the edited file; surround and generate list the
+#               popup items at the start state, before the keys, so that the keys can then apply one of them)
+#       note:   free text for the reader (may repeat)
+#   --- code            the main file; <caret>, <selection>...</selection> as in IntelliJ test data
+#   --- extra NAME      another file of the same package (no markers)
+#   --- paste           text {PASTE} puts on the clipboard: the lines joined with \n plus a final \n (whole lines copied)
+#   --- paste inline    the same without the final \n
+#   --- keys            literal text typed char by char through the typed handlers; lines are joined with nothing;
+#                       tokens {NAME} / {NAME:arg}, NAME = [A-Z_]+ (a '{' not followed by that is a literal brace):
+#                       {ENTER} {TAB} {BACKSPACE} {DELETE} {SPACE} {ESC} {LEFT} {RIGHT} {UP} {DOWN} {HOME} {END}
+#                       {SAVE} (FileDocumentManager.saveAllDocuments: actions on save) {PASTE} (the paste section via the clipboard)
+#                       {ACTION:id} (an action of the editor, e.g. EditorCompleteStatement, ReformatCode)
+#                       {SURROUND:title} (Surround With item whose title equals title, else the first one starting with it)
+# Section text: the lines up to the next '---' / '===' header, trailing blank lines dropped; code / extra end with one \n.
+# Expected results are not written here: GoLand is the reference (tools/ui-robot/goland/analysis/typing_batch.js).
+
+# ---------------------------------------------------------------- Enter
+
+=== E01 | enter | Enter between the braces of an if
+--- code
+package scrape
+
+import "errors"
+
+func checkLabels(lset map[string]string) error {
+	if len(lset) == 0 {<caret>}
+	return errors.New("no labels")
+}
+--- keys
+{ENTER}
+
+=== E02 | enter | '{' then Enter after a range header
+--- code
+package scrape
+
+type Target struct{ URL string }
+
+func urls(targets []*Target) []string {
+	var out []string
+	for _, t := range targets <caret>
+	return out
+}
+--- keys
+{{ENTER}
+
+=== E03 | enter | Enter in the middle of an expression
+--- code
+package scrape
+
+func total(added, seriesAdded int) int {
+	sum := added + <caret>seriesAdded
+	return sum
+}
+--- keys
+{ENTER}
+
+=== E04 | enter | Enter inside a line comment
+--- code
+package scrape
+
+func appendLimit(limit int) int {
+	// appendLimit bounds the number of samples<caret> appended per scrape.
+	return limit
+}
+--- keys
+{ENTER}
+
+=== E05 | enter | Enter inside an interpreted string
+--- code
+package scrape
+
+import "errors"
+
+func reloadErr() error {
+	return errors.New("scrape pool <caret>reload failed")
+}
+--- keys
+{ENTER}
+
+=== E06 | enter | Enter inside a raw string
+--- code
+package rules
+
+const query = `sum by (job) (<caret>rate(http_requests_total[5m]))`
+--- keys
+{ENTER}
+
+=== E07 | enter | Enter after a comma in a struct literal
+--- code
+package config
+
+import "time"
+
+type ScrapeConfig struct {
+	JobName        string
+	ScrapeInterval time.Duration
+}
+
+func defaults() *ScrapeConfig {
+	return &ScrapeConfig{JobName: "node",<caret> ScrapeInterval: 15 * time.Second}
+}
+--- keys
+{ENTER}
+
+=== E08 | enter | Enter after a comma in an argument list
+--- code
+package scrape
+
+import "log/slog"
+
+func logFailure(l *slog.Logger, err error) {
+	l.Debug("Scrape failed",<caret> "err", err)
+}
+--- keys
+{ENTER}
+
+=== E10 | enter | Enter after a case clause
+--- code
+package scrape
+
+type TargetHealth string
+
+func describe(h TargetHealth) string {
+	switch h {
+	case "up":<caret>
+	}
+	return ""
+}
+--- keys
+{ENTER}
+
+# ---------------------------------------------------------------- Complete Statement (Ctrl+Shift+Enter)
+
+=== C01 | complete | Complete Statement after `if err != nil`
+--- code
+package scrape
+
+func scrape() error {
+	err := run()
+	if err != nil<caret>
+	return nil
+}
+
+func run() error { return nil }
+--- keys
+{ACTION:EditorCompleteStatement}
+
+=== C02 | complete | Complete Statement after a for header
+--- code
+package scrape
+
+func count(targets []string) int {
+	n := 0
+	for i := 0; i < len(targets); i++<caret>
+	return n
+}
+--- keys
+{ACTION:EditorCompleteStatement}
+
+=== C03 | complete | Complete Statement on `func f(` without `)`
+--- code
+package scrape
+
+type scrapePool struct{}
+
+type Target struct{}
+
+func (sp *scrapePool) sync(targets []*Target<caret>
+--- keys
+{ACTION:EditorCompleteStatement}
+
+=== C04 | complete | Complete Statement on a call without `)`
+--- code
+package scrape
+
+import "net/http"
+
+func fetch(client *http.Client, req *http.Request) {
+	client.Do(req<caret>
+}
+--- keys
+{ACTION:EditorCompleteStatement}
+
+=== C05 | complete | Complete Statement on `return fmt.Errorf(` without `)`
+--- code
+package rules
+
+import "fmt"
+
+func reload(name string, err error) error {
+	return fmt.Errorf("reload %s: %w", name, err<caret>
+}
+--- keys
+{ACTION:EditorCompleteStatement}
+
+# ---------------------------------------------------------------- auto pairs
+
+=== P01 | pairs | '(' after a method name
+steps: yes
+--- code
+package scrape
+
+type scrapePool struct{}
+
+func (sp *scrapePool) reload() {}
+
+func run(sp *scrapePool) {
+	sp.reload<caret>
+}
+--- keys
+(
+
+=== P02 | pairs | '"' opens a pair, the closing one is overtyped
+steps: yes
+--- code
+package scrape
+
+func job() string {
+	name := <caret>
+	return name
+}
+--- keys
+"node"
+
+=== P03 | pairs | backtick struct tag with quotes inside
+steps: yes
+--- code
+package config
+
+import "time"
+
+type GlobalConfig struct {
+	ScrapeInterval time.Duration <caret>
+}
+--- keys
+`yaml:"scrape_interval"`
+
+=== P04 | pairs | '[' and '{' of a slice literal
+steps: yes
+--- code
+package scrape
+
+func names() []string {
+	ls := <caret>
+	return ls
+}
+--- keys
+[]string{"job"}
+
+=== P05 | pairs | rune quote
+steps: yes
+--- code
+package labels
+
+func sep() rune {
+	s := <caret>
+	return s
+}
+--- keys
+','
+
+=== P06 | pairs | Backspace on an empty ()
+--- code
+package scrape
+
+func run(sp interface{ reload() }) {
+	sp.reload(<caret>)
+}
+--- keys
+{BACKSPACE}
+
+=== P07 | pairs | Backspace on an empty ""
+--- code
+package scrape
+
+func job() string {
+	s := "<caret>"
+	return s
+}
+--- keys
+{BACKSPACE}
+
+=== P08 | pairs | Backspace on an empty {} of a map literal
+--- code
+package labels
+
+func empty() map[string]string {
+	m := map[string]string{<caret>}
+	return m
+}
+--- keys
+{BACKSPACE}
+
+=== P09 | pairs | ')' overtypes the existing closing parenthesis
+--- code
+package scrape
+
+type Config struct{}
+
+func apply(cfg *Config) {}
+
+func run(cfg *Config) {
+	apply(cfg<caret>)
+}
+--- keys
+)
+
+=== P10 | pairs | ':' and '=' after a name
+--- code
+package scrape
+
+func run() int {
+	n <caret>
+	return n
+}
+--- keys
+:= 1
+
+# ---------------------------------------------------------------- indentation: paste and '}'
+
+=== I01 | indent | paste of unindented lines into a function body
+--- code
+package scrape
+
+import "errors"
+
+func validate(limit int) error {
+	<caret>
+	return nil
+}
+--- paste
+if limit < 0 {
+	return errors.New("negative limit")
+}
+--- keys
+{PASTE}
+
+=== I02 | indent | paste of 4-space lines into a nested block
+--- code
+package scrape
+
+func sum(samples []float64, ok bool) float64 {
+	total := 0.0
+	if ok {
+		<caret>
+	}
+	return total
+}
+--- paste
+    for _, s := range samples {
+        total += s
+    }
+--- keys
+{PASTE}
+
+=== I03 | indent | paste of a fragment in the middle of a line
+--- code
+package scrape
+
+import "time"
+
+func timeout(interval time.Duration) time.Duration {
+	return <caret>
+}
+--- paste inline
+interval - 500*time.Millisecond
+--- keys
+{PASTE}
+
+=== I04 | indent | paste of a top-level function with indentation
+--- code
+package scrape
+
+type Target struct{ labels map[string]string }
+
+<caret>
+--- paste
+	func (t *Target) Labels() map[string]string {
+		return t.labels
+	}
+--- keys
+{PASTE}
+
+=== I05 | indent | '}' on its own line dedents
+--- code
+package scrape
+
+func count(xs []int) int {
+	n := 0
+	for _, x := range xs {
+		n += x
+		<caret>
+	return n
+}
+--- keys
+}
+
+=== I06 | indent | '}' closing a badly spaced one-line block
+--- code
+package scrape
+
+func clamp(total int) int {
+	if total>0 {   total=1   <caret>
+	return total
+}
+--- keys
+}
+
+# ---------------------------------------------------------------- formatting
+
+=== F01 | format | Reformat Code on operators and braces
+gofmt: yes
+note: Ctrl+Alt+L. Compare with the gofmt field of the scenario JSON.
+--- code
+package scrape
+
+func next(total int,limit int)int{
+	<caret>total=total+1
+	if total>limit{
+		return limit
+	}
+	return total
+}
+--- keys
+{ACTION:ReformatCode}
+
+=== F02 | format | Reformat Code aligns struct fields, tags and comments
+gofmt: yes
+--- code
+package config
+
+import "time"
+
+type ScrapeConfig struct {
+	<caret>JobName string `yaml:"job_name"` // the job
+	ScrapeInterval time.Duration `yaml:"scrape_interval,omitempty"`
+	HonorLabels bool `yaml:"honor_labels,omitempty"` // keep target labels
+	SampleLimit uint `yaml:"sample_limit,omitempty"`
+}
+--- keys
+{ACTION:ReformatCode}
+
+=== F03 | format | Reformat Code aligns a const block
+gofmt: yes
+--- code
+package scrape
+
+type TargetHealth string
+
+const (
+	<caret>HealthUnknown TargetHealth = "unknown"
+	HealthGood TargetHealth = "up"
+	HealthBad TargetHealth = "down"
+)
+--- keys
+{ACTION:ReformatCode}
+
+=== F04 | format | Reformat Code on a map literal and spaces for indentation
+gofmt: yes
+--- code
+package labels
+
+func defaults() map[string]string {
+    m := map[string]string{
+        "job": "node",
+        "instance":"localhost:9090",
+    }
+    <caret>return m
+}
+--- keys
+{ACTION:ReformatCode}
+
+=== F06 | format | save of a badly formatted file (actions on save)
+gofmt: yes
+note: GoLand: Settings | Tools | Actions on Save | Reformat code is OFF by default, so GoLand is expected to keep the text. The plugin formats on save by default (GoSettings.formatOnSave).
+note: The keys first type `*2` at the end of the line: a save of an unmodified document runs no actions on save; gofmt below is of the text before that edit.
+--- code
+package scrape
+
+func next(total int)int{
+	total=total+1<caret>
+	return total
+}
+--- keys
+*2{SAVE}
+
+# ---------------------------------------------------------------- Extend / Shrink Selection
+
+=== S01 | select | Ctrl+W from an identifier inside a call in an if condition
+steps: yes
+--- code
+package scrape
+
+type cache struct{}
+
+func (c *cache) forEachStale(f func(string) bool) bool { return true }
+
+func run(c *cache) {
+	if c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {
+		return
+	}
+}
+--- keys
+{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}
+
+=== S02 | select | Ctrl+W inside a string literal
+steps: yes
+--- code
+package scrape
+
+import "errors"
+
+func reloadErr() error {
+	return errors.New("scrape pool re<caret>load failed")
+}
+--- keys
+{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}
+
+=== S03 | select | Ctrl+W inside a struct tag
+steps: yes
+--- code
+package config
+
+type GlobalConfig struct {
+	ScrapeInterval string `yaml:"scrape_in<caret>terval,omitempty" json:"interval"`
+}
+--- keys
+{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}
+
+=== S04 | select | Ctrl+W four times, then Ctrl+Shift+W twice
+steps: yes
+--- code
+package scrape
+
+func ratio(added, total int) float64 {
+	return float64(added) / float64(to<caret>tal+1)
+}
+--- keys
+{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorSelectWord}{ACTION:EditorUnSelectWord}{ACTION:EditorUnSelectWord}
+
+# ---------------------------------------------------------------- comments
+
+=== K01 | comment | Ctrl+/ on one line (caret in the middle)
+--- code
+package scrape
+
+func run() int {
+	n := 1
+	n += lo<caret>ad()
+	return n
+}
+
+func load() int { return 0 }
+--- keys
+{ACTION:CommentByLineComment}
+
+=== K02 | comment | Ctrl+/ on three selected lines
+--- code
+package scrape
+
+func run() int {
+	n := 1
+<selection>	n += 2
+	n *= 3
+	n -= 4
+</selection><caret>	return n
+}
+--- keys
+{ACTION:CommentByLineComment}
+
+=== K03 | comment | Ctrl+/ uncomments selected lines
+--- code
+package scrape
+
+func run() int {
+	n := 1
+	<selection>// n += 2
+	// n *= 3<caret></selection>
+	return n
+}
+--- keys
+{ACTION:CommentByLineComment}
+
+=== K04 | comment | Ctrl+Shift+/ on a selected expression
+--- code
+package scrape
+
+func next(total, step int) int {
+	return total + <selection>step*2<caret></selection>
+}
+--- keys
+{ACTION:CommentByBlockComment}
+
+# ---------------------------------------------------------------- duplicate / move
+
+=== L01 | lines | Duplicate Line
+--- code
+package scrape
+
+func labels() []string {
+	ls := []string{}
+	ls = append(ls, "j<caret>ob")
+	return ls
+}
+--- keys
+{ACTION:EditorDuplicate}
+
+=== L03 | lines | Move Line Up into the block above
+--- code
+package scrape
+
+func run(ok bool) int {
+	n := 0
+	if ok {
+		n++
+	}
+	n <caret>+= 2
+	return n
+}
+--- keys
+{ACTION:MoveLineUp}
+
+=== L04 | lines | Move Statement Up past an if block
+--- code
+package scrape
+
+func run(ok bool) int {
+	n := 0
+	if ok {
+		n++
+	}
+	n <caret>+= 2
+	return n
+}
+--- keys
+{ACTION:MoveStatementUp}
+
+=== L05 | lines | Move Statement Down of a whole function
+--- code
+package scrape
+
+func fi<caret>rst() int {
+	return 1
+}
+
+func second() int {
+	return 2
+}
+--- keys
+{ACTION:MoveStatementDown}
+
+# ---------------------------------------------------------------- Optimize Imports
+
+=== O01 | imports | Optimize Imports removes unused imports
+--- code
+package scrape
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"time"
+)
+
+func run(ctx context.Context) error {
+	<caret>return fmt.Errorf("timeout %v", time.Second)
+}
+--- keys
+{ACTION:OptimizeImports}
+
+=== O02 | imports | Optimize Imports with unsorted, aliased and blank imports
+--- code
+package scrape
+
+import (
+	"time"
+	"errors"
+	_ "embed"
+	stdlog "log"
+	"bytes"
+)
+
+func run() error {
+	<caret>stdlog.Println(time.Now())
+	return errors.New("x")
+}
+--- keys
+{ACTION:OptimizeImports}
+
+=== O03 | imports | Optimize Imports leaves one import of a group
+--- code
+package scrape
+
+import (
+	"fmt"
+	"os"
+)
+
+func run() {
+	<caret>fmt.Println()
+}
+--- keys
+{ACTION:OptimizeImports}
+
+# ---------------------------------------------------------------- Surround With (Ctrl+Alt+T)
+
+=== W01 | surround | items offered for two selected statements, apply 'if'
+query: surround
+--- code
+package scrape
+
+func run(ok bool) int {
+	n := 0
+<selection>	n++
+	n *= 2
+</selection><caret>	return n
+}
+--- keys
+{SURROUND:if}
+
+=== W02 | surround | items offered for a selected expression, apply '(expr)'
+query: surround
+--- code
+package scrape
+
+func ratio(added, total int) int {
+	return <selection>added + total<caret></selection>
+}
+--- keys
+{SURROUND:(}
+
+=== W03 | surround | items offered with the caret on a statement (no selection)
+query: surround
+--- code
+package scrape
+
+func run() int {
+	n := 0
+	n <caret>+= 2
+	return n
+}
+
+# ---------------------------------------------------------------- Generate (Alt+Insert)
+
+=== G01 | generate | items with the caret inside a struct type
+query: generate
+--- code
+package scrape
+
+type Target struct {
+	labels map[string]string
+	<caret>health string
+}
+
+=== G02 | generate | items at the top level of a file
+query: generate
+--- code
+package scrape
+
+type Target struct {
+	labels map[string]string
+}
+
+<caret>
+
+=== G03 | generate | items inside a function body
+query: generate
+--- code
+package scrape
+
+func run() int {
+	n := 0
+	<caret>
+	return n
+}
+
+# ---------------------------------------------------------------- navigation
+
+=== N01 | nav | Ctrl+B on a local variable
+query: declaration
+--- code
+package scrape
+
+func run(added int) int {
+	seriesAdded := added * 2
+	return se<caret>riesAdded
+}
+
+=== N02 | nav | Ctrl+B on a method declared in another file of the package
+query: declaration
+--- extra pool.go
+package scrape
+
+type scrapePool struct{ targets []string }
+
+// reload replaces the targets of the pool.
+func (sp *scrapePool) reload(targets []string) {
+	sp.targets = targets
+}
+--- code
+package scrape
+
+func apply(sp *scrapePool) {
+	sp.re<caret>load(nil)
+}
+
+=== N03 | nav | Ctrl+B on a standard library function
+query: declaration
+--- code
+package labels
+
+import "strings"
+
+func reserved(name string) bool {
+	return strings.Has<caret>Prefix(name, "__")
+}
+
+=== N04 | nav | Ctrl+B on an import path
+query: declaration
+--- code
+package web
+
+import "net/ht<caret>tp"
+
+var _ = http.StatusOK
+
+=== N06 | nav | Ctrl+B on an embedded field in a selector
+query: declaration
+--- code
+package scrape
+
+import "sync"
+
+type Target struct {
+	sync.RWMutex
+	labels map[string]string
+}
+
+func (t *Target) Labels() map[string]string {
+	t.RW<caret>Mutex.RLock()
+	defer t.RUnlock()
+	return t.labels
+}
+
+=== N07 | nav | Ctrl+B on a method promoted from an embedded field
+query: declaration
+--- code
+package scrape
+
+import "sync"
+
+type Target struct {
+	sync.RWMutex
+	labels map[string]string
+}
+
+func (t *Target) Labels() map[string]string {
+	t.RLock()
+	defer t.RUn<caret>lock()
+	return t.labels
+}
+
+=== N09 | nav | Ctrl+Alt+B on an interface type
+query: implementations
+--- extra impl.go
+package storage
+
+type memAppender struct{}
+
+func (memAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return ref, nil }
+func (memAppender) Commit() error                                         { return nil }
+
+type nopAppender struct{}
+
+func (*nopAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return 0, nil }
+func (*nopAppender) Commit() error                                          { return nil }
+--- code
+package storage
+
+// Appender provides batched appends against a storage.
+type Appen<caret>der interface {
+	Append(ref uint64, t int64, v float64) (uint64, error)
+	Commit() error
+}
+
+=== N10 | nav | Ctrl+Alt+B on an interface method at a call site
+query: implementations
+--- extra impl.go
+package storage
+
+type memAppender struct{}
+
+func (memAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return ref, nil }
+func (memAppender) Commit() error                                         { return nil }
+
+type nopAppender struct{}
+
+func (*nopAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return 0, nil }
+func (*nopAppender) Commit() error                                          { return nil }
+--- code
+package storage
+
+type Appender interface {
+	Append(ref uint64, t int64, v float64) (uint64, error)
+	Commit() error
+}
+
+func flush(app Appender) error {
+	return app.Com<caret>mit()
+}
+
+=== N11 | nav | Ctrl+U from an implementing method to the interface method
+query: super
+--- extra api.go
+package storage
+
+// Appender provides batched appends against a storage.
+type Appender interface {
+	Append(ref uint64, t int64, v float64) (uint64, error)
+	Commit() error
+}
+--- code
+package storage
+
+type memAppender struct{}
+
+func (memAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return ref, nil }
+
+func (memAppender) Com<caret>mit() error { return nil }
+
+=== N12 | nav | Alt+F7 on a method used in two files
+query: usages
+--- extra loop.go
+package scrape
+
+func loop(sp *scrapePool) {
+	sp.reload(nil)
+	for i := 0; i < 3; i++ {
+		sp.reload([]string{"a"})
+	}
+}
+--- code
+package scrape
+
+type scrapePool struct{ targets []string }
+
+func (sp *scrapePool) rel<caret>oad(targets []string) {
+	sp.targets = targets
+}
+
+func start(sp *scrapePool) {
+	sp.reload(nil)
+}
+
+=== N13 | nav | Alt+F7 on a struct field
+query: usages
+--- code
+package scrape
+
+type Target struct {
+	hea<caret>lth  string
+	labels map[string]string
+}
+
+func (t *Target) up() bool { return t.health == "up" }
+
+func (t *Target) report(h string) {
+	t.health = h
+	_ = Target{health: h}
+}
+
+=== N14 | nav | Ctrl+Shift+F7 on a local variable (reads and writes)
+query: highlight
+--- code
+package scrape
+
+func sum(samples []float64) float64 {
+	to<caret>tal := 0.0
+	for _, s := range samples {
+		total += s
+	}
+	if total < 0 {
+		total = 0
+	}
+	return total
+}
+
+=== N15 | nav | Ctrl+Shift+F7 on `return` (exit points)
+query: highlight
+--- code
+package scrape
+
+import "errors"
+
+func check(n int) (int, error) {
+	if n < 0 {
+		return 0, errors.New("negative")
+	}
+	if n > 100 {
+		panic("too large")
+	}
+	re<caret>turn n, nil
+}
+
+=== N16 | nav | Ctrl+F12 file structure
+query: structure
+--- code
+package scrape
+
+import (
+	"context"
+	"sync"
+)
+
+// TargetHealth describes the health state of a target.
+type TargetHealth string
+
+const (
+	HealthUnknown TargetHealth = "unknown"
+	HealthGood    TargetHealth = "up"
+)
+
+var defaultHealth = HealthUnknown
+
+// Scraper scrapes one target.
+type Scraper interface {
+	Scrape(ctx context.Context) error
+}
+
+// Target refers to a singular HTTP or HTTPS endpoint.
+type Target struct {
+	mtx    sync.RWMutex
+	labels map[string]string
+	health TargetHealth
+}
+
+func NewTarget(labels map[string]string) *Target { return &Target{labels: labels} }
+
+func (t *Target) Health() TargetHealth { return t.health }
+
+func (t *Target) Scrape(ctx context.Context) error { return nil }
+
+type pool[T any] struct{ items []T }
+
+func (p *pool[T]) Add(item T) { p.items = append(p.items, item) }
+
+func <caret>run() {}
+
+# ---------------------------------------------------------------- hints
+
+=== H01 | hints | Ctrl+P on the second argument of a method call
+query: paraminfo
+--- code
+package scrape
+
+import "time"
+
+type scrapeLoop struct{}
+
+func (sl *scrapeLoop) report(start time.Time, duration time.Duration, scraped, added int, scrapeErr error) {}
+
+func run(sl *scrapeLoop) {
+	sl.report(time.Now(), <caret>time.Second, 1, 2, nil)
+}
+
+=== H02 | hints | Ctrl+P on a variadic argument of fmt.Errorf
+query: paraminfo
+--- code
+package rules
+
+import "fmt"
+
+func wrap(name string, err error) error {
+	return fmt.Errorf("group %q: %w", name, <caret>err)
+}
+
+=== H03 | hints | Ctrl+P on a generic function call
+query: paraminfo
+--- code
+package util
+
+func Map[T, U any](items []T, f func(T) U) []U {
+	out := make([]U, 0, len(items))
+	for _, it := range items {
+		out = append(out, f(it))
+	}
+	return out
+}
+
+func lengths(names []string) []int {
+	return Map(names, <caret>)
+}
+
+=== H04 | hints | Ctrl+P on a standard library call
+query: paraminfo
+--- code
+package labels
+
+import "strings"
+
+func pad(name string) string {
+	return strings.Repeat(name, <caret>3)
+}
+
+=== H06 | hints | Ctrl+Q on a standard library function
+query: quickdoc
+--- code
+package labels
+
+import "strings"
+
+func trim(name string) string {
+	return strings.Trim<caret>Prefix(name, "__")
+}
+
+=== H07 | hints | Ctrl+Q on a project function with a doc comment
+query: quickdoc
+--- code
+package scrape
+
+import "time"
+
+// jitter returns a deterministic offset in [0, interval) for the target with the given hash,
+// so that targets of one job are not scraped at the same moment.
+func jitter(interval time.Duration, hash uint64) time.Duration {
+	return time.Duration(hash % uint64(interval))
+}
+
+func run() time.Duration {
+	return jit<caret>ter(time.Minute, 42)
+}
+
+=== H08 | hints | Ctrl+Q on a struct type
+query: quickdoc
+--- code
+package scrape
+
+import "sync"
+
+// Target refers to a singular HTTP or HTTPS endpoint.
+type Target struct {
+	mtx    sync.RWMutex
+	labels map[string]string // the labels after relabeling
+	health string
+}
+
+func newTarget() *Tar<caret>get { return &Target{} }
+
+=== H09 | hints | Ctrl+Shift+P on an index expression
+query: exprtype
+--- code
+package labels
+
+func value(lset map[string][]string) string {
+	vs := lset["job"<caret>]
+	return vs[0]
+}
+
+=== H11 | hints | inlay hints in a function with literal arguments
+query: inlays
+--- code
+package scrape
+
+import "time"
+
+type scrapeLoop struct{}
+
+func (sl *scrapeLoop) report(start time.Time, duration time.Duration, scraped, added int, scrapeErr error) {}
+
+func newLoop(interval time.Duration, limit int, honorLabels bool, name string) *scrapeLoop {
+	return &scrapeLoop{}
+}
+
+func run() {
+	sl := newLoop(15*time.Second, 1000, true, "node")
+	sl.report(time.Now(), 0, 10, 5, nil)
+	<caret>for i, t := range []string{"a", "b"} {
+		_, _ = i, t
+	}
+}
+
+=== H12 | hints | inlay hints of an unkeyed struct literal and constants
+query: inlays
+--- code
+package model
+
+type Sample struct {
+	T int64
+	V float64
+}
+
+const (
+	defaultLimit = 1 << 10
+	maxLabels    = defaultLimit * 2
+)
+
+func samples() []Sample {
+	<caret>return []Sample{{1000, 0.5}, {2000, 1.5}}
+}

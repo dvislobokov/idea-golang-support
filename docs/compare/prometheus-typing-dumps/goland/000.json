@@ -1,0 +1,114 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "E01",
+   "category": "enter",
+   "title": "Enter between the braces of an if",
+   "query": null,
+   "text": "package scrape\n\nimport \"errors\"\n\nfunc checkLabels(lset map[string]string) error {\n\tif len(lset) == 0 {\n\t\t<caret>\n\t}\n\treturn errors.New(\"no labels\")\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2108
+  },
+  {
+   "id": "E02",
+   "category": "enter",
+   "title": "'{' then Enter after a range header",
+   "query": null,
+   "text": "package scrape\n\ntype Target struct{ URL string }\n\nfunc urls(targets []*Target) []string {\n\tvar out []string\n\tfor _, t := range targets {\n\t\t<caret>\n\t}\n\treturn out\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2154
+  },
+  {
+   "id": "E03",
+   "category": "enter",
+   "title": "Enter in the middle of an expression",
+   "query": null,
+   "text": "package scrape\n\nfunc total(added, seriesAdded int) int {\n\tsum := added + \n\t\t<caret>seriesAdded\n\treturn sum\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1796
+  },
+  {
+   "id": "E04",
+   "category": "enter",
+   "title": "Enter inside a line comment",
+   "query": null,
+   "text": "package scrape\n\nfunc appendLimit(limit int) int {\n\t// appendLimit bounds the number of samples\n\t//<caret>appended per scrape.\n\treturn limit\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1831
+  },
+  {
+   "id": "E05",
+   "category": "enter",
+   "title": "Enter inside an interpreted string",
+   "query": null,
+   "text": "package scrape\n\nimport \"errors\"\n\nfunc reloadErr() error {\n\treturn errors.New(\"scrape pool \" +\n\t\t\"<caret>reload failed\")\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1792
+  },
+  {
+   "id": "E06",
+   "category": "enter",
+   "title": "Enter inside a raw string",
+   "query": null,
+   "text": "package rules\n\nconst query = `sum by (job) (\n<caret>rate(http_requests_total[5m]))`\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [
+    "cleanup: JavaException: java.nio.file.FileSystemException: C:\\Users\\dvislobokov\\idea-golang-support\\build\\compare\\prometheus-goland\\typingcmp\\e06: Процесс не может получить доступ к файлу, так как этот файл занят другим процессом"
+   ],
+   "error": null,
+   "durationMs": 1849
+  },
+  {
+   "id": "E07",
+   "category": "enter",
+   "title": "Enter after a comma in a struct literal",
+   "query": null,
+   "text": "package config\n\nimport \"time\"\n\ntype ScrapeConfig struct {\n\tJobName        string\n\tScrapeInterval time.Duration\n}\n\nfunc defaults() *ScrapeConfig {\n\treturn &ScrapeConfig{JobName: \"node\",\n\t\t<caret>ScrapeInterval: 15 * time.Second}\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [
+    "cleanup: JavaException: java.nio.file.FileSystemException: C:\\Users\\dvislobokov\\idea-golang-support\\build\\compare\\prometheus-goland\\typingcmp\\e07: Процесс не может получить доступ к файлу, так как этот файл занят другим процессом"
+   ],
+   "error": null,
+   "durationMs": 1875
+  },
+  {
+   "id": "E08",
+   "category": "enter",
+   "title": "Enter after a comma in an argument list",
+   "query": null,
+   "text": "package scrape\n\nimport \"log/slog\"\n\nfunc logFailure(l *slog.Logger, err error) {\n\tl.Debug(\"Scrape failed\",\n\t\t<caret>\"err\", err)\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1846
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+{"id":"rename-file","intentions":["Generate type from JSON"],"refactorThis":["Move File…","Copy File…","Update Syntax…"],"done":"rename run","usages":0,"conflicts":[],"note":null,"dialog":{"title":"Rename","texts":["Rename","Rename","Rename the test file 'util_test.go' as well?","[Don't ask again]","[Yes]","[No]"]}}

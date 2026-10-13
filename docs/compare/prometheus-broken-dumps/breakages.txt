@@ -1,0 +1,119 @@
+## undefined-name
+# 01: UndeclaredName: typo in a local variable name in defer
+util/runutil/runutil.go|defer tick.Stop()|defer tik.Stop()
+# 02: UndeclaredName: undeclared argument name in a call
+notifier/manager.go|n.targetUpdateLoop(tsets)|n.targetUpdateLoop(tsetz)
+# 03: UndeclaredName: typo in an argument of fmt.Fprintf in promtool
+cmd/promtool/sd.go|sdJobName)\n\t\tfor|sdJobNam)\n\t\tfor
+# 04: MissingFieldOrMethod: typo in a method selector
+notifier/manager.go|ams.cleanSendLoops(ams.ams...)|ams.cleanSendLoop(ams.ams...)
+# 05: MissingFieldOrMethod: typo in a field selector
+scrape/scrape.go|ticker = time.NewTicker(sl.interval)|ticker = time.NewTicker(sl.intervall)
+# 06: MissingFieldOrMethod: typo in a field of a generic receiver
+web/api/v1/search.go|batch := make([]T, 0, s.batchSize)|batch := make([]T, 0, s.batchSizes)
+# 07: MissingFieldOrMethod: typo in a field of a decoded histogram
+promql/engine.go|(h != nil && value.IsStaleNaN(h.Sum))|(h != nil && value.IsStaleNaN(h.Sumn))
+# 08: MissingFieldOrMethod: typo in a method of the label builder
+model/textparse/promparse.go|\tp.builder.Reset()\n\tmetricName := unreplace(s[p.offsets[0]-p.start|\tp.builder.Reest()\n\tmetricName := unreplace(s[p.offsets[0]-p.start
+# 09: UnexportedName: unexported function of another package (chunks.newCRC32)
+tsdb/index/index.go|crc32:           newCRC32(),|crc32:           chunks.newCRC32(),
+# 10: UnexportedName: unexported variable of the standard library (crc32.castagnoliTable)
+storage/remote/chunked.go|castagnoliTable = crc32.MakeTable(crc32.Castagnoli)|castagnoliTable = crc32.castagnoliTable
+## type-mismatch
+# 11: IncompatibleAssign: string assigned to an error-typed map element
+util/annotations/annotations.go|(*a)[err.Error()] = err|(*a)[err.Error()] = err.Error()
+# 12: IncompatibleAssign: uint64 assigned to a float64 field
+tsdb/chunkenc/xor.go|it.val = math.Float64frombits(v)|it.val = v
+# 13: IncompatibleAssign: untyped int assigned to a slice field
+storage/remote/queue_manager.go|\tdefer q.batchMtx.Unlock()\n\tq.batch = nil\n|\tdefer q.batchMtx.Unlock()\n\tq.batch = 0\n
+# 14: IncompatibleAssign: a single group assigned to a slice map element
+cmd/promtool/sd.go|sdCheckResults[tg.Source] = append(sdCheckResults[tg.Source], tg)|sdCheckResults[tg.Source] = tg
+# 15: IncompatibleAssign: string returned where error is expected
+util/annotations/annotations.go|\t\treturn anno\n|\t\treturn metricName\n
+# 16: IncompatibleAssign: model.LabelName passed where string is expected (named vs underlying)
+model/relabel/relabel.go|lb.Get(string(ln))|lb.Get(ln)
+# 17: IncompatibleAssign: int passed where string is expected
+model/relabel/relabel.go|strings.Join(values, cfg.Separator)|strings.Join(values, len(cfg.Separator))
+# 18: IncompatibleAssign: Config value passed where *Config is expected
+model/relabel/relabel.go|keep = relabel(cfg, lb)|keep = relabel(*cfg, lb)
+# 19: IncompatibleAssign: SearchResultSet passed where SearchResult is expected inside a generic method
+web/api/v1/search.go|s.toResult(s.rs.At())|s.toResult(s.rs)
+# 20: MismatchedTypes: string compared with an untyped int
+config/config.go|strings.ToLower(goGCEnv) == "off"|strings.ToLower(goGCEnv) == 0
+## arity
+# 21: WrongArgCount: too few arguments in a closure call
+rules/group.go|eval(i, rule, nil)|eval(i, rule)
+# 22: WrongArgCount: too many arguments in an interface method call
+rules/group.go|ctrl.Done(ctx)|ctrl.Done(ctx, g)
+# 23: WrongArgCount: too few arguments in a method call on an interface
+cmd/promtool/sd.go|d.Run(ctx, targetGroupChan)|d.Run(targetGroupChan)
+# 24: WrongResultCount: too few results in return
+util/notifications/notifications.go|return nil, nil, false|return nil, false
+# 25: WrongAssignCount: three variables for two results
+tsdb/index/postings.go|p, ok := newMergedPostings(its)|p, ok, _ := newMergedPostings(its)
+# 26: MissingReturn: function body does not end with a return
+rules/group.go|func (g *Group) Name() string { return g.name }|func (g *Group) Name() string { _ = g.name }
+## interface
+# 27: InvalidIfaceAssign: value instead of pointer, Close has a pointer receiver
+promql/query_logger.go|var _ io.Closer = &ActiveQueryTracker{}|var _ io.Closer = ActiveQueryTracker{}
+# 28: InvalidIfaceAssign: value instead of pointer for the storage interface
+storage/remote/storage.go|var _ storage.Storage = &Storage{}|var _ storage.Storage = Storage{}
+# 29: InvalidIfaceAssign: method renamed, querierAdapter no longer implements Searcher
+storage/generic.go|func (q *querierAdapter) SearchLabelNames(|func (q *querierAdapter) SearchLabelName(
+# 30: InvalidIfaceAssign: method renamed, HeadAndOOOQuerier no longer implements storage.Searcher
+tsdb/ooo_head_read.go|func (q *HeadAndOOOQuerier) SearchLabelValues(|func (q *HeadAndOOOQuerier) SearchLabelValue(
+## unused-redeclared
+# 31: UnusedVar: unused local variable
+model/relabel/relabel.go|\tvalues := va[:0]\n|\tvalues := va[:0]\n\tn := len(values)\n
+# 32: UnusedImport: package imported and not used
+util/runutil/runutil.go|import "time"|import (\n\t"os"\n\t"time"\n)
+# 33: UnusedImport: package imported and not used
+model/relabel/relabel.go|\t"strings"\n|\t"strings"\n\t"sort"\n
+# 34: DuplicateDecl: variable redeclared in the same block (go/types also adds an 'other declaration' note, so the oracle lists 2 entries)
+model/relabel/relabel.go|\tvar va [16]string\n|\tvar va [16]string\n\tvar va int\n
+# 35: NoNewVar: := with no new variables on the left
+model/relabel/relabel.go|\tvalues := va[:0]\n|\tvalues := va[:0]\n\tvalues := va[:0]\n
+# 36: NoNewVar: := repeated for a channel variable
+cmd/promtool/sd.go|\ttargetGroupChan := make(chan []*targetgroup.Group)\n|\ttargetGroupChan := make(chan []*targetgroup.Group)\n\ttargetGroupChan := make(chan []*targetgroup.Group)\n
+## control-flow
+# 37: MisplacedContinue: continue inside a switch that is not in a loop
+model/relabel/relabel.go|\tcase Drop:\n\t\tif cfg.Regex.MatchString(val) {\n\t\t\treturn false|\tcase Drop:\n\t\tif cfg.Regex.MatchString(val) {\n\t\t\tcontinue
+# 38: MisplacedBreak: break outside a loop, switch or select
+util/annotations/annotations.go|\tif metricName == "" {\n\t\treturn anno|\tif metricName == "" {\n\t\tbreak
+# 39: MisplacedContinue: continue after the range loop, outside any loop
+cmd/promtool/sd.go|\t\t}\n\t\treturn failureExitCode\n\t}\n\n\ttargetGroupChan|\t\t}\n\t\tcontinue\n\t}\n\n\ttargetGroupChan
+# 40: vet-only: unreachable (statement after return in the retry loop)
+util/runutil/runutil.go|\t\t\treturn nil\n|\t\t\treturn nil\n\t\t\terr = nil\n
+## generics
+# 41: WrongTypeArgCount: too many type arguments for errors.AsType
+util/annotations/annotations.go|errors.AsType[annoError](val)|errors.AsType[annoError, error](val)
+# 42: CannotInferTypeArgs: untyped nil gives nothing to infer T from
+model/histogram/histogram.go|to.NegativeSpans = clearIfNotNil(to.NegativeSpans)|to.NegativeSpans = clearIfNotNil(nil)
+# 43: InvalidTypeArg: listPostings (pointer receivers) does not satisfy Postings
+tsdb/index/postings.go|p.mtx.RUnlock()\n\treturn Merge(ctx, its...)|p.mtx.RUnlock()\n\treturn Merge(ctx, lps...)
+# 44: WrongTypeArgCount: too many type arguments for appendWithExponentialGrowth
+tsdb/index/postings.go|list := appendWithExponentialGrowth(vm, id)|list := appendWithExponentialGrowth[storage.SeriesRef, storage.SeriesRef](vm, id)
+## channels
+# 45: InvalidSend: send on a receive-only channel in select
+util/runutil/runutil.go|case <-stopc:|case stopc <- struct{}{}:
+# 46: InvalidReceive: receive from a send-only channel
+scrape/metrics.go|\tch <- mc.CacheBytes|\t<-ch
+# 47: InvalidRangeExpr: range over a mutex
+notifier/manager.go|for id, tgroup := range tgs {|for id, tgroup := range n.mtx {
+# 48: InvalidSend: send on a receive-only channel in a labeled select
+storage/remote/queue_manager.go|case <-done:\n\t\t\tbreak loop|case done <- struct{}{}:\n\t\t\tbreak loop
+# 49: InvalidRangeExpr: range over a pointer to struct
+rules/group.go|for i, rule := range g.rules {\n\t\t\t// Check if the group has been stopped.|for i, rule := range g {\n\t\t\t// Check if the group has been stopped.
+## struct-literal
+# 50: MissingLitField: misspelled field in composite literal
+model/relabel/relabel.go|Separator:   ";",|Seperator:   ";",
+# 51: MissingLitField: unknown field in composite literal
+discovery/manager.go|updatert:    5 * time.Second,|updater:     5 * time.Second,
+# 52: MissingLitField: unknown field in composite literal
+rules/manager.go|QueryOffset:       (*time.Duration)(rg.QueryOffset),|QueryOfset:        (*time.Duration)(rg.QueryOffset),
+# 53: MissingLitField: unknown field in a struct from another package
+model/textparse/promparse.go|\t\tName: metricName,\n|\t\tNam: metricName,\n
+# 54: MixedStructLit: positional element among keyed ones
+rules/manager.go|Annotations:  alert.Annotations,|alert.Annotations,
+# 55: MixedStructLit: positional element among keyed ones
+notifier/manager.go|opts:          o,|o,

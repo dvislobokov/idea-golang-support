@@ -1,0 +1,23 @@
+--- a/util/strutil/strconv.go
++++ b/util/strutil/strconv.go
+@@ -46,20 +46,3 @@
+ 	return invalidLabelCharRE.ReplaceAllString(name, "_")
+ }
+ 
+-// SanitizeFullLabelName replaces any invalid character with an underscore, and
+-// if given an empty string, returns a string containing a single underscore.
+-func SanitizeFullLabelName(name string) string {
+-	if name == "" {
+-		return "_"
+-	}
+-	var validSb strings.Builder
+-	for i, b := range name {
+-		if (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || b == '_' || (b >= '0' && b <= '9' && i > 0) {
+-			validSb.WriteRune(b)
+-		} else {
+-			validSb.WriteRune('_')
+-		}
+-	}
+-	return validSb.String()
+-}
+-

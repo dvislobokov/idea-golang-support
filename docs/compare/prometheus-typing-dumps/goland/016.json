@@ -1,0 +1,323 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "P03",
+   "category": "pairs",
+   "title": "backtick struct tag with quotes inside",
+   "query": null,
+   "text": "package config\n\nimport \"time\"\n\ntype GlobalConfig struct {\n\tScrapeInterval time.Duration `yaml:\"scrape_interval\"`<caret>\n}\n",
+   "steps": [
+    {
+     "key": "`",
+     "line": "\tScrapeInterval time.Duration `<caret>`",
+     "selection": null
+    },
+    {
+     "key": "y",
+     "line": "\tScrapeInterval time.Duration `y<caret>`",
+     "selection": null
+    },
+    {
+     "key": "a",
+     "line": "\tScrapeInterval time.Duration `ya<caret>`",
+     "selection": null
+    },
+    {
+     "key": "m",
+     "line": "\tScrapeInterval time.Duration `yam<caret>`",
+     "selection": null
+    },
+    {
+     "key": "l",
+     "line": "\tScrapeInterval time.Duration `yaml<caret>`",
+     "selection": null
+    },
+    {
+     "key": ":",
+     "line": "\tScrapeInterval time.Duration `yaml:<caret>`",
+     "selection": null
+    },
+    {
+     "key": "\"",
+     "line": "\tScrapeInterval time.Duration `yaml:\"<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "s",
+     "line": "\tScrapeInterval time.Duration `yaml:\"s<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "c",
+     "line": "\tScrapeInterval time.Duration `yaml:\"sc<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "r",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scr<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "a",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scra<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "p",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrap<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "e",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "_",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "i",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_i<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "n",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_in<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "t",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_int<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "e",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_inte<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "r",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_inter<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "v",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_interv<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "a",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_interva<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "l",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_interval<caret>\"`",
+     "selection": null
+    },
+    {
+     "key": "\"",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_interval\"<caret>`",
+     "selection": null
+    },
+    {
+     "key": "`",
+     "line": "\tScrapeInterval time.Duration `yaml:\"scrape_interval\"`<caret>",
+     "selection": null
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 5338
+  },
+  {
+   "id": "P04",
+   "category": "pairs",
+   "title": "'[' and '{' of a slice literal",
+   "query": null,
+   "text": "package scrape\n\nfunc names() []string {\n\tls := []string{\"job\"}<caret>\n\treturn ls\n}\n",
+   "steps": [
+    {
+     "key": "[",
+     "line": "\tls := [<caret>]",
+     "selection": null
+    },
+    {
+     "key": "]",
+     "line": "\tls := []<caret>",
+     "selection": null
+    },
+    {
+     "key": "s",
+     "line": "\tls := []s<caret>",
+     "selection": null
+    },
+    {
+     "key": "t",
+     "line": "\tls := []st<caret>",
+     "selection": null
+    },
+    {
+     "key": "r",
+     "line": "\tls := []str<caret>",
+     "selection": null
+    },
+    {
+     "key": "i",
+     "line": "\tls := []stri<caret>",
+     "selection": null
+    },
+    {
+     "key": "n",
+     "line": "\tls := []strin<caret>",
+     "selection": null
+    },
+    {
+     "key": "g",
+     "line": "\tls := []string<caret>",
+     "selection": null
+    },
+    {
+     "key": "{",
+     "line": "\tls := []string{<caret>}",
+     "selection": null
+    },
+    {
+     "key": "\"",
+     "line": "\tls := []string{\"<caret>\"}",
+     "selection": null
+    },
+    {
+     "key": "j",
+     "line": "\tls := []string{\"j<caret>\"}",
+     "selection": null
+    },
+    {
+     "key": "o",
+     "line": "\tls := []string{\"jo<caret>\"}",
+     "selection": null
+    },
+    {
+     "key": "b",
+     "line": "\tls := []string{\"job<caret>\"}",
+     "selection": null
+    },
+    {
+     "key": "\"",
+     "line": "\tls := []string{\"job\"<caret>}",
+     "selection": null
+    },
+    {
+     "key": "}",
+     "line": "\tls := []string{\"job\"}<caret>",
+     "selection": null
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4032
+  },
+  {
+   "id": "P05",
+   "category": "pairs",
+   "title": "rune quote",
+   "query": null,
+   "text": "package labels\n\nfunc sep() rune {\n\ts := ','<caret>\n\treturn s\n}\n",
+   "steps": [
+    {
+     "key": "'",
+     "line": "\ts := '<caret>'",
+     "selection": null
+    },
+    {
+     "key": ",",
+     "line": "\ts := ',<caret>'",
+     "selection": null
+    },
+    {
+     "key": "'",
+     "line": "\ts := ','<caret>",
+     "selection": null
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2094
+  },
+  {
+   "id": "P06",
+   "category": "pairs",
+   "title": "Backspace on an empty ()",
+   "query": null,
+   "text": "package scrape\n\nfunc run(sp interface{ reload() }) {\n\tsp.reload<caret>\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1790
+  },
+  {
+   "id": "P07",
+   "category": "pairs",
+   "title": "Backspace on an empty \"\"",
+   "query": null,
+   "text": "package scrape\n\nfunc job() string {\n\ts := <caret>\n\treturn s\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1777
+  },
+  {
+   "id": "P08",
+   "category": "pairs",
+   "title": "Backspace on an empty {} of a map literal",
+   "query": null,
+   "text": "package labels\n\nfunc empty() map[string]string {\n\tm := map[string]string<caret>\n\treturn m\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1768
+  },
+  {
+   "id": "P09",
+   "category": "pairs",
+   "title": "')' overtypes the existing closing parenthesis",
+   "query": null,
+   "text": "package scrape\n\ntype Config struct{}\n\nfunc apply(cfg *Config) {}\n\nfunc run(cfg *Config) {\n\tapply(cfg)<caret>\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1791
+  },
+  {
+   "id": "P10",
+   "category": "pairs",
+   "title": "':' and '=' after a name",
+   "query": null,
+   "text": "package scrape\n\nfunc run() int {\n\tn := 1<caret>\n\treturn n\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2229
+  }
+ ]
+}

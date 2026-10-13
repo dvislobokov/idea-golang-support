@@ -1,0 +1,12 @@
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -74,8 +74,7 @@
+ 			continue
+ 		}
+ 
+-		addr := lb.Get(model.AddressLabel)
+-		if err := config.CheckTargetAddress(model.LabelValue(addr)); err != nil {
++		if err := config.CheckTargetAddress(model.LabelValue(lb.Get(model.AddressLabel))); err != nil {
+ 			return nil, nil, err
+ 		}
+ 

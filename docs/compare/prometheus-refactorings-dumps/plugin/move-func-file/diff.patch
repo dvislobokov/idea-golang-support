@@ -1,0 +1,51 @@
+--- a/notifier/alert.go
++++ b/notifier/alert.go
+@@ -17,6 +17,8 @@
+ 	"fmt"
+ 	"time"
+ 
++	"github.com/prometheus/alertmanager/api/v2/models"
++
+ 	"github.com/prometheus/prometheus/model/labels"
+ 	"github.com/prometheus/prometheus/model/relabel"
+ )
+@@ -99,5 +101,14 @@
+ 		relabeledAlerts = append(relabeledAlerts, a)
+ 	}
+ 	return relabeledAlerts
++}
++
++func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {
++	apiLabelSet := models.LabelSet{}
++	modelLabelSet.Range(func(label labels.Label) {
++		apiLabelSet[label.Name] = label.Value
++	})
++
++	return apiLabelSet
+ }
+ 
+--- a/notifier/util.go
++++ b/notifier/util.go
+@@ -17,7 +17,6 @@
+ 	"github.com/go-openapi/strfmt"
+ 	"github.com/prometheus/alertmanager/api/v2/models"
+ 
+-	"github.com/prometheus/prometheus/model/labels"
+ )
+ 
+ func alertsToOpenAPIAlerts(alerts []*Alert) models.PostableAlerts {
+@@ -37,14 +36,5 @@
+ 	}
+ 
+ 	return openAPIAlerts
+-}
+-
+-func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {
+-	apiLabelSet := models.LabelSet{}
+-	modelLabelSet.Range(func(label labels.Label) {
+-		apiLabelSet[label.Name] = label.Value
+-	})
+-
+-	return apiLabelSet
+ }
+ 

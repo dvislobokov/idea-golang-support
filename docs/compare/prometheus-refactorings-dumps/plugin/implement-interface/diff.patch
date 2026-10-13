@@ -1,0 +1,20 @@
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -21,6 +21,7 @@
+ 	"io"
+ 	"log/slog"
+ 	"net/http"
++	"net/url"
+ 	"sync"
+ 	"time"
+ 
+@@ -270,5 +271,9 @@
+ 	}
+ 
+ 	return nil
++}
++
++func (s *sendLoop) url() *url.URL {
++	panic("not implemented")
+ }
+ 

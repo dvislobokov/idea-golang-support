@@ -1,0 +1,1329 @@
+[
+ {
+  "id": "E01",
+  "category": "enter",
+  "title": "Enter between the braces of an if",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport \"errors\"\n\nfunc checkLabels(lset map[string]string) error {\n\tif len(lset) == 0 {<caret>}\n\treturn errors.New(\"no labels\")\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "E02",
+  "category": "enter",
+  "title": "'{' then Enter after a range header",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\ntype Target struct{ URL string }\n\nfunc urls(targets []*Target) []string {\n\tvar out []string\n\tfor _, t := range targets <caret>\n\treturn out\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{",
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "E03",
+  "category": "enter",
+  "title": "Enter in the middle of an expression",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc total(added, seriesAdded int) int {\n\tsum := added + <caret>seriesAdded\n\treturn sum\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "E04",
+  "category": "enter",
+  "title": "Enter inside a line comment",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc appendLimit(limit int) int {\n\t// appendLimit bounds the number of samples<caret> appended per scrape.\n\treturn limit\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "E05",
+  "category": "enter",
+  "title": "Enter inside an interpreted string",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport \"errors\"\n\nfunc reloadErr() error {\n\treturn errors.New(\"scrape pool <caret>reload failed\")\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "E06",
+  "category": "enter",
+  "title": "Enter inside a raw string",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package rules\n\nconst query = `sum by (job) (<caret>rate(http_requests_total[5m]))`\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "E07",
+  "category": "enter",
+  "title": "Enter after a comma in a struct literal",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package config\n\nimport \"time\"\n\ntype ScrapeConfig struct {\n\tJobName        string\n\tScrapeInterval time.Duration\n}\n\nfunc defaults() *ScrapeConfig {\n\treturn &ScrapeConfig{JobName: \"node\",<caret> ScrapeInterval: 15 * time.Second}\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "E08",
+  "category": "enter",
+  "title": "Enter after a comma in an argument list",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport \"log/slog\"\n\nfunc logFailure(l *slog.Logger, err error) {\n\tl.Debug(\"Scrape failed\",<caret> \"err\", err)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "E10",
+  "category": "enter",
+  "title": "Enter after a case clause",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\ntype TargetHealth string\n\nfunc describe(h TargetHealth) string {\n\tswitch h {\n\tcase \"up\":<caret>\n\t}\n\treturn \"\"\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ENTER}"
+  ]
+ },
+ {
+  "id": "C01",
+  "category": "complete",
+  "title": "Complete Statement after `if err != nil`",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc scrape() error {\n\terr := run()\n\tif err != nil<caret>\n\treturn nil\n}\n\nfunc run() error { return nil }\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorCompleteStatement}"
+  ]
+ },
+ {
+  "id": "C02",
+  "category": "complete",
+  "title": "Complete Statement after a for header",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc count(targets []string) int {\n\tn := 0\n\tfor i := 0; i < len(targets); i++<caret>\n\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorCompleteStatement}"
+  ]
+ },
+ {
+  "id": "C03",
+  "category": "complete",
+  "title": "Complete Statement on `func f(` without `)`",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\ntype scrapePool struct{}\n\ntype Target struct{}\n\nfunc (sp *scrapePool) sync(targets []*Target<caret>\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorCompleteStatement}"
+  ]
+ },
+ {
+  "id": "C04",
+  "category": "complete",
+  "title": "Complete Statement on a call without `)`",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport \"net/http\"\n\nfunc fetch(client *http.Client, req *http.Request) {\n\tclient.Do(req<caret>\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorCompleteStatement}"
+  ]
+ },
+ {
+  "id": "C05",
+  "category": "complete",
+  "title": "Complete Statement on `return fmt.Errorf(` without `)`",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package rules\n\nimport \"fmt\"\n\nfunc reload(name string, err error) error {\n\treturn fmt.Errorf(\"reload %s: %w\", name, err<caret>\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorCompleteStatement}"
+  ]
+ },
+ {
+  "id": "P01",
+  "category": "pairs",
+  "title": "'(' after a method name",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\ntype scrapePool struct{}\n\nfunc (sp *scrapePool) reload() {}\n\nfunc run(sp *scrapePool) {\n\tsp.reload<caret>\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "("
+  ]
+ },
+ {
+  "id": "P02",
+  "category": "pairs",
+  "title": "'\"' opens a pair, the closing one is overtyped",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc job() string {\n\tname := <caret>\n\treturn name\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "\"",
+   "n",
+   "o",
+   "d",
+   "e",
+   "\""
+  ]
+ },
+ {
+  "id": "P03",
+  "category": "pairs",
+  "title": "backtick struct tag with quotes inside",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package config\n\nimport \"time\"\n\ntype GlobalConfig struct {\n\tScrapeInterval time.Duration <caret>\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "`",
+   "y",
+   "a",
+   "m",
+   "l",
+   ":",
+   "\"",
+   "s",
+   "c",
+   "r",
+   "a",
+   "p",
+   "e",
+   "_",
+   "i",
+   "n",
+   "t",
+   "e",
+   "r",
+   "v",
+   "a",
+   "l",
+   "\"",
+   "`"
+  ]
+ },
+ {
+  "id": "P04",
+  "category": "pairs",
+  "title": "'[' and '{' of a slice literal",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc names() []string {\n\tls := <caret>\n\treturn ls\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "[",
+   "]",
+   "s",
+   "t",
+   "r",
+   "i",
+   "n",
+   "g",
+   "{",
+   "\"",
+   "j",
+   "o",
+   "b",
+   "\"",
+   "}"
+  ]
+ },
+ {
+  "id": "P05",
+  "category": "pairs",
+  "title": "rune quote",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package labels\n\nfunc sep() rune {\n\ts := <caret>\n\treturn s\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "'",
+   ",",
+   "'"
+  ]
+ },
+ {
+  "id": "P06",
+  "category": "pairs",
+  "title": "Backspace on an empty ()",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc run(sp interface{ reload() }) {\n\tsp.reload(<caret>)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{BACKSPACE}"
+  ]
+ },
+ {
+  "id": "P07",
+  "category": "pairs",
+  "title": "Backspace on an empty \"\"",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc job() string {\n\ts := \"<caret>\"\n\treturn s\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{BACKSPACE}"
+  ]
+ },
+ {
+  "id": "P08",
+  "category": "pairs",
+  "title": "Backspace on an empty {} of a map literal",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package labels\n\nfunc empty() map[string]string {\n\tm := map[string]string{<caret>}\n\treturn m\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{BACKSPACE}"
+  ]
+ },
+ {
+  "id": "P09",
+  "category": "pairs",
+  "title": "')' overtypes the existing closing parenthesis",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\ntype Config struct{}\n\nfunc apply(cfg *Config) {}\n\nfunc run(cfg *Config) {\n\tapply(cfg<caret>)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   ")"
+  ]
+ },
+ {
+  "id": "P10",
+  "category": "pairs",
+  "title": "':' and '=' after a name",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc run() int {\n\tn <caret>\n\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   ":",
+   "=",
+   " ",
+   "1"
+  ]
+ },
+ {
+  "id": "I01",
+  "category": "indent",
+  "title": "paste of unindented lines into a function body",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport \"errors\"\n\nfunc validate(limit int) error {\n\t<caret>\n\treturn nil\n}\n",
+  "extras": [],
+  "paste": "if limit < 0 {\n\treturn errors.New(\"negative limit\")\n}\n",
+  "keys": [
+   "{PASTE}"
+  ]
+ },
+ {
+  "id": "I02",
+  "category": "indent",
+  "title": "paste of 4-space lines into a nested block",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc sum(samples []float64, ok bool) float64 {\n\ttotal := 0.0\n\tif ok {\n\t\t<caret>\n\t}\n\treturn total\n}\n",
+  "extras": [],
+  "paste": "    for _, s := range samples {\n        total += s\n    }\n",
+  "keys": [
+   "{PASTE}"
+  ]
+ },
+ {
+  "id": "I03",
+  "category": "indent",
+  "title": "paste of a fragment in the middle of a line",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport \"time\"\n\nfunc timeout(interval time.Duration) time.Duration {\n\treturn <caret>\n}\n",
+  "extras": [],
+  "paste": "interval - 500*time.Millisecond",
+  "keys": [
+   "{PASTE}"
+  ]
+ },
+ {
+  "id": "I04",
+  "category": "indent",
+  "title": "paste of a top-level function with indentation",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\ntype Target struct{ labels map[string]string }\n\n<caret>\n",
+  "extras": [],
+  "paste": "\tfunc (t *Target) Labels() map[string]string {\n\t\treturn t.labels\n\t}\n",
+  "keys": [
+   "{PASTE}"
+  ]
+ },
+ {
+  "id": "I05",
+  "category": "indent",
+  "title": "'}' on its own line dedents",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc count(xs []int) int {\n\tn := 0\n\tfor _, x := range xs {\n\t\tn += x\n\t\t<caret>\n\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "}"
+  ]
+ },
+ {
+  "id": "I06",
+  "category": "indent",
+  "title": "'}' closing a badly spaced one-line block",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc clamp(total int) int {\n\tif total>0 {   total=1   <caret>\n\treturn total\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "}"
+  ]
+ },
+ {
+  "id": "F01",
+  "category": "format",
+  "title": "Reformat Code on operators and braces",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": true,
+  "query": null,
+  "notes": [
+   "Ctrl+Alt+L. Compare with the gofmt field of the scenario JSON."
+  ],
+  "code": "package scrape\n\nfunc next(total int,limit int)int{\n\t<caret>total=total+1\n\tif total>limit{\n\t\treturn limit\n\t}\n\treturn total\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:ReformatCode}"
+  ],
+  "gofmtResult": "package scrape\n\nfunc next(total int, limit int) int {\n\t<caret>total = total + 1\n\tif total > limit {\n\t\treturn limit\n\t}\n\treturn total\n}\n"
+ },
+ {
+  "id": "F02",
+  "category": "format",
+  "title": "Reformat Code aligns struct fields, tags and comments",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": true,
+  "query": null,
+  "notes": [],
+  "code": "package config\n\nimport \"time\"\n\ntype ScrapeConfig struct {\n\t<caret>JobName string `yaml:\"job_name\"` // the job\n\tScrapeInterval time.Duration `yaml:\"scrape_interval,omitempty\"`\n\tHonorLabels bool `yaml:\"honor_labels,omitempty\"` // keep target labels\n\tSampleLimit uint `yaml:\"sample_limit,omitempty\"`\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:ReformatCode}"
+  ],
+  "gofmtResult": "package config\n\nimport \"time\"\n\ntype ScrapeConfig struct {\n\t<caret>JobName        string        `yaml:\"job_name\"` // the job\n\tScrapeInterval time.Duration `yaml:\"scrape_interval,omitempty\"`\n\tHonorLabels    bool          `yaml:\"honor_labels,omitempty\"` // keep target labels\n\tSampleLimit    uint          `yaml:\"sample_limit,omitempty\"`\n}\n"
+ },
+ {
+  "id": "F03",
+  "category": "format",
+  "title": "Reformat Code aligns a const block",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": true,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\ntype TargetHealth string\n\nconst (\n\t<caret>HealthUnknown TargetHealth = \"unknown\"\n\tHealthGood TargetHealth = \"up\"\n\tHealthBad TargetHealth = \"down\"\n)\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:ReformatCode}"
+  ],
+  "gofmtResult": "package scrape\n\ntype TargetHealth string\n\nconst (\n\t<caret>HealthUnknown TargetHealth = \"unknown\"\n\tHealthGood    TargetHealth = \"up\"\n\tHealthBad     TargetHealth = \"down\"\n)\n"
+ },
+ {
+  "id": "F04",
+  "category": "format",
+  "title": "Reformat Code on a map literal and spaces for indentation",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": true,
+  "query": null,
+  "notes": [],
+  "code": "package labels\n\nfunc defaults() map[string]string {\n    m := map[string]string{\n        \"job\": \"node\",\n        \"instance\":\"localhost:9090\",\n    }\n    <caret>return m\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:ReformatCode}"
+  ],
+  "gofmtResult": "package labels\n\nfunc defaults() map[string]string {\n\tm := map[string]string{\n\t\t\"job\":      \"node\",\n\t\t\"instance\": \"localhost:9090\",\n\t}\n\t<caret>return m\n}\n"
+ },
+ {
+  "id": "F06",
+  "category": "format",
+  "title": "save of a badly formatted file (actions on save)",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": true,
+  "query": null,
+  "notes": [
+   "GoLand: Settings | Tools | Actions on Save | Reformat code is OFF by default, so GoLand is expected to keep the text. The plugin formats on save by default (GoSettings.formatOnSave).",
+   "The keys first type `*2` at the end of the line: a save of an unmodified document runs no actions on save; gofmt below is of the text before that edit."
+  ],
+  "code": "package scrape\n\nfunc next(total int)int{\n\ttotal=total+1<caret>\n\treturn total\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "*",
+   "2",
+   "{SAVE}"
+  ],
+  "gofmtResult": "package scrape\n\nfunc next(total int) int {\n\ttotal = total + 1\n\t<caret>return total\n}\n"
+ },
+ {
+  "id": "S01",
+  "category": "select",
+  "title": "Ctrl+W from an identifier inside a call in an if condition",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\ntype cache struct{}\n\nfunc (c *cache) forEachStale(f func(string) bool) bool { return true }\n\nfunc run(c *cache) {\n\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}"
+  ]
+ },
+ {
+  "id": "S02",
+  "category": "select",
+  "title": "Ctrl+W inside a string literal",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport \"errors\"\n\nfunc reloadErr() error {\n\treturn errors.New(\"scrape pool re<caret>load failed\")\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}"
+  ]
+ },
+ {
+  "id": "S03",
+  "category": "select",
+  "title": "Ctrl+W inside a struct tag",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package config\n\ntype GlobalConfig struct {\n\tScrapeInterval string `yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}"
+  ]
+ },
+ {
+  "id": "S04",
+  "category": "select",
+  "title": "Ctrl+W four times, then Ctrl+Shift+W twice",
+  "file": "a.go",
+  "steps": true,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc ratio(added, total int) float64 {\n\treturn float64(added) / float64(to<caret>tal+1)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorSelectWord}",
+   "{ACTION:EditorUnSelectWord}",
+   "{ACTION:EditorUnSelectWord}"
+  ]
+ },
+ {
+  "id": "K01",
+  "category": "comment",
+  "title": "Ctrl+/ on one line (caret in the middle)",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc run() int {\n\tn := 1\n\tn += lo<caret>ad()\n\treturn n\n}\n\nfunc load() int { return 0 }\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:CommentByLineComment}"
+  ]
+ },
+ {
+  "id": "K02",
+  "category": "comment",
+  "title": "Ctrl+/ on three selected lines",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc run() int {\n\tn := 1\n<selection>\tn += 2\n\tn *= 3\n\tn -= 4\n</selection><caret>\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:CommentByLineComment}"
+  ]
+ },
+ {
+  "id": "K03",
+  "category": "comment",
+  "title": "Ctrl+/ uncomments selected lines",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc run() int {\n\tn := 1\n\t<selection>// n += 2\n\t// n *= 3<caret></selection>\n\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:CommentByLineComment}"
+  ]
+ },
+ {
+  "id": "K04",
+  "category": "comment",
+  "title": "Ctrl+Shift+/ on a selected expression",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc next(total, step int) int {\n\treturn total + <selection>step*2<caret></selection>\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:CommentByBlockComment}"
+  ]
+ },
+ {
+  "id": "L01",
+  "category": "lines",
+  "title": "Duplicate Line",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc labels() []string {\n\tls := []string{}\n\tls = append(ls, \"j<caret>ob\")\n\treturn ls\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:EditorDuplicate}"
+  ]
+ },
+ {
+  "id": "L03",
+  "category": "lines",
+  "title": "Move Line Up into the block above",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n\tif ok {\n\t\tn++\n\t}\n\tn <caret>+= 2\n\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:MoveLineUp}"
+  ]
+ },
+ {
+  "id": "L04",
+  "category": "lines",
+  "title": "Move Statement Up past an if block",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n\tif ok {\n\t\tn++\n\t}\n\tn <caret>+= 2\n\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:MoveStatementUp}"
+  ]
+ },
+ {
+  "id": "L05",
+  "category": "lines",
+  "title": "Move Statement Down of a whole function",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nfunc fi<caret>rst() int {\n\treturn 1\n}\n\nfunc second() int {\n\treturn 2\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:MoveStatementDown}"
+  ]
+ },
+ {
+  "id": "O01",
+  "category": "imports",
+  "title": "Optimize Imports removes unused imports",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"strings\"\n\t\"time\"\n)\n\nfunc run(ctx context.Context) error {\n\t<caret>return fmt.Errorf(\"timeout %v\", time.Second)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:OptimizeImports}"
+  ]
+ },
+ {
+  "id": "O02",
+  "category": "imports",
+  "title": "Optimize Imports with unsorted, aliased and blank imports",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport (\n\t\"time\"\n\t\"errors\"\n\t_ \"embed\"\n\tstdlog \"log\"\n\t\"bytes\"\n)\n\nfunc run() error {\n\t<caret>stdlog.Println(time.Now())\n\treturn errors.New(\"x\")\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:OptimizeImports}"
+  ]
+ },
+ {
+  "id": "O03",
+  "category": "imports",
+  "title": "Optimize Imports leaves one import of a group",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": null,
+  "notes": [],
+  "code": "package scrape\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\nfunc run() {\n\t<caret>fmt.Println()\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{ACTION:OptimizeImports}"
+  ]
+ },
+ {
+  "id": "W01",
+  "category": "surround",
+  "title": "items offered for two selected statements, apply 'if'",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "surround",
+  "notes": [],
+  "code": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n<selection>\tn++\n\tn *= 2\n</selection><caret>\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{SURROUND:if}"
+  ]
+ },
+ {
+  "id": "W02",
+  "category": "surround",
+  "title": "items offered for a selected expression, apply '(expr)'",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "surround",
+  "notes": [],
+  "code": "package scrape\n\nfunc ratio(added, total int) int {\n\treturn <selection>added + total<caret></selection>\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": [
+   "{SURROUND:(}"
+  ]
+ },
+ {
+  "id": "W03",
+  "category": "surround",
+  "title": "items offered with the caret on a statement (no selection)",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "surround",
+  "notes": [],
+  "code": "package scrape\n\nfunc run() int {\n\tn := 0\n\tn <caret>+= 2\n\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "G01",
+  "category": "generate",
+  "title": "items with the caret inside a struct type",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "generate",
+  "notes": [],
+  "code": "package scrape\n\ntype Target struct {\n\tlabels map[string]string\n\t<caret>health string\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "G02",
+  "category": "generate",
+  "title": "items at the top level of a file",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "generate",
+  "notes": [],
+  "code": "package scrape\n\ntype Target struct {\n\tlabels map[string]string\n}\n\n<caret>\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "G03",
+  "category": "generate",
+  "title": "items inside a function body",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "generate",
+  "notes": [],
+  "code": "package scrape\n\nfunc run() int {\n\tn := 0\n\t<caret>\n\treturn n\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N01",
+  "category": "nav",
+  "title": "Ctrl+B on a local variable",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "declaration",
+  "notes": [],
+  "code": "package scrape\n\nfunc run(added int) int {\n\tseriesAdded := added * 2\n\treturn se<caret>riesAdded\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N02",
+  "category": "nav",
+  "title": "Ctrl+B on a method declared in another file of the package",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "declaration",
+  "notes": [],
+  "code": "package scrape\n\nfunc apply(sp *scrapePool) {\n\tsp.re<caret>load(nil)\n}\n",
+  "extras": [
+   {
+    "name": "pool.go",
+    "text": "package scrape\n\ntype scrapePool struct{ targets []string }\n\n// reload replaces the targets of the pool.\nfunc (sp *scrapePool) reload(targets []string) {\n\tsp.targets = targets\n}\n"
+   }
+  ],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N03",
+  "category": "nav",
+  "title": "Ctrl+B on a standard library function",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "declaration",
+  "notes": [],
+  "code": "package labels\n\nimport \"strings\"\n\nfunc reserved(name string) bool {\n\treturn strings.Has<caret>Prefix(name, \"__\")\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N04",
+  "category": "nav",
+  "title": "Ctrl+B on an import path",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "declaration",
+  "notes": [],
+  "code": "package web\n\nimport \"net/ht<caret>tp\"\n\nvar _ = http.StatusOK\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N06",
+  "category": "nav",
+  "title": "Ctrl+B on an embedded field in a selector",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "declaration",
+  "notes": [],
+  "code": "package scrape\n\nimport \"sync\"\n\ntype Target struct {\n\tsync.RWMutex\n\tlabels map[string]string\n}\n\nfunc (t *Target) Labels() map[string]string {\n\tt.RW<caret>Mutex.RLock()\n\tdefer t.RUnlock()\n\treturn t.labels\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N07",
+  "category": "nav",
+  "title": "Ctrl+B on a method promoted from an embedded field",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "declaration",
+  "notes": [],
+  "code": "package scrape\n\nimport \"sync\"\n\ntype Target struct {\n\tsync.RWMutex\n\tlabels map[string]string\n}\n\nfunc (t *Target) Labels() map[string]string {\n\tt.RLock()\n\tdefer t.RUn<caret>lock()\n\treturn t.labels\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N09",
+  "category": "nav",
+  "title": "Ctrl+Alt+B on an interface type",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "implementations",
+  "notes": [],
+  "code": "package storage\n\n// Appender provides batched appends against a storage.\ntype Appen<caret>der interface {\n\tAppend(ref uint64, t int64, v float64) (uint64, error)\n\tCommit() error\n}\n",
+  "extras": [
+   {
+    "name": "impl.go",
+    "text": "package storage\n\ntype memAppender struct{}\n\nfunc (memAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return ref, nil }\nfunc (memAppender) Commit() error                                         { return nil }\n\ntype nopAppender struct{}\n\nfunc (*nopAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return 0, nil }\nfunc (*nopAppender) Commit() error                                          { return nil }\n"
+   }
+  ],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N10",
+  "category": "nav",
+  "title": "Ctrl+Alt+B on an interface method at a call site",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "implementations",
+  "notes": [],
+  "code": "package storage\n\ntype Appender interface {\n\tAppend(ref uint64, t int64, v float64) (uint64, error)\n\tCommit() error\n}\n\nfunc flush(app Appender) error {\n\treturn app.Com<caret>mit()\n}\n",
+  "extras": [
+   {
+    "name": "impl.go",
+    "text": "package storage\n\ntype memAppender struct{}\n\nfunc (memAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return ref, nil }\nfunc (memAppender) Commit() error                                         { return nil }\n\ntype nopAppender struct{}\n\nfunc (*nopAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return 0, nil }\nfunc (*nopAppender) Commit() error                                          { return nil }\n"
+   }
+  ],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N11",
+  "category": "nav",
+  "title": "Ctrl+U from an implementing method to the interface method",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "super",
+  "notes": [],
+  "code": "package storage\n\ntype memAppender struct{}\n\nfunc (memAppender) Append(ref uint64, t int64, v float64) (uint64, error) { return ref, nil }\n\nfunc (memAppender) Com<caret>mit() error { return nil }\n",
+  "extras": [
+   {
+    "name": "api.go",
+    "text": "package storage\n\n// Appender provides batched appends against a storage.\ntype Appender interface {\n\tAppend(ref uint64, t int64, v float64) (uint64, error)\n\tCommit() error\n}\n"
+   }
+  ],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N12",
+  "category": "nav",
+  "title": "Alt+F7 on a method used in two files",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "usages",
+  "notes": [],
+  "code": "package scrape\n\ntype scrapePool struct{ targets []string }\n\nfunc (sp *scrapePool) rel<caret>oad(targets []string) {\n\tsp.targets = targets\n}\n\nfunc start(sp *scrapePool) {\n\tsp.reload(nil)\n}\n",
+  "extras": [
+   {
+    "name": "loop.go",
+    "text": "package scrape\n\nfunc loop(sp *scrapePool) {\n\tsp.reload(nil)\n\tfor i := 0; i < 3; i++ {\n\t\tsp.reload([]string{\"a\"})\n\t}\n}\n"
+   }
+  ],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N13",
+  "category": "nav",
+  "title": "Alt+F7 on a struct field",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "usages",
+  "notes": [],
+  "code": "package scrape\n\ntype Target struct {\n\thea<caret>lth  string\n\tlabels map[string]string\n}\n\nfunc (t *Target) up() bool { return t.health == \"up\" }\n\nfunc (t *Target) report(h string) {\n\tt.health = h\n\t_ = Target{health: h}\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N14",
+  "category": "nav",
+  "title": "Ctrl+Shift+F7 on a local variable (reads and writes)",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "highlight",
+  "notes": [],
+  "code": "package scrape\n\nfunc sum(samples []float64) float64 {\n\tto<caret>tal := 0.0\n\tfor _, s := range samples {\n\t\ttotal += s\n\t}\n\tif total < 0 {\n\t\ttotal = 0\n\t}\n\treturn total\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N15",
+  "category": "nav",
+  "title": "Ctrl+Shift+F7 on `return` (exit points)",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "highlight",
+  "notes": [],
+  "code": "package scrape\n\nimport \"errors\"\n\nfunc check(n int) (int, error) {\n\tif n < 0 {\n\t\treturn 0, errors.New(\"negative\")\n\t}\n\tif n > 100 {\n\t\tpanic(\"too large\")\n\t}\n\tre<caret>turn n, nil\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "N16",
+  "category": "nav",
+  "title": "Ctrl+F12 file structure",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "structure",
+  "notes": [],
+  "code": "package scrape\n\nimport (\n\t\"context\"\n\t\"sync\"\n)\n\n// TargetHealth describes the health state of a target.\ntype TargetHealth string\n\nconst (\n\tHealthUnknown TargetHealth = \"unknown\"\n\tHealthGood    TargetHealth = \"up\"\n)\n\nvar defaultHealth = HealthUnknown\n\n// Scraper scrapes one target.\ntype Scraper interface {\n\tScrape(ctx context.Context) error\n}\n\n// Target refers to a singular HTTP or HTTPS endpoint.\ntype Target struct {\n\tmtx    sync.RWMutex\n\tlabels map[string]string\n\thealth TargetHealth\n}\n\nfunc NewTarget(labels map[string]string) *Target { return &Target{labels: labels} }\n\nfunc (t *Target) Health() TargetHealth { return t.health }\n\nfunc (t *Target) Scrape(ctx context.Context) error { return nil }\n\ntype pool[T any] struct{ items []T }\n\nfunc (p *pool[T]) Add(item T) { p.items = append(p.items, item) }\n\nfunc <caret>run() {}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H01",
+  "category": "hints",
+  "title": "Ctrl+P on the second argument of a method call",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "paraminfo",
+  "notes": [],
+  "code": "package scrape\n\nimport \"time\"\n\ntype scrapeLoop struct{}\n\nfunc (sl *scrapeLoop) report(start time.Time, duration time.Duration, scraped, added int, scrapeErr error) {}\n\nfunc run(sl *scrapeLoop) {\n\tsl.report(time.Now(), <caret>time.Second, 1, 2, nil)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H02",
+  "category": "hints",
+  "title": "Ctrl+P on a variadic argument of fmt.Errorf",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "paraminfo",
+  "notes": [],
+  "code": "package rules\n\nimport \"fmt\"\n\nfunc wrap(name string, err error) error {\n\treturn fmt.Errorf(\"group %q: %w\", name, <caret>err)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H03",
+  "category": "hints",
+  "title": "Ctrl+P on a generic function call",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "paraminfo",
+  "notes": [],
+  "code": "package util\n\nfunc Map[T, U any](items []T, f func(T) U) []U {\n\tout := make([]U, 0, len(items))\n\tfor _, it := range items {\n\t\tout = append(out, f(it))\n\t}\n\treturn out\n}\n\nfunc lengths(names []string) []int {\n\treturn Map(names, <caret>)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H04",
+  "category": "hints",
+  "title": "Ctrl+P on a standard library call",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "paraminfo",
+  "notes": [],
+  "code": "package labels\n\nimport \"strings\"\n\nfunc pad(name string) string {\n\treturn strings.Repeat(name, <caret>3)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H06",
+  "category": "hints",
+  "title": "Ctrl+Q on a standard library function",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "quickdoc",
+  "notes": [],
+  "code": "package labels\n\nimport \"strings\"\n\nfunc trim(name string) string {\n\treturn strings.Trim<caret>Prefix(name, \"__\")\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H07",
+  "category": "hints",
+  "title": "Ctrl+Q on a project function with a doc comment",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "quickdoc",
+  "notes": [],
+  "code": "package scrape\n\nimport \"time\"\n\n// jitter returns a deterministic offset in [0, interval) for the target with the given hash,\n// so that targets of one job are not scraped at the same moment.\nfunc jitter(interval time.Duration, hash uint64) time.Duration {\n\treturn time.Duration(hash % uint64(interval))\n}\n\nfunc run() time.Duration {\n\treturn jit<caret>ter(time.Minute, 42)\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H08",
+  "category": "hints",
+  "title": "Ctrl+Q on a struct type",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "quickdoc",
+  "notes": [],
+  "code": "package scrape\n\nimport \"sync\"\n\n// Target refers to a singular HTTP or HTTPS endpoint.\ntype Target struct {\n\tmtx    sync.RWMutex\n\tlabels map[string]string // the labels after relabeling\n\thealth string\n}\n\nfunc newTarget() *Tar<caret>get { return &Target{} }\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H09",
+  "category": "hints",
+  "title": "Ctrl+Shift+P on an index expression",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "exprtype",
+  "notes": [],
+  "code": "package labels\n\nfunc value(lset map[string][]string) string {\n\tvs := lset[\"job\"<caret>]\n\treturn vs[0]\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H11",
+  "category": "hints",
+  "title": "inlay hints in a function with literal arguments",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "inlays",
+  "notes": [],
+  "code": "package scrape\n\nimport \"time\"\n\ntype scrapeLoop struct{}\n\nfunc (sl *scrapeLoop) report(start time.Time, duration time.Duration, scraped, added int, scrapeErr error) {}\n\nfunc newLoop(interval time.Duration, limit int, honorLabels bool, name string) *scrapeLoop {\n\treturn &scrapeLoop{}\n}\n\nfunc run() {\n\tsl := newLoop(15*time.Second, 1000, true, \"node\")\n\tsl.report(time.Now(), 0, 10, 5, nil)\n\t<caret>for i, t := range []string{\"a\", \"b\"} {\n\t\t_, _ = i, t\n\t}\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ },
+ {
+  "id": "H12",
+  "category": "hints",
+  "title": "inlay hints of an unkeyed struct literal and constants",
+  "file": "a.go",
+  "steps": false,
+  "gofmt": false,
+  "query": "inlays",
+  "notes": [],
+  "code": "package model\n\ntype Sample struct {\n\tT int64\n\tV float64\n}\n\nconst (\n\tdefaultLimit = 1 << 10\n\tmaxLabels    = defaultLimit * 2\n)\n\nfunc samples() []Sample {\n\t<caret>return []Sample{{1000, 0.5}, {2000, 1.5}}\n}\n",
+  "extras": [],
+  "paste": null,
+  "keys": []
+ }
+]

@@ -1,0 +1,52 @@
+model\textparse\openmetrics2lex.l.go:767:3: unreachable code
+model\textparse\openmetrics2lex.l.go:773:3: unreachable code
+model\textparse\openmetrics2lex.l.go:779:3: unreachable code
+model\textparse\openmetrics2lex.l.go:785:3: unreachable code
+model\textparse\openmetrics2lex.l.go:791:3: unreachable code
+model\textparse\openmetrics2lex.l.go:797:3: unreachable code
+model\textparse\openmetrics2lex.l.go:803:3: unreachable code
+model\textparse\openmetrics2lex.l.go:809:3: unreachable code
+model\textparse\openmetrics2lex.l.go:815:3: unreachable code
+model\textparse\openmetrics2lex.l.go:821:3: unreachable code
+model\textparse\openmetrics2lex.l.go:831:3: unreachable code
+model\textparse\openmetrics2lex.l.go:837:3: unreachable code
+model\textparse\openmetrics2lex.l.go:843:3: unreachable code
+promql\histogram_stats_iterator.go:66:36: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\buffer.go:85:34: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\memoized_iterator.go:77:34: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\merge.go:526:31: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\series.go:154:31: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\buffer_test.go:419:30: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\buffer_test.go:478:31: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\merge_test.go:1779:20: method Seek(int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+model\textparse\openmetrics2lex.l.go:853:3: unreachable code
+model\textparse\openmetrics2lex.l.go:859:3: unreachable code
+model\textparse\openmetrics2lex.l.go:865:3: unreachable code
+model\textparse\openmetrics2lex.l.go:875:3: unreachable code
+model\textparse\openmetrics2lex.l.go:881:3: unreachable code
+model\textparse\openmetrics2lex.l.go:891:3: unreachable code
+promql\value.go:495:35: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+promql\histogram_stats_iterator_test.go:224:27: method Seek(int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+model\textparse\openmetrics2lex.l.go:897:3: unreachable code
+model\textparse\openmetrics2lex.l.go:903:3: unreachable code
+model\textparse\openmetrics2lex.l.go:909:3: unreachable code
+model\textparse\openmetrics2lex.l.go:919:3: unreachable code
+model\textparse\openmetrics2lex.l.go:929:3: unreachable code
+model\textparse\openmetrics2lex.l.go:935:3: unreachable code
+tsdb\fileutil\mmap_windows.go:39:29: possible misuse of unsafe.Pointer
+tsdb\chunkenc\chunk.go:154:2: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\chunkenc\chunk.go:283:28: method Seek(int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\chunkenc\chunk.go:326:20: method Seek(int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\chunkenc\float_histogram.go:867:35: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\chunkenc\float_histogram_st.go:549:37: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\chunkenc\histogram.go:926:30: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\chunkenc\histogram_st.go:540:32: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\chunkenc\xor.go:253:24: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\chunkenc\xor2.go:505:25: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\querier.go:835:41: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\querier.go:1304:28: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+tsdb\querier_test.go:802:31: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\remote\codec.go:425:34: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+storage\remote\codec.go:771:34: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+web\api\testhelpers\mocks.go:256:30: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)
+web\api\testhelpers\mocks.go:319:39: method Seek(t int64) chunkenc.ValueType should have signature Seek(int64, int) (int64, error)

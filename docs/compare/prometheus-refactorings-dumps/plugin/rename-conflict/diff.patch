@@ -1,0 +1,35 @@
+--- a/notifier/alert.go
++++ b/notifier/alert.go
+@@ -69,26 +69,26 @@
+ }
+ 
+ func relabelAlerts(relabelConfigs []*relabel.Config, externalLabels labels.Labels, alerts []*Alert) []*Alert {
+-	lb := labels.NewBuilder(labels.EmptyLabels())
++	a := labels.NewBuilder(labels.EmptyLabels())
+ 	var relabeledAlerts []*Alert
+ 
+ 	for _, a := range alerts {
+-		lb.Reset(a.Labels)
++		a.Reset(a.Labels)
+ 		externalLabels.Range(func(l labels.Label) {
+ 			if a.Labels.Get(l.Name) == "" {
+-				lb.Set(l.Name, l.Value)
++				a.Set(l.Name, l.Value)
+ 			}
+ 		})
+ 
+-		keep := relabel.ProcessBuilder(lb, relabelConfigs...)
++		keep := relabel.ProcessBuilder(a, relabelConfigs...)
+ 		if !keep {
+ 			continue
+ 		}
+ 
+ 		// If relabeling has altered the labels, create a new Alert to preserve immutability.
+-		if !labels.Equal(a.Labels, lb.Labels()) {
++		if !labels.Equal(a.Labels, a.Labels()) {
+ 			a = &Alert{
+-				Labels:       lb.Labels(),
++				Labels:       a.Labels(),
+ 				Annotations:  a.Annotations,
+ 				StartsAt:     a.StartsAt,
+ 				EndsAt:       a.EndsAt,

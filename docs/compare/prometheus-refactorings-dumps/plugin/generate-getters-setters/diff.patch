@@ -1,0 +1,78 @@
+--- a/notifier/alertmanagerset.go
++++ b/notifier/alertmanagerset.go
+@@ -190,3 +190,75 @@
+ 	}
+ }
+ 
++func (as *alertmanagerSet) Cfg() *config.AlertmanagerConfig {
++	return as.cfg
++}
++
++func (as *alertmanagerSet) Client() *http.Client {
++	return as.client
++}
++
++func (as *alertmanagerSet) Opts() *Options {
++	return as.opts
++}
++
++func (as *alertmanagerSet) Metrics() *alertMetrics {
++	return as.metrics
++}
++
++func (as *alertmanagerSet) Mtx() sync.RWMutex {
++	return as.mtx
++}
++
++func (as *alertmanagerSet) Ams() []alertmanager {
++	return as.ams
++}
++
++func (as *alertmanagerSet) DroppedAms() []alertmanager {
++	return as.droppedAms
++}
++
++func (as *alertmanagerSet) SendLoops() map[string]*sendLoop {
++	return as.sendLoops
++}
++
++func (as *alertmanagerSet) Logger() *slog.Logger {
++	return as.logger
++}
++
++func (as *alertmanagerSet) SetCfg(cfg *config.AlertmanagerConfig) {
++	as.cfg = cfg
++}
++
++func (as *alertmanagerSet) SetClient(client *http.Client) {
++	as.client = client
++}
++
++func (as *alertmanagerSet) SetOpts(opts *Options) {
++	as.opts = opts
++}
++
++func (as *alertmanagerSet) SetMetrics(metrics *alertMetrics) {
++	as.metrics = metrics
++}
++
++func (as *alertmanagerSet) SetMtx(mtx sync.RWMutex) {
++	as.mtx = mtx
++}
++
++func (as *alertmanagerSet) SetAms(ams []alertmanager) {
++	as.ams = ams
++}
++
++func (as *alertmanagerSet) SetDroppedAms(droppedAms []alertmanager) {
++	as.droppedAms = droppedAms
++}
++
++func (as *alertmanagerSet) SetSendLoops(sendLoops map[string]*sendLoop) {
++	as.sendLoops = sendLoops
++}
++
++func (as *alertmanagerSet) SetLogger(logger *slog.Logger) {
++	as.logger = logger
++}
++

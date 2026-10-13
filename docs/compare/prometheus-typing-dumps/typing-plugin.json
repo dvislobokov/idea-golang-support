@@ -1,0 +1,1633 @@
+{
+  "ide": "plugin",
+  "settings": "formatter=GOFMT formatOnSave=true languageServer=false",
+  "results": [
+    {
+      "id": "E01",
+      "category": "enter",
+      "title": "Enter between the braces of an if",
+      "query": null,
+      "text": "package scrape\n\nimport \"errors\"\n\nfunc checkLabels(lset map[string]string) error {\n\tif len(lset) == 0 {\n\t\t<caret>\n\t}\n\treturn errors.New(\"no labels\")\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 1520
+    },
+    {
+      "id": "E02",
+      "category": "enter",
+      "title": "'{' then Enter after a range header",
+      "query": null,
+      "text": "package scrape\n\ntype Target struct{ URL string }\n\nfunc urls(targets []*Target) []string {\n\tvar out []string\n\tfor _, t := range targets {\n\t\t<caret>\n\t}\n\treturn out\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 251
+    },
+    {
+      "id": "E03",
+      "category": "enter",
+      "title": "Enter in the middle of an expression",
+      "query": null,
+      "text": "package scrape\n\nfunc total(added, seriesAdded int) int {\n\tsum := added + \n\t\t<caret>seriesAdded\n\treturn sum\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 101
+    },
+    {
+      "id": "E04",
+      "category": "enter",
+      "title": "Enter inside a line comment",
+      "query": null,
+      "text": "package scrape\n\nfunc appendLimit(limit int) int {\n\t// appendLimit bounds the number of samples\n\t// <caret>appended per scrape.\n\treturn limit\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 62
+    },
+    {
+      "id": "E05",
+      "category": "enter",
+      "title": "Enter inside an interpreted string",
+      "query": null,
+      "text": "package scrape\n\nimport \"errors\"\n\nfunc reloadErr() error {\n\treturn errors.New(\"scrape pool \n\t\t<caret>reload failed\")\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 65
+    },
+    {
+      "id": "E06",
+      "category": "enter",
+      "title": "Enter inside a raw string",
+      "query": null,
+      "text": "package rules\n\nconst query = `sum by (job) (\n<caret>rate(http_requests_total[5m]))`\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 55
+    },
+    {
+      "id": "E07",
+      "category": "enter",
+      "title": "Enter after a comma in a struct literal",
+      "query": null,
+      "text": "package config\n\nimport \"time\"\n\ntype ScrapeConfig struct {\n\tJobName        string\n\tScrapeInterval time.Duration\n}\n\nfunc defaults() *ScrapeConfig {\n\treturn &ScrapeConfig{JobName: \"node\",\n\t\t<caret>ScrapeInterval: 15 * time.Second}\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 60
+    },
+    {
+      "id": "E08",
+      "category": "enter",
+      "title": "Enter after a comma in an argument list",
+      "query": null,
+      "text": "package scrape\n\nimport \"log/slog\"\n\nfunc logFailure(l *slog.Logger, err error) {\n\tl.Debug(\"Scrape failed\",\n\t\t<caret>\"err\", err)\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 54
+    },
+    {
+      "id": "E10",
+      "category": "enter",
+      "title": "Enter after a case clause",
+      "query": null,
+      "text": "package scrape\n\ntype TargetHealth string\n\nfunc describe(h TargetHealth) string {\n\tswitch h {\n\tcase \"up\":\n\t\t<caret>\n\t}\n\treturn \"\"\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 52
+    },
+    {
+      "id": "C01",
+      "category": "complete",
+      "title": "Complete Statement after `if err != nil`",
+      "query": null,
+      "text": "package scrape\n\nfunc scrape() error {\n\terr := run()\n\tif err != nil {\n\t\t<caret>\n\t}\n\treturn nil\n}\n\nfunc run() error { return nil }\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 56
+    },
+    {
+      "id": "C02",
+      "category": "complete",
+      "title": "Complete Statement after a for header",
+      "query": null,
+      "text": "package scrape\n\nfunc count(targets []string) int {\n\tn := 0\n\tfor i := 0; i < len(targets); i++ {\n\t\t<caret>\n\t}\n\treturn n\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 50
+    },
+    {
+      "id": "C03",
+      "category": "complete",
+      "title": "Complete Statement on `func f(` without `)`",
+      "query": null,
+      "text": "package scrape\n\ntype scrapePool struct{}\n\ntype Target struct{}\n\nfunc (sp *scrapePool) sync(targets []*Target) {\n\t<caret>\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 47
+    },
+    {
+      "id": "C04",
+      "category": "complete",
+      "title": "Complete Statement on a call without `)`",
+      "query": null,
+      "text": "package scrape\n\nimport \"net/http\"\n\nfunc fetch(client *http.Client, req *http.Request) {\n\tclient.Do(req)\n\t<caret>\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 45
+    },
+    {
+      "id": "C05",
+      "category": "complete",
+      "title": "Complete Statement on `return fmt.Errorf(` without `)`",
+      "query": null,
+      "text": "package rules\n\nimport \"fmt\"\n\nfunc reload(name string, err error) error {\n\treturn fmt.Errorf(\"reload %s: %w\", name, err)\n\t<caret>\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 41
+    },
+    {
+      "id": "P01",
+      "category": "pairs",
+      "title": "'(' after a method name",
+      "query": null,
+      "text": "package scrape\n\ntype scrapePool struct{}\n\nfunc (sp *scrapePool) reload() {}\n\nfunc run(sp *scrapePool) {\n\tsp.reload(<caret>)\n}\n",
+      "steps": [
+        {
+          "key": "(",
+          "line": "\tsp.reload(<caret>)",
+          "selection": null
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 53
+    },
+    {
+      "id": "P02",
+      "category": "pairs",
+      "title": "'\"' opens a pair, the closing one is overtyped",
+      "query": null,
+      "text": "package scrape\n\nfunc job() string {\n\tname := \"node\"<caret>\n\treturn name\n}\n",
+      "steps": [
+        {
+          "key": "\"",
+          "line": "\tname := \"<caret>\"",
+          "selection": null
+        },
+        {
+          "key": "n",
+          "line": "\tname := \"n<caret>\"",
+          "selection": null
+        },
+        {
+          "key": "o",
+          "line": "\tname := \"no<caret>\"",
+          "selection": null
+        },
+        {
+          "key": "d",
+          "line": "\tname := \"nod<caret>\"",
+          "selection": null
+        },
+        {
+          "key": "e",
+          "line": "\tname := \"node<caret>\"",
+          "selection": null
+        },
+        {
+          "key": "\"",
+          "line": "\tname := \"node\"<caret>",
+          "selection": null
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 87
+    },
+    {
+      "id": "P03",
+      "category": "pairs",
+      "title": "backtick struct tag with quotes inside",
+      "query": null,
+      "text": "package config\n\nimport \"time\"\n\ntype GlobalConfig struct {\n\tScrapeInterval time.Duration `yaml:\"\"scrape_interval\"`<caret>\"`\n}\n",
+      "steps": [
+        {
+          "key": "`",
+          "line": "\tScrapeInterval time.Duration `<caret>`",
+          "selection": null
+        },
+        {
+          "key": "y",
+          "line": "\tScrapeInterval time.Duration `y<caret>`",
+          "selection": null
+        },
+        {
+          "key": "a",
+          "line": "\tScrapeInterval time.Duration `ya<caret>`",
+          "selection": null
+        },
+        {
+          "key": "m",
+          "line": "\tScrapeInterval time.Duration `yam<caret>`",
+          "selection": null
+        },
+        {
+          "key": "l",
+          "line": "\tScrapeInterval time.Duration `yaml<caret>`",
+          "selection": null
+        },
+        {
+          "key": ":",
+          "line": "\tScrapeInterval time.Duration `yaml:\"<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "\"",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "s",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"s<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "c",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"sc<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "r",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scr<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "a",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scra<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "p",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrap<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "e",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "_",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "i",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_i<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "n",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_in<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "t",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_int<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "e",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_inte<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "r",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_inter<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "v",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_interv<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "a",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_interva<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "l",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_interval<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "\"",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_interval\"<caret>\"`",
+          "selection": null
+        },
+        {
+          "key": "`",
+          "line": "\tScrapeInterval time.Duration `yaml:\"\"scrape_interval\"`<caret>\"`",
+          "selection": null
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 263
+    },
+    {
+      "id": "P04",
+      "category": "pairs",
+      "title": "'[' and '{' of a slice literal",
+      "query": null,
+      "text": "package scrape\n\nfunc names() []string {\n\tls := []string{\"job\"}<caret>\n\treturn ls\n}\n",
+      "steps": [
+        {
+          "key": "[",
+          "line": "\tls := [<caret>]",
+          "selection": null
+        },
+        {
+          "key": "]",
+          "line": "\tls := []<caret>",
+          "selection": null
+        },
+        {
+          "key": "s",
+          "line": "\tls := []s<caret>",
+          "selection": null
+        },
+        {
+          "key": "t",
+          "line": "\tls := []st<caret>",
+          "selection": null
+        },
+        {
+          "key": "r",
+          "line": "\tls := []str<caret>",
+          "selection": null
+        },
+        {
+          "key": "i",
+          "line": "\tls := []stri<caret>",
+          "selection": null
+        },
+        {
+          "key": "n",
+          "line": "\tls := []strin<caret>",
+          "selection": null
+        },
+        {
+          "key": "g",
+          "line": "\tls := []string<caret>",
+          "selection": null
+        },
+        {
+          "key": "{",
+          "line": "\tls := []string{<caret>}",
+          "selection": null
+        },
+        {
+          "key": "\"",
+          "line": "\tls := []string{\"<caret>\"}",
+          "selection": null
+        },
+        {
+          "key": "j",
+          "line": "\tls := []string{\"j<caret>\"}",
+          "selection": null
+        },
+        {
+          "key": "o",
+          "line": "\tls := []string{\"jo<caret>\"}",
+          "selection": null
+        },
+        {
+          "key": "b",
+          "line": "\tls := []string{\"job<caret>\"}",
+          "selection": null
+        },
+        {
+          "key": "\"",
+          "line": "\tls := []string{\"job\"<caret>}",
+          "selection": null
+        },
+        {
+          "key": "}",
+          "line": "\tls := []string{\"job\"}<caret>",
+          "selection": null
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 168
+    },
+    {
+      "id": "P05",
+      "category": "pairs",
+      "title": "rune quote",
+      "query": null,
+      "text": "package labels\n\nfunc sep() rune {\n\ts := ','<caret>\n\treturn s\n}\n",
+      "steps": [
+        {
+          "key": "'",
+          "line": "\ts := '<caret>'",
+          "selection": null
+        },
+        {
+          "key": ",",
+          "line": "\ts := ',<caret>'",
+          "selection": null
+        },
+        {
+          "key": "'",
+          "line": "\ts := ','<caret>",
+          "selection": null
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 181
+    },
+    {
+      "id": "P06",
+      "category": "pairs",
+      "title": "Backspace on an empty ()",
+      "query": null,
+      "text": "package scrape\n\nfunc run(sp interface{ reload() }) {\n\tsp.reload<caret>\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 70
+    },
+    {
+      "id": "P07",
+      "category": "pairs",
+      "title": "Backspace on an empty \"\"",
+      "query": null,
+      "text": "package scrape\n\nfunc job() string {\n\ts := <caret>\n\treturn s\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 40
+    },
+    {
+      "id": "P08",
+      "category": "pairs",
+      "title": "Backspace on an empty {} of a map literal",
+      "query": null,
+      "text": "package labels\n\nfunc empty() map[string]string {\n\tm := map[string]string<caret>\n\treturn m\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 42
+    },
+    {
+      "id": "P09",
+      "category": "pairs",
+      "title": "')' overtypes the existing closing parenthesis",
+      "query": null,
+      "text": "package scrape\n\ntype Config struct{}\n\nfunc apply(cfg *Config) {}\n\nfunc run(cfg *Config) {\n\tapply(cfg)<caret>\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 33
+    },
+    {
+      "id": "P10",
+      "category": "pairs",
+      "title": "':' and '=' after a name",
+      "query": null,
+      "text": "package scrape\n\nfunc run() int {\n\tn := 1<caret>\n\treturn n\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 227
+    },
+    {
+      "id": "I01",
+      "category": "indent",
+      "title": "paste of unindented lines into a function body",
+      "query": null,
+      "text": "package scrape\n\nimport \"errors\"\n\nfunc validate(limit int) error {\n\tif limit < 0 {\n\t\treturn errors.New(\"negative limit\")\n\t}\n<caret>\n\treturn nil\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 208
+    },
+    {
+      "id": "I02",
+      "category": "indent",
+      "title": "paste of 4-space lines into a nested block",
+      "query": null,
+      "text": "package scrape\n\nfunc sum(samples []float64, ok bool) float64 {\n\ttotal := 0.0\n\tif ok {\n\t\tfor _, s := range samples {\n\t\t\ttotal += s\n\t\t}\n<caret>\n\t}\n\treturn total\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 52
+    },
+    {
+      "id": "I03",
+      "category": "indent",
+      "title": "paste of a fragment in the middle of a line",
+      "query": null,
+      "text": "package scrape\n\nimport \"time\"\n\nfunc timeout(interval time.Duration) time.Duration {\n\treturn interval - 500*time.Millisecond<caret>\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 75
+    },
+    {
+      "id": "I04",
+      "category": "indent",
+      "title": "paste of a top-level function with indentation",
+      "query": null,
+      "text": "package scrape\n\ntype Target struct{ labels map[string]string }\n\nfunc (t *Target) Labels() map[string]string {\n\treturn t.labels\n}\n<caret>\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 117
+    },
+    {
+      "id": "I05",
+      "category": "indent",
+      "title": "'}' on its own line dedents",
+      "query": null,
+      "text": "package scrape\n\nfunc count(xs []int) int {\n\tn := 0\n\tfor _, x := range xs {\n\t\tn += x\n\t}<caret>\n\treturn n\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 87
+    },
+    {
+      "id": "I06",
+      "category": "indent",
+      "title": "'}' closing a badly spaced one-line block",
+      "query": null,
+      "text": "package scrape\n\nfunc clamp(total int) int {\n\tif total>0 {   total=1   }<caret>\n\treturn total\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 38
+    },
+    {
+      "id": "F01",
+      "category": "format",
+      "title": "Reformat Code on operators and braces",
+      "query": null,
+      "text": "package scrape\n\nfunc next(total int, limit int) int {\n\t<caret>total = total + 1\n\tif total > limit {\n\t\treturn limit\n\t}\n\treturn total\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 856
+    },
+    {
+      "id": "F02",
+      "category": "format",
+      "title": "Reformat Code aligns struct fields, tags and comments",
+      "query": null,
+      "text": "package config\n\nimport \"time\"\n\ntype ScrapeConfig struct {\n\t<caret>JobName        string        `yaml:\"job_name\"` // the job\n\tScrapeInterval time.Duration `yaml:\"scrape_interval,omitempty\"`\n\tHonorLabels    bool          `yaml:\"honor_labels,omitempty\"` // keep target labels\n\tSampleLimit    uint          `yaml:\"sample_limit,omitempty\"`\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 791
+    },
+    {
+      "id": "F03",
+      "category": "format",
+      "title": "Reformat Code aligns a const block",
+      "query": null,
+      "text": "package scrape\n\ntype TargetHealth string\n\nconst (\n\t<caret>HealthUnknown TargetHealth = \"unknown\"\n\tHealthGood    TargetHealth = \"up\"\n\tHealthBad     TargetHealth = \"down\"\n)\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 816
+    },
+    {
+      "id": "F04",
+      "category": "format",
+      "title": "Reformat Code on a map literal and spaces for indentation",
+      "query": null,
+      "text": "package labels\n\nfunc defaults() map[string]string {\n\tm := map[string]string{\n\t\t\"job\":      \"node\",\n\t\t\"instance\": \"localhost:9090\",\n\t}\n\t<caret>return m\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 790
+    },
+    {
+      "id": "F06",
+      "category": "format",
+      "title": "save of a badly formatted file (actions on save)",
+      "query": null,
+      "text": "package scrape\n\nfunc next(total int) int {\n\ttotal = total + 1*2<caret>\n\treturn total\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 963
+    },
+    {
+      "id": "S01",
+      "category": "select",
+      "title": "Ctrl+W from an identifier inside a call in an if condition",
+      "query": null,
+      "text": "package scrape\n\ntype cache struct{}\n\nfunc (c *cache) forEachStale(f func(string) bool) bool { return true }\n\n<selection>func run(c *cache) {\n\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n}\n</selection>",
+      "steps": [
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\tif c.<selection>forEach<caret>Stale</selection>(func(s string) bool { return len(s) > 0 }) {",
+          "selection": "forEachStale"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\tif <selection>c.forEach<caret>Stale</selection>(func(s string) bool { return len(s) > 0 }) {",
+          "selection": "c.forEachStale"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\tif <selection>c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 })</selection> {",
+          "selection": "c.forEachStale(func(s string) bool { return len(s) > 0 })"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "<selection>\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {",
+          "selection": "\tif c.forEachStale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {",
+          "selection": "{\n\tif c.forEachStale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n}\n"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {",
+          "selection": "func run(c *cache) {\n\tif c.forEachStale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n}\n"
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 107
+    },
+    {
+      "id": "S02",
+      "category": "select",
+      "title": "Ctrl+W inside a string literal",
+      "query": null,
+      "text": "package scrape\n\nimport \"errors\"\n\nfunc reloadErr() error {\n\t<selection>return errors.New(\"scrape pool re<caret>load failed\")</selection>\n}\n",
+      "steps": [
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\treturn errors.New(\"scrape pool <selection>re<caret>load</selection> failed\")",
+          "selection": "reload"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\treturn errors.New(<selection>\"scrape pool re<caret>load failed\"</selection>)",
+          "selection": "\"scrape pool reload failed\""
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\treturn errors.New<selection>(\"scrape pool re<caret>load failed\")</selection>",
+          "selection": "(\"scrape pool reload failed\")"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\treturn <selection>errors.New(\"scrape pool re<caret>load failed\")</selection>",
+          "selection": "errors.New(\"scrape pool reload failed\")"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\t<selection>return errors.New(\"scrape pool re<caret>load failed\")</selection>",
+          "selection": "return errors.New(\"scrape pool reload failed\")"
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 58
+    },
+    {
+      "id": "S03",
+      "category": "select",
+      "title": "Ctrl+W inside a struct tag",
+      "query": null,
+      "text": "package config\n\ntype GlobalConfig <selection>struct {\n\tScrapeInterval string `yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`\n}\n</selection>",
+      "steps": [
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\tScrapeInterval string `yaml:\"<selection>scrape_in<caret>terval</selection>,omitempty\" json:\"interval\"`",
+          "selection": "scrape_interval"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\tScrapeInterval string <selection>`yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`</selection>",
+          "selection": "`yaml:\"scrape_interval,omitempty\" json:\"interval\"`"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\t<selection>ScrapeInterval string `yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`</selection>",
+          "selection": "ScrapeInterval string `yaml:\"scrape_interval,omitempty\" json:\"interval\"`"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "<selection>\tScrapeInterval string `yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`",
+          "selection": "\tScrapeInterval string `yaml:\"scrape_interval,omitempty\" json:\"interval\"`\n"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\tScrapeInterval string `yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`",
+          "selection": "struct {\n\tScrapeInterval string `yaml:\"scrape_interval,omitempty\" json:\"interval\"`\n}\n"
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 45
+    },
+    {
+      "id": "S04",
+      "category": "select",
+      "title": "Ctrl+W four times, then Ctrl+Shift+W twice",
+      "query": null,
+      "text": "package scrape\n\nfunc ratio(added, total int) float64 {\n\treturn float64(added) / float64(<selection>to<caret>tal+1</selection>)\n}\n",
+      "steps": [
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\treturn float64(added) / float64(<selection>to<caret>tal</selection>+1)",
+          "selection": "total"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\treturn float64(added) / float64(<selection>to<caret>tal+1</selection>)",
+          "selection": "total+1"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\treturn float64(added) / float64<selection>(to<caret>tal+1)</selection>",
+          "selection": "(total+1)"
+        },
+        {
+          "key": "{ACTION:EditorSelectWord}",
+          "line": "\treturn float64(added) / <selection>float64(to<caret>tal+1)</selection>",
+          "selection": "float64(total+1)"
+        },
+        {
+          "key": "{ACTION:EditorUnSelectWord}",
+          "line": "\treturn float64(added) / float64<selection>(to<caret>tal+1)</selection>",
+          "selection": "(total+1)"
+        },
+        {
+          "key": "{ACTION:EditorUnSelectWord}",
+          "line": "\treturn float64(added) / float64(<selection>to<caret>tal+1</selection>)",
+          "selection": "total+1"
+        }
+      ],
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 48
+    },
+    {
+      "id": "K01",
+      "category": "comment",
+      "title": "Ctrl+/ on one line (caret in the middle)",
+      "query": null,
+      "text": "package scrape\n\nfunc run() int {\n\tn := 1\n\t// n += load()\n\treturn n<caret>\n}\n\nfunc load() int { return 0 }\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 43
+    },
+    {
+      "id": "K02",
+      "category": "comment",
+      "title": "Ctrl+/ on three selected lines",
+      "query": null,
+      "text": "package scrape\n\nfunc run() int {\n\tn := 1\n<selection>\t// n += 2\n\t// n *= 3\n\t// n -= 4\n<caret></selection>\treturn n\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 36
+    },
+    {
+      "id": "K03",
+      "category": "comment",
+      "title": "Ctrl+/ uncomments selected lines",
+      "query": null,
+      "text": "package scrape\n\nfunc run() int {\n\tn := 1\n\t<selection>n += 2\n\tn *= 3<caret></selection>\n\treturn n\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 36
+    },
+    {
+      "id": "K04",
+      "category": "comment",
+      "title": "Ctrl+Shift+/ on a selected expression",
+      "query": null,
+      "text": "package scrape\n\nfunc next(total, step int) int {\n\treturn total + <selection>/*step*2<caret>*/</selection>\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 39
+    },
+    {
+      "id": "L01",
+      "category": "lines",
+      "title": "Duplicate Line",
+      "query": null,
+      "text": "package scrape\n\nfunc labels() []string {\n\tls := []string{}\n\tls = append(ls, \"job\")\n\tls = append(ls, \"j<caret>ob\")\n\treturn ls\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 87
+    },
+    {
+      "id": "L03",
+      "category": "lines",
+      "title": "Move Line Up into the block above",
+      "query": null,
+      "text": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n\tif ok {\n\t\tn++\n\tn <caret>+= 2\n\t}\n\treturn n\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 37
+    },
+    {
+      "id": "L04",
+      "category": "lines",
+      "title": "Move Statement Up past an if block",
+      "query": null,
+      "text": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n\tn <caret>+= 2\n\tif ok {\n\t\tn++\n\t}\n\treturn n\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 49
+    },
+    {
+      "id": "L05",
+      "category": "lines",
+      "title": "Move Statement Down of a whole function",
+      "query": null,
+      "text": "package scrape\n\nfunc second() int {\n\treturn 2\n}\n\nfunc fi<caret>rst() int {\n\treturn 1\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 37
+    },
+    {
+      "id": "O01",
+      "category": "imports",
+      "title": "Optimize Imports removes unused imports",
+      "query": null,
+      "text": "package scrape\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc run(ctx context.Context) error {\n\t<caret>return fmt.Errorf(\"timeout %v\", time.Second)\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 1145
+    },
+    {
+      "id": "O02",
+      "category": "imports",
+      "title": "Optimize Imports with unsorted, aliased and blank imports",
+      "query": null,
+      "text": "package scrape\n\nimport (\n\t_ \"embed\"\n\t\"errors\"\n\tstdlog \"log\"\n\t\"time\"\n)\n\nfunc run() error {\n\t<caret>stdlog.Println(time.Now())\n\treturn errors.New(\"x\")\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 1067
+    },
+    {
+      "id": "O03",
+      "category": "imports",
+      "title": "Optimize Imports leaves one import of a group",
+      "query": null,
+      "text": "package scrape\n\nimport (\n\t\"fmt\"\n)\n\nfunc run() {\n\t<caret>fmt.Println()\n}\n",
+      "steps": null,
+      "items": null,
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 808
+    },
+    {
+      "id": "W01",
+      "category": "surround",
+      "title": "items offered for two selected statements, apply 'if'",
+      "query": "surround",
+      "text": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n\tif <caret> {\n\t\tn++\n\t\tn *= 2\n\t}\n\treturn n\n}\n",
+      "steps": null,
+      "items": [
+        "if",
+        "if / else",
+        "for",
+        "func() { ... }()",
+        "go func() { ... }()",
+        "defer func() { ... }()",
+        "{ ... }"
+      ],
+      "value": null,
+      "notes": [
+        "surround: applied 'if'"
+      ],
+      "error": null,
+      "stack": null,
+      "durationMs": 277
+    },
+    {
+      "id": "W02",
+      "category": "surround",
+      "title": "items offered for a selected expression, apply '(expr)'",
+      "query": "surround",
+      "text": "package scrape\n\nfunc ratio(added, total int) int {\n\treturn (added + total)<caret>\n}\n",
+      "steps": null,
+      "items": [
+        "(expr)"
+      ],
+      "value": null,
+      "notes": [
+        "surround: applied '(expr)'"
+      ],
+      "error": null,
+      "stack": null,
+      "durationMs": 46
+    },
+    {
+      "id": "W03",
+      "category": "surround",
+      "title": "items offered with the caret on a statement (no selection)",
+      "query": "surround",
+      "text": null,
+      "steps": null,
+      "items": [
+        "if",
+        "if / else",
+        "for",
+        "func() { ... }()",
+        "go func() { ... }()",
+        "defer func() { ... }()",
+        "{ ... }"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 31
+    },
+    {
+      "id": "G01",
+      "category": "generate",
+      "title": "items with the caret inside a struct type",
+      "query": "generate",
+      "text": null,
+      "steps": null,
+      "items": [
+        "Implement Methods…",
+        "Copyright",
+        "Constructor...",
+        "Method...",
+        "Getters...",
+        "Setters...",
+        "Getters and Setters...",
+        "String() Method...",
+        "Equal Method...",
+        "Struct Tags...",
+        "Implement Interface...",
+        "Tests for Package...",
+        "Type from JSON..."
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 237
+    },
+    {
+      "id": "G02",
+      "category": "generate",
+      "title": "items at the top level of a file",
+      "query": "generate",
+      "text": null,
+      "steps": null,
+      "items": [
+        "Copyright",
+        "Tests for Package...",
+        "Type from JSON..."
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 26
+    },
+    {
+      "id": "G03",
+      "category": "generate",
+      "title": "items inside a function body",
+      "query": "generate",
+      "text": null,
+      "steps": null,
+      "items": [
+        "Test…",
+        "Copyright",
+        "Test",
+        "Tests for Package...",
+        "Type from JSON..."
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 31
+    },
+    {
+      "id": "N01",
+      "category": "nav",
+      "title": "Ctrl+B on a local variable",
+      "query": "declaration",
+      "text": null,
+      "steps": null,
+      "items": [
+        "a.go:4: seriesAdded := added * 2"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 56
+    },
+    {
+      "id": "N02",
+      "category": "nav",
+      "title": "Ctrl+B on a method declared in another file of the package",
+      "query": "declaration",
+      "text": null,
+      "steps": null,
+      "items": [
+        "pool.go:6: func (sp *scrapePool) reload(targets []string) {"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 37
+    },
+    {
+      "id": "N03",
+      "category": "nav",
+      "title": "Ctrl+B on a standard library function",
+      "query": "declaration",
+      "text": null,
+      "steps": null,
+      "items": [
+        "$GOROOT/src/strings/strings.go:501: func HasPrefix(s, prefix string) bool {"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 50
+    },
+    {
+      "id": "N04",
+      "category": "nav",
+      "title": "Ctrl+B on an import path",
+      "query": "declaration",
+      "text": null,
+      "steps": null,
+      "items": [
+        "dir:$GOROOT/src/net/http"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 51
+    },
+    {
+      "id": "N06",
+      "category": "nav",
+      "title": "Ctrl+B on an embedded field in a selector",
+      "query": "declaration",
+      "text": null,
+      "steps": null,
+      "items": [
+        "a.go:6: sync.RWMutex"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 46
+    },
+    {
+      "id": "N07",
+      "category": "nav",
+      "title": "Ctrl+B on a method promoted from an embedded field",
+      "query": "declaration",
+      "text": null,
+      "steps": null,
+      "items": [
+        "$GOROOT/src/sync/rwmutex.go:114: func (rw *RWMutex) RUnlock() {"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 47
+    },
+    {
+      "id": "N09",
+      "category": "nav",
+      "title": "Ctrl+Alt+B on an interface type",
+      "query": "implementations",
+      "text": null,
+      "steps": null,
+      "items": [
+        "impl.go:3: type memAppender struct{}",
+        "impl.go:8: type nopAppender struct{}"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 327
+    },
+    {
+      "id": "N10",
+      "category": "nav",
+      "title": "Ctrl+Alt+B on an interface method at a call site",
+      "query": "implementations",
+      "text": null,
+      "steps": null,
+      "items": [
+        "impl.go:11: func (*nopAppender) Commit() error                                          { return nil }",
+        "impl.go:6: func (memAppender) Commit() error                                         { return nil }"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 54
+    },
+    {
+      "id": "N11",
+      "category": "nav",
+      "title": "Ctrl+U from an implementing method to the interface method",
+      "query": "super",
+      "text": null,
+      "steps": null,
+      "items": [
+        "api.go:6: Commit() error"
+      ],
+      "value": "api.go:6: Commit() error",
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 64
+    },
+    {
+      "id": "N12",
+      "category": "nav",
+      "title": "Alt+F7 on a method used in two files",
+      "query": "usages",
+      "text": null,
+      "steps": null,
+      "items": [
+        "count: 3",
+        "a.go:10: sp.reload(nil)",
+        "loop.go:4: sp.reload(nil)",
+        "loop.go:6: sp.reload([]string{\"a\"})"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 232
+    },
+    {
+      "id": "N13",
+      "category": "nav",
+      "title": "Alt+F7 on a struct field",
+      "query": "usages",
+      "text": null,
+      "steps": null,
+      "items": [
+        "count: 3",
+        "a.go:11: t.health = h",
+        "a.go:12: _ = Target{health: h}",
+        "a.go:8: func (t *Target) up() bool { return t.health == \"up\" }"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 41
+    },
+    {
+      "id": "N14",
+      "category": "nav",
+      "title": "Ctrl+Shift+F7 on a local variable (reads and writes)",
+      "query": "highlight",
+      "text": null,
+      "steps": null,
+      "items": [
+        "4:2-4:7 'total' WRITE_SEARCH_RESULT_ATTRIBUTES",
+        "6:3-6:8 'total' WRITE_SEARCH_RESULT_ATTRIBUTES",
+        "8:5-8:10 'total' SEARCH_RESULT_ATTRIBUTES",
+        "9:3-9:8 'total' WRITE_SEARCH_RESULT_ATTRIBUTES",
+        "11:9-11:14 'total' SEARCH_RESULT_ATTRIBUTES"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 78
+    },
+    {
+      "id": "N15",
+      "category": "nav",
+      "title": "Ctrl+Shift+F7 on `return` (exit points)",
+      "query": "highlight",
+      "text": null,
+      "steps": null,
+      "items": [
+        "7:3-7:35 'return 0, errors.New(\"negative\")' SEARCH_RESULT_ATTRIBUTES",
+        "10:3-10:21 'panic(\"too large\")' SEARCH_RESULT_ATTRIBUTES",
+        "12:2-12:15 'return n, nil' SEARCH_RESULT_ATTRIBUTES"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 39
+    },
+    {
+      "id": "N16",
+      "category": "nav",
+      "title": "Ctrl+F12 file structure",
+      "query": "structure",
+      "text": null,
+      "steps": null,
+      "items": [
+        "TargetHealth",
+        "HealthUnknown TargetHealth",
+        "HealthGood TargetHealth",
+        "defaultHealth",
+        "Scraper",
+        "  Scrape(ctx context.Context) error",
+        "Target",
+        "  mtx sync.RWMutex",
+        "  labels map[string]string",
+        "  health TargetHealth",
+        "  (Target) Health() TargetHealth",
+        "  (Target) Scrape(ctx context.Context) error",
+        "NewTarget(labels map[string]string) *Target",
+        "pool[T any]",
+        "  items []T",
+        "  (pool) Add(item T)",
+        "run()"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 69
+    },
+    {
+      "id": "H01",
+      "category": "hints",
+      "title": "Ctrl+P on the second argument of a method call",
+      "query": "paraminfo",
+      "text": null,
+      "steps": null,
+      "items": [
+        "handler: GoParameterInfoHandler, current parameter: 1",
+        "start Time, [[duration Duration]], scraped int, added int, scrapeErr error"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 80
+    },
+    {
+      "id": "H02",
+      "category": "hints",
+      "title": "Ctrl+P on a variadic argument of fmt.Errorf",
+      "query": "paraminfo",
+      "text": null,
+      "steps": null,
+      "items": [
+        "handler: GoParameterInfoHandler, current parameter: 2",
+        "format string, [[a ...any]]"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 41
+    },
+    {
+      "id": "H03",
+      "category": "hints",
+      "title": "Ctrl+P on a generic function call",
+      "query": "paraminfo",
+      "text": null,
+      "steps": null,
+      "items": [
+        "handler: GoParameterInfoHandler, current parameter: 1",
+        "[T any, U any] items []T, [[f func(T) U]]"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 28
+    },
+    {
+      "id": "H04",
+      "category": "hints",
+      "title": "Ctrl+P on a standard library call",
+      "query": "paraminfo",
+      "text": null,
+      "steps": null,
+      "items": [
+        "handler: GoParameterInfoHandler, current parameter: 1",
+        "s string, [[count int]]"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 55
+    },
+    {
+      "id": "H06",
+      "category": "hints",
+      "title": "Ctrl+Q on a standard library function",
+      "query": "quickdoc",
+      "text": null,
+      "steps": null,
+      "items": [
+        "<div class='definition'><pre>func TrimPrefix(s string, prefix string) string</pre></div><div class='content'><p>TrimPrefix returns s without the provided leading prefix string.\nIf s doesn&#39;t start with prefix, s is returned unchanged.</p></div><table class='sections'><tr><td valign='top' class='section'><p>Package:</td><td valign='top'><code>strings</code></td></tr><tr><td valign='top' class='section'><p>File:</td><td valign='top'>strings.go</td></tr></table>"
+      ],
+      "value": "func TrimPrefix(s string, prefix string) string TrimPrefix returns s without the provided leading prefix string. If s doesn't start with prefix, s is returned unchanged. Package:strings File:strings.go",
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 89
+    },
+    {
+      "id": "H07",
+      "category": "hints",
+      "title": "Ctrl+Q on a project function with a doc comment",
+      "query": "quickdoc",
+      "text": null,
+      "steps": null,
+      "items": [
+        "<div class='definition'><pre>func jitter(interval Duration, hash uint64) Duration</pre></div><div class='content'><p>jitter returns a deterministic offset in [0, interval) for the target with the given hash,\nso that targets of one job are not scraped at the same moment.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>a.go</td></tr></table>"
+      ],
+      "value": "func jitter(interval Duration, hash uint64) Duration jitter returns a deterministic offset in [0, interval) for the target with the given hash, so that targets of one job are not scraped at the same moment. File:a.go",
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 53
+    },
+    {
+      "id": "H08",
+      "category": "hints",
+      "title": "Ctrl+Q on a struct type",
+      "query": "quickdoc",
+      "text": null,
+      "steps": null,
+      "items": [
+        "<div class='definition'><pre>type Target struct {\n\tmtx    sync.RWMutex\n\tlabels map[string]string\n\thealth string\n}</pre></div><div class='content'><p>Target refers to a singular HTTP or HTTPS endpoint.</p></div><table class='sections'><tr><td valign='top' class='section'><p>File:</td><td valign='top'>a.go</td></tr></table>"
+      ],
+      "value": "type Target struct { mtx sync.RWMutex labels map[string]string health string } Target refers to a singular HTTP or HTTPS endpoint. File:a.go",
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 49
+    },
+    {
+      "id": "H09",
+      "category": "hints",
+      "title": "Ctrl+Shift+P on an index expression",
+      "query": "exprtype",
+      "text": null,
+      "steps": null,
+      "items": [
+        "<no expression type>"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 22
+    },
+    {
+      "id": "H11",
+      "category": "hints",
+      "title": "inlay hints in a function with literal arguments",
+      "query": "inlays",
+      "text": null,
+      "steps": null,
+      "items": [
+        "14:4 inline : *scrapeLoop",
+        "14:32 inline limit:",
+        "14:38 inline honorLabels:",
+        "14:44 inline name:",
+        "15:24 inline duration:",
+        "15:27 inline scraped:",
+        "15:31 inline added:",
+        "15:34 inline scrapeErr:",
+        "16:7 inline : int",
+        "16:10 inline : string"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 82
+    },
+    {
+      "id": "H12",
+      "category": "hints",
+      "title": "inlay hints of an unkeyed struct literal and constants",
+      "query": "inlays",
+      "text": null,
+      "steps": null,
+      "items": [
+        "3:21 after_line_end 16 bytes",
+        "9:24 inline = 1024",
+        "10:33 inline = 2048",
+        "14:19 inline T:",
+        "14:25 inline V:",
+        "14:32 inline T:",
+        "14:38 inline V:"
+      ],
+      "value": null,
+      "notes": [],
+      "error": null,
+      "stack": null,
+      "durationMs": 38
+    }
+  ]
+}

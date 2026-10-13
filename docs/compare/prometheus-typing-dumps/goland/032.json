@@ -1,0 +1,224 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "F03",
+   "category": "format",
+   "title": "Reformat Code aligns a const block",
+   "query": null,
+   "text": "package scrape\n\ntype TargetHealth string\n\nconst (\n\t<caret>HealthUnknown TargetHealth = \"unknown\"\n\tHealthGood    TargetHealth = \"up\"\n\tHealthBad     TargetHealth = \"down\"\n)\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4615
+  },
+  {
+   "id": "F04",
+   "category": "format",
+   "title": "Reformat Code on a map literal and spaces for indentation",
+   "query": null,
+   "text": "package labels\n\nfunc defaults() map[string]string {\n\tm := map[string]string{\n\t\t\"job\":      \"node\",\n\t\t\"instance\": \"localhost:9090\",\n\t}\n\t<caret>return m\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4653
+  },
+  {
+   "id": "F06",
+   "category": "format",
+   "title": "save of a badly formatted file (actions on save)",
+   "query": null,
+   "text": "package scrape\n\nfunc next(total int) int {\n\ttotal = total + 1*2<caret>\n\treturn total\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4938
+  },
+  {
+   "id": "S01",
+   "category": "select",
+   "title": "Ctrl+W from an identifier inside a call in an if condition",
+   "query": null,
+   "text": "package scrape\n\ntype cache struct{}\n\nfunc (c *cache) forEachStale(f func(string) bool) bool { return true }\n\n<selection>func run(c *cache) {\n\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n}\n</selection>",
+   "steps": [
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\tif c.<selection>forEach<caret>Stale</selection>(func(s string) bool { return len(s) > 0 }) {",
+     "selection": "forEachStale"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\tif <selection>c.forEach<caret>Stale</selection>(func(s string) bool { return len(s) > 0 }) {",
+     "selection": "c.forEachStale"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\tif <selection>c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 })</selection> {",
+     "selection": "c.forEachStale(func(s string) bool { return len(s) > 0 })"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "<selection>\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {",
+     "selection": "\tif c.forEachStale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {",
+     "selection": "{\n\tif c.forEachStale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n}\n"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\tif c.forEach<caret>Stale(func(s string) bool { return len(s) > 0 }) {",
+     "selection": "func run(c *cache) {\n\tif c.forEachStale(func(s string) bool { return len(s) > 0 }) {\n\t\treturn\n\t}\n}\n"
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2602
+  },
+  {
+   "id": "S02",
+   "category": "select",
+   "title": "Ctrl+W inside a string literal",
+   "query": null,
+   "text": "package scrape\n\nimport \"errors\"\n\nfunc reloadErr() error {\n\treturn <selection>errors.New(\"scrape pool re<caret>load failed\")</selection>\n}\n",
+   "steps": [
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn errors.New(\"scrape pool <selection>re<caret>load</selection> failed\")",
+     "selection": "reload"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn errors.New(\"<selection>scrape pool re<caret>load failed</selection>\")",
+     "selection": "scrape pool reload failed"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn errors.New(<selection>\"scrape pool re<caret>load failed\"</selection>)",
+     "selection": "\"scrape pool reload failed\""
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn errors.New<selection>(\"scrape pool re<caret>load failed\")</selection>",
+     "selection": "(\"scrape pool reload failed\")"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn <selection>errors.New(\"scrape pool re<caret>load failed\")</selection>",
+     "selection": "errors.New(\"scrape pool reload failed\")"
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2387
+  },
+  {
+   "id": "S03",
+   "category": "select",
+   "title": "Ctrl+W inside a struct tag",
+   "query": null,
+   "text": "package config\n\ntype GlobalConfig struct {\n<selection>\tScrapeInterval string `yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`\n</selection>}\n",
+   "steps": [
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\tScrapeInterval string `yaml:\"<selection>scrape_in<caret>terval</selection>,omitempty\" json:\"interval\"`",
+     "selection": "scrape_interval"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\tScrapeInterval string `<selection>yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"</selection>`",
+     "selection": "yaml:\"scrape_interval,omitempty\" json:\"interval\""
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\tScrapeInterval string <selection>`yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`</selection>",
+     "selection": "`yaml:\"scrape_interval,omitempty\" json:\"interval\"`"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\t<selection>ScrapeInterval string `yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`</selection>",
+     "selection": "ScrapeInterval string `yaml:\"scrape_interval,omitempty\" json:\"interval\"`"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "<selection>\tScrapeInterval string `yaml:\"scrape_in<caret>terval,omitempty\" json:\"interval\"`",
+     "selection": "\tScrapeInterval string `yaml:\"scrape_interval,omitempty\" json:\"interval\"`\n"
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2385
+  },
+  {
+   "id": "S04",
+   "category": "select",
+   "title": "Ctrl+W four times, then Ctrl+Shift+W twice",
+   "query": null,
+   "text": "package scrape\n\nfunc ratio(added, total int) float64 {\n\treturn float64(added) / float64(<selection>to<caret>tal+1</selection>)\n}\n",
+   "steps": [
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn float64(added) / float64(<selection>to<caret>tal</selection>+1)",
+     "selection": "total"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn float64(added) / float64(<selection>to<caret>tal+1</selection>)",
+     "selection": "total+1"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn float64(added) / float64<selection>(to<caret>tal+1)</selection>",
+     "selection": "(total+1)"
+    },
+    {
+     "key": "{ACTION:EditorSelectWord}",
+     "line": "\treturn float64(added) / <selection>float64(to<caret>tal+1)</selection>",
+     "selection": "float64(total+1)"
+    },
+    {
+     "key": "{ACTION:EditorUnSelectWord}",
+     "line": "\treturn float64(added) / float64<selection>(to<caret>tal+1)</selection>",
+     "selection": "(total+1)"
+    },
+    {
+     "key": "{ACTION:EditorUnSelectWord}",
+     "line": "\treturn float64(added) / float64(<selection>to<caret>tal+1</selection>)",
+     "selection": "total+1"
+    }
+   ],
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 2531
+  },
+  {
+   "id": "K01",
+   "category": "comment",
+   "title": "Ctrl+/ on one line (caret in the middle)",
+   "query": null,
+   "text": "package scrape\n\nfunc run() int {\n\tn := 1\n\t//n += load()\n\treturn n<caret>\n}\n\nfunc load() int { return 0 }\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1758
+  }
+ ]
+}

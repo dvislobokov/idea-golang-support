@@ -1,0 +1,71 @@
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -24,25 +24,16 @@
+ 	"github.com/prometheus/prometheus/discovery/targetgroup"
+ 	"github.com/prometheus/prometheus/model/labels"
+ 	"github.com/prometheus/prometheus/model/relabel"
++	"github.com/prometheus/prometheus/notifier/amlabels"
+ )
+ 
+ // Alertmanager holds Alertmanager endpoint information.
+ type alertmanager interface {
+ 	url() *url.URL
+ }
+-
+-type alertmanagerLabels struct{ labels.Labels }
+ 
+ const pathLabel = "__alerts_path__"
+ 
+-func (a alertmanagerLabels) url() *url.URL {
+-	return &url.URL{
+-		Scheme: a.Get(model.SchemeLabel),
+-		Host:   a.Get(model.AddressLabel),
+-		Path:   a.Get(pathLabel),
+-	}
+-}
+-
+ // AlertmanagerFromGroup extracts a list of alertmanagers from a target group
+ // and an associated AlertmanagerConfig.
+ func AlertmanagerFromGroup(tg *targetgroup.Group, cfg *config.AlertmanagerConfig) ([]alertmanager, []alertmanager, error) {
+@@ -70,7 +61,7 @@
+ 		preRelabel := lb.Labels()
+ 		keep := relabel.ProcessBuilder(lb, cfg.RelabelConfigs...)
+ 		if !keep {
+-			droppedAlertManagers = append(droppedAlertManagers, alertmanagerLabels{preRelabel})
++			droppedAlertManagers = append(droppedAlertManagers, amlabels.alertmanagerLabels{preRelabel})
+ 			continue
+ 		}
+ 
+@@ -79,7 +70,7 @@
+ 			return nil, nil, err
+ 		}
+ 
+-		res = append(res, alertmanagerLabels{lb.Labels()})
++		res = append(res, amlabels.alertmanagerLabels{lb.Labels()})
+ 	}
+ 	return res, droppedAlertManagers, nil
+ }
+--- /dev/null
++++ b/notifier/amlabels/amlabels.go
+@@ -1,0 +1,21 @@
++package amlabels
++
++import (
++	"net/url"
++
++	"github.com/prometheus/common/model"
++
++	"github.com/prometheus/prometheus/model/labels"
++	"github.com/prometheus/prometheus/notifier"
++)
++
++type alertmanagerLabels struct{ labels.Labels }
++
++func (a alertmanagerLabels) url() *url.URL {
++	return &url.URL{
++		Scheme: a.Get(model.SchemeLabel),
++		Host:   a.Get(model.AddressLabel),
++		Path:   a.Get(notifier.pathLabel),
++	}
++}
++

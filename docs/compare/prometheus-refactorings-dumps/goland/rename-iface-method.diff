@@ -1,0 +1,106 @@
+diff --git a/notifier/alertmanager.go b/notifier/alertmanager.go
+index a9c1e86..e44fe9c 100644
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -28,7 +28,7 @@ import (
+ 
+ // Alertmanager holds Alertmanager endpoint information.
+ type alertmanager interface {
+-	url() *url.URL
++	endpoint() *url.URL
+ }
+ 
+ type alertmanagerLabels struct{ labels.Labels }
+diff --git a/notifier/alertmanagerset.go b/notifier/alertmanagerset.go
+index 81565b5..db1673d 100644
+--- a/notifier/alertmanagerset.go
++++ b/notifier/alertmanagerset.go
+@@ -100,7 +100,7 @@ func (s *alertmanagerSet) sync(tgs []*targetgroup.Group) {
+ 	// Deduplicate Alertmanagers and add sendloops for new Alertmanagers.
+ 	seen := map[string]struct{}{}
+ 	for _, am := range allAms {
+-		us := am.url().String()
++		us := am.endpoint().String()
+ 		if _, ok := seen[us]; ok {
+ 			continue
+ 		}
+@@ -113,7 +113,7 @@ func (s *alertmanagerSet) sync(tgs []*targetgroup.Group) {
+ 	// Populate a list of Alertmanagers to clean up,
+ 	// avoid cleaning up what we just added.
+ 	for _, am := range previousAms {
+-		us := am.url().String()
++		us := am.endpoint().String()
+ 		if _, ok := seen[us]; ok {
+ 			continue
+ 		}
+@@ -151,7 +151,7 @@ func (s *alertmanagerSet) send(alerts ...*Alert) {
+ // This function expects the caller to acquire needed locks.
+ func (s *alertmanagerSet) addSendLoops(ams []alertmanager) {
+ 	for _, am := range ams {
+-		us := am.url().String()
++		us := am.endpoint().String()
+ 		// Only add if sendloop doesn't already exist
+ 		if loop, exists := s.sendLoops[us]; exists {
+ 			loop.logger.Debug("Alertmanager already has send loop running, skipping")
+@@ -167,7 +167,7 @@ func (s *alertmanagerSet) addSendLoops(ams []alertmanager) {
+ // This function expects the caller to acquire needed locks.
+ func (s *alertmanagerSet) cleanSendLoops(ams ...alertmanager) {
+ 	for _, am := range ams {
+-		us := am.url().String()
++		us := am.endpoint().String()
+ 		if sendLoop, ok := s.sendLoops[us]; ok {
+ 			sendLoop.stop()
+ 			delete(s.sendLoops, us)
+@@ -180,7 +180,7 @@ func (s *alertmanagerSet) cleanSendLoops(ams ...alertmanager) {
+ // This is mainly needed for testing where the loops are added as part of the test setup.
+ func (s *alertmanagerSet) startSendLoops(ams []alertmanager) {
+ 	for _, am := range ams {
+-		us := am.url().String()
++		us := am.endpoint().String()
+ 
+ 		if l, ok := s.sendLoops[us]; ok {
+ 			go l.loop()
+diff --git a/notifier/manager.go b/notifier/manager.go
+index e25434d..fd1a22a 100644
+--- a/notifier/manager.go
++++ b/notifier/manager.go
+@@ -288,7 +288,7 @@ func (n *Manager) Alertmanagers() []*url.URL {
+ 	for _, ams := range amSets {
+ 		ams.mtx.RLock()
+ 		for _, am := range ams.ams {
+-			res = append(res, am.url())
++			res = append(res, am.endpoint())
+ 		}
+ 		ams.mtx.RUnlock()
+ 	}
+@@ -307,7 +307,7 @@ func (n *Manager) DroppedAlertmanagers() []*url.URL {
+ 	for _, ams := range amSets {
+ 		ams.mtx.RLock()
+ 		for _, dam := range ams.droppedAms {
+-			res = append(res, dam.url())
++			res = append(res, dam.endpoint())
+ 		}
+ 		ams.mtx.RUnlock()
+ 	}
+diff --git a/notifier/manager_test.go b/notifier/manager_test.go
+index 5e33c57..46d8806 100644
+--- a/notifier/manager_test.go
++++ b/notifier/manager_test.go
+@@ -1081,7 +1081,7 @@ alerting:
+ 	// Ensure the config order is taken into account.
+ 	ams := n.alertmanagers["config-1"].ams
+ 	require.Len(t, ams, 1)
+-	require.Equal(t, alertmanagerURL, ams[0].url().String())
++	require.Equal(t, alertmanagerURL, ams[0].endpoint().String())
+ 
+ 	// 3. Ensure known alertmanagers are reused for new config with identical AlertmanagerConfig.
+ 	s = `
+@@ -1102,7 +1102,7 @@ alerting:
+ 	for cfgIdx := range 2 {
+ 		ams := n.alertmanagers[fmt.Sprintf("config-%d", cfgIdx)].ams
+ 		require.Len(t, ams, 1)
+-		require.Equal(t, alertmanagerURL, ams[0].url().String())
++		require.Equal(t, alertmanagerURL, ams[0].endpoint().String())
+ 	}
+ 
+ 	// 4. Ensure known alertmanagers are reused only for identical AlertmanagerConfig.

@@ -1,0 +1,185 @@
+{
+  "about": "Manual / robot steps for the GoLand 2026.2.3 reference (default Windows keymap) of tools/compare/refactor/scenarios.json. Open build/compare/prometheus (clean clone) as the project, wait for indexing. Place = the scenario's anchor + at (caret) or its 'select' text (selection). For every scenario first press Ctrl+Alt+Shift+T (Refactor This) at the place and record the list, then Alt+Enter and record the list (Esc), then do the steps. After each scenario: record the diff (VCS | Local Changes / `git diff` + `git status --short` in the clone for created/deleted files), then Ctrl+Z until clean, or `git checkout -- . && git clean -fdq` in the clone, and File | Reload All from Disk. 'compare' says what to look at against the plugin's build/compare/out/refactor/<id>/diff.patch and gopls's refactor-gopls/<id>/diff.patch.",
+  "steps": {
+    "rename-local": {
+      "place": "notifier/alert.go, caret on relabeledAlerts in `var relabeledAlerts []*Alert`",
+      "steps": ["Shift+F6 (in-place rename starts)", "type kept", "Enter"],
+      "compare": "Three occurrences renamed; nothing else. In-place vs dialog: GoLand renames in place."
+    },
+    "rename-field": {
+      "place": "notifier/alert.go, caret on GeneratorURL in the Alert struct",
+      "steps": ["Shift+F6", "type SourceURL", "if the in-place popup shows options (gear / Shift+F6 again for the dialog), open the dialog: note the default state of 'Rename struct tags' / comments / text occurrences", "Enter / Refactor", "if a 'Rename struct tags' question or preview appears, record it and accept the default"],
+      "compare": "Usages in notifier/alert.go, util.go, util_test.go, rules/manager.go, cmd/prometheus/main_test.go; whether the json tag generatorURL is renamed (plugin: renamed by default if its check box is on); gofmt alignment of the struct block."
+    },
+    "rename-iface-method": {
+      "place": "notifier/alertmanager.go, caret on url in `url() *url.URL` inside `type alertmanager interface`",
+      "steps": ["Shift+F6", "type endpoint", "Enter; if GoLand asks to rename implementations / shows the dialog, accept the default (rename all)"],
+      "compare": "Interface method, alertmanagerLabels.url, alertmanagerMock.url (manager_test.go), every am.url() call."
+    },
+    "rename-type": {
+      "place": "notifier/sendloop.go, caret on sendLoop in `type sendLoop struct`",
+      "steps": ["Shift+F6", "type alertSender", "Enter (if a dialog offers to rename similarly named variables / newSendLoop, record the offer and decline)"],
+      "compare": "Type uses only; locals named sendLoop and the function newSendLoop untouched (or renamed only when the user agreed)."
+    },
+    "rename-package": {
+      "place": "util/kahansum/kahansum.go, caret on kahansum in `package kahansum`",
+      "steps": ["Shift+F6", "GoLand shows 'Rename package' dialog (or the directory question): type kahan", "record the check boxes (rename directory, search in comments), keep defaults", "Refactor"],
+      "compare": "Directory util/kahansum -> util/kahan or not, package clauses, the 4 importers' import path and the qualifier kahansum. -> kahan."
+    },
+    "rename-file": {
+      "place": "Project view: notifier/util.go selected (or the editor tab of util.go)",
+      "steps": ["Shift+F6 in the Project view", "dialog 'Rename file': type openapi.go", "record the check boxes (e.g. 'Rename tests' / search for references) and keep defaults", "OK"],
+      "compare": "Whether util_test.go follows to openapi_test.go; no text changes."
+    },
+    "rename-conflict": {
+      "place": "notifier/alert.go, caret on lb in `lb := labels.NewBuilder(labels.EmptyLabels())` of relabelAlerts",
+      "steps": ["Shift+F6", "type a", "Enter", "record the conflict dialog / balloon text exactly", "press Cancel (and separately try Continue to record the result)"],
+      "compare": "Conflict text (shadowing by the loop variable a) vs plugin conflict text vs gopls error."
+    },
+    "extract-variable": {
+      "place": "notifier/sendloop.go, select s.opts.QueueCapacity in `if d := len(alerts) - s.opts.QueueCapacity; d > 0` (first one in add)",
+      "steps": ["Ctrl+Alt+V", "if an expression chooser appears, pick s.opts.QueueCapacity", "occurrences popup: choose 'Replace all 2 occurrences'", "type capacity, Enter"],
+      "compare": "Where `capacity := ...` is placed, both occurrences replaced."
+    },
+    "extract-constant": {
+      "place": "notifier/alert.go, select \"[resolved]\" in Alert.String",
+      "steps": ["Ctrl+Alt+C", "record whether GoLand asks local vs package-level", "type resolvedSuffix, Enter"],
+      "compare": "Local const vs package const, the replaced use."
+    },
+    "extract-function-multi": {
+      "place": "notifier/sendloop.go, select from `var dropped int` to the closing brace of the second `if d := ...` block in sendLoop.add",
+      "steps": ["Ctrl+Alt+M", "dialog Extract Method: name dropOverflow, record proposed receiver / parameters / results", "OK / Refactor"],
+      "compare": "Method vs function, parameter alerts, results (dropped, alerts), the call form (`dropped, alerts := ...` vs `=`)."
+    },
+    "extract-function-err": {
+      "place": "notifier/alertmanagerset.go, select from `client, err := config_util.NewClientFromConfig(...)` through `client.Transport = t` in newAlertmanagerSet",
+      "steps": ["Ctrl+Alt+M", "name newClient; record the proposed signature", "Refactor (or record the refusal text if GoLand refuses because of return statements)"],
+      "compare": "Handling of the early `return nil, err`: refusal text, or the extracted function's results and the error check at the call."
+    },
+    "extract-method": {
+      "place": "notifier/sendloop.go, select the six `s.metrics.*.DeleteLabelValues(s.alertmanagerURL)` lines inside stop's closure",
+      "steps": ["Ctrl+Alt+M", "name deleteMetrics", "Refactor"],
+      "compare": "Receiver method with no parameters, the call `s.deleteMetrics()` inside the closure."
+    },
+    "introduce-parameter": {
+      "place": "notifier/alertmanager.go, select \"/api/%v/alerts\" in postPath",
+      "steps": ["Ctrl+Alt+P", "type format, Enter (record any dialog)"],
+      "compare": "New parameter position, both call sites (AlertmanagerFromGroup, alertmanager_test.go) pass the literal."
+    },
+    "inline-variable": {
+      "place": "notifier/alertmanager.go, caret on addr in `addr := lb.Get(model.AddressLabel)`",
+      "steps": ["Ctrl+Alt+N", "confirm the dialog/preview if shown (Inline all and remove)"],
+      "compare": "CheckTargetAddress(model.LabelValue(lb.Get(model.AddressLabel))), declaration removed."
+    },
+    "inline-function-all": {
+      "place": "notifier/alert.go, caret on Resolved in `func (a *Alert) Resolved() bool`",
+      "steps": ["Ctrl+Alt+N", "dialog Inline Method: record options ('Inline all and remove the method' / 'Inline all and keep'), keep the default", "Refactor"],
+      "compare": "The call in String becomes a.ResolvedAt(time.Now()); whether the exported method is deleted."
+    },
+    "inline-function-call": {
+      "place": "notifier/alertmanager.go, caret on postPath in the call `postPath(cfg.PathPrefix, cfg.APIVersion)`",
+      "steps": ["Ctrl+Alt+N", "dialog: choose 'Inline this invocation only' (record the options)", "Refactor (or record the refusal text)"],
+      "compare": "Inlined body shape (temporary variable or nested expression), postPath kept."
+    },
+    "inline-constant": {
+      "place": "notifier/alertmanager.go, caret on pathLabel in `const pathLabel = \"__alerts_path__\"`",
+      "steps": ["Ctrl+Alt+N", "confirm (Inline all and remove)"],
+      "compare": "Both uses replaced by the literal, declaration removed."
+    },
+    "cs-add-param": {
+      "place": "notifier/alertmanager.go, caret on postPath in `func postPath(`",
+      "steps": ["Ctrl+F6", "Change Signature dialog: + (add) a parameter: name root, type string, default value \"/\"", "Refactor"],
+      "compare": "Signature and both call sites pass \"/\"."
+    },
+    "cs-remove-param": {
+      "place": "notifier/sendloop.go, caret on sendOne in `func (s *sendLoop) sendOne(`",
+      "steps": ["Ctrl+F6", "select the parameter c *http.Client, press - (remove)", "Refactor", "record the conflict dialog text (c is used in the body); Cancel, then repeat with Continue to record the result"],
+      "compare": "Conflict text and the forced result (calls lose the second argument, body still references c)."
+    },
+    "cs-reorder": {
+      "place": "notifier/sendloop.go, caret on newSendLoop in `func newSendLoop(`",
+      "steps": ["Ctrl+F6", "select client, press Up (move it above alertmanagerURL)", "Refactor"],
+      "compare": "Signature order and the 8 call sites (alertmanagerset.go, manager_test.go, sendloop_test.go x6)."
+    },
+    "cs-results": {
+      "place": "notifier/sendloop.go, caret on nextBatch in `func (s *sendLoop) nextBatch() []*Alert`",
+      "steps": ["Ctrl+F6", "Result type: change to ([]*Alert, int) (record how the dialog edits results)", "Refactor", "record conflicts / what happens to `return alerts` and the call sites"],
+      "compare": "Whether GoLand rewrites returns/calls or reports them."
+    },
+    "move-func-file": {
+      "place": "notifier/util.go, caret on labelsToOpenAPILabelSet in its declaration",
+      "steps": ["F6", "Move dialog: target file notifier/alert.go (record the dialog fields)", "Refactor"],
+      "compare": "Function at the end of alert.go, imports of both files (labels dropped from util.go, models added to alert.go)."
+    },
+    "move-type-newfile": {
+      "place": "notifier/alertmanager.go, caret on alertmanagerLabels in `type alertmanagerLabels struct{ labels.Labels }`",
+      "steps": ["F6", "Move dialog: target file notifier/amlabels.go (new); tick its url() method if the dialog lists members", "Refactor"],
+      "compare": "New file content (package clause, imports), what is left in alertmanager.go."
+    },
+    "move-func-package": {
+      "place": "notifier/util.go, caret on labelsToOpenAPILabelSet in its declaration",
+      "steps": ["F6", "Move dialog: target directory notifier/openapi (new), file labels.go", "record whether GoLand offers to export (LabelsToOpenAPILabelSet) / reports the unexported name", "Refactor"],
+      "compare": "Export, new package clause openapi, import added to util.go and util_test.go."
+    },
+    "move-type-package": {
+      "place": "notifier/alertmanager.go, caret on alertmanagerLabels in its declaration",
+      "steps": ["F6", "target directory notifier/amlabels (new), file amlabels.go, include the method url()", "Refactor", "record conflicts (unexported interface method url, unexported pathLabel); Cancel, then Continue to record the result"],
+      "compare": "Conflict texts; forced result builds or not."
+    },
+    "safe-delete-test-only": {
+      "place": "util/strutil/strconv.go, caret on SanitizeFullLabelName in its declaration",
+      "steps": ["Alt+Delete", "Safe Delete dialog: keep defaults (search in comments)", "OK", "record the 'usages detected' dialog (1 usage in strconv_test.go); View Usages, then Delete Anyway in a second run"],
+      "compare": "Reported usage; forced result (function and comment deleted, test left broken)."
+    },
+    "safe-delete-used": {
+      "place": "notifier/alertmanager.go, caret on postPath in `func postPath(`",
+      "steps": ["Alt+Delete", "OK", "record the usages dialog text", "Cancel"],
+      "compare": "Usages reported (alertmanager.go, alertmanager_test.go)."
+    },
+    "implement-interface": {
+      "place": "notifier/sendloop.go, caret on sendLoop in `type sendLoop struct`",
+      "steps": ["Ctrl+I (or Alt+Insert > Implement Methods / Alt+Enter > Implement interface)", "type alertmanager in the chooser, pick notifier.alertmanager", "OK"],
+      "compare": "Stub text (receiver name and kind, body), position, import net/url added to sendloop.go."
+    },
+    "generate-constructor": {
+      "place": "notifier/alert.go, caret on Alert in `type Alert struct`",
+      "steps": ["Alt+Insert", "Constructor", "select all fields (Ctrl+A)", "OK"],
+      "compare": "Function name NewAlert, parameter names (shadowing of the package labels by a parameter named labels), body."
+    },
+    "generate-getters-setters": {
+      "place": "notifier/alertmanagerset.go, caret on alertmanagerSet in `type alertmanagerSet struct`",
+      "steps": ["Alt+Insert", "Getter and Setter", "select all fields (Ctrl+A)", "OK"],
+      "compare": "Getter names (Cfg vs GetCfg), receiver kind, the mutex field handling, setter names."
+    },
+    "generate-string": {
+      "place": "notifier/manager.go, caret on Options in `type Options struct`",
+      "steps": ["Alt+Insert", "String() (record the exact menu text; if absent, record the Generate list)", "select all fields", "OK"],
+      "compare": "Receiver kind, format string, fmt import."
+    },
+    "introduce-field": {
+      "place": "notifier/sendloop.go, select time.Duration(s.cfg.Timeout) in sendAll",
+      "steps": ["Ctrl+Alt+F (record whether GoLand has Introduce Field for Go at all: Refactor | Introduce/Extract menu)", "name timeout; initialize in current method", "Enter"],
+      "compare": "Field added to sendLoop, initialization statement, replaced use; or 'not available' in GoLand."
+    },
+    "convert-if-switch": {
+      "place": "model/exemplar/exemplar.go, caret on if in `if a.Ts < b.Ts {` of Compare",
+      "steps": ["Alt+Enter", "record the whole list", "pick the 'Convert to switch' item (exact text)", "Enter"],
+      "compare": "switch form and that the second if/else-if chain stays."
+    },
+    "convert-switch-if": {
+      "place": "notifier/sendloop.go, caret on switch in `switch s.cfg.APIVersion {` of sendAll",
+      "steps": ["Alt+Enter", "record the whole list", "pick the switch-to-if item if any (exact text)", "Enter"],
+      "compare": "if/else form or 'not offered'."
+    },
+    "convert-var-to-short": {
+      "place": "notifier/sendloop.go, caret on dropped in `var dropped int` of sendLoop.add",
+      "steps": ["Alt+Enter", "record the whole list", "pick 'Convert to short var declaration' (exact text) if offered", "Enter"],
+      "compare": "`dropped := 0` or not offered."
+    },
+    "convert-short-to-var": {
+      "place": "notifier/alertmanager.go, caret on lb in `lb := labels.NewBuilder(labels.EmptyLabels())` of AlertmanagerFromGroup",
+      "steps": ["Alt+Enter", "record the whole list", "pick the 'Convert to var declaration' item (exact text)", "Enter"],
+      "compare": "`var lb = ...` vs `var lb *labels.Builder = ...`."
+    }
+  }
+}

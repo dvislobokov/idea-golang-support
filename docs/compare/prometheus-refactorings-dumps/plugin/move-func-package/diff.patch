@@ -1,0 +1,87 @@
+--- /dev/null
++++ b/notifier/openapi/labels.go
+@@ -1,0 +1,17 @@
++package openapi
++
++import (
++	"github.com/prometheus/alertmanager/api/v2/models"
++
++	"github.com/prometheus/prometheus/model/labels"
++)
++
++func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {
++	apiLabelSet := models.LabelSet{}
++	modelLabelSet.Range(func(label labels.Label) {
++		apiLabelSet[label.Name] = label.Value
++	})
++
++	return apiLabelSet
++}
++
+--- a/notifier/util.go
++++ b/notifier/util.go
+@@ -17,7 +17,7 @@
+ 	"github.com/go-openapi/strfmt"
+ 	"github.com/prometheus/alertmanager/api/v2/models"
+ 
+-	"github.com/prometheus/prometheus/model/labels"
++	"github.com/prometheus/prometheus/notifier/openapi"
+ )
+ 
+ func alertsToOpenAPIAlerts(alerts []*Alert) models.PostableAlerts {
+@@ -26,25 +26,16 @@
+ 		start := strfmt.DateTime(a.StartsAt)
+ 		end := strfmt.DateTime(a.EndsAt)
+ 		openAPIAlerts = append(openAPIAlerts, &models.PostableAlert{
+-			Annotations: labelsToOpenAPILabelSet(a.Annotations),
++			Annotations: openapi.labelsToOpenAPILabelSet(a.Annotations),
+ 			EndsAt:      end,
+ 			StartsAt:    start,
+ 			Alert: models.Alert{
+ 				GeneratorURL: strfmt.URI(a.GeneratorURL),
+-				Labels:       labelsToOpenAPILabelSet(a.Labels),
++				Labels:       openapi.labelsToOpenAPILabelSet(a.Labels),
+ 			},
+ 		})
+ 	}
+ 
+ 	return openAPIAlerts
+-}
+-
+-func labelsToOpenAPILabelSet(modelLabelSet labels.Labels) models.LabelSet {
+-	apiLabelSet := models.LabelSet{}
+-	modelLabelSet.Range(func(label labels.Label) {
+-		apiLabelSet[label.Name] = label.Value
+-	})
+-
+-	return apiLabelSet
+ }
+ 
+--- a/notifier/util_test.go
++++ b/notifier/util_test.go
+@@ -21,21 +21,22 @@
+ 	"github.com/stretchr/testify/require"
+ 
+ 	"github.com/prometheus/prometheus/model/labels"
++	"github.com/prometheus/prometheus/notifier/openapi"
+ )
+ 
+ func TestLabelsToOpenAPILabelSet(t *testing.T) {
+-	require.Equal(t, models.LabelSet{"aaa": "111", "bbb": "222"}, labelsToOpenAPILabelSet(labels.FromStrings("aaa", "111", "bbb", "222")))
++	require.Equal(t, models.LabelSet{"aaa": "111", "bbb": "222"}, openapi.labelsToOpenAPILabelSet(labels.FromStrings("aaa", "111", "bbb", "222")))
+ }
+ 
+ // Edge case tests for utility functions
+ 
+ func TestLabelsToOpenAPILabelSetEmpty(t *testing.T) {
+-	result := labelsToOpenAPILabelSet(labels.EmptyLabels())
++	result := openapi.labelsToOpenAPILabelSet(labels.EmptyLabels())
+ 	require.Empty(t, result)
+ }
+ 
+ func TestLabelsToOpenAPILabelSetSpecialCharacters(t *testing.T) {
+-	result := labelsToOpenAPILabelSet(labels.FromStrings(
++	result := openapi.labelsToOpenAPILabelSet(labels.FromStrings(
+ 		"special/chars", "value with spaces",
+ 		"unicode", "αβγ",
+ 		"empty", "",

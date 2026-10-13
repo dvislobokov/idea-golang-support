@@ -1,0 +1,21 @@
+--- a/notifier/alert.go
++++ b/notifier/alert.go
+@@ -70,7 +70,7 @@
+ 
+ func relabelAlerts(relabelConfigs []*relabel.Config, externalLabels labels.Labels, alerts []*Alert) []*Alert {
+ 	lb := labels.NewBuilder(labels.EmptyLabels())
+-	var relabeledAlerts []*Alert
++	var kept []*Alert
+ 
+ 	for _, a := range alerts {
+ 		lb.Reset(a.Labels)
+@@ -96,7 +96,7 @@
+ 			}
+ 		}
+ 
+-		relabeledAlerts = append(relabeledAlerts, a)
++		kept = append(kept, a)
+ 	}
+-	return relabeledAlerts
++	return kept
+ }

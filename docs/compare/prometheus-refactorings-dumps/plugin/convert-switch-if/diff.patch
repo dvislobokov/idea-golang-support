@@ -1,0 +1,21 @@
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -215,16 +215,14 @@
+ 
+ 	var payload []byte
+ 	var err error
+-	switch s.cfg.APIVersion {
+-	case config.AlertmanagerAPIVersionV2:
++	if s.cfg.APIVersion == config.AlertmanagerAPIVersionV2 {
+ 		openAPIAlerts := alertsToOpenAPIAlerts(alerts)
+ 		payload, err = json.Marshal(openAPIAlerts)
+ 		if err != nil {
+ 			s.logger.Error("Encoding alerts for Alertmanager API v2 failed", "err", err)
+ 			return false
+ 		}
+-
+-	default:
++	} else {
+ 		s.logger.Error(
+ 			fmt.Sprintf("Invalid Alertmanager API version '%v', expected one of '%v'", s.cfg.APIVersion, config.SupportedAlertmanagerAPIVersions),
+ 			"err", err,

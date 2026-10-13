@@ -1,0 +1,13 @@
+--- a/notifier/alert.go
++++ b/notifier/alert.go
+@@ -68,6 +68,10 @@
+ 	return !a.EndsAt.After(ts)
+ }
+ 
++func NewAlert(labels labels.Labels, annotations labels.Labels, startsAt time.Time, endsAt time.Time, generatorURL string) *Alert {
++	return &Alert{Labels: labels, Annotations: annotations, StartsAt: startsAt, EndsAt: endsAt, GeneratorURL: generatorURL}
++}
++
+ func relabelAlerts(relabelConfigs []*relabel.Config, externalLabels labels.Labels, alerts []*Alert) []*Alert {
+ 	lb := labels.NewBuilder(labels.EmptyLabels())
+ 	var relabeledAlerts []*Alert

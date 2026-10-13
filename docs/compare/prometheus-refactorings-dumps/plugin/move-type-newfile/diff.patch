@@ -1,0 +1,43 @@
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -31,17 +31,7 @@
+ 	url() *url.URL
+ }
+ 
+-type alertmanagerLabels struct{ labels.Labels }
+-
+ const pathLabel = "__alerts_path__"
+-
+-func (a alertmanagerLabels) url() *url.URL {
+-	return &url.URL{
+-		Scheme: a.Get(model.SchemeLabel),
+-		Host:   a.Get(model.AddressLabel),
+-		Path:   a.Get(pathLabel),
+-	}
+-}
+ 
+ // AlertmanagerFromGroup extracts a list of alertmanagers from a target group
+ // and an associated AlertmanagerConfig.
+--- /dev/null
++++ b/notifier/amlabels.go
+@@ -1,0 +1,20 @@
++package notifier
++
++import (
++	"net/url"
++
++	"github.com/prometheus/common/model"
++
++	"github.com/prometheus/prometheus/model/labels"
++)
++
++type alertmanagerLabels struct{ labels.Labels }
++
++func (a alertmanagerLabels) url() *url.URL {
++	return &url.URL{
++		Scheme: a.Get(model.SchemeLabel),
++		Host:   a.Get(model.AddressLabel),
++		Path:   a.Get(pathLabel),
++	}
++}
++

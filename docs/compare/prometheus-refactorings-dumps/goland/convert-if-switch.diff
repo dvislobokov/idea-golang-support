@@ -1,0 +1,17 @@
+diff --git a/model/exemplar/exemplar.go b/model/exemplar/exemplar.go
+index 5db7c46..a64cf9a 100644
+--- a/model/exemplar/exemplar.go
++++ b/model/exemplar/exemplar.go
+@@ -53,9 +53,10 @@ func (e Exemplar) Equals(e2 Exemplar) bool {
+ 
+ // Compare first timestamps, then values, then labels.
+ func Compare(a, b Exemplar) int {
+-	if a.Ts < b.Ts {
++	switch {
++	case a.Ts < b.Ts:
+ 		return -1
+-	} else if a.Ts > b.Ts {
++	case a.Ts > b.Ts:
+ 		return 1
+ 	}
+ 	if a.Value < b.Value {

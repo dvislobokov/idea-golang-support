@@ -1,0 +1,110 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "I01",
+   "category": "indent",
+   "title": "paste of unindented lines into a function body",
+   "query": null,
+   "text": "package scrape\n\nfunc validate(limit int) error {\n\tif limit < 0 {\n\t\treturn errors.New(\"negative limit\")\n\t}\n<caret>\n\treturn nil\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1841
+  },
+  {
+   "id": "I02",
+   "category": "indent",
+   "title": "paste of 4-space lines into a nested block",
+   "query": null,
+   "text": "package scrape\n\nfunc sum(samples []float64, ok bool) float64 {\n\ttotal := 0.0\n\tif ok {\n\t\tfor _, s := range samples {\n\t\t\ttotal += s\n\t\t}\n<caret>\n\t}\n\treturn total\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1800
+  },
+  {
+   "id": "I03",
+   "category": "indent",
+   "title": "paste of a fragment in the middle of a line",
+   "query": null,
+   "text": "package scrape\n\nimport \"time\"\n\nfunc timeout(interval time.Duration) time.Duration {\n\treturn interval - 500*time.Millisecond<caret>\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1774
+  },
+  {
+   "id": "I04",
+   "category": "indent",
+   "title": "paste of a top-level function with indentation",
+   "query": null,
+   "text": "package scrape\n\ntype Target struct{ labels map[string]string }\n\nfunc (t *Target) Labels() map[string]string {\n\treturn t.labels\n}\n<caret>\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1793
+  },
+  {
+   "id": "I05",
+   "category": "indent",
+   "title": "'}' on its own line dedents",
+   "query": null,
+   "text": "package scrape\n\nfunc count(xs []int) int {\n\tn := 0\n\tfor _, x := range xs {\n\t\tn += x\n\t}<caret>\n\treturn n\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1791
+  },
+  {
+   "id": "I06",
+   "category": "indent",
+   "title": "'}' closing a badly spaced one-line block",
+   "query": null,
+   "text": "package scrape\n\nfunc clamp(total int) int {\n\tif total>0 {   total=1   }<caret>\n\treturn total\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1770
+  },
+  {
+   "id": "F01",
+   "category": "format",
+   "title": "Reformat Code on operators and braces",
+   "query": null,
+   "text": "package scrape\n\nfunc next(total, limit int) int {\n\t<caret>total = total + 1\n\tif total > limit {\n\t\treturn limit\n\t}\n\treturn total\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4639
+  },
+  {
+   "id": "F02",
+   "category": "format",
+   "title": "Reformat Code aligns struct fields, tags and comments",
+   "query": null,
+   "text": "package config\n\nimport \"time\"\n\ntype ScrapeConfig struct {\n\t<caret>JobName        string        `yaml:\"job_name\"` // the job\n\tScrapeInterval time.Duration `yaml:\"scrape_interval,omitempty\"`\n\tHonorLabels    bool          `yaml:\"honor_labels,omitempty\"` // keep target labels\n\tSampleLimit    uint          `yaml:\"sample_limit,omitempty\"`\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4640
+  }
+ ]
+}

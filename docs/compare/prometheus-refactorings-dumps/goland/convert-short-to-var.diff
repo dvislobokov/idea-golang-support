@@ -1,0 +1,14 @@
+diff --git a/notifier/alertmanager.go b/notifier/alertmanager.go
+index a9c1e86..3b0176b 100644
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -48,8 +48,7 @@ func (a alertmanagerLabels) url() *url.URL {
+ func AlertmanagerFromGroup(tg *targetgroup.Group, cfg *config.AlertmanagerConfig) ([]alertmanager, []alertmanager, error) {
+ 	var res []alertmanager
+ 	var droppedAlertManagers []alertmanager
+-	lb := labels.NewBuilder(labels.EmptyLabels())
+-
++	var lb = labels.NewBuilder(labels.EmptyLabels())
+ 	for _, tlset := range tg.Targets {
+ 		lb.Reset(labels.EmptyLabels())
+ 

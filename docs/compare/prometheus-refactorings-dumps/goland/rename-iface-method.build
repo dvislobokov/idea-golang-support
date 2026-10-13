@@ -1,0 +1,8 @@
+# github.com/prometheus/prometheus/notifier
+notifier\alertmanager.go:73:56: cannot use alertmanagerLabels{…} (value of struct type alertmanagerLabels) as alertmanager value in argument to append: alertmanagerLabels does not implement alertmanager (missing method endpoint)
+notifier\alertmanager.go:82:21: cannot use alertmanagerLabels{…} (value of struct type alertmanagerLabels) as alertmanager value in argument to append: alertmanagerLabels does not implement alertmanager (missing method endpoint)
+BUILD_EXIT=1
+# github.com/prometheus/prometheus/notifier
+# [github.com/prometheus/prometheus/notifier]
+vet.exe: notifier\alertmanager.go:73:56: cannot use alertmanagerLabels{…} (value of struct type alertmanagerLabels) as alertmanager value in argument to append: alertmanagerLabels does not implement alertmanager (missing method endpoint)
+VET_EXIT=1

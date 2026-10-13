@@ -1,0 +1,8 @@
+model\histogram\float_histogram.go:23:2: no required module provides package github.com/prometheus/prometheus/util/kahan; to add it:
+	go get github.com/prometheus/prometheus/util/kahan
+found packages kahan (kahansum.go) and kahansum (kahansum_test.go) in C:\Users\dvislobokov\idea-golang-support\build\compare\prometheus-goland\util\kahansum
+BUILD_EXIT=1
+model\histogram\float_histogram.go:23:2: no required module provides package github.com/prometheus/prometheus/util/kahan; to add it:
+	go get github.com/prometheus/prometheus/util/kahan
+found packages kahan (kahansum.go) and kahansum (kahansum_test.go) in C:\Users\dvislobokov\idea-golang-support\build\compare\prometheus-goland\util\kahansum
+VET_EXIT=1

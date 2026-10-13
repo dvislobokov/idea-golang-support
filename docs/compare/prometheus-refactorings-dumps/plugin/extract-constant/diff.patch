@@ -1,0 +1,20 @@
+--- a/notifier/alert.go
++++ b/notifier/alert.go
+@@ -21,6 +21,8 @@
+ 	"github.com/prometheus/prometheus/model/relabel"
+ )
+ 
++const resolvedSuffix = "[resolved]"
++
+ // Alert is a generic representation of an alert in the Prometheus eco-system.
+ type Alert struct {
+ 	// Label value pairs for purpose of aggregation, matching, and disposition
+@@ -49,7 +51,7 @@
+ func (a *Alert) String() string {
+ 	s := fmt.Sprintf("%s[%s]", a.Name(), fmt.Sprintf("%016x", a.Hash())[:7])
+ 	if a.Resolved() {
+-		return s + "[resolved]"
++		return s + resolvedSuffix
+ 	}
+ 	return s + "[active]"
+ }

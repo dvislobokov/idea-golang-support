@@ -1,0 +1,2821 @@
+{
+  "AmbiguousSelector_1": [
+    {
+      "file": "ex/AmbiguousSelector_1/example.go",
+      "line": 8,
+      "col": 11,
+      "endLine": 8,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "i",
+      "message": "ambiguous selector x.i"
+    }
+  ],
+  "BadDotDotDotSyntax_1": [
+    {
+      "file": "ex/BadDotDotDotSyntax_1/example.go",
+      "line": 3,
+      "col": 18,
+      "endLine": 3,
+      "endCol": 21,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "...",
+      "message": "invalid use of [...] array (outside a composite literal)"
+    }
+  ],
+  "BadOffsetofSyntax_1": [
+    {
+      "file": "ex/BadOffsetofSyntax_1/example.go",
+      "line": 6,
+      "col": 25,
+      "endLine": 6,
+      "endCol": 26,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "invalid argument: x (variable of type int) is not a selector expression"
+    }
+  ],
+  "BadRecv_1": [
+    {
+      "file": "ex/BadRecv_1/example.go",
+      "line": 3,
+      "col": 7,
+      "endLine": 3,
+      "endCol": 8,
+      "severity": "ERROR",
+      "text": ")",
+      "message": "<type> or IDENTIFIER expected, got ')'"
+    }
+  ],
+  "BadTypeKeyword_1": [
+    {
+      "file": "ex/BadTypeKeyword_1/example.go",
+      "line": 7,
+      "col": 12,
+      "endLine": 7,
+      "endCol": 13,
+      "severity": "ERROR",
+      "text": "t",
+      "message": "'type' unexpected"
+    },
+    {
+      "file": "ex/BadTypeKeyword_1/example.go",
+      "line": 7,
+      "col": 16,
+      "endLine": 7,
+      "endCol": 17,
+      "severity": "ERROR",
+      "text": ")",
+      "message": "'(' or IDENTIFIER expected, got ')'"
+    }
+  ],
+  "BlankIfaceMethod_1": [
+    {
+      "file": "ex/BlankIfaceMethod_1/example.go",
+      "line": 4,
+      "col": 2,
+      "endLine": 4,
+      "endCol": 3,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "_",
+      "message": "methods must have a unique non-blank name"
+    }
+  ],
+  "BlankPkgName_1": [
+    {
+      "file": "ex/BlankPkgName_1/example.go",
+      "line": 1,
+      "col": 9,
+      "endLine": 1,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "_",
+      "message": "invalid package name _"
+    }
+  ],
+  "BrokenImport_1": [
+    {
+      "file": "ex/BrokenImport_1/example.go",
+      "line": 3,
+      "col": 8,
+      "endLine": 3,
+      "endCol": 25,
+      "severity": "ERROR",
+      "tool": "GoMissingPackage",
+      "text": "\"amissingpackage\"",
+      "message": "cannot find package \"amissingpackage\""
+    }
+  ],
+  "CannotInferTypeArgs_1": [
+    {
+      "file": "ex/CannotInferTypeArgs_1/example.go",
+      "line": 3,
+      "col": 8,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "WARNING",
+      "tool": "GoUnusedTypeParameter",
+      "text": "T any",
+      "message": "Unused type parameter 'T any'"
+    },
+    {
+      "file": "ex/CannotInferTypeArgs_1/example.go",
+      "line": 6,
+      "col": 4,
+      "endLine": 6,
+      "endCol": 5,
+      "severity": "ERROR",
+      "tool": "GoGenerics",
+      "text": ")",
+      "message": "in call to f, cannot infer T"
+    }
+  ],
+  "DivByZero_1": [
+    {
+      "file": "ex/DivByZero_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/DivByZero_1/example.go",
+      "line": 4,
+      "col": 7,
+      "endLine": 4,
+      "endCol": 10,
+      "severity": "WEAK WARNING",
+      "tool": "GoVarAndConstTypeMayBeOmitted",
+      "text": "int",
+      "message": "Type can be omitted"
+    },
+    {
+      "file": "ex/DivByZero_1/example.go",
+      "line": 4,
+      "col": 15,
+      "endLine": 4,
+      "endCol": 22,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "divisor",
+      "message": "invalid operation: division by zero"
+    }
+  ],
+  "DuplicateCase_1": [
+    {
+      "file": "ex/DuplicateCase_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 14,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "printInt",
+      "message": "Unused function 'printInt'"
+    },
+    {
+      "file": "ex/DuplicateCase_1/example.go",
+      "line": 7,
+      "col": 7,
+      "endLine": 7,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": "1",
+      "message": "duplicate case 1 in expression switch"
+    }
+  ],
+  "DuplicateDecl_1": [
+    {
+      "file": "ex/DuplicateDecl_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/DuplicateDecl_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": "x",
+      "message": "x redeclared in this block"
+    }
+  ],
+  "DuplicateDefault_1": [
+    {
+      "file": "ex/DuplicateDefault_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 14,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "printInt",
+      "message": "Unused function 'printInt'"
+    },
+    {
+      "file": "ex/DuplicateDefault_1/example.go",
+      "line": 9,
+      "col": 2,
+      "endLine": 9,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": "default",
+      "message": "multiple defaults in switch"
+    },
+    {
+      "file": "ex/DuplicateDefault_1/example.go",
+      "line": 10,
+      "col": 3,
+      "endLine": 10,
+      "endCol": 15,
+      "severity": "WARNING",
+      "tool": "GoUnreachableCode",
+      "text": "println(\"1\")",
+      "message": "unreachable code"
+    }
+  ],
+  "DuplicateFieldAndMethod_1": [
+    {
+      "file": "ex/DuplicateFieldAndMethod_1/example.go",
+      "line": 7,
+      "col": 10,
+      "endLine": 7,
+      "endCol": 11,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": "m",
+      "message": "field and method with the same name m"
+    }
+  ],
+  "DuplicateLabel_1": [
+    {
+      "file": "ex/DuplicateLabel_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/DuplicateLabel_1/example.go",
+      "line": 4,
+      "col": 1,
+      "endLine": 4,
+      "endCol": 2,
+      "severity": "ERROR",
+      "tool": "GoUnusedLabel",
+      "text": "L",
+      "message": "label L declared and not used"
+    },
+    {
+      "file": "ex/DuplicateLabel_1/example.go",
+      "line": 5,
+      "col": 1,
+      "endLine": 5,
+      "endCol": 2,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": "L",
+      "message": "label L already declared"
+    }
+  ],
+  "DuplicateLitField_1": [
+    {
+      "file": "ex/DuplicateLitField_1/example.go",
+      "line": 3,
+      "col": 29,
+      "endLine": 3,
+      "endCol": 30,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "i",
+      "message": "duplicate field name i in struct literal"
+    }
+  ],
+  "DuplicateLitKey_1": [
+    {
+      "file": "ex/DuplicateLitKey_1/example.go",
+      "line": 3,
+      "col": 20,
+      "endLine": 3,
+      "endCol": 21,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "0",
+      "message": "duplicate index 0 in array or slice literal"
+    }
+  ],
+  "DuplicateLitKey_2": [
+    {
+      "file": "ex/DuplicateLitKey_2/example.go",
+      "line": 3,
+      "col": 32,
+      "endLine": 3,
+      "endCol": 35,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "\"a\"",
+      "message": "duplicate key \"a\" in map literal"
+    }
+  ],
+  "DuplicateMethod_1": [
+    {
+      "file": "ex/DuplicateMethod_1/example.go",
+      "line": 5,
+      "col": 10,
+      "endLine": 5,
+      "endCol": 11,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": "m",
+      "message": "method T.m already declared"
+    }
+  ],
+  "ImportCRenamed_1": [
+    {
+      "file": "ex/ImportCRenamed_1/example.go",
+      "line": 3,
+      "col": 8,
+      "endLine": 3,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "_",
+      "message": "cannot rename import \"C\""
+    }
+  ],
+  "ImpossibleAssert_1": [
+    {
+      "file": "ex/ImpossibleAssert_1/example.go",
+      "line": 10,
+      "col": 12,
+      "endLine": 10,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "T",
+      "message": "impossible type assertion: x.(T); T does not implement I (method m has pointer receiver)"
+    }
+  ],
+  "IncomparableMapKey_1": [
+    {
+      "file": "ex/IncomparableMapKey_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/IncomparableMapKey_1/example.go",
+      "line": 3,
+      "col": 11,
+      "endLine": 3,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "T",
+      "message": "invalid map key type T"
+    }
+  ],
+  "IncompatibleAssign_1": [
+    {
+      "file": "ex/IncompatibleAssign_1/example.go",
+      "line": 4,
+      "col": 13,
+      "endLine": 4,
+      "endCol": 14,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "x",
+      "message": "cannot use x (variable of type []int) as int value in variable declaration"
+    }
+  ],
+  "InvalidAppend_1": [
+    {
+      "file": "ex/InvalidAppend_1/example.go",
+      "line": 3,
+      "col": 16,
+      "endLine": 3,
+      "endCol": 17,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "1",
+      "message": "invalid append: argument must be a slice; have 1 (untyped int constant)"
+    }
+  ],
+  "InvalidArrayLen_1": [
+    {
+      "file": "ex/InvalidArrayLen_1/example.go",
+      "line": 4,
+      "col": 10,
+      "endLine": 4,
+      "endCol": 11,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "n",
+      "message": "invalid array length n"
+    }
+  ],
+  "InvalidAssert_1": [
+    {
+      "file": "ex/InvalidAssert_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 20,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x.(float64)",
+      "message": "invalid operation: x (variable of type int) is not an interface"
+    }
+  ],
+  "InvalidBlank_1": [
+    {
+      "file": "ex/InvalidBlank_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidBlank_1/example.go",
+      "line": 3,
+      "col": 9,
+      "endLine": 3,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "_",
+      "message": "cannot use _ as value"
+    }
+  ],
+  "InvalidCall_1": [
+    {
+      "file": "ex/InvalidCall_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "y",
+      "message": "Unused global variable 'y'"
+    },
+    {
+      "file": "ex/InvalidCall_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x()",
+      "message": "invalid operation: cannot call x (variable of type string): string is not a function"
+    }
+  ],
+  "InvalidCap_1": [
+    {
+      "file": "ex/InvalidCap_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidCap_1/example.go",
+      "line": 4,
+      "col": 13,
+      "endLine": 4,
+      "endCol": 14,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "s",
+      "message": "invalid argument: s (variable of type int) for built-in cap"
+    }
+  ],
+  "InvalidChanAssign_1": [
+    {
+      "file": "ex/InvalidChanAssign_1/example.go",
+      "line": 8,
+      "col": 12,
+      "endLine": 8,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "x",
+      "message": "cannot use x (variable of chan type T1) as T2 value in variable declaration"
+    }
+  ],
+  "InvalidClear_1": [
+    {
+      "file": "ex/InvalidClear_1/example.go",
+      "line": 4,
+      "col": 8,
+      "endLine": 4,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "invalid argument: cannot clear x (variable of type int): argument must be (or constrained by) map or slice"
+    }
+  ],
+  "InvalidClose_1": [
+    {
+      "file": "ex/InvalidClose_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidClose_1/example.go",
+      "line": 5,
+      "col": 8,
+      "endLine": 5,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "invalid operation: cannot close non-channel x (variable of type int)"
+    }
+  ],
+  "InvalidComplex_1": [
+    {
+      "file": "ex/InvalidComplex_1/example.go",
+      "line": 3,
+      "col": 17,
+      "endLine": 3,
+      "endCol": 27,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "float32(1)",
+      "message": "invalid operation: complex(float32(1), float64(2)) (mismatched types float32 and float64)"
+    }
+  ],
+  "InvalidCond_1": [
+    {
+      "file": "ex/InvalidCond_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 17,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "checkReturn",
+      "message": "Unused function 'checkReturn'"
+    },
+    {
+      "file": "ex/InvalidCond_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "i",
+      "message": "non-boolean condition in if statement"
+    }
+  ],
+  "InvalidConstInit_1": [
+    {
+      "file": "ex/InvalidConstInit_1/example.go",
+      "line": 4,
+      "col": 11,
+      "endLine": 4,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "x (variable of type int) is not constant"
+    }
+  ],
+  "InvalidConstType_1": [
+    {
+      "file": "ex/InvalidConstType_1/example.go",
+      "line": 3,
+      "col": 7,
+      "endLine": 3,
+      "endCol": 8,
+      "severity": "WARNING",
+      "tool": "GoUnusedConst",
+      "text": "c",
+      "message": "Unused constant 'c'"
+    },
+    {
+      "file": "ex/InvalidConstType_1/example.go",
+      "line": 3,
+      "col": 9,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "*int",
+      "message": "invalid constant type *int"
+    }
+  ],
+  "InvalidConstVal_1": [
+    {
+      "file": "ex/InvalidConstVal_1/example.go",
+      "line": 3,
+      "col": 16,
+      "endLine": 3,
+      "endCol": 23,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "\"hello\"",
+      "message": "cannot convert \"hello\" (untyped string constant) to type uint"
+    }
+  ],
+  "InvalidConversion_1": [
+    {
+      "file": "ex/InvalidConversion_1/example.go",
+      "line": 4,
+      "col": 16,
+      "endLine": 4,
+      "endCol": 17,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "x",
+      "message": "cannot convert x (variable of type float64) to type string"
+    }
+  ],
+  "InvalidCopy_1": [
+    {
+      "file": "ex/InvalidCopy_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidCopy_1/example.go",
+      "line": 6,
+      "col": 7,
+      "endLine": 6,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "invalid copy: arguments x (variable of type []int) and y (variable of type []int64) have different element types int and int64"
+    }
+  ],
+  "InvalidDeclCycle_1": [
+    {
+      "file": "ex/InvalidDeclCycle_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "S",
+      "message": "invalid recursive type: S refers to itself"
+    }
+  ],
+  "InvalidDeclCycle_2": [],
+  "InvalidDefer_1": [
+    {
+      "file": "ex/InvalidDefer_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidDefer_1/example.go",
+      "line": 4,
+      "col": 8,
+      "endLine": 4,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "int32",
+      "message": "defer requires function call, not conversion"
+    }
+  ],
+  "InvalidDelete_1": [
+    {
+      "file": "ex/InvalidDelete_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidDelete_1/example.go",
+      "line": 5,
+      "col": 9,
+      "endLine": 5,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "m",
+      "message": "invalid argument: m (variable of type string) is not a map"
+    }
+  ],
+  "InvalidDotDotDot_1": [
+    {
+      "file": "ex/InvalidDotDotDot_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "l",
+      "message": "Unused global variable 'l'"
+    },
+    {
+      "file": "ex/InvalidDotDotDot_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 18,
+      "severity": "ERROR",
+      "tool": "GoCallArity",
+      "text": "len(s...)",
+      "message": "invalid operation: invalid use of ... with built-in len"
+    }
+  ],
+  "InvalidExprSwitch_1": [
+    {
+      "file": "ex/InvalidExprSwitch_1/example.go",
+      "line": 5,
+      "col": 9,
+      "endLine": 5,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "a",
+      "message": "cannot switch on a (variable of type struct{_ func()}) (struct{_ func()} is not comparable)"
+    }
+  ],
+  "InvalidGo_1": [
+    {
+      "file": "ex/InvalidGo_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidGo_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "int32",
+      "message": "go requires function call, not conversion"
+    }
+  ],
+  "InvalidIfaceAssign_1": [
+    {
+      "file": "ex/InvalidIfaceAssign_1/example.go",
+      "line": 9,
+      "col": 5,
+      "endLine": 9,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidIfaceAssign_1/example.go",
+      "line": 9,
+      "col": 11,
+      "endLine": 9,
+      "endCol": 15,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "T(1)",
+      "message": "cannot use T(1) (constant 1 of type T) as I value in variable declaration: T does not implement I (missing method f)"
+    }
+  ],
+  "InvalidImag_1": [
+    {
+      "file": "ex/InvalidImag_1/example.go",
+      "line": 3,
+      "col": 14,
+      "endLine": 3,
+      "endCol": 20,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "int(1)",
+      "message": "invalid argument: argument has type int, expected complex type"
+    }
+  ],
+  "InvalidIndex_1": [
+    {
+      "file": "ex/InvalidIndex_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidIndex_1/example.go",
+      "line": 4,
+      "col": 11,
+      "endLine": 4,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "5",
+      "message": "invalid argument: index 5 out of bounds [0:3]"
+    }
+  ],
+  "InvalidIndex_2": [
+    {
+      "file": "ex/InvalidIndex_2/example.go",
+      "line": 4,
+      "col": 11,
+      "endLine": 4,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "-1",
+      "message": "invalid argument: index -1 (constant of type int) must not be negative"
+    }
+  ],
+  "InvalidIndex_3": [
+    {
+      "file": "ex/InvalidIndex_3/example.go",
+      "line": 5,
+      "col": 11,
+      "endLine": 5,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "i",
+      "message": "invalid argument: i (variable of type string) must be integer"
+    }
+  ],
+  "InvalidIndirection_1": [
+    {
+      "file": "ex/InvalidIndirection_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "y",
+      "message": "Unused global variable 'y'"
+    },
+    {
+      "file": "ex/InvalidIndirection_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 11,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "*x",
+      "message": "invalid operation: cannot indirect x (variable of type int)"
+    }
+  ],
+  "InvalidInitCycle_1": [
+    {
+      "file": "ex/InvalidInitCycle_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "initialization cycle for x; x refers to x"
+    },
+    {
+      "file": "ex/InvalidInitCycle_1/example.go",
+      "line": 3,
+      "col": 7,
+      "endLine": 3,
+      "endCol": 10,
+      "severity": "WEAK WARNING",
+      "tool": "GoVarAndConstTypeMayBeOmitted",
+      "text": "int",
+      "message": "Type can be omitted"
+    }
+  ],
+  "InvalidInitDecl_1": [
+    {
+      "file": "ex/InvalidInitDecl_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": "init",
+      "message": "cannot declare init - must be func"
+    }
+  ],
+  "InvalidInitDecl_2": [
+    {
+      "file": "ex/InvalidInitDecl_2/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "init",
+      "message": "func init must have no arguments and no return values"
+    }
+  ],
+  "InvalidInstanceCycle_1": [
+    {
+      "file": "ex/InvalidInstanceCycle_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    }
+  ],
+  "InvalidIota_1": [
+    {
+      "file": "ex/InvalidIota_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidIota_1/example.go",
+      "line": 3,
+      "col": 9,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "iota",
+      "message": "cannot use iota outside constant declaration"
+    }
+  ],
+  "InvalidIterVar_1": [
+    {
+      "file": "ex/InvalidIterVar_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidIterVar_1/example.go",
+      "line": 4,
+      "col": 20,
+      "endLine": 4,
+      "endCol": 21,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "c",
+      "message": "range over c (variable of type chan int) permits only one iteration variable"
+    }
+  ],
+  "InvalidLen_1": [
+    {
+      "file": "ex/InvalidLen_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidLen_1/example.go",
+      "line": 4,
+      "col": 13,
+      "endLine": 4,
+      "endCol": 14,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "s",
+      "message": "invalid argument: s (variable of type int) for built-in len"
+    }
+  ],
+  "InvalidLitField_1": [
+    {
+      "file": "ex/InvalidLitField_1/example.go",
+      "line": 3,
+      "col": 23,
+      "endLine": 3,
+      "endCol": 24,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "1",
+      "message": "invalid field name 1 in struct literal"
+    }
+  ],
+  "InvalidLitIndex_1": [
+    {
+      "file": "ex/InvalidLitIndex_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidLitIndex_1/example.go",
+      "line": 4,
+      "col": 18,
+      "endLine": 4,
+      "endCol": 19,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "i",
+      "message": "index i must be integer constant"
+    }
+  ],
+  "InvalidLit_1": [
+    {
+      "file": "ex/InvalidLit_1/example.go",
+      "line": 6,
+      "col": 11,
+      "endLine": 6,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "{}",
+      "message": "invalid composite literal type P"
+    }
+  ],
+  "InvalidMake_1": [
+    {
+      "file": "ex/InvalidMake_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidMake_1/example.go",
+      "line": 3,
+      "col": 14,
+      "endLine": 3,
+      "endCol": 17,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "int",
+      "message": "invalid argument: cannot make int: type must be slice, map, or channel"
+    }
+  ],
+  "InvalidMethodExpr_1": [
+    {
+      "file": "ex/InvalidMethodExpr_1/example.go",
+      "line": 7,
+      "col": 9,
+      "endLine": 7,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "T.m",
+      "message": "invalid method expression T.m (needs pointer receiver (*T).m)"
+    }
+  ],
+  "InvalidMinMaxOperand_1": [
+    {
+      "file": "ex/InvalidMinMaxOperand_1/example.go",
+      "line": 3,
+      "col": 15,
+      "endLine": 3,
+      "endCol": 19,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "true",
+      "message": "invalid argument: true (untyped bool constant) cannot be ordered"
+    }
+  ],
+  "InvalidMinMaxOperand_2": [
+    {
+      "file": "ex/InvalidMinMaxOperand_2/example.go",
+      "line": 4,
+      "col": 13,
+      "endLine": 4,
+      "endCol": 14,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "s",
+      "message": "invalid argument: s (variable of type []byte) cannot be ordered"
+    }
+  ],
+  "InvalidOffsetof_1": [
+    {
+      "file": "ex/InvalidOffsetof_1/example.go",
+      "line": 8,
+      "col": 25,
+      "endLine": 8,
+      "endCol": 28,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "s.f",
+      "message": "invalid argument: field f is embedded via a pointer in s (variable of struct type S)"
+    }
+  ],
+  "InvalidOffsetof_2": [
+    {
+      "file": "ex/InvalidOffsetof_2/example.go",
+      "line": 10,
+      "col": 25,
+      "endLine": 10,
+      "endCol": 28,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "s.m",
+      "message": "invalid argument: s.m is a method value"
+    }
+  ],
+  "InvalidPkgUse_1": [
+    {
+      "file": "ex/InvalidPkgUse_1/example.go",
+      "line": 5,
+      "col": 9,
+      "endLine": 5,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "fmt",
+      "message": "use of package fmt not in selector"
+    }
+  ],
+  "InvalidPostDecl_1": [
+    {
+      "file": "ex/InvalidPostDecl_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidPostDecl_1/example.go",
+      "line": 4,
+      "col": 14,
+      "endLine": 4,
+      "endCol": 20,
+      "severity": "WARNING",
+      "tool": "GoDfaConstantCondition",
+      "text": "i < 10",
+      "message": "Condition 'i < 10' is always 'true'"
+    },
+    {
+      "file": "ex/InvalidPostDecl_1/example.go",
+      "line": 4,
+      "col": 22,
+      "endLine": 4,
+      "endCol": 28,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "j := 0",
+      "message": "cannot declare in post statement of for loop"
+    }
+  ],
+  "InvalidPtrEmbed_1": [
+    {
+      "file": "ex/InvalidPtrEmbed_1/example.go",
+      "line": 6,
+      "col": 2,
+      "endLine": 6,
+      "endCol": 4,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "*T",
+      "message": "embedded field type cannot be a pointer"
+    }
+  ],
+  "InvalidRangeExpr_1": [
+    {
+      "file": "ex/InvalidRangeExpr_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidRangeExpr_1/example.go",
+      "line": 4,
+      "col": 17,
+      "endLine": 4,
+      "endCol": 18,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "f",
+      "message": "cannot range over f (variable of type float64)"
+    }
+  ],
+  "InvalidReal_1": [
+    {
+      "file": "ex/InvalidReal_1/example.go",
+      "line": 3,
+      "col": 14,
+      "endLine": 3,
+      "endCol": 20,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "int(1)",
+      "message": "invalid argument: argument has type int, expected complex type"
+    }
+  ],
+  "InvalidReceive_1": [
+    {
+      "file": "ex/InvalidReceive_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidReceive_1/example.go",
+      "line": 5,
+      "col": 2,
+      "endLine": 5,
+      "endCol": 5,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "<-x",
+      "message": "invalid operation: cannot receive from non-channel x (variable of type int)"
+    }
+  ],
+  "InvalidRecv_1": [
+    {
+      "file": "ex/InvalidRecv_1/example.go",
+      "line": 5,
+      "col": 8,
+      "endLine": 5,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "*T",
+      "message": "invalid receiver type **T (cannot be a pointer)"
+    }
+  ],
+  "InvalidSelectCase_1": [
+    {
+      "file": "ex/InvalidSelectCase_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 15,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "checkChan",
+      "message": "Unused function 'checkChan'"
+    },
+    {
+      "file": "ex/InvalidSelectCase_1/example.go",
+      "line": 5,
+      "col": 7,
+      "endLine": 5,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "c",
+      "message": "select case must be send or receive (possibly with assignment)"
+    }
+  ],
+  "InvalidSend_1": [
+    {
+      "file": "ex/InvalidSend_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidSend_1/example.go",
+      "line": 5,
+      "col": 2,
+      "endLine": 5,
+      "endCol": 15,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x <- \"hello!\"",
+      "message": "invalid operation: cannot send to non-channel x (variable of type int)"
+    }
+  ],
+  "InvalidShiftCount_1": [
+    {
+      "file": "ex/InvalidShiftCount_1/example.go",
+      "line": 5,
+      "col": 2,
+      "endLine": 5,
+      "endCol": 3,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "y",
+      "message": "Unused global variable 'y'"
+    },
+    {
+      "file": "ex/InvalidShiftCount_1/example.go",
+      "line": 5,
+      "col": 4,
+      "endLine": 5,
+      "endCol": 7,
+      "severity": "WEAK WARNING",
+      "tool": "GoVarAndConstTypeMayBeOmitted",
+      "text": "int",
+      "message": "Type can be omitted"
+    },
+    {
+      "file": "ex/InvalidShiftCount_1/example.go",
+      "line": 5,
+      "col": 15,
+      "endLine": 5,
+      "endCol": 16,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "invalid operation: shift count x (variable of type string) must be integer"
+    }
+  ],
+  "InvalidShiftOperand_1": [
+    {
+      "file": "ex/InvalidShiftOperand_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidShiftOperand_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "s",
+      "message": "invalid operation: shifted operand s (variable of type string) must be integer"
+    }
+  ],
+  "InvalidSliceExpr_1": [
+    {
+      "file": "ex/InvalidSliceExpr_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/InvalidSliceExpr_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 17,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "s[1:2:3]",
+      "message": "invalid operation: 3-index slice of string"
+    }
+  ],
+  "InvalidStructLit_1": [
+    {
+      "file": "ex/InvalidStructLit_1/example.go",
+      "line": 3,
+      "col": 30,
+      "endLine": 3,
+      "endCol": 31,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "3",
+      "message": "too many values in struct literal of type struct{i int; j int}"
+    }
+  ],
+  "InvalidTypeSwitch_1": [
+    {
+      "file": "ex/InvalidTypeSwitch_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/InvalidTypeSwitch_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoUnusedVariable",
+      "text": "x",
+      "message": "x declared and not used"
+    },
+    {
+      "file": "ex/InvalidTypeSwitch_1/example.go",
+      "line": 4,
+      "col": 14,
+      "endLine": 4,
+      "endCol": 15,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "i",
+      "message": "i (variable of type int) is not an interface"
+    }
+  ],
+  "InvalidUnion_1": [
+    {
+      "file": "ex/InvalidUnion_1/example.go",
+      "line": 4,
+      "col": 10,
+      "endLine": 4,
+      "endCol": 26,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "interface{ m() }",
+      "message": "cannot use interface{m()} in union (interface{m()} contains methods)"
+    }
+  ],
+  "InvalidUnsafeAdd_1": [
+    {
+      "file": "ex/InvalidUnsafeAdd_1/example.go",
+      "line": 6,
+      "col": 23,
+      "endLine": 6,
+      "endCol": 33,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "float64(1)",
+      "message": "invalid argument: float64(1) (constant 1 of type float64) must be integer"
+    }
+  ],
+  "InvalidUnsafeSliceData_1": [
+    {
+      "file": "ex/InvalidUnsafeSliceData_1/example.go",
+      "line": 6,
+      "col": 26,
+      "endLine": 6,
+      "endCol": 27,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "invalid argument: x (variable of type int) is not a slice"
+    }
+  ],
+  "InvalidUnsafeSlice_1": [
+    {
+      "file": "ex/InvalidUnsafeSlice_1/example.go",
+      "line": 6,
+      "col": 22,
+      "endLine": 6,
+      "endCol": 23,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x",
+      "message": "invalid argument: x (variable of type int) is not a pointer"
+    }
+  ],
+  "InvalidUnsafeSlice_2": [
+    {
+      "file": "ex/InvalidUnsafeSlice_2/example.go",
+      "line": 6,
+      "col": 26,
+      "endLine": 6,
+      "endCol": 36,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "float64(1)",
+      "message": "invalid argument: float64(1) (constant 1 of type float64) must be integer"
+    }
+  ],
+  "InvalidUnsafeSlice_3": [
+    {
+      "file": "ex/InvalidUnsafeSlice_3/example.go",
+      "line": 6,
+      "col": 26,
+      "endLine": 6,
+      "endCol": 28,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "-1",
+      "message": "invalid argument: index -1 (constant of type int) must not be negative"
+    }
+  ],
+  "InvalidUnsafeSlice_4": [],
+  "InvalidUnsafeString_1": [
+    {
+      "file": "ex/InvalidUnsafeString_1/example.go",
+      "line": 6,
+      "col": 30,
+      "endLine": 6,
+      "endCol": 32,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "-1",
+      "message": "invalid argument: index -1 (constant of type int) must not be negative"
+    }
+  ],
+  "InvalidUntypedConversion_1": [
+    {
+      "file": "ex/InvalidUntypedConversion_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    }
+  ],
+  "JumpIntoBlock_1": [
+    {
+      "file": "ex/JumpIntoBlock_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/JumpIntoBlock_1/example.go",
+      "line": 4,
+      "col": 8,
+      "endLine": 4,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "L",
+      "message": "goto L jumps into block"
+    }
+  ],
+  "JumpOverDecl_1": [
+    {
+      "file": "ex/JumpOverDecl_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/JumpOverDecl_1/example.go",
+      "line": 4,
+      "col": 7,
+      "endLine": 4,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "L",
+      "message": "goto L jumps over variable declaration at line 5"
+    },
+    {
+      "file": "ex/JumpOverDecl_1/example.go",
+      "line": 5,
+      "col": 2,
+      "endLine": 5,
+      "endCol": 8,
+      "severity": "WARNING",
+      "tool": "GoUnreachableCode",
+      "text": "x := 2",
+      "message": "unreachable code"
+    }
+  ],
+  "MismatchedTypes_1": [
+    {
+      "file": "ex/MismatchedTypes_1/example.go",
+      "line": 5,
+      "col": 5,
+      "endLine": 5,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "c",
+      "message": "Unused global variable 'c'"
+    },
+    {
+      "file": "ex/MismatchedTypes_1/example.go",
+      "line": 5,
+      "col": 9,
+      "endLine": 5,
+      "endCol": 14,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "a - b",
+      "message": "invalid operation: a - b (mismatched types string and int)"
+    }
+  ],
+  "MisplacedBreak_1": [
+    {
+      "file": "ex/MisplacedBreak_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/MisplacedBreak_1/example.go",
+      "line": 4,
+      "col": 2,
+      "endLine": 4,
+      "endCol": 7,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "break",
+      "message": "break is not in a loop, switch, or select"
+    }
+  ],
+  "MisplacedConstraintIface_1": [
+    {
+      "file": "ex/MisplacedConstraintIface_1/example.go",
+      "line": 5,
+      "col": 7,
+      "endLine": 5,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "I",
+      "message": "cannot use type I outside a type constraint: interface contains type constraints"
+    }
+  ],
+  "MisplacedContinue_1": [
+    {
+      "file": "ex/MisplacedContinue_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "sumeven",
+      "message": "Unused function 'sumeven'"
+    },
+    {
+      "file": "ex/MisplacedContinue_1/example.go",
+      "line": 5,
+      "col": 3,
+      "endLine": 5,
+      "endCol": 11,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "continue",
+      "message": "continue is not in a loop"
+    }
+  ],
+  "MisplacedFallthrough_1": [
+    {
+      "file": "ex/MisplacedFallthrough_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 14,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "typename",
+      "message": "Unused function 'typename'"
+    },
+    {
+      "file": "ex/MisplacedFallthrough_1/example.go",
+      "line": 6,
+      "col": 3,
+      "endLine": 6,
+      "endCol": 14,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "fallthrough",
+      "message": "cannot fallthrough in type switch"
+    }
+  ],
+  "MisplacedLabel_1": [
+    {
+      "file": "ex/MisplacedLabel_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/MisplacedLabel_1/example.go",
+      "line": 8,
+      "col": 10,
+      "endLine": 8,
+      "endCol": 11,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "L",
+      "message": "invalid break label L"
+    }
+  ],
+  "MisplacedTypeParam_1": [
+    {
+      "file": "ex/MisplacedTypeParam_1/example.go",
+      "line": 3,
+      "col": 15,
+      "endLine": 3,
+      "endCol": 16,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "P",
+      "message": "cannot use a type parameter as RHS in type declaration"
+    }
+  ],
+  "MisplacedTypeParam_2": [
+    {
+      "file": "ex/MisplacedTypeParam_2/example.go",
+      "line": 3,
+      "col": 23,
+      "endLine": 3,
+      "endCol": 25,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "*P",
+      "message": "embedded field type cannot be a (pointer to a) type parameter"
+    }
+  ],
+  "MissingFieldOrMethod_1": [
+    {
+      "file": "ex/MissingFieldOrMethod_1/example.go",
+      "line": 5,
+      "col": 5,
+      "endLine": 5,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/MissingFieldOrMethod_1/example.go",
+      "line": 5,
+      "col": 13,
+      "endLine": 5,
+      "endCol": 14,
+      "severity": "ERROR",
+      "tool": "GoUnresolvedReference",
+      "text": "f",
+      "message": "T{}.f undefined (type T has no field or method f)"
+    }
+  ],
+  "MissingInitBody_1": [
+    {
+      "file": "ex/MissingInitBody_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "init",
+      "message": "func init must have a body"
+    }
+  ],
+  "MissingLitField_1": [
+    {
+      "file": "ex/MissingLitField_1/example.go",
+      "line": 3,
+      "col": 23,
+      "endLine": 3,
+      "endCol": 24,
+      "severity": "ERROR",
+      "tool": "GoUnresolvedReference",
+      "text": "j",
+      "message": "unknown field j in struct literal of type struct{i int}"
+    }
+  ],
+  "MissingLitKey_1": [
+    {
+      "file": "ex/MissingLitKey_1/example.go",
+      "line": 3,
+      "col": 24,
+      "endLine": 3,
+      "endCol": 25,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "1",
+      "message": "missing key in map literal"
+    }
+  ],
+  "MissingReturn_1": [
+    {
+      "file": "ex/MissingReturn_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/MissingReturn_1/example.go",
+      "line": 3,
+      "col": 15,
+      "endLine": 3,
+      "endCol": 16,
+      "severity": "ERROR",
+      "tool": "GoMissingReturn",
+      "text": "}",
+      "message": "missing return"
+    }
+  ],
+  "MixedStructLit_1": [
+    {
+      "file": "ex/MixedStructLit_1/example.go",
+      "line": 3,
+      "col": 25,
+      "endLine": 3,
+      "endCol": 34,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "{i: 1, 2}",
+      "message": "mixture of field:value and value elements in struct literal"
+    }
+  ],
+  "MultiValAssignOp_1": [
+    {
+      "file": "ex/MultiValAssignOp_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/MultiValAssignOp_1/example.go",
+      "line": 5,
+      "col": 7,
+      "endLine": 5,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoCallArity",
+      "text": "+=",
+      "message": "assignment operation += requires single-valued expressions"
+    }
+  ],
+  "NoNewVar_1": [
+    {
+      "file": "ex/NoNewVar_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/NoNewVar_1/example.go",
+      "line": 4,
+      "col": 2,
+      "endLine": 4,
+      "endCol": 3,
+      "severity": "ERROR",
+      "tool": "GoUnusedVariable",
+      "text": "x",
+      "message": "declared and not used: x"
+    },
+    {
+      "file": "ex/NoNewVar_1/example.go",
+      "line": 5,
+      "col": 4,
+      "endLine": 5,
+      "endCol": 6,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": ":=",
+      "message": "no new variables on left side of :="
+    }
+  ],
+  "NonIndexableOperand_1": [
+    {
+      "file": "ex/NonIndexableOperand_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "y",
+      "message": "Unused global variable 'y'"
+    },
+    {
+      "file": "ex/NonIndexableOperand_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "x[1]",
+      "message": "invalid operation: cannot index x (variable of type int)"
+    }
+  ],
+  "NonNumericIncDec_1": [
+    {
+      "file": "ex/NonNumericIncDec_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/NonNumericIncDec_1/example.go",
+      "line": 5,
+      "col": 2,
+      "endLine": 5,
+      "endCol": 3,
+      "severity": "WEAK WARNING",
+      "tool": "GoIneffectualAssignment",
+      "text": "c",
+      "message": "ineffectual assignment to c"
+    },
+    {
+      "file": "ex/NonNumericIncDec_1/example.go",
+      "line": 5,
+      "col": 2,
+      "endLine": 5,
+      "endCol": 5,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "c++",
+      "message": "invalid operation: c++ (non-numeric type string)"
+    }
+  ],
+  "NonSliceableOperand_1": [
+    {
+      "file": "ex/NonSliceableOperand_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/NonSliceableOperand_1/example.go",
+      "line": 3,
+      "col": 9,
+      "endLine": 3,
+      "endCol": 30,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "[...]int{1, 2, 3}[:1]",
+      "message": "cannot slice [...]int{...} (value of type [3]int)"
+    }
+  ],
+  "NonSliceableOperand_2": [
+    {
+      "file": "ex/NonSliceableOperand_2/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/NonSliceableOperand_2/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "y",
+      "message": "Unused global variable 'y'"
+    },
+    {
+      "file": "ex/NonSliceableOperand_2/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 14,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "1[:1]",
+      "message": "cannot slice 1 (untyped int constant)"
+    }
+  ],
+  "NonVariadicDotDotDot_1": [
+    {
+      "file": "ex/NonVariadicDotDotDot_1/example.go",
+      "line": 9,
+      "col": 6,
+      "endLine": 9,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/NonVariadicDotDotDot_1/example.go",
+      "line": 11,
+      "col": 11,
+      "endLine": 11,
+      "endCol": 17,
+      "severity": "ERROR",
+      "tool": "GoCallArity",
+      "text": "(s...)",
+      "message": "have (...) but function is not variadic: cannot use ... in call to non-variadic printArgs"
+    }
+  ],
+  "NotAGenericType_1": [
+    {
+      "file": "ex/NotAGenericType_1/example.go",
+      "line": 5,
+      "col": 7,
+      "endLine": 5,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoGenerics",
+      "text": "T",
+      "message": "invalid operation: T[int] (T is not a generic type)"
+    }
+  ],
+  "NotAType_1": [
+    {
+      "file": "ex/NotAType_1/example.go",
+      "line": 5,
+      "col": 8,
+      "endLine": 5,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "S",
+      "message": "S (package-level variable) is not a type"
+    }
+  ],
+  "NotAnExpr_1": [
+    {
+      "file": "ex/NotAnExpr_1/example.go",
+      "line": 5,
+      "col": 6,
+      "endLine": 5,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/NotAnExpr_1/example.go",
+      "line": 6,
+      "col": 2,
+      "endLine": 6,
+      "endCol": 3,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "T",
+      "message": "T (type) is not used"
+    }
+  ],
+  "NumericOverflow_1": [
+    {
+      "file": "ex/NumericOverflow_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/NumericOverflow_1/example.go",
+      "line": 3,
+      "col": 14,
+      "endLine": 3,
+      "endCol": 18,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "1000",
+      "message": "cannot use 1000 (untyped int constant) as int8 value in variable declaration (overflows)"
+    }
+  ],
+  "OutOfScopeResult_1": [
+    {
+      "file": "ex/OutOfScopeResult_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 12,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "factor",
+      "message": "Unused function 'factor'"
+    },
+    {
+      "file": "ex/OutOfScopeResult_1/example.go",
+      "line": 6,
+      "col": 4,
+      "endLine": 6,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "return",
+      "message": "result parameter i not in scope at return"
+    }
+  ],
+  "OversizeArrayLit_1": [
+    {
+      "file": "ex/OversizeArrayLit_1/example.go",
+      "line": 3,
+      "col": 20,
+      "endLine": 3,
+      "endCol": 21,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "3",
+      "message": "index 2 out of bounds [0:2]"
+    }
+  ],
+  "RepeatedDecl_1": [
+    {
+      "file": "ex/RepeatedDecl_1/example.go",
+      "line": 4,
+      "col": 8,
+      "endLine": 4,
+      "endCol": 9,
+      "severity": "ERROR",
+      "tool": "GoDuplicateDeclaration",
+      "text": "y",
+      "message": "y repeated on left side of :="
+    }
+  ],
+  "SwappedMakeArgs_1": [
+    {
+      "file": "ex/SwappedMakeArgs_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/SwappedMakeArgs_1/example.go",
+      "line": 3,
+      "col": 21,
+      "endLine": 3,
+      "endCol": 22,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "3",
+      "message": "invalid argument: length and capacity swapped"
+    }
+  ],
+  "SwappedSliceIndices_1": [
+    {
+      "file": "ex/SwappedSliceIndices_1/example.go",
+      "line": 3,
+      "col": 24,
+      "endLine": 3,
+      "endCol": 25,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "1",
+      "message": "invalid slice indices: 1 < 2"
+    }
+  ],
+  "TooManyValues_1": [
+    {
+      "file": "ex/TooManyValues_1/example.go",
+      "line": 7,
+      "col": 5,
+      "endLine": 7,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/TooManyValues_1/example.go",
+      "line": 7,
+      "col": 9,
+      "endLine": 7,
+      "endCol": 20,
+      "severity": "ERROR",
+      "tool": "GoCallArity",
+      "text": "ReturnTwo()",
+      "message": "multiple-value ReturnTwo() (value of type (int, int)) in single-value context"
+    }
+  ],
+  "TruncatedFloat_1": [
+    {
+      "file": "ex/TruncatedFloat_1/example.go",
+      "line": 3,
+      "col": 13,
+      "endLine": 3,
+      "endCol": 17,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "98.6",
+      "message": "cannot use 98.6 (untyped float constant) as int value in variable declaration (truncated)"
+    }
+  ],
+  "TypeTooLarge_1": [],
+  "TypeTooLarge_2": [],
+  "UnaddressableFieldAssign_1": [
+    {
+      "file": "ex/UnaddressableFieldAssign_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/UnaddressableFieldAssign_1/example.go",
+      "line": 5,
+      "col": 2,
+      "endLine": 5,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "m[\"foo\"].i",
+      "message": "cannot assign to struct field m[\"foo\"].i in map"
+    }
+  ],
+  "UnaddressableOperand_1": [
+    {
+      "file": "ex/UnaddressableOperand_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/UnaddressableOperand_1/example.go",
+      "line": 3,
+      "col": 9,
+      "endLine": 3,
+      "endCol": 11,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "&1",
+      "message": "invalid operation: cannot take address of 1 (untyped int constant)"
+    }
+  ],
+  "UnassignableOperand_1": [
+    {
+      "file": "ex/UnassignableOperand_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/UnassignableOperand_1/example.go",
+      "line": 5,
+      "col": 2,
+      "endLine": 5,
+      "endCol": 3,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "c",
+      "message": "cannot assign to c (neither addressable nor a map index expression)"
+    }
+  ],
+  "UncalledBuiltin_1": [
+    {
+      "file": "ex/UncalledBuiltin_1/example.go",
+      "line": 3,
+      "col": 9,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "copy",
+      "message": "copy (built-in) must be called"
+    }
+  ],
+  "UndeclaredImportedName_1": [
+    {
+      "file": "ex/UndeclaredImportedName_1/example.go",
+      "line": 5,
+      "col": 15,
+      "endLine": 5,
+      "endCol": 36,
+      "severity": "ERROR",
+      "tool": "GoUnresolvedReference",
+      "text": "NotAnActualIdentifier",
+      "message": "undefined: types.NotAnActualIdentifier"
+    }
+  ],
+  "UndeclaredLabel_1": [
+    {
+      "file": "ex/UndeclaredLabel_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/UndeclaredLabel_1/example.go",
+      "line": 4,
+      "col": 7,
+      "endLine": 4,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "L",
+      "message": "label L not declared"
+    }
+  ],
+  "UndeclaredName_1": [
+    {
+      "file": "ex/UndeclaredName_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/UndeclaredName_1/example.go",
+      "line": 3,
+      "col": 7,
+      "endLine": 3,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoUnresolvedReference",
+      "text": "T",
+      "message": "undefined: T"
+    }
+  ],
+  "UndefinedOp_1": [
+    {
+      "file": "ex/UndefinedOp_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "c",
+      "message": "Unused global variable 'c'"
+    },
+    {
+      "file": "ex/UndefinedOp_1/example.go",
+      "line": 3,
+      "col": 9,
+      "endLine": 3,
+      "endCol": 18,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "\"a\" - \"b\"",
+      "message": "invalid operation: operator - not defined on \"b\" (untyped string constant)"
+    }
+  ],
+  "UnexportedName_1": [
+    {
+      "file": "ex/UnexportedName_1/example.go",
+      "line": 5,
+      "col": 16,
+      "endLine": 5,
+      "endCol": 20,
+      "severity": "ERROR",
+      "tool": "GoUnresolvedReference",
+      "text": "flag",
+      "message": "name flag not exported by package reflect"
+    }
+  ],
+  "UntypedLit_1": [
+    {
+      "file": "ex/UntypedLit_1/example.go",
+      "line": 7,
+      "col": 22,
+      "endLine": 7,
+      "endCol": 25,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "{1}",
+      "message": "invalid composite literal element type struct{i int}: missing type"
+    }
+  ],
+  "UntypedNilUse_1": [
+    {
+      "file": "ex/UntypedNilUse_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/UntypedNilUse_1/example.go",
+      "line": 3,
+      "col": 9,
+      "endLine": 3,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoTypeMismatch",
+      "text": "nil",
+      "message": "use of untyped nil in variable declaration"
+    }
+  ],
+  "UnusedExpr_1": [
+    {
+      "file": "ex/UnusedExpr_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/UnusedExpr_1/example.go",
+      "line": 4,
+      "col": 2,
+      "endLine": 4,
+      "endCol": 5,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "i*i",
+      "message": "i * i (value of type int) is not used"
+    }
+  ],
+  "UnusedImport_1": [
+    {
+      "file": "ex/UnusedImport_1/example.go",
+      "line": 3,
+      "col": 8,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoUnusedImport",
+      "text": "\"fmt\"",
+      "message": "\"fmt\" imported and not used"
+    },
+    {
+      "file": "ex/UnusedImport_1/example.go",
+      "line": 5,
+      "col": 6,
+      "endLine": 5,
+      "endCol": 10,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "main",
+      "message": "Unused function 'main'"
+    }
+  ],
+  "UnusedLabel_1": [
+    {
+      "file": "ex/UnusedLabel_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/UnusedLabel_1/example.go",
+      "line": 4,
+      "col": 1,
+      "endLine": 4,
+      "endCol": 2,
+      "severity": "ERROR",
+      "tool": "GoUnusedLabel",
+      "text": "L",
+      "message": "label L declared and not used"
+    }
+  ],
+  "UnusedResults_1": [
+    {
+      "file": "ex/UnusedResults_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/UnusedResults_1/example.go",
+      "line": 4,
+      "col": 8,
+      "endLine": 4,
+      "endCol": 11,
+      "severity": "ERROR",
+      "tool": "GoChecker",
+      "text": "len",
+      "message": "defer discards result of len(a)"
+    },
+    {
+      "file": "ex/UnusedResults_1/example.go",
+      "line": 5,
+      "col": 9,
+      "endLine": 5,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoUnresolvedReference",
+      "text": "i",
+      "message": "undefined: i"
+    }
+  ],
+  "UnusedVar_1": [
+    {
+      "file": "ex/UnusedVar_1/example.go",
+      "line": 3,
+      "col": 6,
+      "endLine": 3,
+      "endCol": 7,
+      "severity": "WARNING",
+      "tool": "GoUnusedFunction",
+      "text": "f",
+      "message": "Unused function 'f'"
+    },
+    {
+      "file": "ex/UnusedVar_1/example.go",
+      "line": 4,
+      "col": 2,
+      "endLine": 4,
+      "endCol": 3,
+      "severity": "ERROR",
+      "tool": "GoUnusedVariable",
+      "text": "x",
+      "message": "declared and not used: x"
+    }
+  ],
+  "WrongArgCount_1": [
+    {
+      "file": "ex/WrongArgCount_1/example.go",
+      "line": 4,
+      "col": 5,
+      "endLine": 4,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/WrongArgCount_1/example.go",
+      "line": 4,
+      "col": 11,
+      "endLine": 4,
+      "endCol": 12,
+      "severity": "ERROR",
+      "tool": "GoCallArity",
+      "text": ")",
+      "message": "not enough arguments in call to f; have (); want (int)"
+    }
+  ],
+  "WrongAssignCount_1": [
+    {
+      "file": "ex/WrongAssignCount_1/example.go",
+      "line": 3,
+      "col": 5,
+      "endLine": 3,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/WrongAssignCount_1/example.go",
+      "line": 3,
+      "col": 12,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "ERROR",
+      "tool": "GoCallArity",
+      "text": "2",
+      "message": "extra init expr 2"
+    }
+  ],
+  "WrongResultCount_1": [
+    {
+      "file": "ex/WrongResultCount_1/example.go",
+      "line": 4,
+      "col": 9,
+      "endLine": 4,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoCallArity",
+      "text": "1",
+      "message": "too many return values; have (number, number); want (int)"
+    }
+  ],
+  "WrongTypeArgCount_1": [
+    {
+      "file": "ex/WrongTypeArgCount_1/example.go",
+      "line": 3,
+      "col": 8,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "WARNING",
+      "tool": "GoUnusedTypeParameter",
+      "text": "p any",
+      "message": "Unused type parameter 'p any'"
+    },
+    {
+      "file": "ex/WrongTypeArgCount_1/example.go",
+      "line": 5,
+      "col": 7,
+      "endLine": 5,
+      "endCol": 8,
+      "severity": "ERROR",
+      "tool": "GoGenerics",
+      "text": "T",
+      "message": "too many type arguments for type T: have 2, want 1"
+    }
+  ],
+  "WrongTypeArgCount_2": [
+    {
+      "file": "ex/WrongTypeArgCount_2/example.go",
+      "line": 3,
+      "col": 8,
+      "endLine": 3,
+      "endCol": 13,
+      "severity": "WARNING",
+      "tool": "GoUnusedTypeParameter",
+      "text": "T any",
+      "message": "Unused type parameter 'T any'"
+    },
+    {
+      "file": "ex/WrongTypeArgCount_2/example.go",
+      "line": 5,
+      "col": 5,
+      "endLine": 5,
+      "endCol": 6,
+      "severity": "WARNING",
+      "tool": "GoUnusedGlobalVariable",
+      "text": "x",
+      "message": "Unused global variable 'x'"
+    },
+    {
+      "file": "ex/WrongTypeArgCount_2/example.go",
+      "line": 5,
+      "col": 9,
+      "endLine": 5,
+      "endCol": 10,
+      "severity": "ERROR",
+      "tool": "GoGenerics",
+      "text": "f",
+      "message": "cannot use generic function f without instantiation"
+    }
+  ]
+}

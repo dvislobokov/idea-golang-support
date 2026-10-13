@@ -1,0 +1,166 @@
+--- a/notifier/alertmanagerset.go
++++ b/notifier/alertmanagerset.go
+@@ -42,7 +42,7 @@
+ 	mtx        sync.RWMutex
+ 	ams        []alertmanager
+ 	droppedAms []alertmanager
+-	sendLoops  map[string]*sendLoop
++	sendLoops  map[string]*alertSender
+ 
+ 	logger *slog.Logger
+ }
+@@ -67,7 +67,7 @@
+ 		client:    client,
+ 		cfg:       cfg,
+ 		opts:      opts,
+-		sendLoops: make(map[string]*sendLoop),
++		sendLoops: make(map[string]*alertSender),
+ 		logger:    logger,
+ 		metrics:   metrics,
+ 	}
+--- a/notifier/manager_test.go
++++ b/notifier/manager_test.go
+@@ -105,7 +105,7 @@
+ 		ams[i] = alertmanagerMock{urlf: func() string { return am }}
+ 	}
+ 	logger := slog.New(slog.DiscardHandler)
+-	sendLoops := make(map[string]*sendLoop)
++	sendLoops := make(map[string]*alertSender)
+ 	for _, am := range alertmanagerURLs {
+ 		sendLoops[am] = newSendLoop(am, client, cfg, opts, logger, metrics)
+ 	}
+@@ -1594,7 +1594,7 @@
+ 	// Capture the old sendLoop.
+ 	oldSendLoops := n.alertmanagers["config-0"].sendLoops
+ 	require.Len(t, oldSendLoops, 1)
+-	var oldSendLoop *sendLoop
++	var oldSendLoop *alertSender
+ 	for _, sl := range oldSendLoops {
+ 		oldSendLoop = sl
+ 	}
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -27,7 +27,7 @@
+ 	"github.com/prometheus/prometheus/config"
+ )
+ 
+-type sendLoop struct {
++type alertSender struct {
+ 	alertmanagerURL string
+ 
+ 	cfg    *config.AlertmanagerConfig
+@@ -52,14 +52,14 @@
+ 	opts *Options,
+ 	logger *slog.Logger,
+ 	metrics *alertMetrics,
+-) *sendLoop {
++) *alertSender {
+ 	// This will initialize the Counters for the AM to 0 and set the static queue capacity gauge.
+ 	metrics.dropped.WithLabelValues(alertmanagerURL)
+ 	metrics.errors.WithLabelValues(alertmanagerURL)
+ 	metrics.sent.WithLabelValues(alertmanagerURL)
+ 	metrics.queueLength.WithLabelValues(alertmanagerURL)
+ 
+-	return &sendLoop{
++	return &alertSender{
+ 		alertmanagerURL: alertmanagerURL,
+ 		client:          client,
+ 		cfg:             cfg,
+@@ -72,7 +72,7 @@
+ 	}
+ }
+ 
+-func (s *sendLoop) add(alerts ...*Alert) {
++func (s *alertSender) add(alerts ...*Alert) {
+ 	select {
+ 	case <-s.stopped:
+ 		return
+@@ -112,7 +112,7 @@
+ 	}
+ }
+ 
+-func (s *sendLoop) notifyWork() {
++func (s *alertSender) notifyWork() {
+ 	select {
+ 	case <-s.stopped:
+ 		return
+@@ -121,7 +121,7 @@
+ 	}
+ }
+ 
+-func (s *sendLoop) stop() {
++func (s *alertSender) stop() {
+ 	s.stopOnce.Do(func() {
+ 		s.logger.Debug("Stopping send loop")
+ 		close(s.stopped)
+@@ -143,20 +143,20 @@
+ 	})
+ }
+ 
+-func (s *sendLoop) drainQueue() {
++func (s *alertSender) drainQueue() {
+ 	for s.queueLen() > 0 {
+ 		s.sendOneBatch()
+ 	}
+ }
+ 
+-func (s *sendLoop) queueLen() int {
++func (s *alertSender) queueLen() int {
+ 	s.mtx.RLock()
+ 	defer s.mtx.RUnlock()
+ 
+ 	return len(s.queue)
+ }
+ 
+-func (s *sendLoop) nextBatch() []*Alert {
++func (s *alertSender) nextBatch() []*Alert {
+ 	s.mtx.Lock()
+ 	defer s.mtx.Unlock()
+ 
+@@ -173,7 +173,7 @@
+ 	return alerts
+ }
+ 
+-func (s *sendLoop) sendOneBatch() {
++func (s *alertSender) sendOneBatch() {
+ 	alerts := s.nextBatch()
+ 
+ 	if !s.sendAll(alerts) {
+@@ -183,7 +183,7 @@
+ 
+ // loop continuously consumes the notifications queue and sends alerts to
+ // the Alertmanager.
+-func (s *sendLoop) loop() {
++func (s *alertSender) loop() {
+ 	s.logger.Debug("Starting send loop")
+ 	for {
+ 		// If we've been asked to stop, that takes priority over sending any further notifications.
+@@ -206,7 +206,7 @@
+ 	}
+ }
+ 
+-func (s *sendLoop) sendAll(alerts []*Alert) bool {
++func (s *alertSender) sendAll(alerts []*Alert) bool {
+ 	if len(alerts) == 0 {
+ 		return true
+ 	}
+@@ -248,7 +248,7 @@
+ 	return true
+ }
+ 
+-func (s *sendLoop) sendOne(ctx context.Context, c *http.Client, url string, b []byte) error {
++func (s *alertSender) sendOne(ctx context.Context, c *http.Client, url string, b []byte) error {
+ 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+ 	if err != nil {
+ 		return err
+--- a/notifier/sendloop_test.go
++++ b/notifier/sendloop_test.go
+@@ -35,7 +35,7 @@
+ 	const testBody = "testbody"
+ 
+ 	var received bool
+-	h := sendLoop{
++	h := alertSender{
+ 		opts: &Options{
+ 			Do: func(_ context.Context, _ *http.Client, req *http.Request) (*http.Response, error) {
+ 				received = true

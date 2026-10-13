@@ -1,0 +1,31 @@
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -235,7 +235,7 @@
+ 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(s.cfg.Timeout))
+ 	defer cancel()
+ 
+-	if err := s.sendOne(ctx, s.client, s.alertmanagerURL, payload); err != nil {
++	if err := s.sendOne(ctx, s.alertmanagerURL, payload); err != nil {
+ 		s.logger.Error("Error sending alerts", "count", len(alerts), "err", err)
+ 		s.metrics.errors.WithLabelValues(s.alertmanagerURL).Add(float64(len(alerts)))
+ 		return false
+@@ -248,7 +248,7 @@
+ 	return true
+ }
+ 
+-func (s *sendLoop) sendOne(ctx context.Context, c *http.Client, url string, b []byte) error {
++func (s *sendLoop) sendOne(ctx context.Context, url string, b []byte) error {
+ 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(b))
+ 	if err != nil {
+ 		return err
+--- a/notifier/sendloop_test.go
++++ b/notifier/sendloop_test.go
+@@ -54,7 +54,7 @@
+ 		},
+ 	}
+ 
+-	h.sendOne(context.Background(), nil, testURL, []byte(testBody))
++	h.sendOne(context.Background(), testURL, []byte(testBody))
+ 
+ 	require.True(t, received)
+ }

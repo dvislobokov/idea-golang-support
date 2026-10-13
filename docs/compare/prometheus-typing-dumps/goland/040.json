@@ -1,0 +1,110 @@
+{
+ "ide": "goland 2026.2.3",
+ "settings": "",
+ "results": [
+  {
+   "id": "K02",
+   "category": "comment",
+   "title": "Ctrl+/ on three selected lines",
+   "query": null,
+   "text": "package scrape\n\nfunc run() int {\n\tn := 1\n<selection>\t//n += 2\n\t//n *= 3\n\t//n -= 4\n<caret></selection>\treturn n\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1749
+  },
+  {
+   "id": "K03",
+   "category": "comment",
+   "title": "Ctrl+/ uncomments selected lines",
+   "query": null,
+   "text": "package scrape\n\nfunc run() int {\n\tn := 1\n\t<selection>n += 2\n\tn *= 3<caret></selection>\n\treturn n\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1762
+  },
+  {
+   "id": "K04",
+   "category": "comment",
+   "title": "Ctrl+Shift+/ on a selected expression",
+   "query": null,
+   "text": "package scrape\n\nfunc next(total, step int) int {\n\treturn total + <selection>/*step*2<caret>*/</selection>\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1771
+  },
+  {
+   "id": "L01",
+   "category": "lines",
+   "title": "Duplicate Line",
+   "query": null,
+   "text": "package scrape\n\nfunc labels() []string {\n\tls := []string{}\n\tls = append(ls, \"job\")\n\tls = append(ls, \"j<caret>ob\")\n\treturn ls\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1767
+  },
+  {
+   "id": "L03",
+   "category": "lines",
+   "title": "Move Line Up into the block above",
+   "query": null,
+   "text": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n\tif ok {\n\t\tn++\n\tn <caret>+= 2\n\t}\n\treturn n\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1763
+  },
+  {
+   "id": "L04",
+   "category": "lines",
+   "title": "Move Statement Up past an if block",
+   "query": null,
+   "text": "package scrape\n\nfunc run(ok bool) int {\n\tn := 0\n\tif ok {\n\t\tn++\n\t\tn <caret>+= 2\n\t}\n\treturn n\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1777
+  },
+  {
+   "id": "L05",
+   "category": "lines",
+   "title": "Move Statement Down of a whole function",
+   "query": null,
+   "text": "package scrape\n\nfunc second() int {\n\treturn 2\n}\n\nfunc fi<caret>rst() int {\n\treturn 1\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 1748
+  },
+  {
+   "id": "O01",
+   "category": "imports",
+   "title": "Optimize Imports removes unused imports",
+   "query": null,
+   "text": "package scrape\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc run(ctx context.Context) error {\n\t<caret>return fmt.Errorf(\"timeout %v\", time.Second)\n}\n",
+   "steps": null,
+   "items": null,
+   "value": null,
+   "notes": [],
+   "error": null,
+   "durationMs": 4599
+  }
+ ]
+}

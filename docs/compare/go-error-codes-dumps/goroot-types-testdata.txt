@@ -1,0 +1,1157 @@
+check/blank.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+check/builtins0.go: sites=286 matched=275 (96%) allowlisted=0 missed=11 falsePositives=0 diagnostics=275
+check/builtins1.go: sites=45 matched=45 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=45
+check/chans.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+check/compliterals.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+check/const0.go: sites=80 matched=79 (98%) allowlisted=0 missed=1 falsePositives=1 diagnostics=80
+check/const1.go: sites=84 matched=84 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=84
+check/constdecl.go: sites=42 matched=40 (95%) allowlisted=0 missed=2 falsePositives=0 diagnostics=40
+check/conversions0.go: sites=14 matched=14 (100%) allowlisted=0 missed=0 falsePositives=1 diagnostics=15
+check/conversions1.go: sites=47 matched=47 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=47
+check/cycles0.go: sites=33 matched=24 (72%) allowlisted=0 missed=9 falsePositives=4 diagnostics=28
+check/cycles1.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+check/cycles2.go: sites=5 matched=0 (0%) allowlisted=0 missed=5 falsePositives=3 diagnostics=3
+check/cycles3.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+check/cycles4.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+check/cycles5.go: sites=13 matched=6 (46%) allowlisted=0 missed=7 falsePositives=1 diagnostics=7
+check/cycles6.go: sites=13 matched=0 (0%) allowlisted=0 missed=13 falsePositives=0 diagnostics=0
+check/decls0.go: skipped (// -lang=go1.17)
+check/decls1.go: sites=45 matched=45 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=45
+check/decls3.go: sites=25 matched=25 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=25
+check/decls4.go: sites=15 matched=14 (93%) allowlisted=0 missed=1 falsePositives=0 diagnostics=14
+check/decls5.go: sites=3 matched=3 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=3
+check/doubled_labels.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+check/errors.go: sites=23 matched=23 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=23
+check/expr0.go: sites=51 matched=51 (100%) allowlisted=0 missed=0 falsePositives=2 diagnostics=53
+check/expr1.go: sites=37 matched=36 (97%) allowlisted=0 missed=1 falsePositives=0 diagnostics=36
+check/expr2.go: sites=53 matched=53 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=53
+check/expr3.go: sites=184 matched=181 (98%) allowlisted=0 missed=3 falsePositives=0 diagnostics=181
+check/funcinference.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+check/go1_12.go: skipped (// -lang=go1.12)
+check/go1_13.go: skipped (// -lang=go1.13)
+check/go1_16.go: skipped (// -lang=go1.16)
+check/go1_19.go: skipped (// -lang=go1.19)
+check/go1_19_20.go: skipped (// -lang=go1.19)
+check/go1_20_19.go: skipped (// -lang=go1.20)
+check/go1_21_19.go: skipped (// -lang=go1.21)
+check/go1_21_22.go: skipped (// -lang=go1.21)
+check/go1_22_21.go: skipped (// -lang=go1.22)
+check/go1_25.go: skipped (// -lang=go1.25)
+check/go1_8.go: skipped (// -lang=go1.8)
+check/go1_xx_19.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+check/gotos.go: sites=40 matched=40 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=40
+check/importC.go: skipped (// -fakeImportC)
+check/init0.go: sites=20 matched=12 (60%) allowlisted=0 missed=8 falsePositives=7 diagnostics=19
+check/init1.go: sites=7 matched=2 (28%) allowlisted=0 missed=5 falsePositives=0 diagnostics=2
+check/init2.go: sites=26 matched=2 (7%) allowlisted=0 missed=24 falsePositives=0 diagnostics=2
+check/issue70974.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+check/issues0.go: skipped (// -lang=go1.17)
+check/issues1.go: sites=12 matched=11 (91%) allowlisted=0 missed=1 falsePositives=0 diagnostics=11
+check/labels.go: sites=33 matched=31 (93%) allowlisted=0 missed=2 falsePositives=0 diagnostics=31
+check/linalg.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+check/literals.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+check/lookup1.go: sites=25 matched=25 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=25
+check/lookup2.go: sites=26 matched=26 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=26
+check/main0.go: sites=4 matched=2 (50%) allowlisted=0 missed=2 falsePositives=0 diagnostics=2
+check/main1.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+check/map0.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=1 diagnostics=1
+check/map1.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+check/methodsets.go: sites=12 matched=12 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=12
+check/shifts.go: sites=171 matched=170 (99%) allowlisted=0 missed=1 falsePositives=0 diagnostics=171
+check/slices.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+check/stmt0.go: sites=175 matched=171 (97%) allowlisted=0 missed=4 falsePositives=2 diagnostics=176
+check/stmt1.go: sites=16 matched=16 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=16
+check/typeinference.go: sites=12 matched=12 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=12
+check/typeinst0.go: sites=11 matched=8 (72%) allowlisted=0 missed=3 falsePositives=1 diagnostics=9
+check/typeinst1.go: sites=20 matched=20 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=20
+check/typeinstcycles.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+check/typeparams.go: sites=67 matched=67 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=67
+check/unions.go: sites=3 matched=3 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=3
+check/vardecl.go: sites=54 matched=51 (94%) allowlisted=0 missed=3 falsePositives=0 diagnostics=51
+examples/constraints.go: sites=15 matched=11 (73%) allowlisted=0 missed=4 falsePositives=1 diagnostics=12
+examples/functions.go: sites=16 matched=6 (37%) allowlisted=0 missed=10 falsePositives=6 diagnostics=12
+examples/inference.go: skipped (// -lang=go1.20)
+examples/inference2.go: sites=14 matched=1 (7%) allowlisted=0 missed=13 falsePositives=13 diagnostics=14
+examples/methods.go: sites=3 matched=1 (33%) allowlisted=0 missed=2 falsePositives=11 diagnostics=12
+examples/operations.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+examples/types.go: sites=32 matched=21 (65%) allowlisted=0 missed=11 falsePositives=1 diagnostics=22
+examples/typesets.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=0 diagnostics=0
+fixedbugs/issue20583.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=0 diagnostics=0
+fixedbugs/issue23203a.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue23203b.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue25838.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue26390.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue28251.go: sites=5 matched=3 (60%) allowlisted=0 missed=2 falsePositives=8 diagnostics=11
+fixedbugs/issue3117.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue39634.go: sites=40 matched=27 (67%) allowlisted=0 missed=13 falsePositives=1 diagnostics=28
+fixedbugs/issue39664.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue39680.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue39693.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue39699.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=2 diagnostics=2
+fixedbugs/issue39711.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue39723.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue39725.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=2 diagnostics=2
+fixedbugs/issue39754.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue39755.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue39768.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=0 diagnostics=1
+fixedbugs/issue39938.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue39948.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue39976.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue39982.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue40038.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue40056.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=1 diagnostics=3
+fixedbugs/issue40057.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue40301.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue40350.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=1 diagnostics=1
+fixedbugs/issue40684.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue40789.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue41124.go: sites=23 matched=12 (52%) allowlisted=0 missed=11 falsePositives=0 diagnostics=12
+fixedbugs/issue41176.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue42695.go: sites=6 matched=0 (0%) allowlisted=0 missed=6 falsePositives=0 diagnostics=0
+fixedbugs/issue42758.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue42881.go: sites=3 matched=3 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=3
+fixedbugs/issue42987.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue43056.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=2 diagnostics=2
+fixedbugs/issue43087.go: sites=5 matched=4 (80%) allowlisted=0 missed=1 falsePositives=3 diagnostics=7
+fixedbugs/issue43109.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=1 diagnostics=1
+fixedbugs/issue43110.go: sites=4 matched=2 (50%) allowlisted=0 missed=2 falsePositives=0 diagnostics=2
+fixedbugs/issue43124.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue43190.go: sites=9 matched=0 (0%) allowlisted=0 missed=9 falsePositives=2 diagnostics=2
+fixedbugs/issue43527.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=1 diagnostics=1
+fixedbugs/issue43671.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=0 diagnostics=0
+fixedbugs/issue44688.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue44799.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue45114.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue45548.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue45550.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue45635.go: sites=6 matched=3 (50%) allowlisted=0 missed=3 falsePositives=1 diagnostics=4
+fixedbugs/issue45639.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue45920.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue45985.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue46090.go: skipped (// -lang=go1.17)
+fixedbugs/issue46275.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue46403.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue46404.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue46461.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue46583.go: sites=4 matched=2 (50%) allowlisted=0 missed=2 falsePositives=2 diagnostics=4
+fixedbugs/issue47031.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue47115.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=0 diagnostics=0
+fixedbugs/issue47127.go: sites=16 matched=16 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=16
+fixedbugs/issue47411.go: sites=5 matched=5 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=5
+fixedbugs/issue47747.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue47796.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue47818.go: skipped (// -lang=go1.17)
+fixedbugs/issue47887.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue47968.go: sites=4 matched=1 (25%) allowlisted=0 missed=3 falsePositives=1 diagnostics=2
+fixedbugs/issue48008.go: sites=12 matched=11 (91%) allowlisted=0 missed=1 falsePositives=1 diagnostics=12
+fixedbugs/issue48018.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue48048.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=1 diagnostics=2
+fixedbugs/issue48082.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=1 diagnostics=1
+fixedbugs/issue48083.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue48136.go: sites=7 matched=7 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=7
+fixedbugs/issue48234.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue48312.go: sites=3 matched=3 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=3
+fixedbugs/issue48472.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue48529.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=1 diagnostics=2
+fixedbugs/issue48582.go: sites=5 matched=1 (20%) allowlisted=0 missed=4 falsePositives=0 diagnostics=1
+fixedbugs/issue48619.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue48656.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue48695.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue48703.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue48712.go: sites=11 matched=9 (81%) allowlisted=0 missed=2 falsePositives=0 diagnostics=9
+fixedbugs/issue48819.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue48827.go: sites=5 matched=4 (80%) allowlisted=0 missed=1 falsePositives=2 diagnostics=6
+fixedbugs/issue48951.go: sites=7 matched=7 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=7
+fixedbugs/issue48962.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue48974.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue49003.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue49005.go: sites=4 matched=2 (50%) allowlisted=0 missed=2 falsePositives=2 diagnostics=4
+fixedbugs/issue49043.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue49112.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=1 diagnostics=2
+fixedbugs/issue49179.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=4 diagnostics=4
+fixedbugs/issue49242.go: sites=5 matched=5 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=5
+fixedbugs/issue49247.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=1 diagnostics=1
+fixedbugs/issue49276.go: sites=5 matched=0 (0%) allowlisted=0 missed=5 falsePositives=0 diagnostics=0
+fixedbugs/issue49296.go: sites=4 matched=4 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=4
+fixedbugs/issue49439.go: sites=4 matched=4 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=4
+fixedbugs/issue49482.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=0 diagnostics=1
+fixedbugs/issue49541.go: sites=3 matched=3 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=3
+fixedbugs/issue49579.go: skipped (crashed: PatternSyntaxException: Illegal repetition near index 18)
+fixedbugs/issue49592.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue49602.go: sites=3 matched=3 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=3
+fixedbugs/issue49705.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue49735.go: sites=4 matched=4 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=4
+fixedbugs/issue49736.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue49739.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue49864.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue50259.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50276.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50281.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50321.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue50372.go: sites=5 matched=3 (60%) allowlisted=0 missed=2 falsePositives=2 diagnostics=5
+fixedbugs/issue50417.go: sites=15 matched=10 (66%) allowlisted=0 missed=5 falsePositives=0 diagnostics=10
+fixedbugs/issue50426.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50427a.go: skipped (// -lang=go1.26)
+fixedbugs/issue50427b.go: sites=5 matched=2 (40%) allowlisted=0 missed=3 falsePositives=0 diagnostics=2
+fixedbugs/issue50450.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50516.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue50646.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue50729.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50729b.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50755.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50779.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue50782.go: sites=9 matched=6 (66%) allowlisted=0 missed=3 falsePositives=0 diagnostics=6
+fixedbugs/issue50816.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=2 diagnostics=2
+fixedbugs/issue50833.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=3 diagnostics=3
+fixedbugs/issue50912.go: sites=5 matched=0 (0%) allowlisted=0 missed=5 falsePositives=0 diagnostics=0
+fixedbugs/issue50918.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue50929.go: sites=10 matched=8 (80%) allowlisted=0 missed=2 falsePositives=2 diagnostics=10
+fixedbugs/issue50965.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=0 diagnostics=1
+fixedbugs/issue51025.go: sites=5 matched=2 (40%) allowlisted=0 missed=3 falsePositives=3 diagnostics=5
+fixedbugs/issue51048.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue51139.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=3 diagnostics=3
+fixedbugs/issue51145.go: sites=4 matched=2 (50%) allowlisted=0 missed=2 falsePositives=0 diagnostics=2
+fixedbugs/issue51158.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue51229.go: sites=4 matched=4 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=4
+fixedbugs/issue51232.go: sites=6 matched=5 (83%) allowlisted=0 missed=1 falsePositives=0 diagnostics=5
+fixedbugs/issue51233.go: sites=4 matched=4 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=4
+fixedbugs/issue51257.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue51335.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=2 diagnostics=2
+fixedbugs/issue51339.go: sites=3 matched=1 (33%) allowlisted=0 missed=2 falsePositives=8 diagnostics=9
+fixedbugs/issue51360.go: sites=5 matched=0 (0%) allowlisted=0 missed=5 falsePositives=5 diagnostics=5
+fixedbugs/issue51376.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=0 diagnostics=1
+fixedbugs/issue51386.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue51437.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue51472.go: sites=6 matched=2 (33%) allowlisted=0 missed=4 falsePositives=1 diagnostics=3
+fixedbugs/issue51503.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue51509.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue51525.go: sites=6 matched=2 (33%) allowlisted=0 missed=4 falsePositives=1 diagnostics=3
+fixedbugs/issue51533.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue51578.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=0 diagnostics=1
+fixedbugs/issue51593.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue51607.go: sites=12 matched=12 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=12
+fixedbugs/issue51610.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue51616.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue51658.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=0 diagnostics=0
+fixedbugs/issue51877.go: sites=4 matched=4 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=4
+fixedbugs/issue52031.go: skipped (// -lang=go1.12)
+fixedbugs/issue52401.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue52529.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue52698.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue52915.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=1 diagnostics=1
+fixedbugs/issue53358.go: sites=3 matched=2 (66%) allowlisted=0 missed=1 falsePositives=0 diagnostics=2
+fixedbugs/issue53535.go: sites=4 matched=4 (100%) allowlisted=0 missed=0 falsePositives=3 diagnostics=7
+fixedbugs/issue53650.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue53692.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue54280.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue54405.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue54424.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue54942.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=2 diagnostics=2
+fixedbugs/issue56351.go: skipped (// -lang=go1.20)
+fixedbugs/issue56425.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=1 diagnostics=1
+fixedbugs/issue56665.go: sites=3 matched=1 (33%) allowlisted=0 missed=2 falsePositives=2 diagnostics=3
+fixedbugs/issue57155.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue57160.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue57192.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=1 diagnostics=1
+fixedbugs/issue57352.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue57486.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue57500.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue57522.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue58611.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=3 diagnostics=3
+fixedbugs/issue58612.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=2 diagnostics=2
+fixedbugs/issue58671.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=3 diagnostics=3
+fixedbugs/issue58742.go: sites=6 matched=3 (50%) allowlisted=0 missed=3 falsePositives=3 diagnostics=6
+fixedbugs/issue59190.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue59207.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue59209.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue59338a.go: skipped (// -lang=go1.20)
+fixedbugs/issue59338b.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue59371.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue59639.go: skipped (// -lang=go1.17)
+fixedbugs/issue59740.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=2 diagnostics=2
+fixedbugs/issue59848.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue59890.go: sites=5 matched=5 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=5
+fixedbugs/issue59953.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue59956.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=0 diagnostics=1
+fixedbugs/issue59958.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue60346.go: skipped (// -lang=go1.20)
+fixedbugs/issue60377.go: sites=5 matched=5 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=5
+fixedbugs/issue60434.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue60460.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue60500.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue60542.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=1 diagnostics=1
+fixedbugs/issue60556.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue60562.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=4 diagnostics=4
+fixedbugs/issue60688.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue60747.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=2 diagnostics=2
+fixedbugs/issue60906.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue60933.go: sites=7 matched=4 (57%) allowlisted=0 missed=3 falsePositives=2 diagnostics=6
+fixedbugs/issue60946.go: sites=8 matched=4 (50%) allowlisted=0 missed=4 falsePositives=0 diagnostics=6
+fixedbugs/issue61486.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue61685.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=1 diagnostics=1
+fixedbugs/issue61822.go: skipped (// -lang=go1.19)
+fixedbugs/issue61879.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue61903.go: skipped (// -lang=go1.20)
+fixedbugs/issue62157.go: sites=15 matched=5 (33%) allowlisted=0 missed=10 falsePositives=20 diagnostics=25
+fixedbugs/issue63563.go: sites=12 matched=4 (33%) allowlisted=0 missed=8 falsePositives=8 diagnostics=12
+fixedbugs/issue64406.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=2 diagnostics=2
+fixedbugs/issue64704.go: skipped (// -lang=go1.21)
+fixedbugs/issue65344.go: sites=3 matched=2 (66%) allowlisted=0 missed=1 falsePositives=0 diagnostics=2
+fixedbugs/issue65711.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue65854.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue66064.go: skipped (// -lang=go1.16)
+fixedbugs/issue66285.go: skipped (// -lang=go1.13)
+fixedbugs/issue66323.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue66751.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue66878.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue67547.go: skipped (crashed: PatternSyntaxException: Illegal repetition near index 21)
+fixedbugs/issue67628.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=1 diagnostics=1
+fixedbugs/issue67683.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue67872.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue67962.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue6814.go: sites=5 matched=5 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=5
+fixedbugs/issue68162.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue68184.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue68903.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue68935.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue69576.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue6977.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=0 diagnostics=0
+fixedbugs/issue69955.go: sites=9 matched=6 (66%) allowlisted=0 missed=3 falsePositives=3 diagnostics=9
+fixedbugs/issue70150.go: sites=3 matched=1 (33%) allowlisted=0 missed=2 falsePositives=2 diagnostics=3
+fixedbugs/issue70417.go: sites=16 matched=2 (12%) allowlisted=0 missed=14 falsePositives=20 diagnostics=22
+fixedbugs/issue70526.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=3 diagnostics=3
+fixedbugs/issue70549.go: sites=4 matched=3 (75%) allowlisted=0 missed=1 falsePositives=1 diagnostics=4
+fixedbugs/issue71131.go: sites=3 matched=0 (0%) allowlisted=0 missed=3 falsePositives=0 diagnostics=0
+fixedbugs/issue71198.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue71284.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue72936.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue73428.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue75194.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue75883.go: sites=4 matched=3 (75%) allowlisted=0 missed=1 falsePositives=0 diagnostics=3
+fixedbugs/issue75885.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue75918.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue75986.go: skipped (// -lang=go1.25)
+fixedbugs/issue76103.go: sites=4 matched=4 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=4
+fixedbugs/issue76220.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=1 diagnostics=3
+fixedbugs/issue76366.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue76383.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue76384.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+fixedbugs/issue76478.go: sites=4 matched=0 (0%) allowlisted=0 missed=4 falsePositives=0 diagnostics=0
+fixedbugs/issue77245.go: sites=6 matched=0 (0%) allowlisted=0 missed=6 falsePositives=13 diagnostics=13
+fixedbugs/issue77382.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=0
+fixedbugs/issue77905.go: sites=0 matched=0 (100%) allowlisted=0 missed=0 falsePositives=3 diagnostics=3
+fixedbugs/issue78163.go: sites=2 matched=1 (50%) allowlisted=0 missed=1 falsePositives=0 diagnostics=1
+fixedbugs/issue78346.go: sites=1 matched=1 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=1
+fixedbugs/issue78483.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue78884.go: sites=9 matched=3 (33%) allowlisted=0 missed=6 falsePositives=3 diagnostics=6
+fixedbugs/issue79265.go: sites=2 matched=0 (0%) allowlisted=0 missed=2 falsePositives=0 diagnostics=0
+fixedbugs/issue79687.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue79832.go: skipped (// -lang=go1.26)
+fixedbugs/issue79883.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=1 diagnostics=1
+fixedbugs/issue80042.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+fixedbugs/issue80172.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+spec/assignability.go: sites=35 matched=35 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=35
+spec/comparable.go: sites=2 matched=2 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=2
+spec/comparable1.19.go: skipped (// -lang=go1.19)
+spec/comparisons.go: sites=38 matched=33 (86%) allowlisted=0 missed=5 falsePositives=0 diagnostics=33
+spec/conversions.go: sites=24 matched=24 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=24
+spec/methods.go: sites=7 matched=2 (28%) allowlisted=0 missed=5 falsePositives=8 diagnostics=10
+spec/range.go: sites=18 matched=6 (33%) allowlisted=0 missed=12 falsePositives=12 diagnostics=18
+spec/range_int.go: sites=29 matched=17 (58%) allowlisted=0 missed=12 falsePositives=12 diagnostics=29
+spec/receivers.go: sites=1 matched=0 (0%) allowlisted=0 missed=1 falsePositives=0 diagnostics=0
+spec/structLits.go: sites=6 matched=6 (100%) allowlisted=0 missed=0 falsePositives=0 diagnostics=6
+spec/typeAliases1.22.go: skipped (// -lang=go1.22)
+spec/typeAliases1.23.go: skipped (// -lang=go1.23)
+spec/typeAliases1.8.go: skipped (// -lang=go1.8)
+TOTAL sites=2776 matched=2262 (81%) allowlisted=0 missed=514 falsePositives=275
+FALSE POSITIVES:
+  check/const0.go:137: no error expected: "invalid operation: ti2 ^ ti5 (mismatched types int64 and int8)" [mismatched-types]
+  check/conversions0.go:34: no error expected: "string(nil) (value of type string) is not constant" [not-constant]
+  check/cycles0.go:89: no error expected: "invalid recursive type t3" [recursive-type]
+  check/cycles0.go:161: no error expected: "array length len(T15{}) (value of type int) must be constant" [array-length]
+  check/cycles0.go:162: no error expected: "array length len(T16{...}) (value of type int) must be constant" [array-length]
+  check/cycles0.go:163: no error expected: "array length len(T17{...}) (value of type int) must be constant" [array-length]
+  check/cycles2.go:68: no error expected: "array length T(nil).m()[0] (variable of type int) must be constant" [array-length]
+  check/cycles2.go:74: no error expected: "array length x1.m()[0] (variable of type int) must be constant" [array-length]
+  check/cycles2.go:80: no error expected: "array length len(x2.m()) (value of type int) must be constant" [array-length]
+  check/cycles5.go:187: no error expected: "array length h()[0] (variable of type int) must be constant" [array-length]
+  check/expr0.go:131: no error expected: "invalid operation: cannot indirect s4 (variable of type string)" [operator]
+  check/expr0.go:134: no error expected: "invalid operation: cannot receive from non-channel s7 (variable of type string)" [operator]
+  check/init0.go:11: no error expected: "initialization cycle for s0" [init-cycle]
+  check/init0.go:23: no error expected: "initialization cycle for s1" [init-cycle]
+  check/init0.go:36: no error expected: "initialization cycle for s2" [init-cycle]
+  check/init0.go:48: no error expected: "initialization cycle for s3" [init-cycle]
+  check/init0.go:64: no error expected: "initialization cycle for cx3" [init-cycle]
+  check/init0.go:65: no error expected: "initialization cycle for vx3" [init-cycle]
+  check/init0.go:80: no error expected: "initialization cycle for x9" [init-cycle]
+  check/map0.go:9: no error expected: "cannot find package "chans"" [missing-package]
+  check/stmt0.go:215: no error expected: "undefined: x" [undefined]
+  check/stmt0.go:216: no error expected: "declared and not used: a" [unused-variable]
+  check/typeinst0.go:39: no error expected: "not enough type arguments for type T1: have 0, want 1" [type-args]
+  examples/constraints.go:23: no error expected: "overlapping terms MyInt and ~int" [union]
+  examples/functions.go:131: no error expected: "type <-chan int of recv does not match chan T" [inference]
+  examples/functions.go:132: no error expected: "type chan<- int of send does not match chan T" [inference]
+  examples/functions.go:136: no error expected: "type chan<- int of send does not match <-chan T" [inference]
+  examples/functions.go:139: no error expected: "type <-chan int of recv does not match chan<- T" [inference]
+  examples/functions.go:185: no error expected: "type myString of myString("2") does not match inferred type string for T" [inference]
+  examples/functions.go:214: no error expected: "h (value of type func()) is not used" [unused-value]
+  examples/inference2.go:22: no error expected: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in variable declaration" [assignability]
+  examples/inference2.go:30: no error expected: "cannot use f4 (value of generic type func[P any](P, P)) as func(int, string) value in variable declaration" [assignability]
+  examples/inference2.go:32: no error expected: "cannot use f5 (value of generic type func[P any](P) []P) as func(string) []int value in variable declaration" [assignability]
+  examples/inference2.go:35: no error expected: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in variable declaration" [assignability]
+  examples/inference2.go:43: no error expected: "cannot use f1 (value of generic type func[P any](P)) as func() int value in assignment" [assignability]
+  examples/inference2.go:44: no error expected: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in assignment" [assignability]
+  examples/inference2.go:52: no error expected: "cannot use f4 (value of generic type func[P any](P, P)) as func(int, string) value in assignment" [assignability]
+  examples/inference2.go:54: no error expected: "cannot use f5 (value of generic type func[P any](P) []P) as func(string) []int value in assignment" [assignability]
+  examples/inference2.go:58: no error expected: "cannot use f5 (value of generic type func[P any](P) []P) as func(string) []int value in assignment" [assignability]
+  examples/inference2.go:69: no error expected: "cannot use f4 (value of generic type func[P any](P, P)) as func(int, string) value in return statement" [assignability]
+  examples/inference2.go:73: no error expected: "cannot use f5 (value of generic type func[P any](P) []P) as func(string) []int value in return statement" [assignability]
+  examples/inference2.go:77: no error expected: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in return statement" [assignability]
+  examples/inference2.go:89: no error expected: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in argument to g1" [assignability]
+  examples/methods.go:42: no error expected: "cannot use 42 (untyped int constant) as A value in variable declaration" [assignability]
+  examples/methods.go:67: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:83: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:84: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:84: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:85: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:85: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:85: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:90: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:90: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/methods.go:90: no error expected: "cannot use _ as value or type" [blank-value]
+  examples/types.go:105: no error expected: "cannot convert 0 (untyped int constant) to type T" [conversion]
+  fixedbugs/issue28251.go:16: no error expected: "invalid receiver type T0 (cannot be a pointer)" [receiver]
+  fixedbugs/issue28251.go:18: no error expected: "(&T{}).m undefined (type *T has no field or method m)" [undefined-member]
+  fixedbugs/issue28251.go:43: no error expected: "invalid receiver type T4 (cannot be a pointer)" [receiver]
+  fixedbugs/issue28251.go:44: no error expected: "(T{}).m4 undefined (type T has no field or method m4)" [undefined-member]
+  fixedbugs/issue28251.go:45: no error expected: "(&T{}).m4 undefined (type *T has no field or method m4)" [undefined-member]
+  fixedbugs/issue28251.go:53: no error expected: "invalid receiver type T6 (cannot be a pointer)" [receiver]
+  fixedbugs/issue28251.go:54: no error expected: "(T{}).m6 undefined (type T has no field or method m6)" [undefined-member]
+  fixedbugs/issue28251.go:55: no error expected: "(&T{}).m6 undefined (type *T has no field or method m6)" [undefined-member]
+  fixedbugs/issue39634.go:90: no error expected: "cannot use generic function F26 without instantiation" [generic-no-instantiation]
+  fixedbugs/issue39699.go:26: no error expected: "cannot convert 1 (untyped int constant) to type T1" [conversion]
+  fixedbugs/issue39699.go:28: no error expected: "cannot convert 3 (untyped int constant) to type T3" [conversion]
+  fixedbugs/issue39725.go:9: no error expected: "type struct{a int; b int} of struct{a, b int}{} does not match struct{a T1; b T2}" [inference]
+  fixedbugs/issue39725.go:15: no error expected: "type func(f []byte) of func(f[]byte) {...} does not match func(T)" [inference]
+  fixedbugs/issue40056.go:15: no error expected: "undefined: T" [undefined]
+  fixedbugs/issue40350.go:15: no error expected: "int does not satisfy number (int missing in float64 | ~int32)" [constraint]
+  fixedbugs/issue43056.go:17: no error expected: "func(F) does not satisfy ~func(func(F)) (func(F) missing in ~func(func(F)))" [constraint]
+  fixedbugs/issue43056.go:30: no error expected: "interface{Equal(I) bool} does not satisfy interface{Equal(interface{Equal(I) bool}) bool} (method Equal has pointer receiver)" [constraint]
+  fixedbugs/issue43087.go:27: no error expected: "undefined: b" [undefined]
+  fixedbugs/issue43087.go:29: no error expected: "undefined: b" [undefined]
+  fixedbugs/issue43087.go:34: no error expected: "no new variables on left side of :=" [no-new-variables]
+  fixedbugs/issue43109.go:10: no error expected: "cannot find package "/foo"" [missing-package]
+  fixedbugs/issue43190.go:11: no error expected: """ imported and not used" [unused-import]
+  fixedbugs/issue43190.go:29: no error expected: "undefined: fmt" [undefined]
+  fixedbugs/issue43527.go:11: no error expected: "undefined: A" [undefined]
+  fixedbugs/issue45635.go:13: no error expected: "not enough type arguments for type N: have 0, want 1" [type-args]
+  fixedbugs/issue46583.go:25: no error expected: "cannot use T2.m (value of type func(T2, x int)) as func(T2) value in assignment" [assignability]
+  fixedbugs/issue46583.go:27: no error expected: "cannot use T4.m (value of type func(T4, x int)) as func(T4) value in assignment" [assignability]
+  fixedbugs/issue47968.go:13: no error expected: "undefined: P" [undefined]
+  fixedbugs/issue48008.go:34: no error expected: "duplicate case T in type switch" [duplicate-case]
+  fixedbugs/issue48048.go:9: no error expected: "cannot use _ as value or type" [blank-value]
+  fixedbugs/issue48082.go:7: no error expected: "cannot find package "init"" [missing-package]
+  fixedbugs/issue48529.go:11: no error expected: "X does not satisfy interface{M() T[X, int]} (method M has pointer receiver)" [constraint]
+  fixedbugs/issue48827.go:13: no error expected: "cannot use generic type G[P any] without instantiation" [generic-no-instantiation]
+  fixedbugs/issue48827.go:18: no error expected: "1 (untyped int constant) is not used" [unused-value]
+  fixedbugs/issue49005.go:23: no error expected: "impossible type assertion: F2 /* ERROR "impossible type assertion: F2().(*X2)\n\t*X2 does not implement T2 (missing method M)" */ ().(*X2)" [type-assertion]
+  fixedbugs/issue49005.go:29: no error expected: "impossible type switch case: F2() (variable of type T2) cannot have dynamic type *X2 (missing method M)" [type-switch]
+  fixedbugs/issue49112.go:14: no error expected: "[]int does not satisfy int ([]int missing in int)" [constraint]
+  fixedbugs/issue49179.go:16: no error expected: "myInt does not satisfy int | string (myInt missing in int | string)" [constraint]
+  fixedbugs/issue49179.go:18: no error expected: "myFloat does not satisfy ~int | string | float64 (myFloat missing in ~int | string | float64)" [constraint]
+  fixedbugs/issue49179.go:20: no error expected: "myInt does not satisfy int (myInt missing in int)" [constraint]
+  fixedbugs/issue49179.go:36: no error expected: "MySlice does not satisfy SliceConstraint[int] (MySlice missing in []int)" [constraint]
+  fixedbugs/issue49247.go:19: no error expected: "cannot convert 1024 (untyped int constant) to type T: constant 1024 overflows int8 (in T)" [conversion]
+  fixedbugs/issue50372.go:14: no error expected: "range over s (variable of type []int) permits only two iteration variables" [range]
+  fixedbugs/issue50372.go:15: no error expected: "range over s (variable of type []int) permits only two iteration variables" [range]
+  fixedbugs/issue50816.go:21: no error expected: "impossible type assertion: i /* ERROR "impossible type assertion: i.(T1)\n\tT1 does not implement I (missing method Foo)\n\t\thave foo()\n\t\twant Foo()" */ .(T1)" [type-assertion]
+  fixedbugs/issue50816.go:22: no error expected: "impossible type assertion: i /* ERROR "impossible type assertion: i.(T2)\n\tT2 does not implement I (missing method Foo)\n\t\thave foo() string\n\t\twant Foo()" */ .(T2)" [type-assertion]
+  fixedbugs/issue50833.go:13: no error expected: "undefined: f" [undefined]
+  fixedbugs/issue50833.go:15: no error expected: "undefined: f" [undefined]
+  fixedbugs/issue50833.go:16: no error expected: "undefined: f" [undefined]
+  fixedbugs/issue50929.go:20: no error expected: "in call to G, cannot infer A" [cannot-infer]
+  fixedbugs/issue50929.go:63: no error expected: "in call to NC, cannot infer Rc" [cannot-infer]
+  fixedbugs/issue51025.go:7: no error expected: "cannot use struct{m func()" [assignability]
+  fixedbugs/issue51025.go:11: no error expected: "cannot use &struct{m func()" [assignability]
+  fixedbugs/issue51025.go:36: no error expected: "cannot use t (variable of struct type T) as I value in assignment: T does not implement I (missing method m)" [assignability]
+  fixedbugs/issue51139.go:11: no error expected: "[]L does not satisfy []chan int ([]L missing in []chan int)" [constraint]
+  fixedbugs/issue51139.go:14: no error expected: "[]chan int does not satisfy []L ([]chan int missing in []L)" [constraint]
+  fixedbugs/issue51139.go:25: no error expected: "[]MyPtr does not satisfy ~[]*int ([]MyPtr missing in ~[]*int)" [constraint]
+  fixedbugs/issue51335.go:11: no error expected: "invalid composite literal type P" [composite-literal]
+  fixedbugs/issue51335.go:15: no error expected: "invalid composite literal type P" [composite-literal]
+  fixedbugs/issue51339.go:14: no error expected: "not enough type arguments for type T: have 1, want 2" [type-args]
+  fixedbugs/issue51339.go:14: no error expected: "cannot use _ as value or type" [blank-value]
+  fixedbugs/issue51339.go:16: no error expected: "cannot use _ as value or type" [blank-value]
+  fixedbugs/issue51339.go:16: no error expected: "cannot use _ as value or type" [blank-value]
+  fixedbugs/issue51339.go:19: no error expected: "too many type arguments for type T: have 3, want 2" [type-args]
+  fixedbugs/issue51339.go:19: no error expected: "cannot use _ as value or type" [blank-value]
+  fixedbugs/issue51339.go:19: no error expected: "cannot use _ as value or type" [blank-value]
+  fixedbugs/issue51339.go:19: no error expected: "cannot use _ as value or type" [blank-value]
+  fixedbugs/issue51360.go:8: no error expected: "len (built-in) must be called" [builtin-value]
+  fixedbugs/issue51360.go:9: no error expected: "len (built-in) must be called" [builtin-value]
+  fixedbugs/issue51360.go:10: no error expected: "len (built-in) must be called" [builtin-value]
+  fixedbugs/issue51360.go:11: no error expected: "len (built-in) must be called" [builtin-value]
+  fixedbugs/issue51360.go:12: no error expected: "len (built-in) must be called" [builtin-value]
+  fixedbugs/issue51472.go:52: no error expected: "[]byte does not satisfy interface{comparable; []byte | string}" [constraint]
+  fixedbugs/issue51525.go:15: no error expected: "invalid operation: cannot close non-channel x (variable of type T constrained by interface{int; string})" [builtin-arg]
+  fixedbugs/issue52915.go:9: no error expected: "invalid recursive type: T[P] refers to itself" [recursive-type]
+  fixedbugs/issue53535.go:10: no error expected: "cannot use W{} (value of struct type W) as io.Writer value in variable declaration: W does not implement io.Writer (missing method Write)" [assignability]
+  fixedbugs/issue53535.go:22: no error expected: "cannot use &S{} (value of type *S) as interface{m()} value in variable declaration: *S does not implement interface{m()} (missing method m)" [assignability]
+  fixedbugs/issue53535.go:30: no error expected: "cannot use &G[int]{} (value of type *G[int]) as interface{m()} value in variable declaration: *G[int] does not implement interface{m()} (missing method m)" [assignability]
+  fixedbugs/issue54942.go:20: no error expected: "cannot use new(T) (value of type *T) as I value in variable declaration: *T does not implement I (wrong type for method m)" [assignability]
+  fixedbugs/issue54942.go:38: no error expected: "cannot use new(myExecutor) (value of type *myExecutor) as Executor value in variable declaration: *myExecutor does not implement Executor (wrong type for method Execute)" [assignability]
+  fixedbugs/issue56425.go:8: no error expected: "invalid operation: shift count s (constant 0 of type float32) must be integer" [operator]
+  fixedbugs/issue56665.go:12: no error expected: "invalid recursive type: B[T] refers to itself" [recursive-type]
+  fixedbugs/issue56665.go:21: no error expected: "invalid recursive type: X[T] refers to itself" [recursive-type]
+  fixedbugs/issue57192.go:21: no error expected: "in call to g, cannot infer T" [cannot-infer]
+  fixedbugs/issue58611.go:13: no error expected: "cannot use 0 (untyped int constant) as int value in assignment" [assignability]
+  fixedbugs/issue58611.go:25: no error expected: "cannot use keys (variable of type []T) as []string value in argument to sort.Strings" [assignability]
+  fixedbugs/issue58611.go:26: no error expected: "cannot use keys (variable of type []T) as []string value in argument to strings.Join" [assignability]
+  fixedbugs/issue58612.go:9: no error expected: "cannot use generic function f without instantiation" [generic-no-instantiation]
+  fixedbugs/issue58612.go:9: no error expected: "x (variable of type *T) is not used" [unused-value]
+  fixedbugs/issue58671.go:17: no error expected: "cannot use true (untyped bool constant) as rune value in argument to g" [assignability]
+  fixedbugs/issue58671.go:18: no error expected: "cannot use "foo" (untyped string constant) as int value in argument to g" [assignability]
+  fixedbugs/issue58671.go:19: no error expected: "cannot use "bar" (untyped string constant) as float64 value in argument to g" [assignability]
+  fixedbugs/issue58742.go:8: no error expected: "not enough return values" [return-arity]
+  fixedbugs/issue58742.go:12: no error expected: "too many return values" [return-arity]
+  fixedbugs/issue58742.go:17: no error expected: "not enough return values" [return-arity]
+  fixedbugs/issue59740.go:13: no error expected: "in call to g, cannot infer T" [cannot-infer]
+  fixedbugs/issue59740.go:24: no error expected: "type func(n T, _ List[T]) T of nil[T] does not match List[T]" [inference]
+  fixedbugs/issue60542.go:12: no error expected: "in call to Clip, cannot infer E" [cannot-infer]
+  fixedbugs/issue60562.go:15: no error expected: "in call to f0, cannot infer T" [cannot-infer]
+  fixedbugs/issue60562.go:24: no error expected: "in call to f1, cannot infer T" [cannot-infer]
+  fixedbugs/issue60562.go:35: no error expected: "type func(interface{m(int)}) of x does not match func(I[T])" [inference]
+  fixedbugs/issue60562.go:49: no error expected: "type [10]interface{I[int]} of x does not match [10]I[T]" [inference]
+  fixedbugs/issue60747.go:9: no error expected: "cannot use f (value of generic type func[P any](P) P) as func(string) int value in variable declaration" [assignability]
+  fixedbugs/issue60747.go:12: no error expected: "cannot use f (value of generic type func[P any](P) P) as func(string) int value in return statement" [assignability]
+  fixedbugs/issue60933.go:25: no error expected: "type interface{} of b does not match inferred type *os.File for T" [inference]
+  fixedbugs/issue60933.go:66: no error expected: "interface{m(F)} does not satisfy interface{m(interface{m(F)})} (method m has pointer receiver)" [constraint]
+  fixedbugs/issue61685.go:8: no error expected: "I[T] does not satisfy I[I[T]] (method m has pointer receiver)" [constraint]
+  fixedbugs/issue62157.go:14: no error expected: "type <-chan string of b does not match inferred type chan string for T" [inference]
+  fixedbugs/issue62157.go:29: no error expected: "type F[<-chan string] of g("") does not match F[T]" [inference]
+  fixedbugs/issue62157.go:45: no error expected: "type chan<- int of b does not match inferred type namedA for T" [inference]
+  fixedbugs/issue62157.go:48: no error expected: "type chan<- int of b does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:49: no error expected: "type chan<- int of b does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:52: no error expected: "type chan<- int of b does not match inferred type namedA for T" [inference]
+  fixedbugs/issue62157.go:53: no error expected: "type chan<- int of b does not match inferred type namedA for T" [inference]
+  fixedbugs/issue62157.go:56: no error expected: "type chan<- int of b does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:65: no error expected: "type chan<- int of b does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:65: no error expected: "type namedB of B does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:66: no error expected: "type namedB of B does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:66: no error expected: "type chan<- int of b does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:80: no error expected: "type chan<- int of b does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:81: no error expected: "type namedB of B does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:85: no error expected: "type chan<- int of b does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:85: no error expected: "type namedB of B does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:86: no error expected: "type namedB of B does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:86: no error expected: "type chan<- int of b does not match inferred type chan int for T" [inference]
+  fixedbugs/issue62157.go:111: no error expected: "type chan<- int of d does not match inferred type A for T" [inference]
+  fixedbugs/issue62157.go:127: no error expected: "type Matcher[<-chan string] of Produces("") does not match Matcher[T]" [inference]
+  fixedbugs/issue63563.go:8: no error expected: "cannot convert 1 << 8 - 1 (untyped int constant 255) to type int8 (overflows)" [conversion]
+  fixedbugs/issue63563.go:9: no error expected: "cannot convert 1 << 16 - 1 (untyped int constant 65535) to type int16 (overflows)" [conversion]
+  fixedbugs/issue63563.go:10: no error expected: "cannot convert 1 << 32 - 1 (untyped int constant 4294967295) to type int32 (overflows)" [conversion]
+  fixedbugs/issue63563.go:11: no error expected: "cannot convert 1 << 64 - 1 (untyped int constant 18446744073709551615) to type int64 (overflows)" [conversion]
+  fixedbugs/issue63563.go:13: no error expected: "cannot convert 1 << 8 (untyped int constant 256) to type uint8 (overflows)" [conversion]
+  fixedbugs/issue63563.go:14: no error expected: "cannot convert 1 << 16 (untyped int constant 65536) to type uint16 (overflows)" [conversion]
+  fixedbugs/issue63563.go:15: no error expected: "cannot convert 1 << 32 (untyped int constant 4294967296) to type uint32 (overflows)" [conversion]
+  fixedbugs/issue63563.go:16: no error expected: "cannot convert 1 << 64 (untyped int constant 18446744073709551616) to type uint64 (overflows)" [conversion]
+  fixedbugs/issue64406.go:12: no error expected: "invalid argument: s (variable of type S constrained by ~[]E) is not a slice" [builtin-arg]
+  fixedbugs/issue64406.go:16: no error expected: "invalid argument: s (variable of type S constrained by ~*E) is not a pointer" [builtin-arg]
+  fixedbugs/issue67628.go:14: no error expected: "invalid operation: b + "foo" (mismatched types int and untyped string)" [mismatched-types]
+  fixedbugs/issue69955.go:34: no error expected: "a (variable of struct type S) is not constant" [not-constant]
+  fixedbugs/issue69955.go:35: no error expected: "b (variable of type int) is not constant" [not-constant]
+  fixedbugs/issue69955.go:36: no error expected: "c (variable of int type N) is not constant" [not-constant]
+  fixedbugs/issue70150.go:10: no error expected: "too many arguments in call to vf" [call-arity]
+  fixedbugs/issue70150.go:11: no error expected: "too many arguments in call to vf" [call-arity]
+  fixedbugs/issue70417.go:14: no error expected: "method A0.m already declared" [redeclared]
+  fixedbugs/issue70417.go:15: no error expected: "invalid receiver type B0 (cannot be a pointer)" [receiver]
+  fixedbugs/issue70417.go:15: no error expected: "method T.m already declared" [redeclared]
+  fixedbugs/issue70417.go:22: no error expected: "method A1.m already declared" [redeclared]
+  fixedbugs/issue70417.go:23: no error expected: "invalid receiver type B1 (cannot be a pointer)" [receiver]
+  fixedbugs/issue70417.go:30: no error expected: "method A2.m already declared" [redeclared]
+  fixedbugs/issue70417.go:31: no error expected: "invalid receiver type B2 (cannot be a pointer)" [receiver]
+  fixedbugs/issue70417.go:37: no error expected: "method T.m already declared" [redeclared]
+  fixedbugs/issue70417.go:38: no error expected: "method A3.m already declared" [redeclared]
+  fixedbugs/issue70417.go:38: no error expected: "method T.m already declared" [redeclared]
+  fixedbugs/issue70417.go:39: no error expected: "invalid receiver type B3 (cannot be a pointer)" [receiver]
+  fixedbugs/issue70417.go:39: no error expected: "method T.m already declared" [redeclared]
+  fixedbugs/issue70417.go:45: no error expected: "undefined: P" [undefined]
+  fixedbugs/issue70417.go:46: no error expected: "undefined: P" [undefined]
+  fixedbugs/issue70417.go:47: no error expected: "invalid receiver type B4 (cannot be a pointer)" [receiver]
+  fixedbugs/issue70417.go:47: no error expected: "invalid operation: B4[P] (*T is not a generic type)" [type-args]
+  fixedbugs/issue70417.go:47: no error expected: "undefined: P" [undefined]
+  fixedbugs/issue70417.go:55: no error expected: "invalid receiver type C2 (cannot be a pointer)" [receiver]
+  fixedbugs/issue70417.go:56: no error expected: "invalid receiver type C2 (cannot be a pointer)" [receiver]
+  fixedbugs/issue70417.go:56: no error expected: "method C2.m already declared" [redeclared]
+  fixedbugs/issue70526.go:10: no error expected: "too many arguments in call to f" [call-arity]
+  fixedbugs/issue70526.go:11: no error expected: "too many arguments in call to f" [call-arity]
+  fixedbugs/issue70526.go:12: no error expected: "too many arguments in call to f" [call-arity]
+  fixedbugs/issue70549.go:11: no error expected: "undefined: math.SQrt" [undefined]
+  fixedbugs/issue76220.go:8: no error expected: "append(nil, ""...) (value of type ?) is not used" [unused-value]
+  fixedbugs/issue77245.go:15: no error expected: "cannot convert g (value of generic type func[T any](T)) to type F" [conversion]
+  fixedbugs/issue77245.go:20: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in struct literal: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:21: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in array or slice literal: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:22: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in array or slice literal: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:23: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in map literal: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:24: no error expected: "cannot convert g (value of generic type func[T any](T)) to type F: cannot convert func[T any](T) to type func(int) (in F)" [conversion]
+  fixedbugs/issue77245.go:25: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in send: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:29: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in struct literal: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:30: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in array or slice literal: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:31: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in array or slice literal: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:32: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in map literal: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77245.go:33: no error expected: "cannot convert g (value of generic type func[T any](T)) to type F: cannot convert func[T any](T) to type func(int) (in F)" [conversion]
+  fixedbugs/issue77245.go:34: no error expected: "cannot use g (value of generic type func[T any](T)) as F value in send: cannot assign func[T any](T) to func(int) (in F)" [assignability]
+  fixedbugs/issue77905.go:18: no error expected: "in call to f, cannot infer T" [cannot-infer]
+  fixedbugs/issue77905.go:23: no error expected: "in call to f, cannot infer T" [cannot-infer]
+  fixedbugs/issue77905.go:29: no error expected: "in call to f, cannot infer T" [cannot-infer]
+  fixedbugs/issue78884.go:17: no error expected: "cannot use f2() (value of type int) as string value in variable declaration" [assignability]
+  fixedbugs/issue78884.go:18: no error expected: "cannot use f3() (value of type int) as string value in variable declaration" [assignability]
+  fixedbugs/issue78884.go:19: no error expected: "cannot use f4() (value of type int) as string value in variable declaration" [assignability]
+  fixedbugs/issue79883.go:8: no error expected: "cannot convert p (variable of type string) to type *P" [conversion]
+  spec/methods.go:60: no error expected: "*int does not satisfy *F (*int missing in *F)" [constraint]
+  spec/methods.go:61: no error expected: "*int does not satisfy *F (*int missing in *F)" [constraint]
+  spec/methods.go:62: no error expected: "*int does not satisfy *F (*int missing in *F)" [constraint]
+  spec/methods.go:63: no error expected: "*string does not satisfy *F (*string missing in *F)" [constraint]
+  spec/methods.go:76: no error expected: "*A does not satisfy *F (*A missing in *F)" [constraint]
+  spec/methods.go:84: no error expected: "cannot use T{} (value of struct type T) as I[int] value in variable declaration: T does not implement I[int] (wrong type for method m)" [assignability]
+  spec/methods.go:91: no error expected: "cannot use U{} (value of struct type U) as I[int] value in variable declaration: U does not implement I[int] (wrong type for method m)" [assignability]
+  spec/methods.go:108: no error expected: "type T of T{} does not match I[X]" [inference]
+  spec/range.go:30: no error expected: "cannot range over m1 (variable of type func(T))" [range]
+  spec/range.go:33: no error expected: "cannot range over m2 (variable of type func(*T))" [range]
+  spec/range.go:35: no error expected: "cannot range over f1 (value of type func())" [range]
+  spec/range.go:37: no error expected: "cannot range over f2 (value of type func(func()))" [range]
+  spec/range.go:105: no error expected: "cannot use i (value of type MyInt) as int value in assignment" [assignability]
+  spec/range.go:105: no error expected: "cannot use s (value of type MyString) as string value in assignment" [assignability]
+  spec/range.go:109: no error expected: "cannot use mi (variable of int32 type MyInt) as int value in assignment" [assignability]
+  spec/range.go:109: no error expected: "cannot use ms (variable of string type MyString) as string value in assignment" [assignability]
+  spec/range.go:133: no error expected: "cannot range over x (variable of type T constrained by any): no core type" [range]
+  spec/range.go:138: no error expected: "cannot range over x (variable of type T constrained by interface{int; string}): no core type" [range]
+  spec/range.go:168: no error expected: "cannot range over func(T) {...} (value of type func(T))" [range]
+  spec/range.go:198: no error expected: "range over seq2 (value of type func(func(int, int) bool)) permits only two iteration variables" [range]
+  spec/range_int.go:47: no error expected: "cannot use i (value of type MyInt) as int value in assignment" [assignability]
+  spec/range_int.go:102: no error expected: "cannot use j (value of type int) as uint value in assignment" [assignability]
+  spec/range_int.go:104: no error expected: "cannot use j (value of type int) as uint value in assignment" [assignability]
+  spec/range_int.go:106: no error expected: "cannot use j (value of type int) as uint value in assignment" [assignability]
+  spec/range_int.go:108: no error expected: "cannot use j (value of type int) as uint value in assignment" [assignability]
+  spec/range_int.go:123: no error expected: "cannot use u8 (value of type int) as uint8 value in assignment" [assignability]
+  spec/range_int.go:125: no error expected: "cannot use u8 (value of type int) as uint8 value in assignment" [assignability]
+  spec/range_int.go:127: no error expected: "cannot use u8 (value of type int) as uint8 value in assignment" [assignability]
+  spec/range_int.go:129: no error expected: "cannot use u8 (value of type int) as uint8 value in assignment" [assignability]
+  spec/range_int.go:135: no error expected: "cannot use &i (value of type *int) as *rune value in variable declaration" [assignability]
+  spec/range_int.go:171: no error expected: "cannot use j (value of type int) as float64 value in assignment" [assignability]
+  spec/range_int.go:188: no error expected: "cannot use i (value of type int) as float64 value in assignment" [assignability]
+MISSED:
+  check/builtins0.go:231: expected ERRORx `cannot use .* in variable declaration` (got: "invalid operation: shifted operand 1 (type float64) must be integer")
+  check/builtins0.go:1065: expected ERROR "not enough arguments"
+  check/builtins0.go:1066: expected ERROR "too many arguments"
+  check/builtins0.go:1067: expected ERROR "boolean constant"
+  check/builtins0.go:1068: expected ERROR "boolean constant"
+  check/builtins0.go:1070: expected ERROR "failed"
+  check/builtins0.go:1074: expected ERROR "invalid use of ..."
+  check/builtins0.go:1080: expected ERROR "used as value"
+  check/builtins0.go:1081: expected ERROR "boolean constant"
+  check/builtins0.go:1082: expected ERROR "boolean constant"
+  check/builtins0.go:1093: expected ERROR "invalid use of ..."
+  check/const0.go:281: expected ERROR "is not constant"
+  check/constdecl.go:134: expected ERROR "invalid array length"
+  check/constdecl.go:135: expected ERROR "invalid array length"
+  check/cycles0.go:48: expected ERROR "invalid recursive type"
+  check/cycles0.go:89: expected ERROR "undefined" (got: "invalid recursive type t3")
+  check/cycles0.go:90: expected ERROR "undefined"
+  check/cycles0.go:160: expected ERROR "invalid recursive type"
+  check/cycles0.go:161: expected ERROR "invalid recursive type" (got: "array length len(T15{}) (value of type int) must be constant")
+  check/cycles0.go:162: expected ERROR "invalid recursive type" (got: "array length len(T16{...}) (value of type int) must be constant")
+  check/cycles0.go:163: expected ERROR "invalid recursive type" (got: "array length len(T17{...}) (value of type int) must be constant")
+  check/cycles0.go:172: expected ERROR "invalid recursive type"
+  check/cycles0.go:174: expected ERROR "invalid recursive type"
+  check/cycles2.go:67: expected ERROR "invalid recursive type"
+  check/cycles2.go:73: expected ERROR "invalid recursive type"
+  check/cycles2.go:79: expected ERROR "invalid recursive type"
+  check/cycles2.go:85: expected ERROR "invalid recursive type"
+  check/cycles2.go:91: expected ERROR "invalid recursive type"
+  check/cycles3.go:51: expected ERROR "invalid recursive type"
+  check/cycles4.go:117: expected ERROR "invalid recursive type"
+  check/cycles5.go:124: expected ERROR "invalid recursive type"
+  check/cycles5.go:125: expected ERROR "invalid recursive type"
+  check/cycles5.go:157: expected ERROR "invalid recursive type"
+  check/cycles5.go:166: expected ERROR "cycle"
+  check/cycles5.go:173: expected ERROR "invalid recursive type T13"
+  check/cycles5.go:187: expected ERROR "no value" (got: "array length h()[0] (variable of type int) must be constant")
+  check/cycles5.go:189: expected ERROR "cycle"
+  check/cycles6.go:14: expected ERROR "invalid recursive type"
+  check/cycles6.go:19: expected ERROR "invalid recursive type"
+  check/cycles6.go:22: expected ERROR "invalid recursive type"
+  check/cycles6.go:27: expected ERROR "invalid recursive type"
+  check/cycles6.go:34: expected ERROR "invalid recursive type"
+  check/cycles6.go:41: expected ERROR "invalid recursive type"
+  check/cycles6.go:51: expected ERROR "invalid recursive type"
+  check/cycles6.go:56: expected ERROR "invalid recursive type"
+  check/cycles6.go:63: expected ERROR "invalid recursive type"
+  check/cycles6.go:65: expected ERROR "invalid recursive type"
+  check/cycles6.go:69: expected ERROR "invalid recursive type"
+  check/cycles6.go:71: expected ERROR "invalid recursive type"
+  check/cycles6.go:73: expected ERROR "invalid recursive type"
+  check/decls4.go:198: expected ERROR "ambiguous selector eD.xm"
+  check/expr1.go:126: expected ERROR "multiple-value f" (got: "multiple-value f() (value of type (int, int)) in single-value context")
+  check/expr3.go:106: expected ERROR "mismatched types int and untyped string" (got: "cannot use 0 (untyped int constant) as string value in map index")
+  check/expr3.go:460: expected ERRORx `use of .* outside type switch`
+  check/expr3.go:508: expected ERROR "not enough arguments in call to f2\n\thave (func())\n\twant (float32, string)" (got: "g0() (no value) used as value")
+  check/init0.go:11: expected ERROR "initialization cycle: s0 refers to itself" (got: "initialization cycle for s0")
+  check/init0.go:23: expected ERROR "initialization cycle: s1 refers to itself" (got: "initialization cycle for s1")
+  check/init0.go:36: expected ERROR "initialization cycle: s2 refers to itself" (got: "initialization cycle for s2")
+  check/init0.go:48: expected ERROR "initialization cycle: s3 refers to itself" (got: "initialization cycle for s3")
+  check/init0.go:65: expected ERROR "initialization cycle: vx3 refers to itself" (got: "initialization cycle for vx3")
+  check/init0.go:80: expected ERROR "initialization cycle: x9 refers to itself" (got: "initialization cycle for x9")
+  check/init0.go:97: expected ERROR "initialization cycle for x11"
+  check/init0.go:106: expected ERROR "initialization cycle for x12"
+  check/init1.go:17: expected ERROR "initialization cycle"
+  check/init1.go:31: expected ERROR "initialization cycle"
+  check/init1.go:42: expected ERROR "initialization cycle"
+  check/init1.go:53: expected ERROR "initialization cycle"
+  check/init1.go:64: expected ERROR "initialization cycle"
+  check/init2.go:21: expected ERROR "initialization cycle"
+  check/init2.go:25: expected ERROR "initialization cycle"
+  check/init2.go:29: expected ERROR "initialization cycle"
+  check/init2.go:33: expected ERROR "initialization cycle"
+  check/init2.go:40: expected ERROR "initialization cycle"
+  check/init2.go:45: expected ERROR "initialization cycle"
+  check/init2.go:50: expected ERROR "initialization cycle"
+  check/init2.go:55: expected ERROR "initialization cycle"
+  check/init2.go:61: expected ERROR "initialization cycle"
+  check/init2.go:65: expected ERROR "initialization cycle"
+  check/init2.go:69: expected ERROR "initialization cycle"
+  check/init2.go:73: expected ERROR "initialization cycle"
+  check/init2.go:78: expected ERROR "initialization cycle"
+  check/init2.go:83: expected ERROR "initialization cycle"
+  check/init2.go:88: expected ERROR "initialization cycle"
+  check/init2.go:93: expected ERROR "initialization cycle"
+  check/init2.go:100: expected ERROR "initialization cycle"
+  check/init2.go:105: expected ERROR "initialization cycle"
+  check/init2.go:110: expected ERROR "initialization cycle"
+  check/init2.go:115: expected ERROR "initialization cycle"
+  check/init2.go:121: expected ERROR "initialization cycle"
+  check/init2.go:127: expected ERROR "initialization cycle"
+  check/init2.go:133: expected ERROR "initialization cycle"
+  check/init2.go:139: expected ERROR "initialization cycle"
+  check/issues1.go:249: expected ERROR "nil (untyped nil) is not a type"
+  check/labels.go:44: expected ERROR "declared and not used"
+  check/labels.go:160: expected ERROR "label L1 declared and not used"
+  check/main0.go:8: expected ERROR "redeclared" (got: "func main must have no arguments and no return values")
+  check/main0.go:9: expected ERROR "redeclared" (got: "func main must have no arguments and no return values")
+  check/map0.go:9: expected ERROR "could not import" (got: "cannot find package "chans"")
+  check/shifts.go:385: expected ERRORx `shifted operand 1 .* must be integer`
+  check/stmt0.go:127: expected ERROR "not an expression"
+  check/stmt0.go:607: expected ERROR "use of untyped nil"
+  check/stmt0.go:684: expected ERROR "outside type switch"
+  check/stmt0.go:733: expected ERROR "1 is not a type"
+  check/typeinst0.go:35: expected ERROR "expected type argument list" (got: "invalid operation: int[] (int is not a generic type)")
+  check/typeinst0.go:36: expected ERROR "expected type argument list" (got: "invalid operation: myInt[] (myInt is not a generic type)")
+  check/typeinst0.go:39: expected ERROR "expected type argument list" (got: "not enough type arguments for type T1: have 0, want 1")
+  check/vardecl.go:17: expected ERROR "expected type"
+  check/vardecl.go:18: expected ERROR "expected type"
+  check/vardecl.go:19: expected ERROR "expected type"
+  examples/constraints.go:23: expected ERROR "overlapping terms p.MyInt and ~int" (got: "overlapping terms MyInt and ~int")
+  examples/constraints.go:31: expected ERROR "invalid use of ~"
+  examples/constraints.go:40: expected ERROR "invalid use of ~"
+  examples/constraints.go:41: expected ERROR "invalid use of ~"
+  examples/functions.go:71: expected ERROR "not enough arguments"
+  examples/functions.go:131: expected ERROR "cannot use" (got: "type <-chan int of recv does not match chan T")
+  examples/functions.go:132: expected ERROR "cannot use" (got: "type chan<- int of send does not match chan T")
+  examples/functions.go:136: expected ERROR "cannot use" (got: "type chan<- int of send does not match <-chan T")
+  examples/functions.go:139: expected ERROR "cannot use" (got: "type <-chan int of recv does not match chan<- T")
+  examples/functions.go:185: expected ERROR "cannot use &s1 (value of type *string) as *myString value in argument to g3" (got: "type myString of myString("2") does not match inferred type string for T")
+  examples/functions.go:211: expected ERROR "empty type parameter list"
+  examples/functions.go:214: expected ERROR "cannot index" (got: "h (value of type func()) is not used")
+  examples/functions.go:214: expected ERROR "operand" (got: "h (value of type func()) is not used")
+  examples/functions.go:219: expected ERROR "generic function is missing function body"
+  examples/inference2.go:22: expected ERROR "cannot infer P" (got: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in variable declaration")
+  examples/inference2.go:30: expected ERROR "inferred type func(int, int) for func(P, P) does not match type func(int, string) of v7" (got: "cannot use f4 (value of generic type func[P any](P, P)) as func(int, string) value in variable declaration")
+  examples/inference2.go:32: expected ERROR "inferred type func(string) []string for func(P) []P does not match type func(string) []int of v9" (got: "cannot use f5 (value of generic type func[P any](P) []P) as func(string) []int value in variable declaration")
+  examples/inference2.go:35: expected ERROR "cannot infer P" (got: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in variable declaration")
+  examples/inference2.go:43: expected ERROR "cannot infer P" (got: "cannot use f1 (value of generic type func[P any](P)) as func() int value in assignment")
+  examples/inference2.go:44: expected ERROR "cannot infer P" (got: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in assignment")
+  examples/inference2.go:52: expected ERROR "inferred type func(int, int) for func(P, P) does not match type func(int, string) of v7" (got: "cannot use f4 (value of generic type func[P any](P, P)) as func(int, string) value in assignment")
+  examples/inference2.go:54: expected ERROR "inferred type func(string) []string for func(P) []P does not match type func(string) []int of v9" (got: "cannot use f5 (value of generic type func[P any](P) []P) as func(string) []int value in assignment")
+  examples/inference2.go:58: expected ERROR "inferred type func(string) []string for func(P) []P does not match type func(string) []int of a[0]" (got: "cannot use f5 (value of generic type func[P any](P) []P) as func(string) []int value in assignment")
+  examples/inference2.go:69: expected ERROR "inferred type func(int, int) for func(P, P) does not match type func(int, string) of result variable" (got: "cannot use f4 (value of generic type func[P any](P, P)) as func(int, string) value in return statement")
+  examples/inference2.go:73: expected ERROR "inferred type func(string) []string for func(P) []P does not match type func(string) []int of result variable" (got: "cannot use f5 (value of generic type func[P any](P) []P) as func(string) []int value in return statement")
+  examples/inference2.go:77: expected ERROR "cannot infer P" (got: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in return statement")
+  examples/inference2.go:89: expected ERROR "cannot infer P" (got: "cannot use f2 (value of generic type func[P any]() P) as func(int) value in argument to g1")
+  examples/methods.go:31: expected ERROR "must be an identifier"
+  examples/methods.go:42: expected ERRORx `cannot use 42 .* as int` (got: "cannot use 42 (untyped int constant) as A value in variable declaration")
+  examples/operations.go:10: expected ERROR "cannot indirect p"
+  examples/operations.go:14: expected ERROR "cannot indirect p"
+  examples/operations.go:22: expected ERROR "must have identical base types"
+  examples/types.go:105: expected ERROR "cannot use generic type T" (got: "cannot convert 0 (untyped int constant) to type T")
+  examples/types.go:109: expected ERRORx `unexpected \[|expected ';'` (got: "cannot use generic type T[P any] without instantiation")
+  examples/types.go:117: expected ERROR "invalid use of ..."
+  examples/types.go:149: expected ERROR "cannot parenthesize"
+  examples/types.go:150: expected ERROR "cannot parenthesize"
+  examples/types.go:151: expected ERROR "cannot parenthesize"
+  examples/types.go:154: expected ERROR "int8 redeclared"
+  examples/types.go:155: expected ERROR "int16 redeclared"
+  examples/types.go:156: expected ERROR "List redeclared"
+  examples/types.go:192: expected ERROR "cannot use function type parameter T as RHS in type declaration"
+  examples/types.go:193: expected ERROR "cannot use function type parameter T as RHS in type declaration"
+  examples/typesets.go:48: expected ERROR "cannot use a type parameter as constraint"
+  examples/typesets.go:49: expected ERROR "cannot use a type parameter as constraint"
+  examples/typesets.go:54: expected ERROR "constrained by string"
+  examples/typesets.go:58: expected ERROR "constrained by int | string"
+  fixedbugs/issue20583.go:8: expected ERROR "malformed constant"
+  fixedbugs/issue20583.go:9: expected ERROR "malformed constant"
+  fixedbugs/issue20583.go:10: expected ERROR "malformed constant"
+  fixedbugs/issue20583.go:13: expected ERROR "not representable"
+  fixedbugs/issue28251.go:44: expected ERROR "cannot call pointer method m4 on T" (got: "(T{}).m4 undefined (type T has no field or method m4)")
+  fixedbugs/issue28251.go:54: expected ERROR "cannot call pointer method m6 on T" (got: "(T{}).m6 undefined (type T has no field or method m6)")
+  fixedbugs/issue39634.go:26: expected ERROR "invalid recursive type"
+  fixedbugs/issue39634.go:30: expected ERROR "cannot indirect" (got: "non-boolean condition in if statement")
+  fixedbugs/issue39634.go:46: expected ERROR "used as value" (got: "u (package-level variable) is not a type" | "undefined: c" | "len (built-in) must be called" | "undefined: c")
+  fixedbugs/issue39634.go:46: expected ERROR "used as value" (got: "u (package-level variable) is not a type" | "undefined: c" | "len (built-in) must be called" | "undefined: c")
+  fixedbugs/issue39634.go:46: expected ERROR "u (package-level variable) is not a type" (got: "u (package-level variable) is not a type" | "undefined: c" | "len (built-in) must be called" | "undefined: c")
+  fixedbugs/issue39634.go:46: expected ERROR "must be called" (got: "u (package-level variable) is not a type" | "undefined: c" | "len (built-in) must be called" | "undefined: c")
+  fixedbugs/issue39634.go:46: expected ERROR "undefined" (got: "u (package-level variable) is not a type" | "undefined: c" | "len (built-in) must be called" | "undefined: c")
+  fixedbugs/issue39634.go:46: expected ERROR "undefined" (got: "u (package-level variable) is not a type" | "undefined: c" | "len (built-in) must be called" | "undefined: c")
+  fixedbugs/issue39634.go:61: expected ERROR "duplicate method"
+  fixedbugs/issue39634.go:69: expected ERROR "invalid recursive type: Z19 refers to itself"
+  fixedbugs/issue39634.go:73: expected ERROR "too many arguments in call to F20\n\thave (unknown type)\n\twant ()" (got: "invalid composite literal type t")
+  fixedbugs/issue39634.go:89: expected ERROR "interface method must have no type parameters"
+  fixedbugs/issue39634.go:90: expected ERROR "operand" (got: "cannot use generic function F26 without instantiation")
+  fixedbugs/issue39693.go:14: expected ERROR "not defined"
+  fixedbugs/issue39699.go:26: expected ERROR "cannot use interface T1 in conversion" (got: "cannot convert 1 (untyped int constant) to type T1")
+  fixedbugs/issue39699.go:27: expected ERROR "cannot use interface T2 in conversion"
+  fixedbugs/issue39699.go:28: expected ERROR "cannot use interface T3 in conversion" (got: "cannot convert 3 (untyped int constant) to type T3")
+  fixedbugs/issue39723.go:9: expected ERROR "cannot use a type parameter as constraint"
+  fixedbugs/issue39725.go:9: expected ERROR "does not match inferred type struct{a int; b string}" (got: "type struct{a int; b int} of struct{a, b int}{} does not match struct{a T1; b T2}")
+  fixedbugs/issue39725.go:15: expected ERROR "does not match inferred type func(string)" (got: "type func(f []byte) of func(f[]byte) {...} does not match func(T)")
+  fixedbugs/issue39768.go:9: expected ERROR "cannot use generic type"
+  fixedbugs/issue39938.go:26: expected ERROR "invalid recursive type"
+  fixedbugs/issue39938.go:34: expected ERROR "invalid recursive type"
+  fixedbugs/issue39938.go:52: expected ERROR "invalid recursive type"
+  fixedbugs/issue40350.go:15: expected ERROR "int does not satisfy number (number mentions int, but int is not in the type set of number)" (got: "int does not satisfy number (int missing in float64 | ~int32)")
+  fixedbugs/issue40684.go:13: expected ERROR "without instantiation"
+  fixedbugs/issue40684.go:14: expected ERROR "without instantiation"
+  fixedbugs/issue40684.go:14: expected ERROR "without instantiation"
+  fixedbugs/issue41124.go:9: expected ERROR "invalid recursive type"
+  fixedbugs/issue41124.go:38: expected ERRORx `interface is .* comparable`
+  fixedbugs/issue41124.go:42: expected ERRORx `interface is .* comparable`
+  fixedbugs/issue41124.go:46: expected ERROR "interface contains type constraints"
+  fixedbugs/issue41124.go:50: expected ERROR "interface contains type constraints"
+  fixedbugs/issue41124.go:74: expected ERROR "interface contains type constraints"
+  fixedbugs/issue41124.go:79: expected ERROR "interface contains type constraints"
+  fixedbugs/issue41124.go:80: expected ERROR "interface contains type constraints"
+  fixedbugs/issue41124.go:83: expected ERROR "interface contains type constraints"
+  fixedbugs/issue41124.go:85: expected ERROR "interface contains type constraints"
+  fixedbugs/issue41124.go:89: expected ERROR "interface contains type constraints"
+  fixedbugs/issue42695.go:7: expected ERROR "malformed constant"
+  fixedbugs/issue42695.go:8: expected ERROR "malformed constant"
+  fixedbugs/issue42695.go:10: expected ERROR "malformed constant"
+  fixedbugs/issue42695.go:11: expected ERROR "malformed constant"
+  fixedbugs/issue42695.go:14: expected ERROR "malformed constant"
+  fixedbugs/issue42695.go:17: expected ERROR "malformed constant"
+  fixedbugs/issue43087.go:27: expected ERRORx `non-name .* on left side of :=` (got: "undefined: b")
+  fixedbugs/issue43109.go:10: expected ERROR "could not import /foo" (got: "cannot find package "/foo"")
+  fixedbugs/issue43110.go:33: expected ERRORx `invalid case f in switch on .* \(func can only be compared to nil\)`
+  fixedbugs/issue43110.go:36: expected ERROR "use of untyped nil in switch expression"
+  fixedbugs/issue43124.go:7: expected ERROR "invalid use of ... in conversion to int"
+  fixedbugs/issue43124.go:15: expected ERROR "invalid use of ... in conversion to M"
+  fixedbugs/issue43190.go:10: expected ERROR "missing import path"
+  fixedbugs/issue43190.go:11: expected ERROR "invalid import path (empty string)" (got: """ imported and not used")
+  fixedbugs/issue43190.go:13: expected ERROR "missing import path"
+  fixedbugs/issue43190.go:14: expected ERROR "missing import path"
+  fixedbugs/issue43190.go:15: expected ERROR "import path must be a string"
+  fixedbugs/issue43190.go:17: expected ERROR "imports must appear before other declarations"
+  fixedbugs/issue43190.go:21: expected ERROR "missing import path"
+  fixedbugs/issue43190.go:25: expected ERROR "missing import path"
+  fixedbugs/issue43190.go:30: expected ERROR "imports must appear before other declarations"
+  fixedbugs/issue43527.go:11: expected ERROR "undefined array length A or missing type constraint" (got: "undefined: A")
+  fixedbugs/issue43527.go:12: expected ERROR "invalid array length B"
+  fixedbugs/issue43671.go:15: expected ERRORx `cannot receive from ch .*: no specific channel type`
+  fixedbugs/issue43671.go:19: expected ERRORx `cannot receive from ch .*: non-channel int`
+  fixedbugs/issue43671.go:31: expected ERRORx `cannot receive from ch .*: channels chan int and chan float32 have different element types`
+  fixedbugs/issue43671.go:35: expected ERRORx `cannot receive from ch .*: send-only channel chan<- int`
+  fixedbugs/issue45114.go:8: expected ERRORx `shifted operand 1 .* must be integer`
+  fixedbugs/issue45635.go:13: expected ERROR "expected type argument list" (got: "not enough type arguments for type N: have 0, want 1")
+  fixedbugs/issue45635.go:21: expected ERROR "more than one index"
+  fixedbugs/issue45635.go:30: expected ERROR "more than one index"
+  fixedbugs/issue45639.go:11: expected ERROR "cannot use function type parameter T as RHS in type declaration"
+  fixedbugs/issue45639.go:12: expected ERROR "cannot use function type parameter T as RHS in type declaration"
+  fixedbugs/issue46403.go:10: expected ERROR "expected operand"
+  fixedbugs/issue46583.go:25: expected ERROR "func(t T2, x int)" (got: "cannot use T2.m (value of type func(T2, x int)) as func(T2) value in assignment")
+  fixedbugs/issue46583.go:27: expected ERROR "func(_ T4, x int)" (got: "cannot use T4.m (value of type func(T4, x int)) as func(T4) value in assignment")
+  fixedbugs/issue47115.go:15: expected ERRORx `cannot send to ch .*: no specific channel type`
+  fixedbugs/issue47115.go:19: expected ERRORx `cannot send to ch .*: non-channel int`
+  fixedbugs/issue47115.go:27: expected ERRORx `cannot send to ch .*: receive-only channel <-chan int`
+  fixedbugs/issue47115.go:31: expected ERRORx `cannot send to ch .*: channels chan int and chan float32 have different element types`
+  fixedbugs/issue47968.go:17: expected ERROR "cannot define new methods on instantiated type T[int]"
+  fixedbugs/issue47968.go:18: expected ERROR "cannot define new methods on instantiated type T[int]"
+  fixedbugs/issue47968.go:21: expected ERROR "must be an identifier"
+  fixedbugs/issue48008.go:27: expected ERROR "cannot use generic type"
+  fixedbugs/issue48018.go:11: expected ERROR "instantiation cycle"
+  fixedbugs/issue48048.go:15: expected ERROR "cannot use generic type"
+  fixedbugs/issue48082.go:7: expected ERROR "init must be a func" (got: "cannot find package "init"")
+  fixedbugs/issue48082.go:7: expected ERROR "could not import init" (got: "cannot find package "init"")
+  fixedbugs/issue48234.go:9: expected ERROR "duplicate method"
+  fixedbugs/issue48582.go:7: expected ERROR "invalid recursive type"
+  fixedbugs/issue48582.go:11: expected ERROR "invalid recursive type"
+  fixedbugs/issue48582.go:19: expected ERROR "invalid recursive type"
+  fixedbugs/issue48582.go:20: expected ERROR "interface contains type constraints"
+  fixedbugs/issue48656.go:11: expected ERROR "instantiation cycle"
+  fixedbugs/issue48703.go:12: expected ERROR "must be an identifier"
+  fixedbugs/issue48712.go:36: expected ERROR "incomparable types in type set"
+  fixedbugs/issue48712.go:37: expected ERROR "incomparable types in type set"
+  fixedbugs/issue48827.go:18: expected ERROR "expected type" (got: "invalid operation: bool[] (bool is not a generic type)" | "1 (untyped int constant) is not used")
+  fixedbugs/issue48962.go:11: expected ERROR "invalid recursive type"
+  fixedbugs/issue48974.go:11: expected ERROR "instantiation cycle"
+  fixedbugs/issue49005.go:23: expected ERROR "impossible type assertion: F2().(*X2)\n\t*X2 does not implement T2 (missing method M)" (got: "impossible type assertion: F2 /* ERROR "impossible type assertion: F2().(*X2)\n\t*X2 does not implement T2 (missing method M)" */ ().(*X2)")
+  fixedbugs/issue49005.go:29: expected ERROR "impossible type switch case: *X2\n\tF2() (value of interface type T2) cannot have dynamic type *X2 (missing method M)" (got: "impossible type switch case: F2() (variable of type T2) cannot have dynamic type *X2 (missing method M)")
+  fixedbugs/issue49112.go:14: expected ERROR "P (type []int) does not satisfy int" (got: "[]int does not satisfy int ([]int missing in int)")
+  fixedbugs/issue49179.go:16: expected ERROR "possibly missing ~ for int in int | string" (got: "myInt does not satisfy int | string (myInt missing in int | string)")
+  fixedbugs/issue49179.go:18: expected ERROR "possibly missing ~ for float64 in ~int | string | float64" (got: "myFloat does not satisfy ~int | string | float64 (myFloat missing in ~int | string | float64)")
+  fixedbugs/issue49179.go:20: expected ERROR "myInt does not satisfy int (possibly missing ~ for int in int)" (got: "myInt does not satisfy int (myInt missing in int)")
+  fixedbugs/issue49179.go:36: expected ERROR "MySlice does not satisfy SliceConstraint[int] (possibly missing ~ for []int in SliceConstraint[int])" (got: "MySlice does not satisfy SliceConstraint[int] (MySlice missing in []int)")
+  fixedbugs/issue49247.go:14: expected ERROR "cannot convert 1024 (untyped int constant) to type T"
+  fixedbugs/issue49247.go:19: expected ERROR "cannot convert 1024 (untyped int value) to type T" (got: "cannot convert 1024 (untyped int constant) to type T: constant 1024 overflows int8 (in T)")
+  fixedbugs/issue49276.go:9: expected ERROR "invalid recursive type S"
+  fixedbugs/issue49276.go:17: expected ERROR "invalid recursive type"
+  fixedbugs/issue49276.go:23: expected ERROR "invalid recursive type"
+  fixedbugs/issue49276.go:34: expected ERROR "invalid recursive type"
+  fixedbugs/issue49276.go:44: expected ERROR "invalid recursive type"
+  fixedbugs/issue49482.go:15: expected ERROR "int (type) is not an expression"
+  fixedbugs/issue49739.go:12: expected ERROR "invalid use of ~"
+  fixedbugs/issue49739.go:20: expected ERROR "cannot satisfy C (empty type set)"
+  fixedbugs/issue49739.go:21: expected ERROR "cannot satisfy interface{C} (empty type set)"
+  fixedbugs/issue50321.go:7: expected ERROR "cannot use a type parameter as constraint"
+  fixedbugs/issue50372.go:14: expected ERRORx "range clause permits at most two iteration variables|at most 2 expressions" (got: "range over s (variable of type []int) permits only two iteration variables")
+  fixedbugs/issue50372.go:15: expected ERRORx "range clause permits at most two iteration variables|at most 2 expressions" (got: "range over s (variable of type []int) permits only two iteration variables")
+  fixedbugs/issue50417.go:16: expected ERROR "p.f undefined"
+  fixedbugs/issue50417.go:17: expected ERROR "p.f undefined"
+  fixedbugs/issue50417.go:21: expected ERROR "p.f undefined"
+  fixedbugs/issue50417.go:22: expected ERROR "p.f undefined"
+  fixedbugs/issue50417.go:38: expected ERROR "does not satisfy"
+  fixedbugs/issue50427b.go:10: expected ERROR "must have no type parameters"
+  fixedbugs/issue50427b.go:13: expected ERROR "must have no type parameters" (got: "cannot use t (variable of interface type T) as interface{m(); n()} value in variable declaration: T does not implement interface{m(); n()} (missing method n)")
+  fixedbugs/issue50427b.go:23: expected ERROR "must have no type parameters" (got: "cannot use s (variable of struct type S) as interface{m(); n()} value in variable declaration: S does not implement interface{m(); n()} (wrong type for method m)")
+  fixedbugs/issue50782.go:27: expected ERROR "a.Value undefined"
+  fixedbugs/issue50782.go:39: expected ERROR "T[P] does not satisfy int" (got: "P does not satisfy int")
+  fixedbugs/issue50782.go:45: expected ERROR "C[Q] does not satisfy comparable" (got: "Q does not satisfy comparable")
+  fixedbugs/issue50816.go:21: expected ERROR "impossible type assertion: i.(T1)\n\tT1 does not implement I (missing method Foo)\n\t\thave foo()\n\t\twant Foo()" (got: "impossible type assertion: i /* ERROR "impossible type assertion: i.(T1)\n\tT1 does not implement I (missing method Foo)\n\t\thave foo()\n\t\twant Foo()" */ .(T1)")
+  fixedbugs/issue50816.go:22: expected ERROR "impossible type assertion: i.(T2)\n\tT2 does not implement I (missing method Foo)\n\t\thave foo() string\n\t\twant Foo()" (got: "impossible type assertion: i /* ERROR "impossible type assertion: i.(T2)\n\tT2 does not implement I (missing method Foo)\n\t\thave foo() string\n\t\twant Foo()" */ .(T2)")
+  fixedbugs/issue50912.go:8: expected ERROR "not supported"
+  fixedbugs/issue50912.go:12: expected ERROR "not supported"
+  fixedbugs/issue50912.go:16: expected ERROR "not supported"
+  fixedbugs/issue50912.go:17: expected ERROR "not supported"
+  fixedbugs/issue50912.go:18: expected ERROR "not supported"
+  fixedbugs/issue50929.go:20: expected ERROR "does not match" (got: "in call to G, cannot infer A")
+  fixedbugs/issue50929.go:63: expected ERROR "does not match" (got: "in call to NC, cannot infer Rc")
+  fixedbugs/issue50965.go:15: expected ERROR "invalid case c in switch on x (slice can only be compared to nil)"
+  fixedbugs/issue51025.go:7: expected ERROR "m is a field, not a method" (got: "cannot use struct{m func()")
+  fixedbugs/issue51025.go:11: expected ERROR "m is a field, not a method" (got: "cannot use &struct{m func()")
+  fixedbugs/issue51025.go:36: expected ERROR "m is a field, not a method" (got: "cannot use t (variable of struct type T) as I value in assignment: T does not implement I (missing method m)")
+  fixedbugs/issue51139.go:14: expected ERROR "[]chan int does not satisfy []L ([]chan int missing in []p.L)" (got: "[]chan int does not satisfy []L ([]chan int missing in []L)")
+  fixedbugs/issue51145.go:10: expected ERROR "invalid array length fmt"
+  fixedbugs/issue51145.go:11: expected ERROR "invalid array length float64"
+  fixedbugs/issue51232.go:27: expected ERRORx `cannot use .* as F\[RCT\]` (got: "not enough type arguments for type concreteF: have 1, want 2")
+  fixedbugs/issue51257.go:21: expected ERROR "L2 does not satisfy comparable"
+  fixedbugs/issue51335.go:11: expected ERROR "invalid composite literal element type P (no common underlying type)" (got: "invalid composite literal type P")
+  fixedbugs/issue51335.go:15: expected ERROR "invalid composite literal element type P (no common underlying type)" (got: "invalid composite literal type P")
+  fixedbugs/issue51339.go:14: expected ERROR "receiver declares 1 type parameter, but receiver base type declares 2" (got: "not enough type arguments for type T: have 1, want 2" | "cannot use _ as value or type")
+  fixedbugs/issue51339.go:19: expected ERROR "receiver declares 3 type parameters, but receiver base type declares 2" (got: "too many type arguments for type T: have 3, want 2" | "cannot use _ as value or type" | "cannot use _ as value or type" | "cannot use _ as value or type")
+  fixedbugs/issue51360.go:8: expected ERROR "invalid use of len (built-in) in selector expression" (got: "len (built-in) must be called")
+  fixedbugs/issue51360.go:9: expected ERROR "invalid use of len (built-in) in selector expression" (got: "len (built-in) must be called")
+  fixedbugs/issue51360.go:10: expected ERROR "invalid use of len (built-in) in selector expression" (got: "len (built-in) must be called")
+  fixedbugs/issue51360.go:11: expected ERROR "cannot index len" (got: "len (built-in) must be called")
+  fixedbugs/issue51360.go:12: expected ERROR "cannot indirect len" (got: "len (built-in) must be called")
+  fixedbugs/issue51376.go:15: expected ERROR "M1 does not satisfy map[K]V"
+  fixedbugs/issue51472.go:24: expected ERROR "empty type set"
+  fixedbugs/issue51472.go:29: expected ERROR "empty type set"
+  fixedbugs/issue51472.go:42: expected ERROR "empty type set"
+  fixedbugs/issue51472.go:52: expected ERROR "T (type []byte) does not satisfy interface{comparable; []byte | string}" (got: "[]byte does not satisfy interface{comparable; []byte | string}")
+  fixedbugs/issue51503.go:14: expected ERROR "r redeclared"
+  fixedbugs/issue51503.go:23: expected ERROR "cannot use a type parameter as constraint"
+  fixedbugs/issue51503.go:26: expected ERROR "cannot use a type parameter as constraint"
+  fixedbugs/issue51509.go:7: expected ERROR "invalid recursive type"
+  fixedbugs/issue51525.go:12: expected ERROR "empty type set"
+  fixedbugs/issue51525.go:13: expected ERROR "empty type set"
+  fixedbugs/issue51525.go:14: expected ERROR "empty type set"
+  fixedbugs/issue51525.go:15: expected ERROR "empty type set" (got: "invalid operation: cannot close non-channel x (variable of type T constrained by interface{int; string})")
+  fixedbugs/issue51578.go:14: expected ERROR "interface contains type constraints"
+  fixedbugs/issue51610.go:8: expected ERROR "duplicate key 1"
+  fixedbugs/issue51610.go:8: expected ERROR "duplicate key (1 + 0i)"
+  fixedbugs/issue51658.go:11: expected ERRORx "expected type|type declaration"
+  fixedbugs/issue51658.go:13: expected ERRORx "expected declaration|non-declaration statement"
+  fixedbugs/issue51658.go:21: expected ERRORx "expected type|type declaration"
+  fixedbugs/issue51658.go:23: expected ERRORx "expected declaration|non-declaration statement"
+  fixedbugs/issue52698.go:12: expected ERROR "invalid recursive type"
+  fixedbugs/issue52915.go:10: expected ERROR "invalid recursive type"
+  fixedbugs/issue52915.go:21: expected ERROR "not constant"
+  fixedbugs/issue52915.go:21: expected ERROR "invalid recursive type"
+  fixedbugs/issue53358.go:19: expected ERROR "invalid method expression struct{A}.m (needs pointer receiver (*struct{A}).m)"
+  fixedbugs/issue54942.go:20: expected ERROR "have m(int, int, int, int)\n\t\twant m(int, int, *int, int)" (got: "cannot use new(T) (value of type *T) as I value in variable declaration: *T does not implement I (wrong type for method m)")
+  fixedbugs/issue54942.go:38: expected ERROR "have Execute(context.Context, sql.Stmt, int, []sql.NamedArg, int) (*Result, error)\n\t\twant Execute(context.Context, sql.Stmt, int, []sql.NamedArg, int) (Result, error)" (got: "cannot use new(myExecutor) (value of type *myExecutor) as Executor value in variable declaration: *myExecutor does not implement Executor (wrong type for method Execute)")
+  fixedbugs/issue56665.go:13: expected ERROR "invalid recursive type"
+  fixedbugs/issue56665.go:22: expected ERROR "invalid recursive type"
+  fixedbugs/issue57352.go:21: expected ERROR "ambiguous selector AAB.a"
+  fixedbugs/issue57486.go:20: expected ERROR "V does not satisfy comparable"
+  fixedbugs/issue57486.go:26: expected ERROR "V does not satisfy C2"
+  fixedbugs/issue57486.go:27: expected ERROR "[2]any does not satisfy C2 (C2 mentions [2]any, but [2]any is not in the type set of C2)"
+  fixedbugs/issue57500.go:15: expected ERROR "[2]any does not satisfy C (C mentions [2]any, but [2]any is not in the type set of C)"
+  fixedbugs/issue57522.go:10: expected ERROR "V.M is not a type"
+  fixedbugs/issue57522.go:13: expected ERROR "V1.M is not a type"
+  fixedbugs/issue57522.go:18: expected ERROR "V2.M is not a type"
+  fixedbugs/issue58611.go:13: expected ERRORx "cannot use 0.*(as int.*with int declared at|type parameter)" (got: "cannot use 0 (untyped int constant) as int value in assignment")
+  fixedbugs/issue58611.go:25: expected ERRORx "cannot use keys.*with string declared at.*|type parameter" (got: "cannot use keys (variable of type []T) as []string value in argument to sort.Strings")
+  fixedbugs/issue58611.go:26: expected ERROR "cannot use strings.Join" (got: "cannot use keys (variable of type []T) as []string value in argument to strings.Join")
+  fixedbugs/issue58611.go:26: expected ERRORx "cannot use keys.*with string declared at.*|type parameter" (got: "cannot use keys (variable of type []T) as []string value in argument to strings.Join")
+  fixedbugs/issue58612.go:9: expected ERROR "not a type" (got: "cannot use generic function f without instantiation" | "x (variable of type *T) is not used")
+  fixedbugs/issue58612.go:9: expected ERROR "use of .(type) outside type switch" (got: "cannot use generic function f without instantiation" | "x (variable of type *T) is not used")
+  fixedbugs/issue58671.go:17: expected ERROR "mismatched types untyped bool and untyped rune (cannot infer P)" (got: "cannot use true (untyped bool constant) as rune value in argument to g")
+  fixedbugs/issue58671.go:18: expected ERROR "mismatched types untyped int and untyped string (cannot infer P)" (got: "cannot use "foo" (untyped string constant) as int value in argument to g")
+  fixedbugs/issue58671.go:19: expected ERROR "mismatched types untyped float and untyped string (cannot infer P)" (got: "cannot use "bar" (untyped string constant) as float64 value in argument to g")
+  fixedbugs/issue58742.go:8: expected ERROR "not enough return values\n\thave (number)\n\twant (int, unknown type, string)" (got: "not enough return values")
+  fixedbugs/issue58742.go:12: expected ERROR "too many return values\n\thave (number, number, number)\n\twant (int, unknown type)" (got: "too many return values")
+  fixedbugs/issue58742.go:17: expected ERROR "not enough return values\n\thave ()\n\twant (unknown type)" (got: "not enough return values")
+  fixedbugs/issue59190.go:11: expected ERROR "too large"
+  fixedbugs/issue59190.go:17: expected ERROR "too large"
+  fixedbugs/issue59190.go:35: expected ERROR "too large"
+  fixedbugs/issue59207.go:12: expected ERROR "too large"
+  fixedbugs/issue59740.go:13: expected ERROR "type func(F[int]) of f does not match F[T] (cannot infer T)" (got: "in call to g, cannot infer T")
+  fixedbugs/issue59740.go:24: expected ERROR "type func(n T, _ List[T]) T of nil[T] does not match inferred type List[T] for List[T]" (got: "type func(n T, _ List[T]) T of nil[T] does not match List[T]")
+  fixedbugs/issue59956.go:44: expected ERROR "cannot infer P"
+  fixedbugs/issue60542.go:12: expected ERROR "in call to Clip, S (type func()) does not satisfy ~[]E" (got: "in call to Clip, cannot infer E")
+  fixedbugs/issue60562.go:15: expected ERROR "type chan interface{m(int)} of x does not match chan S[T] (cannot infer T)" (got: "in call to f0, cannot infer T")
+  fixedbugs/issue60562.go:24: expected ERROR "type []interface{m(int)} of x does not match []S[T] (cannot infer T)" (got: "in call to f1, cannot infer T")
+  fixedbugs/issue60562.go:35: expected ERROR "type func(interface{m(int)}) of x does not match func(I[T]) (cannot infer T)" (got: "type func(interface{m(int)}) of x does not match func(I[T])")
+  fixedbugs/issue60562.go:49: expected ERROR "type [10]interface{I[int]} of x does not match [10]I[T] (cannot infer T)" (got: "type [10]interface{I[int]} of x does not match [10]I[T]")
+  fixedbugs/issue60688.go:16: expected ERROR "inferred type func(int, string) for func(P, string) does not match type func(int, String) of f"
+  fixedbugs/issue60747.go:9: expected ERROR "inferred type func(string) string for func(P) P does not match type func(string) int of v" (got: "cannot use f (value of generic type func[P any](P) P) as func(string) int value in variable declaration")
+  fixedbugs/issue60747.go:12: expected ERROR "inferred type func(string) string for func(P) P does not match type func(string) int of result variable" (got: "cannot use f (value of generic type func[P any](P) P) as func(string) int value in return statement")
+  fixedbugs/issue60933.go:25: expected ERROR "type any of b does not match inferred type *os.File for T" (got: "type interface{} of b does not match inferred type *os.File for T")
+  fixedbugs/issue60933.go:35: expected ERROR "type *os.File of file does not match inferred type interface{Write(p []byte) (n int, err error)} for T"
+  fixedbugs/issue60933.go:42: expected ERROR "does not match"
+  fixedbugs/issue60946.go:29: expected ERROR "does not match"
+  fixedbugs/issue60946.go:31: expected ERROR "does not match"
+  fixedbugs/issue60946.go:34: expected ERROR "does not match"
+  fixedbugs/issue60946.go:36: expected ERROR "does not match"
+  fixedbugs/issue61685.go:8: expected ERROR "T (type I[T]) does not satisfy I[T] (wrong type for method m)" (got: "I[T] does not satisfy I[I[T]] (method m has pointer receiver)")
+  fixedbugs/issue62157.go:45: expected ERROR "cannot use b (variable of type chan<- int) as namedA value in argument to f" (got: "type chan<- int of b does not match inferred type namedA for T")
+  fixedbugs/issue62157.go:46: expected ERROR "cannot use b (variable of type chan<- int) as namedA value in argument to f"
+  fixedbugs/issue62157.go:48: expected ERROR "cannot use b (variable of type chan<- int) as namedA value in argument to f" (got: "type chan<- int of b does not match inferred type chan int for T")
+  fixedbugs/issue62157.go:49: expected ERROR "cannot use b (variable of type chan<- int) as namedA value in argument to f" (got: "type chan<- int of b does not match inferred type chan int for T")
+  fixedbugs/issue62157.go:50: expected ERROR "cannot use b (variable of type chan<- int) as namedA value in argument to f"
+  fixedbugs/issue62157.go:51: expected ERROR "cannot use b (variable of type chan<- int) as namedA value in argument to f"
+  fixedbugs/issue62157.go:52: expected ERROR "cannot use b (variable of type chan<- int) as namedA value in argument to f" (got: "type chan<- int of b does not match inferred type namedA for T")
+  fixedbugs/issue62157.go:53: expected ERROR "cannot use b (variable of type chan<- int) as namedA value in argument to f" (got: "type chan<- int of b does not match inferred type namedA for T")
+  fixedbugs/issue62157.go:110: expected ERROR "type B of b does not match inferred type A for T"
+  fixedbugs/issue62157.go:112: expected ERROR "type B of b does not match inferred type A for T"
+  fixedbugs/issue63563.go:8: expected ERROR "constant 255 overflows int8" (got: "cannot convert 1 << 8 - 1 (untyped int constant 255) to type int8 (overflows)")
+  fixedbugs/issue63563.go:9: expected ERROR "constant 65535 overflows int16" (got: "cannot convert 1 << 16 - 1 (untyped int constant 65535) to type int16 (overflows)")
+  fixedbugs/issue63563.go:10: expected ERROR "constant 4294967295 overflows int32" (got: "cannot convert 1 << 32 - 1 (untyped int constant 4294967295) to type int32 (overflows)")
+  fixedbugs/issue63563.go:11: expected ERROR "constant 18446744073709551615 overflows int64" (got: "cannot convert 1 << 64 - 1 (untyped int constant 18446744073709551615) to type int64 (overflows)")
+  fixedbugs/issue63563.go:13: expected ERROR "constant 256 overflows uint8" (got: "cannot convert 1 << 8 (untyped int constant 256) to type uint8 (overflows)")
+  fixedbugs/issue63563.go:14: expected ERROR "constant 65536 overflows uint16" (got: "cannot convert 1 << 16 (untyped int constant 65536) to type uint16 (overflows)")
+  fixedbugs/issue63563.go:15: expected ERROR "constant 4294967296 overflows uint32" (got: "cannot convert 1 << 32 (untyped int constant 4294967296) to type uint32 (overflows)")
+  fixedbugs/issue63563.go:16: expected ERROR "constant 18446744073709551616 overflows uint64" (got: "cannot convert 1 << 64 (untyped int constant 18446744073709551616) to type uint64 (overflows)")
+  fixedbugs/issue65344.go:10: expected ERROR "cannot convert 0 (untyped int constant) to type T1"
+  fixedbugs/issue65711.go:11: expected ERROR "invalid recursive type"
+  fixedbugs/issue65711.go:23: expected ERROR "invalid recursive type"
+  fixedbugs/issue67628.go:14: expected ERROR "mismatched types A and untyped string" (got: "invalid operation: b + "foo" (mismatched types int and untyped string)")
+  fixedbugs/issue67683.go:13: expected ERROR "cannot use generic type A without instantiation"
+  fixedbugs/issue67683.go:16: expected ERROR "cannot use generic type B without instantiation"
+  fixedbugs/issue67683.go:17: expected ERROR "cannot use generic type C without instantiation"
+  fixedbugs/issue6977.go:35: expected ERROR "duplicate method"
+  fixedbugs/issue6977.go:36: expected ERROR "duplicate method"
+  fixedbugs/issue6977.go:37: expected ERROR "duplicate method"
+  fixedbugs/issue6977.go:38: expected ERROR "duplicate method"
+  fixedbugs/issue69955.go:34: expected ERROR "a (variable of struct type A) is not constant" (got: "a (variable of struct type S) is not constant")
+  fixedbugs/issue69955.go:35: expected ERROR "b (variable of int type B) is not constant" (got: "b (variable of type int) is not constant")
+  fixedbugs/issue69955.go:36: expected ERROR "c (variable of int type C) is not constant" (got: "c (variable of int type N) is not constant")
+  fixedbugs/issue70150.go:10: expected ERROR "have ([]int...)\n\twant (string, ...int)" (got: "too many arguments in call to vf")
+  fixedbugs/issue70150.go:11: expected ERROR "have (string, string, []int...)\n\twant (string, ...int)" (got: "too many arguments in call to vf")
+  fixedbugs/issue70417.go:13: expected ERROR "cannot define new methods on instantiated type T[int]"
+  fixedbugs/issue70417.go:14: expected ERROR "cannot define new methods on instantiated type T[int]" (got: "method A0.m already declared")
+  fixedbugs/issue70417.go:15: expected ERROR "cannot define new methods on instantiated type T[int]" (got: "invalid receiver type B0 (cannot be a pointer)" | "method T.m already declared")
+  fixedbugs/issue70417.go:21: expected ERROR "cannot define new methods on generic alias type A1[P any]"
+  fixedbugs/issue70417.go:22: expected ERROR "cannot define new methods on generic alias type A1[P any]" (got: "method A1.m already declared")
+  fixedbugs/issue70417.go:23: expected ERROR "cannot define new methods on generic alias type B1[P any]" (got: "invalid receiver type B1 (cannot be a pointer)")
+  fixedbugs/issue70417.go:29: expected ERROR "cannot define new methods on generic alias type A2[P any]"
+  fixedbugs/issue70417.go:30: expected ERROR "cannot define new methods on generic alias type A2[P any]" (got: "method A2.m already declared")
+  fixedbugs/issue70417.go:31: expected ERROR "cannot define new methods on generic alias type B2[P any]" (got: "invalid receiver type B2 (cannot be a pointer)")
+  fixedbugs/issue70417.go:37: expected ERROR "cannot define new methods on instantiated type T[int]" (got: "method T.m already declared")
+  fixedbugs/issue70417.go:38: expected ERROR "cannot define new methods on instantiated type T[int]" (got: "method A3.m already declared" | "method T.m already declared")
+  fixedbugs/issue70417.go:39: expected ERROR "cannot define new methods on instantiated type T[int]" (got: "invalid receiver type B3 (cannot be a pointer)" | "method T.m already declared")
+  fixedbugs/issue70417.go:55: expected ERROR "cannot define new methods on instantiated type C1[int]" (got: "invalid receiver type C2 (cannot be a pointer)")
+  fixedbugs/issue70417.go:56: expected ERROR "cannot define new methods on instantiated type C1[int]" (got: "invalid receiver type C2 (cannot be a pointer)" | "method C2.m already declared")
+  fixedbugs/issue70526.go:10: expected ERROR "have (number, int...)\n\twant (...any)" (got: "too many arguments in call to f")
+  fixedbugs/issue70526.go:11: expected ERROR "have (number, []int...)\n\twant (...any)" (got: "too many arguments in call to f")
+  fixedbugs/issue70526.go:12: expected ERROR "have (number, number...)\n\twant (...any)" (got: "too many arguments in call to f")
+  fixedbugs/issue70549.go:11: expected ERROR "undefined: math.SQrt (but have Sqrt)" (got: "undefined: math.SQrt")
+  fixedbugs/issue71131.go:9: expected ERROR "yield func returns user-defined boolean, not bool"
+  fixedbugs/issue71131.go:11: expected ERROR "yield func returns user-defined boolean, not bool"
+  fixedbugs/issue71131.go:13: expected ERROR "yield func returns user-defined boolean, not bool"
+  fixedbugs/issue72936.go:9: expected ERROR "receive-only channel <-chan int"
+  fixedbugs/issue72936.go:13: expected ERROR "send-only channel chan<- int"
+  fixedbugs/issue75883.go:12: expected ERROR "int does not satisfy interface{T2[int]}"
+  fixedbugs/issue75885.go:7: expected ERROR "cannot use type parameter declared in alias declaration as RHS"
+  fixedbugs/issue75885.go:10: expected ERROR "cannot use type parameter declared in alias declaration as RHS"
+  fixedbugs/issue75918.go:9: expected ERROR "invalid recursive type"
+  fixedbugs/issue75918.go:9: expected ERROR "must be constant"
+  fixedbugs/issue76383.go:11: expected ERROR "invalid recursive type"
+  fixedbugs/issue76384.go:9: expected ERROR "invalid recursive type"
+  fixedbugs/issue76478.go:9: expected ERROR "invalid recursive type"
+  fixedbugs/issue76478.go:12: expected ERROR "invalid recursive type"
+  fixedbugs/issue76478.go:18: expected ERROR "invalid recursive type"
+  fixedbugs/issue76478.go:18: expected ERROR "must be constant"
+  fixedbugs/issue77245.go:29: expected ERROR "cannot use generic function g" (got: "cannot use g (value of generic type func[T any](T)) as F value in struct literal: cannot assign func[T any](T) to func(int) (in F)")
+  fixedbugs/issue77245.go:30: expected ERROR "cannot use generic function g" (got: "cannot use g (value of generic type func[T any](T)) as F value in array or slice literal: cannot assign func[T any](T) to func(int) (in F)")
+  fixedbugs/issue77245.go:31: expected ERROR "cannot use generic function g" (got: "cannot use g (value of generic type func[T any](T)) as F value in array or slice literal: cannot assign func[T any](T) to func(int) (in F)")
+  fixedbugs/issue77245.go:32: expected ERROR "cannot use generic function g" (got: "cannot use g (value of generic type func[T any](T)) as F value in map literal: cannot assign func[T any](T) to func(int) (in F)")
+  fixedbugs/issue77245.go:33: expected ERROR "cannot use generic function g" (got: "cannot convert g (value of generic type func[T any](T)) to type F: cannot convert func[T any](T) to type func(int) (in F)")
+  fixedbugs/issue77245.go:34: expected ERROR "cannot use generic function g" (got: "cannot use g (value of generic type func[T any](T)) as F value in send: cannot assign func[T any](T) to func(int) (in F)")
+  fixedbugs/issue78163.go:9: expected ERROR "cannot use x (variable of type P constrained by any) as []byte value in argument to append"
+  fixedbugs/issue78483.go:8: expected ERROR "cannot range over f1 (value of type func(func(...int) bool)): yield func of type func(...int) bool cannot be variadic"
+  fixedbugs/issue78483.go:10: expected ERROR "cannot range over f2 (value of type func(func(int, ...int) bool)): yield func of type func(int, ...int) bool cannot be variadic"
+  fixedbugs/issue78884.go:17: expected ERROR "cannot use 2nd function result (value of type int) as string value in multiple assignment" (got: "cannot use f2() (value of type int) as string value in variable declaration")
+  fixedbugs/issue78884.go:18: expected ERROR "cannot use 3rd function result (value of type int) as string value in multiple assignment" (got: "cannot use f3() (value of type int) as string value in variable declaration")
+  fixedbugs/issue78884.go:19: expected ERROR "cannot use 4th function result (value of type int) as string value in multiple assignment" (got: "cannot use f4() (value of type int) as string value in variable declaration")
+  fixedbugs/issue78884.go:32: expected ERROR "cannot use m[s] (map index expression of type int) as string value in multiple assignment"
+  fixedbugs/issue78884.go:33: expected ERROR "cannot use ok value of (comma, ok) expression (untyped bool value) as string value in multiple assignment"
+  fixedbugs/issue78884.go:42: expected ERROR "cannot use 1st function result (value of type int) as string value in multiple assignment"
+  fixedbugs/issue79265.go:10: expected ERROR "invalid recursive type A"
+  fixedbugs/issue79265.go:15: expected ERROR "invalid recursive type A1"
+  fixedbugs/issue79883.go:8: expected ERROR "pointer to type parameter" (got: "cannot convert p (variable of type string) to type *P")
+  fixedbugs/issue80172.go:7: expected ERROR "instantiation cycle"
+  spec/comparisons.go:99: expected ERROR "mismatched types"
+  spec/comparisons.go:100: expected ERROR "mismatched types"
+  spec/comparisons.go:102: expected ERROR "mismatched types"
+  spec/comparisons.go:105: expected ERROR "mismatched types"
+  spec/comparisons.go:106: expected ERROR "mismatched types"
+  spec/methods.go:53: expected ERROR "cannot use a type parameter as constraint"
+  spec/methods.go:63: expected ERROR "*string does not satisfy *int (*string missing in *int)" (got: "*string does not satisfy *F (*string missing in *F)")
+  spec/methods.go:84: expected ERROR "(wrong type for method m)\n\t\thave m[P any](P) P\n\t\twant m(int) int" (got: "cannot use T{} (value of struct type T) as I[int] value in variable declaration: T does not implement I[int] (wrong type for method m)")
+  spec/methods.go:91: expected ERROR "wrong type for method m)\n\t\thave m[_ any](int) int\n\t\twant m(int) int" (got: "cannot use U{} (value of struct type U) as I[int] value in variable declaration: U does not implement I[int] (wrong type for method m)")
+  spec/methods.go:108: expected ERROR "type T of T{} does not match I[X] (cannot infer X)" (got: "type T of T{} does not match I[X]")
+  spec/range.go:30: expected ERROR "cannot range over m1 (variable of type func(T)): func must be func(yield func(...) bool): argument is not func" (got: "cannot range over m1 (variable of type func(T))")
+  spec/range.go:33: expected ERROR "cannot range over m2 (variable of type func(*T)): func must be func(yield func(...) bool): argument is not func" (got: "cannot range over m2 (variable of type func(*T))")
+  spec/range.go:35: expected ERROR "cannot range over f1 (value of type func()): func must be func(yield func(...) bool): wrong argument count" (got: "cannot range over f1 (value of type func())")
+  spec/range.go:37: expected ERROR "cannot range over f2 (value of type func(func())): func must be func(yield func(...) bool): yield func does not return bool" (got: "cannot range over f2 (value of type func(func()))")
+  spec/range.go:105: expected ERROR "cannot use i (value of int32 type MyInt) as int value in assignment" (got: "cannot use i (value of type MyInt) as int value in assignment" | "cannot use s (value of type MyString) as string value in assignment")
+  spec/range.go:105: expected ERROR "cannot use s (value of string type MyString) as string value in assignment" (got: "cannot use i (value of type MyInt) as int value in assignment" | "cannot use s (value of type MyString) as string value in assignment")
+  spec/range.go:109: expected ERROR "cannot use mi (variable of int32 type MyInt) as int value in multiple assignment" (got: "cannot use mi (variable of int32 type MyInt) as int value in assignment" | "cannot use ms (variable of string type MyString) as string value in assignment")
+  spec/range.go:109: expected ERROR "cannot use ms (variable of string type MyString) as string value in multiple assignment" (got: "cannot use mi (variable of int32 type MyInt) as int value in assignment" | "cannot use ms (variable of string type MyString) as string value in assignment")
+  spec/range.go:133: expected ERROR "cannot range over x (variable of type T constrained by any): no specific type" (got: "cannot range over x (variable of type T constrained by any): no core type")
+  spec/range.go:138: expected ERROR "cannot range over x (variable of type T constrained by interface{int; string} with empty type set): no specific type" (got: "cannot range over x (variable of type T constrained by interface{int; string}): no core type")
+  spec/range.go:168: expected ERROR "func must be func(yield func(...) bool): in yield type, func() bool and func(int) bool have different underlying types" (got: "cannot range over func(T) {...} (value of type func(T))")
+  spec/range.go:198: expected ERRORx "(range clause permits at most two iteration variables|expected at most 2 expressions)" (got: "range over seq2 (value of type func(func(int, int) bool)) permits only two iteration variables")
+  spec/range_int.go:47: expected ERROR "cannot use MyInt(10) (constant 10 of int32 type MyInt) as int value in range clause" (got: "cannot use i (value of type MyInt) as int value in assignment")
+  spec/range_int.go:76: expected ERROR "cannot use maxInt + 1 (untyped int constant 9223372036854775808) as int value in range clause (overflows)"
+  spec/range_int.go:78: expected ERROR "cannot use maxUint (untyped int constant 18446744073709551615) as int value in range clause (overflows)"
+  spec/range_int.go:84: expected ERROR "cannot use maxInt + 1 (untyped int constant 9223372036854775808) as int value in range clause (overflows)"
+  spec/range_int.go:87: expected ERROR "cannot use maxUint (untyped int constant 18446744073709551615) as int value in range clause (overflows)"
+  spec/range_int.go:95: expected ERROR "cannot use maxInt + 1 (untyped int constant 9223372036854775808) as int value in range clause (overflows)"
+  spec/range_int.go:97: expected ERROR "cannot use maxUint (untyped int constant 18446744073709551615) as int value in range clause (overflows)"
+  spec/range_int.go:108: expected ERROR "cannot use maxUint + 1 (untyped int constant 18446744073709551616) as uint value in range clause (overflows)" (got: "cannot use j (value of type int) as uint value in assignment")
+  spec/range_int.go:123: expected ERROR "cannot use -1 (untyped int constant) as uint8 value in range clause (overflows)" (got: "cannot use u8 (value of type int) as uint8 value in assignment")
+  spec/range_int.go:129: expected ERROR "cannot use 256 (untyped int constant) as uint8 value in range clause (overflows)" (got: "cannot use u8 (value of type int) as uint8 value in assignment")
+  spec/range_int.go:171: expected ERROR "cannot use iteration variable of type float64" (got: "cannot use j (value of type int) as float64 value in assignment")
+  spec/range_int.go:188: expected ERROR "cannot use iteration variable of type float64" (got: "cannot use i (value of type int) as float64 value in assignment")
+  spec/receivers.go:12: expected ERROR "cannot define new methods on generic alias type A[P any]"

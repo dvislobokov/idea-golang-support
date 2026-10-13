@@ -1,0 +1,15 @@
+--- a/notifier/alertmanager.go
++++ b/notifier/alertmanager.go
+@@ -58,7 +58,11 @@
+ 		}
+ 		// Set configured scheme as the initial scheme label for overwrite.
+ 		lb.Set(model.SchemeLabel, cfg.Scheme)
+-		lb.Set(pathLabel, postPath(cfg.PathPrefix, cfg.APIVersion))
++		lb.Set(pathLabel, func() string {
++	var pre string = cfg.PathPrefix
++	alertPushEndpoint := fmt.Sprintf("/api/%v/alerts", string(cfg.APIVersion))
++	return path.Join("/", pre, alertPushEndpoint)
++}())
+ 
+ 		// Combine target labels with target group labels.
+ 		for ln, lv := range tg.Labels {

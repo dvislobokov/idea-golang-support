@@ -332,3 +332,7 @@ configure(benchmarkModules.map { project(it) }) {
         }
     }
 }
+
+// The comparison stand of docs/compare (src/test/.../compare, GO_HARNESS=1) loads a whole real project into the light test project:
+// give that run more heap; normal test runs are unchanged.
+if (System.getenv("GO_HARNESS") == "1") tasks.withType<Test>().configureEach { maxHeapSize = "8g" }

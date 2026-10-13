@@ -1,0 +1,45 @@
+--- a/notifier/sendloop.go
++++ b/notifier/sendloop.go
+@@ -82,6 +82,22 @@
+ 	s.mtx.Lock()
+ 	defer s.mtx.Unlock()
+ 
++	dropped, alerts := s.dropOverflow(alerts)
++
++	s.queue = append(s.queue, alerts...)
++
++	// Notify sending goroutine that there are alerts to be processed.
++	// If we cannot send on the channel, it means the signal already exists
++	// and has not been consumed yet.
++	s.notifyWork()
++
++	s.metrics.queueLength.WithLabelValues(s.alertmanagerURL).Set(float64(len(s.queue)))
++	if dropped > 0 {
++		s.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(dropped))
++	}
++}
++
++func (s *sendLoop) dropOverflow(alerts []*Alert) (int, []*Alert) {
+ 	var dropped int
+ 	// Queue capacity should be significantly larger than a single alert
+ 	// batch could be.
+@@ -98,18 +114,7 @@
+ 		dropped += d
+ 		s.queue = s.queue[d:]
+ 	}
+-
+-	s.queue = append(s.queue, alerts...)
+-
+-	// Notify sending goroutine that there are alerts to be processed.
+-	// If we cannot send on the channel, it means the signal already exists
+-	// and has not been consumed yet.
+-	s.notifyWork()
+-
+-	s.metrics.queueLength.WithLabelValues(s.alertmanagerURL).Set(float64(len(s.queue)))
+-	if dropped > 0 {
+-		s.metrics.dropped.WithLabelValues(s.alertmanagerURL).Add(float64(dropped))
+-	}
++	return dropped, alerts
+ }
+ 
+ func (s *sendLoop) notifyWork() {
