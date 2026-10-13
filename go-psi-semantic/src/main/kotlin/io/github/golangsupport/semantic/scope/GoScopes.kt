@@ -37,18 +37,25 @@ object GoScopes {
         data class ReceiverTypeParam(override val element: GoTypeParamDefinition, val receiverName: PsiElement) : Target()
     }
 
-    fun resolveName(place: PsiElement, name: String): List<Target> {
-        if (name == "_" || name.isEmpty()) return emptyList()
+    fun resolveName(place: PsiElement, name: String): List<Target> = resolveNameWithScope(place, name)?.first ?: emptyList()
+
+    /**
+     * [resolveName] and the scope element that declares the name (a block, a case clause, a statement with an init, a function, a
+     * type spec, or the file for package-level, imported and builtin names): which of two declarations is nearer to [place] (Rename
+     * checks whether a new name would be shadowed or would shadow, `GoRenameConflicts`).
+     */
+    fun resolveNameWithScope(place: PsiElement, name: String): Pair<List<Target>, PsiElement>? {
+        if (name == "_" || name.isEmpty()) return null
         var child: PsiElement = place
         var parent: PsiElement? = stubAwareParent(place)
         while (parent != null) {
             val found = declarationsIn(parent, child, place, name)
-            if (found.isNotEmpty()) return found
+            if (found.isNotEmpty()) return found to parent
             if (parent is PsiFile) break
             child = parent
             parent = stubAwareParent(parent)
         }
-        return emptyList()
+        return null
     }
 
     /**

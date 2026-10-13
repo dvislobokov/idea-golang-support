@@ -14,6 +14,7 @@
     <lang.namesValidator language="Go" implementationClass="io.github.golangsupport.ide.rename.GoNamesValidator"/>
     <renameInputValidator implementation="io.github.golangsupport.ide.rename.GoRenameInputValidator"/>
     <renamePsiElementProcessor implementation="io.github.golangsupport.ide.rename.GoRenameMethodProcessor"/>
+    <renamePsiElementProcessor implementation="io.github.golangsupport.ide.rename.GoRenameConflictsProcessor"/>
     <renamePsiElementProcessor implementation="io.github.golangsupport.ide.rename.GoRenamePackageProcessor" order="first"/>
     <vetoRenameCondition implementation="io.github.golangsupport.ide.rename.GoLibraryPackageRenameVeto"/>
     <!-- linked renames with GoLand's Ask / Always / Never (GoIdeOptions): foo.go <-> foo_test.go, a field's struct tag names -->

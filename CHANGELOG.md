@@ -30,6 +30,20 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.227] - 2026-10-14
+
+### Fixed
+
+- **Rename reports what would break by shadowing** (`PLAN.md` C2, item 1 of `docs/compare/prometheus-refactorings-2026-10-13.md`):
+  renaming `lb` to `a` in prometheus `notifier/alert.go:72` went through silently and broke the build (`lb.Reset(a.Labels)` became
+  `a.Reset(a.Labels)` inside `for _, a := range alerts`); gopls refuses it. `GoRenameConflictsProcessor` (variables, constants,
+  parameters, receivers, functions, types, type parameters) puts three kinds of conflicts into the platform's conflicts dialog (Refactor
+  Anyway / Cancel), for the dialog and the in-place rename alike: a reference of the element whose new name resolves to a nearer
+  declaration ("Renaming 'lb' to 'a' would make this reference refer to the variable 'a' (alert.go:75) instead"), a reference of the new
+  name the element would capture (an outer variable, a builtin such as `len`, an import), and a name already declared in the same scope.
+  `GoScopes.resolveNameWithScope` tells which declaration is nearer. Checked in the IDE on the prometheus clone: 5 conflicts for `lb` → `a`,
+  none for `lb` → `builder` (renamed). Tests in `GoRenameTest`; robot script `rename_at.js`.
+
 ## [0.2.226] - 2026-10-14
 
 ### Changed

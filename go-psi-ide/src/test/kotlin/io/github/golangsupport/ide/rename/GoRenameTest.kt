@@ -25,6 +25,82 @@ class GoRenameTest : GoSemanticIdeTestBase() {
 
     fun testLocal() = doTest("local", "sum")
 
+    /** The conflicts of [newName] at the caret of [text] (empty: renamed without one). */
+    private fun conflicts(text: String, newName: String): List<String> {
+        myFixture.configureByText("c.go", text.trimIndent() + "\n")
+        return try {
+            myFixture.renameElementAtCaret(newName)
+            emptyList()
+        } catch (e: com.intellij.refactoring.BaseRefactoringProcessor.ConflictsInTestsException) {
+            e.messages.toList()
+        }
+    }
+
+    /** prometheus notifier/alert.go:72, `lb` → `a`: gopls refuses, the plugin broke the build (docs/compare/prometheus-refactorings). */
+    fun testRenameShadowedByAnInnerDeclaration() = assertEquals(
+        listOf("Renaming 'lb' to 'a' would make this reference refer to the variable 'a' (c.go:5) instead"),
+        conflicts("""
+            package c
+
+            func relabel(alerts []string, reset func(string)) {
+            	l<caret>b := reset
+            	for _, a := range alerts {
+            		lb(a)
+            	}
+            }
+        """, "a"),
+    )
+
+    fun testRenameCapturesAnOuterReference() = assertEquals(
+        listOf("Renaming 'b' to 'a' would make this reference to the variable 'a' (c.go:3) refer to the renamed 'b'"),
+        conflicts("""
+            package c
+
+            var a = 1
+
+            func g() int {
+            	<caret>b := 2
+            	return a + b
+            }
+        """, "a"),
+    )
+
+    fun testRenameToABuiltinUsedInThePackage() = assertEquals(
+        listOf("Renaming 'size' to 'len' would make this reference to the builtin 'len' refer to the renamed 'size'"),
+        conflicts("""
+            package c
+
+            func si<caret>ze(s []int) int { return len(s) }
+        """, "len"),
+    )
+
+    fun testRenameToANameOfTheSameScope() = assertEquals(
+        listOf("'x' is already declared in this scope (the variable 'x' (c.go:4)): renaming 'y' would make a duplicate declaration"),
+        conflicts("""
+            package c
+
+            func h() int {
+            	x := 1
+            	<caret>y := 2
+            	return x + y
+            }
+        """, "x"),
+    )
+
+    fun testRenameWithoutConflict() = assertEquals(
+        emptyList<String>(),
+        conflicts("""
+            package c
+
+            func relabel(alerts []string, reset func(string)) {
+            	l<caret>b := reset
+            	for _, a := range alerts {
+            		lb(a)
+            	}
+            }
+        """, "builder"),
+    )
+
     fun testParameter() = doTest("param", "x")
 
     fun testFieldWithLiteralKeysAndPromotion() = doTest("field", "Title")
