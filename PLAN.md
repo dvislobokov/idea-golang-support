@@ -14,6 +14,7 @@
 4. **Уровень 3 (дни)** — бенчмарки, горутины, зависимости, remote debug, ошибки сборки без gopls, endpoints.
 5. **Уровень 4 (неделя+)** — профили в IDE, Go templates, свой парсер (сделан 2026-10-02, `MIGRATION.md`).
 6. **Паритет с GoLand (G1–G9)** — все различия, снятые с живого GoLand 2026.2.3; это то, что значит «доведи до уровня GoLand» (см. `CLAUDE.md`).
+7. **Сравнение с GoLand на prometheus (C1–C7)** — по отчётам `docs/compare/` 2026-10-13: ложные и пропущенные ошибки, ломающие код рефакторинги, клавиши, completion.
 
 ---
 
@@ -305,6 +306,71 @@
   ещё и ставит пробел при Reformat Code, у нас — только включает инспекцию.
 
 Не повторяем: rr (Record / Rewind / Debug Saved Trace) — только Linux, уйдёт вместе с Run Targets; Code author — платформа (VCS).
+
+## Сравнение с GoLand на prometheus (2026-10-13)
+
+Источник — четыре отчёта сравнения на prometheus v3.15.0 и отчёт по кодам ошибок go/types в `docs/compare/` (у каждого пункта там
+пример, место в клоне и как повторить; сырые данные — `*-dumps/`; инструменты — `tools/compare/README.md`). Порядок блоков — по вреду:
+сначала ложные ошибки, затем то, что тихо ломает код, затем частые промахи completion, затем остальное. Каждый пункт — с регрессионным
+тестом и проверкой в живой IDE на клоне prometheus (WSL: `tools/ui-robot/wsl/`, клон `~/robot/compare/prometheus`); спорное поведение —
+переснять на GoLand (`tools/ui-robot/goland/start-goland.ps1`, копия клона `build/compare/prometheus-goland`).
+
+### C1. Ошибки компиляции (`docs/compare/prometheus-broken-2026-10-13.md`)
+- [x] (2026-10-13, 0.2.222) Методы и объявления `_test.go` в тестовом варианте пакета (и `export_test.go` для внешних тестов): 8 ложных ошибок на клоне; гейт `GorootTestFilesCheckCorpusTest`.
+- [x] (2026-10-13, 0.2.225) Реализация интерфейса после переименования метода (кэш `methodOf` хранил старое имя); файл, добавленный в импортируемый пакет (в т. ч. созданный вне редактора).
+- [x] (2026-10-14, 0.2.226) Файлы вне сборки — как в GoLand: только синтаксис, плашка с причиной (`docs/goland-analysis/dumps/excluded-files.txt`).
+- [x] (2026-10-13, 0.2.224) Неиспользуемые импорт и метка — ошибка, как у компилятора и GoLand.
+- [ ] Позиции ошибок как у `go build` (6 случаев: бинарная операция — на операторе; `not enough return values` — на первом результате; невыводимый тип; приём из send-only; смешанный литерал).
+- [ ] Текст для неэкспортированного имени чужого пакета: `undefined: p.x`, как у компилятора (сейчас `name x not exported by package p`; решить, менять ли).
+
+### C2. Рефакторинги, которые ломают код (`docs/compare/prometheus-refactorings-2026-10-13.md`)
+- [ ] Rename не видит затенения: `lb → a` в `notifier/alert.go:72` проходит молча и ломает сборку. Нужен конфликт, как у gopls.
+- [ ] Safe Delete после «Continue» оставляет неиспользуемые импорты (`strings`, `fmt`).
+- [ ] Move в другой пакет не экспортирует имя и не переписывает вызовы (или не давать Continue).
+- [ ] Генераторы и `go vet`: геттер поля `sync.Mutex` копирует замок; `String()` печатает поле-функцию через `%v`.
+- [ ] Rename поля молча переименовывает json-тег (GoLand спрашивает): по умолчанию спрашивать или не трогать.
+- [ ] Результат рефакторинга не по gofmt (выравнивание полей и `ключ: значение` после смены длины имени, move-func-file).
+- [ ] Отказы там, где gopls справляется: Extract с `return nil, err`, Inline многооператорной функции и всех вызовов метода, if → switch.
+- [ ] Alt+Enter: «Generate constructor» / «Generate method» на типе, убрать «Generate test», тексты как у GoLand.
+- [ ] Change Signature: конфликт «side effects» по разу на вызов — схлопнуть; многострочный список параметров сжимается в строку.
+
+### C3. Набор и клавиши (`docs/compare/prometheus-typing-2026-10-13.md`)
+- [ ] Enter внутри строки разрывает её `" +⏎"` (сейчас ломает литерал); `"` внутри тега в обратных кавычках не удваивать.
+- [ ] Ctrl+Shift+P (тип выражения) не работает: провайдер под неверным тегом (`codeInsight.typeInfo`); тест через EP, не через конструктор.
+- [ ] Ctrl+W: уровни «содержимое строки без кавычек» и «содержимое тега → тег → поле», без прыжка к `struct {}`.
+- [ ] Enter в `//`-комментарии не продолжает его (GoLand); продолжение — опцией.
+- [ ] Вставка кода: каретка на отступе блока; автоимпорт при вставке — сверить с GoLand.
+- [ ] Move Statement Up не выносит оператор из блока.
+- [ ] Ctrl+P / Ctrl+Q: `time.Duration`, а не `Duration`, для типов чужого пакета.
+- [ ] Названия Alt+Insert и Surround With как у GoLand, без дубля «Test».
+- [ ] Решить: format on save включён по умолчанию, у GoLand — выключен.
+
+### C4. Completion (`docs/compare/prometheus-completion-2026-10-13.md`)
+- [ ] Одноимённые пакеты: показывать все варианты с путём, не вставлять импорт молча (`crypto/rand` вместо `math/rand`; 14 из 60 вставок).
+- [ ] `.rr` → `if err != nil { return err }`, как у GoLand.
+- [ ] Ключевые слова не к месту и дубликаты (+1,3 п.п. top-1).
+- [ ] Точное / короткое имя выше длинного с тем же началом (`Keep` над `KeepEqual`; +2,1 п.п.).
+- [ ] Обрывки слов из текста файла (+2,2 п.п.).
+- [ ] Ожидаемый тип в `case`; локальные выше ключевых слов в начале оператора (≈+3,3 п.п.).
+- [ ] Заготовки «missing method of …» на верхнем уровне — только где тип используется как интерфейс.
+- [ ] Tab на методе без аргументов: каретка после `()`.
+- [ ] `.var` / `.for` — как у GoLand (по желанию).
+
+### C5. Коды ошибок go/types (`docs/compare/go-error-codes-2026-10-13.md`)
+- [x] (2026-10-13, 0.2.224) OutOfMemory на длинной строковой константе; `goto` и метки; ещё 11 кодов; `GoErrorCodeExamplesTest`, `GorootTypesTestdataCorpusTest`.
+- [ ] Частое из тестов go/types: текст `constant 256 overflows uint8`; `invalid recursive type` (`type T struct{ x T }`); цикл инициализации; подсказки «m is a field, not a method», «cannot call pointer method»; `mismatched types` в сравнениях.
+- [ ] Остальные ~318 непойманных и ~196 мест с другим текстом (`build/reports/goroot-types-testdata.txt`), крупные группы — вывод типов дженериков, type sets, range по функциям.
+- [ ] Редкое: 6 примеров `codes.go` (`InvalidDeclCycle_2`, `InvalidInstanceCycle_1`, `InvalidUnsafeSlice_4`, `InvalidUntypedConversion_1`, `TypeTooLarge_1/2`).
+
+### C6. Не досняли для сравнения
+- [ ] Плагин в живой IDE теми же драйверами, что сняли GoLand (`TARGET=plugin`): completion, рефакторинги, клавиши.
+- [ ] GoLand вручную: Extract, Inline, Change Signature, Move, Generate (`tools/compare/refactor/goland-steps.json`); Shift+F6 на методе интерфейса, пакете и конфликте.
+
+### C7. Попутные находки
+- [ ] `GoPlatformWidgetFactory.isAvailable` → `GoModulesService.find` читает индекс без read action (SEVERE в логе GIGA IDE, Find Action / Search Everywhere).
+- [ ] GIGA IDE: падающий `RemoteApiProvider` Python ломает весь RPC — брейкпоинты не доходят до бэкенда; обход — снять сломанный провайдер при старте (решения пользователя ещё нет).
+- [ ] Go Monitor каждые несколько секунд запускает `go version -m` для чужих процессов — шум в логе.
+- [ ] `GoDeepExpressionTest` иногда падает в общем прогоне (RecursionManager «Inconsistent depth»), отдельно проходит.
 
 ## Не делать (по замыслу плагина)
 

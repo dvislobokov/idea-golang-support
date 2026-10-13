@@ -297,6 +297,13 @@
   пунктов запуска (старые Run go:generate / `go generate analysis.go` + три новых — объединить), «Add key to tags» и «Update key value in tags» на совпадающем теге у нас нет.
   Не смотрел: страницы Settings (Code Folding Go, Color Scheme Go), Fill selected / Change style попапы, Update dependencies… диалог, сохранение исключений после перезапуска
 
+### Сравнение с GoLand на prometheus (`PLAN.md` C1–C7; отчёты `docs/compare/`)
+- [x] (2026-10-14, 0.2.226) Файл вне сборки (теги, GOOS / GOARCH) — как в GoLand: проверяется только синтаксис (и сама строка `//go:build`), плашка «… is ignored by the build tool because of the OS mismatch / architecture mismatch / custom flag» с Rename file или Navigate to build constraints и Edit settings. Prometheus: 91 проблема в таких файлах → 0.
+- [x] (2026-10-13, 0.2.225) Переименованный метод сразу ломает реализацию интерфейса (кэш `methodOf` хранил старое имя); файл, добавленный в импортируемый пакет — в том числе созданный вне редактора (VFS-события в `GoTrackers`), — виден импортёрам.
+- [x] (2026-10-13, 0.2.224) Пропущенные ошибки компилятора: длинная строковая константа больше не роняет IDE (`constant string too long`); `goto` и метки (порт `labels.go`); неиспользуемые импорт и метка — ошибка; ещё 11 кодов `codes.go`. Покрытие кодов: 129 из 134; тесты go/types: не сообщено 566 → 514.
+- [x] (2026-10-13, 0.2.223) Серый текст после `return fmt.` снова показывается с сетью 0.2.220 (аргументы форматной строки — часть угадываемого сообщения).
+- [x] (2026-10-13, 0.2.222) Нет ложных ошибок на объявлениях `_test.go`: тестовый вариант пакета и `export_test.go` внешних тестов. Prometheus: 8 ложных ошибок ушли; 350 тест-файлов GOROOT: 1452 → 0.
+
 ## Модули
 - [x] go.mod / go.work: тип файла, подсветка, разбор (`GoModFile`)
 - [x] Folding блоков `require (…)`, `replace (…)` и остальных в go.mod / go.work (`GoModFoldingBuilder`) — робот
