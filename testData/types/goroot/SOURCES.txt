@@ -50,3 +50,4 @@ fixedbugs/issue39634.go <- src/internal/types/testdata/fixedbugs/issue39634.go
 fixedbugs/issue45920.go <- src/internal/types/testdata/fixedbugs/issue45920.go
 fixedbugs/issue47411.go <- src/internal/types/testdata/fixedbugs/issue47411.go
 fixedbugs/issue48136.go <- src/internal/types/testdata/fixedbugs/issue48136.go
+check/gotos.go <- src/internal/types/testdata/check/gotos.go

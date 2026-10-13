@@ -44,3 +44,14 @@ func slices[T interface{ ~[]byte | ~[]int }](x T) {
 func calls[P int | string](x P) {
 	x /* ERROR "cannot call x (variable of type P constrained by int | string): int is not a function" */ ()
 }
+
+// An interface term of a union stands for its own terms (GOROOT runtime/map_benchmark_test.go).
+type benchKey interface{ int32 | string }
+
+type benchElem interface{ benchKey | []int32 }
+
+func genValues[T benchElem]() []T { return nil }
+
+var _ = genValues[int32]
+var _ = genValues[[]int32]
+var _ = genValues[float64 /* ERROR "float64 does not satisfy benchElem (float64 missing in int32 | string | []int32)" */]

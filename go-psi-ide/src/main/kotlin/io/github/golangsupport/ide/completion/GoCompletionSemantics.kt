@@ -56,7 +56,7 @@ class GoCompletionSemantics(private val context: GoCompletionContext) {
 
     fun resolveImportPath(path: String): GoPackage? = packageModel.resolveImport(path, context.originalFile)
 
-    fun scopeOf(pkg: GoPackage): GoPackageModel.PackageScope = packageModel.scopeOf(pkg)
+    fun scopeOf(pkg: GoPackage): GoPackageModel.PackageScope = packageModel.scopeOf(pkg, context.originalFile)
 
     /** The imports of the original file (stub-backed, resolvable). */
     val imports: List<GoImportSpec> by lazy { context.originalFile.imports }

@@ -118,7 +118,7 @@ class GoResolver(private val project: Project) {
         if (spec.path == "C") return listOf(Result.Cgo(spec))
         val file = spec.containingFile as? GoFile ?: return emptyList()
         val pkg = packages.resolveImport(spec.path, file) ?: return emptyList()
-        val scope = packages.scopeOf(pkg)
+        val scope = packages.scopeOf(pkg, file)
         return scope.lookup(name).filter { it.isPublic() || pkg.importPath == scope.importPath && false }.map { Result.Member(it, pkg) }
     }
 

@@ -87,7 +87,7 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
     private fun methodExpressions(spec: GoTypeSpec, out: MutableList<GoCandidate>) {
         val type = semantics.service.declarationType(spec)
         for (m in GoLookup.methodSet(type)) {
-            if (!visible(m.isExported, m.pkgPath)) continue
+            if (!visible(m)) continue
             out += methodCandidate(m, depth = 0)
         }
     }
@@ -109,7 +109,7 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
             type
         }
         for (m in GoLookup.methodSet(methodSetType)) {
-            if (!visible(m.isExported, m.pkgPath)) continue
+            if (!visible(m)) continue
             if (!seen.add(m.name)) continue
             out += methodCandidate(m, depth = 0)
         }
@@ -204,6 +204,10 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
 
     fun visible(exported: Boolean, memberPkg: String?): Boolean =
         exported || memberPkg == null || semantics.packagePath == null || memberPkg == semantics.packagePath
+
+    /** [visible], and a method of a `_test.go` file only in test files: the regular build of the package has no such method. */
+    fun visible(m: GoMethod): Boolean =
+        visible(m.isExported, m.pkgPath) && (context.originalFile.isTestFile || (m.declaration?.containingFile as? GoFile)?.isTestFile != true)
 
     /** Variables, fields of addressable operands, pointer indirections and slice elements are addressable. */
     private fun addressable(expr: GoExpression): Boolean = when (expr) {

@@ -51,7 +51,7 @@ class GoChainCandidates(private val context: GoCompletionContext) {
         }
         for (m in GoLookup.methodSet(methodSetType(type, addressable = true))) {
             if (result.size >= MAX_FIRST) break
-            if (!members.visible(m.isExported, m.pkgPath) || m.signature.params.isNotEmpty() || m.signature.results.size != 1) continue
+            if (!members.visible(m) || m.signature.params.isNotEmpty() || m.signature.results.size != 1) continue
             val resultType = m.signature.results[0].type
             if (known(resultType)) result += Step("$root.${m.name}()", resultType, addressable = false)
         }
@@ -70,7 +70,7 @@ class GoChainCandidates(private val context: GoCompletionContext) {
             )
         }
         for (m in GoLookup.methodSet(methodSetType(type, step.addressable))) {
-            if (!members.visible(m.isExported, m.pkgPath) || !names.add(m.name)) continue
+            if (!members.visible(m) || !names.add(m.name)) continue
             result += members.methodCandidate(m, 0, GoScopeLevel.UNIMPORTED, lookupString = "${step.text}.${m.name}", lookupStrings = listOf(m.name))
         }
         return result

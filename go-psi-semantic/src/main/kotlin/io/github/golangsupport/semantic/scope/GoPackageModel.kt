@@ -82,11 +82,44 @@ class GoPackageModel(private val project: Project) {
         CachedValueProvider.Result.create(computeScope(file), *trackers.ownPackageDependencies(file))
     }
 
+    /**
+     * Methods on [typeName] declared in the `_test.go` files of [file]'s package (not of the external `_test` package): `go test` compiles
+     * them into the same package, so the test variant of a type has them (`func (d *Discovery) hasSynced() bool` in `kubernetes_test.go`).
+     */
+    fun testMethodsOf(file: GoFile, typeName: String): List<GoMethodDeclaration> = testFilesOf(file).flatMap { fileDeclarations(it).methodsByReceiver[typeName].orEmpty() }
+
+    private fun testFilesOf(file: GoFile): List<GoFile> = CachedValuesManager.getCachedValue(file, TEST_FILES) {
+        CachedValueProvider.Result.create(computeTestFiles(file), *trackers.ownPackageDependencies(file))
+    }
+
+    private fun computeTestFiles(file: GoFile): List<GoFile> {
+        val vf = GoPsiUtil.originalVirtualFile(file)
+        val packageName = file.packageName ?: return emptyList()
+        val dir = vf.parent
+        val built = if (dir != null && vf.fileSystem.protocol == "file") runCatching { GoPackageResolver.getInstance(project).packageOf(dir) }.getOrNull() else null
+        if (built != null) return forExcludedFile(built, vf).testFiles.mapNotNull(::goFile).filter { it.packageName == packageName }
+        val psiDir = GoPsiUtil.originalFile(file).containingDirectory ?: return emptyList()
+        return psiDir.files.filterIsInstance<GoFile>().filter { it.isTestFile && it.packageName == packageName }
+    }
+
     /** The package scope of a resolved import ([pkg] from the project model). */
     fun scopeOf(pkg: GoPackage): PackageScope {
         val dir = PsiManager.getInstance(project).findDirectory(pkg.directory) ?: return PackageScope(emptyList(), pkg.importPath, pkg.name)
         return CachedValuesManager.getCachedValue(dir) {
             val files = pkg.goFiles.mapNotNull(::goFile)
+            CachedValueProvider.Result.create(PackageScope(files, pkg.importPath, pkg.name), *trackers.ownPackageDependencies(dir))
+        }
+    }
+
+    /**
+     * The scope of the imported [pkg] as [from] sees it: an external test file (`package x_test` in the directory of `x`) imports the test
+     * variant of `x`, with the declarations of its `_test.go` files (`export_test.go`: `var FuncPCTestFn = funcPCTestFn`).
+     */
+    fun scopeOf(pkg: GoPackage, from: GoFile): PackageScope {
+        if (!from.isTestFile || pkg.testFiles.isEmpty() || GoPsiUtil.originalVirtualFile(from).parent != pkg.directory) return scopeOf(pkg)
+        val dir = PsiManager.getInstance(project).findDirectory(pkg.directory) ?: return scopeOf(pkg)
+        return CachedValuesManager.getCachedValue(dir, TEST_VARIANT) {
+            val files = (pkg.goFiles + pkg.testFiles).mapNotNull(::goFile).filter { pkg.name == null || it.packageName == pkg.name }
             CachedValueProvider.Result.create(PackageScope(files, pkg.importPath, pkg.name), *trackers.ownPackageDependencies(dir))
         }
     }
@@ -164,6 +197,8 @@ class GoPackageModel(private val project: Project) {
 
     companion object {
         private val FILE_DECLARATIONS = Key.create<CachedValue<FileDeclarations>>("gopsi.fileDeclarations")
+        private val TEST_FILES = Key.create<CachedValue<List<GoFile>>>("gopsi.packageTestFiles")
+        private val TEST_VARIANT = Key.create<CachedValue<PackageScope>>("gopsi.packageTestVariant")
 
         @JvmStatic
         fun getInstance(project: Project): GoPackageModel = project.service()

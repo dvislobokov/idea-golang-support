@@ -111,6 +111,7 @@ object GoDocSignature {
         is GoConstant.Float -> value.value.stripTrailingZeros().toPlainString()
         is GoConstant.Complex -> "(${value.re.stripTrailingZeros().toPlainString()} + ${value.im.stripTrailingZeros().toPlainString()}i)"
         is GoConstant.Str -> "\"" + com.intellij.openapi.util.text.StringUtil.escapeStringCharacters(value.value) + "\""
+        is GoConstant.LongStr -> value.render()
     }
 
     /** gopls-style type text: like [GoTypeRenderer], with the empty interface printed as `any`. */

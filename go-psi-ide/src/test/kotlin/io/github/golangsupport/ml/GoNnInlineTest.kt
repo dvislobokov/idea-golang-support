@@ -104,6 +104,15 @@ class GoNnInlineTest {
         assertEquals(1.0, conf("	x := 1 // the", listOf(" answer"), floatArrayOf(-4f), -5f), 1e-6)
         // nothing but code: the plain product, including the end of the line
         assertEquals(Math.exp(-0.6), conf("	return ", listOf("len", "(o.items)"), floatArrayOf(-0.2f, -0.3f), -0.1f), 1e-6)
+        // the arguments of a format string are its guess too, up to the end of the call (network of 0.2.220: `, o.ID` after `%s`)
+        assertEquals(Math.exp(-0.2), conf("		return fmt.", listOf("Errorf", "(\"", "order", " %s", "\",", " o", ".ID", ")"),
+            floatArrayOf(-0.1f, -0.1f, -3f, -2f, -1f, -2f, -1f, -1.5f), -0.1f), 1e-6)
+        // ... nested calls inside them as well; what follows the call is code again
+        assertEquals(Math.exp(-0.5), conf("	x := fmt.", listOf("Sprintf", "(\"%d\",", " len", "(a)", ")", " + y"),
+            floatArrayOf(-0.1f, -0.1f, -2f, -2f, -1f, -0.2f), -0.1f), 1e-6)
+        // without a `%` the arguments after a string are ordinary code
+        assertEquals(Math.exp(-0.6), conf("	s = strings.", listOf("Replace", "(s, \"a\",", " b", ", -1)"),
+            floatArrayOf(-0.1f, -0.1f, -0.2f, -0.1f), -0.1f), 1e-6)
         assertArrayEquals(b("\treturn fmt."), GoNnInline.lineBefore(b("func f() error {\n\treturn fmt.Err"), 3))
         assertArrayEquals(b("x"), GoNnInline.lineBefore(b("x"), 0))
     }

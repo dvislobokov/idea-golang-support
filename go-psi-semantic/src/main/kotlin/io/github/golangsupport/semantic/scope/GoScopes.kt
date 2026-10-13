@@ -244,7 +244,7 @@ object GoScopes {
         for (spec in file.imports) {
             if (!spec.isDot) continue
             val pkg = model.resolveImport(spec.path, file) ?: continue
-            model.scopeOf(pkg).lookup(name).filter { it.isPublic() }.forEach { out += Target.Declaration(it) }
+            model.scopeOf(pkg, file).lookup(name).filter { it.isPublic() }.forEach { out += Target.Declaration(it) }
         }
         if (out.isNotEmpty()) return
         GoUniverse.declaration(project, name)?.let { out += Target.Declaration(it) }

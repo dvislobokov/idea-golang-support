@@ -109,6 +109,9 @@ class GoTypeBuilder(private val project: Project) : GoTypeSource {
             val target = RecursionManager.doPreventingRecursion(alias, false) { alias.type?.let { typeOf(it) } } ?: continue
             if (target is GoNamedType && target.declaration == spec) alias.name?.let { declared += scope.methodsOf(it) }
         }
+        // One method set for both variants of the package: methods of its `_test.go` files are in it, and GoChecker reports their use
+        // outside test files (a named type is cached per declaration, not per build variant).
+        if (!file.isTestFile) packages.testMethodsOf(file, name).filterTo(declared) { t -> declared.none { it.name == t.name } }
         val pkgPath = packages.packagePathOf(file)
         val methods = declared.mapNotNull { m -> methodOf(m, pkgPath) }
         val origin = named.origin ?: return methods

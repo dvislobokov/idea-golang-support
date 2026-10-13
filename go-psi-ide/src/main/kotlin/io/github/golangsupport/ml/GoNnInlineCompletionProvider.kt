@@ -170,16 +170,23 @@ object GoNnInline {
     /**
      * The model's confidence over its code only: the tokens inside a string literal or a line comment are free text, each word of it is
      * unlikely on its own and the product over the line never reaches the gate (seen live: `fmt.` → `Errorf("store: no items")` at 0.016
-     * while `Errorf("` alone is near-certain). Counted: every token that starts and ends outside a literal and the token that ends the line; [lineBefore] (the current line up to the healed boundary) gives the state the caret is in.
+     * while `Errorf("` alone is near-certain). Counted: every token that starts and ends outside a literal and the token that ends the line;
+     * [lineBefore] (the current line up to the healed boundary) gives the state the caret is in. The arguments after a format string (one
+     * with a `%`) up to the end of its call are free text too: the message decides them (`Errorf("order %s is empty", o.ID)` of the
+     * network of 0.2.220: 0.34 with them, so neither the line nor its start `Errorf(` was shown after `return fmt.`).
      */
     fun codeConfidence(lineBefore: ByteArray, tokens: List<ByteArray>, logProbs: FloatArray, stopLogProb: Float): Double {
         val state = LiteralState().apply { scan(lineBefore) }
         var sum = 0.0
+        var args = 0   // > 0: inside the arguments of a format string, until the call at this depth of parentheses closes
         for (i in tokens.indices) {
             // the tokens that open and close the literal are part of the guess too: `("` splits its mass with `(` + `"` (0.73 at
             // `fmt.Errorf`), and the closing `")` is as unsure as the message (0.27); counted with them: 0.64 / 0.18, without: 0.89
-            val code = !state.inText
+            val code = !state.inText && args == 0
             state.scan(tokens[i])
+            if (args > 0 && state.depth < args) args = 0
+            else if (args == 0 && state.formatClosedAt > 0 && state.depth >= state.formatClosedAt) args = state.formatClosedAt
+            state.formatClosedAt = 0
             if (code && !state.inText) sum += logProbs[i]
         }
         if (!stopLogProb.isNaN() && !state.inText) sum += stopLogProb
@@ -273,7 +280,12 @@ object GoNnInline {
         private var escaped = false
         private var comment = false
         private var lastSlash = false
+        private var percent = false
         val inText: Boolean get() = quote != 0 || comment
+        /** Parentheses open outside literals and comments. */
+        var depth = 0
+        /** The [depth] at which a literal with a `%` has just closed (0: none since the caller reset it). */
+        var formatClosedAt = 0
 
         fun scan(bytes: ByteArray) {
             for (b in bytes) {
@@ -283,11 +295,14 @@ object GoNnInline {
                     quote == '"'.code -> when {
                         escaped -> escaped = false
                         c == '\\'.code -> escaped = true
-                        c == '"'.code || c == '\n'.code -> quote = 0
+                        c == '"'.code || c == '\n'.code -> { quote = 0; if (percent) formatClosedAt = depth }
+                        c == '%'.code -> percent = true
                     }
-                    quote == '`'.code -> if (c == '`'.code) quote = 0
-                    c == '"'.code || c == '`'.code -> quote = c
+                    quote == '`'.code -> if (c == '`'.code) { quote = 0; if (percent) formatClosedAt = depth } else if (c == '%'.code) percent = true
+                    c == '"'.code || c == '`'.code -> { quote = c; percent = false }
                     c == '/'.code && lastSlash -> comment = true
+                    c == '('.code -> depth++
+                    c == ')'.code -> if (depth > 0) depth--
                 }
                 lastSlash = c == '/'.code && quote == 0 && !comment
             }

@@ -2,8 +2,8 @@ package unusedimport
 
 import (
 	"fmt"
-	<warning descr="\"os\" imported and not used">"os"</warning>
-	<warning descr="\"strings\" imported as str and not used">str "strings"</warning>
+	<error descr="\"os\" imported and not used">"os"</error>
+	<error descr="\"strings\" imported as str and not used">str "strings"</error>
 	_ "embed"
 )
 

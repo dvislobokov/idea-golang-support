@@ -1,7 +1,7 @@
 package unusedlabel
 
 func f() {
-<warning descr="label L declared and not used">L</warning>:
+<error descr="label L declared and not used">L</error>:
 	for {
 		break
 	}

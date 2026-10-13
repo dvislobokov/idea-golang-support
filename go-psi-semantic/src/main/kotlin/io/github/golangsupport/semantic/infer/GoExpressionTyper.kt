@@ -811,8 +811,8 @@ class GoExpressionTyper(private val project: Project) {
             val name = callee.referenceName
             if ((name == "len" || name == "cap") && args.size == 1) {
                 val a = args[0] as? GoExpression ?: return null
-                val c = constantOf(a) as? GoConstant.Str
-                if (c != null) return if (name == "len") GoConstant.Int(c.value.toByteArray(Charsets.UTF_8).size.toLong()) else null
+                val c = constantOf(a)?.stringBytes()
+                if (c != null) return if (name == "len") GoConstant.Int(c) else null
                 // len/cap of an array (or pointer to array) is constant when the operand has no calls or receives.
                 if (hasCallOrReceive(a)) return null
                 val u = typeOf(a).underlying()

@@ -33,8 +33,8 @@ import io.github.golangsupport.ide.inspections.style.GoUnsortedImportInspection
 import java.io.File
 
 /**
- * The G7 inspections over the GoLand probe files (tools/ui-robot/goland/probe, playground/store/order.go) report exactly what GoLand's
- * highlighting dumps (docs/goland-analysis/dumps/highlight-*.txt) show for the checks whose message is GoLand's own, and nothing else:
+ * The G7 inspections over the GoLand probe files (tools/ui-robot/goland/probe; its store/order.go is playground/store/order.go as GoLand
+ * saw it on 2026-10-05 — the playground file has changed since) report exactly what GoLand's highlighting dumps (docs/goland-analysis/dumps/highlight-*.txt) show for the checks whose message is GoLand's own, and nothing else:
  * no false positives where GoLand is quiet.
  */
 class GoParityProbeTest : GoParityInspectionTestBase() {
@@ -80,7 +80,7 @@ class GoParityProbeTest : GoParityInspectionTestBase() {
         myFixture.addFileToProject("probe/analysis.go", read("tools/ui-robot/goland/probe/analysis.go"))
         myFixture.addFileToProject("probe/analysis_test.go", read("tools/ui-robot/goland/probe/analysis_test.go"))
         myFixture.addFileToProject("probe/probeerr/broken.go", read("tools/ui-robot/goland/probe/probeerr/broken.go"))
-        myFixture.addFileToProject("store/order.go", read("playground/store/order.go"))
+        myFixture.addFileToProject("store/order.go", read("tools/ui-robot/goland/probe/store/order.go"))
     }
 
     fun testAnalysisGoIsQuietLikeGoLand() {

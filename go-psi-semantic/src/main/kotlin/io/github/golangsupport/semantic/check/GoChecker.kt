@@ -346,11 +346,13 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             is GoFallthroughStatement -> checkFallthrough(e)
             // In the package-level pass the missing return of an outermost body belongs to its body pass.
             is GoFunctionDeclaration -> { if (mode == Mode.FILE) checkMissingReturn(e.signature, e.block); checkInitSignature(e) }
-            is GoMethodDeclaration -> if (mode == Mode.FILE) checkMissingReturn(e.signature, e.block)
+            is GoMethodDeclaration -> { if (mode == Mode.FILE) checkMissingReturn(e.signature, e.block); checkFieldAndMethod(e) }
+            // go/types `funcType` / `interfaceType` / `packageClause` (codes.go BlankIfaceMethod, BlankPkgName)
+            is io.github.golangsupport.lang.psi.GoMethodSpec -> e.identifier?.takeIf { it.text == "_" }?.let { report(it, "methods must have a unique non-blank name", "blank-method") }
+            is io.github.golangsupport.lang.psi.GoPackageClause -> e.identifier?.takeIf { it.text == "_" }?.let { report(it, "invalid package name _", "package-name") }
             is GoFunctionLit -> if (mode != Mode.PACKAGE_LEVEL) checkMissingReturn(e.signature, GoPsiUtil.run { e.block })
             is GoTypeSpec -> checkTypeSpec(e)
             is GoReceiver -> checkReceiver(e)
-            is io.github.golangsupport.lang.psi.GoGotoStatement -> e.labelRef?.takeIf { it.text == "_" }?.let { report(it, "label _ not declared", "label") }
             is GoAnonymousFieldDefinition -> checkEmbeddedField(e)
             is PsiType -> checkTypeNode(e)
             is io.github.golangsupport.lang.psi.GoConstraintElem -> checkUnion(e)
@@ -369,6 +371,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
      */
     private fun checkImportSpec(spec: GoImportSpec) {
         val path = spec.path
+        // go/types `collectObjects`, as cmd/compile since 1.17 (codes.go ImportCRenamed)
+        if (path == "C") (spec.identifier ?: spec.period)?.let { report(it, "cannot rename import \"C\"", "import-c") }
         if (path.isEmpty() || path == "C") return
         val vf = GoPsiUtil.originalVirtualFile(file)
         val protocol = vf.fileSystem.protocol
@@ -416,13 +420,15 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             if (case.default != null) continue
             val s = case.statement ?: continue
             val ok = when (s) {
-                is GoSendStatement, is io.github.golangsupport.lang.psi.GoRecvStatement -> true
+                is GoSendStatement -> true
+                // `case c:` parses as a receive statement without the arrow (codes.go InvalidSelectCase)
+                is io.github.golangsupport.lang.psi.GoRecvStatement -> s.expression?.let { unparen(it) }.let { it is GoUnaryExpr && it.operator === GoTypes.ARROW }
                 is GoSimpleStatement -> s.statement?.let { it is GoSendStatement } ?: (s.expressions.singleOrNull()?.let { unparen(it) }.let { it is GoUnaryExpr && it.operator === GoTypes.ARROW })
                 is GoShortVarDeclaration -> s.expressionList.singleOrNull()?.let { unparen(it) }.let { it is GoUnaryExpr && it.operator === GoTypes.ARROW }
                 is GoAssignmentStatement -> s.expressionList.singleOrNull()?.let { unparen(it) }.let { it is GoUnaryExpr && it.operator === GoTypes.ARROW }
                 else -> false
             }
-            if (!ok) report(s, "select case must be receive, send or assign recv", "select-case")
+            if (!ok) report(s, "select case must be send or receive (possibly with assignment)", "select-case")
         }
     }
 
@@ -725,7 +731,13 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                     is GoResolver.Result.Cgo -> usedImports += r.element
                     is GoResolver.Result.Selection -> {
                         val sel = r.selection
-                        if (sel is GoLookup.Selection.Ambiguous) report(ref.identifier ?: ref, "ambiguous selector ${exprText(ref)}", "ambiguous-selector")
+                        if (sel is GoLookup.Selection.Method && !file.isTestFile && (sel.method.declaration?.containingFile as? GoFile)?.isTestFile == true) {
+                            // A method of a `_test.go` file exists only in the test variant of the package (see GoTypeBuilder.methodsOf).
+                            val qt = qualifier?.let { typer.typeOf(it) }
+                            val owner = if (qt != null && isKnown(qt)) render(qt) else sel.method.name
+                            report(ref.identifier ?: ref, "${exprText(ref)} undefined (type $owner has no field or method ${sel.method.name})", "undefined-member")
+                        }
+                        else if (sel is GoLookup.Selection.Ambiguous) report(ref.identifier ?: ref, "ambiguous selector ${exprText(ref)}", "ambiguous-selector")
                         else if (sel is GoLookup.Selection.Field && qualifier is GoExpression && ref.parent !is GoKey && typer.isTypeExpression(qualifier))
                             report(ref.identifier ?: ref, "operand for field selector ${sel.member.name} must be value of type ${render(typer.typeOf(qualifier))}", "field-selector")
                         else if (sel is GoLookup.Selection.Method && qualifier != null && sel.method.pointerReceiver && typer.isTypeExpression(qualifier)) {
@@ -762,7 +774,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 usedImports += import.element
                 if (import.element.path == "C") return
                 val pkg = packages.resolveImport(import.element.path, file) ?: return // missing dependency: not our error
-                val unexported = packages.scopeOf(pkg).lookup(name).isNotEmpty()
+                val unexported = packages.scopeOf(pkg, file).lookup(name).isNotEmpty()
                 if (unexported) report(ref.identifier ?: ref, "name $name not exported by package ${pkg.name}", "unexported")
                 else report(ref.identifier ?: ref, "undefined: ${qualifier.text}.$name", "undefined")
                 return
@@ -821,7 +833,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             if (import.element.path == "C") return
             if (resolver.resolveTypeReference(ref) != null) return
             val pkg = packages.resolveImport(import.element.path, file) ?: return
-            if (packages.scopeOf(pkg).lookup(name).isNotEmpty()) report(ref.identifier ?: ref, "name $name not exported by package ${pkg.name}", "unexported")
+            if (packages.scopeOf(pkg, file).lookup(name).isNotEmpty()) report(ref.identifier ?: ref, "name $name not exported by package ${pkg.name}", "unexported")
             else report(ref.identifier ?: ref, "undefined: $qualifier.$name", "undefined")
             return
         }
@@ -889,6 +901,20 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             return
         }
         if (terms.size < 2) return
+        // go/types `parseUnion`: an interface with methods cannot be a term (codes.go InvalidUnion)
+        for (t in terms) {
+            val node = t.type ?: continue
+            val tt = typer.builder.typeOf(node)
+            val iface = if (t.tilde == null) tt.underlying() as? GoInterfaceType else null
+            // go/types prints the named term with its package (`p.M`)
+            val name = if (tt is GoNamedType && !GoUniverse.isBuiltinDeclaration(tt.declaration)) "${file.packageName}.${render(tt)}" else render(tt)
+            when {
+                iface == null -> {}
+                iface.comparableMarker -> report(node, "cannot use comparable in union", "union")
+                iface.allMethods.isNotEmpty() -> report(node, "cannot use $name in union ($name contains methods)", "union")
+                iface.isComparableConstraint -> report(node, "cannot use $name in union ($name embeds comparable)", "union")
+            }
+        }
         val built = terms.map { t -> GoTerm(t.tilde != null, t.type?.let { typer.builder.typeOf(it) } ?: GoUnknownType) }
         val expanded = built.sumOf { t -> termCount(t.type, 0) }
         if (expanded > MAX_UNION_TERMS) {
@@ -1217,6 +1243,11 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         val lhs = stmt.leftHandExprList?.expressionList ?: return
         val rhs = stmt.expressionList
         val op = stmt.assignOp ?: return
+        // go/types `assignment`: `x, y += 1` (codes.go MultiValAssignOp)
+        if (op.assign == null && (lhs.size != 1 || rhs.size != 1)) {
+            report(op, "assignment operation ${op.text} requires single-valued expressions", "assignment-mismatch")
+            return
+        }
         if (op.assign != null) {
             if (rhs.isEmpty()) return
             checkArity(lhs.size, rhs, stmt, "variable", op, init = false)
@@ -1884,9 +1915,14 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         }
     }
 
-    /** go/types: a package name is only usable as the qualifier of a selector (`new(unsafe)`, `f(fmt)`). */
+    /** go/types: a package name is only usable as the qualifier of a selector (`new(unsafe)`, `f(fmt)`, `var _ = fmt`). */
     private fun checkPackageNotInSelector(ref: GoReferenceExpression) {
-        if (ref.qualifier != null || ref.parent !is GoArgumentList) return
+        if (ref.qualifier != null) return
+        val parent = ref.parent
+        // the qualifier of `fmt.Println`; a key of a composite literal names a field, not the package
+        // `[fmt]int` is `invalid array length fmt` only (checkArrayLength)
+        if (parent is io.github.golangsupport.lang.psi.GoArrayOrSliceType) return
+        if (parent is GoReferenceExpression && parent.qualifier === ref || parent is GoTypeReferenceExpression || parent is GoKey) return
         val import = resolver.resolveReferenceExpression(ref).singleOrNull() as? GoResolver.Result.Import ?: return
         report(ref, "use of package ${import.element.let { GoScopes.importName(it) }} not in selector", "not-expression")
     }
@@ -1983,7 +2019,25 @@ class GoChecker(private val project: Project, private val file: GoFile) {
     }
 
     /** go/types `arrayLength`: a constant non-negative integer representable as int. */
+    /** go/types `hasNil`: values of the type compare with nil (a switch on them is fine: `switch f { case nil: }`). */
+    private fun hasNil(t: GoType): Boolean = when (val u = t.underlying()) {
+        is GoPointerType, is io.github.golangsupport.semantic.types.GoSignatureType, is io.github.golangsupport.semantic.types.GoSliceType,
+        is io.github.golangsupport.semantic.types.GoMapType, is io.github.golangsupport.semantic.types.GoChanType, is GoInterfaceType -> true
+        is GoBasicType -> u.kind == GoBasicKind.UNSAFE_POINTER
+        else -> false
+    }
+
+    /** go/types `checkFieldUniqueness`: a method of a struct type must not share the name of one of its fields (codes.go DuplicateFieldAndMethod). */
+    private fun checkFieldAndMethod(decl: GoMethodDeclaration) {
+        val name = decl.name?.takeIf { it != "_" } ?: return
+        val spec = packages.scopeOf(file).lookupType(decl.receiverTypeName ?: return) ?: return
+        val struct = (typer.builder.namedType(spec) as? GoNamedType)?.underlying() as? io.github.golangsupport.semantic.types.GoStructType ?: return
+        if (struct.fields.any { it.name == name }) report(decl.nameIdentifier ?: decl, "field and method with the same name $name", "redeclared")
+    }
+
     private fun checkArrayLength(node: io.github.golangsupport.lang.psi.GoArrayOrSliceType) {
+        // `[...]T` is the type of a composite literal only (codes.go BadDotDotDotSyntax)
+        node.ellipsis?.let { if (node.parent !is GoCompositeLit) report(it, "invalid use of [...] array (outside a composite literal)", "array-length"); return }
         val e = GoPsiUtil.children(node, GoExpression::class.java).firstOrNull() ?: return
         val x = unparen(e)
         if (x is GoReferenceExpression && x.qualifier == null) {
@@ -2049,8 +2103,9 @@ class GoChecker(private val project: Project, private val file: GoFile) {
      */
     private fun reusesResult(found: PsiElement, stmt: GoReturnStatement): Boolean {
         val decl = PsiTreeUtil.getParentOfType(found, GoShortVarDeclaration::class.java, true, GoBlock::class.java) ?: return false
-        val block = PsiTreeUtil.getParentOfType(decl, GoBlock::class.java) ?: return false
-        return isOwnBody(block) && block.parent === GoPsiUtil.functionOwner(stmt)
+        // a statement of that block itself: `for i := ...`, `if x := ...` and `switch` headers open scopes of their own (codes.go OutOfScopeResult)
+        val block = (decl.parent as? GoSimpleStatement)?.parent ?: decl.parent
+        return block is GoBlock && isOwnBody(block) && block.parent === GoPsiUtil.functionOwner(stmt)
     }
 
     /** go/types `collectObjects`: `func main` (package main) and `func init` take no arguments and return nothing; `init` needs a body. */
@@ -2343,6 +2398,12 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             return
         }
         val folded = (at as? GoExpression)?.let { typer.constantOf(it) }
+        // go/types `overflow`: the concatenation that first passes the limit (its value is unknown, so the next one does not)
+        val bytes = folded?.stringBytes()
+        if (bytes != null && bytes > GoConstant.MAX_STRING_BYTES) {
+            report(at, "constant string too long ($bytes bytes > ${GoConstant.MAX_STRING_BYTES} bytes)", "overflow")
+            return
+        }
         if (folded is GoConstant.Int && isUntyped(lt) && isUntyped(rt) && folded.value.abs().bitLength() > UNTYPED_INT_PRECISION) {
             val opName = when (op) { "*" -> "multiplication"; "+" -> "addition"; "-" -> "subtraction"; "^" -> "bitwise XOR"; "|" -> "bitwise OR"; "&" -> "bitwise AND"; "&^" -> "bitwise AND-NOT"; else -> op }
             report(at, "constant $opName overflow", "overflow")
@@ -3082,6 +3143,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             val f = c?.let { representabilityFailure(it, (tagType as GoBasicType).kind) }
             if (f != null) { report(tag, "cannot use ${describe(tag)} as ${render(tagType)} value in switch expression ($f)", "representability"); return }
         }
+        // go/types `switchStmt` (codes.go InvalidExprSwitch)
+        if (tag != null && !GoTypePredicates.comparable(tagType) && !hasNil(tagType)) { report(tag, "cannot switch on ${describe(tag)} (${render(tagType)} is not comparable)", "switch"); return }
         val seen = HashMap<String, GoExpression>()
         for (clause in stmt.exprCaseClauseList) {
             for (e in clause.expressionList) {
@@ -3359,9 +3422,9 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         if (c is GoConstant.Int && c.value.abs().bitLength() > UNTYPED_INT_PRECISION) return null
         when {
             kind.isBoolean -> return if (c is GoConstant.Bool) null else "not representable"
-            kind.isString -> return if (c is GoConstant.Str) null else "not representable"
+            kind.isString -> return if (c is GoConstant.Str || c is GoConstant.LongStr) null else "not representable"
             kind.isInteger -> {
-                if (c is GoConstant.Bool || c is GoConstant.Str) return "not representable"
+                if (c is GoConstant.Bool || c is GoConstant.Str || c is GoConstant.LongStr) return "not representable"
                 val i = c.toBigInteger() ?: return "truncated"
                 val (min, max) = integerRange(kind) ?: return null
                 return if (i < min || i > max) "overflows" else null
@@ -3372,7 +3435,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 return if (d.abs() > max) "overflows" else null
             }
             kind.isComplex -> {
-                if (c is GoConstant.Bool || c is GoConstant.Str) return "not representable"
+                if (c is GoConstant.Bool || c is GoConstant.Str || c is GoConstant.LongStr) return "not representable"
                 val max = floatMax(if (kind == GoBasicKind.COMPLEX64) GoBasicKind.FLOAT32 else GoBasicKind.FLOAT64)
                 val (re, im) = when (c) { is GoConstant.Complex -> c.re to c.im; else -> (c.toBigDecimal() ?: return null) to BigDecimal.ZERO }
                 return if (re.abs() > max || im.abs() > max) "overflows" else null
@@ -3599,7 +3662,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         if (label != null && label.text == "_") { report(label, "invalid break label _", "label"); return }
         if (label != null) {
             val target = GoScopes.resolveLabel(stmt, label.identifier?.text ?: "")
-            if (target != null && !enclosesAsLabeled(stmt, target) { it is GoForStatement || it is GoExprSwitchStatement || it is GoTypeSwitchStatement || it is GoSelectStatement }) report(label, "invalid break label ${label.text}", "label")
+            if (target == null || !enclosesAsLabeled(stmt, target) { it is GoForStatement || it is GoExprSwitchStatement || it is GoTypeSwitchStatement || it is GoSelectStatement }) report(label, "invalid break label ${label.text}", "label")
             return
         }
         if (!hasEnclosing(stmt) { it is GoForStatement || it is GoExprSwitchStatement || it is GoTypeSwitchStatement || it is GoSelectStatement }) report(stmt, "break is not in a loop, switch, or select", "break-continue")
@@ -3610,7 +3673,7 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         if (label != null && label.text == "_") { report(label, "invalid continue label _", "label"); return }
         if (label != null) {
             val target = GoScopes.resolveLabel(stmt, label.identifier?.text ?: "")
-            if (target != null && !enclosesAsLabeled(stmt, target) { it is GoForStatement }) report(label, "invalid continue label ${label.text}", "label")
+            if (target == null || !enclosesAsLabeled(stmt, target) { it is GoForStatement }) report(label, "invalid continue label ${label.text}", "label")
             return
         }
         if (!hasEnclosing(stmt) { it is GoForStatement }) report(stmt, "continue is not in a loop", "break-continue")
@@ -3668,6 +3731,83 @@ class GoChecker(private val project: Project, private val file: GoFile) {
                 if (prev != null) { report(label, "label $n already declared", "redeclared"); continue }
                 if (label !in usedLabels) report(label, "label $n declared and not used", "unused-label")
             }
+        }
+        val bodies = PsiTreeUtil.findChildrenOfType(root, GoBlock::class.java).filter(::isFunctionBody).toMutableList()
+        if (root is GoBlock && isFunctionBody(root)) bodies.add(0, root)
+        for (body in bodies) GotoCheck().run(body)
+    }
+
+    private fun isFunctionBody(b: GoBlock): Boolean = b.parent.let { it is GoFunctionOrMethodDeclaration || it is GoFunctionLit }
+
+    /**
+     * Port of go/types `labels` / `blockBranches` (labels.go) for `goto`: a forward jump stays open until its label is declared in the
+     * same or an enclosing block; a jump still open at the end of the body targets a label inside a block (`goto L jumps into block`)
+     * or none (`label L not declared`); a forward jump to a label declared after a `var` / `:=` of the same block jumps over it.
+     */
+    private inner class GotoCheck {
+        private val all = HashSet<String>()
+
+        fun run(body: GoBlock) {
+            for (jump in branches(null, body.statementList)) {
+                val name = jump.labelRef?.text ?: continue
+                if (name in all) report(jump.labelRef!!, "goto $name jumps into block", "label")
+                else report(jump.labelRef!!, "label $name not declared", "label")
+            }
+        }
+
+        private inner class Block(val parent: Block?) {
+            val labels = HashSet<String>()
+            fun gotoTarget(name: String): Boolean { var b: Block? = this; while (b != null) { if (name in b.labels) return true; b = b.parent }; return false }
+        }
+
+        /** The forward jumps of [list] left unresolved (go/types `blockBranches`). */
+        private fun branches(parent: Block?, list: List<io.github.golangsupport.lang.psi.GoStatement>): List<io.github.golangsupport.lang.psi.GoGotoStatement> {
+            val b = Block(parent)
+            val fwd = ArrayList<io.github.golangsupport.lang.psi.GoGotoStatement>()
+            var varDecl: PsiElement? = null
+            var bad: List<io.github.golangsupport.lang.psi.GoGotoStatement> = emptyList()
+            fun recordVarDecl(at: PsiElement) { varDecl = at; bad = ArrayList(fwd) }
+            fun nested(stmts: List<io.github.golangsupport.lang.psi.GoStatement>) { fwd += branches(b, stmts) }
+            fun stmt(s: PsiElement?) {
+                when (s) {
+                    null -> {}
+                    is io.github.golangsupport.lang.psi.GoVarDeclaration -> recordVarDecl(s)
+                    is io.github.golangsupport.lang.psi.GoShortVarDeclaration -> recordVarDecl(s)
+                    is io.github.golangsupport.lang.psi.GoSimpleStatement -> PsiTreeUtil.getChildOfType(s, io.github.golangsupport.lang.psi.GoShortVarDeclaration::class.java)?.let { recordVarDecl(s) }
+                    is GoLabeledStatement -> {
+                        val name = s.labelDefinition.name
+                        if (name != null && name != "_") {
+                            if (all.add(name)) b.labels += name
+                            val it = fwd.iterator()
+                            while (it.hasNext()) {
+                                val jump = it.next()
+                                if (jump.labelRef?.text != name) continue
+                                it.remove()
+                                val decl = varDecl
+                                if (decl != null && jump in bad) {
+                                    val line = (decl.containingFile.viewProvider.document?.getLineNumber(decl.textOffset) ?: -1) + 1
+                                    report(jump.labelRef!!, "goto $name jumps over variable declaration at line $line", "label")
+                                }
+                            }
+                        }
+                        stmt(s.statement)
+                    }
+                    is io.github.golangsupport.lang.psi.GoGotoStatement -> { val name = s.labelRef?.text; if (name != null && !b.gotoTarget(name)) fwd += s }
+                    is GoBlock -> nested(s.statementList)
+                    is io.github.golangsupport.lang.psi.GoIfStatement -> {
+                        PsiTreeUtil.getChildOfType(s, GoBlock::class.java)?.let { nested(it.statementList) }
+                        PsiTreeUtil.getChildOfType(s, io.github.golangsupport.lang.psi.GoElseStatement::class.java)?.let { e ->
+                            stmt(PsiTreeUtil.getChildOfType(e, io.github.golangsupport.lang.psi.GoIfStatement::class.java) ?: PsiTreeUtil.getChildOfType(e, GoBlock::class.java))
+                        }
+                    }
+                    is GoExprSwitchStatement -> s.exprCaseClauseList.forEach { nested(it.statementList) }
+                    is GoTypeSwitchStatement -> s.typeCaseClauseList.forEach { nested(it.statementList) }
+                    is GoSelectStatement -> s.commClauseList.forEach { nested(it.statementList) }
+                    is GoForStatement -> s.block?.let { nested(it.statementList) }
+                }
+            }
+            for (s in list) stmt(s)
+            return fwd
         }
     }
 }

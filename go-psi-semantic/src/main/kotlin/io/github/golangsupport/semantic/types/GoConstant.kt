@@ -17,6 +17,11 @@ sealed class GoConstant {
     data class Float(val value: BigDecimal) : GoConstant() { override fun toString(): String = render() }
     data class Complex(val re: BigDecimal, val im: BigDecimal) : GoConstant() { override fun toString(): String = render() }
     data class Str(val value: String) : GoConstant() { override fun toString(): String = render() }
+    /**
+     * A string constant longer than [MAX_HELD_STRING] bytes, held by its length only: go/constant keeps such a value as a rope, and
+     * `F = E + E` doubled 31 times (GOROOT `fixedbugs/issue78346.go`) ran the IDE out of memory when the text was built.
+     */
+    data class LongStr(val bytes: Long) : GoConstant() { override fun toString(): String = render() }
 
     val kind: GoBasicKind
         get() = when (this) {
@@ -24,7 +29,7 @@ sealed class GoConstant {
             is Int -> GoBasicKind.UNTYPED_INT
             is Float -> GoBasicKind.UNTYPED_FLOAT
             is Complex -> GoBasicKind.UNTYPED_COMPLEX
-            is Str -> GoBasicKind.UNTYPED_STRING
+            is Str, is LongStr -> GoBasicKind.UNTYPED_STRING
         }
 
     fun toBigInteger(): BigInteger? = when (this) {
@@ -48,10 +53,24 @@ sealed class GoConstant {
         is Float -> renderFloat(value)
         is Complex -> "(${re.stripTrailingZeros().toPlainString()} + ${im.stripTrailingZeros().toPlainString()}i)"
         is Str -> "\"" + value + "\""
+        is LongStr -> "\"…\" ($bytes bytes)"
+    }
+
+    /** The length in bytes of a string constant; null for other kinds. */
+    fun stringBytes(): Long? = when (this) {
+        is Str -> value.toByteArray(Charsets.UTF_8).size.toLong()
+        is LongStr -> bytes
+        else -> null
     }
 
     companion object {
         private val MC = MathContext(64)
+
+        /** Longer string constants are [LongStr]. */
+        const val MAX_HELD_STRING = 1L shl 20
+
+        /** go/types: string constants must not grow past cmd/internal/obj.MaxSymSize (`constant string too long`, go.dev/issue/78346). */
+        const val MAX_STRING_BYTES = 2_000_000_000L
 
         /** go/constant `String()` for floats: `%.6g`-like, plain for moderate magnitudes. */
         fun renderFloat(v: BigDecimal): String {
@@ -78,7 +97,12 @@ sealed class GoConstant {
         }
 
         fun binary(op: String, a: GoConstant, b: GoConstant): GoConstant? {
-            if (a is Str && b is Str) return if (op == "+") Str(a.value + b.value) else compare(op, a.value.compareTo(b.value))
+            if (a is Str && b is Str && a.value.length + b.value.length <= MAX_HELD_STRING) return if (op == "+") Str(a.value + b.value) else compare(op, a.value.compareTo(b.value))
+            if ((a is Str || a is LongStr) && (b is Str || b is LongStr)) {
+                // past the limit the value is unknown (go/types reports it once, where it is exceeded)
+                if (op != "+" || a.stringBytes()!! > MAX_STRING_BYTES || b.stringBytes()!! > MAX_STRING_BYTES) return null
+                return LongStr(a.stringBytes()!! + b.stringBytes()!!)
+            }
             if (a is Bool && b is Bool) return when (op) {
                 "&&" -> Bool(a.value && b.value)
                 "||" -> Bool(a.value || b.value)

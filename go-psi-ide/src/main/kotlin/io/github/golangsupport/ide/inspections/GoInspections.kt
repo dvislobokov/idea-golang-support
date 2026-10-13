@@ -21,7 +21,7 @@ class GoUnresolvedReferenceInspection : GoDiagnosticsInspectionBase() {
 /** `"os" imported and not used`. Fixes: remove the import, optimize imports. */
 class GoUnusedImportInspection : GoDiagnosticsInspectionBase() {
     override fun accepts(code: String) = code in GoDiagnosticClasses.UNUSED_IMPORT
-    override fun highlightType(d: GoDiagnostic) = ProblemHighlightType.LIKE_UNUSED_SYMBOL
+    // an error of the compiler, red as in GoLand (docs/goland-analysis/dumps/highlight-internal-probeerr-broken.txt), not greyed out
     override fun fixes(d: GoDiagnostic, file: GoFile, element: PsiElement): List<LocalQuickFix> = listOf(GoRemoveImportFix(), GoOptimizeImportsFix())
 }
 
@@ -37,7 +37,7 @@ class GoUnusedVariableInspection : GoDiagnosticsInspectionBase() {
 /** `label L declared and not used`. */
 class GoUnusedLabelInspection : GoDiagnosticsInspectionBase() {
     override fun accepts(code: String) = code in GoDiagnosticClasses.UNUSED_LABEL
-    override fun highlightType(d: GoDiagnostic) = ProblemHighlightType.LIKE_UNUSED_SYMBOL
+    // an error of the compiler like an unused import
 }
 
 /** Assignability, representability and conversion errors. Fixes: wrap the value in a conversion `T(x)`; add the methods a type lacks to implement an interface. */

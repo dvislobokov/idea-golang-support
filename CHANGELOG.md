@@ -30,6 +30,69 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.224] - 2026-10-13
+
+Errors of the compiler the plugin did not report (`docs/compare/go-error-codes-2026-10-13.md`: the examples of
+`$GOROOT/src/internal/types/errors/codes.go`, the test data of go/types).
+
+### Fixed
+
+- **A long string constant no longer runs the IDE out of memory.** `F = E + E` doubled 31 times (GOROOT
+  `fixedbugs/issue78346.go`) was built as text; a constant past 1 MiB is now held by its length (`GoConstant.LongStr`, `len()` of it
+  is still a constant), and past 2·10⁹ bytes the error of go/types is reported: `constant string too long (2147483648 bytes >
+  2000000000 bytes)`. Checked in the IDE: the file opens, the error shows in seconds.
+- **`goto` and labels** (port of go/types `labels.go`): `goto L jumps into block`, `goto L jumps over variable declaration at line N`,
+  `label L not declared`; `break` / `continue` with a label that does not exist: `invalid break label L`. `check/gotos.go` of go/types:
+  40 of 40 sites (0 before), now in `GoTypesTestdataTest`.
+- **Unused import and unused label are errors**, red as in GoLand (they were warnings, greyed out): `go build` stops on both.
+- Reported now, with the texts of go/types: `use of package fmt not in selector` (`var _ = fmt`); `assignment operation += requires
+  single-valued expressions`; `methods must have a unique non-blank name`; `field and method with the same name m`; `invalid use of
+  [...] array (outside a composite literal)`; `cannot switch on a (…) (T is not comparable)`; `cannot use interface{m()} in union
+  (… contains methods)`; `invalid package name _`; `cannot rename import "C"`.
+- Two checks existed but did not fire: `select case must be send or receive (possibly with assignment)` for `case c:` (parsed as a
+  receive without the arrow; the text is that of Go 1.27 now), and `result parameter i not in scope at return` when the result is
+  shadowed in a `for` / `if` / `switch` header (it was taken for a `:=` of the function's block).
+
+### Added
+
+- `GoErrorCodeExamplesTest`: every example of `codes.go`, read from GOROOT as `codes_test.go` reads it; the examples still missed are
+  listed and the list may only shrink (6 left: `InvalidDeclCycle_2`, `InvalidInstanceCycle_1`, `InvalidUnsafeSlice_4`,
+  `InvalidUntypedConversion_1`, `TypeTooLarge_1`, `TypeTooLarge_2`).
+
+## [0.2.223] - 2026-10-13
+
+### Fixed
+
+- **ML grey text after `return fmt.` is back with the network of 0.2.220.** The network writes the arguments of a format string too
+  (`Errorf("order %s is empty", o.ID)`), and they were counted as code: 0.34 against the gate 0.5 after a dot, and the certain start
+  `Errorf(` ends with an open bracket, so nothing was shown. The arguments after a literal with a `%`, up to the end of its call, are now
+  free text like the message itself (`GoNnInline.codeConfidence`): 0.999, the line is shown. Arguments after a string without `%` count as
+  before. Tests `GoNnInlineTest.codeConfidenceCountsTheCodeOnly`, `GoNnModelTest.guessesTheStringOfErrorf` (it failed since 0.2.220).
+- `GoParityProbeTest` compares GoLand's dump with the version of `playground/store/order.go` GoLand saw (now
+  `tools/ui-robot/goland/probe/store/order.go`): the playground file changed in 0.2.217 and the expected line moved.
+
+## [0.2.222] - 2026-10-13
+
+### Fixed
+
+- **No false errors on what `_test.go` files declare** (item 1 of `docs/compare/prometheus-broken-2026-10-13.md`). `go test` compiles the
+  test files of a package into it, and their methods and names exist in that test variant only: methods declared in `_test.go` are in the
+  method set of the package's types (`GoPackageModel.testMethodsOf`, `GoTypeBuilder.methodsOf`), and an external test package
+  (`package x_test` next to `x`) imports `x` with the declarations of its test files (`export_test.go`: `GoPackageModel.scopeOf(pkg, from)`,
+  used by resolve, the checker and completion). A regular file that calls such a method gets the error of `go build`
+  (`d.synced undefined (type *D has no field or method synced)`), and completion there does not offer it. On prometheus the 8 false
+  `missing method hasSynced` / `hasCaseInsensitivePrefix undefined` errors of the clean clone are gone (checked in the IDE on the clone);
+  on 350 test files sampled from GOROOT the false errors went from 1452 (50 in internal, 1402 in external test files) to 0.
+- **An interface term of a union stands for its terms** (`interface{ keyType | []int32 }`, GOROOT `runtime/map_benchmark_test.go`):
+  `int32` satisfied the constraint but was reported as `missing in` it (`GoInterfaceType.unionTerms`).
+
+### Added
+
+- Corpus gates: `GorootTestFilesCheckCorpusTest` (400 `_test.go` files of GOROOT, `testData/metrics/goroot-src-test-check.json`) and
+  `GorootTypesTestdataCorpusTest` (every single-file test of `$GOROOT/src/internal/types/testdata` with its `/* ERROR */` sites, in place;
+  `GoTypesTestdataTest` keeps its 51 copies as the strict gate; `testData/metrics/goroot-types-testdata.json`). Tests
+  `GoTestVariantCheckTest` (fixture `testData/project/testvariant`), `GoCheckTest.testMethodsOfTestFiles`.
+
 ## [0.2.221] - 2026-10-10
 
 ### Changed

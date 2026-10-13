@@ -73,18 +73,19 @@ class GoChecksStoreTest : BasePlatformTestCase() {
         val wasEnabled = profile().isToolEnabled(key, null)
         val model = GoChecksStore.load(project)
         model.setEnabled("GoUnusedLabel", !wasEnabled)
-        model.setLevel("GoUnusedLabel", GoCheckLevel.ERROR)
+        model.setLevel("GoUnusedLabel", GoCheckLevel.WARNING)
         try {
             save(model)
             assertEquals(!wasEnabled, profile().isToolEnabled(key, null))
-            assertEquals(HighlightDisplayLevel.ERROR, profile().getErrorLevel(key, null as PsiElement?))
+            assertEquals(HighlightDisplayLevel.WARNING, profile().getErrorLevel(key, null as PsiElement?))
             val again = GoChecksStore.load(project)
-            assertEquals(GoCheckLevel.ERROR, again.state("GoUnusedLabel").level)
+            assertEquals(GoCheckLevel.WARNING, again.state("GoUnusedLabel").level)
             assertFalse("what was written is what is read", again.isModified)
             again.reset("GoUnusedLabel")
             save(again)
             assertTrue(profile().isToolEnabled(key, null))
-            assertEquals(HighlightDisplayLevel.WARNING, profile().getErrorLevel(key, null as PsiElement?))
+            // an unused label is an error of the compiler: ERROR by default since 0.2.224
+            assertEquals(HighlightDisplayLevel.ERROR, profile().getErrorLevel(key, null as PsiElement?))
         } finally {
             val restore = GoChecksStore.load(project)
             restore.setEnabled("GoUnusedLabel", wasEnabled)

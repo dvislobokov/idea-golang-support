@@ -242,7 +242,7 @@ class GoInterfaceType @JvmOverloads constructor(val methods: List<GoMethod>, val
         var terms: List<GoTerm>? = null
         for (e in embedded) {
             val list: List<GoTerm> = when (e) {
-                is GoUnionType -> e.terms
+                is GoUnionType -> unionTerms(e) ?: continue
                 is GoInterfaceType, is GoNamedType -> {
                     val iface = e.underlying() as? GoInterfaceType ?: continue
                     (RecursionManager.doPreventingRecursion(iface, false) { iface.typeTerms } ?: null) ?: continue
@@ -253,6 +253,21 @@ class GoInterfaceType @JvmOverloads constructor(val methods: List<GoMethod>, val
             terms = if (terms == null) list else intersectTerms(terms, list)
         }
         return terms
+    }
+
+    /**
+     * The terms of a union with its interface terms expanded (`mapBenchmarkKeyType | []int32` in GOROOT's runtime tests); null when
+     * an interface term has no type terms: its type set, and so the union's, is every type.
+     */
+    private fun unionTerms(u: GoUnionType): List<GoTerm>? {
+        if (u.terms.none { !it.tilde && it.type.underlying() is GoInterfaceType }) return u.terms
+        val out = ArrayList<GoTerm>()
+        for (t in u.terms) {
+            val iface = if (t.tilde) null else t.type.underlying() as? GoInterfaceType
+            if (iface == null) { out += t; continue }
+            out += (RecursionManager.doPreventingRecursion(iface, false) { iface.typeTerms } ?: return null)
+        }
+        return out
     }
 
     private fun intersectTerms(a: List<GoTerm>, b: List<GoTerm>): List<GoTerm> {

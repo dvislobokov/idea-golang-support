@@ -36,8 +36,17 @@ class GoNnModelTest {
             val r = nn.model.newSession(2048).use { nn.completion.complete(c.path, c.before, c.after, it) }
             val code = GoNnInline.codeConfidence(GoNnInline.lineBefore(c.before, r.typed.size), r.tokens.map { nn.completion.tok.tokenBytes(it) }, r.logProbs, r.stopLogProb)
             println("GoNnModelTest: 'fmt.' -> '${r.textString}' confProd ${r.confProd} code $code")
-            assertTrue("a call with a string: '${r.textString}'", r.textString.startsWith("Errorf(\"") && r.textString.endsWith("\")"))
-            assertTrue("the code is certain, the string is not: $code vs ${r.confProd}", code > r.confProd && code >= 0.6)   // 0.69 on 2026-10-07 (0.89 with an `errors` import and `ErrEmpty` above: `Errorf` certain, the end of the line 0.89)
+            // a format string, with or without arguments: the network of 0.2.220 writes `Errorf("order %s is empty", o.ID)`
+            assertTrue("a call with a string: '${r.textString}'", Regex("""Errorf\("[^"\n]*"(, [^\n]+)?\)""").matches(r.textString))
+            // the code is certain, the message is not: 0.69 on 2026-10-07 (network go-nn-50m-e3-lr2e3, `Errorf("store: no items")`); the network
+            // of 0.2.220 guesses an argument too (`, o.ID`): 0.34 while the arguments of a format string counted as code, 0.999 since 0.2.223
+            assertTrue("the code is certain, the string is not: $code vs ${r.confProd}", code > r.confProd && code >= 0.6)
+            // what the provider shows at the default gate after a dot (GoMlSettings.inlineDotThreshold): the line, or its certain start
+            val gate = 0.5
+            val shown = if (code >= gate) r.textString
+                else GoNnInline.certainPrefix(r.tokens.map { nn.completion.tok.tokenBytes(it) }, r.logProbs, r.typed.size, gate)?.let { String(it, Charsets.UTF_8) }
+            println("GoNnModelTest: shown at gate $gate: '$shown'")
+            assertTrue("at least the call is shown: '$shown'", shown != null && shown.startsWith("Errorf("))
         } finally { nn.model.close() }
     }
 
