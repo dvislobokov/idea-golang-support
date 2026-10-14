@@ -298,6 +298,8 @@
   Не смотрел: страницы Settings (Code Folding Go, Color Scheme Go), Fill selected / Change style попапы, Update dependencies… диалог, сохранение исключений после перезапуска
 
 ### Сравнение с GoLand на prometheus (`PLAN.md` C1–C7; отчёты `docs/compare/`)
+- [x] (2026-10-14, 0.2.229) ML-сборка: `-Pml.modelSize=50|100` — сеть 50m или 100m (`go-nn-102m-caret-v2`, zip `-ml-100m`), как в dotnet-плагине.
+- [x] (2026-10-14, 0.2.228) Частые ошибки компилятора: `x == nil` для типов без nil, циклы инициализации через методы, тексты `constant N overflows T`, «field, not a method», «cannot call pointer method». Тесты go/types: не сообщено 514 → 466.
 - [x] (2026-10-14, 0.2.227) Rename сообщает о затенении (конфликты в диалоге платформы, как отказ gopls): ссылка уйдёт к более близкому объявлению, новое имя перехватит чужую ссылку (в т. ч. builtin, импорт), имя уже объявлено в этой области. Prometheus `lb → a`: 5 конфликтов.
 - [x] (2026-10-14, 0.2.226) Файл вне сборки (теги, GOOS / GOARCH) — как в GoLand: проверяется только синтаксис (и сама строка `//go:build`), плашка «… is ignored by the build tool because of the OS mismatch / architecture mismatch / custom flag» с Rename file или Navigate to build constraints и Edit settings. Prometheus: 91 проблема в таких файлах → 0.
 - [x] (2026-10-13, 0.2.225) Переименованный метод сразу ломает реализацию интерфейса (кэш `methodOf` хранил старое имя); файл, добавленный в импортируемый пакет — в том числе созданный вне редактора (VFS-события в `GoTrackers`), — виден импортёрам.

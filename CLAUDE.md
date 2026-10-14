@@ -63,6 +63,7 @@ tools/gates.sh corpus:semantic bench                                            
 export JAVA_HOME="C:\Program Files\JetBrains\IntelliJ IDEA 2026.1.4\jbr"
 ./gradlew.bat test buildPlugin -q --offline   # основная проверка перед тем, как сказать «готово»
 ./gradlew.bat compileKotlin -q                # быстрая проверка компиляции
+./gradlew.bat buildPlugin -PmlEnabled=true -Pml.modelSize=100 -q --offline   # ML-сборка: сеть 50m (по умолчанию, …-ml.zip) или 100m (go-nn-102m-caret-v2, …-ml-100m.zip)
 ./gradlew.bat :test --tests "io.github.golangsupport.GoToolingTest" -q --offline   # фильтр по корневым тестам — только `:test`: в подпроектах go-psi таких классов нет, и агрегат `test` падает
 ./gradlew.bat runIde --args="C:/Users/dvislobokov/idea-golang-support/playground"   # песочница для пользователя
 ```

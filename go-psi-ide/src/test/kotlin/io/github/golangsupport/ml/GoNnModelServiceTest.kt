@@ -39,7 +39,8 @@ class GoNnModelServiceTest : BasePlatformTestCase() {
         val models = GoMlModels.getInstance()
         models.reset()
         assertNull(models.nn(s.modelDirectory))   // loading in the background
-        waitForNetwork(GoMlModels.NN_MODEL.removeSuffix(".cml"))
+        // a directory with both networks loads the bigger one (GoMlModels.NN_MODELS)
+        waitForNetwork(GoMlModels.NN_MODELS.first { java.io.File(dir, it).isFile }.removeSuffix(".cml"))
 
         // a file opened with the caret after `fmt.`: the prefill returns at once, the completion then finds its prompt in the cache
         val editor = Any()

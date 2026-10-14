@@ -30,6 +30,32 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.229] - 2026-10-14
+
+### Added
+
+- **ML build: the size of the network** (as in idea-dotnet-support 0.1.164): `-Pml.modelSize=50` (the default) or `100` picks the network
+  the zip carries, `go-nn-50m-caret-ft5e5.cml` or `go-nn-102m-caret-v2.cml` (the 100 M one: rest of line exact 56.0 % against 52.2 %, shown
+  44.0 % against 38.6 %, about twice the latency and memory); the zip of the 100 M build is `…-ml-100m.zip`. The plugin loads whichever of
+  the two is bundled, and from the models directory of the settings the bigger one it finds (`GoMlModels.NN_MODELS`). Checked in the IDE
+  with the 100 M build: `go-nn-102m-caret-v2 (bundled) loaded in 1440 ms`, grey text after `return fmt.`.
+
+## [0.2.228] - 2026-10-14
+
+### Fixed
+
+Frequent errors of the compiler from the test data of go/types (`PLAN.md` C5), with the texts of `go build`:
+- `b == nil` with a bool, an array, a struct or a type parameter without nil: `invalid operation: b == nil (mismatched types bool and
+  untyped nil)` (it was accepted).
+- Initialization cycles through method values, method expressions and method calls (`var x = T{}.m()` with `m` reading `x`); a variable
+  that refers to itself directly: `initialization cycle: s refers to itself`. Cycles that leave the file stay with
+  `GoInitializationCycleInspection`.
+- `constant 256 overflows uint8` for an integer constant converted to an integer type (was `cannot convert … (overflows)`), and no cause
+  after another constant conversion: `cannot convert 1.5 (untyped float constant) to type int32`.
+- Why a type does not implement an interface: `(Job.Run is a field, not a method)`.
+- `T{}.m()` with a method of `*T`: `cannot call pointer method m on T` (was `undefined`).
+- Test data of go/types: missed 514 → 466, false 275 → 258. Checked in the IDE on a module with one package per check.
+
 ## [0.2.227] - 2026-10-14
 
 ### Fixed

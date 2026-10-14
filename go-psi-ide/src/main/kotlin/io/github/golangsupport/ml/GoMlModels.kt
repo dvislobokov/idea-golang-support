@@ -285,8 +285,12 @@ class GoMlModels : GoNnEngine, Disposable {
         /** Weight of the per-file cache in the mixed language model; the value the models were trained with. */
         const val CACHE_LAMBDA = 0.3
         private const val RESOURCE_DIR = "ml/go"
-        /** The bundled transformer and its BPE vocabulary (`ml-models/go`, copied by the ML build). */
+        /** The 50 M transformer, the one of `-Pml.modelSize=50` (the default of the ML build); its BPE vocabulary [NN_VOCAB] (`ml-models/go`). */
         const val NN_MODEL = "go-nn-50m-caret-ft5e5.cml"
+        /** The 100 M transformer of `-Pml.modelSize=100`: the same vocabulary, healing v2 prompts, about twice the latency and memory. */
+        const val NN_MODEL_100 = "go-nn-102m-caret-v2.cml"
+        /** The networks the plugin knows, by file name: the ML build carries one of them; a models directory may hold either (the bigger wins). */
+        val NN_MODELS: List<String> = listOf(NN_MODEL_100, NN_MODEL)
         const val NN_VOCAB = "go-16384.bpe"
         private const val KEY_SEPARATOR = "\u0000"
         /** KV cache of an editor's session: the prompt (≤ 2000 tokens) and the generated line; capped by the model's context. */
@@ -301,9 +305,14 @@ class GoMlModels : GoNnEngine, Disposable {
         @Volatile var debugSink: ((String) -> Unit)? = null
 
         /** True when the build carries the grey-text network. */
-        val isNnBundled: Boolean by lazy { resource(NN_MODEL) != null && resource(NN_VOCAB) != null }
-        /** The key of a network load: the directory and the model file. */
-        private fun nnKey(modelDirectory: String): String = modelDirectory.trim().let { "$it$KEY_SEPARATOR$NN_MODEL" }
+        val isNnBundled: Boolean by lazy { NN_MODELS.any { resource(it) != null } && resource(NN_VOCAB) != null }
+        /** The network the build carries ([NN_MODELS] in order), [NN_MODEL] when none. */
+        private val bundledModel: String by lazy { NN_MODELS.firstOrNull { resource(it) != null } ?: NN_MODEL }
+        /** The key of a network load: the directory and the model file (in a directory: the first of [NN_MODELS] it holds). */
+        private fun nnKey(modelDirectory: String): String = modelDirectory.trim().let { dir ->
+            val name = if (dir.isEmpty()) bundledModel else NN_MODELS.firstOrNull { File(dir, it).isFile } ?: NN_MODEL
+            "$dir$KEY_SEPARATOR$name"
+        }
         /** True in a build that carries any of the models (and therefore shows the Smart Completion settings page). */
         val isBundled: Boolean by lazy { isRankerBundled || isNnBundled }
 
@@ -311,7 +320,7 @@ class GoMlModels : GoNnEngine, Disposable {
          * Builds and warms up the network [model] from [dir] (null: bundled). In a directory: [model] and [NN_VOCAB], or else the only `*.bpe`
          * with the first `*-nn-*.cml`; no such files there — the bundled network. Null when there is none at all. Blocking (a second).
          */
-        fun loadNn(dir: File?, options: NnCompletion.Options = NnCompletion.Options(), model: String = NN_MODEL): Nn? {
+        fun loadNn(dir: File?, options: NnCompletion.Options = NnCompletion.Options(), model: String = if (dir == null) bundledModel else NN_MODEL): Nn? {
             val started = System.currentTimeMillis()
             val (modelFile, vocab) = dir?.let { directoryNn(it, model) } ?: bundledNn(model) ?: return null
             val model = NnModel(NnFormat.read(modelFile), nThreads = minOf(8, Runtime.getRuntime().availableProcessors()))
@@ -326,7 +335,7 @@ class GoMlModels : GoNnEngine, Disposable {
         }
 
         private fun directoryNn(dir: File, name: String): Pair<File, BpeTokenizer>? {
-            val model = File(dir, name).takeIf { it.isFile } ?: dir.listFiles { f -> f.isFile && f.name.endsWith(".cml") && "-nn-" in f.name }?.minByOrNull { it.name } ?: return null
+            val model = File(dir, name).takeIf { it.isFile } ?: NN_MODELS.map { File(dir, it) }.firstOrNull { it.isFile } ?: dir.listFiles { f -> f.isFile && f.name.endsWith(".cml") && "-nn-" in f.name }?.minByOrNull { it.name } ?: return null
             val vocab = File(dir, NN_VOCAB).takeIf { it.isFile } ?: dir.listFiles { f -> f.isFile && f.name.endsWith(".bpe") }?.singleOrNull() ?: return null
             return model to BpeTokenizer.load(vocab.toPath())
         }
@@ -334,7 +343,7 @@ class GoMlModels : GoNnEngine, Disposable {
         private fun bundledNn(name: String): Pair<File, BpeTokenizer>? {
             val cl = GoMlModels::class.java.classLoader
             val vocab = cl.getResourceAsStream("$RESOURCE_DIR/$NN_VOCAB")?.use { BpeTokenizer.load(it) } ?: return null
-            return (extract("$RESOURCE_DIR/$name") ?: extract("$RESOURCE_DIR/$NN_MODEL") ?: return null) to vocab
+            return (extract("$RESOURCE_DIR/$name") ?: NN_MODELS.firstNotNullOfOrNull { extract("$RESOURCE_DIR/$it") } ?: return null) to vocab
         }
 
         /**
