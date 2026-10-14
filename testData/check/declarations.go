@@ -39,3 +39,38 @@ type AB struct {
 }
 
 var _ = AB{}.F /* ERROR "ambiguous selector AB{}.F" */
+
+// Comparisons with nil: only what has nil (go/types testdata spec/comparisons.go).
+type nilS struct{ x int }
+
+func nilCompare(b bool, a [2]int, s nilS, p *int, f func(), sl []int, m map[int]int, i interface{}) {
+	_ = b == nil /* ERROR "invalid operation: b == nil (mismatched types bool and untyped nil)" */
+	_ = a == nil /* ERROR "mismatched types [2]int and untyped nil" */
+	_ = s == nil /* ERROR "mismatched types nilS and untyped nil" */
+	_ = p == nil
+	_ = f == nil
+	_ = sl == nil
+	_ = m == nil
+	_ = i == nil
+}
+
+// A field where a method is wanted (go/types testdata fixedbugs/issue51025.go).
+type fieldNotMethodI interface{ m() }
+type fieldNotMethodT struct{ m func() }
+
+func fieldNotMethod(t fieldNotMethodT) {
+	var i fieldNotMethodI
+	i = t // ERROR "fieldNotMethodT does not implement fieldNotMethodI (fieldNotMethodT.m is a field, not a method)"
+	_ = i
+}
+
+// A pointer method on a value that is not addressable (go/types testdata fixedbugs/issue28251.go).
+type ptrMethodT struct{}
+
+func (*ptrMethodT) m() {}
+
+func ptrMethod() {
+	ptrMethodT{}.m /* ERROR "cannot call pointer method m on ptrMethodT" */ ()
+	var v ptrMethodT
+	v.m()
+}

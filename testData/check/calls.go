@@ -49,8 +49,8 @@ func g() {
 	_ = string(65)
 	_ = float64(x)
 	_ = []byte("s")
-	_ = int(1.5) // ERROR "cannot convert 1.5 (untyped float constant) to type int (truncated)"
-	_ = int8(300) // ERROR "cannot convert 300 (untyped int constant) to type int8 (overflows)"
+	_ = int(1.5) // ERROR "cannot convert 1.5 (untyped float constant) to type int"
+	_ = int8(300) // ERROR "constant 300 overflows int8"
 	_ = T(x) // ERROR "cannot convert x (variable of type int) to type T"
 	close(m) // ERROR "invalid operation: cannot close non-channel m (variable of type map[string]int)"
 	defer f(1, "a")

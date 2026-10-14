@@ -586,12 +586,28 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             }
         }
         val funcDeps = HashMap<GoFunctionOrMethodDeclaration, Set<GoNamedElement>>()
+        // this file only: the cycles that leave it are GoInitializationCycleInspection's (go-psi-ide), with limits for big packages
+        fun samePackage(e: PsiElement): Boolean = e.containingFile == f
+        fun initsOf(d: GoNamedElement): List<GoExpression> = inits[d] ?: when (val spec = d.parent) {
+            is GoVarSpec -> spec.expressionList.let { values -> if (values.size == spec.varDefinitionList.size) listOfNotNull(values.getOrNull(spec.varDefinitionList.indexOf(d))) else values }
+            is GoConstSpec -> spec.expressionList.let { values -> if (values.size == spec.constDefinitionList.size) listOfNotNull(values.getOrNull(spec.constDefinitionList.indexOf(d))) else values }
+            else -> emptyList()
+        }
         fun refsIn(root: PsiElement, out: MutableSet<GoNamedElement>, visited: MutableSet<GoFunctionOrMethodDeclaration>) {
             for (ref in listOfNotNull(root as? GoReferenceExpression) + PsiTreeUtil.findChildrenOfType(root, GoReferenceExpression::class.java)) {
-                if (ref.qualifier != null || ref.parent is GoKey) continue
+                if (ref.parent is GoKey) continue
+                // a method value, a method expression or a call of a method runs (or may run) its body at initialization: `T.m`, `T{}.m()`
+                if (ref.qualifier != null) {
+                    val method = resolver.resolveReferenceExpression(ref).firstOrNull()?.element as? GoMethodDeclaration ?: continue
+                    if (!samePackage(method) || !visited.add(method)) continue
+                    val body = method.block ?: continue
+                    followedBodies?.add(body)
+                    out += funcDeps.getOrPut(method) { val s = HashSet<GoNamedElement>(); refsIn(body, s, visited); s }
+                    continue
+                }
                 val target = resolver.resolveReferenceExpression(ref).firstOrNull()?.element ?: continue
-                if (target is GoVarDefinition || target is io.github.golangsupport.lang.psi.GoConstDefinition) { if (!GoPsiUtil.isInsideFunctionBody(target) && target.containingFile == f) out += target as GoNamedElement }
-                else if (target is GoFunctionDeclaration && target.containingFile == f && visited.add(target)) {
+                if (target is GoVarDefinition || target is io.github.golangsupport.lang.psi.GoConstDefinition) { if (!GoPsiUtil.isInsideFunctionBody(target) && samePackage(target)) out += target as GoNamedElement }
+                else if (target is GoFunctionDeclaration && samePackage(target) && visited.add(target)) {
                     val body = target.block ?: continue
                     followedBodies?.add(body)
                     out += funcDeps.getOrPut(target) { val s = HashSet<GoNamedElement>(); refsIn(body, s, visited); s }
@@ -599,26 +615,30 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             }
         }
         val deps = HashMap<GoNamedElement, Set<GoNamedElement>>()
-        for ((d, values) in inits) {
-            val s = HashSet<GoNamedElement>()
-            for (v in values) refsIn(v, s, HashSet())
-            deps[d] = s
-        }
+        fun depsOf(d: GoNamedElement): Set<GoNamedElement> = deps.getOrPut(d) { val s = HashSet<GoNamedElement>(); for (v in initsOf(d)) refsIn(v, s, HashSet()); s }
         // Report each elementary cycle once, at its lowest-offset member.
         val reported = HashSet<GoNamedElement>()
         val color = HashMap<GoNamedElement, Int>() // 1 = on path, 2 = done
         val path = ArrayList<GoNamedElement>()
         fun dfs(n: GoNamedElement) {
             color[n] = 1; path += n
-            for (m in deps[n].orEmpty()) {
+            for (m in depsOf(n)) {
                 when (color[m]) {
                     1 -> {
                         val cycle = path.subList(path.indexOf(m), path.size)
                         val first = cycle.minByOrNull { it.textOffset } ?: continue
                         if (reported.add(first)) {
                             val chain = cycle.drop(cycle.indexOf(first)) + cycle.take(cycle.indexOf(first))
-                            val detail = (chain + first).zipWithNext().joinToString("") { (a, b) -> "\n\t${a.name} refers to ${b.name}" }
-                            report(first.nameIdentifier ?: first, "initialization cycle for ${first.name}$detail", "init-cycle")
+                            // go/types reportCycle: a one-element cycle without a function in between "refers to itself"
+                            val direct = cycle.size == 1 && initsOf(first).any { v ->
+                                (listOfNotNull(v as? GoReferenceExpression) + PsiTreeUtil.findChildrenOfType(v, GoReferenceExpression::class.java))
+                                    .any { r -> r.qualifier == null && resolver.resolveReferenceExpression(r).firstOrNull()?.element == first }
+                            }
+                            if (direct) report(first.nameIdentifier ?: first, "initialization cycle: ${first.name} refers to itself", "init-cycle")
+                            else {
+                                val detail = (chain + first).zipWithNext().joinToString("") { (a, b) -> "\n\t${a.name} refers to ${b.name}" }
+                                report(first.nameIdentifier ?: first, "initialization cycle for ${first.name}$detail", "init-cycle")
+                            }
                         }
                     }
                     null -> dfs(m)
@@ -791,6 +811,11 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             return
         }
 
+        // go/types `lookupError`: a method of *T on a T value that is not addressable (`T{}.m()`)
+        if (qt !is GoPointerType && qt.underlying() !is GoInterfaceType && GoLookup.methodSet(GoPointerType(qt)).any { it.name == name }) {
+            report(ref.identifier ?: ref, "cannot call pointer method $name on ${render(qt)}", "pointer-method")
+            return
+        }
         report(ref.identifier ?: ref, "$text undefined (${lookupError(qt, name, false)})", "undefined-member")
     }
 
@@ -2019,6 +2044,12 @@ class GoChecker(private val project: Project, private val file: GoFile) {
     }
 
     /** go/types `arrayLength`: a constant non-negative integer representable as int. */
+    /** [hasNil] for a comparison with `nil`: a type parameter has nil when every type of its type set has (spec "Comparison operators"). */
+    private fun nilComparable(t: GoType): Boolean {
+        if (t is GoTypeParamType) return t.terms?.let { terms -> terms.isNotEmpty() && terms.all { hasNil(it.type) } } ?: false
+        return hasNil(t)
+    }
+
     /** go/types `hasNil`: values of the type compare with nil (a switch on them is fine: `switch f { case nil: }`). */
     private fun hasNil(t: GoType): Boolean = when (val u = t.underlying()) {
         is GoPointerType, is io.github.golangsupport.semantic.types.GoSignatureType, is io.github.golangsupport.semantic.types.GoSliceType,
@@ -2268,7 +2299,10 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             val tb = target.underlying() as? GoBasicType
             if (tb != null) {
                 val f = if (tb.kind.isString && c is GoConstant.Int) null else representabilityFailure(c, tb.kind)
-                if (f != null) report(arg, "cannot convert ${describe(arg)} to type ${render(target)}${if (f == "not representable") "" else " ($f)"}", "conversion")
+                // go/types `conversion` (go.dev/issue/63563): an integer constant to an integer type fails by overflow only, said concisely
+                if (f == "overflows" && c is GoConstant.Int && tb.kind.isInteger) report(arg, "constant ${c.render()} overflows ${render(target)}", "conversion")
+                // go/types gives no cause for a constant (`cannot convert 1.5 (untyped float constant) to type int32`)
+                else if (f != null) report(arg, "cannot convert ${describe(arg)} to type ${render(target)}", "conversion")
                 else if (!GoTypePredicates.representableKind((vt as GoBasicType).kind, tb.kind) && !(vt.kind.isInteger && tb.kind.isString)) report(arg, "cannot convert ${describe(arg)} to type ${render(target)}", "conversion")
                 return
             }
@@ -2439,7 +2473,12 @@ class GoChecker(private val project: Project, private val file: GoFile) {
             fun errAt(operand: GoExpression): PsiElement = if (operand === left) at else operand
             if (op == "==" || op == "!=") {
                 if (t is GoBasicType && t.kind == GoBasicKind.UNTYPED_NIL) { if (lt == rt) report(at, "invalid operation: $text (operator $op not defined on untyped nil)", "operator"); return }
-                if (isNil(lt) || isNil(rt)) return
+                if (isNil(lt) || isNil(rt)) {
+                    // go/types `matchTypes`: nil compares only with what has nil (`b == nil` with b a bool, an array, a struct)
+                    val other = if (isNil(lt)) rt else lt
+                    if (isKnown(other) && !nilComparable(other)) report(at, "invalid operation: $text (mismatched types ${render(lt)} and ${render(rt)})", "mismatched-types")
+                    return
+                }
                 val bad = when { !comparable(lt) -> left to lt; !comparable(rt) -> right to rt; else -> null }
                 if (bad != null) report(errAt(bad.first), "invalid operation: $text (${incomparableReason(bad.second)})", "operator")
             } else {
@@ -3399,6 +3438,8 @@ class GoChecker(private val project: Project, private val file: GoFile) {
         val wrong = set.firstOrNull { it.name == m.name }
         if (wrong != null) return "(wrong type for method ${m.name})\n\t\thave ${m.name}${render(wrong.signature).removePrefix("func")}\n\t\twant ${m.name}${render(m.signature).removePrefix("func")}"
         if (type !is GoPointerType && GoLookup.methodSet(GoPointerType(type)).any { it.name == m.name }) return "(method ${m.name} has pointer receiver)"
+        // go/types `missingMethodCause`: a field of that name (a `func` field is the usual slip) is not a method
+        if (GoLookup.lookupFieldOrMethod(type, m.name) is GoLookup.Selection.Field) return "(${render(type)}.${m.name} is a field, not a method)"
         return "(missing method ${m.name})"
     }
 

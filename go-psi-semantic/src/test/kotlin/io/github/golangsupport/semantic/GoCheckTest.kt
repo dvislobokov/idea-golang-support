@@ -34,6 +34,7 @@ class GoCheckTest : GoErrorSiteTestBase() {
     fun testRecursiveIface() = check("recursiveiface")
     fun testGo127Errors() = check("go127errors")
     fun testLongString() = check("longstring")
+    fun testInitCycles() = check("initcycles")
 
     /** A method of a `_test.go` file is in the test variant of the package only (prometheus `discovery/kubernetes`, `model/labels`). */
     fun testMethodsOfTestFiles() {

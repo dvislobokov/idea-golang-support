@@ -358,7 +358,7 @@
 
 ### C5. Коды ошибок go/types (`docs/compare/go-error-codes-2026-10-13.md`)
 - [x] (2026-10-13, 0.2.224) OutOfMemory на длинной строковой константе; `goto` и метки; ещё 11 кодов; `GoErrorCodeExamplesTest`, `GorootTypesTestdataCorpusTest`.
-- [ ] Частое из тестов go/types: текст `constant 256 overflows uint8`; `invalid recursive type` (`type T struct{ x T }`); цикл инициализации; подсказки «m is a field, not a method», «cannot call pointer method»; `mismatched types` в сравнениях.
+- [x] (2026-10-14, 0.2.228) Частое из тестов go/types: текст `constant 256 overflows uint8`; цикл инициализации через методы и «refers to itself»; подсказки «m is a field, not a method», «cannot call pointer method»; `x == nil` для типов без nil. `invalid recursive type` для обычных случаев уже ловился — остался в хвосте (экзотика `cycles*.go`).
 - [ ] Остальные ~318 непойманных и ~196 мест с другим текстом (`build/reports/goroot-types-testdata.txt`), крупные группы — вывод типов дженериков, type sets, range по функциям.
 - [ ] Редкое: 6 примеров `codes.go` (`InvalidDeclCycle_2`, `InvalidInstanceCycle_1`, `InvalidUnsafeSlice_4`, `InvalidUntypedConversion_1`, `TypeTooLarge_1/2`).
 
