@@ -48,21 +48,25 @@ class GoCompletionWeigher : CompletionWeigher() {
 
 /**
  * Alphabetical tie-break for Go candidates (case-insensitive, then case-sensitive); the packages of one name (`rand` of crypto/rand and
- * math/rand) by their import path, the standard library first — the order of the list when the import statistics have nothing to say.
+ * math/rand) by how many files of the project import them ([GoImportUses]), then by their import path, the standard library first — the order
+ * of the list when the import statistics have nothing to say.
  */
 class GoAlphabeticalWeigher : CompletionWeigher() {
     override fun weigh(element: LookupElement, location: CompletionLocation): Comparable<*> {
         val info = GoCompletionWeigher.infoOf(element) ?: return Reversed("", "")
-        return Reversed(element.lookupString, info.importPath?.let { (if ('.' in it.substringBefore('/')) "~" else "") + it } ?: "")
+        return Reversed(element.lookupString, info.importPath?.let { (if ('.' in it.substringBefore('/')) "~" else "") + it } ?: "", info.importUses)
     }
 
     /** Descending weights sort first, so the string order is inverted. */
-    data class Reversed(val text: String, val path: String) : Comparable<Reversed> {
+    data class Reversed(val text: String, val path: String, val uses: Int = 0) : Comparable<Reversed> {
         override fun compareTo(other: Reversed): Int {
             val c = other.text.compareTo(text, ignoreCase = true)
             if (c != 0) return c
             val cs = other.text.compareTo(text)
-            return if (cs != 0) cs else other.path.compareTo(path)
+            if (cs != 0) return cs
+            // the package of one name the project imports more often first ([GoImportUses]), then by path
+            if (uses != other.uses) return uses.compareTo(other.uses)
+            return other.path.compareTo(path)
         }
     }
 }

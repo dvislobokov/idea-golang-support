@@ -30,6 +30,21 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.231] - 2026-10-14
+
+### Fixed
+
+- **Packages of one name: completion lists them all instead of inserting the first** (`PLAN.md` C4, item 1 of
+  `docs/compare/prometheus-completion-2026-10-13.md`; 14 of 60 insertions of the measurement). `rand.Int` without an import inserted
+  `rand.Int(` with `crypto/rand` at once — the first of the alphabetical GOROOT walk — and `template.New` took `html/template`. Now the
+  members of every package of that name are listed with their paths, as in GoLand (`GoMemberCandidates.sameNamePackages`, at most 10), and
+  nothing is inserted without a choice. Order: the corpus import statistics when loaded (now for these members too, by the qualifier),
+  then the packages the project imports more often (`GoImportUses`: prometheus has math/rand in 31 files, crypto/rand in 4), then the
+  path. The catalogue of the host plugin leaves all those packages to the built-in completion (it duplicated them as `rand.Int()` rows).
+  Checked in the IDE on the prometheus clone: `rand.Int` → math/rand, crypto/rand, math/rand/v2, golang.org/x/exp/rand, k8s…/rand;
+  `template.New` → html/template, text/template, …. Test `GoInsertCompletionTest.testSameNamePackagesAreAllListed`; robot script
+  `complete_list.js` (the items of the list with their tails).
+
 ## [0.2.230] - 2026-10-14
 
 ### Fixed

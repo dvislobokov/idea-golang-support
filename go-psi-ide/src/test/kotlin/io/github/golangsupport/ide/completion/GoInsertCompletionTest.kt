@@ -165,6 +165,22 @@ class GoInsertCompletionTest : GoCompletionTestBase() {
         """)
     }
 
+    /**
+     * `rand.Int` without an import: the members of every `rand` package with their paths, nothing inserted without a choice (it was
+     * `crypto/rand`, the first of the alphabetical GOROOT walk — docs/compare/prometheus-completion-2026-10-13.md C09).
+     */
+    fun testSameNamePackagesAreAllListed() {
+        myFixture.configureByText("main.go", "package main\n\nfunc main() {\n\t_ = rand.Int<caret>\n}\n")
+        val items = myFixture.completeBasic()
+        assertNotNull("one item would have been inserted without a choice", items)
+        val paths = items.filter { it.lookupString == "Int" }.map { item ->
+            com.intellij.codeInsight.lookup.LookupElementPresentation().also { item.renderElement(it) }.let { p -> p.tailFragments.joinToString("") { it.text } + " " + p.typeText }
+        }
+        assertTrue("math/rand: $paths", paths.any { "math/rand" in it && "math/rand/v2" !in it })
+        assertTrue("crypto/rand: $paths", paths.any { "crypto/rand" in it })
+        assertEquals("package main\n\nfunc main() {\n\t_ = rand.Int\n}\n", myFixture.editor.document.text)
+    }
+
     fun testUnimportedMemberAddsImportIntoSortedGroup() {
         checkInsert("""
             package main

@@ -72,14 +72,19 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
         }
     }
 
-    /** `strings.Bu<caret>` without `import "strings"`: the standard library first, then module packages with that name. */
+    /**
+     * `strings.Bu<caret>` without `import "strings"`: the members of every package of that name, each with its path (GoLand: `rand.Int`
+     * lists math/rand, crypto/rand, math/rand/v2, … — `docs/compare/prometheus-completion-2026-10-13.md` C09, C10). Taking the first one
+     * inserted `crypto/rand` for `rand.Int` without a choice (the walk of GOROOT is alphabetical). The packages the project imports more
+     * often come first; [GoImportStatsWeigher] reorders by the corpus statistics when they are loaded.
+     */
     private fun unimportedPackageMembers(name: String, typesOnly: Boolean, out: MutableList<GoCandidate>) {
         if (semantics.imports.any { !it.isBlank && !it.isDot && semantics.importName(it) == name }) return
-        val project = context.file.project
-        val entry = GoImportPaths.all(project, context.originalFile.virtualFile).firstOrNull { it.name == name } ?: return
-        val pkg = semantics.resolveImportPath(entry.path) ?: return
-        if (pkg.name != null && pkg.name != name) return
-        packageMembers(pkg, entry.path, typesOnly, out)
+        for (path in sameNamePackages(context.file.project, context.originalFile.virtualFile, name)) {
+            val pkg = semantics.resolveImportPath(path) ?: continue
+            if (pkg.name != null && pkg.name != name) continue
+            packageMembers(pkg, path, typesOnly, out)
+        }
     }
 
     // --- method expressions ---
@@ -191,6 +196,19 @@ class GoMemberCandidates(private val context: GoCompletionContext) {
     }
 
     companion object {
+        /** Packages of one name whose members an unimported qualifier lists (`rand`: math/rand, crypto/rand, math/rand/v2, …). */
+        const val MAX_SAME_NAME_PACKAGES = 10
+
+        /**
+         * The packages named [name] an unimported qualifier lists the members of: the ones the project imports more often first
+         * ([GoImportUses]), at most [MAX_SAME_NAME_PACKAGES]. The catalogue of the host plugin leaves them to the built-in completion.
+         */
+        @JvmStatic
+        fun sameNamePackages(project: com.intellij.openapi.project.Project, file: com.intellij.openapi.vfs.VirtualFile?, name: String): List<String> {
+            val uses = GoImportUses.getInstance(project)
+            return GoImportPaths.all(project, file).filter { it.name == name }.map { it.path }.distinct().sortedByDescending { uses.count(it) }.take(MAX_SAME_NAME_PACKAGES)
+        }
+
         /**
          * The receiver GoLand shows after `→`: `Base`, `*Square` (from the stub of the method declaration), `interface {...}` for a method
          * of an interface (GoLand writes it so even for a named interface).

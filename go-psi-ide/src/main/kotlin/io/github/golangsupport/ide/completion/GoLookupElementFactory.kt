@@ -78,6 +78,10 @@ class GoLookupInfo(
     @Volatile
     var contextKind: String = GoAcceptanceMemory.KIND_EXPRESSION
 
+    /** Files of the project importing [importPath] ([GoImportUses]): the tie-break of the packages of one name in [GoAlphabeticalWeigher]. */
+    @Volatile
+    var importUses: Int = 0
+
     /** Acceptances of this lookup string in this context kind, when [GoAcceptanceWeigher] is to order by them; 0 otherwise. */
     @Volatile
     var acceptedCount: Int = 0
@@ -156,10 +160,17 @@ object GoLookupElementFactory {
         if (candidate.kind == GoCandidateKind.KEYWORD) builder = builder.withCaseSensitivity(true)
         val info = GoLookupInfo(candidate.name, candidate.kind, candidate.level, match, candidate.element, candidate.importPath)
         info.contextKind = GoAcceptanceMemory.kindOf(context)
-        // only where the item itself chooses the package (`rand (crypto/rand)`, `api.Handler` of a project package), not the members
-        // listed after a qualifier the plugin already resolved to one path (`strings.Bu` without the import)
-        if (importPath != null && candidate.level >= GoScopeLevel.UNIMPORTED && (candidate.kind == GoCandidateKind.PACKAGE || candidate.lookupString != candidate.name))
-            info.importStatsScore = context.importStatsScore(candidate.name, importPath)
+        // where the item itself chooses the package (`rand (crypto/rand)`, `api.Handler` of a project package) by its name; the members
+        // after an unimported qualifier (`rand.Int`: every package named `rand`) by the qualifier
+        if (importPath != null && candidate.level >= GoScopeLevel.UNIMPORTED) {
+            val qualifier = (context.qualifier as? io.github.golangsupport.lang.psi.GoReferenceExpression)?.takeIf { it.expression == null }?.identifier?.text
+            info.importStatsScore = when {
+                candidate.kind == GoCandidateKind.PACKAGE || candidate.lookupString != candidate.name -> context.importStatsScore(candidate.name, importPath)
+                qualifier != null -> context.importStatsScore(qualifier, importPath)
+                else -> null
+            }
+            info.importUses = GoImportUses.getInstance(context.file.project).count(importPath)
+        }
         builder.putUserData(GoLookupInfo.KEY, info)
         return builder
     }

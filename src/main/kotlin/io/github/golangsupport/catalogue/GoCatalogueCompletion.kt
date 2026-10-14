@@ -193,8 +193,8 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
 
     /**
      * `json.` / `json.Mar` with no `json` imported: the members of every package of that name the catalogue has, each row showing its path
-     * (`encoding/json`, `encoding/json/v2`), and choosing one imports that one. The package the built-in completion lists itself for that
-     * name ([GoImportPaths], its first) is left to it. False when the place is not that.
+     * (`encoding/json`, `encoding/json/v2`), and choosing one imports that one. The packages the built-in completion lists itself for that
+     * name (`GoMemberCandidates.sameNamePackages`) are left to it. False when the place is not that.
      */
     private fun unimportedPackage(parameters: CompletionParameters, file: GoFile, text: CharSequence, typed: String, result: CompletionResultSet): Boolean {
         val start = parameters.offset - typed.length
@@ -206,8 +206,9 @@ class GoCatalogueCompletionContributor : CompletionContributor() {
         val own = ownPackage(file)
         val excluded = GoSettings.getInstance().importExcluded
         val native = GoFeatures.native(GoFeature.COMPLETION, file.project)
-        val nativePick = if (native) GoImportPaths.all(file.project, file.virtualFile).firstOrNull { it.name == qualifier }?.path else null
-        val found = index.find(typed, Int.MAX_VALUE, emptySet(), qualifier) { it.name == qualifier && it.importPath != nativePick && visible(it, own, emptySet(), excluded) }
+        // the built-in completion lists the members of every package of that name it finds itself: those are left to it
+        val nativePicks = if (native) io.github.golangsupport.ide.completion.GoMemberCandidates.sameNamePackages(file.project, file.virtualFile, qualifier).toSet() else emptySet()
+        val found = index.find(typed, Int.MAX_VALUE, emptySet(), qualifier) { it.name == qualifier && it.importPath !in nativePicks && visible(it, own, emptySet(), excluded) }
             .filter { !(native && it.project) }.sortedWith(compareBy<GoSymbolIndex.Entry> { it.origin }.thenBy { it.pack.importPath.length }.thenBy { it.pack.importPath })
             .take(LIMIT * 4)
         if (found.isEmpty()) return false

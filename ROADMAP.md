@@ -298,6 +298,7 @@
   Не смотрел: страницы Settings (Code Folding Go, Color Scheme Go), Fill selected / Change style попапы, Update dependencies… диалог, сохранение исключений после перезапуска
 
 ### Сравнение с GoLand на prometheus (`PLAN.md` C1–C7; отчёты `docs/compare/`)
+- [x] (2026-10-14, 0.2.231) Completion одноимённых пакетов: `rand.Int` без импорта показывает члены всех пакетов `rand` с путями (как GoLand), без молчаливой вставки; первым — пакет, который проект импортирует чаще (prometheus: math/rand).
 - [x] (2026-10-14, 0.2.230) Safe Delete убирает импорты, которые использовало только удаляемое объявление (строку группы или всю декларацию): после «Refactor Anyway» сборка больше не падает на лишнем импорте.
 - [x] (2026-10-14, 0.2.229) ML-сборка: `-Pml.modelSize=50|100` — сеть 50m или 100m (`go-nn-102m-caret-v2`, zip `-ml-100m`), как в dotnet-плагине.
 - [x] (2026-10-14, 0.2.228) Частые ошибки компилятора: `x == nil` для типов без nil, циклы инициализации через методы, тексты `constant N overflows T`, «field, not a method», «cannot call pointer method». Тесты go/types: не сообщено 514 → 466.
