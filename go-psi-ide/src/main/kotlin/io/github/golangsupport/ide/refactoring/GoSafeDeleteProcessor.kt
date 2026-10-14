@@ -9,6 +9,11 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
+import io.github.golangsupport.lang.psi.GoFile
+import io.github.golangsupport.lang.psi.GoImportDeclaration
+import io.github.golangsupport.lang.psi.GoImportSpec
+import io.github.golangsupport.lang.psi.GoReferenceExpression
+import io.github.golangsupport.semantic.scope.GoScopes
 import com.intellij.refactoring.RefactoringSettings
 import com.intellij.refactoring.safeDelete.NonCodeUsageSearchInfo
 import com.intellij.refactoring.safeDelete.SafeDeleteProcessorDelegateBase
@@ -181,10 +186,43 @@ class GoSafeDeleteProcessor : SafeDeleteProcessorDelegateBase() {
         if (element is GoParamDefinition) return prepareParameter(element)
         val file = element.containingFile ?: return
         val own = element.textRange
-        val extras = deletionRanges(element, file.viewProvider.contents).flatMap { r ->
+        val text = file.viewProvider.contents
+        val extras = deletionRanges(element, text).flatMap { r ->
             if (!r.contains(own)) listOf(r) else listOf(TextRange(r.startOffset, own.startOffset), TextRange(own.endOffset, r.endOffset))
         }.filter { !it.isEmpty }
-        for (r in extras.sortedByDescending { it.startOffset }) removeText(file, r)
+        // imports used only by what goes away would be left unused, and `go build` stops on them (prometheus: `strings`, `fmt`)
+        val imports = (file as? GoFile)?.let { go -> importRanges(go, importsUsedOnlyIn(go, deletionRanges(element, text) + own), text) }.orEmpty()
+        for (r in (extras + imports).sortedByDescending { it.startOffset }) removeText(file, r)
+    }
+
+    /** The imports of [file] whose every use lies in [ranges] (none of them unused already, blank or dot imports). */
+    private fun importsUsedOnlyIn(file: GoFile, ranges: List<TextRange>): List<GoImportSpec> {
+        val specs = file.imports.filter { !it.isBlank && !it.isDot && it.path != "C" }
+        if (specs.isEmpty()) return emptyList()
+        val inside = HashMap<GoImportSpec, Int>()
+        val outside = HashSet<GoImportSpec>()
+        val names = specs.associateBy { GoScopes.importName(it) }
+        PsiTreeUtil.processElements(file) { e ->
+            if (e is GoReferenceExpression && e.expression == null) {
+                val name = e.identifier?.text
+                val spec = names[name]
+                if (spec != null && (GoScopes.resolveName(e, name!!).firstOrNull() as? GoScopes.Target.Import)?.element == spec) {
+                    if (ranges.any { it.contains(e.textRange) }) inside.merge(spec, 1, Int::plus) else outside += spec
+                }
+            }
+            true
+        }
+        return specs.filter { it in inside && it !in outside }
+    }
+
+    /** What to remove of [file] for [specs]: their lines in a group, the whole declaration when nothing of it stays. */
+    private fun importRanges(file: GoFile, specs: List<GoImportSpec>, text: CharSequence): List<TextRange> {
+        if (specs.isEmpty()) return emptyList()
+        return specs.groupBy { it.parent as? GoImportDeclaration }.flatMap { (decl, gone) ->
+            if (decl == null) emptyList()
+            else if (decl.importSpecList.all { it in gone }) listOf(lines(text, decl.textRange))
+            else gone.map { lines(text, it.textRange) }
+        }
     }
 
     /**

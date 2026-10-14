@@ -31,6 +31,68 @@ class GoSafeDeleteTest : GoSemanticIdeTestBase() {
         return ""
     }
 
+    /** An import only the deleted function used goes with it: `go build` stops on an unused import (prometheus safe-delete-test-only). */
+    fun testImportUsedOnlyByTheFunctionGoes() = doTest(
+        """
+        package sd
+
+        import "strings"
+
+        func up<caret>per(s string) string { return strings.ToUpper(s) }
+
+        func main() {}
+        """,
+        """
+        package sd
+
+        func main() {}
+        """,
+    )
+
+    fun testOnlyTheLineOfAGroupedImportGoes() = doTest(
+        """
+        package sd
+
+        import (
+            "fmt"
+            "strings"
+        )
+
+        func up<caret>per(s string) string { return strings.ToUpper(s) }
+
+        func main() { fmt.Println() }
+        """,
+        """
+        package sd
+
+        import (
+            "fmt"
+        )
+
+        func main() { fmt.Println() }
+        """,
+    )
+
+    /** prometheus safe-delete-used: deleted anyway after the conflict, `fmt` of the function went unused and broke the build. */
+    fun testImportOfAFunctionDeletedAnyway() {
+        com.intellij.refactoring.BaseRefactoringProcessor.ConflictsInTestsException.withIgnoredConflicts<Throwable> {
+            delete("sa.go", """
+                package sa
+
+                import "fmt"
+
+                func pa<caret>th(s string) string { return fmt.Sprintf("/%s", s) }
+
+                func main() { _ = path("x") }
+                """)
+        }
+        assertEquals(go("""
+            package sa
+
+            func main() { _ = path("x") }
+            """), myFixture.editor.document.text)
+    }
+
     fun testUnusedFunctionWithDocComment() = doTest(
         """
         package sd

@@ -30,6 +30,17 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.230] - 2026-10-14
+
+### Fixed
+
+- **Safe Delete takes the imports only the deleted declaration used** (`PLAN.md` C2, item 2 of
+  `docs/compare/prometheus-refactorings-2026-10-13.md`): after "Refactor Anyway" on a conflict the import stayed and `go build`
+  stopped on it (prometheus: `fmt` of `postPath`, `strings` of `SanitizeFullLabelName`). The imports whose every use lies in what is
+  deleted go with it: their lines of a group, or the whole declaration (`GoSafeDeleteProcessor.prepareForDeletion`, on the PSI like the
+  rest of it). Checked in the IDE on the prometheus clone: Safe Delete of `postPath` anyway removes it with `fmt` and `path`, both used
+  by it only. Tests in `GoSafeDeleteTest`; robot scripts `safe_delete_at.js`, `dialog_button.js` (a button of a modal dialog).
+
 ## [0.2.229] - 2026-10-14
 
 ### Added
