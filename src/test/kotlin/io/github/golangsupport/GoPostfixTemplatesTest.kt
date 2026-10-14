@@ -105,6 +105,17 @@ class GoPostfixTemplatesTest : BasePlatformTestCase() {
     fun testErrOnACallOfAnErrorChecksItInTheIf() =
         assertEquals("\tif err := save(); err != nil {\n\t\treturn \"\", err\n\t}", expand("err", "", "save()<caret>", "(string, error)"))
 
+    /** GoLand's `.rr` / `.reterr` check the error (docs/compare/prometheus-completion-2026-10-13.md C19: it was `return err, nil`). */
+    fun testRrAndReterrCheckTheErrorAsInGoLand() {
+        for (key in listOf("rr", "reterr")) {
+            assertEquals(key, "\tif err != nil {\n\t\treturn 0, err\n\t}", expand(key, "err error", "err<caret>", "(int, error)"))
+            assertEquals(key, "\tif err := save(); err != nil {\n\t\treturn err\n\t}", expand(key, "", "save()<caret>", "error"))
+            assertFalse(key, applies(key, "n int", "n<caret>"))
+        }
+        assertEquals("\terr := save()\n\tif err != nil {\n\t\treturn err\n\t}", expand("varCheckError", "", "save()<caret>", "error"))
+        assertEquals("\tv, err := load()\n\tif err != nil {\n\t\treturn err\n\t}", expand("varCheckError", "", "load()<caret>", "error"))
+    }
+
     fun testForGoesOverWhatRangeTakesWithVariablesByTheType() {
         assertFalse(applies("for", "ok bool", "ok<caret>"))
         assertTrue(applies("for", "n int", "n<caret>"))

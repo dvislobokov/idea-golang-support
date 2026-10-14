@@ -379,6 +379,8 @@ object GoPostfixKinds {
     }
 
     private const val NOT = "Negates the boolean expression."
+    private const val RETURN_ERROR = "Generates boilerplate code for idiomatic error handling: err becomes if err != nil { return … }, a call " +
+        "if err := f(); err != nil { return … }. The return values are the error and the zero values of the other results of the function."
     private const val ADDRESS = "Adds the & operator before the expression."
     private const val DEREFERENCE = "Creates a dereference expression."
     private const val APPEND_ASSIGN = "Wraps the expression with the append() built-in function and assigns its result to the expression."
@@ -409,7 +411,15 @@ object GoPostfixKinds {
         kind("return", "return expr", "Adds the return keyword before the expression; the other results of the function get their zero values.", applies = ::value) { s, c ->
             GoPostfixExpansion("return " + c.returnValues(s).joinToString(", ") { it ?: "\$EXPR$" } + "\$END$")
         },
-        fixed("rr", "return expr, nil", "Returns the expression with a nil error.", "return \$EXPR$, nil\$END$", applies = ::value),
+        // GoLand's keys of the error check (dump postfix-go.txt): `.rr` was `return expr, nil` here, another meaning (compare C19)
+        kind("rr", "if err != nil { return err }", RETURN_ERROR, applies = ::errorSubject, expand = ::errorCheck),
+        kind("reterr", "if err != nil { return err }", RETURN_ERROR, applies = ::errorSubject, expand = ::errorCheck),
+        kind("varCheckError", "err := f(); if err != nil { return }", "Assigns the expression to new variables and checks the error: " +
+            "err := f(); if err != nil { return … }. The return values are the zero values of the function's results.",
+            applies = ::errorSubject) { s, c ->
+            if (tupleNames(s.type) != null || !s.isCall) errorCheck(s, c)
+            else GoPostfixExpansion("err := \$EXPR$\nif err != nil {\n\t\$RESULT$\n}\$END$", listOf("RESULT" to c.errorExit("err")))
+        },
         kind("var", "name := expr", "Assigns the expression to a new variable by using :=. The name comes from the expression: area := c.Area(), " +
             "user := loadUser(), item := items[0]; v when the expression gives none.", applies = { !GoPostfixTypes.isVoid(it.type) }) { s, c ->
             val name = GoPostfixNames.variableName(s.text)?.let { GoPostfixNames.unique(it, c.taken()) } ?: "v"

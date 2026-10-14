@@ -5,8 +5,8 @@ what each one writes.
 <table>
 <tr><td><code>.if</code> <code>.else</code></td><td>if expr {} / if !expr {} (bool)</td></tr>
 <tr><td><code>.nil</code> <code>.nn</code> <code>.notnil</code></td><td>if expr == nil {} / if expr != nil {} (pointers, slices, maps, channels, functions, interfaces)</td></tr>
-<tr><td><code>.err</code> <code>.errv</code> <code>.errn</code></td><td>check the error of a call or of an error value</td></tr>
-<tr><td><code>.return</code> <code>.rr</code></td><td>return expr (other results get zero values) / return expr, nil</td></tr>
+<tr><td><code>.err</code> <code>.errv</code> <code>.errn</code> <code>.rr</code> <code>.reterr</code> <code>.varCheckError</code></td><td>check the error of a call or of an error value: if err != nil { return … }</td></tr>
+<tr><td><code>.return</code></td><td>return expr (other results get zero values)</td></tr>
 <tr><td><code>.var</code></td><td>name := expr, the name from the expression: area := c.Area()</td></tr>
 <tr><td><code>.for</code> <code>.forr</code> <code>.range</code></td><td>for _, v := range expr {} / for i, name := range names {} / for range expr {}</td></tr>
 <tr><td><code>.fori</code> <code>.forrev</code></td><td>for i := 0; i &lt; len(expr); i++ {} / from the last index down</td></tr>

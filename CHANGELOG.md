@@ -30,6 +30,18 @@ Versions 0.2.34–0.2.36 are the second batch of quick tasks (time layouts, dire
 Versions 0.2.31–0.2.33 are quick follow-ups (typed Implement Interface, doc comment and build constraint inspections).
 Versions 0.2.23–0.2.30 are wave 3 (code creation: Generate, import groups, smart / chain / project-member completion, create from usage, implement missing methods).
 
+## [0.2.232] - 2026-10-14
+
+### Fixed
+
+- **`.rr` checks the error, as in GoLand** (`PLAN.md` C4, item 2; scenario C19 of `docs/compare/prometheus-completion-2026-10-13.md`).
+  `err.rr` expanded to `return err, nil`, a meaning of our own; GoLand's `.rr` is the error check. Now `.rr` and GoLand's other keys
+  `.reterr` and `.varCheckError` expand like `.err`: `err` → `if err != nil { return …, err }`, a call of an error → `if err := f(); err != nil
+  { … }`, a call of several results → `v, err := f()` and the check (`.varCheckError` on a call of an error: `err := f()` and the check).
+  The return values are the zero values of the function's other results. Checked in the IDE on prometheus (`util/fmtutil/format.go`:
+  `err.rr` → `if err != nil { return err }`, `parser.TextToMetricFamilies(input).rr` → `v, err := …` with `return nil, err`). Test
+  `GoPostfixTemplatesTest.testRrAndReterrCheckTheErrorAsInGoLand`; the template descriptions and `docs/guide.html` updated.
+
 ## [0.2.231] - 2026-10-14
 
 ### Fixed

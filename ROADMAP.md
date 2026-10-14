@@ -71,7 +71,7 @@
 
 ## Ежедневная работа с кодом (как в GoLand)
 - [x] Автоимпорт при дополнении: `strings.ToUp` → `ToUpper` добавляет `import "strings"` (gopls отдаёт `additionalTextEdits`, платформа применяет) — робот
-- [x] Постфиксные шаблоны (`GoPostfixTemplates`): `.if .else .nil .notnil .err .errv .return .rr .var .for .fori .forr .range .len .print .printf .panic .go .defer .append .not .switch .wrap`; выражение слева от точки — по тексту (цепочки, вызовы, индексы, литералы) — робот: `.nil`, `.err`, `.for`, `.var`, `.return`
+- [x] Постфиксные шаблоны (`GoPostfixTemplates`): `.if .else .nil .notnil .err .errv .return .rr .reterr .varCheckError .var .for .fori .forr .range .len .print .printf .panic .go .defer .append .not .switch .wrap`; выражение слева от точки — по тексту (цепочки, вызовы, индексы, литералы) — робот: `.nil`, `.err`, `.for`, `.var`, `.return`
 - [x] Live templates: 41 шаблон (`err errw errn ife fn main init meth str inter enum ctx tctx hf mu wg ch mk sw tsw ticker lf test ttest tr helper bench fuzz example tmain errt erras sentinel opt gof deff sel pf forr fori`)
 - [x] (2026-09-30) Surround With (Ctrl+Alt+T, `GoSurround.kt`): выделенные строки — `if`, `if … else`, `for`, `for {}`, `func() {}()`, `go func() {}()`, `defer func() {}()`, `{}` с отступом на уровень и курсором на условии; выделение внутри строки — `(expr)`, `!(expr)`. По тексту, без границ выражений: строки берутся целиком, выделение до начала строки эту строку не берёт — робот: две строки `main.go` в `if`, курсор после `if `; `order.Total()` в `!(order.Total())`; в списке для строк 8 пунктов, для куска строки 10
 - [x] Complete Statement (Ctrl+Shift+Enter, `GoSmartEnterProcessor`): `{}` после `if/for/func/switch/select/type … struct`, закрытие скобок вызова, каретка внутрь — робот
@@ -298,6 +298,7 @@
   Не смотрел: страницы Settings (Code Folding Go, Color Scheme Go), Fill selected / Change style попапы, Update dependencies… диалог, сохранение исключений после перезапуска
 
 ### Сравнение с GoLand на prometheus (`PLAN.md` C1–C7; отчёты `docs/compare/`)
+- [x] (2026-10-14, 0.2.232) `.rr` / `.reterr` / `.varCheckError` — проверка ошибки, как у GoLand (было `return err, nil`).
 - [x] (2026-10-14, 0.2.231) Completion одноимённых пакетов: `rand.Int` без импорта показывает члены всех пакетов `rand` с путями (как GoLand), без молчаливой вставки; первым — пакет, который проект импортирует чаще (prometheus: math/rand).
 - [x] (2026-10-14, 0.2.230) Safe Delete убирает импорты, которые использовало только удаляемое объявление (строку группы или всю декларацию): после «Refactor Anyway» сборка больше не падает на лишнем импорте.
 - [x] (2026-10-14, 0.2.229) ML-сборка: `-Pml.modelSize=50|100` — сеть 50m или 100m (`go-nn-102m-caret-v2`, zip `-ml-100m`), как в dotnet-плагине.
